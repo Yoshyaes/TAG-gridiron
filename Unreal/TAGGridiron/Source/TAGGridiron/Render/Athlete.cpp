@@ -130,10 +130,11 @@ void AAthlete::Setup(const tag::Player* InPlayer, const FUniform& U)
 	Facemask->SetRelativeScale3D(FVector(0.12f, 0.03f, 0.2f));
 	Facemask->SetMaterial(0, TagColorMat(this, FLinearColor(0.85f, 0.85f, 0.85f), 0.3f));
 	// shoulder pads over the upper spine
-	Pads->SetStaticMesh(A.Cube);
+	// rounded shoulder pads: a flattened ellipsoid over the upper chest/shoulders
+	Pads->SetStaticMesh(A.Sphere);
 	Pads->AttachToComponent(Body, FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("spine_05"));
-	Pads->SetRelativeLocation(FVector(6, 0, 0));
-	Pads->SetRelativeScale3D(FVector(0.24f, 0.36f, 0.58f) * FMath::Sqrt(Bulk));
+	Pads->SetRelativeLocation(FVector(8, 0, 0));
+	Pads->SetRelativeScale3D(FVector(0.16f, 0.30f, 0.54f) * FMath::Sqrt(Bulk));
 	Pads->SetMaterial(0, TagColorMat(this, U.Jersey, 0.7f));
 	// numbers on back and chest
 	const FText Num = FText::AsNumber(InPlayer->number);

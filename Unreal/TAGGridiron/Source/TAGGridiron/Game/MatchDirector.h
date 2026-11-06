@@ -95,6 +95,7 @@ private:
 	std::map<tag::Ent*, FVector2D> Prev;
 	std::map<tag::Ent*, FString> Labels;
 	ECamMode CamMode = ECamMode::Broadcast;
+	ECamMode LastCamMode = ECamMode::Broadcast;
 	FVector CamPos = FVector(4572, 6000, 2500);
 	FVector CamLook = FVector(4572, 0, 0);
 	FVector IdleFocus = FVector(4572, 0, 0);
@@ -106,6 +107,11 @@ private:
 	int LastQ = 1;
 	EMatchState ResumeState = EMatchState::Menu;
 	float MenuOrbit = 0.f;
+	// automation (-TagAutoWatch): start a CPU game and capture screenshots, then exit
+	bool bAuto = false;
+	float AutoT = 0.f;
+	int32 AutoShot = 0;
+	void TickAutomation(float Dt);
 
 	struct FKick
 	{

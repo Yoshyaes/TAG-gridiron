@@ -174,7 +174,7 @@ void AStadium::Build(const tag::Team& Home, const tag::Team& Away, const tag::We
 	UDirectionalLightComponent* Sun = NewObject<UDirectionalLightComponent>(this);
 	Sun->SetupAttachment(RootComponent);
 	Sun->SetRelativeRotation(bNight ? FRotator(-62, 30, 0) : FRotator(-48, 135, 0));
-	Sun->SetIntensity(bNight ? 0.4f : (W.precip == tag::Precip::None ? 9.f : 3.f));
+	Sun->SetIntensity(bNight ? 0.05f : (W.precip == tag::Precip::None ? 9.f : 3.f));
 	Sun->SetLightColor(bNight ? FLinearColor(0.6f, 0.7f, 1.f) : FLinearColor(1.f, 0.95f, 0.88f));
 	Sun->bAtmosphereSunLight = true;
 	Sun->SetDynamicShadowCascades(4);
@@ -187,7 +187,7 @@ void AStadium::Build(const tag::Team& Home, const tag::Team& Away, const tag::We
 	USkyLightComponent* Sky = NewObject<USkyLightComponent>(this);
 	Sky->SetupAttachment(RootComponent);
 	Sky->bRealTimeCapture = true;
-	Sky->SetIntensity(bNight ? 0.6f : 1.0f);
+	Sky->SetIntensity(bNight ? 0.15f : 1.0f);
 	Sky->RegisterComponent();
 
 	if (!bNight)
@@ -218,7 +218,7 @@ void AStadium::Build(const tag::Team& Home, const tag::Team& Away, const tag::We
 				L->SetRelativeLocation(FVector(X, Y, 7000));
 				L->SetRelativeRotation((FVector(50 * YD, 0, 0) - FVector(X, Y, 7000)).Rotation());
 				L->SetIntensityUnits(ELightUnits::Candelas);
-				L->SetIntensity(60000.f);
+				L->SetIntensity(400000.f);
 				L->SetAttenuationRadius(40000.f);
 				L->SetOuterConeAngle(38.f);
 				L->SetInnerConeAngle(20.f);
@@ -230,10 +230,21 @@ void AStadium::Build(const tag::Team& Home, const tag::Team& Away, const tag::We
 	UPostProcessComponent* PP = NewObject<UPostProcessComponent>(this);
 	PP->SetupAttachment(RootComponent);
 	PP->bUnbound = true;
+	// keep exposure in a narrow, broadcast-like range so the turf doesn't wash out
 	PP->Settings.bOverride_AutoExposureMinBrightness = true;
-	PP->Settings.AutoExposureMinBrightness = bNight ? 0.6f : 1.f;
+	PP->Settings.AutoExposureMinBrightness = bNight ? 1.5f : 3.f;
 	PP->Settings.bOverride_AutoExposureMaxBrightness = true;
-	PP->Settings.AutoExposureMaxBrightness = bNight ? 2.f : 4.f;
+	PP->Settings.AutoExposureMaxBrightness = bNight ? 3.f : 5.f;
+	PP->Settings.bOverride_AutoExposureBias = true;
+	PP->Settings.AutoExposureBias = -0.5f;
+	PP->Settings.bOverride_MotionBlurAmount = true;
+	PP->Settings.MotionBlurAmount = 0.2f;
+	PP->Settings.bOverride_MotionBlurMax = true;
+	PP->Settings.MotionBlurMax = 2.f;
+	PP->Settings.bOverride_ColorSaturation = true;
+	PP->Settings.ColorSaturation = FVector4(1.08f, 1.08f, 1.08f, 1.f);
+	PP->Settings.bOverride_ColorContrast = true;
+	PP->Settings.ColorContrast = FVector4(1.1f, 1.1f, 1.1f, 1.f);
 	PP->Settings.bOverride_BloomIntensity = true;
 	PP->Settings.BloomIntensity = bNight ? 0.9f : 0.5f;
 	PP->Settings.bOverride_VignetteIntensity = true;

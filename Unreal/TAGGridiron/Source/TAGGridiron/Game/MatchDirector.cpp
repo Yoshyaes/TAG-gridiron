@@ -14,6 +14,12 @@
 #include "GameFramework/PlayerController.h"
 #include "InputCoreTypes.h"
 #include "Sim/Playbook.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
+#include "UnrealClient.h"
+#if WITH_EDITOR
+#include "ShaderCompiler.h"
+#endif
 
 using namespace TagCoords;
 
@@ -71,6 +77,33 @@ void AMatchDirector::BeginPlay()
 	W.tempF = 60;
 	BuildWorld(*League[0], *League[1], W, true);
 	ShowMainMenu();
+	if (FParse::Param(FCommandLine::Get(), TEXT("TagAutoWatch")))
+	{
+		bAuto = true;
+		int32 Wx = 0;
+		FParse::Value(FCommandLine::Get(), TEXT("TagWeather="), Wx);
+		const bool bDay = FParse::Param(FCommandLine::Get(), TEXT("TagDay"));
+		StartMatch(3, 7, false, true, Wx, !bDay, 900);
+	}
+}
+
+void AMatchDirector::TickAutomation(float Dt)
+{
+	if (!bAuto) return;
+#if WITH_EDITOR
+	if (GShaderCompilingManager && GShaderCompilingManager->GetNumRemainingJobs() > 0) return; // wait for shaders
+#endif
+	AutoT += Dt;
+	static const float Times[] = {3.f, 9.f, 14.f, 20.f, 27.f, 34.f, 42.f, 50.f};
+	if (AutoShot < static_cast<int32>(UE_ARRAY_COUNT(Times)) && AutoT >= Times[AutoShot])
+	{
+		if (AutoShot == 4) CamMode = ECamMode::Sideline;
+		if (AutoShot == 6) CamMode = ECamMode::Skycam;
+		FScreenshotRequest::RequestScreenshot(FString::Printf(TEXT("tag_auto_%02d.png"), AutoShot), false, false);
+		UE_LOG(LogTemp, Display, TEXT("TAG auto screenshot %d state=%d"), AutoShot, static_cast<int32>(State));
+		++AutoShot;
+	}
+	if (AutoT > 56.f) FPlatformMisc::RequestExit(false);
 }
 
 void AMatchDirector::EndPlay(const EEndPlayReason::Type Reason)
@@ -650,7 +683,8 @@ void AMatchDirector::UpdateCamera(float Dt, const FVector& Focus)
 		Look = FVector(Focus.X + D * 7 * Y, Focus.Y * 0.8, 0);
 		break;
 	case ECamMode::Sideline:
-		T = FVector(Focus.X - D * 4 * Y, -(tag::FIELD_W / 2 + 36) * Y, 22 * Y);
+		// high sideline position in front of the lower bowl (press-box angle)
+		T = FVector(Focus.X - D * 4 * Y, -(tag::FIELD_W / 2 + 12) * Y, 17 * Y);
 		Look = FVector(Focus.X + D * 2 * Y, Focus.Y * 0.5, 0);
 		break;
 	case ECamMode::Skycam:
@@ -665,6 +699,15 @@ void AMatchDirector::UpdateCamera(float Dt, const FVector& Focus)
 		Look = FVector(F.X + D * 8 * Y, F.Y, 1 * Y);
 		break;
 	}
+	}
+	// keep cameras over the field / in front of the stands (never inside geometry)
+	T.X = FMath::Clamp(T.X, -6.0 * Y, 106.0 * Y);
+	T.Y = FMath::Clamp(T.Y, -(tag::FIELD_W / 2 + 12) * Y, (tag::FIELD_W / 2 + 12) * Y);
+	if (CamMode != LastCamMode)
+	{
+		LastCamMode = CamMode;
+		CamPos = T; // cut, don't swoop, when the camera changes
+		CamLook = Look;
 	}
 	const double K = 1.0 - FMath::Exp(-Dt * 3.2);
 	CamPos = FMath::Lerp(CamPos, T, K);
@@ -736,6 +779,7 @@ void AMatchDirector::ReadUserInput()
 void AMatchDirector::Tick(float Dt)
 {
 	Super::Tick(Dt);
+	TickAutomation(Dt);
 	APlayerController* PC = GetWorld()->GetFirstPlayerController();
 	const bool bEsc = PC && (PC->WasInputKeyJustPressed(EKeys::Escape) || PC->WasInputKeyJustPressed(EKeys::Gamepad_Special_Right));
 	if (State == EMatchState::Menu)
