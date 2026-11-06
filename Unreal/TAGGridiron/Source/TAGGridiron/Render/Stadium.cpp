@@ -1,4 +1,4 @@
-#include "Render/Stadium.h"
+﻿#include "Render/Stadium.h"
 
 #include "Render/Athlete.h"
 #include "Render/Coords.h"
@@ -216,9 +216,14 @@ void AStadium::Build(const tag::Team& Home, const tag::Team& Away, const tag::We
 		const FRotator R(0, Yaw, 0);
 		const FVector Fwd = R.Vector();
 		AddMesh(Cube, C + Fwd * 0, FVector(1.2, Len / 100, 2.2), WallC, 0.5f, R);
-		Deck(C + Fwd * 1600 + FVector(0, 0, 1050), FVector(36, Len / 100, 0.5), FRotator(-33, Yaw, 0));
-		Deck(C + Fwd * 4200 + FVector(0, 0, 3300), FVector(28, Len / 100, 0.5), FRotator(-38, Yaw, 0));
-		AddMesh(Cube, C + Fwd * 5400 + FVector(0, 0, 5600), FVector(24, Len / 100, 0.6), FLinearColor(0.2f, 0.21f, 0.24f), 0.7f, FRotator(-8, Yaw, 0));
+		// seating bowls rise AWAY from the field (positive pitch about the stand's forward axis)
+		Deck(C + Fwd * 1600 + FVector(0, 0, 1050), FVector(36, Len / 100, 0.5), FRotator(33, Yaw, 0));
+		Deck(C + Fwd * 4200 + FVector(0, 0, 3300), FVector(28, Len / 100, 0.5), FRotator(38, Yaw, 0));
+		// club-level fascia + suites between the decks (no sky gaps), and a back wall
+		AddMesh(Cube, C + Fwd * 3050 + FVector(0, 0, 2100), FVector(1.0, Len / 100, 6.0), WallC * 0.7f, 0.4f, R);
+		AddMesh(Cube, C + Fwd * 3060 + FVector(0, 0, 2050), FVector(1.05, Len / 100 * 0.98, 1.6), FLinearColor(0.02f, 0.03f, 0.05f), 0.1f, R, false);
+		AddMesh(Cube, C + Fwd * 5300 + FVector(0, 0, 3000), FVector(1.0, Len / 100, 60), FLinearColor(0.08f, 0.08f, 0.09f), 0.9f, R);
+		AddMesh(Cube, C + Fwd * 5400 + FVector(0, 0, 5600), FVector(24, Len / 100, 0.6), FLinearColor(0.2f, 0.21f, 0.24f), 0.7f, FRotator(8, Yaw, 0));
 	};
 	const double SideY = (FW / 2 + 9) * YD;
 	Stand(FVector(50 * YD, SideY, 0), 90, 140 * YD);

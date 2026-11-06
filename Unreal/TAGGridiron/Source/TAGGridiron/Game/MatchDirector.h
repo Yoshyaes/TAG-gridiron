@@ -111,6 +111,7 @@ private:
 	bool bAuto = false;
 	float AutoT = 0.f;
 	int32 AutoShot = 0;
+	bool bAutoEstablish = false;
 	void TickAutomation(float Dt);
 
 	struct FKick

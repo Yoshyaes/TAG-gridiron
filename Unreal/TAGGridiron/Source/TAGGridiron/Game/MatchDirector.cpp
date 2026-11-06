@@ -105,6 +105,16 @@ void AMatchDirector::TickAutomation(float Dt)
 		UE_LOG(LogTemp, Display, TEXT("TAG auto screenshot %d state=%d"), AutoShot, static_cast<int32>(State));
 		++AutoShot;
 	}
+	// final shot: establishing view of the far stands (verifies crowd/stadium rendering)
+	if (AutoShot == static_cast<int32>(UE_ARRAY_COUNT(Times)) && AutoT > 52.f && AutoT < 54.f)
+	{
+		bAutoEstablish = true;
+	}
+	if (bAutoEstablish && AutoShot == static_cast<int32>(UE_ARRAY_COUNT(Times)) && AutoT >= 53.5f)
+	{
+		FScreenshotRequest::RequestScreenshot(TEXT("tag_auto_stands.png"), false, false);
+		++AutoShot;
+	}
 	if (AutoT > 56.f) FPlatformMisc::RequestExit(false);
 }
 
@@ -719,6 +729,11 @@ void AMatchDirector::UpdateCamera(float Dt, const FVector& Focus)
 	{
 		P += FVector(FMath::FRandRange(-Shake, Shake), FMath::FRandRange(-Shake, Shake), FMath::FRandRange(-Shake, Shake));
 		Shake *= FMath::Exp(-Dt * 6.f);
+	}
+	if (bAutoEstablish)
+	{
+		P = FVector(50 * Y, -30 * Y, 22 * Y);
+		CamLook = FVector(50 * Y, 70 * Y, 14 * Y);
 	}
 	Camera->SetActorLocation(P);
 	Camera->SetActorRotation((CamLook - P).Rotation());

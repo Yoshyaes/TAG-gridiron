@@ -162,6 +162,8 @@ def crowd(w=2048, h=1024):
             x += sw + rng.uniform(-2, 4)
         d.rectangle([0, y, w, y + 3], fill=(10, 10, 12, 0))
     img = img.filter(ImageFilter.GaussianBlur(0.5))
+    # rows run along V so they follow the length of the stand mesh's top face
+    img = img.transpose(Image.Transpose.ROTATE_90)
     img.save(os.path.join(OUT, "T_Crowd.png"))
 
 
