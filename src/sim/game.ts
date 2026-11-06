@@ -2,8 +2,20 @@
 import { Rng, clamp, sigmoid } from './rng';
 import type { Player, Team } from './types';
 import {
-  DEF_PLAYS, DefCall, FIELD_W, HASH_L, HASH_R, OFF_PLAYS, OffPlay, formationById, playById,
+  DEF_PLAYS, DefCall, FIELD_W, HASH_L, HASH_R, OFF_PLAYS, OffPlay, ROUTES, formationById, playById,
 } from './playbook';
+
+/** Depths (yards past LOS) where each play's routes break / settle. */
+function routeDepths(p: OffPlay): number[] {
+  const out: number[] = [];
+  for (const r of p.reads ?? []) {
+    const name = p.routes[r];
+    const rd = name ? ROUTES[name] : undefined;
+    if (!rd || !rd.pts.length) continue;
+    out.push(Math.max(...rd.pts.map((q) => q[0])));
+  }
+  return out;
+}
 import { PlayConfig, PlayResult, PlaySim, Weather, Side } from './play';
 import { StatBook, TeamLine, emptyTeamLine } from './stats';
 
@@ -398,6 +410,12 @@ export class Game {
       if (p.type === 'playaction' && d === 1) x += 0.6;
       if (p.type === 'screen' && long) x += 0.6;
       if (this.recent.includes(p.id)) x *= 0.4;
+      // money downs: favor concepts with a route that settles at/just past the sticks
+      if (d >= 3 && p.type !== 'run') {
+        const ds = routeDepths(p);
+        if (ds.some((q) => q >= tg && q <= tg + 7)) x *= 2.2;
+        else if (ds.every((q) => q < tg - 1)) x *= 0.35;
+      }
       return x;
     });
     const pick = this.rng.weighted(pool, w);
@@ -445,10 +463,10 @@ export class Game {
     let acc = 0;
     const roll = (p: number) => r < (acc += p);
     if (res.kind === 'kneel' || res.kind === 'spike') return null;
-    if (roll(isPass ? 0.02 : 0.03)) return { name: 'Offensive Holding', on: 'off', yards: 10, autoFirst: false, spot: 'los', replayDown: true };
+    if (roll(isPass ? 0.026 : 0.036)) return { name: 'Offensive Holding', on: 'off', yards: 10, autoFirst: false, spot: 'los', replayDown: true };
     if (isPass && res.incomplete && res.airYards >= 5 && roll(res.deepContested ? 0.09 : 0.012))
       return { name: 'Defensive Pass Interference', on: 'def', yards: 0, autoFirst: true, spot: 'spot', spotX: res.airYards, replayDown: false };
-    if (isPass && roll(0.008)) return { name: this.rng.chance(0.6) ? 'Defensive Holding' : 'Illegal Contact', on: 'def', yards: 5, autoFirst: true, spot: 'los', replayDown: false };
+    if (isPass && roll(0.014)) return { name: this.rng.chance(0.6) ? 'Defensive Holding' : 'Illegal Contact', on: 'def', yards: 5, autoFirst: true, spot: 'los', replayDown: false };
     if (isPass && res.pressured && roll(0.012)) return { name: 'Roughing the Passer', on: 'def', yards: 15, autoFirst: true, spot: 'end', replayDown: false };
     if (isPass && res.complete && res.airYards >= 8 && roll(0.005)) return { name: 'Offensive Pass Interference', on: 'off', yards: 10, autoFirst: false, spot: 'los', replayDown: true };
     if (roll(0.004)) return { name: this.rng.pick(['Unnecessary Roughness', 'Face Mask']), on: 'def', yards: 15, autoFirst: true, spot: 'end', replayDown: false };
@@ -481,7 +499,7 @@ export class Game {
       this.toGo = Math.min(10, 100 - this.ballOn);
     }
     this.team[k].penalties++;
-    this.team[k].penYds += Math.abs(moved);
+    this.team[k].penYds += Math.round(Math.abs(moved));
     this.lastPenalty = pen;
     this.clockRunning = false;
     this.addLog(`PENALTY on ${t.abbr}: ${pen.name}, ${Math.abs(Math.round(moved))} yards. ${this.downText()} at ${this.ydLine()}.`, 'penalty');
@@ -560,7 +578,7 @@ export class Game {
       if (usePen) {
         const k = pen.on === 'off' ? ok : dk;
         this.team[k].penalties++;
-        this.team[k].penYds += Math.abs(penBall - (pen.spot === 'end' ? res.endX : los));
+        this.team[k].penYds += Math.round(Math.abs(penBall - (pen.spot === 'end' ? res.endX : los)));
         const moved = penBall - los;
         this.ballOn = penBall;
         if (pen.on === 'def' && (pen.autoFirst || penBall >= los + this.toGo)) {

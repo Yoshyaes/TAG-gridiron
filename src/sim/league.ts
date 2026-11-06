@@ -177,7 +177,7 @@ const NUMBER_RANGES: Record<Pos, [number, number][]> = {
 function makeTeam(rng: Rng, id: number, seed: TeamSeed, idx: number): Team {
   const roster: Player[] = [];
   const used = new Set<number>();
-  const teamTalent = rng.normal(0, 3.5); // franchise-level talent spread
+  const teamTalent = rng.normal(0, 2.4); // franchise-level talent spread
   for (const [pos, n] of ROSTER_COUNTS) {
     for (let i = 0; i < n; i++) {
       // starters better than backups
