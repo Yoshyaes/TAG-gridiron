@@ -1720,7 +1720,9 @@ export class PlaySim {
       d.vel = v;
       d.pos = add(d.pos, scale(v, dt));
       d.face = angleOf(toGoal);
+      if (d.anim !== 'block' && (d.anim !== 'tackle' || d.animT > 0.4)) d.anim = 'block';
       for (const b of blockers) {
+        if (b.anim !== 'block') b.anim = 'block';
         const offset = scale(norm(sub(b.pos, d.pos)), b.radius + d.radius);
         b.pos = add(d.pos, offset);
         b.vel = v;
