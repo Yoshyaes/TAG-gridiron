@@ -6,7 +6,7 @@ const league = createLeague(2027); const rng = new Rng(17);
 const ys: number[] = []; let brk = 0;
 for (let i = 0; i < 1500; i++) {
   const op = rng.pick(OFF_PLAYS.filter((p) => p.type === 'run' && p.id !== 'gl_sneak'));
-  const dc = rng.pick(DEF_PLAYS.filter((d) => d.front !== 'goalline'));
+  const pool = DEF_PLAYS.filter((d) => d.front !== 'goalline'); const dc = rng.weighted(pool, pool.map((d) => (d.coverage === 'c0' ? 0.12 : 1)));
   const r = new PlaySim({ off: league[rng.int(0,31)], def: league[rng.int(0,31)], offPlay: op, defCall: dc, los: 25, ballY: FIELD_W / 2, flip: rng.chance(0.5), weather: { windX: 0, windY: 0, precip: 'none', tempF: 65 }, worldDir: 1, rng: rng.fork() }).runToEnd();
   ys.push(r.yards); brk += r.brokenTackles;
 }

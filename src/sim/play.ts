@@ -60,6 +60,9 @@ export class Ent {
   userControlled = false;
   gap = 0; // run-fit gap y
   getOff = 0;
+  sprintT = 0;
+  /** deep-third / half / quarter / single-high defender: keeps last-line leverage */
+  deepRole = false;
   eligible = false;
   beatBy: Set<Ent> = new Set();
   bitFake = 0;
@@ -399,7 +402,7 @@ export class PlaySim {
       let side = Math.sign(e.pos.y - by);
       if (Math.abs(e.pos.y - by) < 0.6) side = e.role === 'RB' ? (this.cfg.flip ? -1 : 1) : 1;
       e.outSign = side;
-      e.route = rd.pts.map(([fx, oy]) => ({ x: e.pos.x + fx, y: clamp(e.pos.y + oy * side, 0.8, FIELD_W - 0.8) }));
+      e.route = rd.pts.map(([fx, oy]) => ({ x: e.pos.x + fx, y: clamp(e.pos.y + oy * side, 1.5, FIELD_W - 1.5) }));
       e.routeIdx = 0;
       // check-release backs wait in protection briefly
       if (e.role === 'RB' && (rname === 'checkdown' || rname === 'flat')) e.pressDelay = 0.9;
@@ -498,6 +501,7 @@ export class PlaySim {
       });
     }
     for (const e of this.def) {
+      if (e.zone && /^(deep|third|half|q)/.test(e.zone)) e.deepRole = true;
       if (e.zone) e.zoneSpot = this.zoneLandmark(e.zone);
       e.reactT = 0.12 + (99 - Math.max(e.r.playRec, e.r.awareness)) * 0.006;
       e.getOff = 0.12 + this.rng.range(0, 0.12) + (99 - e.r.awareness) * 0.002;
@@ -889,7 +893,7 @@ export class PlaySim {
     const thresh = (quick ? 0.8 : 2.6) - tPocket * 0.24 - pressure * 1.1;
     if (cur) {
       const depthT = this.predictPos(cur, 1.2).x - L;
-      let open = this.openness(cur, e) - (depthT > 15 ? 1.7 + (depthT - 15) * 0.09 : 0);
+      let open = this.openness(cur, e) - (depthT > 15 ? 1.35 + (depthT - 15) * 0.08 : 0);
       // situational: on 3rd/4th down, routes past the sticks are worth more
       const down = this.cfg.down ?? 1;
       const toGo = this.cfg.toGo ?? 10;
@@ -1092,7 +1096,8 @@ export class PlaySim {
       T = this.solveT(D, v0max, Math.min(0.45, touch));
       aim = this.predictPos(tgt, T + 0.05);
     }
-    aim = { x: aim.x, y: clamp(aim.y, 0.6, FIELD_W - 0.6) };
+    // QBs throw receivers away from the sideline so they can stay in bounds
+    aim = { x: aim.x, y: clamp(aim.y, 1.8, FIELD_W - 1.8) };
     const D = dist(qb.pos, aim);
     // accuracy model
     const depthAcc = D < 10 ? qb.r.accShort : D < 20 ? qb.r.accMid : qb.r.accDeep;
@@ -1101,7 +1106,7 @@ export class PlaySim {
     const onRun = moving > 0.35 ? 1 + (1 - qb.r.throwOnRun / 100) * moving * 1.5 : 1;
     const poise = 1 + pressure * (1.4 - qb.r.poise / 100);
     const weather = this.cfg.weather.precip === 'rain' ? 1.12 : this.cfg.weather.precip === 'snow' ? 1.18 : 1;
-    const sd = (0.22 + (99 - depthAcc) * 0.019) * (0.5 + D / 19) * onRun * poise * weather * (1 + qb.p.fatigue * 0.2);
+    const sd = (0.36 + (99 - depthAcc) * 0.021) * (0.5 + D / 19) * onRun * poise * weather * (1 + qb.p.fatigue * 0.2);
     aim = { x: aim.x + this.rng.normal(0, sd * 0.9), y: aim.y + this.rng.normal(0, sd) };
     const zErr = this.rng.normal(0, sd * 0.45);
     this.launch(qb, aim, T, 1.45 + zErr);
@@ -1520,7 +1525,12 @@ export class PlaySim {
     const k = 0.75 + e.r.pursuit * 0.0035;
     // close in: cut the angle hard (aim almost at the body) instead of running parallel
     const lead = Math.min(tInt, (d / e.vmax) * 1.1 + 0.1) * k;
-    const tgt = d < 1.2 ? c.pos : add(c.pos, scale(c.vel, lead));
+    let tgt = d < 1.2 ? c.pos : add(c.pos, scale(c.vel, lead));
+    // last line of defense: deep defenders keep depth (stay over the top) until the carrier is close
+    if (e.deepRole && c.side === 'off' && d > 3.5) {
+      const keep = c.pos.x + Math.min(4, 1 + d * 0.3);
+      if (tgt.x < keep) tgt = { x: keep, y: tgt.y };
+    }
     e.want = scale(norm(sub(tgt, e.pos)), e.vmax);
   }
 
@@ -1647,7 +1657,10 @@ export class PlaySim {
     const perpC = pl > lat ? scale(perp, lat / pl) : perp;
     e.vel = add(e.vel, add(scale(dir, parC), perpC));
     const ns = len(e.vel);
-    const vcap = e.vmax * (e.hasBall && e.state === 'carrier' ? 0.96 : 1);
+    // sustained sprinting with the ball: top speed fades after ~2.5s (stamina matters)
+    if (ns > e.vmax * 0.85) e.sprintT += dt;
+    const fade = e.hasBall && e.state === 'carrier' ? Math.max(0.86, 0.96 - Math.max(0, e.sprintT - 2.5) * (0.04 - e.r.stamina * 0.0002)) : 1;
+    const vcap = e.vmax * fade;
     if (ns > vcap) e.vel = scale(e.vel, vcap / ns);
     e.pos = add(e.pos, scale(e.vel, dt));
     if (ns > 0.4) e.face = angleOf(e.vel);
@@ -1733,7 +1746,7 @@ export class PlaySim {
       }
       // shed hazard: skill matchup plus blocks degrade the longer they're held
       for (const b of blockers) b.engT += dt;
-      const base = passPro ? 0.1 : 0.18;
+      const base = passPro ? 0.1 : 0.09;
       const holderNear = holder && holder.side !== d.side && dist(holder.pos, d.pos) < 1.6;
       const decay = Math.max(0, blockers[0].engT - (passPro ? 2.6 : 1.6)) * 0.5;
       const lambda = (base * Math.exp(diff / 17) + decay) * (holderNear ? 3.2 : 1);
@@ -1872,9 +1885,10 @@ export class PlaySim {
     }
     if (!cands.length) return;
     // batted at the line
-    const early = cands.find((c) => c.e.side === 'def' && isDL(c.e.role));
+    const early = cands.find((c) => c.e.side === 'def' && isDL(c.e.role) && !this.reached.has(c.e) && c.d < 0.8);
     if (early && b.t < 0.35) {
-      if (this.rng.chance(0.25)) {
+      this.reached.set(early.e, this.t); // one swipe per lineman
+      if (this.rng.chance(0.07 + Math.max(0, early.e.p.heightIn - 76) * 0.02)) {
         this.ev('batted', early.e);
         this.pbuBy = early.e;
         b.vel = { x: this.rng.range(-3, 3), y: this.rng.range(-3, 3), z: 2 };
@@ -1910,7 +1924,7 @@ export class PlaySim {
           // best-positioned defender: closest to the ball at arrival
           const dbest = oppNear.reduce((m, o) => (dist(o.pos, bp) < dist(m.pos, bp) ? o : m), oppNear[0]);
           const edge = d - dist(dbest.pos, bp); // >0: defender closer to the ball than the receiver
-          const pbu = sigmoid((dbest.r.ballSkills - 70) / 12 + edge * 1.6 - 1.2 + (deepBall ? 0.35 : 0)) * (deepBall ? 0.6 : 0.42);
+          const pbu = sigmoid((dbest.r.ballSkills - 70) / 12 + edge * 1.6 - 1.2 + (deepBall ? 0.35 : 0)) * (deepBall ? 0.6 : 0.62);
           if (this.rng.chance(pbu)) {
             this.pbuBy = dbest;
             this.deepContested = airYds > 15;
@@ -1919,7 +1933,7 @@ export class PlaySim {
             b.vel.z = 1.5;
             b.target = null;
             // defender in great position may come down with it; or tipped and picked
-            const pInt = sigmoid((dbest.r.catching - 62) / 10 + edge * 1.2 - 1.4);
+            const pInt = sigmoid((dbest.r.catching - 62) / 10 + edge * 1.2 - 1.4 - (deepBall ? 1.0 : 0));
             if (this.rng.chance(pInt)) {
               this.intercept(dbest);
             }
@@ -1929,7 +1943,7 @@ export class PlaySim {
         }
         if (this.rng.chance(p)) {
           // feet in bounds?
-          if (e.pos.y < 0.15 || e.pos.y > FIELD_W - 0.15 || e.pos.x > 110) {
+          if (e.pos.y < -0.05 || e.pos.y > FIELD_W + 0.05 || e.pos.x > 110) {
             this.ev('oobcatch', e);
             this.endPlay('incomplete');
             return;
@@ -1956,7 +1970,7 @@ export class PlaySim {
         const edge = clamp(rd - d, -2, 1.5); // defender beat the receiver to the ball
         const pPlay = sigmoid((e.r.ballSkills - 70) / 10 + edge * 1.0 - 1.1 - d * 0.8 - (b.pos.z > 2.5 ? 0.8 : 0));
         if (!this.rng.chance(pPlay)) continue;
-        const pInt = sigmoid((e.r.catching - 62) / 10 + edge * 0.6 - 1.2);
+        const pInt = sigmoid((e.r.catching - 62) / 10 + edge * 0.6 - 1.2 - (b.pos.x - this.los > 18 ? 1.0 : 0));
         if (this.rng.chance(pInt)) {
           this.intercept(e);
         } else {

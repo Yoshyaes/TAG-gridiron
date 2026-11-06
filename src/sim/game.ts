@@ -441,6 +441,8 @@ export class Game {
       if (blitz) x *= t.blitzLean * 3;
       if (long && d.tags.includes('long')) x += 1;
       if (short && d.tags.includes('shortyard')) x += 1;
+      // Cover 0 (no deep help) is a situational call: short yardage / goal line / desperation
+      if (d.coverage === 'c0' && !short && !goal) x *= 0.12;
       if (this.tempo() === 'hurry' && this.margin(other(this.poss)) > 0 && d.tags.includes('prevent')) x += 2;
       return x;
     });
