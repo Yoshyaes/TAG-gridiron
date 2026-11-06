@@ -278,7 +278,7 @@ void AStadium::Build(const tag::Team& Home, const tag::Team& Away, const tag::We
 				L->SetRelativeLocation(FVector(X, Y, 7000));
 				L->SetRelativeRotation((FVector(50 * YD, 0, 0) - FVector(X, Y, 7000)).Rotation());
 				L->SetIntensityUnits(ELightUnits::Candelas);
-				L->SetIntensity(400000.f);
+				L->SetIntensity(140000.f);
 				L->SetAttenuationRadius(40000.f);
 				L->SetOuterConeAngle(38.f);
 				L->SetInnerConeAngle(20.f);
@@ -292,11 +292,11 @@ void AStadium::Build(const tag::Team& Home, const tag::Team& Away, const tag::We
 	PP->bUnbound = true;
 	// keep exposure in a narrow, broadcast-like range so the turf doesn't wash out
 	PP->Settings.bOverride_AutoExposureMinBrightness = true;
-	PP->Settings.AutoExposureMinBrightness = bNight ? 1.5f : 3.f;
+	PP->Settings.AutoExposureMinBrightness = bNight ? 0.8f : 0.6f;
 	PP->Settings.bOverride_AutoExposureMaxBrightness = true;
-	PP->Settings.AutoExposureMaxBrightness = bNight ? 3.f : 5.f;
+	PP->Settings.AutoExposureMaxBrightness = bNight ? 2.2f : 2.0f;
 	PP->Settings.bOverride_AutoExposureBias = true;
-	PP->Settings.AutoExposureBias = -0.5f;
+	PP->Settings.AutoExposureBias = bNight ? -0.4f : 0.4f;
 	PP->Settings.bOverride_MotionBlurAmount = true;
 	PP->Settings.MotionBlurAmount = 0.2f;
 	PP->Settings.bOverride_MotionBlurMax = true;
