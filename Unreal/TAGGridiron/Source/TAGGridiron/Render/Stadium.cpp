@@ -13,6 +13,7 @@
 #include "Components/SpotLightComponent.h"
 #include "Components/PostProcessComponent.h"
 #include "Engine/StaticMesh.h"
+#include "Materials/MaterialInstanceDynamic.h"
 #include "Sim/Types.h"
 #include "Sim/PlaySim.h"
 
@@ -74,25 +75,69 @@ void AStadium::Build(const tag::Team& Home, const tag::Team& Away, const tag::We
 	UStaticMesh* Cube = A.Cube;
 	const bool bSnowy = W.precip == tag::Precip::Snow;
 	const bool bWet = W.precip == tag::Precip::Rain;
+	const bool bPro = A.TurfMat && A.Plane;
+	auto TurfMID = [&](float LinesAmt, const FLinearColor& Tint, float PaintAmt, const FLinearColor& Paint, const FLinearColor& Tiling, float Stripes)
+	{
+		UMaterialInstanceDynamic* M = UMaterialInstanceDynamic::Create(A.TurfMat, this);
+		M->SetScalarParameterValue(TEXT("LinesAmount"), LinesAmt);
+		M->SetVectorParameterValue(TEXT("Tint"), Tint);
+		M->SetScalarParameterValue(TEXT("PaintAmount"), PaintAmt);
+		M->SetVectorParameterValue(TEXT("PaintColor"), Paint);
+		M->SetVectorParameterValue(TEXT("GrassTiling"), Tiling);
+		M->SetScalarParameterValue(TEXT("StripeAmount"), Stripes);
+		M->SetScalarParameterValue(TEXT("Roughness"), bWet ? 0.45f : 0.88f);
+		return M;
+	};
+	auto PlaneAt = [&](const FVector& C, double LenYd, double WidYd, UMaterialInterface* M)
+	{
+		UStaticMeshComponent* P = NewObject<UStaticMeshComponent>(this);
+		P->SetupAttachment(RootComponent);
+		P->SetStaticMesh(A.Plane);
+		P->SetRelativeLocation(C);
+		P->SetRelativeScale3D(FVector(LenYd * YD / 100, WidYd * YD / 100, 1));
+		P->SetMaterial(0, M);
+		P->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		P->RegisterComponent();
+		return P;
+	};
+	if (bPro)
+	{
+		const FLinearColor SnowTint = bSnowy ? FLinearColor(0.85f, 0.9f, 0.9f) : FLinearColor(0.62f, 0.66f, 0.56f);
+		// one surface for the whole 120-yard field: grass + mowing stripes + painted markings
+		PlaneAt(FVector(50 * YD, 0, 0.5), 120, FW, TurfMID(1.f, SnowTint, 0.f, FLinearColor::Black, FLinearColor(60, 27, 0, 0), 1.f));
+		// team-painted end zones, inset so the boundary paint stays visible
+		auto EZ = [&](double X0, const tag::Team& T, float Yaw)
+		{
+			PlaneAt(FVector((X0 + 5) * YD, 0, 1.0), 9.6, FW - 0.8, TurfMID(0.f, SnowTint, 0.92f, Hex(T.colors.primary), FLinearColor(5, 27, 0, 0), 0.f));
+			AddText(FString(T.name.c_str()).ToUpper(), FVector((X0 + 5) * YD, 0, 3), FRotator(90, Yaw, 0), 520.f, FColor(240, 240, 240));
+		};
+		EZ(-10, Away, 90);
+		EZ(100, Home, -90);
+		// apron around the field (darker, unpainted turf)
+		PlaneAt(FVector(50 * YD, 0, -0.5), 170, 100, TurfMID(0.f, FLinearColor(0.7f, 0.75f, 0.7f) * SnowTint, 0.f, FLinearColor::Black, FLinearColor(85, 50, 0, 0), 0.f));
+	}
 	// ---------------- turf: 5-yard mowing stripes (cube is 100 cm)
 	const FLinearColor G1 = bSnowy ? FLinearColor(0.11f, 0.2f, 0.1f) : FLinearColor(0.035f, 0.13f, 0.03f);
 	const FLinearColor G2 = bSnowy ? FLinearColor(0.1f, 0.18f, 0.09f) : FLinearColor(0.028f, 0.105f, 0.025f);
 	const float TurfRough = bWet ? 0.35f : 0.9f;
-	for (int i = 0; i < 24; ++i)
+	for (int i = 0; i < (bPro ? 0 : 24); ++i)
 	{
 		const double X0 = (-10 + i * 5) * YD;
 		AddMesh(Cube, FVector(X0 + 2.5 * YD, 0, -50), FVector(5 * YD / 100, FW * YD / 100, 1), i % 2 ? G1 : G2, TurfRough, FRotator::ZeroRotator, false);
 	}
 	// surround
-	AddMesh(Cube, FVector(50 * YD, 0, -52), FVector(170 * YD / 100, 100 * YD / 100, 1), bSnowy ? FLinearColor(0.6f, 0.62f, 0.65f) : FLinearColor(0.02f, 0.08f, 0.02f), 0.95f, FRotator::ZeroRotator, false);
+	if (!bPro) AddMesh(Cube, FVector(50 * YD, 0, -52), FVector(170 * YD / 100, 100 * YD / 100, 1), bSnowy ? FLinearColor(0.6f, 0.62f, 0.65f) : FLinearColor(0.02f, 0.08f, 0.02f), 0.95f, FRotator::ZeroRotator, false);
 	// end zones
 	auto EndZone = [&](double X0, const tag::Team& T, float Yaw)
 	{
 		AddMesh(Cube, FVector((X0 + 5) * YD, 0, -49.6), FVector(10 * YD / 100, FW * YD / 100, 1), Hex(T.colors.primary) * 0.55f, 0.85f, FRotator::ZeroRotator, false);
 		AddText(FString(T.name.c_str()).ToUpper(), FVector((X0 + 5) * YD, 0, 2), FRotator(90, Yaw, 0), 520.f, FColor::White);
 	};
-	EndZone(-10, Away, 90);
-	EndZone(100, Home, -90);
+	if (!bPro)
+	{
+		EndZone(-10, Away, 90);
+		EndZone(100, Home, -90);
+	}
 	// ---------------- markings (white paint, slightly emissive-looking via low roughness off)
 	const FLinearColor Paint(0.85f, 0.85f, 0.82f);
 	UInstancedStaticMeshComponent* Lines = AddISM(Cube, Paint, 0.7f, false);
@@ -101,7 +146,7 @@ void AStadium::Build(const tag::Team& Home, const tag::Team& Away, const tag::We
 		const FVector S = bAlongY ? FVector(Wid * YD / 100, Len * YD / 100, 0.005) : FVector(Len * YD / 100, Wid * YD / 100, 0.005);
 		Lines->AddInstance(FTransform(FRotator::ZeroRotator, FVector(X * YD, Y * YD, 1.0), S));
 	};
-	for (int yd = 0; yd <= 100; ++yd)
+	for (int yd = 0; yd <= (bPro ? -1 : 100); ++yd)
 	{
 		if (yd % 5 == 0)
 			Line(yd, 0, FW - 0.6, (yd == 0 || yd == 100) ? 0.22 : 0.12, true);
@@ -111,16 +156,17 @@ void AStadium::Build(const tag::Team& Home, const tag::Team& Away, const tag::We
 				Line(yd, y, 0.67, 0.1, true);
 		}
 	}
-	// sidelines and end lines
-	Line(50, -FW / 2, 120, 0.33, false);
-	Line(50, FW / 2, 120, 0.33, false);
-	Line(-10, 0, FW, 0.33, true);
-	Line(110, 0, FW, 0.33, true);
-	// two-point marks
-	Line(2, 0, 1, 0.12, true);
-	Line(98, 0, 1, 0.12, true);
-	// yard numbers (6 ft tall, tops 9 yd from the sideline)
-	for (int yd = 10; yd <= 90; yd += 10)
+	if (!bPro)
+	{
+		Line(50, -FW / 2, 120, 0.33, false);
+		Line(50, FW / 2, 120, 0.33, false);
+		Line(-10, 0, FW, 0.33, true);
+		Line(110, 0, FW, 0.33, true);
+		Line(2, 0, 1, 0.12, true);
+		Line(98, 0, 1, 0.12, true);
+	}
+	// yard numbers (6 ft tall, tops 9 yd from the sideline) - baked into the turf texture when available
+	for (int yd = 10; yd <= (bPro ? 0 : 90); yd += 10)
 	{
 		const int N = yd <= 50 ? yd : 100 - yd;
 		const FString S = FString::Printf(TEXT("%d"), N);
@@ -151,13 +197,27 @@ void AStadium::Build(const tag::Team& Home, const tag::Team& Away, const tag::We
 	// ---------------- stands: lower bowl + upper deck on all four sides
 	const FLinearColor Concrete(0.12f, 0.12f, 0.13f);
 	const FLinearColor WallC = Hex(Home.colors.primary) * 0.6f;
+	auto Deck = [&](const FVector& P, const FVector& Scale, const FRotator& R)
+	{
+		UStaticMeshComponent* D = AddMesh(Cube, P, Scale, Concrete, 0.9f, R);
+		if (A.CrowdMat)
+		{
+			UMaterialInstanceDynamic* M = UMaterialInstanceDynamic::Create(A.CrowdMat, this);
+			M->SetVectorParameterValue(TEXT("TeamColor"), Hex(Home.colors.primary));
+			// crowd texture is 16 rows of fans ~ 2048px wide (~70 seats): tile to real seat spacing
+			M->SetVectorParameterValue(TEXT("Tiling"), FLinearColor(Scale.X * 100 / 1450.f, Scale.Y * 100 / 4500.f, 0, 0));
+			M->SetScalarParameterValue(TEXT("Glow"), bNight ? 0.25f : 0.08f);
+			D->SetMaterial(0, M);
+		}
+		return D;
+	};
 	auto Stand = [&](const FVector& C, float Yaw, double Len)
 	{
 		const FRotator R(0, Yaw, 0);
 		const FVector Fwd = R.Vector();
 		AddMesh(Cube, C + Fwd * 0, FVector(1.2, Len / 100, 2.2), WallC, 0.5f, R);
-		AddMesh(Cube, C + Fwd * 1600 + FVector(0, 0, 1050), FVector(36, Len / 100, 0.5), Concrete, 0.9f, FRotator(-33, Yaw, 0));
-		AddMesh(Cube, C + Fwd * 4200 + FVector(0, 0, 3300), FVector(28, Len / 100, 0.5), Concrete, 0.9f, FRotator(-38, Yaw, 0));
+		Deck(C + Fwd * 1600 + FVector(0, 0, 1050), FVector(36, Len / 100, 0.5), FRotator(-33, Yaw, 0));
+		Deck(C + Fwd * 4200 + FVector(0, 0, 3300), FVector(28, Len / 100, 0.5), FRotator(-38, Yaw, 0));
 		AddMesh(Cube, C + Fwd * 5400 + FVector(0, 0, 5600), FVector(24, Len / 100, 0.6), FLinearColor(0.2f, 0.21f, 0.24f), 0.7f, FRotator(-8, Yaw, 0));
 	};
 	const double SideY = (FW / 2 + 9) * YD;
@@ -165,7 +225,7 @@ void AStadium::Build(const tag::Team& Home, const tag::Team& Away, const tag::We
 	Stand(FVector(50 * YD, -SideY, 0), -90, 140 * YD);
 	Stand(FVector(-24 * YD, 0, 0), 180, 76 * YD);
 	Stand(FVector(124 * YD, 0, 0), 0, 76 * YD);
-	BuildCrowd(Home);
+	if (!A.CrowdMat) BuildCrowd(Home);
 	// sideline benches & personnel area tint
 	for (double Y : {-(FW / 2 + 4.5), FW / 2 + 4.5})
 		AddMesh(Cube, FVector(50 * YD, Y * YD, 30), FVector(30 * YD / 100, 0.6, 0.5), FLinearColor(0.05f, 0.05f, 0.06f), 0.6f);

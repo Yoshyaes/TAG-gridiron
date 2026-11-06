@@ -43,6 +43,9 @@ void FAthleteAssets::Load()
 	Sphere = LoadAsset<UStaticMesh>(TEXT("/Engine/BasicShapes/Sphere.Sphere"));
 	Cube = LoadAsset<UStaticMesh>(TEXT("/Engine/BasicShapes/Cube.Cube"));
 	Cylinder = LoadAsset<UStaticMesh>(TEXT("/Engine/BasicShapes/Cylinder.Cylinder"));
+	Plane = LoadAsset<UStaticMesh>(TEXT("/Engine/BasicShapes/Plane.Plane"));
+	TurfMat = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/TAG/Materials/M_TagTurf.M_TagTurf"));
+	CrowdMat = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/TAG/Materials/M_TagCrowd.M_TagCrowd"));
 	ShapeMat = LoadAsset<UMaterialInterface>(TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial"));
 }
 

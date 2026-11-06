@@ -98,6 +98,9 @@ struct FAthleteAssets
 	TObjectPtr<class UStaticMesh> Cube;
 	TObjectPtr<class UStaticMesh> Cylinder;
 	TObjectPtr<class UStaticMesh> Torus;
+	TObjectPtr<class UStaticMesh> Plane;
+	TObjectPtr<class UMaterialInterface> TurfMat;
+	TObjectPtr<class UMaterialInterface> CrowdMat;
 	TObjectPtr<class UMaterialInterface> ShapeMat;
 	void Load();
 };

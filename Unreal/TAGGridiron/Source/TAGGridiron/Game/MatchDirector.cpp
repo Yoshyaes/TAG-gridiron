@@ -17,6 +17,7 @@
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
 #include "UnrealClient.h"
+#include "AssetCompilingManager.h"
 #if WITH_EDITOR
 #include "ShaderCompiler.h"
 #endif
@@ -93,6 +94,7 @@ void AMatchDirector::TickAutomation(float Dt)
 #if WITH_EDITOR
 	if (GShaderCompilingManager && GShaderCompilingManager->GetNumRemainingJobs() > 0) return; // wait for shaders
 #endif
+	if (FAssetCompilingManager::Get().GetNumRemainingAssets() > 0) return; // and textures/meshes
 	AutoT += Dt;
 	static const float Times[] = {3.f, 9.f, 14.f, 20.f, 27.f, 34.f, 42.f, 50.f};
 	if (AutoShot < static_cast<int32>(UE_ARRAY_COUNT(Times)) && AutoT >= Times[AutoShot])

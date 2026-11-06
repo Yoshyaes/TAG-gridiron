@@ -15,3 +15,8 @@ Unreal/**/build.log
 # engine-provided template characters (copied by Unreal/TAGGridiron/Tools/setup_assets.bat)
 Unreal/TAGGridiron/Content/Characters/
 Unreal/**/build/
+# generated art (rebuilt by Unreal/TAGGridiron/Tools/setup_assets.bat)
+Unreal/TAGGridiron/RawArt/
+Unreal/TAGGridiron/Content/TAG/
+Unreal/**/mat.log
+Unreal/**/build_editor.log
