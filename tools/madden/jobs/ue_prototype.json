@@ -1,0 +1,486 @@
+[
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/prototype/meshes/fullarms_t_mesh.fbx",
+  "dest": "/Game/MaddenRef/Skeleton",
+  "name": "MaddenFB_Hero",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/prototype/meshes/fullarms_t_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Prototype",
+  "name": "SK_fullarms_t",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/prototype/meshes/legs_t_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Prototype",
+  "name": "SK_legs_t",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/prototype/meshes/jersey_t_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Prototype",
+  "name": "SK_jersey_t",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/prototype/meshes/pants_t_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Prototype",
+  "name": "SK_pants_t",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/prototype/meshes/socks_mid_t_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Prototype",
+  "name": "SK_socks_mid_t",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/prototype/meshes/sleeve_tight_t_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Prototype",
+  "name": "SK_sleeve_tight_t",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/prototype/meshes/shoe_low_nikealphamenaceelite99clubr_t_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Prototype",
+  "name": "SK_shoe_low_nikealphamenaceelite99clubr_t",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/prototype/meshes/shoe_low_nikealphamenaceelite99clubl_t_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Prototype",
+  "name": "SK_shoe_low_nikealphamenaceelite99clubl_t",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/prototype/meshes/glover_t_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Prototype",
+  "name": "SK_glover_t",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/prototype/meshes/glovel_t_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Prototype",
+  "name": "SK_glovel_t",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/prototype/meshes/fullarms_m_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Prototype",
+  "name": "SK_fullarms_m",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/prototype/meshes/legs_m_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Prototype",
+  "name": "SK_legs_m",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/prototype/meshes/jersey_m_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Prototype",
+  "name": "SK_jersey_m",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/prototype/meshes/pants_m_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Prototype",
+  "name": "SK_pants_m",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/prototype/meshes/socks_mid_m_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Prototype",
+  "name": "SK_socks_mid_m",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/prototype/meshes/sleeve_tight_m_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Prototype",
+  "name": "SK_sleeve_tight_m",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/prototype/meshes/shoe_low_nikealphamenaceelite99clubr_m_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Prototype",
+  "name": "SK_shoe_low_nikealphamenaceelite99clubr_m",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/prototype/meshes/shoe_low_nikealphamenaceelite99clubl_m_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Prototype",
+  "name": "SK_shoe_low_nikealphamenaceelite99clubl_m",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/prototype/meshes/glover_m_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Prototype",
+  "name": "SK_glover_m",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/prototype/meshes/glovel_m_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Prototype",
+  "name": "SK_glovel_m",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/prototype/meshes/fullarms_h_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Prototype",
+  "name": "SK_fullarms_h",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/prototype/meshes/legs_h_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Prototype",
+  "name": "SK_legs_h",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/prototype/meshes/jersey_h_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Prototype",
+  "name": "SK_jersey_h",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/prototype/meshes/pants_h_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Prototype",
+  "name": "SK_pants_h",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/prototype/meshes/socks_mid_h_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Prototype",
+  "name": "SK_socks_mid_h",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/prototype/meshes/sleeve_tight_h_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Prototype",
+  "name": "SK_sleeve_tight_h",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/prototype/meshes/shoe_low_nikealphamenaceelite99clubr_h_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Prototype",
+  "name": "SK_shoe_low_nikealphamenaceelite99clubr_h",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/prototype/meshes/shoe_low_nikealphamenaceelite99clubl_h_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Prototype",
+  "name": "SK_shoe_low_nikealphamenaceelite99clubl_h",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/prototype/meshes/glover_h_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Prototype",
+  "name": "SK_glover_h",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/prototype/meshes/glovel_h_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Prototype",
+  "name": "SK_glovel_h",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/prototype/meshes/faulkmarshall_11413_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Prototype",
+  "name": "SK_faulkmarshall_11413",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/prototype/meshes/helmet_shell_xenith_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Prototype",
+  "name": "SK_helmet_shell_xenith",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/prototype/meshes/helmet_facemask_xenithprism_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Prototype",
+  "name": "SK_helmet_facemask_xenithprism",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/prototype/meshes/helmet_shell_speedflex_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Prototype",
+  "name": "SK_helmet_shell_speedflex",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/prototype/meshes/helmet_facemask_speedflex2bar_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Prototype",
+  "name": "SK_helmet_facemask_speedflex2bar",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/prototype/textures/ls_common_legs_rsm.png",
+  "dest": "/Game/MaddenRef/Players/Prototype/Textures",
+  "name": "T_ls_common_legs_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/prototype/textures/ls_common_legs_normal.png",
+  "dest": "/Game/MaddenRef/Players/Prototype/Textures",
+  "name": "T_ls_common_legs_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/prototype/textures/genericpadless_legs_st1.png",
+  "dest": "/Game/MaddenRef/Players/Prototype/Textures",
+  "name": "T_genericpadless_legs_st1"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/prototype/textures/skinnoise.png",
+  "dest": "/Game/MaddenRef/Players/Prototype/Textures",
+  "name": "T_skinnoise"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/prototype/textures/arm-sweat-packed.png",
+  "dest": "/Game/MaddenRef/Players/Prototype/Textures",
+  "name": "T_arm-sweat-packed"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/prototype/textures/arm_rsm_skintone2.png",
+  "dest": "/Game/MaddenRef/Players/Prototype/Textures",
+  "name": "T_arm_rsm_skintone2",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/prototype/textures/arm_normal.png",
+  "dest": "/Game/MaddenRef/Players/Prototype/Textures",
+  "name": "T_arm_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/prototype/textures/arm_skintone1.png",
+  "dest": "/Game/MaddenRef/Players/Prototype/Textures",
+  "name": "T_arm_skintone1"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/prototype/textures/commonrsm.png",
+  "dest": "/Game/MaddenRef/Players/Prototype/Textures",
+  "name": "T_commonrsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/prototype/textures/face_skintile.png",
+  "dest": "/Game/MaddenRef/Players/Prototype/Textures",
+  "name": "T_face_skintile"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/prototype/textures/venthole_norm.png",
+  "dest": "/Game/MaddenRef/Players/Prototype/Textures",
+  "name": "T_venthole_norm",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/prototype/textures/shoe_low_nikealphamenaceelite99club_decal.png",
+  "dest": "/Game/MaddenRef/Players/Prototype/Textures",
+  "name": "T_shoe_low_nikealphamenaceelite99club_decal"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/prototype/textures/shoe_low_nikealphamenaceelite99club_norm.png",
+  "dest": "/Game/MaddenRef/Players/Prototype/Textures",
+  "name": "T_shoe_low_nikealphamenaceelite99club_norm",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/prototype/textures/shoe_low_nikealphamenaceelite99club_rsm.png",
+  "dest": "/Game/MaddenRef/Players/Prototype/Textures",
+  "name": "T_shoe_low_nikealphamenaceelite99club_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/prototype/textures/shoe_low_nikealphamenaceelite99club_black_col.png",
+  "dest": "/Game/MaddenRef/Players/Prototype/Textures",
+  "name": "T_shoe_low_nikealphamenaceelite99club_black_col"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/prototype/textures/socks_outer_col.png",
+  "dest": "/Game/MaddenRef/Players/Prototype/Textures",
+  "name": "T_socks_outer_col"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/prototype/textures/socks_outer_norm.png",
+  "dest": "/Game/MaddenRef/Players/Prototype/Textures",
+  "name": "T_socks_outer_norm",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/prototype/textures/socks_outer_rsm.png",
+  "dest": "/Game/MaddenRef/Players/Prototype/Textures",
+  "name": "T_socks_outer_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/prototype/textures/nin_helmet_2018_golalt_sticker_col.png",
+  "dest": "/Game/MaddenRef/Players/Prototype/Textures",
+  "name": "T_nin_helmet_2018_golalt_sticker_col"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/prototype/textures/nin_helmet_2018_golalt_helmet_col.png",
+  "dest": "/Game/MaddenRef/Players/Prototype/Textures",
+  "name": "T_nin_helmet_2018_golalt_helmet_col"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/prototype/textures/nin_jersey_2018_whialt_jersey_col.png",
+  "dest": "/Game/MaddenRef/Players/Prototype/Textures",
+  "name": "T_nin_jersey_2018_whialt_jersey_col"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/prototype/textures/nin_jersey_2018_whialt_jersey_norm.png",
+  "dest": "/Game/MaddenRef/Players/Prototype/Textures",
+  "name": "T_nin_jersey_2018_whialt_jersey_norm",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/prototype/textures/nin_jersey_2018_whialt_jersey_rsm.png",
+  "dest": "/Game/MaddenRef/Players/Prototype/Textures",
+  "name": "T_nin_jersey_2018_whialt_jersey_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/prototype/textures/nin_pants_2018_whialt_pants_col.png",
+  "dest": "/Game/MaddenRef/Players/Prototype/Textures",
+  "name": "T_nin_pants_2018_whialt_pants_col"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/prototype/textures/nin_pants_2018_whialt_pants_norm.png",
+  "dest": "/Game/MaddenRef/Players/Prototype/Textures",
+  "name": "T_nin_pants_2018_whialt_pants_norm",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/prototype/textures/nin_pants_2018_whialt_pants_rsm.png",
+  "dest": "/Game/MaddenRef/Players/Prototype/Textures",
+  "name": "T_nin_pants_2018_whialt_pants_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/prototype/textures/nin_socks_2018_whi_socksunder_col.png",
+  "dest": "/Game/MaddenRef/Players/Prototype/Textures",
+  "name": "T_nin_socks_2018_whi_socksunder_col"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/prototype/textures/jerseywrinkles_d.png",
+  "dest": "/Game/MaddenRef/Players/Prototype/Textures",
+  "name": "T_jerseywrinkles_d"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/prototype/textures/metalflake_color.png",
+  "dest": "/Game/MaddenRef/Players/Prototype/Textures",
+  "name": "T_metalflake_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/prototype/textures/playerhead_sweat.png",
+  "dest": "/Game/MaddenRef/Players/Prototype/Textures",
+  "name": "T_playerhead_sweat"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/prototype/textures/faulkmarshall_11413_color.png",
+  "dest": "/Game/MaddenRef/Players/Prototype/Textures",
+  "name": "T_faulkmarshall_11413_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/prototype/textures/faulkmarshall_11413_normal.png",
+  "dest": "/Game/MaddenRef/Players/Prototype/Textures",
+  "name": "T_faulkmarshall_11413_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/prototype/textures/flatgrey_color.png",
+  "dest": "/Game/MaddenRef/Players/Prototype/Textures",
+  "name": "T_flatgrey_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/prototype/textures/flatnormal_normal.png",
+  "dest": "/Game/MaddenRef/Players/Prototype/Textures",
+  "name": "T_flatnormal_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/prototype/textures/flatsweat.png",
+  "dest": "/Game/MaddenRef/Players/Prototype/Textures",
+  "name": "T_flatsweat"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/prototype/textures/invisible_color.png",
+  "dest": "/Game/MaddenRef/Players/Prototype/Textures",
+  "name": "T_invisible_color"
+ }
+]

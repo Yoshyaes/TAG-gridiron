@@ -1,0 +1,1906 @@
+[
+ {
+  "id": "m_fullarms_t_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/bodies/fullarms_t_mesh",
+  "out": "{REPO}/extracted/prototype/meshes/fullarms_t_mesh.fbx",
+  "units": "Meters",
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/bodies/fullarms_t_launch_playerarms_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/characters/common/textures/skintones/arm_skintone1",
+      "normalClampTexture": "content/characters/common/textures/skintones/arm_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/SkinNoise",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/arm_RSM_skintone2",
+      "sweatNormalTexture": "content/characters/common/textures/skintones/arm-sweat-packed"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/characters/common/textures/skintones/arm_skintone1",
+      "normalClampTexture": "content/characters/common/textures/skintones/arm_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/SkinNoise",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/arm_RSM_skintone2",
+      "sweatNormalTexture": "content/characters/common/textures/skintones/arm-sweat-packed"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/characters/common/textures/skintones/arm_skintone1",
+      "normalClampTexture": "content/characters/common/textures/skintones/arm_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/SkinNoise",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/arm_RSM_skintone2",
+      "sweatNormalTexture": "content/characters/common/textures/skintones/arm-sweat-packed"
+     },
+     "vectors": {}
+    }
+   ]
+  }
+ },
+ {
+  "id": "m_legs_t_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/bodies/legs_t_mesh",
+  "out": "{REPO}/extracted/prototype/meshes/legs_t_mesh.fbx",
+  "units": "Meters",
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/bodies/legs_t_launch_playerarms_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "normalWrapTexture": "content/characters/common/textures/skintones/SkinNoise",
+      "normalClampTexture": "Longshot/Characters/Common/Textures/ls_common_legs_normal",
+      "R_S_SSR_T_Texture": "Longshot/Characters/Common/Textures/ls_common_legs_RSM",
+      "colorTexture": "content/characters/common/textures/skintones/GenericPadless_Legs_ST1",
+      "sweatNormalTexture": "content/common/textures/default/flatSweat"
+     },
+     "vectors": {}
+    }
+   ]
+  }
+ },
+ {
+  "id": "m_jersey_t_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/torsoapparel/jersey/jersey_t_mesh",
+  "out": "{REPO}/extracted/prototype/meshes/jersey_t_mesh.fbx",
+  "units": "Meters",
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/torsoapparel/jersey/jersey_t_launch_playergear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "RSMTexture": "content/common/textures/default/flatGrey_color",
+      "wrinkleNormTexture": "content/characters/player/parts/uniforms/commonTextures/JerseyWrinkles_D",
+      "patchSampler": "content/common/textures/default/invisible_color",
+      "shoulderNumbers": "content/common/textures/default/invisible_color",
+      "ChestNumbers": "content/common/textures/default/invisible_color",
+      "BackNumbers": "content/common/textures/default/invisible_color",
+      "seamPatternNormTexture": "content/common/textures/default/flatNormal_normal"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "RSMTexture": "content/common/textures/default/flatGrey_color",
+      "wrinkleNormTexture": "content/characters/player/parts/uniforms/commonTextures/JerseyWrinkles_D",
+      "patchSampler": "content/common/textures/default/invisible_color",
+      "shoulderNumbers": "content/common/textures/default/invisible_color",
+      "ChestNumbers": "content/common/textures/default/invisible_color",
+      "BackNumbers": "content/common/textures/default/invisible_color",
+      "seamPatternNormTexture": "content/common/textures/default/flatNormal_normal"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "RSMTexture": "content/common/textures/default/flatGrey_color",
+      "wrinkleNormTexture": "content/characters/player/parts/uniforms/commonTextures/JerseyWrinkles_D",
+      "patchSampler": "content/common/textures/default/invisible_color",
+      "shoulderNumbers": "content/common/textures/default/invisible_color",
+      "ChestNumbers": "content/common/textures/default/invisible_color",
+      "BackNumbers": "content/common/textures/default/invisible_color",
+      "seamPatternNormTexture": "content/common/textures/default/flatNormal_normal"
+     },
+     "vectors": {}
+    }
+   ]
+  }
+ },
+ {
+  "id": "m_pants_t_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/legsapparel/pants/pants_t_mesh",
+  "out": "{REPO}/extracted/prototype/meshes/pants_t_mesh.fbx",
+  "units": "Meters",
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/legsapparel/pants/pants_t_launch_playergear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal",
+      "RSMTexture": "content/common/textures/default/flatGrey_color",
+      "kneeNormalArrayTexture": "content/characters/player/parts/legsApparel/pants/kneePadsArray_norm",
+      "thighNormalArrayTexture": "content/characters/player/parts/legsApparel/pants/thighPadsArray_norm"
+     },
+     "vectors": {}
+    }
+   ]
+  }
+ },
+ {
+  "id": "m_socks_mid_t_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/legsapparel/socks_mid/socks_mid_t_mesh",
+  "out": "{REPO}/extracted/prototype/meshes/socks_mid_t_mesh.fbx",
+  "units": "Meters",
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/legsapparel/socks_mid/socks_mid_t_launch_playergear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/characters/player/parts/legsApparel/socks_Mid/socks_Outer_COL",
+      "normalClampTexture": "content/characters/player/parts/legsApparel/socks_Mid/socks_Outer_NORM",
+      "RSMTexture": "content/characters/player/parts/legsApparel/socks_Mid/socks_Outer_RSM"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/characters/player/parts/legsApparel/socks_Mid/socks_Outer_COL",
+      "normalClampTexture": "content/characters/player/parts/legsApparel/socks_Mid/socks_Outer_NORM",
+      "RSMTexture": "content/characters/player/parts/legsApparel/socks_Mid/socks_Outer_RSM"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/characters/player/parts/legsApparel/socks_Mid/socks_Outer_COL",
+      "normalClampTexture": "content/characters/player/parts/legsApparel/socks_Mid/socks_Outer_NORM",
+      "RSMTexture": "content/characters/player/parts/legsApparel/socks_Mid/socks_Outer_RSM"
+     },
+     "vectors": {}
+    }
+   ]
+  }
+ },
+ {
+  "id": "m_sleeve_tight_t_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/torsoapparel/sleeve_tight/sleeve_tight_t_mesh",
+  "out": "{REPO}/extracted/prototype/meshes/sleeve_tight_t_mesh.fbx",
+  "units": "Meters",
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/torsoapparel/sleeve_tight/sleeve_tight_t_launch_playergear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "RSMTexture": "content/common/textures/default/flatGrey_color",
+      "sleeveNumbers": "content/common/textures/default/flatGrey_color",
+      "colorTexture": "content/common/textures/default/invisible_color",
+      "wrinkleNormTexture": "content/characters/player/parts/uniforms/commonTextures/JerseyWrinkles_D",
+      "seamPatternNormTexture": "content/common/textures/default/flatNormal_normal"
+     },
+     "vectors": {}
+    }
+   ]
+  }
+ },
+ {
+  "id": "m_shoe_low_nikealphamenaceelite99clubr_t_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/footwear/shoe_low_nikealphamenaceelite99club/shoe_low_nikealphamenaceelite99clubr_t_mesh",
+  "out": "{REPO}/extracted/prototype/meshes/shoe_low_nikealphamenaceelite99clubr_t_mesh.fbx",
+  "units": "Meters",
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/footwear/shoe_low_nikealphamenaceelite99club/shoe_low_nikealphamenaceelite99clubr_t_playergear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "normalClampTexture": "content/characters/player/parts/footwear/shoe_low_NikeAlphaMenaceElite99Club/shoe_low_NikeAlphaMenaceElite99Club_NORM",
+      "RSMTexture": "content/characters/player/parts/footwear/shoe_low_NikeAlphaMenaceElite99Club/shoe_low_NikeAlphaMenaceElite99Club_RSM",
+      "logoOverlayTexture": "content/characters/player/parts/footwear/shoe_low_NikeAlphaMenaceElite99Club/shoe_low_NikeAlphaMenaceElite99Club_DECAL",
+      "colorTexture": "content/characters/player/parts/footwear/shoe_low_NikeAlphaMenaceElite99Club/shoe_low_NikeAlphaMenaceElite99Club_black_COL"
+     },
+     "vectors": {}
+    }
+   ]
+  }
+ },
+ {
+  "id": "m_shoe_low_nikealphamenaceelite99clubl_t_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/footwear/shoe_low_nikealphamenaceelite99club/shoe_low_nikealphamenaceelite99clubl_t_mesh",
+  "out": "{REPO}/extracted/prototype/meshes/shoe_low_nikealphamenaceelite99clubl_t_mesh.fbx",
+  "units": "Meters",
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/footwear/shoe_low_nikealphamenaceelite99club/shoe_low_nikealphamenaceelite99clubl_t_playergear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "normalClampTexture": "content/characters/player/parts/footwear/shoe_low_NikeAlphaMenaceElite99Club/shoe_low_NikeAlphaMenaceElite99Club_NORM",
+      "RSMTexture": "content/characters/player/parts/footwear/shoe_low_NikeAlphaMenaceElite99Club/shoe_low_NikeAlphaMenaceElite99Club_RSM",
+      "logoOverlayTexture": "content/characters/player/parts/footwear/shoe_low_NikeAlphaMenaceElite99Club/shoe_low_NikeAlphaMenaceElite99Club_DECAL",
+      "colorTexture": "content/characters/player/parts/footwear/shoe_low_NikeAlphaMenaceElite99Club/shoe_low_NikeAlphaMenaceElite99Club_black_COL"
+     },
+     "vectors": {}
+    }
+   ]
+  }
+ },
+ {
+  "id": "m_glover_t_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/armgear/glover/glover_t_mesh",
+  "out": "{REPO}/extracted/prototype/meshes/glover_t_mesh.fbx",
+  "units": "Meters",
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/armgear/glover/glover_t_launch_playerarms_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal",
+      "RSMTexture": "content/common/textures/default/flatGrey_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal",
+      "RSMTexture": "content/common/textures/default/flatGrey_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal",
+      "RSMTexture": "content/common/textures/default/flatGrey_color"
+     },
+     "vectors": {}
+    }
+   ]
+  }
+ },
+ {
+  "id": "m_glovel_t_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/armgear/glovel/glovel_t_mesh",
+  "out": "{REPO}/extracted/prototype/meshes/glovel_t_mesh.fbx",
+  "units": "Meters",
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/armgear/glovel/glovel_t_launch_playerarms_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal",
+      "RSMTexture": "content/common/textures/default/flatGrey_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal",
+      "RSMTexture": "content/common/textures/default/flatGrey_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal",
+      "RSMTexture": "content/common/textures/default/flatGrey_color"
+     },
+     "vectors": {}
+    }
+   ]
+  }
+ },
+ {
+  "id": "m_fullarms_m_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/bodies/fullarms_m_mesh",
+  "out": "{REPO}/extracted/prototype/meshes/fullarms_m_mesh.fbx",
+  "units": "Meters",
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/bodies/fullarms_m_launch_playerarms_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/characters/common/textures/skintones/arm_skintone1",
+      "normalClampTexture": "content/characters/common/textures/skintones/arm_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/SkinNoise",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/arm_RSM_skintone2",
+      "sweatNormalTexture": "content/characters/common/textures/skintones/arm-sweat-packed"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/characters/common/textures/skintones/arm_skintone1",
+      "normalClampTexture": "content/characters/common/textures/skintones/arm_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/SkinNoise",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/arm_RSM_skintone2",
+      "sweatNormalTexture": "content/characters/common/textures/skintones/arm-sweat-packed"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/characters/common/textures/skintones/arm_skintone1",
+      "normalClampTexture": "content/characters/common/textures/skintones/arm_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/SkinNoise",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/arm_RSM_skintone2",
+      "sweatNormalTexture": "content/characters/common/textures/skintones/arm-sweat-packed"
+     },
+     "vectors": {}
+    }
+   ]
+  }
+ },
+ {
+  "id": "m_legs_m_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/bodies/legs_m_mesh",
+  "out": "{REPO}/extracted/prototype/meshes/legs_m_mesh.fbx",
+  "units": "Meters",
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/bodies/legs_m_launch_playerarms_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "normalWrapTexture": "content/characters/common/textures/skintones/SkinNoise",
+      "normalClampTexture": "Longshot/Characters/Common/Textures/ls_common_legs_normal",
+      "R_S_SSR_T_Texture": "Longshot/Characters/Common/Textures/ls_common_legs_RSM",
+      "colorTexture": "content/characters/common/textures/skintones/GenericPadless_Legs_ST1",
+      "sweatNormalTexture": "content/common/textures/default/flatSweat"
+     },
+     "vectors": {}
+    }
+   ]
+  }
+ },
+ {
+  "id": "m_jersey_m_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/torsoapparel/jersey/jersey_m_mesh",
+  "out": "{REPO}/extracted/prototype/meshes/jersey_m_mesh.fbx",
+  "units": "Meters",
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/torsoapparel/jersey/jersey_m_launch_playergear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "RSMTexture": "content/common/textures/default/flatGrey_color",
+      "wrinkleNormTexture": "content/characters/player/parts/uniforms/commonTextures/JerseyWrinkles_D",
+      "patchSampler": "content/common/textures/default/invisible_color",
+      "shoulderNumbers": "content/common/textures/default/invisible_color",
+      "ChestNumbers": "content/common/textures/default/invisible_color",
+      "BackNumbers": "content/common/textures/default/invisible_color",
+      "seamPatternNormTexture": "content/common/textures/default/flatNormal_normal"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "RSMTexture": "content/common/textures/default/flatGrey_color",
+      "wrinkleNormTexture": "content/characters/player/parts/uniforms/commonTextures/JerseyWrinkles_D",
+      "patchSampler": "content/common/textures/default/invisible_color",
+      "shoulderNumbers": "content/common/textures/default/invisible_color",
+      "ChestNumbers": "content/common/textures/default/invisible_color",
+      "BackNumbers": "content/common/textures/default/invisible_color",
+      "seamPatternNormTexture": "content/common/textures/default/flatNormal_normal"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "RSMTexture": "content/common/textures/default/flatGrey_color",
+      "wrinkleNormTexture": "content/characters/player/parts/uniforms/commonTextures/JerseyWrinkles_D",
+      "patchSampler": "content/common/textures/default/invisible_color",
+      "shoulderNumbers": "content/common/textures/default/invisible_color",
+      "ChestNumbers": "content/common/textures/default/invisible_color",
+      "BackNumbers": "content/common/textures/default/invisible_color",
+      "seamPatternNormTexture": "content/common/textures/default/flatNormal_normal"
+     },
+     "vectors": {}
+    }
+   ]
+  }
+ },
+ {
+  "id": "m_pants_m_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/legsapparel/pants/pants_m_mesh",
+  "out": "{REPO}/extracted/prototype/meshes/pants_m_mesh.fbx",
+  "units": "Meters",
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/legsapparel/pants/pants_m_launch_playergear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal",
+      "RSMTexture": "content/common/textures/default/flatGrey_color",
+      "kneeNormalArrayTexture": "content/characters/player/parts/legsApparel/pants/kneePadsArray_norm",
+      "thighNormalArrayTexture": "content/characters/player/parts/legsApparel/pants/thighPadsArray_norm"
+     },
+     "vectors": {}
+    }
+   ]
+  }
+ },
+ {
+  "id": "m_socks_mid_m_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/legsapparel/socks_mid/socks_mid_m_mesh",
+  "out": "{REPO}/extracted/prototype/meshes/socks_mid_m_mesh.fbx",
+  "units": "Meters",
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/legsapparel/socks_mid/socks_mid_m_launch_playergear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/characters/player/parts/legsApparel/socks_Mid/socks_Outer_COL",
+      "normalClampTexture": "content/characters/player/parts/legsApparel/socks_Mid/socks_Outer_NORM",
+      "RSMTexture": "content/characters/player/parts/legsApparel/socks_Mid/socks_Outer_RSM"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/characters/player/parts/legsApparel/socks_Mid/socks_Outer_COL",
+      "normalClampTexture": "content/characters/player/parts/legsApparel/socks_Mid/socks_Outer_NORM",
+      "RSMTexture": "content/characters/player/parts/legsApparel/socks_Mid/socks_Outer_RSM"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/characters/player/parts/legsApparel/socks_Mid/socks_Outer_COL",
+      "normalClampTexture": "content/characters/player/parts/legsApparel/socks_Mid/socks_Outer_NORM",
+      "RSMTexture": "content/characters/player/parts/legsApparel/socks_Mid/socks_Outer_RSM"
+     },
+     "vectors": {}
+    }
+   ]
+  }
+ },
+ {
+  "id": "m_sleeve_tight_m_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/torsoapparel/sleeve_tight/sleeve_tight_m_mesh",
+  "out": "{REPO}/extracted/prototype/meshes/sleeve_tight_m_mesh.fbx",
+  "units": "Meters",
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/torsoapparel/sleeve_tight/sleeve_tight_m_launch_playergear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "RSMTexture": "content/common/textures/default/flatGrey_color",
+      "sleeveNumbers": "content/common/textures/default/flatGrey_color",
+      "colorTexture": "content/common/textures/default/invisible_color",
+      "wrinkleNormTexture": "content/characters/player/parts/uniforms/commonTextures/JerseyWrinkles_D",
+      "seamPatternNormTexture": "content/common/textures/default/flatNormal_normal"
+     },
+     "vectors": {}
+    }
+   ]
+  }
+ },
+ {
+  "id": "m_shoe_low_nikealphamenaceelite99clubr_m_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/footwear/shoe_low_nikealphamenaceelite99club/shoe_low_nikealphamenaceelite99clubr_m_mesh",
+  "out": "{REPO}/extracted/prototype/meshes/shoe_low_nikealphamenaceelite99clubr_m_mesh.fbx",
+  "units": "Meters",
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/footwear/shoe_low_nikealphamenaceelite99club/shoe_low_nikealphamenaceelite99clubr_m_playergear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "normalClampTexture": "content/characters/player/parts/footwear/shoe_low_NikeAlphaMenaceElite99Club/shoe_low_NikeAlphaMenaceElite99Club_NORM",
+      "RSMTexture": "content/characters/player/parts/footwear/shoe_low_NikeAlphaMenaceElite99Club/shoe_low_NikeAlphaMenaceElite99Club_RSM",
+      "logoOverlayTexture": "content/characters/player/parts/footwear/shoe_low_NikeAlphaMenaceElite99Club/shoe_low_NikeAlphaMenaceElite99Club_DECAL",
+      "colorTexture": "content/characters/player/parts/footwear/shoe_low_NikeAlphaMenaceElite99Club/shoe_low_NikeAlphaMenaceElite99Club_black_COL"
+     },
+     "vectors": {}
+    }
+   ]
+  }
+ },
+ {
+  "id": "m_shoe_low_nikealphamenaceelite99clubl_m_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/footwear/shoe_low_nikealphamenaceelite99club/shoe_low_nikealphamenaceelite99clubl_m_mesh",
+  "out": "{REPO}/extracted/prototype/meshes/shoe_low_nikealphamenaceelite99clubl_m_mesh.fbx",
+  "units": "Meters",
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/footwear/shoe_low_nikealphamenaceelite99club/shoe_low_nikealphamenaceelite99clubl_m_playergear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "normalClampTexture": "content/characters/player/parts/footwear/shoe_low_NikeAlphaMenaceElite99Club/shoe_low_NikeAlphaMenaceElite99Club_NORM",
+      "RSMTexture": "content/characters/player/parts/footwear/shoe_low_NikeAlphaMenaceElite99Club/shoe_low_NikeAlphaMenaceElite99Club_RSM",
+      "logoOverlayTexture": "content/characters/player/parts/footwear/shoe_low_NikeAlphaMenaceElite99Club/shoe_low_NikeAlphaMenaceElite99Club_DECAL",
+      "colorTexture": "content/characters/player/parts/footwear/shoe_low_NikeAlphaMenaceElite99Club/shoe_low_NikeAlphaMenaceElite99Club_black_COL"
+     },
+     "vectors": {}
+    }
+   ]
+  }
+ },
+ {
+  "id": "m_glover_m_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/armgear/glover/glover_m_mesh",
+  "out": "{REPO}/extracted/prototype/meshes/glover_m_mesh.fbx",
+  "units": "Meters",
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/armgear/glover/glover_m_launch_playerarms_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal",
+      "RSMTexture": "content/common/textures/default/flatGrey_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal",
+      "RSMTexture": "content/common/textures/default/flatGrey_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal",
+      "RSMTexture": "content/common/textures/default/flatGrey_color"
+     },
+     "vectors": {}
+    }
+   ]
+  }
+ },
+ {
+  "id": "m_glovel_m_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/armgear/glovel/glovel_m_mesh",
+  "out": "{REPO}/extracted/prototype/meshes/glovel_m_mesh.fbx",
+  "units": "Meters",
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/armgear/glovel/glovel_m_launch_playerarms_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal",
+      "RSMTexture": "content/common/textures/default/flatGrey_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal",
+      "RSMTexture": "content/common/textures/default/flatGrey_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal",
+      "RSMTexture": "content/common/textures/default/flatGrey_color"
+     },
+     "vectors": {}
+    }
+   ]
+  }
+ },
+ {
+  "id": "m_fullarms_h_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/bodies/fullarms_h_mesh",
+  "out": "{REPO}/extracted/prototype/meshes/fullarms_h_mesh.fbx",
+  "units": "Meters",
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/bodies/fullarms_h_launch_playerarms_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/characters/common/textures/skintones/arm_skintone1",
+      "normalClampTexture": "content/characters/common/textures/skintones/arm_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/SkinNoise",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/arm_RSM_skintone2",
+      "sweatNormalTexture": "content/characters/common/textures/skintones/arm-sweat-packed"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/characters/common/textures/skintones/arm_skintone1",
+      "normalClampTexture": "content/characters/common/textures/skintones/arm_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/SkinNoise",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/arm_RSM_skintone2",
+      "sweatNormalTexture": "content/characters/common/textures/skintones/arm-sweat-packed"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/characters/common/textures/skintones/arm_skintone1",
+      "normalClampTexture": "content/characters/common/textures/skintones/arm_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/SkinNoise",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/arm_RSM_skintone2",
+      "sweatNormalTexture": "content/characters/common/textures/skintones/arm-sweat-packed"
+     },
+     "vectors": {}
+    }
+   ]
+  }
+ },
+ {
+  "id": "m_legs_h_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/bodies/legs_h_mesh",
+  "out": "{REPO}/extracted/prototype/meshes/legs_h_mesh.fbx",
+  "units": "Meters",
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/bodies/legs_h_launch_playerarms_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "normalWrapTexture": "content/characters/common/textures/skintones/SkinNoise",
+      "normalClampTexture": "Longshot/Characters/Common/Textures/ls_common_legs_normal",
+      "R_S_SSR_T_Texture": "Longshot/Characters/Common/Textures/ls_common_legs_RSM",
+      "colorTexture": "content/characters/common/textures/skintones/GenericPadless_Legs_ST1",
+      "sweatNormalTexture": "content/common/textures/default/flatSweat"
+     },
+     "vectors": {}
+    }
+   ]
+  }
+ },
+ {
+  "id": "m_jersey_h_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/torsoapparel/jersey/jersey_h_mesh",
+  "out": "{REPO}/extracted/prototype/meshes/jersey_h_mesh.fbx",
+  "units": "Meters",
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/torsoapparel/jersey/jersey_h_launch_playergear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "RSMTexture": "content/common/textures/default/flatGrey_color",
+      "wrinkleNormTexture": "content/characters/player/parts/uniforms/commonTextures/JerseyWrinkles_D",
+      "patchSampler": "content/common/textures/default/invisible_color",
+      "shoulderNumbers": "content/common/textures/default/invisible_color",
+      "ChestNumbers": "content/common/textures/default/invisible_color",
+      "BackNumbers": "content/common/textures/default/invisible_color",
+      "seamPatternNormTexture": "content/common/textures/default/flatNormal_normal"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "RSMTexture": "content/common/textures/default/flatGrey_color",
+      "wrinkleNormTexture": "content/characters/player/parts/uniforms/commonTextures/JerseyWrinkles_D",
+      "patchSampler": "content/common/textures/default/invisible_color",
+      "shoulderNumbers": "content/common/textures/default/invisible_color",
+      "ChestNumbers": "content/common/textures/default/invisible_color",
+      "BackNumbers": "content/common/textures/default/invisible_color",
+      "seamPatternNormTexture": "content/common/textures/default/flatNormal_normal"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "RSMTexture": "content/common/textures/default/flatGrey_color",
+      "wrinkleNormTexture": "content/characters/player/parts/uniforms/commonTextures/JerseyWrinkles_D",
+      "patchSampler": "content/common/textures/default/invisible_color",
+      "shoulderNumbers": "content/common/textures/default/invisible_color",
+      "ChestNumbers": "content/common/textures/default/invisible_color",
+      "BackNumbers": "content/common/textures/default/invisible_color",
+      "seamPatternNormTexture": "content/common/textures/default/flatNormal_normal"
+     },
+     "vectors": {}
+    }
+   ]
+  }
+ },
+ {
+  "id": "m_pants_h_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/legsapparel/pants/pants_h_mesh",
+  "out": "{REPO}/extracted/prototype/meshes/pants_h_mesh.fbx",
+  "units": "Meters",
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/legsapparel/pants/pants_h_launch_playergear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal",
+      "RSMTexture": "content/common/textures/default/flatGrey_color",
+      "kneeNormalArrayTexture": "content/characters/player/parts/legsApparel/pants/kneePadsArray_norm",
+      "thighNormalArrayTexture": "content/characters/player/parts/legsApparel/pants/thighPadsArray_norm"
+     },
+     "vectors": {}
+    }
+   ]
+  }
+ },
+ {
+  "id": "m_socks_mid_h_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/legsapparel/socks_mid/socks_mid_h_mesh",
+  "out": "{REPO}/extracted/prototype/meshes/socks_mid_h_mesh.fbx",
+  "units": "Meters",
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/legsapparel/socks_mid/socks_mid_h_launch_playergear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/characters/player/parts/legsApparel/socks_Mid/socks_Outer_COL",
+      "normalClampTexture": "content/characters/player/parts/legsApparel/socks_Mid/socks_Outer_NORM",
+      "RSMTexture": "content/characters/player/parts/legsApparel/socks_Mid/socks_Outer_RSM"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/characters/player/parts/legsApparel/socks_Mid/socks_Outer_COL",
+      "normalClampTexture": "content/characters/player/parts/legsApparel/socks_Mid/socks_Outer_NORM",
+      "RSMTexture": "content/characters/player/parts/legsApparel/socks_Mid/socks_Outer_RSM"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/characters/player/parts/legsApparel/socks_Mid/socks_Outer_COL",
+      "normalClampTexture": "content/characters/player/parts/legsApparel/socks_Mid/socks_Outer_NORM",
+      "RSMTexture": "content/characters/player/parts/legsApparel/socks_Mid/socks_Outer_RSM"
+     },
+     "vectors": {}
+    }
+   ]
+  }
+ },
+ {
+  "id": "m_sleeve_tight_h_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/torsoapparel/sleeve_tight/sleeve_tight_h_mesh",
+  "out": "{REPO}/extracted/prototype/meshes/sleeve_tight_h_mesh.fbx",
+  "units": "Meters",
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/torsoapparel/sleeve_tight/sleeve_tight_h_launch_playergear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "RSMTexture": "content/common/textures/default/flatGrey_color",
+      "sleeveNumbers": "content/common/textures/default/flatGrey_color",
+      "colorTexture": "content/common/textures/default/invisible_color",
+      "wrinkleNormTexture": "content/characters/player/parts/uniforms/commonTextures/JerseyWrinkles_D",
+      "seamPatternNormTexture": "content/common/textures/default/flatNormal_normal"
+     },
+     "vectors": {}
+    }
+   ]
+  }
+ },
+ {
+  "id": "m_shoe_low_nikealphamenaceelite99clubr_h_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/footwear/shoe_low_nikealphamenaceelite99club/shoe_low_nikealphamenaceelite99clubr_h_mesh",
+  "out": "{REPO}/extracted/prototype/meshes/shoe_low_nikealphamenaceelite99clubr_h_mesh.fbx",
+  "units": "Meters",
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/footwear/shoe_low_nikealphamenaceelite99club/shoe_low_nikealphamenaceelite99clubr_h_playergear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "normalClampTexture": "content/characters/player/parts/footwear/shoe_low_NikeAlphaMenaceElite99Club/shoe_low_NikeAlphaMenaceElite99Club_NORM",
+      "RSMTexture": "content/characters/player/parts/footwear/shoe_low_NikeAlphaMenaceElite99Club/shoe_low_NikeAlphaMenaceElite99Club_RSM",
+      "logoOverlayTexture": "content/characters/player/parts/footwear/shoe_low_NikeAlphaMenaceElite99Club/shoe_low_NikeAlphaMenaceElite99Club_DECAL",
+      "colorTexture": "content/characters/player/parts/footwear/shoe_low_NikeAlphaMenaceElite99Club/shoe_low_NikeAlphaMenaceElite99Club_black_COL"
+     },
+     "vectors": {}
+    }
+   ]
+  }
+ },
+ {
+  "id": "m_shoe_low_nikealphamenaceelite99clubl_h_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/footwear/shoe_low_nikealphamenaceelite99club/shoe_low_nikealphamenaceelite99clubl_h_mesh",
+  "out": "{REPO}/extracted/prototype/meshes/shoe_low_nikealphamenaceelite99clubl_h_mesh.fbx",
+  "units": "Meters",
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/footwear/shoe_low_nikealphamenaceelite99club/shoe_low_nikealphamenaceelite99clubl_h_playergear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "normalClampTexture": "content/characters/player/parts/footwear/shoe_low_NikeAlphaMenaceElite99Club/shoe_low_NikeAlphaMenaceElite99Club_NORM",
+      "RSMTexture": "content/characters/player/parts/footwear/shoe_low_NikeAlphaMenaceElite99Club/shoe_low_NikeAlphaMenaceElite99Club_RSM",
+      "logoOverlayTexture": "content/characters/player/parts/footwear/shoe_low_NikeAlphaMenaceElite99Club/shoe_low_NikeAlphaMenaceElite99Club_DECAL",
+      "colorTexture": "content/characters/player/parts/footwear/shoe_low_NikeAlphaMenaceElite99Club/shoe_low_NikeAlphaMenaceElite99Club_black_COL"
+     },
+     "vectors": {}
+    }
+   ]
+  }
+ },
+ {
+  "id": "m_glover_h_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/armgear/glover/glover_h_mesh",
+  "out": "{REPO}/extracted/prototype/meshes/glover_h_mesh.fbx",
+  "units": "Meters",
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/armgear/glover/glover_h_launch_playerarms_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal",
+      "RSMTexture": "content/common/textures/default/flatGrey_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal",
+      "RSMTexture": "content/common/textures/default/flatGrey_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal",
+      "RSMTexture": "content/common/textures/default/flatGrey_color"
+     },
+     "vectors": {}
+    }
+   ]
+  }
+ },
+ {
+  "id": "m_glovel_h_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/armgear/glovel/glovel_h_mesh",
+  "out": "{REPO}/extracted/prototype/meshes/glovel_h_mesh.fbx",
+  "units": "Meters",
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/armgear/glovel/glovel_h_launch_playerarms_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal",
+      "RSMTexture": "content/common/textures/default/flatGrey_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal",
+      "RSMTexture": "content/common/textures/default/flatGrey_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal",
+      "RSMTexture": "content/common/textures/default/flatGrey_color"
+     },
+     "vectors": {}
+    }
+   ]
+  }
+ },
+ {
+  "id": "m_faulkmarshall_11413_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/players/f/faulkmarshall_11413/faulkmarshall_11413_mesh",
+  "out": "{REPO}/extracted/prototype/meshes/faulkmarshall_11413_mesh.fbx",
+  "units": "Meters",
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/players/f/faulkmarshall_11413/faulkmarshall_11413_playerhead_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/characters/player/players/f/faulkMarshall_11413/faulkMarshall_11413_color",
+      "normalClampTexture": "content/characters/player/players/f/faulkMarshall_11413/faulkMarshall_11413_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/characters/player/players/f/faulkMarshall_11413/faulkMarshall_11413_color",
+      "normalClampTexture": "content/characters/player/players/f/faulkMarshall_11413/faulkMarshall_11413_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 3,
+     "textures": {
+      "colorTexture": "content/characters/player/players/f/faulkMarshall_11413/faulkMarshall_11413_color",
+      "normalClampTexture": "content/characters/player/players/f/faulkMarshall_11413/faulkMarshall_11413_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 4,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 5,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  }
+ },
+ {
+  "id": "m_helmet_shell_xenith_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/xenith/helmet_shell_xenith_mesh",
+  "out": "{REPO}/extracted/prototype/meshes/helmet_shell_xenith_mesh.fbx",
+  "units": "Meters",
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/xenith/helmet_shell_xenith_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "helmetBackNumberTexture": "content/common/textures/default/invisible_color_array",
+      "helmetFrontNumberTexture": "content/common/textures/default/invisible_color_array",
+      "colorBorderTexture": "content/common/textures/default/invisible_color",
+      "normalClampTexture": "content/characters/player/commonTextures/Helmet/ventHole_NORM",
+      "metalFlakeNormalTexture": "content/characters/player/parts/uniforms/commonTextures/helmet/metalFlake_color",
+      "greendot": "content/common/textures/default/invisible_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "helmetBackNumberTexture": "content/common/textures/default/invisible_color_array",
+      "helmetFrontNumberTexture": "content/common/textures/default/invisible_color_array",
+      "colorBorderTexture": "content/common/textures/default/invisible_color",
+      "normalClampTexture": "content/characters/player/commonTextures/Helmet/ventHole_NORM",
+      "metalFlakeNormalTexture": "content/characters/player/parts/uniforms/commonTextures/helmet/metalFlake_color",
+      "greendot": "content/common/textures/default/invisible_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "helmetBackNumberTexture": "content/common/textures/default/invisible_color_array",
+      "helmetFrontNumberTexture": "content/common/textures/default/invisible_color_array",
+      "colorBorderTexture": "content/common/textures/default/invisible_color",
+      "normalClampTexture": "content/characters/player/commonTextures/Helmet/ventHole_NORM",
+      "metalFlakeNormalTexture": "content/characters/player/parts/uniforms/commonTextures/helmet/metalFlake_color",
+      "greendot": "content/common/textures/default/invisible_color"
+     },
+     "vectors": {}
+    }
+   ]
+  }
+ },
+ {
+  "id": "m_helmet_facemask_xenithprism_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/xenith/facemasks/helmet_facemask_xenithprism_mesh",
+  "out": "{REPO}/extracted/prototype/meshes/helmet_facemask_xenithprism_mesh.fbx",
+  "units": "Meters",
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/xenith/facemasks/helmet_facemask_xenithprism_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  }
+ },
+ {
+  "id": "m_helmet_shell_speedflex_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/speedflex/helmet_shell_speedflex_mesh",
+  "out": "{REPO}/extracted/prototype/meshes/helmet_shell_speedflex_mesh.fbx",
+  "units": "Meters",
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/speedflex/helmet_shell_speedflex_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "helmetBackNumberTexture": "content/common/textures/default/invisible_color_array",
+      "helmetFrontNumberTexture": "content/common/textures/default/invisible_color_array",
+      "colorBorderTexture": "content/common/textures/default/invisible_color",
+      "normalClampTexture": "content/characters/player/commonTextures/Helmet/ventHole_NORM",
+      "metalFlakeNormalTexture": "content/characters/player/parts/uniforms/commonTextures/helmet/metalFlake_color",
+      "greendot": "content/common/textures/default/invisible_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "helmetBackNumberTexture": "content/common/textures/default/invisible_color_array",
+      "helmetFrontNumberTexture": "content/common/textures/default/invisible_color_array",
+      "colorBorderTexture": "content/common/textures/default/invisible_color",
+      "normalClampTexture": "content/characters/player/commonTextures/Helmet/ventHole_NORM",
+      "metalFlakeNormalTexture": "content/characters/player/parts/uniforms/commonTextures/helmet/metalFlake_color",
+      "greendot": "content/common/textures/default/invisible_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "helmetBackNumberTexture": "content/common/textures/default/invisible_color_array",
+      "helmetFrontNumberTexture": "content/common/textures/default/invisible_color_array",
+      "colorBorderTexture": "content/common/textures/default/invisible_color",
+      "normalClampTexture": "content/characters/player/commonTextures/Helmet/ventHole_NORM",
+      "metalFlakeNormalTexture": "content/characters/player/parts/uniforms/commonTextures/helmet/metalFlake_color",
+      "greendot": "content/common/textures/default/invisible_color"
+     },
+     "vectors": {}
+    }
+   ]
+  }
+ },
+ {
+  "id": "m_helmet_facemask_speedflex2bar_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflex2bar_mesh",
+  "out": "{REPO}/extracted/prototype/meshes/helmet_facemask_speedflex2bar_mesh.fbx",
+  "units": "Meters",
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflex2bar_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  }
+ },
+ {
+  "id": "t_ls_common_legs_rsm",
+  "op": "texture",
+  "asset": "Longshot/Characters/Common/Textures/ls_common_legs_RSM",
+  "out": "{REPO}/extracted/prototype/textures/ls_common_legs_rsm",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "legs_h_mesh",
+    "legs_m_mesh",
+    "legs_t_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_ls_common_legs_normal",
+  "op": "texture",
+  "asset": "Longshot/Characters/Common/Textures/ls_common_legs_normal",
+  "out": "{REPO}/extracted/prototype/textures/ls_common_legs_normal",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "legs_h_mesh",
+    "legs_m_mesh",
+    "legs_t_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_genericpadless_legs_st1",
+  "op": "texture",
+  "asset": "content/characters/common/textures/skintones/GenericPadless_Legs_ST1",
+  "out": "{REPO}/extracted/prototype/textures/genericpadless_legs_st1",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "legs_h_mesh",
+    "legs_m_mesh",
+    "legs_t_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_skinnoise",
+  "op": "texture",
+  "asset": "content/characters/common/textures/skintones/SkinNoise",
+  "out": "{REPO}/extracted/prototype/textures/skinnoise",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "fullarms_h_mesh",
+    "fullarms_m_mesh",
+    "fullarms_t_mesh",
+    "legs_h_mesh",
+    "legs_m_mesh",
+    "legs_t_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_arm-sweat-packed",
+  "op": "texture",
+  "asset": "content/characters/common/textures/skintones/arm-sweat-packed",
+  "out": "{REPO}/extracted/prototype/textures/arm-sweat-packed",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "fullarms_h_mesh",
+    "fullarms_m_mesh",
+    "fullarms_t_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_arm_rsm_skintone2",
+  "op": "texture",
+  "asset": "content/characters/common/textures/skintones/arm_RSM_skintone2",
+  "out": "{REPO}/extracted/prototype/textures/arm_rsm_skintone2",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "fullarms_h_mesh",
+    "fullarms_m_mesh",
+    "fullarms_t_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_arm_normal",
+  "op": "texture",
+  "asset": "content/characters/common/textures/skintones/arm_normal",
+  "out": "{REPO}/extracted/prototype/textures/arm_normal",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "fullarms_h_mesh",
+    "fullarms_m_mesh",
+    "fullarms_t_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_arm_skintone1",
+  "op": "texture",
+  "asset": "content/characters/common/textures/skintones/arm_skintone1",
+  "out": "{REPO}/extracted/prototype/textures/arm_skintone1",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "fullarms_h_mesh",
+    "fullarms_m_mesh",
+    "fullarms_t_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_commonrsm",
+  "op": "texture",
+  "asset": "content/characters/common/textures/skintones/commonRSM",
+  "out": "{REPO}/extracted/prototype/textures/commonrsm",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "faulkmarshall_11413_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_face_skintile",
+  "op": "texture",
+  "asset": "content/characters/common/textures/skintones/face_skinTile",
+  "out": "{REPO}/extracted/prototype/textures/face_skintile",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "faulkmarshall_11413_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_venthole_norm",
+  "op": "texture",
+  "asset": "content/characters/player/commonTextures/Helmet/ventHole_NORM",
+  "out": "{REPO}/extracted/prototype/textures/venthole_norm",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "helmet_shell_speedflex_mesh",
+    "helmet_shell_xenith_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_shoe_low_nikealphamenaceelite99club_decal",
+  "op": "texture",
+  "asset": "content/characters/player/parts/footwear/shoe_low_NikeAlphaMenaceElite99Club/shoe_low_NikeAlphaMenaceElite99Club_DECAL",
+  "out": "{REPO}/extracted/prototype/textures/shoe_low_nikealphamenaceelite99club_decal",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "shoe_low_nikealphamenaceelite99clubl_h_mesh",
+    "shoe_low_nikealphamenaceelite99clubl_m_mesh",
+    "shoe_low_nikealphamenaceelite99clubl_t_mesh",
+    "shoe_low_nikealphamenaceelite99clubr_h_mesh",
+    "shoe_low_nikealphamenaceelite99clubr_m_mesh",
+    "shoe_low_nikealphamenaceelite99clubr_t_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_shoe_low_nikealphamenaceelite99club_norm",
+  "op": "texture",
+  "asset": "content/characters/player/parts/footwear/shoe_low_NikeAlphaMenaceElite99Club/shoe_low_NikeAlphaMenaceElite99Club_NORM",
+  "out": "{REPO}/extracted/prototype/textures/shoe_low_nikealphamenaceelite99club_norm",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "shoe_low_nikealphamenaceelite99clubl_h_mesh",
+    "shoe_low_nikealphamenaceelite99clubl_m_mesh",
+    "shoe_low_nikealphamenaceelite99clubl_t_mesh",
+    "shoe_low_nikealphamenaceelite99clubr_h_mesh",
+    "shoe_low_nikealphamenaceelite99clubr_m_mesh",
+    "shoe_low_nikealphamenaceelite99clubr_t_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_shoe_low_nikealphamenaceelite99club_rsm",
+  "op": "texture",
+  "asset": "content/characters/player/parts/footwear/shoe_low_NikeAlphaMenaceElite99Club/shoe_low_NikeAlphaMenaceElite99Club_RSM",
+  "out": "{REPO}/extracted/prototype/textures/shoe_low_nikealphamenaceelite99club_rsm",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "shoe_low_nikealphamenaceelite99clubl_h_mesh",
+    "shoe_low_nikealphamenaceelite99clubl_m_mesh",
+    "shoe_low_nikealphamenaceelite99clubl_t_mesh",
+    "shoe_low_nikealphamenaceelite99clubr_h_mesh",
+    "shoe_low_nikealphamenaceelite99clubr_m_mesh",
+    "shoe_low_nikealphamenaceelite99clubr_t_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_shoe_low_nikealphamenaceelite99club_black_col",
+  "op": "texture",
+  "asset": "content/characters/player/parts/footwear/shoe_low_NikeAlphaMenaceElite99Club/shoe_low_NikeAlphaMenaceElite99Club_black_COL",
+  "out": "{REPO}/extracted/prototype/textures/shoe_low_nikealphamenaceelite99club_black_col",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "shoe_low_nikealphamenaceelite99clubl_h_mesh",
+    "shoe_low_nikealphamenaceelite99clubl_m_mesh",
+    "shoe_low_nikealphamenaceelite99clubl_t_mesh",
+    "shoe_low_nikealphamenaceelite99clubr_h_mesh",
+    "shoe_low_nikealphamenaceelite99clubr_m_mesh",
+    "shoe_low_nikealphamenaceelite99clubr_t_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_socks_outer_col",
+  "op": "texture",
+  "asset": "content/characters/player/parts/legsApparel/socks_Mid/socks_Outer_COL",
+  "out": "{REPO}/extracted/prototype/textures/socks_outer_col",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "socks_mid_h_mesh",
+    "socks_mid_m_mesh",
+    "socks_mid_t_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_socks_outer_norm",
+  "op": "texture",
+  "asset": "content/characters/player/parts/legsApparel/socks_Mid/socks_Outer_NORM",
+  "out": "{REPO}/extracted/prototype/textures/socks_outer_norm",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "socks_mid_h_mesh",
+    "socks_mid_m_mesh",
+    "socks_mid_t_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_socks_outer_rsm",
+  "op": "texture",
+  "asset": "content/characters/player/parts/legsApparel/socks_Mid/socks_Outer_RSM",
+  "out": "{REPO}/extracted/prototype/textures/socks_outer_rsm",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "socks_mid_h_mesh",
+    "socks_mid_m_mesh",
+    "socks_mid_t_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_nin_helmet_2018_golalt_sticker_col",
+  "op": "texture",
+  "asset": "content/characters/player/parts/uniforms/49ers/2018/NIN_HELMET_2018_GOLALT_Sticker_COL",
+  "out": "{REPO}/extracted/prototype/textures/nin_helmet_2018_golalt_sticker_col",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "uniform 49ers 2018"
+   ]
+  }
+ },
+ {
+  "id": "t_nin_helmet_2018_golalt_helmet_col",
+  "op": "texture",
+  "asset": "content/characters/player/parts/uniforms/49ers/2018/NIN_HELMET_2018_GOLALT_helmet_COL",
+  "out": "{REPO}/extracted/prototype/textures/nin_helmet_2018_golalt_helmet_col",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "uniform 49ers 2018"
+   ]
+  }
+ },
+ {
+  "id": "t_nin_jersey_2018_whialt_jersey_col",
+  "op": "texture",
+  "asset": "content/characters/player/parts/uniforms/49ers/2018/NIN_JERSEY_2018_WHIALT_Jersey_COL",
+  "out": "{REPO}/extracted/prototype/textures/nin_jersey_2018_whialt_jersey_col",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "uniform 49ers 2018"
+   ]
+  }
+ },
+ {
+  "id": "t_nin_jersey_2018_whialt_jersey_norm",
+  "op": "texture",
+  "asset": "content/characters/player/parts/uniforms/49ers/2018/NIN_JERSEY_2018_WHIALT_Jersey_NORM",
+  "out": "{REPO}/extracted/prototype/textures/nin_jersey_2018_whialt_jersey_norm",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "uniform 49ers 2018"
+   ]
+  }
+ },
+ {
+  "id": "t_nin_jersey_2018_whialt_jersey_rsm",
+  "op": "texture",
+  "asset": "content/characters/player/parts/uniforms/49ers/2018/NIN_JERSEY_2018_WHIALT_Jersey_RSM",
+  "out": "{REPO}/extracted/prototype/textures/nin_jersey_2018_whialt_jersey_rsm",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "uniform 49ers 2018"
+   ]
+  }
+ },
+ {
+  "id": "t_nin_pants_2018_whialt_pants_col",
+  "op": "texture",
+  "asset": "content/characters/player/parts/uniforms/49ers/2018/NIN_PANTS_2018_WHIALT_Pants_COL",
+  "out": "{REPO}/extracted/prototype/textures/nin_pants_2018_whialt_pants_col",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "uniform 49ers 2018"
+   ]
+  }
+ },
+ {
+  "id": "t_nin_pants_2018_whialt_pants_norm",
+  "op": "texture",
+  "asset": "content/characters/player/parts/uniforms/49ers/2018/NIN_PANTS_2018_WHIALT_Pants_NORM",
+  "out": "{REPO}/extracted/prototype/textures/nin_pants_2018_whialt_pants_norm",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "uniform 49ers 2018"
+   ]
+  }
+ },
+ {
+  "id": "t_nin_pants_2018_whialt_pants_rsm",
+  "op": "texture",
+  "asset": "content/characters/player/parts/uniforms/49ers/2018/NIN_PANTS_2018_WHIALT_Pants_RSM",
+  "out": "{REPO}/extracted/prototype/textures/nin_pants_2018_whialt_pants_rsm",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "uniform 49ers 2018"
+   ]
+  }
+ },
+ {
+  "id": "t_nin_socks_2018_whi_socksunder_col",
+  "op": "texture",
+  "asset": "content/characters/player/parts/uniforms/49ers/2018/NIN_SOCKS_2018_WHI_socksUnder_COL",
+  "out": "{REPO}/extracted/prototype/textures/nin_socks_2018_whi_socksunder_col",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "uniform 49ers 2018"
+   ]
+  }
+ },
+ {
+  "id": "t_jerseywrinkles_d",
+  "op": "texture",
+  "asset": "content/characters/player/parts/uniforms/commonTextures/JerseyWrinkles_D",
+  "out": "{REPO}/extracted/prototype/textures/jerseywrinkles_d",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "jersey_h_mesh",
+    "jersey_m_mesh",
+    "jersey_t_mesh",
+    "sleeve_tight_h_mesh",
+    "sleeve_tight_m_mesh",
+    "sleeve_tight_t_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_metalflake_color",
+  "op": "texture",
+  "asset": "content/characters/player/parts/uniforms/commonTextures/helmet/metalFlake_color",
+  "out": "{REPO}/extracted/prototype/textures/metalflake_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "helmet_shell_speedflex_mesh",
+    "helmet_shell_xenith_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_playerhead_sweat",
+  "op": "texture",
+  "asset": "content/characters/player/players/commonTextures/playerHead_Sweat",
+  "out": "{REPO}/extracted/prototype/textures/playerhead_sweat",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "faulkmarshall_11413_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_faulkmarshall_11413_color",
+  "op": "texture",
+  "asset": "content/characters/player/players/f/faulkMarshall_11413/faulkMarshall_11413_color",
+  "out": "{REPO}/extracted/prototype/textures/faulkmarshall_11413_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "faulkmarshall_11413_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_faulkmarshall_11413_normal",
+  "op": "texture",
+  "asset": "content/characters/player/players/f/faulkMarshall_11413/faulkMarshall_11413_normal",
+  "out": "{REPO}/extracted/prototype/textures/faulkmarshall_11413_normal",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "faulkmarshall_11413_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_flatgrey_color",
+  "op": "texture",
+  "asset": "content/common/textures/default/flatGrey_color",
+  "out": "{REPO}/extracted/prototype/textures/flatgrey_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "glovel_h_mesh",
+    "glovel_m_mesh",
+    "glovel_t_mesh",
+    "glover_h_mesh",
+    "glover_m_mesh",
+    "glover_t_mesh",
+    "helmet_shell_speedflex_mesh",
+    "helmet_shell_xenith_mesh",
+    "jersey_h_mesh",
+    "jersey_m_mesh",
+    "jersey_t_mesh",
+    "pants_h_mesh",
+    "pants_m_mesh",
+    "pants_t_mesh",
+    "sleeve_tight_h_mesh",
+    "sleeve_tight_m_mesh",
+    "sleeve_tight_t_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_flatnormal_normal",
+  "op": "texture",
+  "asset": "content/common/textures/default/flatNormal_normal",
+  "out": "{REPO}/extracted/prototype/textures/flatnormal_normal",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "glovel_h_mesh",
+    "glovel_m_mesh",
+    "glovel_t_mesh",
+    "glover_h_mesh",
+    "glover_m_mesh",
+    "glover_t_mesh",
+    "jersey_h_mesh",
+    "jersey_m_mesh",
+    "jersey_t_mesh",
+    "pants_h_mesh",
+    "pants_m_mesh",
+    "pants_t_mesh",
+    "sleeve_tight_h_mesh",
+    "sleeve_tight_m_mesh",
+    "sleeve_tight_t_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_flatsweat",
+  "op": "texture",
+  "asset": "content/common/textures/default/flatSweat",
+  "out": "{REPO}/extracted/prototype/textures/flatsweat",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "legs_h_mesh",
+    "legs_m_mesh",
+    "legs_t_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_invisible_color",
+  "op": "texture",
+  "asset": "content/common/textures/default/invisible_color",
+  "out": "{REPO}/extracted/prototype/textures/invisible_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "helmet_shell_speedflex_mesh",
+    "helmet_shell_xenith_mesh",
+    "jersey_h_mesh",
+    "jersey_m_mesh",
+    "jersey_t_mesh",
+    "sleeve_tight_h_mesh",
+    "sleeve_tight_m_mesh",
+    "sleeve_tight_t_mesh"
+   ]
+  }
+ }
+]

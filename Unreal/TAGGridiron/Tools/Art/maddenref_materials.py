@@ -7,7 +7,8 @@
 #   {"bindings": [{"mesh": "/Game/MaddenRef/...", "slot": 0 | "all", "mi": "/Game/MaddenRef/.../MI_x",
 #                  "textures": {"BaseColor": "/Game/...", "Normal": "/Game/...", "RSM": "/Game/..."},
 #                  "scalars": {"Roughness": 0.6}, "switches": {"UseRSM": true, "UseAlphaMask": false}}],
-#    "preview_level": {"path": "/Game/MaddenRef/Maps/L_x", "meshes": ["/Game/MaddenRef/..."]}}
+#    "preview_level": {"path": "/Game/MaddenRef/Maps/L_x",
+#                      "meshes": ["/Game/MaddenRef/..." | {"mesh": "/Game/...", "x": 120.0, "label": "thin"}]}}
 #
 # Master material M_MaddenRef_Basic (rebuilt only when missing)
 #   BaseColor texture -> Base Color, Normal texture -> Normal.
@@ -112,6 +113,8 @@ def apply_binding(b, master):
         raise RuntimeError("missing mesh " + b["mesh"])
     mats = list(mesh.materials) if isinstance(mesh, unreal.SkeletalMesh) else list(mesh.static_materials)
     slots = range(len(mats)) if b.get("slot", 0) == "all" else [int(b.get("slot", 0))]
+    if any(i >= len(mats) for i in slots):
+        raise IndexError("slot %s out of range, mesh has %d material slots" % (list(slots), len(mats)))
     for i in slots:
         mats[i].material_interface = mi
     if isinstance(mesh, unreal.SkeletalMesh):
@@ -134,10 +137,14 @@ def build_preview(spec):
         EAL.delete_asset(path)
     les.new_level(path)
     for m in spec["meshes"]:
-        mesh = unreal.load_asset(m)
-        actor = eas.spawn_actor_from_class(unreal.SkeletalMeshActor, unreal.Vector(0, 0, 0))
+        if isinstance(m, dict):
+            mpath, x, label = m["mesh"], float(m.get("x", 0.0)), m.get("label", "")
+        else:
+            mpath, x, label = m, 0.0, ""
+        mesh = unreal.load_asset(mpath)
+        actor = eas.spawn_actor_from_class(unreal.SkeletalMeshActor, unreal.Vector(x, 0, 0))
         actor.skeletal_mesh_component.set_skeletal_mesh_asset(mesh)
-        actor.set_actor_label(m.rsplit("/", 1)[1])
+        actor.set_actor_label((label + "_" if label else "") + mpath.rsplit("/", 1)[1])
     les.save_current_level()
     return {"preview": path}
 
