@@ -76,7 +76,7 @@ def cmd_plan(spec):
             fname += "_2"
         used.add(fname.lower())
         jobs.append({"name": n, "file": fname, "clip_key": b["clip_key"], "layer_key": l["clip_key"] if l else None,
-                     "fps": float(b["fps"]), "frames": int(b["frames"])})
+                     "fps": float(b["fps"]), "frames": int(b["frames"]), "additive": b.get("additive") == "True"})
         ue.append({"kind": "anim", "file": "{REPO}/extracted/" + spec["out"] + "/" + fname + ".fbx", "dest": spec["ue_dir"],
                    "name": "A_" + fname, "skeleton": spec["ue_skeleton"], "fps": float(b["fps"])})
         frames += int(b["frames"])
@@ -131,6 +131,10 @@ def cmd_export(spec):
         try:
             r, _ = checkb.evaluate(ex.ev, int(j["clip_key"], 16))
             problems = plausible(r)
+            if j.get("additive"):
+                # Additive clips store deltas for layering (fatigue posture, lean, head tracking twist).
+                # Played as absolute poses they collapse, so they are held out of the standalone set.
+                problems.append("additive clip (delta layer for blending, not a standalone motion)")
             checks[j["name"]] = {"ok": not problems, "problems": problems,
                                  **{k: r[k] for k in ("frames", "duration_s", "traj_speed_mps", "head_height_m", "lowest_foot_m",
                                                       "bone_length_rel_dev_max", "max_deg_per_frame")}}
