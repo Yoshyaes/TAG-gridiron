@@ -67,11 +67,14 @@ def cmd_plan(spec):
     if spec.get("offset") or spec.get("limit"):
         a = spec.get("offset", 0)
         names = names[a:a + spec["limit"]] if spec.get("limit") else names[a:]
-    jobs, ue, frames = [], [], 0
+    jobs, ue, frames, used = [], [], 0, set()
     for n in names:
         b = body[n]
         l = layer.get(n)
         fname = safe(n)
+        while fname.lower() in used:            # Windows paths ignore case, two names can map to one file
+            fname += "_2"
+        used.add(fname.lower())
         jobs.append({"name": n, "file": fname, "clip_key": b["clip_key"], "layer_key": l["clip_key"] if l else None,
                      "fps": float(b["fps"]), "frames": int(b["frames"])})
         ue.append({"kind": "anim", "file": "{REPO}/extracted/" + spec["out"] + "/" + fname + ".fbx", "dest": spec["ue_dir"],
@@ -94,7 +97,9 @@ def plausible(r):
     if r["bone_length_rel_dev_max"] > 1e-4:
         problems.append("bone length varies %.2e (%s)" % (r["bone_length_rel_dev_max"], r["bone_length_worst"]))
     lo, hi = r["head_height_m"]
-    if hi > 2.6 or hi < 0.2:
+    # A player lying on his back keeps the head near 0.16 m (injury clips), so only a head that never
+    # clears 5 cm (inside the ground) counts as broken.
+    if hi > 2.6 or hi < 0.05:
         problems.append("head height %.2f to %.2f m" % (lo, hi))
     if r["lowest_foot_m"] < -0.3:
         problems.append("foot %.2f m below ground" % r["lowest_foot_m"])
@@ -134,7 +139,7 @@ def cmd_export(spec):
                 madden.append_failure(spec["name"], j["name"], "anim_plausibility", "; ".join(problems))
                 continue
             ex.export(spec["OUTDIR"], int(j["clip_key"], 16), int(j["layer_key"], 16) if j["layer_key"] else None, skip_existing=False,
-                      sparse=bool(spec.get("sparse", False)))
+                      sparse=bool(spec.get("sparse", False)), fname=j["file"])
             for p, op in ((fbx, "fbxanim"), (meta, "fbxanim_meta")):
                 m["files"][madden.rel(p)] = {"op": op, "stage": spec["name"], "source_asset": "%s (clip %s, layer %s)" % (j["name"], j["clip_key"], j["layer_key"]),
                                              "bundles": "levels/maddengame + launch_sba AssetBanks", "superbundles": "",

@@ -171,9 +171,9 @@ class Exporter:
                 if o.get(role):
                     self.ctrl.setdefault(o[role], o)
 
-    def export(self, out_dir, key, layer=None, skip_existing=True, sparse=False):
+    def export(self, out_dir, key, layer=None, skip_existing=True, sparse=False, fname=None):
         c = self.ctrl.get(key)
-        name = safe(c["__name"]) if c else "%016x" % key
+        name = fname or (safe(c["__name"]) if c else "%016x" % key)
         fps = float(c.get("FPS") or 30.0) if c else 30.0
         path = os.path.join(out_dir, name + ".fbx")
         meta_path = os.path.join(out_dir, name + ".json")
