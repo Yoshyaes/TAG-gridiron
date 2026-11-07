@@ -6,10 +6,11 @@ Updated after every gate. Branch `madden-extraction`, nothing pushed.
 | Stage | Result |
 | --- | --- |
 | 0b Host bring up | PASS |
-| 1 Inventory | running |
+| 1 Inventory | PASS (523,630 rows, 19 skeletons, 2,374 heads) |
+| 2 Skeleton and one player | running |
 
 ## On disk
-- `D:\MaddenRef\extracted` (junction `extracted\`). Stage 0b test head only, a few MB.
+- `D:\MaddenRef\extracted` (junction `extracted\`). 192 MB (inventory 188 MB, Stage 0b test head).
 
 ## In Unreal under /Game/MaddenRef
 - `Stage0b/SM_faulkmarshall_11413_head__head_lod0_mat` and `__eyes_lod0_mat` (static, 25.5 x 22.8 x 37.4 cm).

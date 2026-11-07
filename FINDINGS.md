@@ -29,3 +29,15 @@ Every surprise, with evidence. Newest stage last. Private reference work, see `e
 - UE 5.8 imports FBX through Interchange from `AssetImportTask`, headless with `-nullrhi`, in about 5 s per run. Multi node FBX files give one asset per material node (known issue 2). `maddenref_import.py` imports into a staging folder and renames to `<name>` or `<name>__<node>`, so re-runs replace cleanly.
 - Under `-nullrhi`, the static mesh UV channel query returns 0 even though the FBX has one UV set. UV checks use `tools\madden\fbxinfo.py` on the FBX instead.
 - The head mesh's LOD0 references 87 skeleton bones with indices up to 220. Its skeleton must therefore have at least 221 bones.
+
+## Stage 1. Inventory
+- Full inventory in 9 s through FrostyHost. 320,890 EBX, 202,740 RES and chunk rows (523,630 rows total) across 81,649 bundles. Outputs `extracted\inventory\inventory.csv`, `bundles.csv`, `inventory-summary.md` and `families.json`.
+- **Skeletons.** 19 SkeletonAssets. The player candidate is `content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton`. Others are sideline player, actor (male, female, child), crowd and Longshot props.
+- **Body types.** Every player body and apparel part comes in four variants, `_t` thin, `_m` muscular, `_h` heavy and `_d` default. Bodies are `content/characters/player/bodies/{fullarms,nohands,legs}_{t,m,h,d}_mesh` (12, plus old fallbacks).
+- **Parts.** Helmets 185 skinned meshes under `parts/helmets/<model>/` split into shell, facemask, visor, visor clips, accessories and green dot. Footwear 936, armgear 336, torso apparel 132 (sleeves, shoulder pad variants), legs apparel 100 (socks), torso gear 16 (towel, neck roll).
+- **Uniforms have no meshes.** `parts/uniforms/<team>/<year>/` holds 32,011 TextureAssets (`_COL`, `_NORM`, `_RSM`) and 2,696 AppearanceShaderPresets. Jersey and pants geometry must come from the body meshes. To be confirmed in Stage 2.
+- **Heads.** 2,374 player heads at `content/characters/player/players/<letter>/<name_id>/<name_id>_mesh`.
+- **Coaches.** 936 skinned meshes under `content/characters/coach/` (per coach head, headset, warm and cold bodies, plus 123 shared bodies).
+- **Stadiums.** 3,792 ObjectBlueprints under `content/worlds/components/stadiums/` and 4,053 world RigidMeshAssets.
+- **Animation risk is now visible.** 1,383 AntStateAssets and 1,338 AssetBank resources. Gameplay animation lives in one bank, `animations/antanimations/levels/maddengame/maddengame_win32_antstate` (635 MB raw, 352 MB compressed). Another 137 MB bank serves launch content. This matches the FIFA style single bank layout reported by the community.
+- The inventory csv has fields over 131,072 characters (bundle lists). Readers must raise `csv.field_size_limit`.
