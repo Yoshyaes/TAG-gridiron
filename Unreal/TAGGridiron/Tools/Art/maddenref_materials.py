@@ -56,14 +56,26 @@ def _switch(m, name, x, y):
     return e
 
 
-def build_master():
-    if EAL.does_asset_exist(MASTER):
-        return unreal.load_asset(MASTER)
-    pkg, name = MASTER.rsplit("/", 1)
+WORLD_MASTER = ROOT + "/Materials/M_MaddenRef_World"
+
+
+def build_master(path=MASTER, tiling=False):
+    """M_MaddenRef_Ref for characters. M_MaddenRef_World adds a Tiling scalar on the UVs (world presets tile)."""
+    if EAL.does_asset_exist(path):
+        return unreal.load_asset(path)
+    pkg, name = path.rsplit("/", 1)
     m = tools.create_asset(name, pkg, unreal.Material, unreal.MaterialFactoryNew())
     base = _tex(m, "BaseColor", WHITE, -800, -300, unreal.MaterialSamplerType.SAMPLERTYPE_COLOR)
     nrm = _tex(m, "Normal", FLAT_NORMAL, -800, 0, unreal.MaterialSamplerType.SAMPLERTYPE_NORMAL)
     rsm = _tex(m, "RSM", WHITE, -800, 300, unreal.MaterialSamplerType.SAMPLERTYPE_LINEAR_COLOR)
+    if tiling:
+        uv = _expr(m, unreal.MaterialExpressionTextureCoordinate, -1300, 0)
+        tile = _scalar(m, "Tiling", 1.0, -1300, 150)
+        mul = _expr(m, unreal.MaterialExpressionMultiply, -1100, 0)
+        MEL.connect_material_expressions(uv, "", mul, "A")
+        MEL.connect_material_expressions(tile, "", mul, "B")
+        for t in (base, nrm, rsm):
+            MEL.connect_material_expressions(mul, "", t, "UVs")
     rough = _scalar(m, "Roughness", 0.6, -500, 500)
     metal = _scalar(m, "Metallic", 0.0, -500, 600)
     spec = _scalar(m, "Specular", 0.5, -500, 700)
@@ -100,6 +112,8 @@ def make_mi(path, master):
 
 
 def apply_binding(b, master):
+    if b.get("master") == WORLD_MASTER:
+        master = build_master(WORLD_MASTER, tiling=True)
     mi = make_mi(b["mi"], master)
     for k, v in b.get("textures", {}).items():
         tex = unreal.load_asset(v)

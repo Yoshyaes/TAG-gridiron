@@ -38,6 +38,8 @@ def _pipeline(kind, skeleton):
         raise RuntimeError("could not create pipeline asset " + pipe_path)
     mesh_p = pipe.get_editor_property("mesh_pipeline")
     mesh_p.set_editor_property("create_physics_asset", False)
+    # No Nanite on reference static meshes. Its bounds pad small objects and it adds nothing here.
+    mesh_p.set_editor_property("build_nanite", False)
     mesh_p.set_editor_property("import_static_meshes", kind == "mesh")
     mesh_p.set_editor_property("import_skeletal_meshes", kind == "mesh")
     cur = mesh_p.get_editor_property("combine_static_meshes_behavior")
@@ -156,6 +158,12 @@ def run():
         try:
             if not job["dest"].startswith(ROOT):
                 raise ValueError("destination outside " + ROOT)
+            if job.get("kind") == "report":
+                # Report only, for spot checks. Nothing is imported or saved.
+                res["assets"] = [mesh_report(job["dest"] + "/" + job["name"])]
+                res["status"] = "ok" if res["assets"][0]["class"] else "fail"
+                report["results"].append(res)
+                continue
             paths = import_with_task(job)
             res["imported"] = paths
             if job.get("kind") == "texture" and paths:

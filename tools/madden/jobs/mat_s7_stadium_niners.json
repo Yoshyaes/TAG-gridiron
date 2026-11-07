@@ -1,5 +1,2919 @@
 {
- "bindings": [],
+ "bindings": [
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_niners_bgfacility",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_niners_bgfacility_NinersFacilityConcrete",
+   "scalars": {
+    "Tiling": 2.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_concrete_lightclean_2mx2m_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_concrete_cleanlight_2mx2m_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_concrete_cleanlight_2mx2m_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_niners_bggameplay_buildings",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_niners_bggameplay_buildings_concreteBuilding_mat",
+   "scalars": {
+    "Tiling": 0.25
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_exteriorroofconcrete_color"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_niners_bggameplay_panorama",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_niners_bggameplay_panorama_background_mountains_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_background_mountains_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_niners_bglevibridge",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_niners_bglevibridge_metalWhite",
+   "scalars": {
+    "Tiling": 10.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_white_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_white_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_white_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_niners_bgnis_buildings",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_niners_bgnis_buildings_concreteBuilding_mat",
+   "scalars": {
+    "Tiling": 0.15
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_exteriorroofconcrete_color"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_niners_bgnis_highways",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_niners_bgnis_highways_railways_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_exterior_railroad_tracks_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_exterior_railroad_tracks_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_exterior_railroad_tracks_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_niners_bgnis_movingboats",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_niners_bgnis_movingboats_boat_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_concretefloor_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_concretefloor_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_concretefloor_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_niners_bgnis_neighbourhoods",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_niners_bgnis_neighbourhoods_neighbourhoodBuilding_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_background_neibourhoodhouse_color"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_niners_bgnis_terrain",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_niners_bgnis_terrain_road_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_exteriorhighways_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_exteriorhighways_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_exteriorhighways_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_niners_bgnis_trees",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_niners_bgnis_trees_treeCard_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_treecards_color"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_niners_bgparkinggarage",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_niners_bgparkinggarage_ParkingConcrete",
+   "scalars": {
+    "Tiling": 2.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_concrete_lightclean_2mx2m_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_concrete_cleanlight_2mx2m_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_concrete_cleanlight_2mx2m_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_advertisement_northwest",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_advertisement_northwest_metalWhite",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_white_01_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_white_01_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_white_01_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_advertising_north",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_advertising_north_Nin_suites_add_Emissive",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_suites_add_emissive_colorao"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_advertising_south",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_advertising_south_Nin_suites_add_Emissive",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_suites_add_emissive_colorao"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_advertising_southwest",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_advertising_southwest_metalWhite",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_white_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_white_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_white_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_concourse_concessionstand",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_concourse_concessionstand_nin_Concourse_elements",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_concourse_elements_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_concourse_elements_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_concourse_elements_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_concourse_elements",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_concourse_elements_metalWhite",
+   "scalars": {
+    "Tiling": 10.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_white_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_white_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_white_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_concourse_light",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_concourse_light_nin_emissive",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_emissive_colorao"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_concourse_shop",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_concourse_shop_Nin_suites_add_Emissive",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_suites_add_emissive_colorao"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_concourse_shopmetal",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_concourse_shopmetal_nin_Concourse_elements",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_concourse_elements_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_concourse_elements_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_concourse_elements_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_concourse_structure",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_concourse_structure_concrete_CleanLight_2mX2m_mat",
+   "scalars": {
+    "Tiling": 2.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_concrete_lightclean_2mx2m_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_concrete_cleanlight_2mx2m_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_concrete_cleanlight_2mx2m_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_concoursestairs01",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_concoursestairs01_metalWhite",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_white_01_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_white_01_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_white_01_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_concoursestairs02",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_concoursestairs02_metalWhite",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_white_01_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_white_01_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_white_01_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_concoursestairs03",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_concoursestairs03_metalWhite",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_white_01_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_white_01_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_white_01_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_edgewalls",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_edgewalls_nin_edgeWall",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_edgewall_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_edgewall_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_edgewall_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_facadealpha_railings",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_facadealpha_railings_Nin_facade_metal_Alpha",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_facade_metal_alpha_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_facade_metal_alpha_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_facade_metal_alpha_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_facadeconcrete",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_facadeconcrete_concrete_CleanLight_2mX2m_mat",
+   "scalars": {
+    "Tiling": 2.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_concrete_lightclean_2mx2m_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_concrete_cleanlight_2mx2m_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_concrete_cleanlight_2mx2m_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_facadeemmisive",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_facadeemmisive_Nin_suites_add_Emissive",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_suites_add_emissive_colorao"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_facadeglass",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_facadeglass_glass_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_glass_clear_color"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_facadeinterior",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_facadeinterior_paintedConcrete_clean",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_concrete_cleanpainted_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_concrete_cleanpainted_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_concrete_cleanpainted_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_facademetal",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_facademetal_nin_facade_metal_wall",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_facade_metal_wall_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_facade_metal_wall_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_facade_metal_wall_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_facadeupper",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_facadeupper_concrete_underseating",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_concrete_underseating_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_concrete_underseating_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_concrete_underseating_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_fieldskirt",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_fieldskirt_concrete_CleanLight_2mX2m_mat",
+   "scalars": {
+    "Tiling": 2.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_concrete_lightclean_2mx2m_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_concrete_cleanlight_2mx2m_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_concrete_cleanlight_2mx2m_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_fiftysign",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_fiftysign_lambert1",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_flagpole",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_flagpole_nin_Flagpole_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_gray_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_gray_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_gray_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_hangingspeaker",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_hangingspeaker_pan_camera_speaker_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_jumbotron",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_jumbotron_Nin_suites_add_Emissive",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_suites_add_emissive_colorao"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_lightingstructure_east",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_lightingstructure_east_metalWhite",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_white_01_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_white_01_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_white_01_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_lightingstructure_west",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_lightingstructure_west_metalWhite",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_white_01_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_white_01_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_white_01_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_lowertunnel_northeast_emmisive",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_lowertunnel_northeast_emmisive_lightGreenSignExit",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_lightgreensignexit_colorao"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_lowertunnel_northeastelements",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_lowertunnel_northeastelements_metal_stainless",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_stainless_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_stainless_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_stainless_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_lowertunnel_northeaststructure",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_lowertunnel_northeaststructure_nin_tunnelfloor",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_lowertunnel_northwest_emmesive",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_lowertunnel_northwest_emmesive_lightGreenSignExit",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_lightgreensignexit_colorao"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_lowertunnel_northwestelements",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_lowertunnel_northwestelements_metal_stainless",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_stainless_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_stainless_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_stainless_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_lowertunnel_northweststructure",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_lowertunnel_northweststructure_nin_tunnelfloor",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_lowertunnel_southelements",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_lowertunnel_southelements_metal_stainless",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_stainless_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_stainless_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_stainless_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_lowertunnel_southemmesive",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_lowertunnel_southemmesive_nin_emissive",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_emissive_colorao"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_lowertunnel_southstructure",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_lowertunnel_southstructure_nin_tunnelfloor",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_pillars",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_pillars_Nin_suites_add_Emissive",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_suites_add_emissive_colorao"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_playclockupper_north",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_playclockupper_north_metal_grungeGrey_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_grunge_gray_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_grunge_gray_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_grunge_gray_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_playclockupper_south",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_playclockupper_south_metal_grungeGrey_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_grunge_gray_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_grunge_gray_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_grunge_gray_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_polelight",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_polelight_metal_stainless",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_stainless_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_stainless_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_stainless_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_rail_lower",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_rail_lower_grayGalvanized_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_galvanized_gray_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_galvanized_gray_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_galvanized_gray_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_railing_01",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_railing_01_grayGalvanized_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_galvanized_gray_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_galvanized_gray_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_galvanized_gray_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_railing_01_tall",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_railing_01_tall_grayGalvanized_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_galvanized_gray_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_galvanized_gray_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_galvanized_gray_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_railing_02",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_railing_02_grayGalvanized_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_galvanized_gray_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_galvanized_gray_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_galvanized_gray_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_railing_02_tall",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_railing_02_tall_grayGalvanized_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_galvanized_gray_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_galvanized_gray_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_galvanized_gray_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_railing_03",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_railing_03_grayGalvanized_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_galvanized_gray_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_galvanized_gray_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_galvanized_gray_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_railing_04",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_railing_04_grayGalvanized_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_galvanized_gray_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_galvanized_gray_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_galvanized_gray_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_railingalpha_01",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_railingalpha_01_grayGalvanized_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_railingalpha_02",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_railingalpha_02_grayGalvanized_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_railingalpha_03",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_railingalpha_03_grayGalvanized_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_ribbonboards_frame",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_ribbonboards_frame_concrete_CleanLight_2mX2m_mat",
+   "scalars": {
+    "Tiling": 2.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_concrete_lightclean_2mx2m_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_concrete_cleanlight_2mx2m_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_concrete_cleanlight_2mx2m_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_roof_light_main",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_roof_light_main_metal_grungeGrey_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_grunge_gray_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_grunge_gray_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_grunge_gray_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_southtunnelrollupdoors",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_southtunnelrollupdoors_greyRollupDoor_Mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_graytrainingrollupdoors_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_genericgalvanizedmetalglossy_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_genericgalvanizedmetalglossy_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standslower_entryshop",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_standslower_entryshop_lambert3",
+   "scalars": {
+    "Tiling": 12.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standslower_glass",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_standslower_glass_glass_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_glass_clear_color"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standslower",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_standslower_concrete_underseating",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_concrete_underseating_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_concrete_underseating_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_concrete_underseating_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standslower_room",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_standslower_room_lightgrayMetal",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_light_gray_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_light_gray_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_light_gray_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standslower_text",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_standslower_text_plastic_red",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_plastic_red_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_plastic_red_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_plastic_red_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standsloweralpha",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_standsloweralpha_Nin_facade_metal_Alpha",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_facade_metal_alpha_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_facade_metal_alpha_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_facade_metal_alpha_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standslowerentry",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_standslowerentry_concrete_cleanLight2x2_mat",
+   "scalars": {
+    "Tiling": 2.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standslowerentry_railing",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_standslowerentry_railing_grayGalvanized_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standslowerexterior",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_standslowerexterior_nin_facade_metal_wall",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standslowerexterioremmesive",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_standslowerexterioremmesive_Nin_suites_add_Emissive",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_suites_add_emissive_colorao"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standslowerexteriorstairs",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_standslowerexteriorstairs_nin_facade_metal_wall",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_facade_metal_wall_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_facade_metal_wall_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_facade_metal_wall_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standslowerglass",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_standslowerglass_glass_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_glass_clear_color"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standslowerglassframe",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_standslowerglassframe_metal_stainless",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_stainless_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_stainless_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_stainless_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standsupper_easportsemissive",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_standsupper_easportsemissive_Nin_suites_add_Emissive",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_suites_add_emissive_colorao"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standsupper_levisemissive",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_standsupper_levisemissive_Nin_suites_add_Emissive",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_suites_add_emissive_colorao"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standsupper",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_standsupper_concrete_underseating",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_concrete_underseating_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_concrete_underseating_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_concrete_underseating_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standsuppercafe",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_standsuppercafe_nin_Concourse_elements",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_concourse_elements_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_concourse_elements_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_concourse_elements_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standsuppercafeshopinterior",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_standsuppercafeshopinterior_common_concession_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_concession_common_colorao"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standsupperelements",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_standsupperelements_greyScuffedPlasticMidRange",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standsupperglass",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_standsupperglass_glass_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_glass_clear_color"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standsupperrailingcard",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_standsupperrailingcard_nin_whiteMetal_horizontal_Rail",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_whitemetal_horizontal_rail_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_whitemetal_horizontal_rail_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_whitemetal_horizontal_rail_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standsupperstairs01",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_standsupperstairs01_metalWhite",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_white_01_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_white_01_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_white_01_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standsupperstairs",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_standsupperstairs_metalWhite",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_white_01_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_white_01_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_white_01_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standsupperstructure",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_standsupperstructure_metalWhite",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standsupperstruturestairs",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_standsupperstruturestairs_metalDark",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_dark_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_dark_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_dark_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standsuppersuit",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_standsuppersuit_nin_suite",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_suites_colorao"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_suites_ceilinglight",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_suites_ceilinglight_nin_emissive",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_emissive_colorao"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_suites_exterior",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_suites_exterior_nin_suites_metal",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_suites_metal_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_suites_metal_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_suites_metal_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_suites_exteriorlogo",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_suites_exteriorlogo_Nin_suites_add_Emissive",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_suites_add_emissive_colorao"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_suites_exteriorraling",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_suites_exteriorraling_Nin_facade_metal_Alpha",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_facade_metal_alpha_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_facade_metal_alpha_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_facade_metal_alpha_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_suites_glassrailing",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_suites_glassrailing_glass_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_glass_clear_color"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_suites",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_suites_paintedConcrete_clean",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_concrete_cleanpainted_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_concrete_cleanpainted_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_concrete_cleanpainted_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_suites_structureelements",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_suites_structureelements_metal_stainless",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_stainless_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_stainless_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_stainless_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_suites_terraceelements",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_suites_terraceelements_nin_suites_metal",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_suites_metal_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_suites_metal_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_suites_metal_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_terrain",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_terrain_concrete_sidewalk2X2",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_terrainadpole",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_terrainadpole_metalWhite",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_white_01_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_white_01_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_metal_white_01_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_terrainelements",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_terrainelements_nin_facade_metal_wall",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_terrainhalmet",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_terrainhalmet_Nin_Terrain_ShoesHelmat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_terrain_shoeshelmat_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_terrain_shoeshelmat_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_terrain_shoeshelmat_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_terrainrailingalpha",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_nin_terrainrailingalpha_Nin_facade_metal_Alpha",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_facade_metal_alpha_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_facade_metal_alpha_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_nin_facade_metal_alpha_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_anvilbox_low",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_anvilbox_low_lambert2",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_anvilboxlarge",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_anvilboxlarge_AnvilBox_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_anvilbox_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_anvilbox_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_anvilbox_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_anvilboxmedium",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_anvilboxmedium_AnvilBox_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_anvilbox_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_anvilbox_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_anvilbox_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_anvilboxmediumrec",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_anvilboxmediumrec_AnvilBox_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_anvilbox_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_anvilbox_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_anvilbox_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_anvilboxsmall",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_anvilboxsmall_AnvilBox_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_anvilbox_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_anvilbox_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_anvilbox_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_anvilboxsmallrec",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_anvilboxsmallrec_AnvilBox_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_anvilbox_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_anvilbox_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_anvilbox_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_anvilboxxlarge",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_anvilboxxlarge_AnvilBox_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_anvilbox_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_anvilbox_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_anvilbox_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_anvilwheels",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_anvilwheels_NormalTest",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_ballmachine",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_ballmachine_practiceProps_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_practiceprops_color"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_bench",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_bench_sidelineItemsAtlas_01_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_bench",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_bench_sidelineItemsAtlas_01_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_blockingsled",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_blockingsled_redPracticeBlock_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_redpracticeblock_color"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_cardlinemarkersfifty",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_cardlinemarkersfifty_orangePracticeMarkers_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_orangepracticemarkers_color"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_cardlinemarkersforty",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_cardlinemarkersforty_orangePracticeMarkers_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_orangepracticemarkers_color"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_cardlinemarkersten",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_cardlinemarkersten_orangePracticeMarkers_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_orangepracticemarkers_color"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_cardlinemarkersthirty",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_cardlinemarkersthirty_orangePracticeMarkers_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_orangepracticemarkers_color"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_cardlinemarkerstwenty",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_cardlinemarkerstwenty_orangePracticeMarkers_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_orangepracticemarkers_color"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_communicationscart",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_communicationscart_sidelineItemsAtlas_01_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_drillpad",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_drillpad_practiceProps_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_practiceprops_color"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_duffle",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_duffle_sidelineItemsAtlas_01_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_base_color",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_base_norm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_equipmentcaselarge",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_equipmentcaselarge_sidelineItemsAtlas_01_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_base_color",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_base_norm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_exercisebike",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_exercisebike_sidelineItemsAtlas_01_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_base_color",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_base_norm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_exercisebike",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_exercisebike_sidelineItemsAtlas_01_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_base_color",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_base_norm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_football",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_football_football_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_football_color"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_garbageplasticlarge",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_garbageplasticlarge_garbage_can_plastic_large_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_gatoradebasket",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_gatoradebasket_sidelineItemsAtlas_01_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_base_color",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_base_norm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_gatoradecontainer",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_gatoradecontainer_sidelineItemsAtlas_01_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_base_color",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_base_norm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_gatoradecontainer",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_gatoradecontainer_sidelineItemsAtlas_01_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_base_color",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_base_norm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_gatoradecooler",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_gatoradecooler_sidelineItemsAtlas_01_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_base_color",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_base_norm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_gatoradecoolerlarge",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_gatoradecoolerlarge_sidelineItemsAtlas_01_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_base_color",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_base_norm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_gatoradecoolersmall",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_gatoradecoolersmall_sidelineItemsAtlas_01_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_base_color",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_base_norm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_gatoradecoolersmall",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_gatoradecoolersmall_sidelineItemsAtlas_01_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_base_color",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_base_norm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_gatoradecup",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_gatoradecup_lrCup_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_gatoradecup",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_gatoradecup_lrCup_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_gatoradedrink",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_gatoradedrink_sidelineItemsAtlas_01_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_base_color",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_base_norm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_gatoradedrinkbottle",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_gatoradedrinkbottle_sidelineItemsAtlas_01_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_base_color",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_base_norm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_gatoradedrinkholder",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_gatoradedrinkholder_sidelineItemsAtlas_01_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_base_color",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_base_norm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_gatoradeicecooler",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_gatoradeicecooler_gatoradeIceCooler_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_gatoradesquirtbottle",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_gatoradesquirtbottle_sidelineItemsAtlas_01_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_base_color",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_base_norm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_gatoradesquirtbottle",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_gatoradesquirtbottle_sidelineItemsAtlas_01_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_base_color",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_base_norm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_gatoradestand",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_gatoradestand_Default_Material",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_base_color",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_base_norm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_icecooler",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_icecooler_sidelineItemsAtlas_01_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_base_color",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_base_norm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_longbag",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_longbag_sidelineItemsAtlas_01_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_base_color",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_base_norm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_longbag",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_longbag_sidelineItemsAtlas_01_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_base_color",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_base_norm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_massagetable",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_massagetable_trainerstable_sidelineItemsAtlas_03_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_medicalcabinetopen",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_medicalcabinetopen_sidelineItemsAtlas_02_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_base_color",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_base_norm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_medicalcabinetclosed",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_medicalcabinetclosed_MedicalCabinet_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_medicinecabinetopen_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_medicinecabinetopen_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_medicinecabinetopen_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_medicinecabinet",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_medicinecabinet_sidelineItemsAtlas_02_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_medicinecabinetopen_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_medicinecabinetopen_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_medicinecabinetopen_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_mediumequipment",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_mediumequipment_sidelineItemsAtlas_02_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_base_color",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_base_norm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_mscommunicationcart",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_mscommunicationcart_sidelineItemsAtlas_01_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_practicecone",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_practicecone_orangePracticeCone_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_orangepracticecone_color"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_practiceramped",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_practiceramped_redPracticeBlock_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_redpracticeblock_color"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_runpads",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_runpads_grayTarpSurface_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_props_tarpsurface_color"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_sportsbag",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_sportsbag_bag_sports_01_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_table",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_table_weatherItems_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_all_weather_items_color",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_all_weather_items_normal"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_tackledummy",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_tackledummy_practiceProps_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_practiceprops_color"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_tacklesled",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_tacklesled_yellowTrackleSled_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_yellowtracklesled_color"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_titanwobblea",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_titanwobblea_practiceProps_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_practiceprops_color"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_titanwobbleb",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_titanwobbleb_practiceProps_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_practiceprops_color"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_trainerstable",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_trainerstable_sidelineItemsAtlas_03_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_base_color",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_base_norm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_trashcanplastic",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_trashcanplastic_King_Drew_trashCanPlastic_1_m1",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_trunkd",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_trunkd_sidelineItemsAtlas_02_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_base_color",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_base_norm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_umbrella",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_umbrella_scissorCrane_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_colorao",
+    "Normal": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_n",
+    "RSM": "/Game/MaddenRef/Stadiums/Niners/Textures/T_default_nsm_nsm_rsm"
+   }
+  },
+  {
+   "master": "/Game/MaddenRef/Materials/M_MaddenRef_World",
+   "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_woodsled",
+   "mi": "/Game/MaddenRef/Stadiums/Niners/Materials/MI_woodsled_lightBrownWood_mat",
+   "scalars": {
+    "Tiling": 1.0
+   },
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Stadiums/Niners/Textures/T_wood_lightbrown_color"
+   }
+  }
+ ],
  "preview_level": {
   "path": "/Game/MaddenRef/Maps/L_MaddenRef_Stage7StadiumNiners",
   "meshes": [

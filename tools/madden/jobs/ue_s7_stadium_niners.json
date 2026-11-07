@@ -1156,5 +1156,1253 @@
   "file": "{REPO}/extracted/stage7/stadium_niners/meshes/woodsled_mesh.fbx",
   "dest": "/Game/MaddenRef/Stadiums/Niners",
   "name": "SM_woodsled"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/all_weather_items_color.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_all_weather_items_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/all_weather_items_normal_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_all_weather_items_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/anvilbox_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_anvilbox_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/anvilbox_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_anvilbox_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/anvilbox_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_anvilbox_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/medicinecabinetopen_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_medicinecabinetopen_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/medicinecabinetopen_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_medicinecabinetopen_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/medicinecabinetopen_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_medicinecabinetopen_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/bg_grass_color.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_bg_grass_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/background_neibourhoodhouse_color.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_background_neibourhoodhouse_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/exteriorbuildingsmiddlefloors_color.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_exteriorbuildingsmiddlefloors_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/exteriorhighways.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_exteriorhighways"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/exteriorroofconcrete_color.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_exteriorroofconcrete_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/treecards_color.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_treecards_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/concrete_underseating_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_concrete_underseating_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/concrete_underseating_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_concrete_underseating_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/concrete_underseating_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_concrete_underseating_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/metal_corrugated_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_metal_corrugated_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/metal_corrugated_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_metal_corrugated_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/metal_corrugated_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_metal_corrugated_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/metal_stainless_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_metal_stainless_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/metal_stainless_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_metal_stainless_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/metal_stainless_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_metal_stainless_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/props_tarpsurface_color.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_props_tarpsurface_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/default_base_color.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_default_base_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/default_base_norm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_default_base_norm",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/default_nsm_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_default_nsm_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/default_nsm_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_default_nsm_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/default_nsm_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_default_nsm_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/background_mountains_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_background_mountains_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/exteriorhighways_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_exteriorhighways_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/exteriorhighways_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_exteriorhighways_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/exteriorhighways_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_exteriorhighways_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/exterior_railroad_tracks_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_exterior_railroad_tracks_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/exterior_railroad_tracks_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_exterior_railroad_tracks_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/exterior_railroad_tracks_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_exterior_railroad_tracks_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/brick_cinderblocks_red_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_brick_cinderblocks_red_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/brick_cinderblocks_red_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_brick_cinderblocks_red_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/brick_cinderblocks_red_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_brick_cinderblocks_red_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/brick_cleancinderblock_brown_01_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_brick_cleancinderblock_brown_01_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/brick_cleancinderblock_brown_01_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_brick_cleancinderblock_brown_01_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/brick_cleancinderblock_brown_01_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_brick_cleancinderblock_brown_01_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/brick_lightcinderblocks_brown_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_brick_lightcinderblocks_brown_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/brick_lightcinderblocks_brown_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_brick_lightcinderblocks_brown_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/brick_lightcinderblocks_brown_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_brick_lightcinderblocks_brown_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/carpetgenericblack_1x1_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_carpetgenericblack_1x1_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/carpetgenericblack_1x1_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_carpetgenericblack_1x1_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/carpetgenericblack_1x1_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_carpetgenericblack_1x1_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/ducttapestrip_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_ducttapestrip_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/ducttapestrip_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_ducttapestrip_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/ducttapestrip_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_ducttapestrip_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/concession_common_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_concession_common_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/concrete_cleanlight_2mx2m_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_concrete_cleanlight_2mx2m_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/concrete_cleanlight_2mx2m_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_concrete_cleanlight_2mx2m_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/concrete_broomfinishlesscontrast_color.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_concrete_broomfinishlesscontrast_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/concrete_broomfinish_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_concrete_broomfinish_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/concrete_broomfinish_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_concrete_broomfinish_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/concrete_cleanbare_01_2mx2m_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_concrete_cleanbare_01_2mx2m_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/concrete_cleanbare_01_2mx2m_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_concrete_cleanbare_01_2mx2m_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/concrete_cleanbare_01_2mx2m_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_concrete_cleanbare_01_2mx2m_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/concrete_cleanpainted_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_concrete_cleanpainted_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/concrete_cleanpainted_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_concrete_cleanpainted_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/concrete_cleanpainted_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_concrete_cleanpainted_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/concrete_darkclean_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_concrete_darkclean_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/concrete_lightclean_2mx2m_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_concrete_lightclean_2mx2m_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/concrete_sidewalk_2mx2m_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_concrete_sidewalk_2mx2m_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/concrete_sidewalk_2mx2m_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_concrete_sidewalk_2mx2m_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/concrete_sidewalk_2mx2m_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_concrete_sidewalk_2mx2m_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/graytrainingrollupdoors_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_graytrainingrollupdoors_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/orangepracticecone_color.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_orangepracticecone_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/orangepracticemarkers_color.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_orangepracticemarkers_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/practiceprops_color.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_practiceprops_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/redpracticeblock_color.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_redpracticeblock_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/yellowtracklesled_color.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_yellowtracklesled_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/genericgalvanizedmetalglossy_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_genericgalvanizedmetalglossy_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/genericgalvanizedmetalglossy_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_genericgalvanizedmetalglossy_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/genericgalvanizedmetalmatte_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_genericgalvanizedmetalmatte_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/genericgalvanizedmetalmatte_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_genericgalvanizedmetalmatte_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/glass_clear_color.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_glass_clear_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/light_circular_01_color.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_light_circular_01_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/light_spot_01_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_light_spot_01_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/coolmetalgrate_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_coolmetalgrate_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/coolmetalgrate_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_coolmetalgrate_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/coolmetalgrate_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_coolmetalgrate_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/metal_chainlinkfence_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_metal_chainlinkfence_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/metal_chainlinkfence_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_metal_chainlinkfence_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/metal_chainlinkfence_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_metal_chainlinkfence_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/metal_dark_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_metal_dark_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/metal_dark_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_metal_dark_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/metal_dark_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_metal_dark_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/metal_galvanized_gray_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_metal_galvanized_gray_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/metal_galvanized_gray_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_metal_galvanized_gray_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/metal_galvanized_gray_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_metal_galvanized_gray_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/metal_gray_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_metal_gray_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/metal_gray_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_metal_gray_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/metal_gray_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_metal_gray_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/metal_grunge_gray_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_metal_grunge_gray_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/metal_grunge_gray_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_metal_grunge_gray_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/metal_grunge_gray_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_metal_grunge_gray_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/metal_light_gray_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_metal_light_gray_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/metal_light_gray_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_metal_light_gray_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/metal_light_gray_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_metal_light_gray_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/metal_tunnelsbeam_color.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_metal_tunnelsbeam_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/metal_white_01_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_metal_white_01_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/metal_white_01_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_metal_white_01_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/metal_white_01_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_metal_white_01_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/metal_white_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_metal_white_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/metal_white_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_metal_white_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/metal_white_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_metal_white_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/plastic_gray_dark_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_plastic_gray_dark_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/plastic_gray_dark_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_plastic_gray_dark_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/plastic_gray_dark_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_plastic_gray_dark_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/plastic_red_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_plastic_red_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/plastic_red_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_plastic_red_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/plastic_red_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_plastic_red_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/football_color.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_football_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/lightgreensignexit_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_lightgreensignexit_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/nin_terrain_shoeshelmat_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_terrain_shoeshelmat_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/nin_terrain_shoeshelmat_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_terrain_shoeshelmat_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/nin_terrain_shoeshelmat_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_terrain_shoeshelmat_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/nin_facade_cloth_poster_text_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_facade_cloth_poster_text_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/nin_facade_cloth_poster_text_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_facade_cloth_poster_text_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/nin_facade_cloth_poster_text_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_facade_cloth_poster_text_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/nin_facade_add_emissive_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_facade_add_emissive_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/nin_facade_add_metal_text_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_facade_add_metal_text_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/nin_facade_add_metal_text_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_facade_add_metal_text_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/nin_facade_add_metal_text_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_facade_add_metal_text_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/nin_facade_metal_alpha_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_facade_metal_alpha_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/nin_facade_metal_alpha_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_facade_metal_alpha_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/nin_facade_metal_alpha_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_facade_metal_alpha_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/nin_suites_add_emissive_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_suites_add_emissive_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/nin_concourse_red_wall_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_concourse_red_wall_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/nin_concourse_red_wall_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_concourse_red_wall_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/nin_concourse_red_wall_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_concourse_red_wall_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/nin_concourse_white_wall_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_concourse_white_wall_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/nin_concourse_white_wall_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_concourse_white_wall_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/nin_concourse_white_wall_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_concourse_white_wall_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/nin_concourse_elements_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_concourse_elements_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/nin_concourse_elements_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_concourse_elements_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/nin_concourse_elements_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_concourse_elements_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/nin_adboard_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_adboard_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/nin_adboard_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_adboard_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/nin_adboard_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_adboard_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/nin_ceiling_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_ceiling_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/nin_concourse_emissive_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_concourse_emissive_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/nin_concretefloor_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_concretefloor_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/nin_concretefloor_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_concretefloor_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/nin_concretefloor_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_concretefloor_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/nin_doordetails_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_doordetails_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/nin_doordetails_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_doordetails_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/nin_doordetails_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_doordetails_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/nin_edgewall_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_edgewall_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/nin_edgewall_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_edgewall_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/nin_edgewall_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_edgewall_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/nin_emissive_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_emissive_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/nin_facade_metal_wall_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_facade_metal_wall_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/nin_facade_metal_wall_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_facade_metal_wall_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/nin_facade_metal_wall_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_facade_metal_wall_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/nin_lowerstand_elements_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_lowerstand_elements_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/nin_lowerstand_elements_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_lowerstand_elements_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/nin_lowerstand_elements_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_lowerstand_elements_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/nin_standsupper_cafesouth_cloth_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_standsupper_cafesouth_cloth_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/nin_standsupper_cafesouth_cloth_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_standsupper_cafesouth_cloth_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/nin_standsupper_cafesouth_cloth_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_standsupper_cafesouth_cloth_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/nin_standsupper_cafesouth_bricks_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_standsupper_cafesouth_bricks_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/nin_standsupper_cafesouth_bricks_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_standsupper_cafesouth_bricks_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/nin_standsupper_cafesouth_bricks_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_standsupper_cafesouth_bricks_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/nin_standsupper_cafesouth_metal_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_standsupper_cafesouth_metal_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/nin_standsupper_cafesouth_metal_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_standsupper_cafesouth_metal_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/nin_standsupper_cafesouth_metal_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_standsupper_cafesouth_metal_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/nin_standsupper_cafesouth_wood_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_standsupper_cafesouth_wood_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/nin_standsupper_cafesouth_wood_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_standsupper_cafesouth_wood_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/nin_standsupper_cafesouth_wood_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_standsupper_cafesouth_wood_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/nin_suites_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_suites_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/nin_suites_metal_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_suites_metal_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/nin_suites_metal_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_suites_metal_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/nin_suites_metal_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_suites_metal_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/nin_terrain_floor_ground_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_terrain_floor_ground_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/nin_terrain_floor_ground_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_terrain_floor_ground_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/nin_terrain_floor_ground_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_terrain_floor_ground_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/nin_tunnelfloor_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_tunnelfloor_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/nin_tunnelfloor_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_tunnelfloor_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/nin_tunnelfloor_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_tunnelfloor_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/nin_whitemetal_horizontal_rail_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_whitemetal_horizontal_rail_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/nin_whitemetal_horizontal_rail_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_whitemetal_horizontal_rail_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/nin_whitemetal_horizontal_rail_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_whitemetal_horizontal_rail_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/nin_wood_nsm_n_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_wood_nsm_n",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures_ue/nin_wood_nsm_rsm_ue.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_wood_nsm_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/nin_wood_colorao.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_nin_wood_colorao"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/stadium_niners/textures/wood_lightbrown_color.png",
+  "dest": "/Game/MaddenRef/Stadiums/Niners/Textures",
+  "name": "T_wood_lightbrown_color"
  }
 ]

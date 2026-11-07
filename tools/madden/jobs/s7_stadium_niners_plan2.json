@@ -1,0 +1,614 @@
+[
+ {
+  "id": "preset_worlds_default_NSM_preset",
+  "op": "ebx",
+  "asset": "content/common/materialPresets/worlds_default_NSM_preset",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__common__materialPresets__worlds_default_NSM_preset.ebx.json"
+ },
+ {
+  "id": "preset_concrete_lightClean_2mx2m",
+  "op": "ebx",
+  "asset": "content/worlds/materials/concrete/concrete_lightClean_2mx2m",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__concrete__concrete_lightClean_2mx2m.ebx.json"
+ },
+ {
+  "id": "preset_nin_suites_Glass",
+  "op": "ebx",
+  "asset": "content/worlds/materials/teamSpecific/niners/nin_suites_Glass",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__teamSpecific__niners__nin_suites_Glass.ebx.json"
+ },
+ {
+  "id": "preset_buildingroof_mat",
+  "op": "ebx",
+  "asset": "content/worlds/materials/background/buildingroof_mat",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__background__buildingroof_mat.ebx.json"
+ },
+ {
+  "id": "preset_middlefloors_mat",
+  "op": "ebx",
+  "asset": "content/worlds/materials/background/middlefloors_mat",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__background__middlefloors_mat.ebx.json"
+ },
+ {
+  "id": "preset_background_mountains",
+  "op": "ebx",
+  "asset": "content/worlds/materials/background/background_mountains",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__background__background_mountains.ebx.json"
+ },
+ {
+  "id": "preset_metal_white_00",
+  "op": "ebx",
+  "asset": "content/worlds/materials/Metal/metal_white_00",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__Metal__metal_white_00.ebx.json"
+ },
+ {
+  "id": "preset_exteriorcars_mat",
+  "op": "ebx",
+  "asset": "content/worlds/materials/background/exteriorcars_mat",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__background__exteriorcars_mat.ebx.json"
+ },
+ {
+  "id": "preset_exteriorhighways_mat",
+  "op": "ebx",
+  "asset": "content/worlds/materials/background/exteriorhighways_mat",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__background__exteriorhighways_mat.ebx.json"
+ },
+ {
+  "id": "preset_exteriorrailways_mat",
+  "op": "ebx",
+  "asset": "content/worlds/materials/background/exteriorrailways_mat",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__background__exteriorrailways_mat.ebx.json"
+ },
+ {
+  "id": "preset_concrete_cleanVertexColorTint",
+  "op": "ebx",
+  "asset": "content/worlds/materials/concrete/concrete_cleanVertexColorTint",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__concrete__concrete_cleanVertexColorTint.ebx.json"
+ },
+ {
+  "id": "preset_nin_concretefloor",
+  "op": "ebx",
+  "asset": "content/worlds/materials/teamSpecific/niners/nin_concretefloor",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__teamSpecific__niners__nin_concretefloor.ebx.json"
+ },
+ {
+  "id": "preset_exteriorneighbourhoods_mat",
+  "op": "ebx",
+  "asset": "content/worlds/materials/background/exteriorneighbourhoods_mat",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__background__exteriorneighbourhoods_mat.ebx.json"
+ },
+ {
+  "id": "preset_worlds_detail_NSM_preset",
+  "op": "ebx",
+  "asset": "content/common/materialPresets/worlds_detail_NSM_preset",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__common__materialPresets__worlds_detail_NSM_preset.ebx.json"
+ },
+ {
+  "id": "preset_exteriorwater_mat",
+  "op": "ebx",
+  "asset": "content/worlds/materials/background/exteriorwater_mat",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__background__exteriorwater_mat.ebx.json"
+ },
+ {
+  "id": "preset_exteriorroads_mat",
+  "op": "ebx",
+  "asset": "content/worlds/materials/background/exteriorroads_mat",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__background__exteriorroads_mat.ebx.json"
+ },
+ {
+  "id": "preset_exteriorgrass_mat",
+  "op": "ebx",
+  "asset": "content/worlds/materials/background/exteriorgrass_mat",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__background__exteriorgrass_mat.ebx.json"
+ },
+ {
+  "id": "preset_worlds_detail_complex_preset",
+  "op": "ebx",
+  "asset": "content/common/materialPresets/worlds_detail_complex_preset",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__common__materialPresets__worlds_detail_complex_preset.ebx.json"
+ },
+ {
+  "id": "preset_exteriortreecard_mat",
+  "op": "ebx",
+  "asset": "content/worlds/materials/background/exteriortreecard_mat",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__background__exteriortreecard_mat.ebx.json"
+ },
+ {
+  "id": "preset_nin_adboard",
+  "op": "ebx",
+  "asset": "content/worlds/materials/teamSpecific/niners/nin_adboard",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__teamSpecific__niners__nin_adboard.ebx.json"
+ },
+ {
+  "id": "preset_metal_white_01",
+  "op": "ebx",
+  "asset": "content/worlds/materials/Metal/metal_white_01",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__Metal__metal_white_01.ebx.json"
+ },
+ {
+  "id": "preset_metal_stainless",
+  "op": "ebx",
+  "asset": "content/worlds/materials/Metal/metal_stainless",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__Metal__metal_stainless.ebx.json"
+ },
+ {
+  "id": "preset_Nin_suites_add_Emissive",
+  "op": "ebx",
+  "asset": "content/worlds/materials/teamSpecific/niners/Nin_suites_add_Emissive",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__teamSpecific__niners__Nin_suites_add_Emissive.ebx.json"
+ },
+ {
+  "id": "preset_concession_common",
+  "op": "ebx",
+  "asset": "content/worlds/materials/concession/concession_common",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__concession__concession_common.ebx.json"
+ },
+ {
+  "id": "preset_nin_Concourse_elements",
+  "op": "ebx",
+  "asset": "content/worlds/materials/teamSpecific/niners/nin_Concourse_elements",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__teamSpecific__niners__nin_Concourse_elements.ebx.json"
+ },
+ {
+  "id": "preset_nin_ceiling",
+  "op": "ebx",
+  "asset": "content/worlds/materials/teamSpecific/niners/nin_ceiling",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__teamSpecific__niners__nin_ceiling.ebx.json"
+ },
+ {
+  "id": "preset_nin_facade_metal_wall",
+  "op": "ebx",
+  "asset": "content/worlds/materials/teamSpecific/niners/nin_facade_metal_wall",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__teamSpecific__niners__nin_facade_metal_wall.ebx.json"
+ },
+ {
+  "id": "preset_metal_corrugated",
+  "op": "ebx",
+  "asset": "content/worlds/materials/Metal/metal_corrugated",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__Metal__metal_corrugated.ebx.json"
+ },
+ {
+  "id": "preset_glass_clear",
+  "op": "ebx",
+  "asset": "content/worlds/materials/glass/glass_clear",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__glass__glass_clear.ebx.json"
+ },
+ {
+  "id": "preset_nin_emissive",
+  "op": "ebx",
+  "asset": "content/worlds/materials/teamSpecific/niners/nin_emissive",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__teamSpecific__niners__nin_emissive.ebx.json"
+ },
+ {
+  "id": "preset_nin_concourse_emissive",
+  "op": "ebx",
+  "asset": "content/worlds/materials/teamSpecific/niners/nin_concourse_emissive",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__teamSpecific__niners__nin_concourse_emissive.ebx.json"
+ },
+ {
+  "id": "preset_nin_standsUpper_cafesouth_metal",
+  "op": "ebx",
+  "asset": "content/worlds/materials/teamSpecific/niners/nin_standsUpper_cafesouth_metal",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__teamSpecific__niners__nin_standsUpper_cafesouth_metal.ebx.json"
+ },
+ {
+  "id": "preset_nin_Concourse_Red_Wall",
+  "op": "ebx",
+  "asset": "content/worlds/materials/teamSpecific/niners/nin_Concourse_Red_Wall",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__teamSpecific__niners__nin_Concourse_Red_Wall.ebx.json"
+ },
+ {
+  "id": "preset_nin_Concurse_White_Wall",
+  "op": "ebx",
+  "asset": "content/worlds/materials/teamSpecific/niners/nin_Concurse_White_Wall",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__teamSpecific__niners__nin_Concurse_White_Wall.ebx.json"
+ },
+ {
+  "id": "preset_concrete_cleanPainted",
+  "op": "ebx",
+  "asset": "content/worlds/materials/concrete/concrete_cleanPainted",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__concrete__concrete_cleanPainted.ebx.json"
+ },
+ {
+  "id": "preset_nin_edgeWall",
+  "op": "ebx",
+  "asset": "content/worlds/materials/teamSpecific/niners/nin_edgeWall",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__teamSpecific__niners__nin_edgeWall.ebx.json"
+ },
+ {
+  "id": "preset_GrayPlasticDark",
+  "op": "ebx",
+  "asset": "content/worlds/materials/plastic/GrayPlasticDark",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__plastic__GrayPlasticDark.ebx.json"
+ },
+ {
+  "id": "preset_nin_whiteMetal_horizontal_Railing",
+  "op": "ebx",
+  "asset": "content/worlds/materials/teamSpecific/niners/nin_whiteMetal_horizontal_Railing",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__teamSpecific__niners__nin_whiteMetal_horizontal_Railing.ebx.json"
+ },
+ {
+  "id": "preset_Nin_facade_metal_Alpha",
+  "op": "ebx",
+  "asset": "content/worlds/materials/teamSpecific/niners/Nin_facade_metal_Alpha",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__teamSpecific__niners__Nin_facade_metal_Alpha.ebx.json"
+ },
+ {
+  "id": "preset_metal_chainLinkFence_00",
+  "op": "ebx",
+  "asset": "content/worlds/materials/Metal/metal_chainLinkFence_00",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__Metal__metal_chainLinkFence_00.ebx.json"
+ },
+ {
+  "id": "preset_concrete_sidewalk2X2",
+  "op": "ebx",
+  "asset": "content/worlds/materials/concrete/concrete_sidewalk2X2",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__concrete__concrete_sidewalk2X2.ebx.json"
+ },
+ {
+  "id": "preset_brick_cleanCinderblock_brown_01",
+  "op": "ebx",
+  "asset": "content/worlds/materials/brick/brick_cleanCinderblock_brown_01",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__brick__brick_cleanCinderblock_brown_01.ebx.json"
+ },
+ {
+  "id": "preset_Nin_facade_add_Emissive",
+  "op": "ebx",
+  "asset": "content/worlds/materials/teamSpecific/niners/Nin_facade_add_Emissive",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__teamSpecific__niners__Nin_facade_add_Emissive.ebx.json"
+ },
+ {
+  "id": "preset_Nin_facade_add_metal_text",
+  "op": "ebx",
+  "asset": "content/worlds/materials/teamSpecific/niners/Nin_facade_add_metal_text",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__teamSpecific__niners__Nin_facade_add_metal_text.ebx.json"
+ },
+ {
+  "id": "preset_concrete_underseating",
+  "op": "ebx",
+  "asset": "content/worlds/materials/concrete/concrete_underseating",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__concrete__concrete_underseating.ebx.json"
+ },
+ {
+  "id": "preset_field_grass_mat",
+  "op": "ebx",
+  "asset": "content/worlds/materials/field/field_grass_mat",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__field__field_grass_mat.ebx.json"
+ },
+ {
+  "id": "preset_coolMetalGrate",
+  "op": "ebx",
+  "asset": "content/worlds/materials/Metal/coolMetalGrate",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__Metal__coolMetalGrate.ebx.json"
+ },
+ {
+  "id": "preset_metal_gray",
+  "op": "ebx",
+  "asset": "content/worlds/materials/Metal/metal_gray",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__Metal__metal_gray.ebx.json"
+ },
+ {
+  "id": "preset_metal_stainless_lightProbe",
+  "op": "ebx",
+  "asset": "content/worlds/materials/Metal/metal_stainless_lightProbe",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__Metal__metal_stainless_lightProbe.ebx.json"
+ },
+ {
+  "id": "preset_worlds_bakedshadow_NSM_preset",
+  "op": "ebx",
+  "asset": "content/common/materialPresets/worlds_bakedshadow_NSM_preset",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__common__materialPresets__worlds_bakedshadow_NSM_preset.ebx.json"
+ },
+ {
+  "id": "preset_worlds_jumbotron_preset",
+  "op": "ebx",
+  "asset": "content/common/materialPresets/worlds_jumbotron_preset",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__common__materialPresets__worlds_jumbotron_preset.ebx.json"
+ },
+ {
+  "id": "preset_lightGreenSignExit",
+  "op": "ebx",
+  "asset": "content/worlds/materials/sign/lightGreenSignExit",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__sign__lightGreenSignExit.ebx.json"
+ },
+ {
+  "id": "preset_nin_wood",
+  "op": "ebx",
+  "asset": "content/worlds/materials/teamSpecific/niners/nin_wood",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__teamSpecific__niners__nin_wood.ebx.json"
+ },
+ {
+  "id": "preset_nin_doordetails",
+  "op": "ebx",
+  "asset": "content/worlds/materials/teamSpecific/niners/nin_doordetails",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__teamSpecific__niners__nin_doordetails.ebx.json"
+ },
+ {
+  "id": "preset_brick_cinderblocks_red",
+  "op": "ebx",
+  "asset": "content/worlds/materials/brick/brick_cinderblocks_red",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__brick__brick_cinderblocks_red.ebx.json"
+ },
+ {
+  "id": "preset_brick_lightCinderblocks_brown",
+  "op": "ebx",
+  "asset": "content/worlds/materials/brick/brick_lightCinderblocks_brown",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__brick__brick_lightCinderblocks_brown.ebx.json"
+ },
+ {
+  "id": "preset_nin_tunnel_carpet_mat",
+  "op": "ebx",
+  "asset": "content/worlds/materials/teamSpecific/niners/nin_tunnel_carpet_mat",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__teamSpecific__niners__nin_tunnel_carpet_mat.ebx.json"
+ },
+ {
+  "id": "preset_nin_duct_tape",
+  "op": "ebx",
+  "asset": "content/worlds/materials/teamSpecific/niners/nin_duct_tape",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__teamSpecific__niners__nin_duct_tape.ebx.json"
+ },
+ {
+  "id": "preset_nin_awayTunnelFloor_concrete_mat",
+  "op": "ebx",
+  "asset": "content/worlds/materials/teamSpecific/niners/nin_awayTunnelFloor_concrete_mat",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__teamSpecific__niners__nin_awayTunnelFloor_concrete_mat.ebx.json"
+ },
+ {
+  "id": "preset_worlds_detail_Wallcomplex_preset",
+  "op": "ebx",
+  "asset": "content/common/materialPresets/worlds_detail_Wallcomplex_preset",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__common__materialPresets__worlds_detail_Wallcomplex_preset.ebx.json"
+ },
+ {
+  "id": "preset_nin_tunnelFloors",
+  "op": "ebx",
+  "asset": "content/worlds/materials/teamSpecific/niners/nin_tunnelFloors",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__teamSpecific__niners__nin_tunnelFloors.ebx.json"
+ },
+ {
+  "id": "preset_nin_suites_metal",
+  "op": "ebx",
+  "asset": "content/worlds/materials/teamSpecific/niners/nin_suites_metal",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__teamSpecific__niners__nin_suites_metal.ebx.json"
+ },
+ {
+  "id": "preset_metal_grunge_gray",
+  "op": "ebx",
+  "asset": "content/worlds/materials/Metal/metal_grunge_gray",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__Metal__metal_grunge_gray.ebx.json"
+ },
+ {
+  "id": "preset_scoreboard_shader",
+  "op": "ebx",
+  "asset": "content/common/shaders/implementations/worlds/scoreboard_shader",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__common__shaders__implementations__worlds__scoreboard_shader.ebx.json"
+ },
+ {
+  "id": "preset_worlds_detail_walls_dynamic_shadows",
+  "op": "ebx",
+  "asset": "content/common/shaders/implementations/worlds/worlds_detail_walls_dynamic_shadows",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__common__shaders__implementations__worlds__worlds_detail_walls_dynamic_shadows.ebx.json"
+ },
+ {
+  "id": "preset_worlds_Walldynamic_preset",
+  "op": "ebx",
+  "asset": "content/common/materialPresets/worlds_Walldynamic_preset",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__common__materialPresets__worlds_Walldynamic_preset.ebx.json"
+ },
+ {
+  "id": "preset_Nin_facade_Cloth_Poster_Text",
+  "op": "ebx",
+  "asset": "content/worlds/materials/teamSpecific/niners/Nin_facade_Cloth_Poster_Text",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__teamSpecific__niners__Nin_facade_Cloth_Poster_Text.ebx.json"
+ },
+ {
+  "id": "preset_interiorCircularLight",
+  "op": "ebx",
+  "asset": "content/worlds/materials/light/interiorCircularLight",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__light__interiorCircularLight.ebx.json"
+ },
+ {
+  "id": "preset_metal_galvanizedLightProbe_gray",
+  "op": "ebx",
+  "asset": "content/worlds/materials/Metal/metal_galvanizedLightProbe_gray",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__Metal__metal_galvanizedLightProbe_gray.ebx.json"
+ },
+ {
+  "id": "preset_worlds_bakedshadow_alphaNSM_preset",
+  "op": "ebx",
+  "asset": "content/common/materialPresets/worlds_bakedshadow_alphaNSM_preset",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__common__materialPresets__worlds_bakedshadow_alphaNSM_preset.ebx.json"
+ },
+ {
+  "id": "preset_worlds_ribbonboard_preset",
+  "op": "ebx",
+  "asset": "content/Common/materialPresets/worlds_ribbonboard_preset",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__Common__materialPresets__worlds_ribbonboard_preset.ebx.json"
+ },
+ {
+  "id": "preset_metal_tunnelsBeam",
+  "op": "ebx",
+  "asset": "content/worlds/materials/Metal/metal_tunnelsBeam",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__Metal__metal_tunnelsBeam.ebx.json"
+ },
+ {
+  "id": "preset_spotLightA",
+  "op": "ebx",
+  "asset": "content/worlds/materials/light/spotLightA",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__light__spotLightA.ebx.json"
+ },
+ {
+  "id": "preset_GrayTrainingRollupdoor",
+  "op": "ebx",
+  "asset": "content/worlds/materials/door/GrayTrainingRollupdoor",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__door__GrayTrainingRollupdoor.ebx.json"
+ },
+ {
+  "id": "preset_nin_lowerstand_elements",
+  "op": "ebx",
+  "asset": "content/worlds/materials/teamSpecific/niners/nin_lowerstand_elements",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__teamSpecific__niners__nin_lowerstand_elements.ebx.json"
+ },
+ {
+  "id": "preset_metal_galvanized_gray",
+  "op": "ebx",
+  "asset": "content/worlds/materials/Metal/metal_galvanized_gray",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__Metal__metal_galvanized_gray.ebx.json"
+ },
+ {
+  "id": "preset_nin_suit",
+  "op": "ebx",
+  "asset": "content/worlds/materials/teamSpecific/niners/nin_suit",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__teamSpecific__niners__nin_suit.ebx.json"
+ },
+ {
+  "id": "preset_metal_light_gray",
+  "op": "ebx",
+  "asset": "content/worlds/materials/Metal/metal_light_gray",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__Metal__metal_light_gray.ebx.json"
+ },
+ {
+  "id": "preset_RedPlasticDark",
+  "op": "ebx",
+  "asset": "content/worlds/materials/plastic/RedPlasticDark",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__plastic__RedPlasticDark.ebx.json"
+ },
+ {
+  "id": "preset_metal_dark",
+  "op": "ebx",
+  "asset": "content/worlds/materials/Metal/metal_dark",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__Metal__metal_dark.ebx.json"
+ },
+ {
+  "id": "preset_concrete_broomFinish_lessContrast",
+  "op": "ebx",
+  "asset": "content/worlds/materials/concrete/concrete_broomFinish_lessContrast",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__concrete__concrete_broomFinish_lessContrast.ebx.json"
+ },
+ {
+  "id": "preset_nin_standsUpper_cafesouth_wood",
+  "op": "ebx",
+  "asset": "content/worlds/materials/teamSpecific/niners/nin_standsUpper_cafesouth_wood",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__teamSpecific__niners__nin_standsUpper_cafesouth_wood.ebx.json"
+ },
+ {
+  "id": "preset_nin_standsUpper_cafesouth_bricks",
+  "op": "ebx",
+  "asset": "content/worlds/materials/teamSpecific/niners/nin_standsUpper_cafesouth_bricks",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__teamSpecific__niners__nin_standsUpper_cafesouth_bricks.ebx.json"
+ },
+ {
+  "id": "preset_nin_standsUpper_cafesouth_Cloth",
+  "op": "ebx",
+  "asset": "content/worlds/materials/teamSpecific/niners/nin_standsUpper_cafesouth_Cloth",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__teamSpecific__niners__nin_standsUpper_cafesouth_Cloth.ebx.json"
+ },
+ {
+  "id": "preset_glassWithGrunge_skyVisOverride",
+  "op": "ebx",
+  "asset": "content/common/shaders/implementations/glassWithGrunge_skyVisOverride",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__common__shaders__implementations__glassWithGrunge_skyVisOverride.ebx.json"
+ },
+ {
+  "id": "preset_nin_terrain_floor_ground",
+  "op": "ebx",
+  "asset": "content/worlds/materials/teamSpecific/niners/nin_terrain_floor_ground",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__teamSpecific__niners__nin_terrain_floor_ground.ebx.json"
+ },
+ {
+  "id": "preset_nin_tunnelfloor",
+  "op": "ebx",
+  "asset": "content/worlds/materials/teamSpecific/niners/nin_tunnelfloor",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__teamSpecific__niners__nin_tunnelfloor.ebx.json"
+ },
+ {
+  "id": "preset_Nin_Terrain_ShoesHelmat",
+  "op": "ebx",
+  "asset": "content/worlds/materials/teamSpecific/niners/Nin_Terrain_ShoesHelmat",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__teamSpecific__niners__Nin_Terrain_ShoesHelmat.ebx.json"
+ },
+ {
+  "id": "preset_anvilBoxes",
+  "op": "ebx",
+  "asset": "content/worlds/materials/equipment/anvilBoxes",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__equipment__anvilBoxes.ebx.json"
+ },
+ {
+  "id": "preset_practiceProps",
+  "op": "ebx",
+  "asset": "content/worlds/materials/equipment/practiceProps",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__equipment__practiceProps.ebx.json"
+ },
+ {
+  "id": "preset_worlds_default_dynamic_nsm_shader",
+  "op": "ebx",
+  "asset": "content/common/shaders/implementations/worlds/worlds_default_dynamic_nsm_shader",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__common__shaders__implementations__worlds__worlds_default_dynamic_nsm_shader.ebx.json"
+ },
+ {
+  "id": "preset_redPracticeBlock",
+  "op": "ebx",
+  "asset": "content/worlds/materials/equipment/redPracticeBlock",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__equipment__redPracticeBlock.ebx.json"
+ },
+ {
+  "id": "preset_orangePracticeMarkers",
+  "op": "ebx",
+  "asset": "content/worlds/materials/equipment/orangePracticeMarkers",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__equipment__orangePracticeMarkers.ebx.json"
+ },
+ {
+  "id": "preset_worlds_default_preset",
+  "op": "ebx",
+  "asset": "content/common/materialPresets/worlds_default_preset",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__common__materialPresets__worlds_default_preset.ebx.json"
+ },
+ {
+  "id": "preset_football",
+  "op": "ebx",
+  "asset": "content/worlds/materials/prop/football",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__prop__football.ebx.json"
+ },
+ {
+  "id": "preset_worlds_defaultDynamic_preset",
+  "op": "ebx",
+  "asset": "content/common/materialPresets/worlds_defaultDynamic_preset",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__common__materialPresets__worlds_defaultDynamic_preset.ebx.json"
+ },
+ {
+  "id": "preset_medicineCabinet",
+  "op": "ebx",
+  "asset": "content/worlds/materials/equipment/medicineCabinet",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__equipment__medicineCabinet.ebx.json"
+ },
+ {
+  "id": "preset_orangePracticeCone",
+  "op": "ebx",
+  "asset": "content/worlds/materials/equipment/orangePracticeCone",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__equipment__orangePracticeCone.ebx.json"
+ },
+ {
+  "id": "preset_props_tarpSurface",
+  "op": "ebx",
+  "asset": "content/worlds/materials/prop/props_tarpSurface",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__prop__props_tarpSurface.ebx.json"
+ },
+ {
+  "id": "preset_all_weather_items",
+  "op": "ebx",
+  "asset": "content/worlds/materials/equipment/all_weather_items",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__equipment__all_weather_items.ebx.json"
+ },
+ {
+  "id": "preset_yellowTrackleSled",
+  "op": "ebx",
+  "asset": "content/worlds/materials/equipment/yellowTrackleSled",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__equipment__yellowTrackleSled.ebx.json"
+ },
+ {
+  "id": "preset_lightBrownWood",
+  "op": "ebx",
+  "asset": "content/worlds/materials/wood/lightBrownWood",
+  "out": "{REPO}/extracted/stage7/stadium_niners/presets/content__worlds__materials__wood__lightBrownWood.ebx.json"
+ }
+]

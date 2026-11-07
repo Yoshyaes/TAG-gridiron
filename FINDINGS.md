@@ -98,3 +98,24 @@ Every surprise, with evidence. Newest stage last. Private reference work, see `e
 - **Disk projection.** 1 MB per mesh and 8 MB per texture (twice the Stage 4 averages). Each kit checks the projection against the 50 GB floor on D and is skipped, not partly run, when it would break it.
 - Scale lives in one place (FBX meters at export). Naming and Content layout are documented in `tools\madden\README.md`.
 - Animations are not hooked up because Stage 3 was a no go.
+
+## Stage 7. Capped scale out
+| Chunk (kit) | Selection | Meshes | Textures | Material instances | Result |
+| --- | --- | --- | --- | --- | --- |
+| `s7_bodies` | every player body mesh | 16 | 8 | 16 | pass |
+| `s7_helmets` | every helmet mesh (shells, facemasks, visors, clips, accessories, green dots) | 185 | 4 | 28 | pass |
+| `s7_heads` | random sample of 50 player head folder meshes (seed 19) | 50 | 78 | 50 | pass |
+| `s7_coaches` | 8 random coaches, all their meshes (seed 19) | 28 | 72 | 28 | pass |
+| `s7_stadium_niners` | 49ers stadium components plus shared sideline objects (static) | 193 | 137 | 168 | pass |
+- Every kit's second run skips all export and import work. No meshes were excluded by the skeleton bound check. Projected sizes stayed far under the 50 GB floor (largest 1.3 GB, D had 451 GB free).
+- **Coaches use the player skeleton.** Coach indices fit both `MaddenFB_Hero_Skeleton` (268) and the actor `Male_Skeleton_6ft` (298, same first 60 bones), but only Hero gives sensible names (body max index 250 is `RightToeBase` on Hero, a pec helper on the actor skeleton).
+- **Head folders hold more than heads.** The 50 sample includes hair caps (`*_haircap_mesh`), because hair lives in the same folder.
+- **Variation DB matching bug, fixed.** A prefix match picked a sibling part's DB (`<base>_hair_playerhead_brt` sorts before `<base>_playerhead_brt`), leaving 14 of 50 heads untextured. Ranking candidates by fewest extra name tokens fixed all 50.
+- **World meshes keep materials in the mesh EBX.** Stadium meshes have no MeshVariationDb. Each `MeshMaterial` points at a `SurfaceShaderPreset` (`colorTexture` colour plus AO, `nsmTexture` RG normal XY, B smoothness, A metal, plus `colorTile` tiling). The kit runner now dumps presets in a second plan pass. `texfix.py` splits NSM into a DirectX normal and an RSM style map (roughness = 1 minus smoothness). `M_MaddenRef_World` adds a Tiling scalar.
+- **One normal map rule for the whole game.** Across 53 stadium NSM maps the vote was mixed (36 OpenGL, 17 DirectX, mostly low confidence), but the strongest structured maps (chainlink fence 0.75, stand cloth 0.61) test OpenGL like the character maps, while the DirectX votes come from isotropic noise surfaces. Green is inverted for every Madden normal.
+- **Nanite off for reference statics.** The first spot check failed on two small stadium props (UE bounds up to 7 cm larger than the FBX). Nanite was padding the bounds. With `build_nanite` off, all five spot checks match within 0.2 cm.
+- Stadium pieces are authored in local space and laid out on a 50 m grid in `L_MaddenRef_Stage7StadiumNiners`, not assembled into a stadium. Placement lives in level data that was not extracted.
+- 25 of 193 stadium meshes have no usable colour, normal or NSM texture (glass, decals and special shaders) and keep the default material.
+- Spot check (five random across Stage 7, report only Unreal run). `SK_novaknick_19965_haircap`, `SM_gatoradestand`, `SM_niners_bgnis_highways`, `SM_gatoradedrinkholder`, `SM_anvilwheels`. All pass (`logs\spotcheck_stage7.json`).
+- `failures.csv` has 31 rows in total, all from Stage 2 and Stage 4 debugging and all resolved (see the Stage 4 review). No failures were logged in Stage 5, 6 or 7.
+- Frosty's `editor_config.json` hash, the hand export `Test` folder and `Caches\madden19.cache` are unchanged by the whole run.

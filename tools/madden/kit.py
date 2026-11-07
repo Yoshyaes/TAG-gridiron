@@ -38,7 +38,9 @@ JOBS = os.path.join(HERE, "jobs")
 LOGS = os.path.join(REPO, "logs")
 DEFAULT_TEX = re.compile(r"/(flatgrey_color|flatnormal_normal|invisible_color[^/]*|flatsweat)$", re.I)
 PARAM_MAP = {"colorTexture": "BaseColor", "normalClampTexture": "Normal", "R_S_SSR_T_Texture": "RSM", "RSMTexture": "RSM",
-             "diffuseTexture": "BaseColor", "normalTexture": "Normal", "colorMap": "BaseColor", "normalMap": "Normal"}
+             "diffuseTexture": "BaseColor", "normalTexture": "Normal", "colorMap": "BaseColor", "normalMap": "Normal",
+             "nsmTexture": "NSM"}
+WORLD_MASTER = "/Game/MaddenRef/Materials/M_MaddenRef_World"
 MASTER = "/Game/MaddenRef/Materials/M_MaddenRef_Ref"
 # Size projection per exported item. Observed in Stage 4: about 0.5 MB per LOD0 FBX and about 4 MB per texture
 # (DDS plus PNG plus the converted normal). Doubled to stay on the safe side of the disk floor.
@@ -151,15 +153,89 @@ def info_path(spec, mesh):
     return spec["OUTDIR"] + "meshinfo" + os.sep + leaf(mesh) + ".meshinfo.json"
 
 
+def mesh_dump(spec, mesh):
+    return spec["OUT"] + "meshebx/" + leaf(mesh) + ".ebx.json"
+
+
+def preset_dump(spec, preset):
+    return spec["OUT"] + "presets/" + preset.replace("/", "__") + ".ebx.json"
+
+
 def cmd_plan(spec):
     jobs = []
     for m in kit_meshes(spec):
         mv = mvdb_for(m)
         if mv:
             jobs.append({"id": "mvdb_" + leaf(m), "op": "ebx", "asset": mv, "out": dump_name(spec, mv), "meta": {"mesh": m}})
+        else:
+            # World meshes keep materials in the mesh EBX (MeshMaterial -> SurfaceShaderPreset).
+            jobs.append({"id": "mebx_" + leaf(m), "op": "ebx", "asset": m, "out": mesh_dump(spec, m)})
         jobs.append({"id": "mi_" + leaf(m), "op": "meshinfo", "asset": m, "out": spec["OUT"] + "meshinfo/" + leaf(m) + ".meshinfo.json"})
     json.dump(jobs, open(os.path.join(JOBS, spec["name"] + "_plan.json"), "w"), indent=1)
     print("plan jobs", len(jobs))
+
+
+def _load(path):
+    p = path.replace("{REPO}", REPO)
+    return json.load(open(p, encoding="utf-8")) if os.path.exists(p) else None
+
+
+def _mesh_materials(spec, mesh):
+    d = _load(mesh_dump(spec, mesh))
+    if not d:
+        return []
+    objs = d["objects"]
+    mats = []
+    for ref in objs[0].get("Materials", []) or []:
+        if isinstance(ref, dict) and "ref" in ref and 0 <= ref["ref"] < len(objs):
+            mats.append(objs[ref["ref"]])
+    return mats
+
+
+def cmd_plan2(spec):
+    """Second plan pass for world meshes. Dumps the SurfaceShaderPresets their materials point at."""
+    inv = inventory()
+    jobs, seen = [], set()
+    for m in kit_meshes(spec):
+        if mvdb_for(m):
+            continue
+        for mat in _mesh_materials(spec, m):
+            ext = ((mat.get("Shader") or {}).get("Shader") or {}).get("ext")
+            if ext and ext.lower() in inv and ext.lower() not in seen:
+                seen.add(ext.lower())
+                real = inv[ext.lower()][0]
+                jobs.append({"id": "preset_" + leaf(real), "op": "ebx", "asset": real, "out": preset_dump(spec, real)})
+    json.dump(jobs, open(os.path.join(JOBS, spec["name"] + "_plan2.json"), "w"), indent=1)
+    print("plan2 jobs", len(jobs))
+
+
+def _vec(v):
+    val = v.get("Value") or {}
+    return [val.get(k) for k in ("x", "y", "z", "w")] if isinstance(val, dict) else val
+
+
+def world_params(spec, mesh):
+    """Material slots from the mesh EBX. Preset textures and vectors, overridden by the mesh material's own."""
+    inv = inventory()
+    out = []
+    for slot, mat in enumerate(_mesh_materials(spec, mesh)):
+        sh = mat.get("Shader") or {}
+        ext = (sh.get("Shader") or {}).get("ext")
+        tex, vec = {}, {}
+        if ext and ext.lower() in inv:
+            pd = _load(preset_dump(spec, inv[ext.lower()][0]))
+            if pd:
+                ps = pd["objects"][0].get("ShaderPreset") or {}
+                for t in ps.get("TextureParameters", []) or []:
+                    tex[t.get("ParameterName")] = (t.get("Value") or {}).get("ext")
+                for v in ps.get("VectorParameters", []) or []:
+                    vec[v.get("ParameterName")] = _vec(v)
+        for t in sh.get("TextureParameters", []) or []:
+            tex[t.get("ParameterName")] = (t.get("Value") or {}).get("ext")
+        for v in sh.get("VectorParameters", []) or []:
+            vec[v.get("ParameterName")] = _vec(v)
+        out.append({"slot": slot, "preset": ext, "textures": tex, "vectors": vec})
+    return out
 
 
 def material_params(spec, mvdb, mesh):
@@ -209,7 +285,7 @@ def cmd_jobs(spec):
     jobs, textures, meta = [], {}, {}
     for m in meshes:
         mv = mvdb_for(m)
-        params = material_params(spec, mv, m) if mv else None
+        params = material_params(spec, mv, m) if mv else world_params(spec, m)
         meta[m] = {"mvdb": mv, "materials": params}
         for slot in params or []:
             for name, t in slot["textures"].items():
@@ -246,6 +322,12 @@ def cmd_jobs(spec):
     for t in sorted(textures):
         lt = leaf(t).lower()
         j = {"kind": "texture", "file": spec["OUT"] + "textures/" + lt + ".png", "dest": spec["ue_dir"] + "/Textures", "name": "T_" + lt}
+        if lt.endswith("_nsm"):
+            ue.append({"kind": "texture", "file": spec["OUT"] + "textures_ue/" + lt + "_n_ue.png", "dest": spec["ue_dir"] + "/Textures",
+                       "name": "T_" + lt + "_n", "normal": True})
+            ue.append({"kind": "texture", "file": spec["OUT"] + "textures_ue/" + lt + "_rsm_ue.png", "dest": spec["ue_dir"] + "/Textures",
+                       "name": "T_" + lt + "_rsm", "srgb": False})
+            continue
         if lt.endswith(("_norm", "_normal", "_nrm")) or "normal" in lt:
             j["normal"] = True
             j["file"] = spec["OUT"] + "textures_ue/" + lt + "_ue.png"
@@ -282,11 +364,22 @@ def bindings_for(spec, mesh, meta):
             continue
         tex = {}
         for pname, path in s["textures"].items():
-            if pname in PARAM_MAP and path and not DEFAULT_TEX.search(path.lower()) and PARAM_MAP[pname] not in tex:
-                tex[PARAM_MAP[pname]] = ue_dir + "/Textures/T_" + leaf(path).lower()
+            if pname in PARAM_MAP and path and not DEFAULT_TEX.search(path.lower()):
+                key = PARAM_MAP[pname]
+                t = ue_dir + "/Textures/T_" + leaf(path).lower()
+                if key == "NSM":
+                    tex.setdefault("Normal", t + "_n")
+                    tex.setdefault("RSM", t + "_rsm")
+                else:
+                    tex.setdefault(key, t)
         if tex:
-            out.append({"mesh": ue_dir + "/" + prefix(spec) + name, "slot": 0, "mi": ue_dir + "/Materials/MI_" + name + "_" + sec["name"],
-                        "textures": tex, "switches": {"UseRSM": "RSM" in tex, "RSMIsSkin": "R_S_SSR_T_Texture" in s["textures"]}})
+            b = {"mesh": ue_dir + "/" + prefix(spec) + name, "slot": 0, "mi": ue_dir + "/Materials/MI_" + name + "_" + sec["name"],
+                 "textures": tex, "switches": {"UseRSM": "RSM" in tex, "RSMIsSkin": "R_S_SSR_T_Texture" in s["textures"]}}
+            if not spec.get("skeleton"):
+                tile = (s.get("vectors") or {}).get("colorTile")
+                b["master"] = WORLD_MASTER
+                b["scalars"] = {"Tiling": float(tile[0]) if isinstance(tile, list) and tile and tile[0] else 1.0}
+            out.append(b)
     return out
 
 
@@ -364,4 +457,4 @@ def cmd_mat(spec):
 
 
 if __name__ == "__main__":
-    {"plan": cmd_plan, "jobs": cmd_jobs, "matdesc": cmd_matdesc, "mat": cmd_mat}[sys.argv[1]](load_spec(sys.argv[2]))
+    {"plan": cmd_plan, "plan2": cmd_plan2, "jobs": cmd_jobs, "matdesc": cmd_matdesc, "mat": cmd_mat}[sys.argv[1]](load_spec(sys.argv[2]))

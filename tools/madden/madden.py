@@ -268,6 +268,9 @@ def cmd_ue(jobs_path, stage):
         key = j["dest"] + "/" + j["name"]
         if os.path.exists(uasset_path(key)) and os.path.exists(j["file"]) and state.get(key) == sha256(j["file"]):
             continue
+        # Skeleton bootstrap job (its mesh is named after the skeleton). Needed once, whichever kit runs first.
+        if j.get("skeleton") == key + "_Skeleton" and os.path.exists(uasset_path(j["skeleton"])):
+            continue
         todo.append(j)
     log("ue %s todo=%d" % (stage, len(todo)))
     if not todo:
@@ -305,6 +308,15 @@ def cmd_materials(spec_path, stage):
     return 0
 
 
+def cmd_uereport(jobs_path, stage):
+    """Report only Unreal run (bounds, bones, skeleton) for spot checks. Bypasses the import skip state."""
+    report = os.path.join(LOGS, "uereport_%s.json" % stage)
+    expanded = os.path.join(LOGS, "uereport_%s_jobs.json" % stage)
+    json.dump(load_jobs(jobs_path), open(expanded, "w", encoding="utf-8"), indent=1)
+    run_ue("maddenref_import.py", {"MADDENREF_JOBS": expanded, "MADDENREF_REPORT": report}, "uereport_%s.log" % stage)
+    return 0 if os.path.exists(report) else 7
+
+
 def cmd_audit(stage):
     out = os.path.join(LOGS, "audit_%s.json" % stage)
     if os.path.exists(out):
@@ -340,6 +352,8 @@ def cmd_kit(spec_path):
         save()
         return 1
     step("host_plan", cmd_host(os.path.join(TOOLS, "jobs", name + "_plan.json"), name + "_plan"))
+    step("plan2", subprocess.run(kit + ["plan2", spec_path], timeout=STEP_TIMEOUT).returncode)
+    step("host_plan2", cmd_host(os.path.join(TOOLS, "jobs", name + "_plan2.json"), name + "_plan2"))
     if step("jobs", subprocess.run(kit + ["jobs", spec_path], timeout=STEP_TIMEOUT).returncode):
         save()
         return 1
@@ -410,6 +424,8 @@ def main(argv):
         return cmd_ue(argv[2], argv[3])
     if c == "materials":
         return cmd_materials(argv[2], argv[3])
+    if c == "uereport":
+        return cmd_uereport(argv[2], argv[3])
     if c == "audit":
         return cmd_audit(argv[2])
     if c == "kit":

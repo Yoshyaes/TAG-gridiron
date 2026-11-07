@@ -30,7 +30,42 @@ import madden  # noqa: E402  (stdlib only, shares manifest helpers)
 
 NORMAL_FLIP_GREEN = True
 NORMAL_REBUILD_Z = True
+# World NSM maps (RG normal XY, B smoothness, A metal). Across 53 stadium maps the strongest structured
+# signals test OpenGL style (chainlink fence 0.75, stand cloth 0.61) like the character maps. The DirectX
+# votes come from isotropic noise surfaces (concrete, galvanized metal) where the curl test is weak. One
+# rule for the whole game, so green is inverted here too. Each conversion logs its own curl measurement.
+NSM_FLIP_GREEN = True
 VERSION = "texfix-1 flip_green=%s rebuild_z=%s" % (NORMAL_FLIP_GREEN, NORMAL_REBUILD_Z)
+NSM_VERSION = "texfix-nsm-1 flip_green=%s" % NSM_FLIP_GREEN
+
+
+def is_nsm(name):
+    return name.lower().endswith("_nsm.png")
+
+
+def curl(x, y):
+    z = np.sqrt(np.clip(1 - x * x - y * y, 0, 1))
+    nx, ny = x / np.maximum(z, 0.05), y / np.maximum(z, 0.05)
+    d1, d2 = np.diff(nx, axis=0)[:, :-1], np.diff(ny, axis=1)[:-1, :]
+    gl, dx = float(np.mean((d1 + d2) ** 2)), float(np.mean((d1 - d2) ** 2))
+    return {"opengl": round(gl, 6), "directx": round(dx, 6), "convention": "DirectX" if dx < gl else "OpenGL",
+            "confidence": round(abs(gl - dx) / max(gl, dx, 1e-12), 3)}
+
+
+def convert_nsm(src, dst_n, dst_rsm):
+    """NSM -> DirectX normal (Z rebuilt) and an RSM style map (R roughness = 1 - smoothness, G 0.5, B metal)."""
+    a = np.asarray(Image.open(src).convert("RGBA")).astype(np.float64) / 255.0
+    x = a[..., 0] * 2 - 1
+    y = a[..., 1] * 2 - 1
+    measured = curl(x, y)
+    if NSM_FLIP_GREEN:
+        y = -y
+    z = np.sqrt(np.clip(1 - x * x - y * y, 0, 1))
+    n = np.stack([(x + 1) / 2, (y + 1) / 2, (z + 1) / 2, np.ones_like(x)], axis=-1)
+    Image.fromarray(np.clip(n * 255 + 0.5, 0, 255).astype(np.uint8)).save(dst_n)
+    rsm = np.stack([1 - a[..., 2], np.full_like(x, 0.5), a[..., 3], np.ones_like(x)], axis=-1)
+    Image.fromarray(np.clip(rsm * 255 + 0.5, 0, 255).astype(np.uint8)).save(dst_rsm)
+    return measured
 
 
 def is_normal(name):
@@ -61,6 +96,22 @@ def main(tex_dir):
     m = madden.load_manifest()
     done = skipped = 0
     for f in sorted(os.listdir(tex_dir)):
+        if f.endswith(".png") and is_nsm(f):
+            src = os.path.join(tex_dir, f)
+            dst_n = os.path.join(out_dir, f[:-4] + "_n_ue.png")
+            dst_r = os.path.join(out_dir, f[:-4] + "_rsm_ue.png")
+            src_hash = madden.sha256(src)
+            prev = m["files"].get(madden.rel(dst_n), {})
+            if all(os.path.exists(d) for d in (dst_n, dst_r)) and prev.get("source_sha256") == src_hash and prev.get("params", {}).get("version") == NSM_VERSION:
+                skipped += 1
+                continue
+            measured = convert_nsm(src, dst_n, dst_r)
+            for path, kind in ((dst_n, "nsm_normal_ue"), (dst_r, "nsm_rsm_ue")):
+                m["files"][madden.rel(path)] = {"op": "texfix", "stage": "stage7", "kind": kind, "source_file": madden.rel(src),
+                                                "source_sha256": src_hash, "size": os.path.getsize(path), "sha256": madden.sha256(path),
+                                                "params": {"version": NSM_VERSION, "measured_curl": measured}}
+            done += 1
+            continue
         if not f.endswith(".png") or not is_normal(f):
             continue
         src = os.path.join(tex_dir, f)
