@@ -260,7 +260,7 @@
  },
  {
   "kind": "texture",
-  "file": "{REPO}/extracted/prototype/textures/ls_common_legs_normal.png",
+  "file": "{REPO}/extracted/prototype/textures_ue/ls_common_legs_normal_ue.png",
   "dest": "/Game/MaddenRef/Players/Prototype/Textures",
   "name": "T_ls_common_legs_normal",
   "normal": true
@@ -292,7 +292,7 @@
  },
  {
   "kind": "texture",
-  "file": "{REPO}/extracted/prototype/textures/arm_normal.png",
+  "file": "{REPO}/extracted/prototype/textures_ue/arm_normal_ue.png",
   "dest": "/Game/MaddenRef/Players/Prototype/Textures",
   "name": "T_arm_normal",
   "normal": true
@@ -318,7 +318,7 @@
  },
  {
   "kind": "texture",
-  "file": "{REPO}/extracted/prototype/textures/venthole_norm.png",
+  "file": "{REPO}/extracted/prototype/textures_ue/venthole_norm_ue.png",
   "dest": "/Game/MaddenRef/Players/Prototype/Textures",
   "name": "T_venthole_norm",
   "normal": true
@@ -331,7 +331,7 @@
  },
  {
   "kind": "texture",
-  "file": "{REPO}/extracted/prototype/textures/shoe_low_nikealphamenaceelite99club_norm.png",
+  "file": "{REPO}/extracted/prototype/textures_ue/shoe_low_nikealphamenaceelite99club_norm_ue.png",
   "dest": "/Game/MaddenRef/Players/Prototype/Textures",
   "name": "T_shoe_low_nikealphamenaceelite99club_norm",
   "normal": true
@@ -357,7 +357,7 @@
  },
  {
   "kind": "texture",
-  "file": "{REPO}/extracted/prototype/textures/socks_outer_norm.png",
+  "file": "{REPO}/extracted/prototype/textures_ue/socks_outer_norm_ue.png",
   "dest": "/Game/MaddenRef/Players/Prototype/Textures",
   "name": "T_socks_outer_norm",
   "normal": true
@@ -389,7 +389,7 @@
  },
  {
   "kind": "texture",
-  "file": "{REPO}/extracted/prototype/textures/nin_jersey_2018_whialt_jersey_norm.png",
+  "file": "{REPO}/extracted/prototype/textures_ue/nin_jersey_2018_whialt_jersey_norm_ue.png",
   "dest": "/Game/MaddenRef/Players/Prototype/Textures",
   "name": "T_nin_jersey_2018_whialt_jersey_norm",
   "normal": true
@@ -409,7 +409,7 @@
  },
  {
   "kind": "texture",
-  "file": "{REPO}/extracted/prototype/textures/nin_pants_2018_whialt_pants_norm.png",
+  "file": "{REPO}/extracted/prototype/textures_ue/nin_pants_2018_whialt_pants_norm_ue.png",
   "dest": "/Game/MaddenRef/Players/Prototype/Textures",
   "name": "T_nin_pants_2018_whialt_pants_norm",
   "normal": true
@@ -453,7 +453,7 @@
  },
  {
   "kind": "texture",
-  "file": "{REPO}/extracted/prototype/textures/faulkmarshall_11413_normal.png",
+  "file": "{REPO}/extracted/prototype/textures_ue/faulkmarshall_11413_normal_ue.png",
   "dest": "/Game/MaddenRef/Players/Prototype/Textures",
   "name": "T_faulkmarshall_11413_normal",
   "normal": true
@@ -466,7 +466,7 @@
  },
  {
   "kind": "texture",
-  "file": "{REPO}/extracted/prototype/textures/flatnormal_normal.png",
+  "file": "{REPO}/extracted/prototype/textures_ue/flatnormal_normal_ue.png",
   "dest": "/Game/MaddenRef/Players/Prototype/Textures",
   "name": "T_flatnormal_normal",
   "normal": true

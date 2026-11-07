@@ -10,7 +10,8 @@ Updated after every gate. Branch `madden-extraction`, nothing pushed.
 | 2 Skeleton and one player | PASS (268 bone MaddenFB_Hero skeleton, 13 parts, 189.7 cm) |
 | 3 Animation probe | NO GO, cut list taken (VBR AssetBank, no decoder without a port) |
 | 4 Prototype batch | PASS (35 meshes, 36 textures, 3 body types, 2 helmets, manifest 265) |
-| 5 Textures and materials | running |
+| 5 Textures and materials | PASS (normals OpenGL to DirectX in texfix.py, per mesh material JSON, master M_MaddenRef_Ref) |
+| 6 UE import automation | running |
 
 ## On disk
 - `D:\MaddenRef\extracted` (junction `extracted\`). about 1.1 GB (inventory 188 MB, Stage 3 animation banks 645 MB, Stage 2 107 MB, prototype 148 MB).

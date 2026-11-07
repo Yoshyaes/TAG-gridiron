@@ -4,7 +4,8 @@ Two passes, both idempotent.
   python -I prototype.py mvdb   writes jobs/prototype_mvdb.json (EBX dumps of each mesh's MeshVariationDb)
   python -I prototype.py jobs   reads those dumps, writes jobs/prototype.json (meshes, textures, meta)
                                 and jobs/ue_prototype.json for Unreal
-  python -I prototype.py mat    writes jobs/mat_prototype.json (material instances and preview level)
+  python -I prototype.py matdesc  writes extracted/prototype/materials/<mesh>.material.json (Stage 5)
+  python -I prototype.py mat      reads those files, writes jobs/mat_prototype.json (instances, preview level)
 
 The kit (Fred's prototype set, animations cut after Stage 3)
   one skeleton, three body types (t thin, m muscular, h heavy), two helmets (Xenith, Riddell SpeedFlex),
@@ -156,6 +157,7 @@ def cmd_jobs():
         j = {"kind": "texture", "file": OUT + "textures/" + lt + ".png", "dest": UE_DIR + "/Textures", "name": "T_" + lt}
         if lt.endswith(("_norm", "_normal")) or "normal" in lt:
             j["normal"] = True
+            j["file"] = OUT + "textures_ue/" + lt + "_ue.png"  # converted by texfix.py (green flip, Z rebuild)
         elif "rsm" in lt or lt.endswith(("_mask", "_coeff")):
             j["srgb"] = False
         ue.append(j)
@@ -202,20 +204,57 @@ def bindings_for(mesh, meta):
                 tex[PARAM_MAP[pname]] = UE_DIR + "/Textures/T_" + leaf(path).lower()
         if not tex:
             continue
+        skin = "R_S_SSR_T_Texture" in s["textures"]
         out.append({"mesh": UE_DIR + "/SK_" + name, "slot": ue_slot, "mi": UE_DIR + "/Materials/MI_" + name + "_" + sec["name"],
-                    "textures": tex, "switches": {"UseRSM": "RSM" in tex}})
+                    "textures": tex, "switches": {"UseRSM": "RSM" in tex, "RSMIsSkin": skin}})
     return out
+
+
+def cmd_matdesc():
+    """Per mesh material description JSON (Stage 5). Unreal materials are built from these files."""
+    sys.path.insert(0, HERE)
+    import madden
+    jobs = json.load(open(os.path.join(HERE, "jobs", "prototype.json")))
+    out_dir = OUT.replace("{REPO}", REPO) + "materials/"
+    os.makedirs(out_dir, exist_ok=True)
+    m = madden.load_manifest()
+    n = 0
+    for j in jobs:
+        if j["op"] != "mesh":
+            continue
+        name = leaf(j["asset"])[:-len("_mesh")]
+        desc = {
+            "source_mesh": j["asset"], "fbx": "prototype/meshes/" + leaf(j["asset"]) + ".fbx",
+            "skeleton": SKELETON, "mesh_variation_db": j["meta"].get("mvdb"),
+            "madden_materials": j["meta"].get("materials"),
+            "conventions": {"normal": "texfix.py: green flipped to DirectX, Z rebuilt from XY",
+                            "RSMTexture": "R roughness, G specular, B metallic, A unknown (cloth B near 0)",
+                            "R_S_SSR_T_Texture": "R roughness, G specular, B subsurface (not metallic), A translucency (skin)"},
+            "unreal": {"mesh": UE_DIR + "/SK_" + name, "master": "/Game/MaddenRef/Materials/M_MaddenRef_Ref",
+                       "bindings": bindings_for(j["asset"], j["meta"])},
+        }
+        p = out_dir + leaf(j["asset"]) + ".material.json"
+        text = json.dumps(desc, indent=1, sort_keys=True)
+        if not os.path.exists(p) or open(p, encoding="utf-8").read() != text:
+            open(p, "w", encoding="utf-8").write(text)
+        m["files"][madden.rel(p)] = {"op": "matdesc", "stage": "stage5", "source_asset": j["asset"], "size": os.path.getsize(p),
+                                     "sha256": madden.sha256(p), "bundles": "", "superbundles": "", "params": {}}
+        n += 1
+    madden.save_manifest(m)
+    print("material descriptions", n, "->", out_dir)
 
 
 def cmd_mat():
     jobs = json.load(open(os.path.join(HERE, "jobs", "prototype.json")))
+    desc_dir = OUT.replace("{REPO}", REPO) + "materials/"
     binds, preview = [], []
     xs = {"t": -120.0, "m": 0.0, "h": 120.0}
     helmets = {"t": "xenith", "m": "speedflex", "h": "xenith"}
     for j in jobs:
         if j["op"] != "mesh":
             continue
-        binds.extend(bindings_for(j["asset"], j["meta"]))
+        d = json.load(open(desc_dir + leaf(j["asset"]) + ".material.json", encoding="utf-8"))
+        binds.extend(d["unreal"]["bindings"])
     names = ["SK_" + leaf(j["asset"])[:-len("_mesh")] for j in jobs if j["op"] == "mesh"]
     for b, x in xs.items():
         for n in names:
@@ -232,4 +271,4 @@ def cmd_mat():
 
 
 if __name__ == "__main__":
-    {"mvdb": cmd_mvdb, "jobs": cmd_jobs, "mat": cmd_mat}[sys.argv[1]]()
+    {"mvdb": cmd_mvdb, "jobs": cmd_jobs, "matdesc": cmd_matdesc, "mat": cmd_mat}[sys.argv[1]]()

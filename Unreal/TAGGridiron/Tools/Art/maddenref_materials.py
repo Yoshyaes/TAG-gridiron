@@ -10,10 +10,11 @@
 #    "preview_level": {"path": "/Game/MaddenRef/Maps/L_x",
 #                      "meshes": ["/Game/MaddenRef/..." | {"mesh": "/Game/...", "x": 120.0, "label": "thin"}]}}
 #
-# Master material M_MaddenRef_Basic (rebuilt only when missing)
-#   BaseColor texture -> Base Color, Normal texture -> Normal.
-#   UseRSM switch. When on, RSM texture R -> Roughness, G -> Specular, B -> Metallic (channel meaning is
-#   checked in Stage 5 and recorded in FINDINGS.md). When off, Roughness and Metallic scalars are used.
+# Master material M_MaddenRef_Ref (rebuilt only when missing)
+#   BaseColor texture -> Base Color, Normal texture -> Normal (already DirectX, converted by texfix.py).
+#   UseRSM switch. When on, RSM texture R -> Roughness, G -> Specular, B -> Metallic.
+#   RSMIsSkin switch. Skin maps are R_S_SSR_T (B is subsurface), so Metallic falls back to the scalar.
+#   When UseRSM is off, the Roughness, Specular and Metallic scalars are used.
 import json
 import os
 import traceback
@@ -21,7 +22,7 @@ import traceback
 import unreal
 
 ROOT = "/Game/MaddenRef"
-MASTER = ROOT + "/Materials/M_MaddenRef_Basic"
+MASTER = ROOT + "/Materials/M_MaddenRef_Ref"
 EAL = unreal.EditorAssetLibrary
 MEL = unreal.MaterialEditingLibrary
 tools = unreal.AssetToolsHelpers.get_asset_tools()
@@ -69,11 +70,14 @@ def build_master():
     sw_r = _switch(m, "UseRSM", -250, 300)
     sw_s = _switch(m, "UseRSM", -250, 450)
     sw_m = _switch(m, "UseRSM", -250, 600)
+    sw_skin = _switch(m, "RSMIsSkin", -500, 850)
     MEL.connect_material_expressions(rsm, "R", sw_r, "True")
     MEL.connect_material_expressions(rough, "", sw_r, "False")
     MEL.connect_material_expressions(rsm, "G", sw_s, "True")
     MEL.connect_material_expressions(spec, "", sw_s, "False")
-    MEL.connect_material_expressions(rsm, "B", sw_m, "True")
+    MEL.connect_material_expressions(rsm, "B", sw_skin, "False")
+    MEL.connect_material_expressions(metal, "", sw_skin, "True")
+    MEL.connect_material_expressions(sw_skin, "", sw_m, "True")
     MEL.connect_material_expressions(metal, "", sw_m, "False")
     MEL.connect_material_property(base, "RGB", unreal.MaterialProperty.MP_BASE_COLOR)
     MEL.connect_material_property(nrm, "RGB", unreal.MaterialProperty.MP_NORMAL)
