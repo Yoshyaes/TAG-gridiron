@@ -9,7 +9,7 @@ public class TAGGridiron : ModuleRules
 
 		PublicDependencyModuleNames.AddRange(new string[] {
 			"Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput",
-			"UMG", "Slate", "SlateCore", "CinematicCamera", "Niagara", "IKRig"
+			"UMG", "Slate", "SlateCore", "CinematicCamera", "Niagara", "IKRig", "AnimationCore"
 		});
 
 		// The simulation core (Sim/) is plain standard C++ shared with the headless calibration tools.

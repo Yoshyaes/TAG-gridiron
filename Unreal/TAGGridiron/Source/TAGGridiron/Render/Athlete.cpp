@@ -206,6 +206,12 @@ void AAthlete::Setup(const tag::Player* InPlayer, const FUniform& U)
 	BodyRelLoc = Body->GetRelativeLocation();
 	BodyRelRot = Body->GetRelativeRotation();
 	const int32 Arch = FAthleteAssets::ArchetypeFor(static_cast<int32>(InPlayer->pos));
+	// stable per-player style ("signature"): arm slot and timing/height variation
+	{
+		uint32 H = static_cast<uint32>(InPlayer->id) * 2654435761u;
+		ArmSlot = static_cast<float>((H >> 8) % 1000) / 500.f - 1.f;
+		StyleJitter = static_cast<float>((H >> 18) % 1000) / 500.f - 1.f;
+	}
 	float Depth = 1.f;
 	if (A.bMetaHumans)
 	{
@@ -528,12 +534,77 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 	(void)VMaxYds;
 }
 
+FVector AAthlete::BoneWorld(FName Bone) const
+{
+	const USkeletalMeshComponent* V = Visible();
+	return V && V->GetBoneIndex(Bone) != INDEX_NONE ? V->GetSocketLocation(Bone) : GetActorLocation() + FVector(0, 0, 120);
+}
+
+void AAthlete::SetFootball(const FAthleteFootball& F, float Dt)
+{
+	if (!MHBody) return;
+	UTagRetargetAnimInstance* I = Cast<UTagRetargetAnimInstance>(MHBody->GetAnimInstance());
+	if (!I) return;
+	auto Ease = [Dt](float& V, float Target, float Rate) { V = FMath::FInterpTo(V, Target, Dt, Rate); };
+	const bool bThrow = F.ThrowT >= 0.f;
+	Ease(CarryA, F.bHasBall && !F.bSecure && !bThrow ? 1.f : 0.f, 9.f);
+	Ease(SecureA, F.bSecure && !bThrow ? 1.f : 0.f, 9.f);
+	Ease(ReachA, F.bReach ? 1.f : 0.f, F.bReach ? 7.f : 4.f);
+	Ease(LeanA, F.Lean, 5.f);
+	Ease(StanceA, F.bStance ? 1.f : 0.f, 6.f);
+	Ease(LookA, F.bLook ? 0.85f : 0.f, 4.f);
+	const FTransform& C = MHBody->GetComponentTransform();
+	if (F.bReach) ReachSmoothed = ReachSmoothed.IsZero() ? F.ReachWorld : FMath::VInterpTo(ReachSmoothed, F.ReachWorld, Dt, 18.f);
+	if (F.bLook) LookSmoothed = LookSmoothed.IsZero() ? F.LookWorld : FMath::VInterpTo(LookSmoothed, F.LookWorld, Dt, 8.f);
+	FTagProcInput& P = I->Proc;
+	P.ThrowT = F.ThrowT;
+	P.CarryAlpha = CarryA;
+	P.SecureAlpha = SecureA;
+	P.ReachAlpha = ReachA;
+	P.ReachTarget = C.InverseTransformPosition(ReachSmoothed);
+	P.ReachSpread = F.ReachSpread;
+	P.LeanAlpha = LeanA;
+	P.StanceAlpha = StanceA;
+	P.LookAlpha = LookA;
+	P.LookTarget = C.InverseTransformPosition(LookSmoothed);
+	P.ArmSlot = ArmSlot;
+	P.StyleJitter = StyleJitter;
+}
+
+bool AAthlete::GetBallHold(FVector& OutLoc, FRotator& OutRot) const
+{
+	if (!MHBody) return false;
+	const FVector HR = MHBody->GetSocketLocation(TEXT("hand_r"));
+	const FVector HL = MHBody->GetSocketLocation(TEXT("hand_l"));
+	const FVector LR = MHBody->GetSocketLocation(TEXT("lowerarm_r"));
+	const FVector Fwd = GetActorForwardVector();
+	if (SecureA > 0.5f)
+	{
+		OutLoc = (HR + HL) * 0.5f + Fwd * 4.f;
+		OutRot = GetActorRotation() + FRotator(25, 0, 0);
+	}
+	else
+	{
+		// palm side of the right hand, long axis along the forearm (tucked: nose up and forward)
+		const FVector Along = (HR - LR).GetSafeNormal();
+		OutLoc = HR + Along * 6.f + Fwd * 3.f - GetActorRightVector() * 2.f;
+		OutRot = Along.Rotation();
+	}
+	return true;
+}
+
 FString AAthlete::DebugAnimState() const
 {
 	const UAnimSingleNodeInstance* I = Body->GetSingleNodeInstance();
 	const int32 HI = Body->GetBoneIndex(TEXT("hand_l"));
 	const FVector Hand = HI != INDEX_NONE && Body->GetComponentSpaceTransforms().IsValidIndex(HI) ? Body->GetComponentSpaceTransforms()[HI].GetLocation() : FVector::ZeroVector;
-	return FString::Printf(TEXT("anim=%s mode=%d inst=%s asset=%s playing=%d pos=%.2f rate=%.2f hand_l=%s ticking=%d vis=%d"),
+	FString Fb;
+	if (MHBody)
+		if (const UTagRetargetAnimInstance* RI = Cast<UTagRetargetAnimInstance>(MHBody->GetAnimInstance()))
+			Fb = FString::Printf(TEXT(" | throw=%.2f carry=%.2f secure=%.2f reach=%.2f@%s lean=%.2f look=%.2f handR=%s"),
+				RI->Proc.ThrowT, RI->Proc.CarryAlpha, RI->Proc.SecureAlpha, RI->Proc.ReachAlpha, *RI->Proc.ReachTarget.ToCompactString(),
+				RI->Proc.LeanAlpha, RI->Proc.LookAlpha, *MHBody->GetComponentTransform().InverseTransformPosition(MHBody->GetSocketLocation(TEXT("hand_r"))).ToCompactString());
+	return Fb + FString::Printf(TEXT(" anim=%s mode=%d inst=%s asset=%s playing=%d pos=%.2f rate=%.2f hand_l=%s ticking=%d vis=%d"),
 		*CurrentAnim, static_cast<int32>(Body->GetAnimationMode()), Body->GetAnimInstance() ? *Body->GetAnimInstance()->GetClass()->GetName() : TEXT("none"),
 		I && I->GetAnimationAsset() ? *I->GetAnimationAsset()->GetName() : TEXT("none"), I ? I->IsPlaying() : -1, I ? I->GetCurrentTime() : -1.f,
 		I ? I->GetPlayRate() : -1.f, *Hand.ToString(), Body->IsComponentTickEnabled(), Body->IsVisible());

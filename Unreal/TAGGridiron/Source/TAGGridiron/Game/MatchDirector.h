@@ -115,6 +115,10 @@ private:
 	UPROPERTY()
 	TObjectPtr<AActor> CloseupTarget;
 	int32 CloseupView = 0;
+	bool bShotThrow = false;
+	bool bShotCatch = false;
+	int32 EventShotFrames = 0;
+	FString EventShotName;
 	void TickAutomation(float Dt);
 
 	struct FKick

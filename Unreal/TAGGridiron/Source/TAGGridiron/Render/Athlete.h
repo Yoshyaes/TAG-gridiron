@@ -13,6 +13,21 @@ class UMaterialInstanceDynamic;
 
 namespace tag { struct Player; }
 
+/** What the simulation says this player is doing this frame (world space), for the football anim layer. */
+struct FAthleteFootball
+{
+	bool bHasBall = false;
+	bool bSecure = false;      // two hands on the ball (QB in the pocket)
+	float ThrowT = -1.f;       // 0..1 through a pass
+	bool bReach = false;       // hands to ReachWorld (catch / wrap / block punch)
+	FVector ReachWorld = FVector::ZeroVector;
+	float ReachSpread = 8.f;
+	float Lean = 0.f;          // drive lean 0..1
+	bool bStance = false;
+	bool bLook = false;
+	FVector LookWorld = FVector::ZeroVector;
+};
+
 struct FUniform
 {
 	FLinearColor Jersey;
@@ -44,6 +59,13 @@ public:
 
 	void SetSelected(bool bSel);
 	FString DebugAnimState() const;
+
+	/** Feed the procedural football layer (throw, ball security, catch, block, tackle, stance, look). */
+	void SetFootball(const FAthleteFootball& F, float DeltaTime);
+	/** Where the held ball should be drawn (in the hands), world space. */
+	bool GetBallHold(FVector& OutLoc, FRotator& OutRot) const;
+	/** World position of a bone on the visible body (falls back to the actor). */
+	FVector BoneWorld(FName Bone) const;
 	void SetLabel(const FString& Text);
 
 	const tag::Player* Player = nullptr;
@@ -94,6 +116,10 @@ private:
 	void StartRagdoll(const FVector& VelWorld);
 	void SetupMetaHuman(int32 Arch, const FUniform& U);
 	FVector VisRelScale = FVector::OneVector;
+	// smoothed football-layer weights
+	float CarryA = 0.f, SecureA = 0.f, ReachA = 0.f, LeanA = 0.f, StanceA = 0.f, LookA = 0.f;
+	FVector ReachSmoothed = FVector::ZeroVector, LookSmoothed = FVector::ZeroVector;
+	float ArmSlot = 0.f, StyleJitter = 0.f;
 
 	UPROPERTY()
 	TObjectPtr<UAnimationAsset> CurrentClip;

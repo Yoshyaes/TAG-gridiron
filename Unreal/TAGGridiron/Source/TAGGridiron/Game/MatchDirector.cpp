@@ -701,14 +701,130 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 	}
 	// ball
 	const tag::Ball& B = Sim->ball;
+	auto AthOf = [&](const tag::Ent* X) { return AthleteFor(X->p, X->side == tag::Side::Off ? OffK : tag::other(OffK)); };
+	const FVector BallW = ToWorld(B.pos.x, B.pos.y, Dir, B.pos.z);
+	const FVector BallVelW = Dir > 0 ? FVector(B.vel.x, -B.vel.y, B.vel.z) * YD : FVector(-B.vel.x, B.vel.y, B.vel.z) * YD;
+
+	// football animation layer: what each player's hands, torso and eyes are doing (spec L2/L4)
+	const tag::Ent* Holder = B.mode == tag::BallMode::Held ? B.holder : nullptr;
+	for (tag::Ent* E : Sim->ents)
+	{
+		AAthlete* A = AthOf(E);
+		FAthleteFootball F;
+		const bool bQB = E->p->pos == tag::Pos::QB;
+		F.bHasBall = Holder == E;
+		F.bSecure = F.bHasBall && bQB && E->speed() < 5.5 && E->anim != tag::Anim::Run;
+		if (E->anim == tag::Anim::Throw) F.ThrowT = FMath::Clamp(static_cast<float>(E->animT) / 0.45f, 0.f, 1.f);
+		F.bStance = Sim->t < 0.05 && (E->isOL || E->isDL);
+		const FVector Me = A->GetActorLocation();
+		// catch: the intended receiver (and anyone right on the ball) gets hands to where the ball will be
+		if (B.mode == tag::BallMode::Air)
+		{
+			const float Dist = FVector::Dist(BallW, Me + FVector(0, 0, 120));
+			const bool bTarget = B.target == E;
+			if ((bTarget && Dist < 900.f) || Dist < 260.f)
+			{
+				// hands go to the interception point (ball's closest approach to the chest), always out in
+				// front of the facemask - over-the-shoulder balls are caught in front, not behind
+				const FVector ChestW = A->BoneWorld(TEXT("spine_05"));
+				const float V2 = FMath::Max(static_cast<float>(BallVelW.SizeSquared()), 1.f);
+				const float Tc = FMath::Clamp(static_cast<float>(FVector::DotProduct(ChestW - BallW, BallVelW)) / V2, 0.f, 1.f);
+				FVector Catch = A->GetActorTransform().InverseTransformPosition(BallW + BallVelW * Tc);
+				Catch.X = FMath::Max(static_cast<float>(Catch.X), 32.f);       // in front of the chest
+				Catch.Y = FMath::Clamp(static_cast<float>(Catch.Y), -45.f, 45.f);
+				Catch.Z = FMath::Clamp(static_cast<float>(Catch.Z), 70.f, 215.f);
+				F.bReach = true;
+				F.ReachWorld = A->GetActorTransform().TransformPosition(Catch);
+				F.ReachSpread = Catch.Z > 150.f ? 6.f : 9.f; // thumbs together high, pinkies together low
+			}
+			F.bLook = true;
+			F.LookWorld = BallW;
+		}
+		// blocks: hands inside on the opponent's chest plate, drive lean
+		const tag::Ent* Opp = E->engaged ? E->engaged : (!E->engagedBy.empty() ? E->engagedBy[0] : nullptr);
+		if (Opp && !F.bHasBall)
+		{
+			AAthlete* O = AthOf(Opp);
+			const FVector Chest = O->BoneWorld(TEXT("spine_04"));
+			F.bReach = true;
+			F.ReachWorld = Chest + (Me - Chest).GetSafeNormal2D() * 16.f;
+			F.ReachSpread = 13.f;
+			F.Lean = E->engaged ? 0.9f : 0.6f;
+			F.bLook = true;
+			F.LookWorld = O->BoneWorld(TEXT("head"));
+		}
+		// tackles: wrap the ball carrier at the waist
+		if (Holder && Holder != E && (E->anim == tag::Anim::Tackle || E->anim == tag::Anim::Dive ||
+			(E->side != Holder->side && FVector::Dist2D(Me, AthOf(Holder)->GetActorLocation()) < 230.f)))
+		{
+			AAthlete* H = AthOf(Holder);
+			F.bReach = true;
+			F.ReachWorld = H->BoneWorld(TEXT("pelvis")) + FVector(0, 0, 18);
+			F.ReachSpread = 22.f;
+			F.Lean = 0.8f;
+		}
+		if (!F.bLook)
+		{
+			F.bLook = true;
+			if (F.bHasBall && bQB && B.target) F.LookWorld = AthOf(B.target)->BoneWorld(TEXT("head"));
+			else if (Holder && Holder != E) F.LookWorld = AthOf(Holder)->BoneWorld(TEXT("spine_04"));
+			else F.LookWorld = Me + A->GetActorForwardVector() * 1500.f + FVector(0, 0, 160);
+		}
+		A->SetFootball(F, Dt);
+	}
+
+	// automation: grab the key football moments up close (spec acceptance shots)
+	if (bAuto && EventShotFrames == 0)
+	{
+		for (tag::Ent* E : Sim->ents)
+		{
+			if (!bShotThrow && E->anim == tag::Anim::Throw && E->animT > 0.14)
+			{
+				bShotThrow = true;
+				EventShotName = TEXT("tag_auto_throw.png");
+				CloseupTarget = AthOf(E);
+				EventShotFrames = 3;
+			}
+		}
+		if (!bShotCatch && B.mode == tag::BallMode::Air && B.target &&
+			FVector::Dist(BallW, AthOf(B.target)->GetActorLocation()) < 380.f)
+		{
+			bShotCatch = true;
+			EventShotName = TEXT("tag_auto_catch.png");
+			CloseupTarget = AthOf(B.target);
+			EventShotFrames = 3;
+		}
+	}
+	if (EventShotFrames > 0 && --EventShotFrames == 0)
+	{
+		FScreenshotRequest::RequestScreenshot(EventShotName, false, false);
+		const AAthlete* CA = Cast<AAthlete>(CloseupTarget);
+		UE_LOG(LogTemp, Display, TEXT("TAG event shot %s ball=%s %s"), *EventShotName,
+			CA ? *CA->GetActorTransform().InverseTransformPosition(BallW).ToCompactString() : TEXT("-"), CA ? *CA->DebugAnimState() : TEXT(""));
+	}
+	else if (EventShotFrames == 0 && CloseupTarget && AutoShot < 8)
+	{
+		CloseupTarget = nullptr;
+	}
+
 	if (B.mode == tag::BallMode::Held && B.holder)
 	{
-		AAthlete* A = AthleteFor(B.holder->p, B.holder->side == tag::Side::Off ? OffK : tag::other(OffK));
-		const FVector Fwd = A->GetActorForwardVector();
-		const FVector Right = A->GetActorRightVector();
-		const bool bDown = B.holder->anim == tag::Anim::Down;
-		Ball->SetActorLocation(A->GetActorLocation() + Fwd * 16 + Right * 20 + FVector(0, 0, bDown ? 30 : 108));
-		Ball->SetActorRotation(A->GetActorRotation());
+		AAthlete* A = AthOf(B.holder);
+		FVector HoldLoc;
+		FRotator HoldRot;
+		if (B.holder->anim != tag::Anim::Down && A->GetBallHold(HoldLoc, HoldRot))
+		{
+			Ball->SetActorLocation(HoldLoc);
+			Ball->SetActorRotation(HoldRot);
+		}
+		else
+		{
+			const FVector Fwd = A->GetActorForwardVector();
+			const FVector Right = A->GetActorRightVector();
+			const bool bDown = B.holder->anim == tag::Anim::Down;
+			Ball->SetActorLocation(A->GetActorLocation() + Fwd * 16 + Right * 20 + FVector(0, 0, bDown ? 30 : 108));
+			Ball->SetActorRotation(A->GetActorRotation());
+		}
 	}
 	else
 	{
