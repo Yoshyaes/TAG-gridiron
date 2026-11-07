@@ -182,7 +182,7 @@ class Exporter:
         clip, names, poses = self.ev.sample(key)
         if layer:
             _, lnames, lposes = self.ev.sample(layer)
-            for i, p in enumerate(poses):
+            for i, p in enumerate(poses if lposes else []):   # empty FRAM placeholder layers add nothing
                 lp = lposes[min(i, len(lposes) - 1)]
                 for k, v in lp.items():
                     p.setdefault(k, v)

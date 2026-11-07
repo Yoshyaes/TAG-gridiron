@@ -74,8 +74,40 @@ class Evaluator:
         names = [self.ri.name(d) for d in dofs]
         return c, names
 
+    def sample_frame_asset(self, o):
+        """FrameAnimationAsset ("FRAM"): one stored pose. Many finger layers are empty placeholders (no
+        channels, no data) and contribute nothing. Data is QuatCount x 4 floats, then Vec3Count vectors
+        (3 or 4 floats each, detected from the length), then FloatCount floats."""
+        base = o.get("__base") or {}
+        c2d = self.db.get(base.get("ChannelToDofAsset"))
+        dofs = list(c2d["DofIds"]) if c2d else []
+        names = [self.ri.name(d) for d in dofs]
+        data = list(o.get("Data") or [])
+        Q, V, F = int(o.get("QuatCount") or 0), int(o.get("Vec3Count") or 0), int(o.get("FloatCount") or 0)
+        if not data or not names:
+            return None, names, []
+        if len(data) == 4 * Q + 3 * V + F:
+            vs = 3
+        elif len(data) in (4 * Q + 4 * V + F, 4 * Q + 4 * V + (F + 3) // 4 * 4):
+            vs = 4      # vectors take 4 lanes, the float block is padded to whole groups of 4 lanes
+        else:
+            raise ValueError("FRAM layout unknown (data %d, Q %d, V %d, F %d)" % (len(data), Q, V, F))
+        pose_ = {}
+        for j, n in enumerate(names):
+            if j < Q:
+                pose_[n] = np.array(data[4 * j:4 * j + 4])
+            elif j < Q + V:
+                a = 4 * Q + vs * (j - Q)
+                pose_[n] = np.array(data[a:a + 3]) * YARD
+            else:
+                pose_[n] = data[4 * Q + vs * V + (j - Q - V)]
+        return None, names, [pose_]
+
     def sample(self, key, frames=None):
         """-> per frame dict joint -> {"q": quat, "t": meters} for every animated joint, plus floats."""
+        o = self.db.get(key)
+        if o is not None and o["__type"] == "FrameAnimationAsset":
+            return self.sample_frame_asset(o)
         c, names = self.clip(key)
         q, v, f = c.sample_frames(frames)
         nq, nv = c.Q + c.CQ, c.V + c.CV
