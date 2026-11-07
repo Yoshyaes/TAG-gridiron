@@ -53,9 +53,12 @@ def arr(vals):
     return ",".join(fmt(v) for v in vals)
 
 
-def write_fbx(path, hero, frames, fps, take="Take 001"):
+def write_fbx(path, hero, frames, fps, take="Take 001", keyed=None):
+    """keyed = bone indices that get curves (None keys every bone). Unkeyed bones carry the EBX bind in
+    their Lcl values, which is also the reference pose Unreal falls back to for bones without a track."""
     n = len(hero.names)
     nf = len(frames)
+    keyed = list(range(n)) if keyed is None else sorted(keyed)
     stop = int(round((nf - 1) * KTIME / fps))
     times = [int(round(i * KTIME / fps)) for i in range(nf)]
     # curves: translation and rotation per bone, Euler unwrapped over time
@@ -81,7 +84,7 @@ def write_fbx(path, hero, frames, fps, take="Take 001"):
     w("\t\tP: \"TimeSpanStart\", \"KTime\", \"Time\", \"\",0")
     w("\t\tP: \"TimeSpanStop\", \"KTime\", \"Time\", \"\",%d" % stop)
     w("\t}\n}")
-    ncurve_nodes, ncurves = 2 * n, 6 * n
+    ncurve_nodes, ncurves = 2 * len(keyed), 6 * len(keyed)
     w("Definitions:  {\n\tVersion: 100\n\tCount: %d" % (1 + 2 * n + 3 + ncurve_nodes + ncurves))
     for t, c in (("GlobalSettings", 1), ("Model", n), ("NodeAttribute", n), ("Pose", 1), ("AnimationStack", 1), ("AnimationLayer", 1),
                  ("AnimationCurveNode", ncurve_nodes), ("AnimationCurve", ncurves)):
@@ -122,7 +125,7 @@ def write_fbx(path, hero, frames, fps, take="Take 001"):
     conns.append("\tC: \"OO\",%d,%d" % (layer_id, stack_id))
     cid = 4000000
     ktimes = arr(times)
-    for i in range(n):
+    for i in keyed:
         for prop, short, data in (("Lcl Translation", "T", trans[i]), ("Lcl Rotation", "R", rot[i])):
             cn = cid
             cid += 1
@@ -168,7 +171,7 @@ class Exporter:
                 if o.get(role):
                     self.ctrl.setdefault(o[role], o)
 
-    def export(self, out_dir, key, layer=None, skip_existing=True):
+    def export(self, out_dir, key, layer=None, skip_existing=True, sparse=False):
         c = self.ctrl.get(key)
         name = safe(c["__name"]) if c else "%016x" % key
         fps = float(c.get("FPS") or 30.0) if c else 30.0
@@ -184,7 +187,11 @@ class Exporter:
                 for k, v in lp.items():
                     p.setdefault(k, v)
         frames = local_frames(self.ev, poses)
-        write_fbx(path, self.ev.hero, frames, fps)
+        keyed = None
+        if sparse:
+            driven = {n.rsplit(".", 1)[0] for n in poses[0] if n.endswith((".q", ".t"))}
+            keyed = [i for i, n in enumerate(self.ev.hero.names) if n in driven]
+        write_fbx(path, self.ev.hero, frames, fps, keyed=keyed)
         meta = {"name": c["__name"] if c else None, "clip_key": "%016x" % key, "layer_key": "%016x" % layer if layer else None,
                 "frames": len(poses), "fps": fps, "duration_s": round((len(poses) - 1) / fps, 4),
                 "animated": sorted({n.rsplit(".", 1)[0] for n in poses[0] if n.endswith((".q", ".t"))})}
@@ -201,7 +208,7 @@ def main(argv):
         parts = spec.split(":")
         key = int(parts[0], 16)
         layer = int(parts[1], 16) if len(parts) > 1 and parts[1] else None
-        path, meta = ex.export(out_dir, key, layer, skip_existing=not force)
+        path, meta = ex.export(out_dir, key, layer, skip_existing=not force, sparse="--sparse" in argv)
         print("wrote", path, meta["frames"], "frames at", meta["fps"], "fps")
 
 

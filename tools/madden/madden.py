@@ -345,9 +345,61 @@ def cmd_audit(stage):
 PY313 = ["py", "-3.13", "-I"]
 
 
+def cmd_animkit(spec_path, spec):
+    """Animation kit: plan, disk floor, decode and FBX with plausibility gate, UE import, preview, verify, guard, audit."""
+    name = spec["name"]
+    ak = PY313 + [os.path.join(TOOLS, "antbank", "animkit.py")]
+    result = {"kit": name, "kind": "anim", "steps": []}
+
+    def step(label, rc):
+        result["steps"].append([label, rc])
+        log("kit %s step %s rc=%s" % (name, label, rc))
+        return rc
+
+    def save():
+        json.dump(result, open(os.path.join(LOGS, "kit_%s_result.json" % name), "w"), indent=1)
+
+    if step("plan", subprocess.run(ak + ["plan", spec_path], timeout=STEP_TIMEOUT).returncode):
+        save()
+        return 1
+    summary = json.load(open(os.path.join(LOGS, "kit_%s_summary.json" % name)))
+    result["summary"] = summary
+    for n in summary.get("missing", []):
+        append_failure(name, n, "anim_plan", "controller name not found among body clips")
+    if step("diskcheck", cmd_diskcheck(summary["projected_bytes"])):
+        result["skipped"] = "projected size would break the 50 GB floor on D"
+        save()
+        return 4
+    # Unreal assets land on C, which is 95 percent full. Own safety floor, 40 GB free after the chunk.
+    ue_bytes = summary.get("frames", 0) * 10 * 1024
+    c_free = shutil.disk_usage(CONTENT).free
+    if c_free - ue_bytes < 40 * 1024 ** 3:
+        log("C floor: free %.1f GB, chunk needs %.2f GB, floor 40 GB -> SKIP" % (c_free / 1024 ** 3, ue_bytes / 1024 ** 3))
+        result["skipped"] = "projected Unreal size would break the 40 GB floor on C"
+        save()
+        return 4
+    if step("export", subprocess.run(ak + ["export", spec_path], timeout=STEP_TIMEOUT).returncode):
+        save()
+        return 1
+    step("ue", cmd_ue(os.path.join(LOGS, "ue_%s_gated.json" % name), name))
+    step("mat", subprocess.run(ak + ["mat", spec_path], timeout=STEP_TIMEOUT).returncode)
+    if spec.get("preview"):
+        step("preview", cmd_materials(os.path.join(TOOLS, "jobs", "mat_" + name + ".json"), name))
+    step("verify", cmd_verify(name if spec.get("quick_verify") else None))
+    g = step("guard", cmd_guard())
+    save()
+    if g != 0:
+        return 3
+    step("audit", cmd_audit(name))
+    save()
+    return 0
+
+
 def cmd_kit(spec_path):
     """Runs one kit end to end with gates. Exit 3 means the install guard saw a change (stop everything)."""
     spec = json.load(open(spec_path, encoding="utf-8"))
+    if spec.get("kind") == "anim":
+        return cmd_animkit(spec_path, spec)
     name = spec["name"]
     kit = [sys.executable, "-I", os.path.join(TOOLS, "kit.py")]
     result = {"kit": name, "steps": []}
@@ -393,13 +445,18 @@ def cmd_kit(spec_path):
     return 0
 
 
-def cmd_verify():
+def cmd_verify(stage=None):
+    """Full verify hashes every file. With a stage (quick mode, used per animation chunk) only that stage's
+    files are hashed and the rest are checked by size. A full verify runs at the end of a checkpoint."""
     m = load_manifest()
     missing, bad = [], []
     for k, e in m["files"].items():
         p = os.path.join(EXTRACTED, k)
         if not os.path.exists(p):
             missing.append(k)
+        elif stage is not None and e.get("stage") != stage:
+            if os.path.getsize(p) != e.get("size"):
+                bad.append(k)
         elif sha256(p) != e["sha256"]:
             bad.append(k)
     on_disk = 0
@@ -445,7 +502,7 @@ def main(argv):
     if c == "kit":
         return cmd_kit(argv[2])
     if c == "verify":
-        return cmd_verify()
+        return cmd_verify(argv[argv.index("--stage") + 1] if "--stage" in argv else None)
     print(__doc__)
     return 2
 

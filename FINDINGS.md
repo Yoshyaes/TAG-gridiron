@@ -173,3 +173,24 @@ Tooling is in `tools\madden\antbank\`. It is Python and reads the AssetBank RES 
 
 - Preview level `/Game/MaddenRef/Maps/L_MaddenRef_AnimCheckpoint` puts the dressed Stage 2 player in each clip side by side (every part plays the same sequence). Visual sign off is left for Fred.
 - Install guard unchanged, manifest 3,099 files matching the disk, MaddenRef audit passes (1,283 packages).
+
+## Checkpoint D. Prototype batch of 26 core clips through the kit system. PASS
+- **Kit integration.** Specs with `"kind": "anim"` run through `tools\madden\antbank\animkit.py` from `madden.py kit`. Steps are plan (controller names to body and finger clips), disk floor, decode with a plausibility gate, FBX export with manifest entries, Unreal import of the clips that passed, preview level, verify, install guard and audit. Spec `tools\madden\kits\anim_prototype.json`.
+- **Plausibility gate per clip.** A clip is held out of the Unreal import, and logged to `failures.csv` with a reason, when any value is not finite, a bone length varies by more than 1e-4, the head goes above 2.6 m or never above 0.2 m, a foot goes 0.3 m below ground, or the root moves faster than 15 m/s.
+- **Result.** 26 of 26 clips decoded, passed the gate, exported and imported. The Unreal log ends `Success - 0 error(s), 0 warning(s)`. Every clip has 268 bone tracks, none missing from the skeleton. A second run skipped all 26 (export `skipped=26`, Unreal `todo=0`). Manifest 3,151 files matching the disk, install guard unchanged, audit passes (1,310 packages).
+
+| Category | Clips (controller names) | Numbers |
+| --- | --- | --- |
+| Stance | `Idle_Preplay_Crouch_Stance_var3__P01`, `MADNAUG04_0054_1_1_PrePlay_3ptStance_quick_LookAround__P01`, `FATIGUED_STANCE_P_QB_shotgun_looping__P01`, `FATIGUED_STANCE_P_WR_2pt_armsDN_looping__P01` | root still, head 1.32 m crouch, 0.68 to 0.74 m in the three point stance |
+| Run | `MG_Loco_Run_Average__P01`, `MG_Loco_Sprint_Normal__P01`, `MG_Loco_Standard_Sprint_Burn__P01`, `Loco_NonBC_15_Jog_Loop__P01`, `MG_Loco_QB_Run_ShortStride__P01` | 7.06, 9.61, 11.20, 2.23 and 7.31 m/s |
+| Cut | `BC_JUKE_AGILE_LEFT__P01`, `BC_JUKE_AGILE_RIGHT__P01`, `BC_Agile_Juke_Left_Precision_v01__P01`, `BC_Cut_Test_D1_to_D7__P01` | 3.9 to 5.5 m/s, head dips to 1.08 m in the jukes |
+| Tackle | `2man_Catch_Def_In_Over_ShoveTackle__P01` and `__P02` (both players), `2man_Catch_Def_In_Under_SwatTackle_v6__P01`, `2man_Catch_Jump_Def_In_Under_JumpCatchTackle_v5__P01` | head down to 0.18 m when a player goes to ground |
+| Throw | `MADNMAY04_0022_2._QB_deepPass_D1_standardRelease__P01`, `MADNMAY04_0041_2_QB_backFootShortPass_D1_standard__P01`, `MADNMAY04_0093_QB_rollout_R_shortPass_D7_standard__P01` | 0.8 to 3.2 m/s, head peaks 1.6 to 1.76 m |
+| Catch | `Catch_Stand_0_Waist_RunFwd_16f_V1__P01`, `2man_BS_Catch_Under_GoodTiming_v1__P01`, `EffortCatch_AboveHead_Overthrow__P01` | head up to 1.93 m in the above head catch |
+| Celebrate | `2014_PC_Generic_SpikeBall__P01`, `2012_NCAA_Celebration_MidTensity_V7__P01`, `2014_PI_Celebration_Pointtohelmet_Var1__P01` | head up to 2.15 m in the jump |
+
+- Unreal assets in `/Game/MaddenRef/Animations/Prototype`. Preview level `/Game/MaddenRef/Maps/L_MaddenRef_AnimPrototype` has the dressed Stage 2 player in each of the 26 clips on a grid.
+- **Sizes measured.** About 42 KB of ASCII FBX and 9.7 KB of Unreal asset per frame with every bone keyed.
+- **Sparse keying for Checkpoint E.** `fbxanim.py --sparse` keys only the bones a clip drives (about 70, body plus fingers). The rest keep the EBX bind in their Lcl values, which is also the reference pose Unreal falls back to. On the three Checkpoint C clips the FBX shrinks 3.4 times and Unreal gives identical results (head height, root travel and length, 0 errors, 0 warnings). Unreal still bakes a track for every bone, so Unreal assets stay at about 10 KB per frame.
+- **Scope of E.** 12,187 player body clips with 2,376,939 frames. That is about 30 GB of sparse FBX on D and about 23 GB of Unreal assets on C. About 400 clips use other rigs (camera, props, quadruped, sideline) and are out of scope for MaddenFB_Hero_Skeleton.
+- **Extra safety floor on C.** C is 95 percent full and holds the Unreal project, so each animation chunk also checks for 40 GB free on C after its projected Unreal size, on top of the 50 GB floor on D. A per chunk quick verify hashes that chunk's files and size checks the rest, with a full verify at the end.

@@ -1,0 +1,210 @@
+[
+ {
+  "name": "Idle_Preplay_Crouch_Stance_var3__P01",
+  "file": "Idle_Preplay_Crouch_Stance_var3__P01",
+  "clip_key": "f72c1eb75a3d933d",
+  "layer_key": "2568c809c10af786",
+  "fps": 30.0,
+  "frames": 87
+ },
+ {
+  "name": "MADNAUG04_0054_1_1_PrePlay_3ptStance_quick_LookAround__P01",
+  "file": "MADNAUG04_0054_1_1_PrePlay_3ptStance_quick_LookAround__P01",
+  "clip_key": "9bbbfb98b3b63524",
+  "layer_key": "bfdf8eae1487bcad",
+  "fps": 30.0,
+  "frames": 126
+ },
+ {
+  "name": "FATIGUED_STANCE_P_QB_shotgun_looping__P01",
+  "file": "FATIGUED_STANCE_P_QB_shotgun_looping__P01",
+  "clip_key": "0e988c90c0974edf",
+  "layer_key": "c0be7b631364ac1a",
+  "fps": 30.0,
+  "frames": 99
+ },
+ {
+  "name": "FATIGUED_STANCE_P_WR_2pt_armsDN_looping__P01",
+  "file": "FATIGUED_STANCE_P_WR_2pt_armsDN_looping__P01",
+  "clip_key": "7f952ac0148703f7",
+  "layer_key": "a4a5dfb761f0c3ff",
+  "fps": 30.0,
+  "frames": 209
+ },
+ {
+  "name": "MG_Loco_Run_Average__P01",
+  "file": "MG_Loco_Run_Average__P01",
+  "clip_key": "3baf401e5a1208cb",
+  "layer_key": "bf003d491ef6a3e6",
+  "fps": 30.0,
+  "frames": 53
+ },
+ {
+  "name": "MG_Loco_Sprint_Normal__P01",
+  "file": "MG_Loco_Sprint_Normal__P01",
+  "clip_key": "5345cedc49edd629",
+  "layer_key": "bbb8db164fbb05f9",
+  "fps": 30.0,
+  "frames": 48
+ },
+ {
+  "name": "MG_Loco_Standard_Sprint_Burn__P01",
+  "file": "MG_Loco_Standard_Sprint_Burn__P01",
+  "clip_key": "57be88420b0101cf",
+  "layer_key": "4a2e88153062413c",
+  "fps": 30.0,
+  "frames": 47
+ },
+ {
+  "name": "Loco_NonBC_15_Jog_Loop__P01",
+  "file": "Loco_NonBC_15_Jog_Loop__P01",
+  "clip_key": "4821add0631f238a",
+  "layer_key": "4bec4a1dd38eb7b1",
+  "fps": 30.0,
+  "frames": 24
+ },
+ {
+  "name": "MG_Loco_QB_Run_ShortStride__P01",
+  "file": "MG_Loco_QB_Run_ShortStride__P01",
+  "clip_key": "77d273b7f3b00bb4",
+  "layer_key": "72ef94fb9d9c8cd4",
+  "fps": 60.0,
+  "frames": 87
+ },
+ {
+  "name": "BC_JUKE_AGILE_LEFT__P01",
+  "file": "BC_JUKE_AGILE_LEFT__P01",
+  "clip_key": "704aff6ccf11d11a",
+  "layer_key": "a6441b84814ff151",
+  "fps": 30.0,
+  "frames": 44
+ },
+ {
+  "name": "BC_JUKE_AGILE_RIGHT__P01",
+  "file": "BC_JUKE_AGILE_RIGHT__P01",
+  "clip_key": "317fd1afcf2fc067",
+  "layer_key": "54eec3f3da57da25",
+  "fps": 30.0,
+  "frames": 44
+ },
+ {
+  "name": "BC_Agile_Juke_Left_Precision_v01__P01",
+  "file": "BC_Agile_Juke_Left_Precision_v01__P01",
+  "clip_key": "1bdc306f06d9c6fb",
+  "layer_key": "8b1410ca0cd0e8b4",
+  "fps": 30.0,
+  "frames": 54
+ },
+ {
+  "name": "BC_Cut_Test_D1_to_D7__P01",
+  "file": "BC_Cut_Test_D1_to_D7__P01",
+  "clip_key": "d3a120c869129f32",
+  "layer_key": "715348dd1c030971",
+  "fps": 30.0,
+  "frames": 47
+ },
+ {
+  "name": "2man_Catch_Def_In_Over_ShoveTackle__P01",
+  "file": "2man_Catch_Def_In_Over_ShoveTackle__P01",
+  "clip_key": "5e9d6a52c48f75cb",
+  "layer_key": "af6919152a08f93d",
+  "fps": 60.0,
+  "frames": 147
+ },
+ {
+  "name": "2man_Catch_Def_In_Over_ShoveTackle__P02",
+  "file": "2man_Catch_Def_In_Over_ShoveTackle__P02",
+  "clip_key": "89f3713096627b55",
+  "layer_key": "63e65e6e2e03626e",
+  "fps": 60.0,
+  "frames": 189
+ },
+ {
+  "name": "2man_Catch_Def_In_Under_SwatTackle_v6__P01",
+  "file": "2man_Catch_Def_In_Under_SwatTackle_v6__P01",
+  "clip_key": "81f62da4c3bb0526",
+  "layer_key": "df97bd388b01aa17",
+  "fps": 60.0,
+  "frames": 279
+ },
+ {
+  "name": "2man_Catch_Jump_Def_In_Under_JumpCatchTackle_v5__P01",
+  "file": "2man_Catch_Jump_Def_In_Under_JumpCatchTackle_v5__P01",
+  "clip_key": "7089212db80ff067",
+  "layer_key": "15717e3180839618",
+  "fps": 60.0,
+  "frames": 173
+ },
+ {
+  "name": "MADNMAY04_0022_2._QB_deepPass_D1_standardRelease__P01",
+  "file": "MADNMAY04_0022_2__QB_deepPass_D1_standardRelease__P01",
+  "clip_key": "a44a3d62d7c3852f",
+  "layer_key": "9f6be639a190a662",
+  "fps": 30.0,
+  "frames": 77
+ },
+ {
+  "name": "MADNMAY04_0041_2_QB_backFootShortPass_D1_standard__P01",
+  "file": "MADNMAY04_0041_2_QB_backFootShortPass_D1_standard__P01",
+  "clip_key": "4231cf08d03bd287",
+  "layer_key": "2d9d98b5b3196138",
+  "fps": 30.0,
+  "frames": 72
+ },
+ {
+  "name": "MADNMAY04_0093_QB_rollout_R_shortPass_D7_standard__P01",
+  "file": "MADNMAY04_0093_QB_rollout_R_shortPass_D7_standard__P01",
+  "clip_key": "b2b2530b382deb33",
+  "layer_key": "bafb1eb75fab4025",
+  "fps": 30.0,
+  "frames": 87
+ },
+ {
+  "name": "Catch_Stand_0_Waist_RunFwd_16f_V1__P01",
+  "file": "Catch_Stand_0_Waist_RunFwd_16f_V1__P01",
+  "clip_key": "100635826d9ec16c",
+  "layer_key": "9448bb84c024f243",
+  "fps": 30.0,
+  "frames": 47
+ },
+ {
+  "name": "2man_BS_Catch_Under_GoodTiming_v1__P01",
+  "file": "2man_BS_Catch_Under_GoodTiming_v1__P01",
+  "clip_key": "9d19ab6557b7cd21",
+  "layer_key": "2b47f87da379f2f7",
+  "fps": 60.0,
+  "frames": 569
+ },
+ {
+  "name": "EffortCatch_AboveHead_Overthrow__P01",
+  "file": "EffortCatch_AboveHead_Overthrow__P01",
+  "clip_key": "85ce387f36dfe799",
+  "layer_key": "fd85f30704574891",
+  "fps": 60.0,
+  "frames": 410
+ },
+ {
+  "name": "2014_PC_Generic_SpikeBall__P01",
+  "file": "2014_PC_Generic_SpikeBall__P01",
+  "clip_key": "561047573f5cf4e8",
+  "layer_key": "923ba5defbd5aff2",
+  "fps": 30.0,
+  "frames": 139
+ },
+ {
+  "name": "2012_NCAA_Celebration_MidTensity_V7__P01",
+  "file": "2012_NCAA_Celebration_MidTensity_V7__P01",
+  "clip_key": "3943ce27e8e0b82a",
+  "layer_key": "f68bccae294d078d",
+  "fps": 30.0,
+  "frames": 93
+ },
+ {
+  "name": "2014_PI_Celebration_Pointtohelmet_Var1__P01",
+  "file": "2014_PI_Celebration_Pointtohelmet_Var1__P01",
+  "clip_key": "b88b4d5653caaa7e",
+  "layer_key": "54b7d7ddd3c95f94",
+  "fps": 30.0,
+  "frames": 128
+ }
+]
