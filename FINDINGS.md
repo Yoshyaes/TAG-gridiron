@@ -119,3 +119,40 @@ Every surprise, with evidence. Newest stage last. Private reference work, see `e
 - Spot check (five random across Stage 7, report only Unreal run). `SK_novaknick_19965_haircap`, `SM_gatoradestand`, `SM_niners_bgnis_highways`, `SM_gatoradedrinkholder`, `SM_anvilwheels`. All pass (`logs\spotcheck_stage7.json`).
 - `failures.csv` has 31 rows in total, all from Stage 2 and Stage 4 debugging and all resolved (see the Stage 4 review). No failures were logged in Stage 5, 6 or 7.
 - Frosty's `editor_config.json` hash, the hand export `Test` folder and `Caches\madden19.cache` are unchanged by the whole run.
+
+
+# Animation decoder port (started 2026-11-07, approved by Fred)
+Tooling is in `tools\madden\antbank\`. It is Python and reads the AssetBank RES that FrostyHost exports through the Frosty SDK, so it reads the bank the same way the rest of the pipeline does. `gd.py` GenericData reader, `vbr.py` VBR codec, `antdb.py` cross bank database and rig index, `pose.py` evaluation on MaddenFB_Hero_Skeleton, `inventory.py` Checkpoint A, `checkb.py` Checkpoint B. The FIFA 17 edition FrostyAnimationEditor has no licence file, so it was read as format reference and the code here is an independent reimplementation, private like everything else.
+
+## Checkpoint A. Bank header and clip index. PASS
+- **Container layout matches FIFA 17.** Big endian header, root key table T, export table C, import tables A and B, then GD streams. Only the version differs. The gameplay bank `levels/maddengame` is version 3 with 471,492 root keys and empty import tables. The small NIS banks are version 5.
+- **Madden's GD streams are little endian.** Tags end in `l` (`GD.STRMl`, `GD.REFLl`, `GD.DATAl`) where FIFA 17's end in `b`. Every size, offset and value inside them is little endian.
+- **The object header moves with byte order.** Marker `0x030E6205` at +0x00 and type id at +0x10 (FIFA 17 big endian has +0x04 and +0x14). Data offset u16 at +0x1C in both.
+- The type table parses unchanged (468 types in the gameplay bank). `AnimationAsset`, `VbrAnimationAsset`, `FrameAnimationAsset`, `ClipControllerAsset`, `ChannelToDofAsset`, `RigAsset`, `SkeletonAsset` and `LayoutHierarchyAsset` carry the field names the FIFA 17 decoder reads.
+- **VBR data layout and bitstream match.** On 400 random clips the layout arithmetic (key times, constants, channel map, widths, ramps, blocks) equals the Data length exactly, and block 0's bitstream ends within 0 to 7 spare bits (byte padding).
+- **Clip names come from controllers, as in FIFA 17.** A clip's own name is the hex key of its `ClipControllerAsset` (sometimes with `_1`). The controller name is readable (`MG_Loco_Run_Average__P01`). Controllers usually play two clips, a body clip (`Anim`) and a finger clip (`LayerAnim`).
+- **Inventory.** `extracted\animation\animation_inventory.csv` lists 25,349 clips (25,026 `VBR `, 323 `FRAM`), 25,166 named by a controller, with frames, fps, duration, codec id, trim, flags, channel counts and channel map keys. Rates are 60 fps (14,048 clips) and 30 fps (11,245), plus a few at 24, 59.94 and 100. Median length 142 frames, longest 4,448.
+- **Two banks are needed.** Clips are in the gameplay bank, but their `ChannelToDofAsset`s, the main `DofSetList` and the player rigs are in the launch bank (`content/common/configs/bundles/launch_sba`, 137 MB, 145,037 objects). Both are exported by `tools\madden\jobs\anim_banks.json`.
+- VBR `Flags` use bits FIFA 17 does not document (2, 3, 7 and 8, for example 0x10C). They did not affect decoding in Checkpoint B.
+
+## Checkpoint B. Three clips decoded onto MaddenFB_Hero_Skeleton. PASS (one criterion interpreted, see below)
+- **Channels.** Body clips use channel maps `6a6eb813061beab6` (39 DOFs) or `e5b9c7b4b01de68d` (37 DOFs). They hold 29 to 31 joint rotations (`Hips` to `Head`, arms, legs, `AITrajectory`, ball and ankle effectors), 6 translations (`AITrajectory.t`, `Hips.t`, `Left/RightFootball.t`, `Left/RightAnkleEffectorAux.t`) and 2 floats (`Left/RightToeBase.vel`). Finger clips use `0183f7cfb285b0d9` (38 finger rotations). DOF names resolve through the launch bank's rigs (8,808 named DOFs) and equal MaddenFB_Hero_Skeleton bone names. `MaddenRigamatePreview` (266 joints) is a strict subset of the Hero skeleton.
+- **Units are yards.** Every `MaddenRig` default translation is 1.0936 times the EBX bind translation, so meters = rig x 0.9144. FIFA 17 used feet.
+- **Rotation convention.** Standard quaternion (x, y, z, w) to matrix. With it, 227 of 266 shared joints' rig defaults equal the EBX bind within 1 degree. The rest are RM_ deformation helpers, IK effectors and `Hips`, which differs by exactly 90 degrees about the vertical axis. Children are relative to Hips, so that offset only changes heading. Decoded as is, the run faces and moves along +Z, the mesh's forward axis, so no correction is applied.
+- **Clips.** Idle `HB_Blocking_Idle_Loop__P01` (key `f7f8174082a094de`), run `MG_Loco_Run_Average__P01` (`3baf401e5a1208cb`), tackle `2man_Catch_Def_In_Over_ShoveTackle__P01` (`5e9d6a52c48f75cb`). Full numbers are in `extracted\animation\checkpoint_b.json`.
+
+| Check | Idle | Run | Tackle |
+| --- | --- | --- | --- |
+| No NaN or infinity | yes | yes | yes |
+| Bone length relative deviation (real bones) | 4e-15 | 1e-14 | 1e-14 |
+| Root speed (AITrajectory, horizontal) | 0.10 m/s | **7.06 m/s** | 2.43 m/s |
+| Facing against direction of travel (cos) | stationary | 0.99 | 0.77 |
+| Knees bend forward (left, right) | 100%, 100% | 100%, 100% | 100%, 100% |
+| Knee angle range | 100 to 111 deg | 50 to 166 deg | 53 to 161 deg |
+| Head height | 1.27 to 1.35 m (blocking crouch) | 1.50 to 1.57 m | 1.14 to 1.69 m |
+| Lowest foot above ground | 0.045 m | 0.014 m | 0.028 m |
+| First to last frame (median) | 0.81 deg (loop closes) | 4.8 deg | 22.8 deg (not a loop) |
+| Frame 0 against bind, median spine and head, legs, arms | 12, 51, 27 deg | 9, 26, 25 deg | 14, 22, 29 deg |
+
+- **Frame 0 against the bind pose, interpreted.** The Hero bind pose is a T pose, and these clips start in a crouch, a run stride and a ready stance, so frame 0 cannot equal it. A scrambled decode would leave joints at random rotations, median about 126 degrees from the bind. The decoded medians are 9 to 51 degrees, bone lengths equal the bind exactly, and the joint frames follow the bind convention (227 rig defaults within 1 degree). No T pose clip exists in the bank to test it literally. Flagged for Fred.
+- The largest frame to frame steps are on `LeftAnkleEffectorAux` and `RightAnkleEffectorAux` (IK targets, not skinned bones), up to 54 degrees per frame in the run. Real joints stay smooth (idle maximum 7 degrees per frame at 60 fps, on Head).

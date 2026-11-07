@@ -317,6 +317,18 @@ def cmd_uereport(jobs_path, stage):
     return 0 if os.path.exists(report) else 7
 
 
+def cmd_register(stage, op, paths):
+    """Record derived files (made by tools/madden/antbank scripts) in the manifest."""
+    m = load_manifest()
+    for p in paths:
+        p = os.path.abspath(p)
+        m["files"][rel(p)] = {"op": op, "stage": stage, "source_asset": "", "bundles": "", "superbundles": "",
+                              "size": os.path.getsize(p), "sha256": sha256(p), "params": {}}
+    save_manifest(m)
+    log("register %s %s %d files" % (stage, op, len(paths)))
+    return 0
+
+
 def cmd_audit(stage):
     out = os.path.join(LOGS, "audit_%s.json" % stage)
     if os.path.exists(out):
@@ -426,6 +438,8 @@ def main(argv):
         return cmd_materials(argv[2], argv[3])
     if c == "uereport":
         return cmd_uereport(argv[2], argv[3])
+    if c == "register":
+        return cmd_register(argv[2], argv[3], argv[4:])
     if c == "audit":
         return cmd_audit(argv[2])
     if c == "kit":

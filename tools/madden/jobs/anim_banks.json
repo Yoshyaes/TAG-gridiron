@@ -1,0 +1,58 @@
+[
+ {
+  "id": "bank_createaplayermatchlife_win32_antstate",
+  "op": "raw",
+  "kind": "res",
+  "asset": "animations/antanimations/global/dsub/frontend/createaplayermatchlife/createaplayermatchlife_win32_antstate",
+  "out": "{REPO}/extracted/animation/banks/global__dsub__frontend__createaplayermatchlife__createaplayermatchlife_win32_antstate.assetbank"
+ },
+ {
+  "id": "bank_createacoachmatchlife_win32_antstate",
+  "op": "raw",
+  "kind": "res",
+  "asset": "animations/antanimations/global/dsub/frontend/createacoachmatchlife/createacoachmatchlife_win32_antstate",
+  "out": "{REPO}/extracted/animation/banks/global__dsub__frontend__createacoachmatchlife__createacoachmatchlife_win32_antstate.assetbank"
+ },
+ {
+  "id": "bank_cfmhubmatchlife_win32_antstate",
+  "op": "raw",
+  "kind": "res",
+  "asset": "animations/antanimations/global/dsub/frontend/cfmhubmatchlife/cfmhubmatchlife_win32_antstate",
+  "out": "{REPO}/extracted/animation/banks/global__dsub__frontend__cfmhubmatchlife__cfmhubmatchlife_win32_antstate.assetbank"
+ },
+ {
+  "id": "bank_launch_sba_win32_antstate",
+  "op": "raw",
+  "kind": "res",
+  "asset": "animations/antanimations/content/common/configs/bundles/launch_sba_win32_antstate",
+  "out": "{REPO}/extracted/animation/banks/content__common__configs__bundles__launch_sba_win32_antstate.assetbank"
+ },
+ {
+  "id": "bank_maddengame_win32_antstate",
+  "op": "raw",
+  "kind": "res",
+  "asset": "animations/antanimations/levels/maddengame/maddengame_win32_antstate",
+  "out": "{REPO}/extracted/animation/banks/levels__maddengame__maddengame_win32_antstate.assetbank"
+ },
+ {
+  "id": "bank_state_game_win32_antstate",
+  "op": "raw",
+  "kind": "res",
+  "asset": "animations/antanimations/longshot/levels/longshot_main/state_game_win32_antstate",
+  "out": "{REPO}/extracted/animation/banks/longshot__levels__longshot_main__state_game_win32_antstate.assetbank"
+ },
+ {
+  "id": "bank_longshot_main_win32_antstate",
+  "op": "raw",
+  "kind": "res",
+  "asset": "animations/antanimations/longshot/levels/longshot_main/longshot_main_win32_antstate",
+  "out": "{REPO}/extracted/animation/banks/longshot__levels__longshot_main__longshot_main_win32_antstate.assetbank"
+ },
+ {
+  "id": "bank_ingamematchlife_default_win32_antstate",
+  "op": "raw",
+  "kind": "res",
+  "asset": "animations/antanimations/global/dsub/ingame/ingamematchlife_default/ingamematchlife_default_win32_antstate",
+  "out": "{REPO}/extracted/animation/banks/global__dsub__ingame__ingamematchlife_default__ingamematchlife_default_win32_antstate.assetbank"
+ }
+]
