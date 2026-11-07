@@ -1,0 +1,26 @@
+[
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/checkpoint_c/HB_Blocking_Idle_Loop__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Checkpoint",
+  "name": "A_HB_Blocking_Idle_Loop__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/checkpoint_c/MG_Loco_Run_Average__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Checkpoint",
+  "name": "A_MG_Loco_Run_Average__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/checkpoint_c/2man_Catch_Def_In_Over_ShoveTackle__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Checkpoint",
+  "name": "A_2man_Catch_Def_In_Over_ShoveTackle__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ }
+]

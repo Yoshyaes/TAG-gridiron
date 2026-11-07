@@ -1,0 +1,242 @@
+{
+ "bindings": [],
+ "preview_level": {
+  "path": "/Game/MaddenRef/Maps/L_MaddenRef_AnimCheckpoint",
+  "meshes": [
+   {
+    "mesh": "/Game/MaddenRef/Players/Stage2/SK_faulkmarshall_11413",
+    "x": 0.0,
+    "label": "HB_Blocking_",
+    "anim": "/Game/MaddenRef/Animations/Checkpoint/A_HB_Blocking_Idle_Loop__P01"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Stage2/SK_fullarms_d",
+    "x": 0.0,
+    "label": "HB_Blocking_",
+    "anim": "/Game/MaddenRef/Animations/Checkpoint/A_HB_Blocking_Idle_Loop__P01"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Stage2/SK_legs_d",
+    "x": 0.0,
+    "label": "HB_Blocking_",
+    "anim": "/Game/MaddenRef/Animations/Checkpoint/A_HB_Blocking_Idle_Loop__P01"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Stage2/SK_jersey_d",
+    "x": 0.0,
+    "label": "HB_Blocking_",
+    "anim": "/Game/MaddenRef/Animations/Checkpoint/A_HB_Blocking_Idle_Loop__P01"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Stage2/SK_pants_d",
+    "x": 0.0,
+    "label": "HB_Blocking_",
+    "anim": "/Game/MaddenRef/Animations/Checkpoint/A_HB_Blocking_Idle_Loop__P01"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Stage2/SK_socks_mid_d",
+    "x": 0.0,
+    "label": "HB_Blocking_",
+    "anim": "/Game/MaddenRef/Animations/Checkpoint/A_HB_Blocking_Idle_Loop__P01"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_shell_xenith",
+    "x": 0.0,
+    "label": "HB_Blocking_",
+    "anim": "/Game/MaddenRef/Animations/Checkpoint/A_HB_Blocking_Idle_Loop__P01"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_facemask_xenithprism",
+    "x": 0.0,
+    "label": "HB_Blocking_",
+    "anim": "/Game/MaddenRef/Animations/Checkpoint/A_HB_Blocking_Idle_Loop__P01"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubr_d",
+    "x": 0.0,
+    "label": "HB_Blocking_",
+    "anim": "/Game/MaddenRef/Animations/Checkpoint/A_HB_Blocking_Idle_Loop__P01"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubl_d",
+    "x": 0.0,
+    "label": "HB_Blocking_",
+    "anim": "/Game/MaddenRef/Animations/Checkpoint/A_HB_Blocking_Idle_Loop__P01"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Stage2/SK_glover_d",
+    "x": 0.0,
+    "label": "HB_Blocking_",
+    "anim": "/Game/MaddenRef/Animations/Checkpoint/A_HB_Blocking_Idle_Loop__P01"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Stage2/SK_glovel_d",
+    "x": 0.0,
+    "label": "HB_Blocking_",
+    "anim": "/Game/MaddenRef/Animations/Checkpoint/A_HB_Blocking_Idle_Loop__P01"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Stage2/SK_sleeve_tight_d",
+    "x": 0.0,
+    "label": "HB_Blocking_",
+    "anim": "/Game/MaddenRef/Animations/Checkpoint/A_HB_Blocking_Idle_Loop__P01"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Stage2/SK_faulkmarshall_11413",
+    "x": 300.0,
+    "label": "MG_Loco_Run_",
+    "anim": "/Game/MaddenRef/Animations/Checkpoint/A_MG_Loco_Run_Average__P01"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Stage2/SK_fullarms_d",
+    "x": 300.0,
+    "label": "MG_Loco_Run_",
+    "anim": "/Game/MaddenRef/Animations/Checkpoint/A_MG_Loco_Run_Average__P01"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Stage2/SK_legs_d",
+    "x": 300.0,
+    "label": "MG_Loco_Run_",
+    "anim": "/Game/MaddenRef/Animations/Checkpoint/A_MG_Loco_Run_Average__P01"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Stage2/SK_jersey_d",
+    "x": 300.0,
+    "label": "MG_Loco_Run_",
+    "anim": "/Game/MaddenRef/Animations/Checkpoint/A_MG_Loco_Run_Average__P01"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Stage2/SK_pants_d",
+    "x": 300.0,
+    "label": "MG_Loco_Run_",
+    "anim": "/Game/MaddenRef/Animations/Checkpoint/A_MG_Loco_Run_Average__P01"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Stage2/SK_socks_mid_d",
+    "x": 300.0,
+    "label": "MG_Loco_Run_",
+    "anim": "/Game/MaddenRef/Animations/Checkpoint/A_MG_Loco_Run_Average__P01"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_shell_xenith",
+    "x": 300.0,
+    "label": "MG_Loco_Run_",
+    "anim": "/Game/MaddenRef/Animations/Checkpoint/A_MG_Loco_Run_Average__P01"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_facemask_xenithprism",
+    "x": 300.0,
+    "label": "MG_Loco_Run_",
+    "anim": "/Game/MaddenRef/Animations/Checkpoint/A_MG_Loco_Run_Average__P01"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubr_d",
+    "x": 300.0,
+    "label": "MG_Loco_Run_",
+    "anim": "/Game/MaddenRef/Animations/Checkpoint/A_MG_Loco_Run_Average__P01"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubl_d",
+    "x": 300.0,
+    "label": "MG_Loco_Run_",
+    "anim": "/Game/MaddenRef/Animations/Checkpoint/A_MG_Loco_Run_Average__P01"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Stage2/SK_glover_d",
+    "x": 300.0,
+    "label": "MG_Loco_Run_",
+    "anim": "/Game/MaddenRef/Animations/Checkpoint/A_MG_Loco_Run_Average__P01"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Stage2/SK_glovel_d",
+    "x": 300.0,
+    "label": "MG_Loco_Run_",
+    "anim": "/Game/MaddenRef/Animations/Checkpoint/A_MG_Loco_Run_Average__P01"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Stage2/SK_sleeve_tight_d",
+    "x": 300.0,
+    "label": "MG_Loco_Run_",
+    "anim": "/Game/MaddenRef/Animations/Checkpoint/A_MG_Loco_Run_Average__P01"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Stage2/SK_faulkmarshall_11413",
+    "x": 600.0,
+    "label": "2man_Catch_D",
+    "anim": "/Game/MaddenRef/Animations/Checkpoint/A_2man_Catch_Def_In_Over_ShoveTackle__P01"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Stage2/SK_fullarms_d",
+    "x": 600.0,
+    "label": "2man_Catch_D",
+    "anim": "/Game/MaddenRef/Animations/Checkpoint/A_2man_Catch_Def_In_Over_ShoveTackle__P01"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Stage2/SK_legs_d",
+    "x": 600.0,
+    "label": "2man_Catch_D",
+    "anim": "/Game/MaddenRef/Animations/Checkpoint/A_2man_Catch_Def_In_Over_ShoveTackle__P01"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Stage2/SK_jersey_d",
+    "x": 600.0,
+    "label": "2man_Catch_D",
+    "anim": "/Game/MaddenRef/Animations/Checkpoint/A_2man_Catch_Def_In_Over_ShoveTackle__P01"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Stage2/SK_pants_d",
+    "x": 600.0,
+    "label": "2man_Catch_D",
+    "anim": "/Game/MaddenRef/Animations/Checkpoint/A_2man_Catch_Def_In_Over_ShoveTackle__P01"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Stage2/SK_socks_mid_d",
+    "x": 600.0,
+    "label": "2man_Catch_D",
+    "anim": "/Game/MaddenRef/Animations/Checkpoint/A_2man_Catch_Def_In_Over_ShoveTackle__P01"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_shell_xenith",
+    "x": 600.0,
+    "label": "2man_Catch_D",
+    "anim": "/Game/MaddenRef/Animations/Checkpoint/A_2man_Catch_Def_In_Over_ShoveTackle__P01"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_facemask_xenithprism",
+    "x": 600.0,
+    "label": "2man_Catch_D",
+    "anim": "/Game/MaddenRef/Animations/Checkpoint/A_2man_Catch_Def_In_Over_ShoveTackle__P01"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubr_d",
+    "x": 600.0,
+    "label": "2man_Catch_D",
+    "anim": "/Game/MaddenRef/Animations/Checkpoint/A_2man_Catch_Def_In_Over_ShoveTackle__P01"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubl_d",
+    "x": 600.0,
+    "label": "2man_Catch_D",
+    "anim": "/Game/MaddenRef/Animations/Checkpoint/A_2man_Catch_Def_In_Over_ShoveTackle__P01"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Stage2/SK_glover_d",
+    "x": 600.0,
+    "label": "2man_Catch_D",
+    "anim": "/Game/MaddenRef/Animations/Checkpoint/A_2man_Catch_Def_In_Over_ShoveTackle__P01"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Stage2/SK_glovel_d",
+    "x": 600.0,
+    "label": "2man_Catch_D",
+    "anim": "/Game/MaddenRef/Animations/Checkpoint/A_2man_Catch_Def_In_Over_ShoveTackle__P01"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Stage2/SK_sleeve_tight_d",
+    "x": 600.0,
+    "label": "2man_Catch_D",
+    "anim": "/Game/MaddenRef/Animations/Checkpoint/A_2man_Catch_Def_In_Over_ShoveTackle__P01"
+   }
+  ]
+ }
+}

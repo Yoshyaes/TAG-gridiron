@@ -156,3 +156,20 @@ Tooling is in `tools\madden\antbank\`. It is Python and reads the AssetBank RES 
 
 - **Frame 0 against the bind pose, interpreted.** The Hero bind pose is a T pose, and these clips start in a crouch, a run stride and a ready stance, so frame 0 cannot equal it. A scrambled decode would leave joints at random rotations, median about 126 degrees from the bind. The decoded medians are 9 to 51 degrees, bone lengths equal the bind exactly, and the joint frames follow the bind convention (227 rig defaults within 1 degree). No T pose clip exists in the bank to test it literally. Flagged for Fred.
 - The largest frame to frame steps are on `LeftAnkleEffectorAux` and `RightAnkleEffectorAux` (IK targets, not skinned bones), up to 54 degrees per frame in the run. Real joints stay smooth (idle maximum 7 degrees per frame at 60 fps, on Head).
+
+## Checkpoint C. FBX export and Unreal import of the three clips. PASS
+- **Exporter.** `tools\madden\antbank\fbxanim.py` writes ASCII FBX 7.4 that mirrors Frosty's skeleton FBX. Y up, meters (UnitScaleFactor 100), the same 268 bone names and parents, bind = EBX LocalPose, Euler XYZ (R = Rz Ry Rx), and a BindPose with the EBX global matrices. Every bone is keyed on every frame. Joints a clip does not drive keep the EBX bind, so RM_ deformation helpers and the face stay at the mesh bind. The finger layer clip (`LayerAnim`) is merged into the body clip.
+- **Convention check.** The Euler extraction reproduces Frosty's own Lcl Rotation and Lcl Translation values exactly (for example Hips 90, 0, 90 and LeftArm 3.19, -29.03, 32.46), so the animation FBX and the mesh FBX describe the same skeleton.
+- **Two Interchange findings, both fixed.**
+  1. Interchange ignores the FBX `CustomFrameRate` and guessed 12 fps, then refused clips whose length is not frame aligned. The exporter now writes the standard FBX time mode (6 for 30 fps, 3 for 60 fps, and so on) and the importer bakes at the clip's own rate (`custom_bone_animation_sample_rate`).
+  2. Without a BindPose node Interchange warned about invalid bind poses. The exporter now writes one and the warning is gone.
+- **Result.** `/Game/MaddenRef/Animations/Checkpoint/A_HB_Blocking_Idle_Loop__P01`, `A_MG_Loco_Run_Average__P01` and `A_2man_Catch_Def_In_Over_ShoveTackle__P01`, all on `MaddenFB_Hero_Skeleton`. The import log ends `Success - 0 error(s), 0 warning(s)`. Every clip has 268 bone tracks and none is missing from the skeleton.
+
+| Clip | Length | Frames | Head height at t0 (UE, Python) | Root travel (UE, Python) |
+| --- | --- | --- | --- | --- |
+| Idle | 1.317 s | 80 | 127.5 cm, 126.7 to 134.5 cm | 0.5 cm, 0.4 cm |
+| Run | 1.733 s | 53 | 156.3 cm, 150.3 to 156.7 cm | 11.33 m, 11.327 m |
+| Tackle | 2.433 s | 147 | 142.5 cm, 113.6 to 168.8 cm | 5.59 m, 5.59 m |
+
+- Preview level `/Game/MaddenRef/Maps/L_MaddenRef_AnimCheckpoint` puts the dressed Stage 2 player in each clip side by side (every part plays the same sequence). Visual sign off is left for Fred.
+- Install guard unchanged, manifest 3,099 files matching the disk, MaddenRef audit passes (1,283 packages).

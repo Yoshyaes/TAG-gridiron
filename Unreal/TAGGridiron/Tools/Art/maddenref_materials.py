@@ -167,7 +167,15 @@ def build_preview(spec):
             actor.static_mesh_component.set_static_mesh(mesh)
         else:
             actor = eas.spawn_actor_from_class(unreal.SkeletalMeshActor, unreal.Vector(x, y, 0))
-            actor.skeletal_mesh_component.set_skeletal_mesh_asset(mesh)
+            comp = actor.skeletal_mesh_component
+            comp.set_skeletal_mesh_asset(mesh)
+            if isinstance(m, dict) and m.get("anim"):
+                # Every part plays the same sequence from the same start, so the dressed player stays in sync.
+                anim = unreal.load_asset(m["anim"])
+                if anim is not None:
+                    comp.set_animation_mode(unreal.AnimationMode.ANIMATION_SINGLE_NODE)
+                    comp.set_animation(anim)
+                    comp.set_editor_property("animation_data", unreal.SingleAnimationPlayData(anim_to_play=anim, saved_looping=True, saved_playing=True))
         actor.set_actor_label((label + "_" if label else "") + mpath.rsplit("/", 1)[1])
     les.save_current_level()
     return {"preview": path}
