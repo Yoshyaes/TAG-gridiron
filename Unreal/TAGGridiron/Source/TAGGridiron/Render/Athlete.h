@@ -1,4 +1,4 @@
-// A football player on the field: skinned character + uniform pieces, posed from the simulation.
+// A football player on the field: motion-captured character + uniform pieces, driven from the simulation.
 #pragma once
 
 #include "CoreMinimal.h"
@@ -32,8 +32,15 @@ public:
 
 	void Setup(const tag::Player* InPlayer, const FUniform& U);
 
-	/** Drive from simulation state. Location in world cm, yaw degrees, speed in yd/s. */
-	void Drive(const FVector& Location, float Yaw, float SpeedYds, float VMaxYds, const FString& Anim, float AnimT, float DeltaTime);
+	/**
+	 * Drive from simulation state.
+	 * Location: world cm. Yaw: facing (deg). VelWorld: cm/s. Anim: sim animation state name.
+	 * bLineman: uses crouched stance/footwork.
+	 */
+	void Drive(const FVector& Location, float Yaw, const FVector& VelWorld, float VMaxYds, const FString& Anim, float AnimT, float DeltaTime, bool bLineman);
+
+	/** Restore an animated (non-ragdoll) pose, e.g. before the next snap. */
+	void ResetPose();
 
 	void SetSelected(bool bSel);
 	void SetLabel(const FString& Text);
@@ -69,14 +76,19 @@ public:
 
 private:
 	void PlayClip(UAnimationAsset* Clip, bool bLoop, float Rate = 1.f);
+	void StartRagdoll(const FVector& VelWorld);
 
 	UPROPERTY()
 	TObjectPtr<UAnimationAsset> CurrentClip;
 
 	FString CurrentAnim;
-	float BlendAxisMax = 500.f;
 	float SmoothedYaw = 0.f;
+	float SmoothedDir = 0.f;
+	float SmoothedSpeed = 0.f;
 	bool bYawInit = false;
+	bool bRagdoll = false;
+	FVector BodyRelLoc = FVector::ZeroVector;
+	FRotator BodyRelRot = FRotator(0, -90, 0);
 };
 
 /** Shared asset cache for athletes (loaded once). */
@@ -84,8 +96,10 @@ struct FAthleteAssets
 {
 	static FAthleteAssets& Get();
 	bool bLoaded = false;
+	bool bMocap = false; // Game Animation Sample (UEFN mannequin) assets available
 	TObjectPtr<class USkeletalMesh> Mesh;
 	TObjectPtr<class UBlendSpace> Locomotion;
+	TObjectPtr<class UBlendSpace> Crouch;
 	TObjectPtr<UAnimationAsset> FallFront;
 	TObjectPtr<UAnimationAsset> FallFront2;
 	TObjectPtr<UAnimationAsset> FallBack;
@@ -94,6 +108,10 @@ struct FAthleteAssets
 	TObjectPtr<UAnimationAsset> Throw;
 	TObjectPtr<UAnimationAsset> Jump;
 	TObjectPtr<UAnimationAsset> Dash;
+	TObjectPtr<UAnimationAsset> Celebrate;
+	TObjectPtr<class UMaterialInterface> UniformMat;
+	float LocoMaxSpeed = 700.f;
+	float CrouchMaxSpeed = 225.f;
 	TObjectPtr<class UStaticMesh> Sphere;
 	TObjectPtr<class UStaticMesh> Cube;
 	TObjectPtr<class UStaticMesh> Cylinder;

@@ -75,6 +75,18 @@ void AStadium::Build(const tag::Team& Home, const tag::Team& Away, const tag::We
 	UStaticMesh* Cube = A.Cube;
 	const bool bSnowy = W.precip == tag::Precip::Snow;
 	const bool bWet = W.precip == tag::Precip::Rain;
+	// invisible ground for physics (ragdoll tackles land on the turf)
+	{
+		UStaticMeshComponent* Ground = NewObject<UStaticMeshComponent>(this);
+		Ground->SetupAttachment(RootComponent);
+		Ground->SetStaticMesh(Cube);
+		Ground->SetRelativeLocation(FVector(50 * YD, 0, -50));
+		Ground->SetRelativeScale3D(FVector(200 * YD / 100, 120 * YD / 100, 1));
+		Ground->SetCollisionProfileName(TEXT("BlockAll"));
+		Ground->SetHiddenInGame(true);
+		Ground->SetCastShadow(false);
+		Ground->RegisterComponent();
+	}
 	const bool bPro = A.TurfMat && A.Plane;
 	auto TurfMID = [&](float LinesAmt, const FLinearColor& Tint, float PaintAmt, const FLinearColor& Paint, const FLinearColor& Tiling, float Stripes)
 	{

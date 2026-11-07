@@ -522,7 +522,9 @@ void AMatchDirector::UpdateKick(float Dt)
 	{
 		AAthlete* A = AthleteFor(P, Game->home->hasPlayer(P) ? tag::TeamKey::Home : tag::TeamKey::Away);
 		A->SetActorHiddenInGame(false);
-		A->Drive(ToWorld(X, Y, K.Dir), FaceToYaw(FaceX > 0 ? 0 : PI, K.Dir), Sp, 9.f, Anim, K.T, Dt);
+		const float Yw = FaceToYaw(FaceX > 0 ? 0 : PI, K.Dir);
+		const FVector VelW = FRotator(0, Yw, 0).Vector() * Sp * YD;
+		A->Drive(ToWorld(X, Y, K.Dir), Yw, VelW, 9.f, Anim, K.T, Dt, false);
 		A->SetSelected(false);
 		A->SetLabel(TEXT(""));
 	};
@@ -624,7 +626,11 @@ void AMatchDirector::ShowOnly(const std::vector<tag::Player*>& Ps)
 		Ids.Add(P->id);
 		AthleteFor(P, Game && Game->home->hasPlayer(P) ? tag::TeamKey::Home : tag::TeamKey::Away);
 	}
-	for (auto& KV : Athletes) KV.Value->SetActorHiddenInGame(!Ids.Contains(KV.Key));
+	for (auto& KV : Athletes)
+	{
+		KV.Value->ResetPose(); // stand tackled players back up for the next snap
+		KV.Value->SetActorHiddenInGame(!Ids.Contains(KV.Key));
+	}
 }
 
 void AMatchDirector::CapturePrev()
@@ -645,7 +651,8 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 		const double X = PV ? FMath::Lerp(PV->X, E->pos.x, static_cast<double>(Alpha)) : E->pos.x;
 		const double Y = PV ? FMath::Lerp(PV->Y, E->pos.y, static_cast<double>(Alpha)) : E->pos.y;
 		AAthlete* A = AthleteFor(E->p, E->side == tag::Side::Off ? OffK : tag::other(OffK));
-		A->Drive(ToWorld(X, Y, Dir), FaceToYaw(E->face, Dir), static_cast<float>(E->speed()), static_cast<float>(E->vmax), FString(E->animName()), static_cast<float>(E->animT), Dt);
+		const FVector VelW = Dir > 0 ? FVector(E->vel.x, -E->vel.y, 0) * YD : FVector(-E->vel.x, E->vel.y, 0) * YD;
+		A->Drive(ToWorld(X, Y, Dir), FaceToYaw(E->face, Dir), VelW, static_cast<float>(E->vmax), FString(E->animName()), static_cast<float>(E->animT), Dt, E->isOL || E->isDL);
 		A->SetSelected(E->userControlled);
 		auto L = Labels.find(E);
 		A->SetLabel(L != Labels.end() ? L->second : FString());
