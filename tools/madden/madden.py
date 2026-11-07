@@ -14,6 +14,8 @@ Commands
   materials <spec> <stage>  headless reference materials and preview level (maddenref_materials.py)
   audit <stage>             headless MaddenRef audit (maddenref_audit.py), exit 5 on fail
   verify                    manifest counts and hashes against the disk, exit 6 on mismatch
+  kit <spec.json>           run one kit end to end (plan, export, texfix, material JSON, UE import,
+                            materials, verify, guard, audit). Exit 3 on install change, 4 on disk floor
 """
 import csv
 import hashlib
@@ -247,10 +249,30 @@ def run_ue(script, env_extra, logname):
     return p.returncode
 
 
+UE_STATE = os.path.join(LOGS, "ue_state.json")
+CONTENT = os.path.join(REPO, "Unreal", "TAGGridiron", "Content")
+
+
+def uasset_path(game_path):
+    return os.path.join(CONTENT, *game_path[len("/Game/"):].split("/")) + ".uasset"
+
+
 def cmd_ue(jobs_path, stage):
+    """Headless import. A job is skipped when its .uasset exists and the source file hash matches the
+    hash recorded at its last successful import (logs/ue_state.json)."""
     report = os.path.join(LOGS, "ue_%s_report.json" % stage)
     expanded = os.path.join(LOGS, "ue_%s_jobs.json" % stage)
-    json.dump(load_jobs(jobs_path), open(expanded, "w", encoding="utf-8"), indent=1)
+    state = json.load(open(UE_STATE)) if os.path.exists(UE_STATE) else {}
+    todo = []
+    for j in load_jobs(jobs_path):
+        key = j["dest"] + "/" + j["name"]
+        if os.path.exists(uasset_path(key)) and os.path.exists(j["file"]) and state.get(key) == sha256(j["file"]):
+            continue
+        todo.append(j)
+    log("ue %s todo=%d" % (stage, len(todo)))
+    if not todo:
+        return 0
+    json.dump(todo, open(expanded, "w", encoding="utf-8"), indent=1)
     rc = run_ue("maddenref_import.py", {"MADDENREF_JOBS": expanded, "MADDENREF_REPORT": report}, "ue_%s.log" % stage)
     if not os.path.exists(report):
         log("ue %s produced no report rc=%d" % (stage, rc))
@@ -259,6 +281,10 @@ def cmd_ue(jobs_path, stage):
     bad = [x for x in r["results"] if x["status"] != "ok"]
     for x in bad:
         append_failure(stage, x["job"].get("file"), "ue_import", x.get("error"))
+    for x in r["results"]:
+        if x["status"] == "ok":
+            state[x["job"]["dest"] + "/" + x["job"]["name"]] = sha256(x["job"]["file"])
+    json.dump(state, open(UE_STATE, "w"), indent=1, sort_keys=True)
     log("ue %s ok=%d fail=%d" % (stage, len(r["results"]) - len(bad), len(bad)))
     return 0
 
@@ -290,6 +316,55 @@ def cmd_audit(stage):
     r = json.load(open(out))
     log("audit %s %s packages=%d problems=%s" % (stage, r["status"], r["maddenref_packages"], r["problems"]))
     return 0 if r["status"] == "pass" else 5
+
+
+PY313 = ["py", "-3.13", "-I"]
+
+
+def cmd_kit(spec_path):
+    """Runs one kit end to end with gates. Exit 3 means the install guard saw a change (stop everything)."""
+    spec = json.load(open(spec_path, encoding="utf-8"))
+    name = spec["name"]
+    kit = [sys.executable, "-I", os.path.join(TOOLS, "kit.py")]
+    result = {"kit": name, "steps": []}
+
+    def step(label, rc):
+        result["steps"].append([label, rc])
+        log("kit %s step %s rc=%s" % (name, label, rc))
+        return rc
+
+    def save():
+        json.dump(result, open(os.path.join(LOGS, "kit_%s_result.json" % name), "w"), indent=1)
+
+    if step("plan", subprocess.run(kit + ["plan", spec_path], timeout=STEP_TIMEOUT).returncode):
+        save()
+        return 1
+    step("host_plan", cmd_host(os.path.join(TOOLS, "jobs", name + "_plan.json"), name + "_plan"))
+    if step("jobs", subprocess.run(kit + ["jobs", spec_path], timeout=STEP_TIMEOUT).returncode):
+        save()
+        return 1
+    summary = json.load(open(os.path.join(LOGS, "kit_%s_summary.json" % name)))
+    result["summary"] = summary
+    if step("diskcheck", cmd_diskcheck(summary["projected_bytes"])):
+        result["skipped"] = "projected size would break the 50 GB floor on D"
+        save()
+        return 4
+    step("host", cmd_host(os.path.join(TOOLS, "jobs", name + ".json"), name))
+    tex_dir = os.path.join(EXTRACTED, spec["out"], "textures")
+    if os.path.isdir(tex_dir):
+        step("texfix", subprocess.run(PY313 + [os.path.join(TOOLS, "texfix.py"), tex_dir], timeout=STEP_TIMEOUT).returncode)
+    step("matdesc", subprocess.run(kit + ["matdesc", spec_path], timeout=STEP_TIMEOUT).returncode)
+    step("mat", subprocess.run(kit + ["mat", spec_path], timeout=STEP_TIMEOUT).returncode)
+    step("ue", cmd_ue(os.path.join(TOOLS, "jobs", "ue_" + name + ".json"), name))
+    step("materials", cmd_materials(os.path.join(TOOLS, "jobs", "mat_" + name + ".json"), name))
+    step("verify", cmd_verify())
+    g = step("guard", cmd_guard())
+    save()
+    if g != 0:
+        return 3
+    step("audit", cmd_audit(name))
+    save()
+    return 0
 
 
 def cmd_verify():
@@ -337,6 +412,8 @@ def main(argv):
         return cmd_materials(argv[2], argv[3])
     if c == "audit":
         return cmd_audit(argv[2])
+    if c == "kit":
+        return cmd_kit(argv[2])
     if c == "verify":
         return cmd_verify()
     print(__doc__)

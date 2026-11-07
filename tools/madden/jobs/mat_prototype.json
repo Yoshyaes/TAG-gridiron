@@ -15,8 +15,64 @@
    }
   },
   {
+   "mesh": "/Game/MaddenRef/Players/Prototype/SK_fullarms_m",
+   "mi": "/Game/MaddenRef/Players/Prototype/Materials/MI_fullarms_m_arm_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": true,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Prototype/Textures/T_arm_skintone1",
+    "Normal": "/Game/MaddenRef/Players/Prototype/Textures/T_arm_normal",
+    "RSM": "/Game/MaddenRef/Players/Prototype/Textures/T_arm_rsm_skintone2"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Prototype/SK_fullarms_h",
+   "mi": "/Game/MaddenRef/Players/Prototype/Materials/MI_fullarms_h_arm_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": true,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Prototype/Textures/T_arm_skintone1",
+    "Normal": "/Game/MaddenRef/Players/Prototype/Textures/T_arm_normal",
+    "RSM": "/Game/MaddenRef/Players/Prototype/Textures/T_arm_rsm_skintone2"
+   }
+  },
+  {
    "mesh": "/Game/MaddenRef/Players/Prototype/SK_legs_t",
    "mi": "/Game/MaddenRef/Players/Prototype/Materials/MI_legs_t_playerLegs_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": true,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Prototype/Textures/T_genericpadless_legs_st1",
+    "Normal": "/Game/MaddenRef/Players/Prototype/Textures/T_ls_common_legs_normal",
+    "RSM": "/Game/MaddenRef/Players/Prototype/Textures/T_ls_common_legs_rsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Prototype/SK_legs_m",
+   "mi": "/Game/MaddenRef/Players/Prototype/Materials/MI_legs_m_playerLegs_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": true,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Prototype/Textures/T_genericpadless_legs_st1",
+    "Normal": "/Game/MaddenRef/Players/Prototype/Textures/T_ls_common_legs_normal",
+    "RSM": "/Game/MaddenRef/Players/Prototype/Textures/T_ls_common_legs_rsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Prototype/SK_legs_h",
+   "mi": "/Game/MaddenRef/Players/Prototype/Materials/MI_legs_h_playerLegs_lod0_mat",
    "slot": 0,
    "switches": {
     "RSMIsSkin": true,
@@ -33,6 +89,35 @@
    "mi": "/Game/MaddenRef/Players/Prototype/Materials/MI_jersey_t",
    "slot": "all",
    "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Prototype/Textures/T_nin_jersey_2018_whialt_jersey_col",
+    "Normal": "/Game/MaddenRef/Players/Prototype/Textures/T_nin_jersey_2018_whialt_jersey_norm",
+    "RSM": "/Game/MaddenRef/Players/Prototype/Textures/T_nin_jersey_2018_whialt_jersey_rsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Prototype/SK_jersey_m",
+   "mi": "/Game/MaddenRef/Players/Prototype/Materials/MI_jersey_m",
+   "slot": "all",
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Prototype/Textures/T_nin_jersey_2018_whialt_jersey_col",
+    "Normal": "/Game/MaddenRef/Players/Prototype/Textures/T_nin_jersey_2018_whialt_jersey_norm",
+    "RSM": "/Game/MaddenRef/Players/Prototype/Textures/T_nin_jersey_2018_whialt_jersey_rsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Prototype/SK_jersey_h",
+   "mi": "/Game/MaddenRef/Players/Prototype/Materials/MI_jersey_h",
+   "slot": "all",
+   "switches": {
+    "RSMIsSkin": false,
     "UseRSM": true
    },
    "textures": {
@@ -46,6 +131,35 @@
    "mi": "/Game/MaddenRef/Players/Prototype/Materials/MI_pants_t",
    "slot": "all",
    "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Prototype/Textures/T_nin_pants_2018_whialt_pants_col",
+    "Normal": "/Game/MaddenRef/Players/Prototype/Textures/T_nin_pants_2018_whialt_pants_norm",
+    "RSM": "/Game/MaddenRef/Players/Prototype/Textures/T_nin_pants_2018_whialt_pants_rsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Prototype/SK_pants_m",
+   "mi": "/Game/MaddenRef/Players/Prototype/Materials/MI_pants_m",
+   "slot": "all",
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Prototype/Textures/T_nin_pants_2018_whialt_pants_col",
+    "Normal": "/Game/MaddenRef/Players/Prototype/Textures/T_nin_pants_2018_whialt_pants_norm",
+    "RSM": "/Game/MaddenRef/Players/Prototype/Textures/T_nin_pants_2018_whialt_pants_rsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Prototype/SK_pants_h",
+   "mi": "/Game/MaddenRef/Players/Prototype/Materials/MI_pants_h",
+   "slot": "all",
+   "switches": {
+    "RSMIsSkin": false,
     "UseRSM": true
    },
    "textures": {
@@ -57,6 +171,34 @@
   {
    "mesh": "/Game/MaddenRef/Players/Prototype/SK_socks_mid_t",
    "mi": "/Game/MaddenRef/Players/Prototype/Materials/MI_socks_mid_t_playerSocks_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Prototype/Textures/T_socks_outer_col",
+    "Normal": "/Game/MaddenRef/Players/Prototype/Textures/T_socks_outer_norm",
+    "RSM": "/Game/MaddenRef/Players/Prototype/Textures/T_socks_outer_rsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Prototype/SK_socks_mid_m",
+   "mi": "/Game/MaddenRef/Players/Prototype/Materials/MI_socks_mid_m_playerSocks_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Prototype/Textures/T_socks_outer_col",
+    "Normal": "/Game/MaddenRef/Players/Prototype/Textures/T_socks_outer_norm",
+    "RSM": "/Game/MaddenRef/Players/Prototype/Textures/T_socks_outer_rsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Prototype/SK_socks_mid_h",
+   "mi": "/Game/MaddenRef/Players/Prototype/Materials/MI_socks_mid_h_playerSocks_lod0_mat",
    "slot": 0,
    "switches": {
     "RSMIsSkin": false,
@@ -83,88 +225,6 @@
    }
   },
   {
-   "mesh": "/Game/MaddenRef/Players/Prototype/SK_shoe_low_nikealphamenaceelite99clubl_t",
-   "mi": "/Game/MaddenRef/Players/Prototype/Materials/MI_shoe_low_nikealphamenaceelite99clubl_t_playerShoeL_lod0_mat",
-   "slot": 0,
-   "switches": {
-    "RSMIsSkin": false,
-    "UseRSM": true
-   },
-   "textures": {
-    "BaseColor": "/Game/MaddenRef/Players/Prototype/Textures/T_shoe_low_nikealphamenaceelite99club_black_col",
-    "Normal": "/Game/MaddenRef/Players/Prototype/Textures/T_shoe_low_nikealphamenaceelite99club_norm",
-    "RSM": "/Game/MaddenRef/Players/Prototype/Textures/T_shoe_low_nikealphamenaceelite99club_rsm"
-   }
-  },
-  {
-   "mesh": "/Game/MaddenRef/Players/Prototype/SK_fullarms_m",
-   "mi": "/Game/MaddenRef/Players/Prototype/Materials/MI_fullarms_m_arm_lod0_mat",
-   "slot": 0,
-   "switches": {
-    "RSMIsSkin": true,
-    "UseRSM": true
-   },
-   "textures": {
-    "BaseColor": "/Game/MaddenRef/Players/Prototype/Textures/T_arm_skintone1",
-    "Normal": "/Game/MaddenRef/Players/Prototype/Textures/T_arm_normal",
-    "RSM": "/Game/MaddenRef/Players/Prototype/Textures/T_arm_rsm_skintone2"
-   }
-  },
-  {
-   "mesh": "/Game/MaddenRef/Players/Prototype/SK_legs_m",
-   "mi": "/Game/MaddenRef/Players/Prototype/Materials/MI_legs_m_playerLegs_lod0_mat",
-   "slot": 0,
-   "switches": {
-    "RSMIsSkin": true,
-    "UseRSM": true
-   },
-   "textures": {
-    "BaseColor": "/Game/MaddenRef/Players/Prototype/Textures/T_genericpadless_legs_st1",
-    "Normal": "/Game/MaddenRef/Players/Prototype/Textures/T_ls_common_legs_normal",
-    "RSM": "/Game/MaddenRef/Players/Prototype/Textures/T_ls_common_legs_rsm"
-   }
-  },
-  {
-   "mesh": "/Game/MaddenRef/Players/Prototype/SK_jersey_m",
-   "mi": "/Game/MaddenRef/Players/Prototype/Materials/MI_jersey_m",
-   "slot": "all",
-   "switches": {
-    "UseRSM": true
-   },
-   "textures": {
-    "BaseColor": "/Game/MaddenRef/Players/Prototype/Textures/T_nin_jersey_2018_whialt_jersey_col",
-    "Normal": "/Game/MaddenRef/Players/Prototype/Textures/T_nin_jersey_2018_whialt_jersey_norm",
-    "RSM": "/Game/MaddenRef/Players/Prototype/Textures/T_nin_jersey_2018_whialt_jersey_rsm"
-   }
-  },
-  {
-   "mesh": "/Game/MaddenRef/Players/Prototype/SK_pants_m",
-   "mi": "/Game/MaddenRef/Players/Prototype/Materials/MI_pants_m",
-   "slot": "all",
-   "switches": {
-    "UseRSM": true
-   },
-   "textures": {
-    "BaseColor": "/Game/MaddenRef/Players/Prototype/Textures/T_nin_pants_2018_whialt_pants_col",
-    "Normal": "/Game/MaddenRef/Players/Prototype/Textures/T_nin_pants_2018_whialt_pants_norm",
-    "RSM": "/Game/MaddenRef/Players/Prototype/Textures/T_nin_pants_2018_whialt_pants_rsm"
-   }
-  },
-  {
-   "mesh": "/Game/MaddenRef/Players/Prototype/SK_socks_mid_m",
-   "mi": "/Game/MaddenRef/Players/Prototype/Materials/MI_socks_mid_m_playerSocks_lod0_mat",
-   "slot": 0,
-   "switches": {
-    "RSMIsSkin": false,
-    "UseRSM": true
-   },
-   "textures": {
-    "BaseColor": "/Game/MaddenRef/Players/Prototype/Textures/T_socks_outer_col",
-    "Normal": "/Game/MaddenRef/Players/Prototype/Textures/T_socks_outer_norm",
-    "RSM": "/Game/MaddenRef/Players/Prototype/Textures/T_socks_outer_rsm"
-   }
-  },
-  {
    "mesh": "/Game/MaddenRef/Players/Prototype/SK_shoe_low_nikealphamenaceelite99clubr_m",
    "mi": "/Game/MaddenRef/Players/Prototype/Materials/MI_shoe_low_nikealphamenaceelite99clubr_m_playerShoeR_lod0_mat",
    "slot": 0,
@@ -179,8 +239,8 @@
    }
   },
   {
-   "mesh": "/Game/MaddenRef/Players/Prototype/SK_shoe_low_nikealphamenaceelite99clubl_m",
-   "mi": "/Game/MaddenRef/Players/Prototype/Materials/MI_shoe_low_nikealphamenaceelite99clubl_m_playerShoeL_lod0_mat",
+   "mesh": "/Game/MaddenRef/Players/Prototype/SK_shoe_low_nikealphamenaceelite99clubr_h",
+   "mi": "/Game/MaddenRef/Players/Prototype/Materials/MI_shoe_low_nikealphamenaceelite99clubr_h_playerShoeR_lod0_mat",
    "slot": 0,
    "switches": {
     "RSMIsSkin": false,
@@ -193,76 +253,22 @@
    }
   },
   {
-   "mesh": "/Game/MaddenRef/Players/Prototype/SK_fullarms_h",
-   "mi": "/Game/MaddenRef/Players/Prototype/Materials/MI_fullarms_h_arm_lod0_mat",
-   "slot": 0,
-   "switches": {
-    "RSMIsSkin": true,
-    "UseRSM": true
-   },
-   "textures": {
-    "BaseColor": "/Game/MaddenRef/Players/Prototype/Textures/T_arm_skintone1",
-    "Normal": "/Game/MaddenRef/Players/Prototype/Textures/T_arm_normal",
-    "RSM": "/Game/MaddenRef/Players/Prototype/Textures/T_arm_rsm_skintone2"
-   }
-  },
-  {
-   "mesh": "/Game/MaddenRef/Players/Prototype/SK_legs_h",
-   "mi": "/Game/MaddenRef/Players/Prototype/Materials/MI_legs_h_playerLegs_lod0_mat",
-   "slot": 0,
-   "switches": {
-    "RSMIsSkin": true,
-    "UseRSM": true
-   },
-   "textures": {
-    "BaseColor": "/Game/MaddenRef/Players/Prototype/Textures/T_genericpadless_legs_st1",
-    "Normal": "/Game/MaddenRef/Players/Prototype/Textures/T_ls_common_legs_normal",
-    "RSM": "/Game/MaddenRef/Players/Prototype/Textures/T_ls_common_legs_rsm"
-   }
-  },
-  {
-   "mesh": "/Game/MaddenRef/Players/Prototype/SK_jersey_h",
-   "mi": "/Game/MaddenRef/Players/Prototype/Materials/MI_jersey_h",
-   "slot": "all",
-   "switches": {
-    "UseRSM": true
-   },
-   "textures": {
-    "BaseColor": "/Game/MaddenRef/Players/Prototype/Textures/T_nin_jersey_2018_whialt_jersey_col",
-    "Normal": "/Game/MaddenRef/Players/Prototype/Textures/T_nin_jersey_2018_whialt_jersey_norm",
-    "RSM": "/Game/MaddenRef/Players/Prototype/Textures/T_nin_jersey_2018_whialt_jersey_rsm"
-   }
-  },
-  {
-   "mesh": "/Game/MaddenRef/Players/Prototype/SK_pants_h",
-   "mi": "/Game/MaddenRef/Players/Prototype/Materials/MI_pants_h",
-   "slot": "all",
-   "switches": {
-    "UseRSM": true
-   },
-   "textures": {
-    "BaseColor": "/Game/MaddenRef/Players/Prototype/Textures/T_nin_pants_2018_whialt_pants_col",
-    "Normal": "/Game/MaddenRef/Players/Prototype/Textures/T_nin_pants_2018_whialt_pants_norm",
-    "RSM": "/Game/MaddenRef/Players/Prototype/Textures/T_nin_pants_2018_whialt_pants_rsm"
-   }
-  },
-  {
-   "mesh": "/Game/MaddenRef/Players/Prototype/SK_socks_mid_h",
-   "mi": "/Game/MaddenRef/Players/Prototype/Materials/MI_socks_mid_h_playerSocks_lod0_mat",
+   "mesh": "/Game/MaddenRef/Players/Prototype/SK_shoe_low_nikealphamenaceelite99clubl_t",
+   "mi": "/Game/MaddenRef/Players/Prototype/Materials/MI_shoe_low_nikealphamenaceelite99clubl_t_playerShoeL_lod0_mat",
    "slot": 0,
    "switches": {
     "RSMIsSkin": false,
     "UseRSM": true
    },
    "textures": {
-    "BaseColor": "/Game/MaddenRef/Players/Prototype/Textures/T_socks_outer_col",
-    "Normal": "/Game/MaddenRef/Players/Prototype/Textures/T_socks_outer_norm",
-    "RSM": "/Game/MaddenRef/Players/Prototype/Textures/T_socks_outer_rsm"
+    "BaseColor": "/Game/MaddenRef/Players/Prototype/Textures/T_shoe_low_nikealphamenaceelite99club_black_col",
+    "Normal": "/Game/MaddenRef/Players/Prototype/Textures/T_shoe_low_nikealphamenaceelite99club_norm",
+    "RSM": "/Game/MaddenRef/Players/Prototype/Textures/T_shoe_low_nikealphamenaceelite99club_rsm"
    }
   },
   {
-   "mesh": "/Game/MaddenRef/Players/Prototype/SK_shoe_low_nikealphamenaceelite99clubr_h",
-   "mi": "/Game/MaddenRef/Players/Prototype/Materials/MI_shoe_low_nikealphamenaceelite99clubr_h_playerShoeR_lod0_mat",
+   "mesh": "/Game/MaddenRef/Players/Prototype/SK_shoe_low_nikealphamenaceelite99clubl_m",
+   "mi": "/Game/MaddenRef/Players/Prototype/Materials/MI_shoe_low_nikealphamenaceelite99clubl_m_playerShoeL_lod0_mat",
    "slot": 0,
    "switches": {
     "RSMIsSkin": false,
@@ -307,6 +313,7 @@
    "mi": "/Game/MaddenRef/Players/Prototype/Materials/MI_helmet_shell_xenith",
    "slot": "all",
    "switches": {
+    "RSMIsSkin": false,
     "UseRSM": false
    },
    "textures": {
@@ -318,6 +325,7 @@
    "mi": "/Game/MaddenRef/Players/Prototype/Materials/MI_helmet_shell_speedflex",
    "slot": "all",
    "switches": {
+    "RSMIsSkin": false,
     "UseRSM": false
    },
    "textures": {

@@ -89,3 +89,12 @@ Every surprise, with evidence. Newest stage last. Private reference work, see `e
 - **Per mesh material description JSON.** `extracted\prototype\materials\<mesh>.material.json` holds the source mesh, MeshVariationDb path, every Madden material slot with its shader parameter names (`colorTexture`, `normalClampTexture`, `normalWrapTexture`, `R_S_SSR_T_Texture`, `RSMTexture`, `sweatNormalTexture`, wrinkle, pad and number slots), the conventions above, and the Unreal bindings. `maddenref_materials.py` builds material instances from these files only.
 - **Master material** `/Game/MaddenRef/Materials/M_MaddenRef_Ref` takes BaseColor, Normal and RSM textures plus `UseRSM` and `RSMIsSkin` switches. Stage 2's preview keeps the earlier `M_MaddenRef_Basic` with unconverted normals. The prototype set is the current reference.
 - Not modelled yet. Detail normal tiling (`normalWrapTexture`), sweat, dirt and grass masks, team colour palettes, jersey numbers and names (number and font slice textures exist per team). These need Madden shader graph work and were left out of the reference materials.
+
+## Stage 6. UE import automation
+- **One command per kit.** `python -I tools\madden\madden.py kit <spec>` runs plan, export, `texfix.py`, material JSON, Interchange import, material instances and preview level, manifest verify, install guard and audit, logging each step to `logs\kit_<name>_result.json`. A second run skips everything (host `todo=0`, UE `todo=0`).
+- **Kit specs** (`tools\madden\kits\*.json`) replace the hard coded prototype. They select meshes by explicit path with body type expansion, by regex (first or all matches), or by seeded random sample. They add team textures and overrides, and choose a preview layout. Specs without a skeleton import as static meshes (`SM_`).
+- **Skeleton bound check per kit.** Any mesh whose highest vertex bone index reaches the skeleton's bone count is excluded and listed in the kit summary instead of exported with garbage weights.
+- **UE import skip state.** `logs\ue_state.json` records each imported asset's source hash. An import is skipped when its `.uasset` exists and the hash matches.
+- **Disk projection.** 1 MB per mesh and 8 MB per texture (twice the Stage 4 averages). Each kit checks the projection against the 50 GB floor on D and is skipped, not partly run, when it would break it.
+- Scale lives in one place (FBX meters at export). Naming and Content layout are documented in `tools\madden\README.md`.
+- Animations are not hooked up because Stage 3 was a no go.

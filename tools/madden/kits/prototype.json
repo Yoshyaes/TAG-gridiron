@@ -1,0 +1,36 @@
+{
+ "name": "prototype",
+ "out": "prototype",
+ "ue_dir": "/Game/MaddenRef/Players/Prototype",
+ "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+ "ue_skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+ "skeleton_bones": 268,
+ "body_types": ["t", "m", "h"],
+ "meshes": [
+  "content/characters/player/bodies/fullarms_{b}_mesh",
+  "content/characters/player/bodies/legs_{b}_mesh",
+  "content/characters/player/parts/torsoapparel/jersey/jersey_{b}_mesh",
+  "content/characters/player/parts/legsapparel/pants/pants_{b}_mesh",
+  "content/characters/player/parts/legsapparel/socks_mid/socks_mid_{b}_mesh",
+  "content/characters/player/parts/torsoapparel/sleeve_tight/sleeve_tight_{b}_mesh",
+  "content/characters/player/parts/footwear/shoe_low_nikealphamenaceelite99club/shoe_low_nikealphamenaceelite99clubr_{b}_mesh",
+  "content/characters/player/parts/footwear/shoe_low_nikealphamenaceelite99club/shoe_low_nikealphamenaceelite99clubl_{b}_mesh",
+  "content/characters/player/parts/armgear/glover/glover_{b}_mesh",
+  "content/characters/player/parts/armgear/glovel/glovel_{b}_mesh"
+ ],
+ "mesh_patterns": [
+  "^content/characters/player/players/f/faulkmarshall_11413/faulkmarshall_11413_mesh$",
+  "^content/characters/player/parts/helmets/xenith/helmet_shell_xenith_mesh$",
+  "^content/characters/player/parts/helmets/xenith/facemasks/helmet_facemask_xenithprism_mesh$",
+  "^content/characters/player/parts/helmets/speedflex/helmet_shell_speedflex_mesh$",
+  "^content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflex[^/]*_mesh$"
+ ],
+ "extra_textures": {"dir": "content/characters/player/parts/uniforms/49ers/2018/", "regex": "(WHIALT_(Jersey|Pants)_(COL|NORM|RSM)|GOLALT_(helmet|Sticker)_COL|socksUnder_COL)$"},
+ "overrides": [
+  ["/jersey_[tmhd]_mesh$", {"BaseColor": "nin_jersey_2018_whialt_jersey_col", "Normal": "nin_jersey_2018_whialt_jersey_norm", "RSM": "nin_jersey_2018_whialt_jersey_rsm"}],
+  ["/pants_[tmhd]_mesh$", {"BaseColor": "nin_pants_2018_whialt_pants_col", "Normal": "nin_pants_2018_whialt_pants_norm", "RSM": "nin_pants_2018_whialt_pants_rsm"}],
+  ["/helmet_shell_[a-z0-9]+_mesh$", {"BaseColor": "nin_helmet_2018_golalt_helmet_col"}]
+ ],
+ "preview": {"mode": "bodytypes", "level": "Prototype", "xs": {"t": -120.0, "m": 0.0, "h": 120.0},
+             "helmets": {"t": "xenith", "m": "speedflex", "h": "xenith"}, "head": "SK_faulkmarshall_11413"}
+}
