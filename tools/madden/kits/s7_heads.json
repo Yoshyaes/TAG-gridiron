@@ -1,0 +1,19 @@
+{
+ "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+ "ue_skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+ "skeleton_bones": 268,
+ "name": "s7_heads",
+ "out": "stage7/heads",
+ "ue_dir": "/Game/MaddenRef/Players/Heads",
+ "sample": {
+  "pattern": "^content/characters/player/players/[^/]+/[^/]+/[^/]+_mesh$",
+  "count": 50,
+  "seed": 19
+ },
+ "preview": {
+  "mode": "grid",
+  "spacing": 40,
+  "per_row": 10,
+  "level": "Stage7Heads"
+ }
+}

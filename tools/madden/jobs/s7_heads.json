@@ -1,0 +1,3353 @@
+[
+ {
+  "id": "m_bouyeaj_14134_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/players/b/bouyeaj_14134/bouyeaj_14134_mesh",
+  "out": "{REPO}/extracted/stage7/heads/meshes/bouyeaj_14134_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/players/b/bouyeaj_14134/bouyeaj_14134_launch_playerhead_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/characters/player/players/b/bouyeAJ_14134/bouyeAJ_14134_color",
+      "normalClampTexture": "content/characters/player/players/b/bouyeAJ_14134/bouyeAJ_14134_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/characters/player/players/b/bouyeAJ_14134/bouyeAJ_14134_color",
+      "normalClampTexture": "content/characters/player/players/b/bouyeAJ_14134/bouyeAJ_14134_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 3,
+     "textures": {
+      "colorTexture": "content/characters/player/players/b/bouyeAJ_14134/bouyeAJ_14134_color",
+      "normalClampTexture": "content/characters/player/players/b/bouyeAJ_14134/bouyeAJ_14134_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 4,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 5,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_greentj_17754_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/players/g/greentj_17754/greentj_17754_mesh",
+  "out": "{REPO}/extracted/stage7/heads/meshes/greentj_17754_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/players/g/greentj_17754/greentj_17754_playerhead_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/characters/player/players/G/greenTJ_17754/greenTJ_17754_color",
+      "normalClampTexture": "content/characters/player/players/G/greenTJ_17754/greenTJ_17754_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/characters/player/players/G/greenTJ_17754/greenTJ_17754_color",
+      "normalClampTexture": "content/characters/player/players/G/greenTJ_17754/greenTJ_17754_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 3,
+     "textures": {
+      "colorTexture": "content/characters/player/players/G/greenTJ_17754/greenTJ_17754_color",
+      "normalClampTexture": "content/characters/player/players/G/greenTJ_17754/greenTJ_17754_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 4,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 5,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_gonzaleztony_11395_hair_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/players/g/gonzaleztony_11395/gonzaleztony_11395_hair_mesh",
+  "out": "{REPO}/extracted/stage7/heads/meshes/gonzaleztony_11395_hair_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/players/g/gonzaleztony_11395/gonzaleztony_11395_hair_playerhead_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/characters/player/players/G/gonzalezTony_11395/gonzalezTony_11395_hair_color",
+      "coefficientTexture": "content/characters/player/players/G/gonzalezTony_11395/gonzalezTony_11395_hair_coeff"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_mcdonaldjrtj_11904_hair_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/players/m/mcdonaldjrtj_11904/mcdonaldjrtj_11904_hair_mesh",
+  "out": "{REPO}/extracted/stage7/heads/meshes/mcdonaldjrtj_11904_hair_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/players/m/mcdonaldjrtj_11904/mcdonaldjrtj_11904_hair_playerhead_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "coefficientTexture": "content/characters/player/players/M/mcDonaldJrTJ_11904/mcDonaldJrTJ_11904_hair_coeff",
+      "colorTexture": "content/characters/player/players/M/mcDonaldJrTJ_11904/mcDonaldJrTJ_11904_hair_color"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_gen_7_h_n_02_haircap_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/players/gen_7/gen_7_h_n_02/gen_7_h_n_02_haircap_mesh",
+  "out": "{REPO}/extracted/stage7/heads/meshes/gen_7_h_n_02_haircap_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/players/gen_7/gen_7_h_n_02/gen_7_h_n_02_haircap_launch_playerhead_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "coefficientTexture": "Content/characters/Player/Players/gen_7/gen_7_H_N_02/gen_7_H_N_02_hair_coeff",
+      "colorTexture": "Content/characters/Player/Players/gen_7/gen_7_H_N_02/gen_7_H_N_02_hair_color"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_gen_7_t_n_001_haircap_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/players/gen_7/gen_7_t_n_001/gen_7_t_n_001_haircap_mesh",
+  "out": "{REPO}/extracted/stage7/heads/meshes/gen_7_t_n_001_haircap_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/players/gen_7/gen_7_t_n_001/gen_7_t_n_001_haircap_launch_playerhead_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/characters/player/commonSimHair/DoRag_color",
+      "normalClampTexture": "content/characters/player/commonSimHair/DoRag_normal",
+      "RSMTexture": "content/characters/player/commonSimHair/DoRag_RSM"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_gen_7_btm_n_007_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/players/gen_7/gen_7_btm_n_007/gen_7_btm_n_007_mesh",
+  "out": "{REPO}/extracted/stage7/heads/meshes/gen_7_btm_n_007_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/players/gen_7/gen_7_btm_n_007/gen_7_btm_n_007_launch_playerhead_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/characters/player/players/gen_7/gen_7_BTM_N_007/gen_7_BTM_N_007_color",
+      "normalClampTexture": "content/characters/player/players/gen_7/gen_7_BTM_N_007/gen_7_BTM_N_007_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/characters/player/players/gen_7/gen_7_BTM_N_007/gen_7_BTM_N_007_color",
+      "normalClampTexture": "content/characters/player/players/gen_7/gen_7_BTM_N_007/gen_7_BTM_N_007_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 3,
+     "textures": {
+      "colorTexture": "content/characters/player/players/gen_7/gen_7_BTM_N_007/gen_7_BTM_N_007_color",
+      "normalClampTexture": "content/characters/player/players/gen_7/gen_7_BTM_N_007/gen_7_BTM_N_007_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 4,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 5,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_gen_6_bmh_g_010_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/players/gen_6/gen_6_bmh_g_010/gen_6_bmh_g_010_mesh",
+  "out": "{REPO}/extracted/stage7/heads/meshes/gen_6_bmh_g_010_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/players/gen_6/gen_6_bmh_g_010/gen_6_bmh_g_010_launch_playerhead_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/characters/player/players/gen_6/gen_6_BMH_G_010/gen_6_BMH_G_010_color",
+      "normalClampTexture": "content/characters/player/players/gen_6/gen_6_BMH_G_010/gen_6_BMH_G_010_normal",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/characters/player/players/gen_6/gen_6_BMH_G_010/gen_6_BMH_G_010_color",
+      "normalClampTexture": "content/characters/player/players/gen_6/gen_6_BMH_G_010/gen_6_BMH_G_010_normal",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 3,
+     "textures": {
+      "colorTexture": "content/characters/player/players/gen_6/gen_6_BMH_G_010/gen_6_BMH_G_010_color",
+      "normalClampTexture": "content/characters/player/players/gen_6/gen_6_BMH_G_010/gen_6_BMH_G_010_normal",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 4,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 5,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_mooredj_13184_haircap_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/players/m/mooredj_13184/mooredj_13184_haircap_mesh",
+  "out": "{REPO}/extracted/stage7/heads/meshes/mooredj_13184_haircap_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/players/m/mooredj_13184/mooredj_13184_haircap_playerhead_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "coefficientTexture": "content/characters/player/Players/m/mooreDJ_13184/mooreDJ_13184_hair_coeff",
+      "colorTexture": "content/characters/player/Players/m/mooreDJ_13184/mooreDJ_13184_hair_color"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_largentsteve_11965_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/players/l/largentsteve_11965/largentsteve_11965_mesh",
+  "out": "{REPO}/extracted/stage7/heads/meshes/largentsteve_11965_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/players/l/largentsteve_11965/largentsteve_11965_playerhead_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/characters/player/players/L/largentSteve_11965/largentSteve_11965_color",
+      "normalClampTexture": "content/characters/player/players/L/largentSteve_11965/largentSteve_11965_normal",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/characters/player/players/L/largentSteve_11965/largentSteve_11965_color",
+      "normalClampTexture": "content/characters/player/players/L/largentSteve_11965/largentSteve_11965_normal",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 3,
+     "textures": {
+      "colorTexture": "content/characters/player/players/L/largentSteve_11965/largentSteve_11965_color",
+      "normalClampTexture": "content/characters/player/players/L/largentSteve_11965/largentSteve_11965_normal",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 4,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 5,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_maclinjeremy_20088_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/players/m/maclinjeremy_20088/maclinjeremy_20088_mesh",
+  "out": "{REPO}/extracted/stage7/heads/meshes/maclinjeremy_20088_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/players/m/maclinjeremy_20088/maclinjeremy_20088_playerhead_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/characters/player/players/M/maclinJeremy_20088/maclinJeremy_20088_color",
+      "normalClampTexture": "content/characters/player/players/M/maclinJeremy_20088/maclinJeremy_20088_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/characters/player/players/M/maclinJeremy_20088/maclinJeremy_20088_color",
+      "normalClampTexture": "content/characters/player/players/M/maclinJeremy_20088/maclinJeremy_20088_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 3,
+     "textures": {
+      "colorTexture": "content/characters/player/players/M/maclinJeremy_20088/maclinJeremy_20088_color",
+      "normalClampTexture": "content/characters/player/players/M/maclinJeremy_20088/maclinJeremy_20088_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 4,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 5,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_samuelsjaylen_13173_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/players/s/samuelsjaylen_13173/samuelsjaylen_13173_mesh",
+  "out": "{REPO}/extracted/stage7/heads/meshes/samuelsjaylen_13173_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/players/s/samuelsjaylen_13173/samuelsjaylen_13173_playerhead_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/characters/player/Players/s/samuelsJaylen_13173/samuelsJaylen_13173_color",
+      "normalClampTexture": "content/characters/player/Players/s/samuelsJaylen_13173/samuelsJaylen_13173_normal",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/characters/player/Players/s/samuelsJaylen_13173/samuelsJaylen_13173_color",
+      "normalClampTexture": "content/characters/player/Players/s/samuelsJaylen_13173/samuelsJaylen_13173_normal",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 3,
+     "textures": {
+      "colorTexture": "content/characters/player/Players/s/samuelsJaylen_13173/samuelsJaylen_13173_color",
+      "normalClampTexture": "content/characters/player/Players/s/samuelsJaylen_13173/samuelsJaylen_13173_normal",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 4,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 5,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 6,
+     "textures": {
+      "colorTexture": "content/characters/common/textures/eyes/eyelashes_M19"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_asiatamatt_11155_haircap_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/players/a/asiatamatt_11155/asiatamatt_11155_haircap_mesh",
+  "out": "{REPO}/extracted/stage7/heads/meshes/asiatamatt_11155_haircap_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/players/a/asiatamatt_11155/asiatamatt_11155_haircap_playerhead_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "coefficientTexture": "content/characters/player/players/a/asiataMatt_11155/asiataMatt_11155_hair_coeff",
+      "colorTexture": "content/characters/player/players/a/asiataMatt_11155/asiataMatt_11155_hair_color"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_gen_2_t_ea_sc_haircap_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/players/gen_2/gen_2_t_ea_sc/gen_2_t_ea_sc_haircap_mesh",
+  "out": "{REPO}/extracted/stage7/heads/meshes/gen_2_t_ea_sc_haircap_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/players/gen_2/gen_2_t_ea_sc/gen_2_t_ea_sc_haircap_launch_playerhead_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "coefficientTexture": "Content/characters/Player/Players/gen_2/gen_2_T_EA_SC/gen_2_T_EA_SC_hair_coeff",
+      "colorTexture": "Content/characters/Player/Players/gen_2/gen_2_T_EA_SC/gen_2_T_EA_SC_hair_color"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_fitzpatrickminkah_13084_hair_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/players/f/fitzpatrickminkah_13084/fitzpatrickminkah_13084_hair_mesh",
+  "out": "{REPO}/extracted/stage7/heads/meshes/fitzpatrickminkah_13084_hair_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/players/f/fitzpatrickminkah_13084/fitzpatrickminkah_13084_hair_playerhead_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "coefficientTexture": "content/characters/player/Players/f/fitzpatrickMinkah_13084/fitzpatrickMinkah_13084_hair_coeff",
+      "colorTexture": "content/characters/player/Players/f/fitzpatrickMinkah_13084/fitzpatrickMinkah_13084_hair_color"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_locketttyler_2448_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/players/l/locketttyler_2448/locketttyler_2448_mesh",
+  "out": "{REPO}/extracted/stage7/heads/meshes/locketttyler_2448_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/players/l/locketttyler_2448/locketttyler_2448_playerhead_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/characters/player/players/L/lockettTyler_2448/lockettTyler_2448_color",
+      "normalClampTexture": "content/characters/player/players/L/lockettTyler_2448/lockettTyler_2448_normal",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/characters/player/players/L/lockettTyler_2448/lockettTyler_2448_color",
+      "normalClampTexture": "content/characters/player/players/L/lockettTyler_2448/lockettTyler_2448_normal",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 3,
+     "textures": {
+      "colorTexture": "content/characters/player/players/L/lockettTyler_2448/lockettTyler_2448_color",
+      "normalClampTexture": "content/characters/player/players/L/lockettTyler_2448/lockettTyler_2448_normal",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 4,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 5,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_johnsonlane_927_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/players/j/johnsonlane_927/johnsonlane_927_mesh",
+  "out": "{REPO}/extracted/stage7/heads/meshes/johnsonlane_927_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/players/j/johnsonlane_927/johnsonlane_927_launch_playerhead_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/characters/player/players/j/johnsonLane_927/johnsonLane_927_color",
+      "normalClampTexture": "content/characters/player/players/j/johnsonLane_927/johnsonLane_927_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/characters/player/players/j/johnsonLane_927/johnsonLane_927_color",
+      "normalClampTexture": "content/characters/player/players/j/johnsonLane_927/johnsonLane_927_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 3,
+     "textures": {
+      "colorTexture": "content/characters/player/players/j/johnsonLane_927/johnsonLane_927_color",
+      "normalClampTexture": "content/characters/player/players/j/johnsonLane_927/johnsonLane_927_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 4,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 5,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_gen_7_bmh_s_008_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/players/gen_7/gen_7_bmh_s_008/gen_7_bmh_s_008_mesh",
+  "out": "{REPO}/extracted/stage7/heads/meshes/gen_7_bmh_s_008_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/players/gen_7/gen_7_bmh_s_008/gen_7_bmh_s_008_launch_playerhead_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/characters/player/players/gen_7/gen_7_BMH_S_008/gen_7_BMH_S_008_color",
+      "normalClampTexture": "content/characters/player/players/gen_7/gen_7_BMH_S_008/gen_7_BMH_S_008_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/characters/player/players/gen_7/gen_7_BMH_S_008/gen_7_BMH_S_008_color",
+      "normalClampTexture": "content/characters/player/players/gen_7/gen_7_BMH_S_008/gen_7_BMH_S_008_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 3,
+     "textures": {
+      "colorTexture": "content/characters/player/players/gen_7/gen_7_BMH_S_008/gen_7_BMH_S_008_color",
+      "normalClampTexture": "content/characters/player/players/gen_7/gen_7_BMH_S_008/gen_7_BMH_S_008_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 4,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 5,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_thielenadam_2280_hair_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/players/t/thielenadam_2280/thielenadam_2280_hair_mesh",
+  "out": "{REPO}/extracted/stage7/heads/meshes/thielenadam_2280_hair_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/players/t/thielenadam_2280/thielenadam_2280_hair_playerhead_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "coefficientTexture": "content/characters/player/players/T/thielenAdam_2280/thielenAdam_2280_hair_coeff",
+      "colorTexture": "content/characters/player/players/T/thielenAdam_2280/thielenAdam_2280_hair_color"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_hitchensanthony_2033_haircap_helmet_on_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/players/h/hitchensanthony_2033/hitchensanthony_2033_haircap_helmet_on_mesh",
+  "out": "{REPO}/extracted/stage7/heads/meshes/hitchensanthony_2033_haircap_helmet_on_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/players/h/hitchensanthony_2033/hitchensanthony_2033_haircap_helmet_on_playerhead_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "coefficientTexture": "content/common/textures/default/flatGrey_color",
+      "colorTexture": "content/common/textures/flatBlack_color"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_stantondrew_27939_hair_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/players/s/stantondrew_27939/stantondrew_27939_hair_mesh",
+  "out": "{REPO}/extracted/stage7/heads/meshes/stantondrew_27939_hair_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/players/s/stantondrew_27939/stantondrew_27939_hair_playerhead_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "coefficientTexture": "content/characters/player/players/s/stantonDrew_27939/stantonDrew_27939_hair_coeff",
+      "colorTexture": "content/characters/player/players/s/stantonDrew_27939/stantonDrew_27939_hair_color"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_abdullahameer_2402_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/players/a/abdullahameer_2402/abdullahameer_2402_mesh",
+  "out": "{REPO}/extracted/stage7/heads/meshes/abdullahameer_2402_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/players/a/abdullahameer_2402/abdullahameer_2402_playerhead_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/characters/player/players/a/abdullahAmeer_2402/abdullahAmeer_2402_color",
+      "normalClampTexture": "content/characters/player/players/a/abdullahAmeer_2402/abdullahAmeer_2402_normal",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/characters/player/players/a/abdullahAmeer_2402/abdullahAmeer_2402_color",
+      "normalClampTexture": "content/characters/player/players/a/abdullahAmeer_2402/abdullahAmeer_2402_normal",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 3,
+     "textures": {
+      "colorTexture": "content/characters/player/players/a/abdullahAmeer_2402/abdullahAmeer_2402_color",
+      "normalClampTexture": "content/characters/player/players/a/abdullahAmeer_2402/abdullahAmeer_2402_normal",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 4,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 5,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_colemantevin_2401_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/players/c/colemantevin_2401/colemantevin_2401_mesh",
+  "out": "{REPO}/extracted/stage7/heads/meshes/colemantevin_2401_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/players/c/colemantevin_2401/colemantevin_2401_playerhead_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/characters/player/players/c/colemanTevin_2401/colemanTevin_2401_color",
+      "normalClampTexture": "content/characters/player/players/c/colemanTevin_2401/colemanTevin_2401_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/characters/player/players/c/colemanTevin_2401/colemanTevin_2401_color",
+      "normalClampTexture": "content/characters/player/players/c/colemanTevin_2401/colemanTevin_2401_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 3,
+     "textures": {
+      "colorTexture": "content/characters/player/players/c/colemanTevin_2401/colemanTevin_2401_color",
+      "normalClampTexture": "content/characters/player/players/c/colemanTevin_2401/colemanTevin_2401_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 4,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 5,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_addaejahleel_9919_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/players/a/addaejahleel_9919/addaejahleel_9919_mesh",
+  "out": "{REPO}/extracted/stage7/heads/meshes/addaejahleel_9919_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/players/a/addaejahleel_9919/addaejahleel_9919_playerhead_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/characters/player/players/a/addaeJahleel_9919/addaeJahleel_9919_color",
+      "normalClampTexture": "content/characters/player/players/a/addaeJahleel_9919/addaeJahleel_9919_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/characters/player/players/a/addaeJahleel_9919/addaeJahleel_9919_color",
+      "normalClampTexture": "content/characters/player/players/a/addaeJahleel_9919/addaeJahleel_9919_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 3,
+     "textures": {
+      "colorTexture": "content/characters/player/players/a/addaeJahleel_9919/addaeJahleel_9919_color",
+      "normalClampTexture": "content/characters/player/players/a/addaeJahleel_9919/addaeJahleel_9919_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 4,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 5,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_ebroneric_10855_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/players/e/ebroneric_10855/ebroneric_10855_mesh",
+  "out": "{REPO}/extracted/stage7/heads/meshes/ebroneric_10855_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/players/e/ebroneric_10855/ebroneric_10855_playerhead_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/characters/player/players/e/ebronEric_10855/ebronEric_10855_color",
+      "normalClampTexture": "content/characters/player/players/e/ebronEric_10855/ebronEric_10855_normal",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/characters/player/players/e/ebronEric_10855/ebronEric_10855_color",
+      "normalClampTexture": "content/characters/player/players/e/ebronEric_10855/ebronEric_10855_normal",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 3,
+     "textures": {
+      "colorTexture": "content/characters/player/players/e/ebronEric_10855/ebronEric_10855_color",
+      "normalClampTexture": "content/characters/player/players/e/ebronEric_10855/ebronEric_10855_normal",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 4,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 5,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_jenkinsjanoris_11437_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/players/j/jenkinsjanoris_11437/jenkinsjanoris_11437_mesh",
+  "out": "{REPO}/extracted/stage7/heads/meshes/jenkinsjanoris_11437_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/players/j/jenkinsjanoris_11437/jenkinsjanoris_11437_playerhead_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/characters/player/players/j/jenkinsJanoris_11437/jenkinsJanoris_11437_color",
+      "normalClampTexture": "content/characters/player/players/j/jenkinsJanoris_11437/jenkinsJanoris_11437_normal",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/characters/player/players/j/jenkinsJanoris_11437/jenkinsJanoris_11437_color",
+      "normalClampTexture": "content/characters/player/players/j/jenkinsJanoris_11437/jenkinsJanoris_11437_normal",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 3,
+     "textures": {
+      "colorTexture": "content/characters/player/players/j/jenkinsJanoris_11437/jenkinsJanoris_11437_color",
+      "normalClampTexture": "content/characters/player/players/j/jenkinsJanoris_11437/jenkinsJanoris_11437_normal",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 4,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 5,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_gen_4_h_n_002_haircap_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/players/gen_4/gen_4_h_n_002/gen_4_h_n_002_haircap_mesh",
+  "out": "{REPO}/extracted/stage7/heads/meshes/gen_4_h_n_002_haircap_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/players/gen_4/gen_4_h_n_002/gen_4_h_n_002_haircap_launch_playerhead_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/characters/player/commonSimHair/DoRag_color",
+      "normalClampTexture": "content/characters/player/commonSimHair/DoRag_normal",
+      "RSMTexture": "content/characters/player/commonSimHair/DoRag_RSM"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_veldheerjared_9805_haircap_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/players/v/veldheerjared_9805/veldheerjared_9805_haircap_mesh",
+  "out": "{REPO}/extracted/stage7/heads/meshes/veldheerjared_9805_haircap_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/players/v/veldheerjared_9805/veldheerjared_9805_haircap_playerhead_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "coefficientTexture": "content/characters/player/players/V/veldheerJared_9805/veldheerJared_9805_hair_coeff",
+      "colorTexture": "content/characters/player/players/V/veldheerJared_9805/veldheerJared_9805_hair_color"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_richardsonsheldon_1042_haircap_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/players/r/richardsonsheldon_1042/richardsonsheldon_1042_haircap_mesh",
+  "out": "{REPO}/extracted/stage7/heads/meshes/richardsonsheldon_1042_haircap_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/players/r/richardsonsheldon_1042/richardsonsheldon_1042_haircap_playerhead_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "coefficientTexture": "content/characters/player/players/r/richardsonSheldon_1042/richardsonSheldon_1042_hair_coeff",
+      "colorTexture": "content/characters/player/players/r/richardsonSheldon_1042/richardsonSheldon_1042_hair_color"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_harvinpercy_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/players/h/harvinpercy/harvinpercy_mesh",
+  "out": "{REPO}/extracted/stage7/heads/meshes/harvinpercy_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/players/h/harvinpercy/harvinpercy_playerhead_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/characters/player/players/h/harvinPercy/harvinPercy_color",
+      "normalClampTexture": "content/characters/player/players/h/harvinPercy/harvinPercy_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/characters/player/players/h/harvinPercy/harvinPercy_color",
+      "normalClampTexture": "content/characters/player/players/h/harvinPercy/harvinPercy_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 3,
+     "textures": {
+      "colorTexture": "content/characters/player/players/h/harvinPercy/harvinPercy_color",
+      "normalClampTexture": "content/characters/player/players/h/harvinPercy/harvinPercy_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 4,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 5,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_novaknick_19965_haircap_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/players/n/novaknick_19965/novaknick_19965_haircap_mesh",
+  "out": "{REPO}/extracted/stage7/heads/meshes/novaknick_19965_haircap_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/players/n/novaknick_19965/novaknick_19965_haircap_playerhead_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "coefficientTexture": "content/characters/player/players/n/novakNick_19965/novakNick_19965_hair_coeff",
+      "colorTexture": "content/characters/player/players/n/novakNick_19965/novakNick_19965_hair_color"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_mccourtyjason_28829_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/players/m/mccourtyjason_28829/mccourtyjason_28829_mesh",
+  "out": "{REPO}/extracted/stage7/heads/meshes/mccourtyjason_28829_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/players/m/mccourtyjason_28829/mccourtyjason_28829_playerhead_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/characters/player/players/M/mcCourtyJason_28829/mcCourtyJason_28829_color",
+      "normalClampTexture": "content/characters/player/players/M/mcCourtyJason_28829/mcCourtyJason_28829_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/characters/player/players/M/mcCourtyJason_28829/mcCourtyJason_28829_color",
+      "normalClampTexture": "content/characters/player/players/M/mcCourtyJason_28829/mcCourtyJason_28829_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 3,
+     "textures": {
+      "colorTexture": "content/characters/player/players/M/mcCourtyJason_28829/mcCourtyJason_28829_color",
+      "normalClampTexture": "content/characters/player/players/M/mcCourtyJason_28829/mcCourtyJason_28829_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 4,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 5,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_wilforkvince_17417_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/players/w/wilforkvince_17417/wilforkvince_17417_mesh",
+  "out": "{REPO}/extracted/stage7/heads/meshes/wilforkvince_17417_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/players/w/wilforkvince_17417/wilforkvince_17417_playerhead_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/characters/player/Players/W/wilforkVince_17417/wilforkVince_17417_color",
+      "normalClampTexture": "content/characters/player/Players/W/wilforkVince_17417/wilforkVince_17417_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/characters/player/Players/W/wilforkVince_17417/wilforkVince_17417_color",
+      "normalClampTexture": "content/characters/player/Players/W/wilforkVince_17417/wilforkVince_17417_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 3,
+     "textures": {
+      "colorTexture": "content/characters/player/Players/W/wilforkVince_17417/wilforkVince_17417_color",
+      "normalClampTexture": "content/characters/player/Players/W/wilforkVince_17417/wilforkVince_17417_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 4,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 5,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_gen_6_t_g_005_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/players/gen_6/gen_6_t_g_005/gen_6_t_g_005_mesh",
+  "out": "{REPO}/extracted/stage7/heads/meshes/gen_6_t_g_005_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/players/gen_6/gen_6_t_g_005/gen_6_t_g_005_launch_playerhead_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/characters/player/players/gen_6/gen_6_T_G_005/gen_6_T_G_005_color",
+      "normalClampTexture": "content/characters/player/players/gen_6/gen_6_T_G_005/gen_6_T_G_005_normal",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/characters/player/players/gen_6/gen_6_T_G_005/gen_6_T_G_005_color",
+      "normalClampTexture": "content/characters/player/players/gen_6/gen_6_T_G_005/gen_6_T_G_005_normal",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 3,
+     "textures": {
+      "colorTexture": "content/characters/player/players/gen_6/gen_6_T_G_005/gen_6_T_G_005_color",
+      "normalClampTexture": "content/characters/player/players/gen_6/gen_6_T_G_005/gen_6_T_G_005_normal",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 4,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 5,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_gen_2_t_s_007_hair_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/players/gen_2/gen_2_t_s_007/gen_2_t_s_007_hair_mesh",
+  "out": "{REPO}/extracted/stage7/heads/meshes/gen_2_t_s_007_hair_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/players/gen_2/gen_2_t_s_007/gen_2_t_s_007_hair_launch_playerhead_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "coefficientTexture": "Content/characters/Player/Players/gen_2/gen_2_T_S_007/gen_2_T_S_007_hair_coeff",
+      "colorTexture": "Content/characters/Player/Players/gen_2/gen_2_T_S_007/gen_2_T_S_007_hair_color"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_lafellbrandon_9759_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/players/l/lafellbrandon_9759/lafellbrandon_9759_mesh",
+  "out": "{REPO}/extracted/stage7/heads/meshes/lafellbrandon_9759_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/players/l/lafellbrandon_9759/lafellbrandon_9759_playerhead_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/characters/player/players/L/laFellBrandon_9759/laFellBrandon_9759_color",
+      "normalClampTexture": "content/characters/player/players/L/laFellBrandon_9759/laFellBrandon_9759_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/characters/player/players/L/laFellBrandon_9759/laFellBrandon_9759_color",
+      "normalClampTexture": "content/characters/player/players/L/laFellBrandon_9759/laFellBrandon_9759_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 3,
+     "textures": {
+      "colorTexture": "content/characters/player/players/L/laFellBrandon_9759/laFellBrandon_9759_color",
+      "normalClampTexture": "content/characters/player/players/L/laFellBrandon_9759/laFellBrandon_9759_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 4,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 5,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_johnsonstevie_28561_haircap_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/players/j/johnsonstevie_28561/johnsonstevie_28561_haircap_mesh",
+  "out": "{REPO}/extracted/stage7/heads/meshes/johnsonstevie_28561_haircap_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/players/j/johnsonstevie_28561/johnsonstevie_28561_haircap_playerhead_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/characters/player/commonSimHair/DoRag_color",
+      "normalClampTexture": "content/characters/player/commonSimHair/DoRag_normal",
+      "RSMTexture": "content/characters/player/commonSimHair/DoRag_RSM"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_adamsjamal_12524_hair_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/players/a/adamsjamal_12524/adamsjamal_12524_hair_mesh",
+  "out": "{REPO}/extracted/stage7/heads/meshes/adamsjamal_12524_hair_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/players/a/adamsjamal_12524/adamsjamal_12524_hair_playerhead_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "coefficientTexture": "content/characters/player/players/a/adamsJamal_12524/adamsJamal_12524_hair_coeff",
+      "colorTexture": "content/characters/player/players/a/adamsJamal_12524/adamsJamal_12524_hair_color"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_babineauxjonathan_26832_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/players/b/babineauxjonathan_26832/babineauxjonathan_26832_mesh",
+  "out": "{REPO}/extracted/stage7/heads/meshes/babineauxjonathan_26832_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/players/b/babineauxjonathan_26832/babineauxjonathan_26832_playerhead_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/characters/player/players/b/babineauxJonathan_26832/babineauxJonathan_26832_color",
+      "normalClampTexture": "content/characters/player/players/b/babineauxJonathan_26832/babineauxJonathan_26832_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/characters/player/players/b/babineauxJonathan_26832/babineauxJonathan_26832_color",
+      "normalClampTexture": "content/characters/player/players/b/babineauxJonathan_26832/babineauxJonathan_26832_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 3,
+     "textures": {
+      "colorTexture": "content/characters/player/players/b/babineauxJonathan_26832/babineauxJonathan_26832_color",
+      "normalClampTexture": "content/characters/player/players/b/babineauxJonathan_26832/babineauxJonathan_26832_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 4,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 5,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_keiselbrett_hair_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/players/k/keiselbrett/keiselbrett_hair_mesh",
+  "out": "{REPO}/extracted/stage7/heads/meshes/keiselbrett_hair_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/players/k/keiselbrett/keiselbrett_hair_playerhead_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "coefficientTexture": "content/characters/player/Players/k/keiselBrett/keiselBrett_hair_coeff",
+      "colorTexture": "content/characters/player/Players/k/keiselBrett/keiselBrett_hair_color"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_gen_2_h_g_01_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/players/gen_2/gen_2_h_g_01/gen_2_h_g_01_mesh",
+  "out": "{REPO}/extracted/stage7/heads/meshes/gen_2_h_g_01_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/players/gen_2/gen_2_h_g_01/gen_2_h_g_01_launch_playerhead_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/characters/player/players/gen_2/gen_2_H_G_01/gen_2_H_G_01_color",
+      "normalClampTexture": "content/characters/player/players/gen_2/gen_2_H_G_01/gen_2_H_G_01_normal",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/characters/player/players/gen_2/gen_2_H_G_01/gen_2_H_G_01_color",
+      "normalClampTexture": "content/characters/player/players/gen_2/gen_2_H_G_01/gen_2_H_G_01_normal",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 3,
+     "textures": {
+      "colorTexture": "content/characters/player/players/gen_2/gen_2_H_G_01/gen_2_H_G_01_color",
+      "normalClampTexture": "content/characters/player/players/gen_2/gen_2_H_G_01/gen_2_H_G_01_normal",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 4,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 5,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_gen_2_b_s_005_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/players/gen_2/gen_2_b_s_005/gen_2_b_s_005_mesh",
+  "out": "{REPO}/extracted/stage7/heads/meshes/gen_2_b_s_005_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/players/gen_2/gen_2_b_s_005/gen_2_b_s_005_launch_playerhead_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/characters/player/players/gen_2/gen_2_B_S_005/gen_2_B_S_005_color",
+      "normalClampTexture": "content/characters/player/players/gen_2/gen_2_B_S_005/gen_2_B_S_005_normal",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/characters/player/players/gen_2/gen_2_B_S_005/gen_2_B_S_005_color",
+      "normalClampTexture": "content/characters/player/players/gen_2/gen_2_B_S_005/gen_2_B_S_005_normal",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 3,
+     "textures": {
+      "colorTexture": "content/characters/player/players/gen_2/gen_2_B_S_005/gen_2_B_S_005_color",
+      "normalClampTexture": "content/characters/player/players/gen_2/gen_2_B_S_005/gen_2_B_S_005_normal",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 4,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 5,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_falkluke_13329_haircap_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/players/f/falkluke_13329/falkluke_13329_haircap_mesh",
+  "out": "{REPO}/extracted/stage7/heads/meshes/falkluke_13329_haircap_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/players/f/falkluke_13329/falkluke_13329_haircap_playerhead_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "coefficientTexture": "content/characters/player/Players/f/falkLuke_13329/falkLuke_13329_hair_coeff",
+      "colorTexture": "content/characters/player/Players/f/falkLuke_13329/falkLuke_13329_hair_color"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_gen_7_btm_mb_023_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/players/gen_7/gen_7_btm_mb_023/gen_7_btm_mb_023_mesh",
+  "out": "{REPO}/extracted/stage7/heads/meshes/gen_7_btm_mb_023_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/players/gen_7/gen_7_btm_mb_023/gen_7_btm_mb_023_launch_playerhead_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/characters/player/players/gen_7/gen_7_BTM_MB_023/gen_7_BTM_MB_023_color",
+      "normalClampTexture": "content/characters/player/players/gen_7/gen_7_BTM_MB_023/gen_7_BTM_MB_023_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/characters/player/players/gen_7/gen_7_BTM_MB_023/gen_7_BTM_MB_023_color",
+      "normalClampTexture": "content/characters/player/players/gen_7/gen_7_BTM_MB_023/gen_7_BTM_MB_023_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 3,
+     "textures": {
+      "colorTexture": "content/characters/player/players/gen_7/gen_7_BTM_MB_023/gen_7_BTM_MB_023_color",
+      "normalClampTexture": "content/characters/player/players/gen_7/gen_7_BTM_MB_023/gen_7_BTM_MB_023_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 4,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 5,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_garrettmyles_12520_haircap_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/players/g/garrettmyles_12520/garrettmyles_12520_haircap_mesh",
+  "out": "{REPO}/extracted/stage7/heads/meshes/garrettmyles_12520_haircap_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/players/g/garrettmyles_12520/garrettmyles_12520_haircap_playerhead_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "coefficientTexture": "content/characters/player/players/G/garrettMyles_12520/garrettMyles_12520_hair_coeff",
+      "colorTexture": "content/characters/player/players/G/garrettMyles_12520/garrettMyles_12520_hair_color"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_gen_2_b_ea_jd_haircap_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/players/gen_2/gen_2_b_ea_jd/gen_2_b_ea_jd_haircap_mesh",
+  "out": "{REPO}/extracted/stage7/heads/meshes/gen_2_b_ea_jd_haircap_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/players/gen_2/gen_2_b_ea_jd/gen_2_b_ea_jd_haircap_launch_playerhead_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "coefficientTexture": "Content/characters/Player/Players/gen_2/gen_2_B_EA_JD/gen_2_B_EA_JD_hair_coeff",
+      "colorTexture": "Content/characters/Player/Players/gen_2/gen_2_B_EA_JD/gen_2_B_EA_JD_hair_color"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_gen_7_b_g_005_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/players/gen_7/gen_7_b_g_005/gen_7_b_g_005_mesh",
+  "out": "{REPO}/extracted/stage7/heads/meshes/gen_7_b_g_005_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/players/gen_7/gen_7_b_g_005/gen_7_b_g_005_launch_playerhead_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/characters/player/players/gen_7/gen_7_B_G_005/gen_7_B_G_005_color",
+      "normalClampTexture": "content/characters/player/players/gen_7/gen_7_B_G_005/gen_7_B_G_005_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/characters/player/players/gen_7/gen_7_B_G_005/gen_7_B_G_005_color",
+      "normalClampTexture": "content/characters/player/players/gen_7/gen_7_B_G_005/gen_7_B_G_005_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 3,
+     "textures": {
+      "colorTexture": "content/characters/player/players/gen_7/gen_7_B_G_005/gen_7_B_G_005_color",
+      "normalClampTexture": "content/characters/player/players/gen_7/gen_7_B_G_005/gen_7_B_G_005_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 4,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 5,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_taborteez_12534_haircap_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/players/t/taborteez_12534/taborteez_12534_haircap_mesh",
+  "out": "{REPO}/extracted/stage7/heads/meshes/taborteez_12534_haircap_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/players/t/taborteez_12534/taborteez_12534_haircap_playerhead_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "coefficientTexture": "content/characters/player/players/T/taborTeez_12534/taborTeez_12534_hair_coeff",
+      "colorTexture": "content/characters/player/players/T/taborTeez_12534/taborTeez_12534_hair_color"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_williamskarlos_2410_hair_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/players/w/williamskarlos_2410/williamskarlos_2410_hair_mesh",
+  "out": "{REPO}/extracted/stage7/heads/meshes/williamskarlos_2410_hair_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/players/w/williamskarlos_2410/williamskarlos_2410_hair_playerhead_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "coefficientTexture": "content/characters/player/Players/W/williamsKarlos_2410/williamsKarlos_2410_hair_coeff",
+      "colorTexture": "content/characters/player/Players/W/williamsKarlos_2410/williamsKarlos_2410_hair_color"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_gen_4_m_n_01_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/players/gen_4/gen_4_m_n_01/gen_4_m_n_01_mesh",
+  "out": "{REPO}/extracted/stage7/heads/meshes/gen_4_m_n_01_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/players/gen_4/gen_4_m_n_01/gen_4_m_n_01_launch_playerhead_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/characters/player/players/gen_4/gen_4_M_N_01/gen_4_M_N_01_color",
+      "normalClampTexture": "content/characters/player/players/gen_4/gen_4_M_N_01/gen_4_M_N_01_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/characters/player/players/gen_4/gen_4_M_N_01/gen_4_M_N_01_color",
+      "normalClampTexture": "content/characters/player/players/gen_4/gen_4_M_N_01/gen_4_M_N_01_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 3,
+     "textures": {
+      "normalClampTexture": "content/characters/player/players/gen_4/gen_4_M_N_01/gen_4_M_N_01_normal",
+      "colorTexture": "content/characters/player/players/gen_4/gen_4_M_N_01/gen_4_M_N_01_color",
+      "normalWrapTexture": "content/characters/common/textures/skintones/face_skinTile",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/commonRSM",
+      "sweatNormalTexture": "content/characters/player/players/commonTextures/playerHead_Sweat"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 4,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 5,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "t_gen_2_b_ea_jd_hair_color",
+  "op": "texture",
+  "asset": "Content/characters/Player/Players/gen_2/gen_2_B_EA_JD/gen_2_B_EA_JD_hair_color",
+  "out": "{REPO}/extracted/stage7/heads/textures/gen_2_b_ea_jd_hair_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "gen_2_b_ea_jd_haircap_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_gen_2_t_ea_sc_hair_color",
+  "op": "texture",
+  "asset": "Content/characters/Player/Players/gen_2/gen_2_T_EA_SC/gen_2_T_EA_SC_hair_color",
+  "out": "{REPO}/extracted/stage7/heads/textures/gen_2_t_ea_sc_hair_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "gen_2_t_ea_sc_haircap_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_gen_2_t_s_007_hair_color",
+  "op": "texture",
+  "asset": "Content/characters/Player/Players/gen_2/gen_2_T_S_007/gen_2_T_S_007_hair_color",
+  "out": "{REPO}/extracted/stage7/heads/textures/gen_2_t_s_007_hair_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "gen_2_t_s_007_hair_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_gen_7_h_n_02_hair_color",
+  "op": "texture",
+  "asset": "Content/characters/Player/Players/gen_7/gen_7_H_N_02/gen_7_H_N_02_hair_color",
+  "out": "{REPO}/extracted/stage7/heads/textures/gen_7_h_n_02_hair_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "gen_7_h_n_02_haircap_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_eyelashes_m19",
+  "op": "texture",
+  "asset": "content/characters/common/textures/eyes/eyelashes_M19",
+  "out": "{REPO}/extracted/stage7/heads/textures/eyelashes_m19",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "samuelsjaylen_13173_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_commonrsm",
+  "op": "texture",
+  "asset": "content/characters/common/textures/skintones/commonRSM",
+  "out": "{REPO}/extracted/stage7/heads/textures/commonrsm",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "abdullahameer_2402_mesh",
+    "addaejahleel_9919_mesh",
+    "babineauxjonathan_26832_mesh",
+    "bouyeaj_14134_mesh",
+    "colemantevin_2401_mesh",
+    "ebroneric_10855_mesh",
+    "gen_2_b_s_005_mesh",
+    "gen_2_h_g_01_mesh",
+    "gen_4_m_n_01_mesh",
+    "gen_6_bmh_g_010_mesh",
+    "gen_6_t_g_005_mesh",
+    "gen_7_b_g_005_mesh",
+    "gen_7_bmh_s_008_mesh",
+    "gen_7_btm_mb_023_mesh",
+    "gen_7_btm_n_007_mesh",
+    "greentj_17754_mesh",
+    "harvinpercy_mesh",
+    "jenkinsjanoris_11437_mesh",
+    "johnsonlane_927_mesh",
+    "lafellbrandon_9759_mesh",
+    "largentsteve_11965_mesh",
+    "locketttyler_2448_mesh",
+    "maclinjeremy_20088_mesh",
+    "mccourtyjason_28829_mesh",
+    "samuelsjaylen_13173_mesh",
+    "wilforkvince_17417_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_wilforkvince_17417_color",
+  "op": "texture",
+  "asset": "content/characters/player/Players/W/wilforkVince_17417/wilforkVince_17417_color",
+  "out": "{REPO}/extracted/stage7/heads/textures/wilforkvince_17417_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "wilforkvince_17417_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_wilforkvince_17417_normal",
+  "op": "texture",
+  "asset": "content/characters/player/Players/W/wilforkVince_17417/wilforkVince_17417_normal",
+  "out": "{REPO}/extracted/stage7/heads/textures/wilforkvince_17417_normal",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "wilforkvince_17417_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_williamskarlos_2410_hair_color",
+  "op": "texture",
+  "asset": "content/characters/player/Players/W/williamsKarlos_2410/williamsKarlos_2410_hair_color",
+  "out": "{REPO}/extracted/stage7/heads/textures/williamskarlos_2410_hair_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "williamskarlos_2410_hair_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_falkluke_13329_hair_color",
+  "op": "texture",
+  "asset": "content/characters/player/Players/f/falkLuke_13329/falkLuke_13329_hair_color",
+  "out": "{REPO}/extracted/stage7/heads/textures/falkluke_13329_hair_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "falkluke_13329_haircap_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_fitzpatrickminkah_13084_hair_color",
+  "op": "texture",
+  "asset": "content/characters/player/Players/f/fitzpatrickMinkah_13084/fitzpatrickMinkah_13084_hair_color",
+  "out": "{REPO}/extracted/stage7/heads/textures/fitzpatrickminkah_13084_hair_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "fitzpatrickminkah_13084_hair_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_keiselbrett_hair_color",
+  "op": "texture",
+  "asset": "content/characters/player/Players/k/keiselBrett/keiselBrett_hair_color",
+  "out": "{REPO}/extracted/stage7/heads/textures/keiselbrett_hair_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "keiselbrett_hair_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_mooredj_13184_hair_color",
+  "op": "texture",
+  "asset": "content/characters/player/Players/m/mooreDJ_13184/mooreDJ_13184_hair_color",
+  "out": "{REPO}/extracted/stage7/heads/textures/mooredj_13184_hair_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "mooredj_13184_haircap_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_samuelsjaylen_13173_color",
+  "op": "texture",
+  "asset": "content/characters/player/Players/s/samuelsJaylen_13173/samuelsJaylen_13173_color",
+  "out": "{REPO}/extracted/stage7/heads/textures/samuelsjaylen_13173_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "samuelsjaylen_13173_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_samuelsjaylen_13173_normal",
+  "op": "texture",
+  "asset": "content/characters/player/Players/s/samuelsJaylen_13173/samuelsJaylen_13173_normal",
+  "out": "{REPO}/extracted/stage7/heads/textures/samuelsjaylen_13173_normal",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "samuelsjaylen_13173_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_dorag_rsm",
+  "op": "texture",
+  "asset": "content/characters/player/commonSimHair/DoRag_RSM",
+  "out": "{REPO}/extracted/stage7/heads/textures/dorag_rsm",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "gen_4_h_n_002_haircap_mesh",
+    "gen_7_t_n_001_haircap_mesh",
+    "johnsonstevie_28561_haircap_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_dorag_color",
+  "op": "texture",
+  "asset": "content/characters/player/commonSimHair/DoRag_color",
+  "out": "{REPO}/extracted/stage7/heads/textures/dorag_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "gen_4_h_n_002_haircap_mesh",
+    "gen_7_t_n_001_haircap_mesh",
+    "johnsonstevie_28561_haircap_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_dorag_normal",
+  "op": "texture",
+  "asset": "content/characters/player/commonSimHair/DoRag_normal",
+  "out": "{REPO}/extracted/stage7/heads/textures/dorag_normal",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "gen_4_h_n_002_haircap_mesh",
+    "gen_7_t_n_001_haircap_mesh",
+    "johnsonstevie_28561_haircap_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_garrettmyles_12520_hair_color",
+  "op": "texture",
+  "asset": "content/characters/player/players/G/garrettMyles_12520/garrettMyles_12520_hair_color",
+  "out": "{REPO}/extracted/stage7/heads/textures/garrettmyles_12520_hair_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "garrettmyles_12520_haircap_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_gonzaleztony_11395_hair_color",
+  "op": "texture",
+  "asset": "content/characters/player/players/G/gonzalezTony_11395/gonzalezTony_11395_hair_color",
+  "out": "{REPO}/extracted/stage7/heads/textures/gonzaleztony_11395_hair_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "gonzaleztony_11395_hair_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_greentj_17754_color",
+  "op": "texture",
+  "asset": "content/characters/player/players/G/greenTJ_17754/greenTJ_17754_color",
+  "out": "{REPO}/extracted/stage7/heads/textures/greentj_17754_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "greentj_17754_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_greentj_17754_normal",
+  "op": "texture",
+  "asset": "content/characters/player/players/G/greenTJ_17754/greenTJ_17754_normal",
+  "out": "{REPO}/extracted/stage7/heads/textures/greentj_17754_normal",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "greentj_17754_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_lafellbrandon_9759_color",
+  "op": "texture",
+  "asset": "content/characters/player/players/L/laFellBrandon_9759/laFellBrandon_9759_color",
+  "out": "{REPO}/extracted/stage7/heads/textures/lafellbrandon_9759_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "lafellbrandon_9759_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_lafellbrandon_9759_normal",
+  "op": "texture",
+  "asset": "content/characters/player/players/L/laFellBrandon_9759/laFellBrandon_9759_normal",
+  "out": "{REPO}/extracted/stage7/heads/textures/lafellbrandon_9759_normal",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "lafellbrandon_9759_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_largentsteve_11965_color",
+  "op": "texture",
+  "asset": "content/characters/player/players/L/largentSteve_11965/largentSteve_11965_color",
+  "out": "{REPO}/extracted/stage7/heads/textures/largentsteve_11965_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "largentsteve_11965_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_largentsteve_11965_normal",
+  "op": "texture",
+  "asset": "content/characters/player/players/L/largentSteve_11965/largentSteve_11965_normal",
+  "out": "{REPO}/extracted/stage7/heads/textures/largentsteve_11965_normal",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "largentsteve_11965_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_locketttyler_2448_color",
+  "op": "texture",
+  "asset": "content/characters/player/players/L/lockettTyler_2448/lockettTyler_2448_color",
+  "out": "{REPO}/extracted/stage7/heads/textures/locketttyler_2448_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "locketttyler_2448_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_locketttyler_2448_normal",
+  "op": "texture",
+  "asset": "content/characters/player/players/L/lockettTyler_2448/lockettTyler_2448_normal",
+  "out": "{REPO}/extracted/stage7/heads/textures/locketttyler_2448_normal",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "locketttyler_2448_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_maclinjeremy_20088_color",
+  "op": "texture",
+  "asset": "content/characters/player/players/M/maclinJeremy_20088/maclinJeremy_20088_color",
+  "out": "{REPO}/extracted/stage7/heads/textures/maclinjeremy_20088_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "maclinjeremy_20088_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_maclinjeremy_20088_normal",
+  "op": "texture",
+  "asset": "content/characters/player/players/M/maclinJeremy_20088/maclinJeremy_20088_normal",
+  "out": "{REPO}/extracted/stage7/heads/textures/maclinjeremy_20088_normal",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "maclinjeremy_20088_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_mccourtyjason_28829_color",
+  "op": "texture",
+  "asset": "content/characters/player/players/M/mcCourtyJason_28829/mcCourtyJason_28829_color",
+  "out": "{REPO}/extracted/stage7/heads/textures/mccourtyjason_28829_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "mccourtyjason_28829_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_mccourtyjason_28829_normal",
+  "op": "texture",
+  "asset": "content/characters/player/players/M/mcCourtyJason_28829/mcCourtyJason_28829_normal",
+  "out": "{REPO}/extracted/stage7/heads/textures/mccourtyjason_28829_normal",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "mccourtyjason_28829_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_mcdonaldjrtj_11904_hair_color",
+  "op": "texture",
+  "asset": "content/characters/player/players/M/mcDonaldJrTJ_11904/mcDonaldJrTJ_11904_hair_color",
+  "out": "{REPO}/extracted/stage7/heads/textures/mcdonaldjrtj_11904_hair_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "mcdonaldjrtj_11904_hair_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_taborteez_12534_hair_color",
+  "op": "texture",
+  "asset": "content/characters/player/players/T/taborTeez_12534/taborTeez_12534_hair_color",
+  "out": "{REPO}/extracted/stage7/heads/textures/taborteez_12534_hair_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "taborteez_12534_haircap_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_thielenadam_2280_hair_color",
+  "op": "texture",
+  "asset": "content/characters/player/players/T/thielenAdam_2280/thielenAdam_2280_hair_color",
+  "out": "{REPO}/extracted/stage7/heads/textures/thielenadam_2280_hair_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "thielenadam_2280_hair_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_veldheerjared_9805_hair_color",
+  "op": "texture",
+  "asset": "content/characters/player/players/V/veldheerJared_9805/veldheerJared_9805_hair_color",
+  "out": "{REPO}/extracted/stage7/heads/textures/veldheerjared_9805_hair_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "veldheerjared_9805_haircap_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_abdullahameer_2402_color",
+  "op": "texture",
+  "asset": "content/characters/player/players/a/abdullahAmeer_2402/abdullahAmeer_2402_color",
+  "out": "{REPO}/extracted/stage7/heads/textures/abdullahameer_2402_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "abdullahameer_2402_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_abdullahameer_2402_normal",
+  "op": "texture",
+  "asset": "content/characters/player/players/a/abdullahAmeer_2402/abdullahAmeer_2402_normal",
+  "out": "{REPO}/extracted/stage7/heads/textures/abdullahameer_2402_normal",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "abdullahameer_2402_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_adamsjamal_12524_hair_color",
+  "op": "texture",
+  "asset": "content/characters/player/players/a/adamsJamal_12524/adamsJamal_12524_hair_color",
+  "out": "{REPO}/extracted/stage7/heads/textures/adamsjamal_12524_hair_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "adamsjamal_12524_hair_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_addaejahleel_9919_color",
+  "op": "texture",
+  "asset": "content/characters/player/players/a/addaeJahleel_9919/addaeJahleel_9919_color",
+  "out": "{REPO}/extracted/stage7/heads/textures/addaejahleel_9919_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "addaejahleel_9919_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_addaejahleel_9919_normal",
+  "op": "texture",
+  "asset": "content/characters/player/players/a/addaeJahleel_9919/addaeJahleel_9919_normal",
+  "out": "{REPO}/extracted/stage7/heads/textures/addaejahleel_9919_normal",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "addaejahleel_9919_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_asiatamatt_11155_hair_color",
+  "op": "texture",
+  "asset": "content/characters/player/players/a/asiataMatt_11155/asiataMatt_11155_hair_color",
+  "out": "{REPO}/extracted/stage7/heads/textures/asiatamatt_11155_hair_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "asiatamatt_11155_haircap_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_babineauxjonathan_26832_color",
+  "op": "texture",
+  "asset": "content/characters/player/players/b/babineauxJonathan_26832/babineauxJonathan_26832_color",
+  "out": "{REPO}/extracted/stage7/heads/textures/babineauxjonathan_26832_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "babineauxjonathan_26832_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_babineauxjonathan_26832_normal",
+  "op": "texture",
+  "asset": "content/characters/player/players/b/babineauxJonathan_26832/babineauxJonathan_26832_normal",
+  "out": "{REPO}/extracted/stage7/heads/textures/babineauxjonathan_26832_normal",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "babineauxjonathan_26832_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_bouyeaj_14134_color",
+  "op": "texture",
+  "asset": "content/characters/player/players/b/bouyeAJ_14134/bouyeAJ_14134_color",
+  "out": "{REPO}/extracted/stage7/heads/textures/bouyeaj_14134_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "bouyeaj_14134_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_bouyeaj_14134_normal",
+  "op": "texture",
+  "asset": "content/characters/player/players/b/bouyeAJ_14134/bouyeAJ_14134_normal",
+  "out": "{REPO}/extracted/stage7/heads/textures/bouyeaj_14134_normal",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "bouyeaj_14134_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_colemantevin_2401_color",
+  "op": "texture",
+  "asset": "content/characters/player/players/c/colemanTevin_2401/colemanTevin_2401_color",
+  "out": "{REPO}/extracted/stage7/heads/textures/colemantevin_2401_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "colemantevin_2401_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_colemantevin_2401_normal",
+  "op": "texture",
+  "asset": "content/characters/player/players/c/colemanTevin_2401/colemanTevin_2401_normal",
+  "out": "{REPO}/extracted/stage7/heads/textures/colemantevin_2401_normal",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "colemantevin_2401_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_ebroneric_10855_color",
+  "op": "texture",
+  "asset": "content/characters/player/players/e/ebronEric_10855/ebronEric_10855_color",
+  "out": "{REPO}/extracted/stage7/heads/textures/ebroneric_10855_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "ebroneric_10855_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_ebroneric_10855_normal",
+  "op": "texture",
+  "asset": "content/characters/player/players/e/ebronEric_10855/ebronEric_10855_normal",
+  "out": "{REPO}/extracted/stage7/heads/textures/ebroneric_10855_normal",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "ebroneric_10855_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_gen_2_b_s_005_color",
+  "op": "texture",
+  "asset": "content/characters/player/players/gen_2/gen_2_B_S_005/gen_2_B_S_005_color",
+  "out": "{REPO}/extracted/stage7/heads/textures/gen_2_b_s_005_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "gen_2_b_s_005_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_gen_2_b_s_005_normal",
+  "op": "texture",
+  "asset": "content/characters/player/players/gen_2/gen_2_B_S_005/gen_2_B_S_005_normal",
+  "out": "{REPO}/extracted/stage7/heads/textures/gen_2_b_s_005_normal",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "gen_2_b_s_005_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_gen_2_h_g_01_color",
+  "op": "texture",
+  "asset": "content/characters/player/players/gen_2/gen_2_H_G_01/gen_2_H_G_01_color",
+  "out": "{REPO}/extracted/stage7/heads/textures/gen_2_h_g_01_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "gen_2_h_g_01_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_gen_2_h_g_01_normal",
+  "op": "texture",
+  "asset": "content/characters/player/players/gen_2/gen_2_H_G_01/gen_2_H_G_01_normal",
+  "out": "{REPO}/extracted/stage7/heads/textures/gen_2_h_g_01_normal",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "gen_2_h_g_01_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_gen_4_m_n_01_color",
+  "op": "texture",
+  "asset": "content/characters/player/players/gen_4/gen_4_M_N_01/gen_4_M_N_01_color",
+  "out": "{REPO}/extracted/stage7/heads/textures/gen_4_m_n_01_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "gen_4_m_n_01_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_gen_4_m_n_01_normal",
+  "op": "texture",
+  "asset": "content/characters/player/players/gen_4/gen_4_M_N_01/gen_4_M_N_01_normal",
+  "out": "{REPO}/extracted/stage7/heads/textures/gen_4_m_n_01_normal",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "gen_4_m_n_01_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_gen_6_bmh_g_010_color",
+  "op": "texture",
+  "asset": "content/characters/player/players/gen_6/gen_6_BMH_G_010/gen_6_BMH_G_010_color",
+  "out": "{REPO}/extracted/stage7/heads/textures/gen_6_bmh_g_010_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "gen_6_bmh_g_010_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_gen_6_bmh_g_010_normal",
+  "op": "texture",
+  "asset": "content/characters/player/players/gen_6/gen_6_BMH_G_010/gen_6_BMH_G_010_normal",
+  "out": "{REPO}/extracted/stage7/heads/textures/gen_6_bmh_g_010_normal",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "gen_6_bmh_g_010_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_gen_6_t_g_005_color",
+  "op": "texture",
+  "asset": "content/characters/player/players/gen_6/gen_6_T_G_005/gen_6_T_G_005_color",
+  "out": "{REPO}/extracted/stage7/heads/textures/gen_6_t_g_005_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "gen_6_t_g_005_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_gen_6_t_g_005_normal",
+  "op": "texture",
+  "asset": "content/characters/player/players/gen_6/gen_6_T_G_005/gen_6_T_G_005_normal",
+  "out": "{REPO}/extracted/stage7/heads/textures/gen_6_t_g_005_normal",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "gen_6_t_g_005_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_gen_7_bmh_s_008_color",
+  "op": "texture",
+  "asset": "content/characters/player/players/gen_7/gen_7_BMH_S_008/gen_7_BMH_S_008_color",
+  "out": "{REPO}/extracted/stage7/heads/textures/gen_7_bmh_s_008_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "gen_7_bmh_s_008_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_gen_7_bmh_s_008_normal",
+  "op": "texture",
+  "asset": "content/characters/player/players/gen_7/gen_7_BMH_S_008/gen_7_BMH_S_008_normal",
+  "out": "{REPO}/extracted/stage7/heads/textures/gen_7_bmh_s_008_normal",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "gen_7_bmh_s_008_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_gen_7_btm_mb_023_color",
+  "op": "texture",
+  "asset": "content/characters/player/players/gen_7/gen_7_BTM_MB_023/gen_7_BTM_MB_023_color",
+  "out": "{REPO}/extracted/stage7/heads/textures/gen_7_btm_mb_023_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "gen_7_btm_mb_023_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_gen_7_btm_mb_023_normal",
+  "op": "texture",
+  "asset": "content/characters/player/players/gen_7/gen_7_BTM_MB_023/gen_7_BTM_MB_023_normal",
+  "out": "{REPO}/extracted/stage7/heads/textures/gen_7_btm_mb_023_normal",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "gen_7_btm_mb_023_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_gen_7_btm_n_007_color",
+  "op": "texture",
+  "asset": "content/characters/player/players/gen_7/gen_7_BTM_N_007/gen_7_BTM_N_007_color",
+  "out": "{REPO}/extracted/stage7/heads/textures/gen_7_btm_n_007_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "gen_7_btm_n_007_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_gen_7_btm_n_007_normal",
+  "op": "texture",
+  "asset": "content/characters/player/players/gen_7/gen_7_BTM_N_007/gen_7_BTM_N_007_normal",
+  "out": "{REPO}/extracted/stage7/heads/textures/gen_7_btm_n_007_normal",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "gen_7_btm_n_007_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_gen_7_b_g_005_color",
+  "op": "texture",
+  "asset": "content/characters/player/players/gen_7/gen_7_B_G_005/gen_7_B_G_005_color",
+  "out": "{REPO}/extracted/stage7/heads/textures/gen_7_b_g_005_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "gen_7_b_g_005_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_gen_7_b_g_005_normal",
+  "op": "texture",
+  "asset": "content/characters/player/players/gen_7/gen_7_B_G_005/gen_7_B_G_005_normal",
+  "out": "{REPO}/extracted/stage7/heads/textures/gen_7_b_g_005_normal",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "gen_7_b_g_005_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_harvinpercy_color",
+  "op": "texture",
+  "asset": "content/characters/player/players/h/harvinPercy/harvinPercy_color",
+  "out": "{REPO}/extracted/stage7/heads/textures/harvinpercy_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "harvinpercy_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_harvinpercy_normal",
+  "op": "texture",
+  "asset": "content/characters/player/players/h/harvinPercy/harvinPercy_normal",
+  "out": "{REPO}/extracted/stage7/heads/textures/harvinpercy_normal",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "harvinpercy_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_jenkinsjanoris_11437_color",
+  "op": "texture",
+  "asset": "content/characters/player/players/j/jenkinsJanoris_11437/jenkinsJanoris_11437_color",
+  "out": "{REPO}/extracted/stage7/heads/textures/jenkinsjanoris_11437_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "jenkinsjanoris_11437_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_jenkinsjanoris_11437_normal",
+  "op": "texture",
+  "asset": "content/characters/player/players/j/jenkinsJanoris_11437/jenkinsJanoris_11437_normal",
+  "out": "{REPO}/extracted/stage7/heads/textures/jenkinsjanoris_11437_normal",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "jenkinsjanoris_11437_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_johnsonlane_927_color",
+  "op": "texture",
+  "asset": "content/characters/player/players/j/johnsonLane_927/johnsonLane_927_color",
+  "out": "{REPO}/extracted/stage7/heads/textures/johnsonlane_927_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "johnsonlane_927_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_johnsonlane_927_normal",
+  "op": "texture",
+  "asset": "content/characters/player/players/j/johnsonLane_927/johnsonLane_927_normal",
+  "out": "{REPO}/extracted/stage7/heads/textures/johnsonlane_927_normal",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "johnsonlane_927_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_novaknick_19965_hair_color",
+  "op": "texture",
+  "asset": "content/characters/player/players/n/novakNick_19965/novakNick_19965_hair_color",
+  "out": "{REPO}/extracted/stage7/heads/textures/novaknick_19965_hair_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "novaknick_19965_haircap_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_richardsonsheldon_1042_hair_color",
+  "op": "texture",
+  "asset": "content/characters/player/players/r/richardsonSheldon_1042/richardsonSheldon_1042_hair_color",
+  "out": "{REPO}/extracted/stage7/heads/textures/richardsonsheldon_1042_hair_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "richardsonsheldon_1042_haircap_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_stantondrew_27939_hair_color",
+  "op": "texture",
+  "asset": "content/characters/player/players/s/stantonDrew_27939/stantonDrew_27939_hair_color",
+  "out": "{REPO}/extracted/stage7/heads/textures/stantondrew_27939_hair_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "stantondrew_27939_hair_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_flatblack_color",
+  "op": "texture",
+  "asset": "content/common/textures/flatBlack_color",
+  "out": "{REPO}/extracted/stage7/heads/textures/flatblack_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "hitchensanthony_2033_haircap_helmet_on_mesh"
+   ]
+  }
+ }
+]

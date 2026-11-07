@@ -1,0 +1,2777 @@
+[
+ {
+  "id": "mvdb_helmet_accessories_airxp_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/airxp/helmet_accessories_airxp_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__airxp__helmet_accessories_airxp_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/airxp/helmet_accessories_airxp_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_accessories_airxp_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/airxp/helmet_accessories_airxp_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_accessories_airxp_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_greendot_airxp_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/airxp/helmet_greendot_airxp_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__airxp__helmet_greendot_airxp_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/airxp/helmet_greendot_airxp_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_greendot_airxp_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/airxp/helmet_greendot_airxp_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_greendot_airxp_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_shell_airxp_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/airxp/helmet_shell_airxp_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__airxp__helmet_shell_airxp_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/airxp/helmet_shell_airxp_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_shell_airxp_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/airxp/helmet_shell_airxp_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_shell_airxp_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_visor_airxp_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/airxp/helmet_visor_airxp_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__airxp__helmet_visor_airxp_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/airxp/helmet_visor_airxp_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_visor_airxp_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/airxp/helmet_visor_airxp_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_visor_airxp_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_ballcap_backward_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/hats/ballcap_backward_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__hats__ballcap_backward_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/hats/ballcap_backward_mesh"
+  }
+ },
+ {
+  "id": "mi_ballcap_backward_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/hats/ballcap_backward_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/ballcap_backward_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_ballcap_forward_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/hats/ballcap_forward_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__hats__ballcap_forward_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/hats/ballcap_forward_mesh"
+  }
+ },
+ {
+  "id": "mi_ballcap_forward_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/hats/ballcap_forward_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/ballcap_forward_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_visorhat_d_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/hats/visorhat_d_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__hats__visorhat_d_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/hats/visorhat_d_mesh"
+  }
+ },
+ {
+  "id": "mi_visorhat_d_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/hats/visorhat_d_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/visorhat_d_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_vintagelong_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/pill/facemasks/helmet_facemask_vintagelong_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__pill__facemasks__helmet_facemask_vintagelong_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/pill/facemasks/helmet_facemask_vintagelong_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_vintagelong_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/pill/facemasks/helmet_facemask_vintagelong_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_vintagelong_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_vintageonebar_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/pill/facemasks/helmet_facemask_vintageonebar_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__pill__facemasks__helmet_facemask_vintageonebar_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/pill/facemasks/helmet_facemask_vintageonebar_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_vintageonebar_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/pill/facemasks/helmet_facemask_vintageonebar_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_vintageonebar_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_vintagestandard_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/pill/facemasks/helmet_facemask_vintagestandard_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__pill__facemasks__helmet_facemask_vintagestandard_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/pill/facemasks/helmet_facemask_vintagestandard_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_vintagestandard_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/pill/facemasks/helmet_facemask_vintagestandard_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_vintagestandard_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_vintagetowbar_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/pill/facemasks/helmet_facemask_vintagetowbar_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__pill__facemasks__helmet_facemask_vintagetowbar_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/pill/facemasks/helmet_facemask_vintagetowbar_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_vintagetowbar_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/pill/facemasks/helmet_facemask_vintagetowbar_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_vintagetowbar_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_accessories_pill_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/pill/helmet_accessories_pill_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__pill__helmet_accessories_pill_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/pill/helmet_accessories_pill_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_accessories_pill_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/pill/helmet_accessories_pill_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_accessories_pill_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_shell_pill_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/pill/helmet_shell_pill_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__pill__helmet_shell_pill_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/pill/helmet_shell_pill_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_shell_pill_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/pill/helmet_shell_pill_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_shell_pill_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_g2b_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_g2b_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__revo__facemasks__helmet_facemask_g2b_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_g2b_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_g2b_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_g2b_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_g2b_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_g2bd_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_g2bd_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__revo__facemasks__helmet_facemask_g2bd_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_g2bd_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_g2bd_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_g2bd_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_g2bd_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_g2eg_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_g2eg_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__revo__facemasks__helmet_facemask_g2eg_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_g2eg_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_g2eg_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_g2eg_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_g2eg_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_g3b_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_g3b_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__revo__facemasks__helmet_facemask_g3b_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_g3b_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_g3b_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_g3b_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_g3b_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_g3bd_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_g3bd_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__revo__facemasks__helmet_facemask_g3bd_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_g3bd_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_g3bd_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_g3bd_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_g3bd_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_g3bdu_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_g3bdu_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__revo__facemasks__helmet_facemask_g3bdu_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_g3bdu_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_g3bdu_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_g3bdu_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_g3bdu_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_g3bn_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_g3bn_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__revo__facemasks__helmet_facemask_g3bn_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_g3bn_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_g3bn_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_g3bn_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_g3bn_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_revo3bar_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_revo3bar_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__revo__facemasks__helmet_facemask_revo3bar_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_revo3bar_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_revo3bar_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_revo3bar_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_revo3bar_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_revo3barlb_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_revo3barlb_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__revo__facemasks__helmet_facemask_revo3barlb_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_revo3barlb_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_revo3barlb_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_revo3barlb_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_revo3barlb_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_revo3barrb_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_revo3barrb_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__revo__facemasks__helmet_facemask_revo3barrb_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_revo3barrb_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_revo3barrb_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_revo3barrb_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_revo3barrb_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_revofullcage2_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_revofullcage2_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__revo__facemasks__helmet_facemask_revofullcage2_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_revofullcage2_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_revofullcage2_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_revofullcage2_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_revofullcage2_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_revofullcage3_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_revofullcage3_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__revo__facemasks__helmet_facemask_revofullcage3_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_revofullcage3_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_revofullcage3_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_revofullcage3_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_revofullcage3_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_revofullcage_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_revofullcage_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__revo__facemasks__helmet_facemask_revofullcage_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_revofullcage_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_revofullcage_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_revofullcage_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_revofullcage_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_revokicker_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_revokicker_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__revo__facemasks__helmet_facemask_revokicker_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_revokicker_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_revokicker_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_revokicker_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_revokicker_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_revorobot2_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_revorobot2_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__revo__facemasks__helmet_facemask_revorobot2_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_revorobot2_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_revorobot2_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_revorobot2_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_revorobot2_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_revorobot_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_revorobot_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__revo__facemasks__helmet_facemask_revorobot_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_revorobot_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_revorobot_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_revorobot_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_revorobot_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_accessories_revo_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/revo/helmet_accessories_revo_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__revo__helmet_accessories_revo_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/revo/helmet_accessories_revo_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_accessories_revo_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/revo/helmet_accessories_revo_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_accessories_revo_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_greendot_revo_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/revo/helmet_greendot_revo_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__revo__helmet_greendot_revo_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/revo/helmet_greendot_revo_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_greendot_revo_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/revo/helmet_greendot_revo_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_greendot_revo_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_shell_revo_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/revo/helmet_shell_revo_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__revo__helmet_shell_revo_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/revo/helmet_shell_revo_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_shell_revo_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/revo/helmet_shell_revo_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_shell_revo_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_visor_revo_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/revo/helmet_visor_revo_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__revo__helmet_visor_revo_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/revo/helmet_visor_revo_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_visor_revo_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/revo/helmet_visor_revo_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_visor_revo_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_visorclips_g3b_revo_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/revo/helmet_visorclips_g3b_revo_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__revo__helmet_visorclips_g3b_revo_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/revo/helmet_visorclips_g3b_revo_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_visorclips_g3b_revo_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/revo/helmet_visorclips_g3b_revo_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_visorclips_g3b_revo_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_visorclips_kicker_revo_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/revo/helmet_visorclips_kicker_revo_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__revo__helmet_visorclips_kicker_revo_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/revo/helmet_visorclips_kicker_revo_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_visorclips_kicker_revo_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/revo/helmet_visorclips_kicker_revo_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_visorclips_kicker_revo_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_visorclips_revo3barrbclip_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/revo/helmet_visorclips_revo3barrbclip_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__revo__helmet_visorclips_revo3barrbclip_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/revo/helmet_visorclips_revo3barrbclip_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_visorclips_revo3barrbclip_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/revo/helmet_visorclips_revo3barrbclip_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_visorclips_revo3barrbclip_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_visorclips_revoclip_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/revo/helmet_visorclips_revoclip_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__revo__helmet_visorclips_revoclip_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/revo/helmet_visorclips_revoclip_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_visorclips_revoclip_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/revo/helmet_visorclips_revoclip_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_visorclips_revoclip_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_visorclips_revofullcage3clip_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/revo/helmet_visorclips_revofullcage3clip_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__revo__helmet_visorclips_revofullcage3clip_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/revo/helmet_visorclips_revofullcage3clip_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_visorclips_revofullcage3clip_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/revo/helmet_visorclips_revofullcage3clip_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_visorclips_revofullcage3clip_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_revospeed2bar_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeed2bar_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__revospeed__facemasks__helmet_facemask_revospeed2bar_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeed2bar_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_revospeed2bar_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeed2bar_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_revospeed2bar_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_revospeed2barsingle_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeed2barsingle_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__revospeed__facemasks__helmet_facemask_revospeed2barsingle_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeed2barsingle_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_revospeed2barsingle_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeed2barsingle_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_revospeed2barsingle_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_revospeed2barwr_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeed2barwr_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__revospeed__facemasks__helmet_facemask_revospeed2barwr_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeed2barwr_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_revospeed2barwr_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeed2barwr_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_revospeed2barwr_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_revospeed3bar_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeed3bar_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__revospeed__facemasks__helmet_facemask_revospeed3bar_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeed3bar_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_revospeed3bar_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeed3bar_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_revospeed3bar_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_revospeed3barlb_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeed3barlb_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__revospeed__facemasks__helmet_facemask_revospeed3barlb_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeed3barlb_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_revospeed3barlb_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeed3barlb_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_revospeed3barlb_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_revospeed3barlbstraight_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeed3barlbstraight_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__revospeed__facemasks__helmet_facemask_revospeed3barlbstraight_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeed3barlbstraight_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_revospeed3barlbstraight_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeed3barlbstraight_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_revospeed3barlbstraight_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_revospeed3barqb_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeed3barqb_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__revospeed__facemasks__helmet_facemask_revospeed3barqb_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeed3barqb_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_revospeed3barqb_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeed3barqb_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_revospeed3barqb_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_revospeed3barsingle_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeed3barsingle_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__revospeed__facemasks__helmet_facemask_revospeed3barsingle_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeed3barsingle_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_revospeed3barsingle_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeed3barsingle_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_revospeed3barsingle_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_revospeed3barstraight_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeed3barstraight_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__revospeed__facemasks__helmet_facemask_revospeed3barstraight_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeed3barstraight_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_revospeed3barstraight_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeed3barstraight_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_revospeed3barstraight_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_revospeed808_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeed808_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__revospeed__facemasks__helmet_facemask_revospeed808_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeed808_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_revospeed808_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeed808_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_revospeed808_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_revospeedcage_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeedcage_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__revospeed__facemasks__helmet_facemask_revospeedcage_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeedcage_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_revospeedcage_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeedcage_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_revospeedcage_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_revospeedfullcage2_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeedfullcage2_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__revospeed__facemasks__helmet_facemask_revospeedfullcage2_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeedfullcage2_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_revospeedfullcage2_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeedfullcage2_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_revospeedfullcage2_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_revospeedfullcage_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeedfullcage_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__revospeed__facemasks__helmet_facemask_revospeedfullcage_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeedfullcage_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_revospeedfullcage_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeedfullcage_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_revospeedfullcage_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_revospeedfullcagehook_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeedfullcagehook_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__revospeed__facemasks__helmet_facemask_revospeedfullcagehook_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeedfullcagehook_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_revospeedfullcagehook_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeedfullcagehook_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_revospeedfullcagehook_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_revospeedgrid_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeedgrid_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__revospeed__facemasks__helmet_facemask_revospeedgrid_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeedgrid_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_revospeedgrid_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeedgrid_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_revospeedgrid_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_revospeedkicker_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeedkicker_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__revospeed__facemasks__helmet_facemask_revospeedkicker_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeedkicker_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_revospeedkicker_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeedkicker_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_revospeedkicker_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_revospeedrobot2_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeedrobot2_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__revospeed__facemasks__helmet_facemask_revospeedrobot2_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeedrobot2_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_revospeedrobot2_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeedrobot2_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_revospeedrobot2_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_revospeedrobot_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeedrobot_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__revospeed__facemasks__helmet_facemask_revospeedrobot_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeedrobot_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_revospeedrobot_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeedrobot_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_revospeedrobot_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_revospeedrobotrb_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeedrobotrb_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__revospeed__facemasks__helmet_facemask_revospeedrobotrb_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeedrobotrb_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_revospeedrobotrb_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeedrobotrb_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_revospeedrobotrb_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_accessories_revospeed_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/revospeed/helmet_accessories_revospeed_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__revospeed__helmet_accessories_revospeed_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/revospeed/helmet_accessories_revospeed_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_accessories_revospeed_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/revospeed/helmet_accessories_revospeed_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_accessories_revospeed_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_greendot_revospeed_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/revospeed/helmet_greendot_revospeed_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__revospeed__helmet_greendot_revospeed_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/revospeed/helmet_greendot_revospeed_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_greendot_revospeed_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/revospeed/helmet_greendot_revospeed_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_greendot_revospeed_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_shell_revospeed_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/revospeed/helmet_shell_revospeed_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__revospeed__helmet_shell_revospeed_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/revospeed/helmet_shell_revospeed_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_shell_revospeed_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/revospeed/helmet_shell_revospeed_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_shell_revospeed_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_visor_revospeed_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/revospeed/helmet_visor_revospeed_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__revospeed__helmet_visor_revospeed_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/revospeed/helmet_visor_revospeed_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_visor_revospeed_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/revospeed/helmet_visor_revospeed_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_visor_revospeed_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_visorclips_revospeed2barwrclip_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/revospeed/helmet_visorclips_revospeed2barwrclip_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__revospeed__helmet_visorclips_revospeed2barwrclip_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/revospeed/helmet_visorclips_revospeed2barwrclip_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_visorclips_revospeed2barwrclip_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/revospeed/helmet_visorclips_revospeed2barwrclip_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_visorclips_revospeed2barwrclip_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_visorclips_revospeedcageclip_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/revospeed/helmet_visorclips_revospeedcageclip_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__revospeed__helmet_visorclips_revospeedcageclip_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/revospeed/helmet_visorclips_revospeedcageclip_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_visorclips_revospeedcageclip_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/revospeed/helmet_visorclips_revospeedcageclip_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_visorclips_revospeedcageclip_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_visorclips_revospeedclip_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/revospeed/helmet_visorclips_revospeedclip_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__revospeed__helmet_visorclips_revospeedclip_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/revospeed/helmet_visorclips_revospeedclip_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_visorclips_revospeedclip_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/revospeed/helmet_visorclips_revospeedclip_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_visorclips_revospeedclip_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_visorclips_revospeedrobotclip_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/revospeed/helmet_visorclips_revospeedrobotclip_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__revospeed__helmet_visorclips_revospeedrobotclip_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/revospeed/helmet_visorclips_revospeedrobotclip_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_visorclips_revospeedrobotclip_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/revospeed/helmet_visorclips_revospeedrobotclip_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_visorclips_revospeedrobotclip_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_riddell3603barlb_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/riddell360/facemasks/helmet_facemask_riddell3603barlb_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__riddell360__facemasks__helmet_facemask_riddell3603barlb_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/riddell360/facemasks/helmet_facemask_riddell3603barlb_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_riddell3603barlb_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/riddell360/facemasks/helmet_facemask_riddell3603barlb_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_riddell3603barlb_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_riddell360fullcage_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/riddell360/facemasks/helmet_facemask_riddell360fullcage_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__riddell360__facemasks__helmet_facemask_riddell360fullcage_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/riddell360/facemasks/helmet_facemask_riddell360fullcage_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_riddell360fullcage_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/riddell360/facemasks/helmet_facemask_riddell360fullcage_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_riddell360fullcage_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_riddell360robot2_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/riddell360/facemasks/helmet_facemask_riddell360robot2_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__riddell360__facemasks__helmet_facemask_riddell360robot2_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/riddell360/facemasks/helmet_facemask_riddell360robot2_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_riddell360robot2_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/riddell360/facemasks/helmet_facemask_riddell360robot2_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_riddell360robot2_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_riddell360robot_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/riddell360/facemasks/helmet_facemask_riddell360robot_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__riddell360__facemasks__helmet_facemask_riddell360robot_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/riddell360/facemasks/helmet_facemask_riddell360robot_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_riddell360robot_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/riddell360/facemasks/helmet_facemask_riddell360robot_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_riddell360robot_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_accessories_riddell360_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/riddell360/helmet_accessories_riddell360_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__riddell360__helmet_accessories_riddell360_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/riddell360/helmet_accessories_riddell360_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_accessories_riddell360_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/riddell360/helmet_accessories_riddell360_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_accessories_riddell360_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_greendot_riddell360_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/riddell360/helmet_greendot_riddell360_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__riddell360__helmet_greendot_riddell360_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/riddell360/helmet_greendot_riddell360_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_greendot_riddell360_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/riddell360/helmet_greendot_riddell360_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_greendot_riddell360_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_shell_riddell360_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/riddell360/helmet_shell_riddell360_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__riddell360__helmet_shell_riddell360_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/riddell360/helmet_shell_riddell360_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_shell_riddell360_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/riddell360/helmet_shell_riddell360_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_shell_riddell360_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_visor_riddell360_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/riddell360/helmet_visor_riddell360_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__riddell360__helmet_visor_riddell360_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/riddell360/helmet_visor_riddell360_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_visor_riddell360_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/riddell360/helmet_visor_riddell360_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_visor_riddell360_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_visorclips_riddell360clip_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/riddell360/helmet_visorclips_riddell360clip_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__riddell360__helmet_visorclips_riddell360clip_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/riddell360/helmet_visorclips_riddell360clip_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_visorclips_riddell360clip_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/riddell360/helmet_visorclips_riddell360clip_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_visorclips_riddell360clip_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_accessories_schutt_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/schutt/helmet_accessories_schutt_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__schutt__helmet_accessories_schutt_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/schutt/helmet_accessories_schutt_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_accessories_schutt_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/schutt/helmet_accessories_schutt_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_accessories_schutt_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_greendot_schutt_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/schutt/helmet_greendot_schutt_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__schutt__helmet_greendot_schutt_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/schutt/helmet_greendot_schutt_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_greendot_schutt_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/schutt/helmet_greendot_schutt_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_greendot_schutt_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_shell_schutt_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/schutt/helmet_shell_schutt_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__schutt__helmet_shell_schutt_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/schutt/helmet_shell_schutt_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_shell_schutt_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/schutt/helmet_shell_schutt_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_shell_schutt_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_visor_schutt_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/schutt/helmet_visor_schutt_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__schutt__helmet_visor_schutt_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/schutt/helmet_visor_schutt_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_visor_schutt_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/schutt/helmet_visor_schutt_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_visor_schutt_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_accessories_schuttvengeancez10_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/schuttvengeancez10/helmet_accessories_schuttvengeancez10_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__schuttvengeancez10__helmet_accessories_schuttvengeancez10_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/schuttvengeancez10/helmet_accessories_schuttvengeancez10_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_accessories_schuttvengeancez10_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/schuttvengeancez10/helmet_accessories_schuttvengeancez10_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_accessories_schuttvengeancez10_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_shell_schuttvengeancez10_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/schuttvengeancez10/helmet_shell_schuttvengeancez10_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__schuttvengeancez10__helmet_shell_schuttvengeancez10_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/schuttvengeancez10/helmet_shell_schuttvengeancez10_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_shell_schuttvengeancez10_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/schuttvengeancez10/helmet_shell_schuttvengeancez10_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_shell_schuttvengeancez10_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_visor_schuttvengeancez10_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/schuttvengeancez10/helmet_visor_schuttvengeancez10_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__schuttvengeancez10__helmet_visor_schuttvengeancez10_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/schuttvengeancez10/helmet_visor_schuttvengeancez10_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_visor_schuttvengeancez10_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/schuttvengeancez10/helmet_visor_schuttvengeancez10_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_visor_schuttvengeancez10_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_visorclips_schuttvengeancez10clip_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/schuttvengeancez10/helmet_visorclips_schuttvengeancez10clip_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__schuttvengeancez10__helmet_visorclips_schuttvengeancez10clip_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/schuttvengeancez10/helmet_visorclips_schuttvengeancez10clip_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_visorclips_schuttvengeancez10clip_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/schuttvengeancez10/helmet_visorclips_schuttvengeancez10clip_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_visorclips_schuttvengeancez10clip_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_speedflex2bar_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflex2bar_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__speedflex__facemasks__helmet_facemask_speedflex2bar_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflex2bar_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_speedflex2bar_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflex2bar_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_speedflex2bar_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_speedflex2barqb_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflex2barqb_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__speedflex__facemasks__helmet_facemask_speedflex2barqb_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflex2barqb_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_speedflex2barqb_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflex2barqb_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_speedflex2barqb_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_speedflex2barsingle_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflex2barsingle_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__speedflex__facemasks__helmet_facemask_speedflex2barsingle_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflex2barsingle_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_speedflex2barsingle_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflex2barsingle_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_speedflex2barsingle_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_speedflex3barlb_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflex3barlb_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__speedflex__facemasks__helmet_facemask_speedflex3barlb_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflex3barlb_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_speedflex3barlb_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflex3barlb_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_speedflex3barlb_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_speedflex3barqb_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflex3barqb_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__speedflex__facemasks__helmet_facemask_speedflex3barqb_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflex3barqb_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_speedflex3barqb_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflex3barqb_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_speedflex3barqb_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_speedflex3barrb_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflex3barrb_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__speedflex__facemasks__helmet_facemask_speedflex3barrb_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflex3barrb_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_speedflex3barrb_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflex3barrb_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_speedflex3barrb_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_speedflex3barsingle_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflex3barsingle_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__speedflex__facemasks__helmet_facemask_speedflex3barsingle_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflex3barsingle_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_speedflex3barsingle_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflex3barsingle_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_speedflex3barsingle_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_speedflexcage_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflexcage_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__speedflex__facemasks__helmet_facemask_speedflexcage_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflexcage_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_speedflexcage_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflexcage_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_speedflexcage_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_speedflexfullcage_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflexfullcage_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__speedflex__facemasks__helmet_facemask_speedflexfullcage_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflexfullcage_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_speedflexfullcage_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflexfullcage_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_speedflexfullcage_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_speedflexrobot_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflexrobot_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__speedflex__facemasks__helmet_facemask_speedflexrobot_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflexrobot_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_speedflexrobot_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflexrobot_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_speedflexrobot_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_speedflexrobotrb_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflexrobotrb_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__speedflex__facemasks__helmet_facemask_speedflexrobotrb_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflexrobotrb_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_speedflexrobotrb_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflexrobotrb_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_speedflexrobotrb_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_speedflexrobotrbjagged_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflexrobotrbjagged_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__speedflex__facemasks__helmet_facemask_speedflexrobotrbjagged_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflexrobotrbjagged_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_speedflexrobotrbjagged_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflexrobotrbjagged_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_speedflexrobotrbjagged_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_accessories_speedflex_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/speedflex/helmet_accessories_speedflex_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__speedflex__helmet_accessories_speedflex_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/speedflex/helmet_accessories_speedflex_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_accessories_speedflex_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/speedflex/helmet_accessories_speedflex_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_accessories_speedflex_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_greendot_speedflex_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/speedflex/helmet_greendot_speedflex_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__speedflex__helmet_greendot_speedflex_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/speedflex/helmet_greendot_speedflex_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_greendot_speedflex_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/speedflex/helmet_greendot_speedflex_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_greendot_speedflex_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_shell_speedflex_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/speedflex/helmet_shell_speedflex_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__speedflex__helmet_shell_speedflex_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/speedflex/helmet_shell_speedflex_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_shell_speedflex_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/speedflex/helmet_shell_speedflex_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_shell_speedflex_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_visor_speedflex_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/speedflex/helmet_visor_speedflex_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__speedflex__helmet_visor_speedflex_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/speedflex/helmet_visor_speedflex_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_visor_speedflex_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/speedflex/helmet_visor_speedflex_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_visor_speedflex_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_visorclips_speedflexcageclip_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/speedflex/helmet_visorclips_speedflexcageclip_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__speedflex__helmet_visorclips_speedflexcageclip_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/speedflex/helmet_visorclips_speedflexcageclip_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_visorclips_speedflexcageclip_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/speedflex/helmet_visorclips_speedflexcageclip_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_visorclips_speedflexcageclip_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_visorclips_speedflexclip_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/speedflex/helmet_visorclips_speedflexclip_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__speedflex__helmet_visorclips_speedflexclip_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/speedflex/helmet_visorclips_speedflexclip_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_visorclips_speedflexclip_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/speedflex/helmet_visorclips_speedflexclip_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_visorclips_speedflexclip_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_3barrb_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_3barrb_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__standard__facemasks__helmet_facemask_3barrb_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_3barrb_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_3barrb_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_3barrb_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_3barrb_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_3barrbjagged_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_3barrbjagged_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__standard__facemasks__helmet_facemask_3barrbjagged_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_3barrbjagged_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_3barrbjagged_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_3barrbjagged_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_3barrbjagged_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_bullrb_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_bullrb_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__standard__facemasks__helmet_facemask_bullrb_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_bullrb_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_bullrb_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_bullrb_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_bullrb_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_egjop_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_egjop_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__standard__facemasks__helmet_facemask_egjop_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_egjop_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_egjop_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_egjop_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_egjop_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_egop_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_egop_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__standard__facemasks__helmet_facemask_egop_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_egop_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_egop_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_egop_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_egop_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_egopii_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_egopii_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__standard__facemasks__helmet_facemask_egopii_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_egopii_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_egopii_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_egopii_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_egopii_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_fullcage2_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_fullcage2_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__standard__facemasks__helmet_facemask_fullcage2_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_fullcage2_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_fullcage2_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_fullcage2_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_fullcage2_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_fullcage_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_fullcage_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__standard__facemasks__helmet_facemask_fullcage_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_fullcage_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_fullcage_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_fullcage_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_fullcage_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_fullcagesingle_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_fullcagesingle_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__standard__facemasks__helmet_facemask_fullcagesingle_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_fullcagesingle_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_fullcagesingle_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_fullcagesingle_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_fullcagesingle_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_njop_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_njop_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__standard__facemasks__helmet_facemask_njop_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_njop_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_njop_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_njop_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_njop_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_njopdw_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_njopdw_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__standard__facemasks__helmet_facemask_njopdw_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_njopdw_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_njopdw_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_njopdw_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_njopdw_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_opo_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_opo_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__standard__facemasks__helmet_facemask_opo_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_opo_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_opo_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_opo_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_opo_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_opodw_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_opodw_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__standard__facemasks__helmet_facemask_opodw_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_opodw_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_opodw_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_opodw_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_opodw_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_oposw_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_oposw_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__standard__facemasks__helmet_facemask_oposw_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_oposw_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_oposw_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_oposw_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_oposw_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_rjop_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_rjop_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__standard__facemasks__helmet_facemask_rjop_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_rjop_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_rjop_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_rjop_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_rjop_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_rjopdw_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_rjopdw_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__standard__facemasks__helmet_facemask_rjopdw_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_rjopdw_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_rjopdw_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_rjopdw_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_rjopdw_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_rjopubdw_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_rjopubdw_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__standard__facemasks__helmet_facemask_rjopubdw_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_rjopubdw_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_rjopubdw_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_rjopubdw_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_rjopubdw_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_rkop_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_rkop_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__standard__facemasks__helmet_facemask_rkop_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_rkop_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_rkop_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_rkop_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_rkop_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_ropo_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_ropo_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__standard__facemasks__helmet_facemask_ropo_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_ropo_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_ropo_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_ropo_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_ropo_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_ropodw_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_ropodw_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__standard__facemasks__helmet_facemask_ropodw_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_ropodw_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_ropodw_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_ropodw_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_ropodw_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_ropodwxl_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_ropodwxl_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__standard__facemasks__helmet_facemask_ropodwxl_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_ropodwxl_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_ropodwxl_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_ropodwxl_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_ropodwxl_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_roposw_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_roposw_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__standard__facemasks__helmet_facemask_roposw_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_roposw_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_roposw_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_roposw_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_roposw_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_ropoubdw_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_ropoubdw_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__standard__facemasks__helmet_facemask_ropoubdw_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_ropoubdw_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_ropoubdw_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_ropoubdw_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_ropoubdw_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_standard2barwr_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_standard2barwr_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__standard__facemasks__helmet_facemask_standard2barwr_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_standard2barwr_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_standard2barwr_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_standard2barwr_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_standard2barwr_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_stdbulldog_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_stdbulldog_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__standard__facemasks__helmet_facemask_stdbulldog_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_stdbulldog_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_stdbulldog_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_stdbulldog_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_stdbulldog_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_accessories_standard_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/standard/helmet_accessories_standard_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__standard__helmet_accessories_standard_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/standard/helmet_accessories_standard_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_accessories_standard_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/standard/helmet_accessories_standard_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_accessories_standard_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_accessories_standardbrady_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/standard/helmet_accessories_standardbrady_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__standard__helmet_accessories_standardbrady_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/standard/helmet_accessories_standardbrady_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_accessories_standardbrady_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/standard/helmet_accessories_standardbrady_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_accessories_standardbrady_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_greendot_standard_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/standard/helmet_greendot_standard_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__standard__helmet_greendot_standard_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/standard/helmet_greendot_standard_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_greendot_standard_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/standard/helmet_greendot_standard_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_greendot_standard_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_greendot_standardbrady_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/standard/helmet_greendot_standardbrady_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__standard__helmet_greendot_standardbrady_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/standard/helmet_greendot_standardbrady_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_greendot_standardbrady_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/standard/helmet_greendot_standardbrady_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_greendot_standardbrady_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_shell_standard_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/standard/helmet_shell_standard_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__standard__helmet_shell_standard_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/standard/helmet_shell_standard_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_shell_standard_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/standard/helmet_shell_standard_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_shell_standard_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_shell_standardbrady_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/standard/helmet_shell_standardbrady_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__standard__helmet_shell_standardbrady_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/standard/helmet_shell_standardbrady_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_shell_standardbrady_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/standard/helmet_shell_standardbrady_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_shell_standardbrady_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_visor_standard_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/standard/helmet_visor_standard_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__standard__helmet_visor_standard_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/standard/helmet_visor_standard_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_visor_standard_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/standard/helmet_visor_standard_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_visor_standard_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_visor_standardbrady_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/standard/helmet_visor_standardbrady_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__standard__helmet_visor_standardbrady_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/standard/helmet_visor_standardbrady_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_visor_standardbrady_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/standard/helmet_visor_standardbrady_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_visor_standardbrady_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_visorclips_standard2clip_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/standard/helmet_visorclips_standard2clip_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__standard__helmet_visorclips_standard2clip_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/standard/helmet_visorclips_standard2clip_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_visorclips_standard2clip_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/standard/helmet_visorclips_standard2clip_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_visorclips_standard2clip_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_visorclips_standardbrady2clip_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/standard/helmet_visorclips_standardbrady2clip_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__standard__helmet_visorclips_standardbrady2clip_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/standard/helmet_visorclips_standardbrady2clip_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_visorclips_standardbrady2clip_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/standard/helmet_visorclips_standardbrady2clip_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_visorclips_standardbrady2clip_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_visorclips_standardbradyclip_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/standard/helmet_visorclips_standardbradyclip_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__standard__helmet_visorclips_standardbradyclip_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/standard/helmet_visorclips_standardbradyclip_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_visorclips_standardbradyclip_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/standard/helmet_visorclips_standardbradyclip_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_visorclips_standardbradyclip_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_visorclips_standardclip_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/standard/helmet_visorclips_standardclip_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__standard__helmet_visorclips_standardclip_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/standard/helmet_visorclips_standardclip_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_visorclips_standardclip_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/standard/helmet_visorclips_standardclip_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_visorclips_standardclip_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_vengeance3barrb_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeance3barrb_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__vengeance__facemasks__helmet_facemask_vengeance3barrb_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeance3barrb_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_vengeance3barrb_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeance3barrb_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_vengeance3barrb_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_vengeancecage_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancecage_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__vengeance__facemasks__helmet_facemask_vengeancecage_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancecage_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_vengeancecage_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancecage_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_vengeancecage_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_vengeancefullcage_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancefullcage_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__vengeance__facemasks__helmet_facemask_vengeancefullcage_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancefullcage_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_vengeancefullcage_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancefullcage_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_vengeancefullcage_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_vengeancefullcagebulldog_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancefullcagebulldog_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__vengeance__facemasks__helmet_facemask_vengeancefullcagebulldog_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancefullcagebulldog_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_vengeancefullcagebulldog_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancefullcagebulldog_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_vengeancefullcagebulldog_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_vengeancekicker_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancekicker_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__vengeance__facemasks__helmet_facemask_vengeancekicker_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancekicker_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_vengeancekicker_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancekicker_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_vengeancekicker_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_vengeanceqb_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeanceqb_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__vengeance__facemasks__helmet_facemask_vengeanceqb_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeanceqb_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_vengeanceqb_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeanceqb_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_vengeanceqb_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_vengeancerobot_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancerobot_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__vengeance__facemasks__helmet_facemask_vengeancerobot_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancerobot_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_vengeancerobot_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancerobot_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_vengeancerobot_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_vengeancerobotrb_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancerobotrb_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__vengeance__facemasks__helmet_facemask_vengeancerobotrb_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancerobotrb_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_vengeancerobotrb_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancerobotrb_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_vengeancerobotrb_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_vengeancez102bar_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancez102bar_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__vengeance__facemasks__helmet_facemask_vengeancez102bar_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancez102bar_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_vengeancez102bar_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancez102bar_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_vengeancez102bar_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_vengeancez103barlb_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancez103barlb_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__vengeance__facemasks__helmet_facemask_vengeancez103barlb_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancez103barlb_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_vengeancez103barlb_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancez103barlb_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_vengeancez103barlb_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_vengeancez10cage_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancez10cage_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__vengeance__facemasks__helmet_facemask_vengeancez10cage_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancez10cage_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_vengeancez10cage_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancez10cage_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_vengeancez10cage_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_vengeancez10robot_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancez10robot_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__vengeance__facemasks__helmet_facemask_vengeancez10robot_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancez10robot_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_vengeancez10robot_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancez10robot_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_vengeancez10robot_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_vengeancez10robotrb_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancez10robotrb_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__vengeance__facemasks__helmet_facemask_vengeancez10robotrb_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancez10robotrb_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_vengeancez10robotrb_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancez10robotrb_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_vengeancez10robotrb_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_accessories_schuttvengeance_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/vengeance/helmet_accessories_schuttvengeance_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__vengeance__helmet_accessories_schuttvengeance_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/vengeance/helmet_accessories_schuttvengeance_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_accessories_schuttvengeance_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/vengeance/helmet_accessories_schuttvengeance_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_accessories_schuttvengeance_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_greendot_schuttvengeance_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/vengeance/helmet_greendot_schuttvengeance_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__vengeance__helmet_greendot_schuttvengeance_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/vengeance/helmet_greendot_schuttvengeance_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_greendot_schuttvengeance_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/vengeance/helmet_greendot_schuttvengeance_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_greendot_schuttvengeance_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_shell_schuttvengeance_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/vengeance/helmet_shell_schuttvengeance_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__vengeance__helmet_shell_schuttvengeance_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/vengeance/helmet_shell_schuttvengeance_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_shell_schuttvengeance_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/vengeance/helmet_shell_schuttvengeance_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_shell_schuttvengeance_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_visor_schuttvengeance_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/vengeance/helmet_visor_schuttvengeance_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__vengeance__helmet_visor_schuttvengeance_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/vengeance/helmet_visor_schuttvengeance_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_visor_schuttvengeance_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/vengeance/helmet_visor_schuttvengeance_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_visor_schuttvengeance_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_visorclips_vengeanceclip_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/vengeance/helmet_visorclips_vengeanceclip_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__vengeance__helmet_visorclips_vengeanceclip_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/vengeance/helmet_visorclips_vengeanceclip_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_visorclips_vengeanceclip_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/vengeance/helmet_visorclips_vengeanceclip_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_visorclips_vengeanceclip_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_viciszero12bar_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/viciszero1/facemasks/helmet_facemask_viciszero12bar_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__viciszero1__facemasks__helmet_facemask_viciszero12bar_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/viciszero1/facemasks/helmet_facemask_viciszero12bar_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_viciszero12bar_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/viciszero1/facemasks/helmet_facemask_viciszero12bar_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_viciszero12bar_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_viciszero13bar_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/viciszero1/facemasks/helmet_facemask_viciszero13bar_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__viciszero1__facemasks__helmet_facemask_viciszero13bar_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/viciszero1/facemasks/helmet_facemask_viciszero13bar_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_viciszero13bar_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/viciszero1/facemasks/helmet_facemask_viciszero13bar_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_viciszero13bar_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_viciszero13barlb_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/viciszero1/facemasks/helmet_facemask_viciszero13barlb_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__viciszero1__facemasks__helmet_facemask_viciszero13barlb_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/viciszero1/facemasks/helmet_facemask_viciszero13barlb_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_viciszero13barlb_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/viciszero1/facemasks/helmet_facemask_viciszero13barlb_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_viciszero13barlb_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_viciszero13barrb_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/viciszero1/facemasks/helmet_facemask_viciszero13barrb_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__viciszero1__facemasks__helmet_facemask_viciszero13barrb_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/viciszero1/facemasks/helmet_facemask_viciszero13barrb_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_viciszero13barrb_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/viciszero1/facemasks/helmet_facemask_viciszero13barrb_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_viciszero13barrb_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_viciszero1bullrb_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/viciszero1/facemasks/helmet_facemask_viciszero1bullrb_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__viciszero1__facemasks__helmet_facemask_viciszero1bullrb_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/viciszero1/facemasks/helmet_facemask_viciszero1bullrb_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_viciszero1bullrb_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/viciszero1/facemasks/helmet_facemask_viciszero1bullrb_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_viciszero1bullrb_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_viciszero1fullcage_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/viciszero1/facemasks/helmet_facemask_viciszero1fullcage_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__viciszero1__facemasks__helmet_facemask_viciszero1fullcage_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/viciszero1/facemasks/helmet_facemask_viciszero1fullcage_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_viciszero1fullcage_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/viciszero1/facemasks/helmet_facemask_viciszero1fullcage_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_viciszero1fullcage_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_viciszero1robot_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/viciszero1/facemasks/helmet_facemask_viciszero1robot_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__viciszero1__facemasks__helmet_facemask_viciszero1robot_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/viciszero1/facemasks/helmet_facemask_viciszero1robot_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_viciszero1robot_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/viciszero1/facemasks/helmet_facemask_viciszero1robot_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_viciszero1robot_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_viciszero1robotrb_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/viciszero1/facemasks/helmet_facemask_viciszero1robotrb_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__viciszero1__facemasks__helmet_facemask_viciszero1robotrb_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/viciszero1/facemasks/helmet_facemask_viciszero1robotrb_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_viciszero1robotrb_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/viciszero1/facemasks/helmet_facemask_viciszero1robotrb_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_viciszero1robotrb_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_accessories_viciszero1_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/viciszero1/helmet_accessories_viciszero1_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__viciszero1__helmet_accessories_viciszero1_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/viciszero1/helmet_accessories_viciszero1_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_accessories_viciszero1_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/viciszero1/helmet_accessories_viciszero1_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_accessories_viciszero1_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_greendot_viciszero1_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/viciszero1/helmet_greendot_viciszero1_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__viciszero1__helmet_greendot_viciszero1_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/viciszero1/helmet_greendot_viciszero1_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_greendot_viciszero1_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/viciszero1/helmet_greendot_viciszero1_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_greendot_viciszero1_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_shell_viciszero1_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/viciszero1/helmet_shell_viciszero1_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__viciszero1__helmet_shell_viciszero1_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/viciszero1/helmet_shell_viciszero1_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_shell_viciszero1_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/viciszero1/helmet_shell_viciszero1_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_shell_viciszero1_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_visor_viciszero1_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/viciszero1/helmet_visor_viciszero1_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__viciszero1__helmet_visor_viciszero1_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/viciszero1/helmet_visor_viciszero1_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_visor_viciszero1_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/viciszero1/helmet_visor_viciszero1_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_visor_viciszero1_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_visorclips_viciszero1clip_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/viciszero1/helmet_visorclips_viciszero1clip_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__viciszero1__helmet_visorclips_viciszero1clip_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/viciszero1/helmet_visorclips_viciszero1clip_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_visorclips_viciszero1clip_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/viciszero1/helmet_visorclips_viciszero1clip_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_visorclips_viciszero1clip_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_s2egfacemask_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/xenith/facemasks/helmet_facemask_s2egfacemask_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__xenith__facemasks__helmet_facemask_s2egfacemask_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/xenith/facemasks/helmet_facemask_s2egfacemask_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_s2egfacemask_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/xenith/facemasks/helmet_facemask_s2egfacemask_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_s2egfacemask_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_xenith3barrb_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/xenith/facemasks/helmet_facemask_xenith3barrb_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__xenith__facemasks__helmet_facemask_xenith3barrb_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/xenith/facemasks/helmet_facemask_xenith3barrb_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_xenith3barrb_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/xenith/facemasks/helmet_facemask_xenith3barrb_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_xenith3barrb_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_xenithfullcage_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/xenith/facemasks/helmet_facemask_xenithfullcage_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__xenith__facemasks__helmet_facemask_xenithfullcage_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/xenith/facemasks/helmet_facemask_xenithfullcage_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_xenithfullcage_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/xenith/facemasks/helmet_facemask_xenithfullcage_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_xenithfullcage_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_xenithpredator_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/xenith/facemasks/helmet_facemask_xenithpredator_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__xenith__facemasks__helmet_facemask_xenithpredator_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/xenith/facemasks/helmet_facemask_xenithpredator_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_xenithpredator_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/xenith/facemasks/helmet_facemask_xenithpredator_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_xenithpredator_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_xenithprism_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/xenith/facemasks/helmet_facemask_xenithprism_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__xenith__facemasks__helmet_facemask_xenithprism_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/xenith/facemasks/helmet_facemask_xenithprism_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_xenithprism_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/xenith/facemasks/helmet_facemask_xenithprism_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_xenithprism_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_xenithrobot_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/xenith/facemasks/helmet_facemask_xenithrobot_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__xenith__facemasks__helmet_facemask_xenithrobot_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/xenith/facemasks/helmet_facemask_xenithrobot_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_xenithrobot_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/xenith/facemasks/helmet_facemask_xenithrobot_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_xenithrobot_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_xenithrobotrb_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/xenith/facemasks/helmet_facemask_xenithrobotrb_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__xenith__facemasks__helmet_facemask_xenithrobotrb_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/xenith/facemasks/helmet_facemask_xenithrobotrb_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_xenithrobotrb_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/xenith/facemasks/helmet_facemask_xenithrobotrb_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_facemask_xenithrobotrb_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_accessories_xenith_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/xenith/helmet_accessories_xenith_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__xenith__helmet_accessories_xenith_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/xenith/helmet_accessories_xenith_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_accessories_xenith_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/xenith/helmet_accessories_xenith_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_accessories_xenith_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_greendot_xenith_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/xenith/helmet_greendot_xenith_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__xenith__helmet_greendot_xenith_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/xenith/helmet_greendot_xenith_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_greendot_xenith_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/xenith/helmet_greendot_xenith_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_greendot_xenith_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_shell_xenith_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/xenith/helmet_shell_xenith_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__xenith__helmet_shell_xenith_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/xenith/helmet_shell_xenith_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_shell_xenith_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/xenith/helmet_shell_xenith_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_shell_xenith_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_visor_xenith_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/xenith/helmet_visor_xenith_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__xenith__helmet_visor_xenith_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/xenith/helmet_visor_xenith_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_visor_xenith_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/xenith/helmet_visor_xenith_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_visor_xenith_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_visorclips_xenithclip_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/xenith/helmet_visorclips_xenithclip_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__xenith__helmet_visorclips_xenithclip_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/xenith/helmet_visorclips_xenithclip_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_visorclips_xenithclip_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/xenith/helmet_visorclips_xenithclip_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_visorclips_xenithclip_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_visorclips_xenithprismclip_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/xenith/helmet_visorclips_xenithprismclip_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__xenith__helmet_visorclips_xenithprismclip_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/xenith/helmet_visorclips_xenithprismclip_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_visorclips_xenithprismclip_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/xenith/helmet_visorclips_xenithprismclip_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_visorclips_xenithprismclip_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_accessories_xenithepic_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/xenithepic/helmet_accessories_xenithepic_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__xenithepic__helmet_accessories_xenithepic_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/xenithepic/helmet_accessories_xenithepic_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_accessories_xenithepic_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/xenithepic/helmet_accessories_xenithepic_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_accessories_xenithepic_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_shell_xenithepic_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/xenithepic/helmet_shell_xenithepic_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__xenithepic__helmet_shell_xenithepic_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/xenithepic/helmet_shell_xenithepic_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_shell_xenithepic_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/xenithepic/helmet_shell_xenithepic_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_shell_xenithepic_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_visor_xenithepic_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/xenithepic/helmet_visor_xenithepic_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__xenithepic__helmet_visor_xenithepic_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/xenithepic/helmet_visor_xenithepic_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_visor_xenithepic_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/xenithepic/helmet_visor_xenithepic_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_visor_xenithepic_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_visorclips_xenithepicclip_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/xenithepic/helmet_visorclips_xenithepicclip_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/helmets/mvdb/content__characters__player__parts__helmets__xenithepic__helmet_visorclips_xenithepicclip_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/xenithepic/helmet_visorclips_xenithepicclip_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_visorclips_xenithepicclip_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/xenithepic/helmet_visorclips_xenithepicclip_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshinfo/helmet_visorclips_xenithepicclip_mesh.meshinfo.json"
+ }
+]

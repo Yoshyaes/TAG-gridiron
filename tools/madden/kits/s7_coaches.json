@@ -1,0 +1,20 @@
+{
+ "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+ "ue_skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+ "skeleton_bones": 268,
+ "name": "s7_coaches",
+ "out": "stage7/coaches",
+ "ue_dir": "/Game/MaddenRef/Coaches/Sample",
+ "sample": {
+  "pattern": "^content/characters/coach/coaches/[^/]+/[^/]+/[^/]+_mesh$",
+  "group": "/coaches/[^/]+/([^/]+)/",
+  "count": 8,
+  "seed": 19
+ },
+ "preview": {
+  "mode": "groups",
+  "group_regex": "/coaches/[^/]+/([^/]+)/",
+  "spacing": 100,
+  "level": "Stage7Coaches"
+ }
+}

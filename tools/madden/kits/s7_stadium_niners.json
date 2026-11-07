@@ -1,0 +1,19 @@
+{
+ "name": "s7_stadium_niners",
+ "out": "stage7/stadium_niners",
+ "ue_dir": "/Game/MaddenRef/Stadiums/Niners",
+ "skeleton": null,
+ "ue_skeleton": null,
+ "mesh_type": "RigidMeshAsset",
+ "mesh_patterns": [
+  "^content/worlds/components/stadiums/niners/.*",
+  "^content/worlds/components/objects/sidelineobjects/.*"
+ ],
+ "pattern_mode": "all",
+ "preview": {
+  "mode": "grid",
+  "spacing": 5000,
+  "per_row": 14,
+  "level": "Stage7StadiumNiners"
+ }
+}

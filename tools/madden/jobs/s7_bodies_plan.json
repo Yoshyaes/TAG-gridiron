@@ -1,0 +1,242 @@
+[
+ {
+  "id": "mvdb_fullarms_d_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/bodies/fullarms_d_launch_playerarms_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/bodies/mvdb/content__characters__player__bodies__fullarms_d_launch_playerarms_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/bodies/fullarms_d_mesh"
+  }
+ },
+ {
+  "id": "mi_fullarms_d_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/bodies/fullarms_d_mesh",
+  "out": "{REPO}/extracted/stage7/bodies/meshinfo/fullarms_d_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_fullarms_h_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/bodies/fullarms_h_launch_playerarms_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/bodies/mvdb/content__characters__player__bodies__fullarms_h_launch_playerarms_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/bodies/fullarms_h_mesh"
+  }
+ },
+ {
+  "id": "mi_fullarms_h_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/bodies/fullarms_h_mesh",
+  "out": "{REPO}/extracted/stage7/bodies/meshinfo/fullarms_h_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_fullarms_m_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/bodies/fullarms_m_launch_playerarms_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/bodies/mvdb/content__characters__player__bodies__fullarms_m_launch_playerarms_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/bodies/fullarms_m_mesh"
+  }
+ },
+ {
+  "id": "mi_fullarms_m_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/bodies/fullarms_m_mesh",
+  "out": "{REPO}/extracted/stage7/bodies/meshinfo/fullarms_m_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_fullarms_t_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/bodies/fullarms_t_launch_playerarms_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/bodies/mvdb/content__characters__player__bodies__fullarms_t_launch_playerarms_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/bodies/fullarms_t_mesh"
+  }
+ },
+ {
+  "id": "mi_fullarms_t_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/bodies/fullarms_t_mesh",
+  "out": "{REPO}/extracted/stage7/bodies/meshinfo/fullarms_t_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_legs_d_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/bodies/legs_d_launch_playerarms_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/bodies/mvdb/content__characters__player__bodies__legs_d_launch_playerarms_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/bodies/legs_d_mesh"
+  }
+ },
+ {
+  "id": "mi_legs_d_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/bodies/legs_d_mesh",
+  "out": "{REPO}/extracted/stage7/bodies/meshinfo/legs_d_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_legs_h_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/bodies/legs_h_launch_playerarms_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/bodies/mvdb/content__characters__player__bodies__legs_h_launch_playerarms_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/bodies/legs_h_mesh"
+  }
+ },
+ {
+  "id": "mi_legs_h_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/bodies/legs_h_mesh",
+  "out": "{REPO}/extracted/stage7/bodies/meshinfo/legs_h_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_legs_m_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/bodies/legs_m_launch_playerarms_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/bodies/mvdb/content__characters__player__bodies__legs_m_launch_playerarms_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/bodies/legs_m_mesh"
+  }
+ },
+ {
+  "id": "mi_legs_m_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/bodies/legs_m_mesh",
+  "out": "{REPO}/extracted/stage7/bodies/meshinfo/legs_m_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_legs_t_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/bodies/legs_t_launch_playerarms_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/bodies/mvdb/content__characters__player__bodies__legs_t_launch_playerarms_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/bodies/legs_t_mesh"
+  }
+ },
+ {
+  "id": "mi_legs_t_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/bodies/legs_t_mesh",
+  "out": "{REPO}/extracted/stage7/bodies/meshinfo/legs_t_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_nohands_d_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/bodies/nohands_d_launch_playerarms_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/bodies/mvdb/content__characters__player__bodies__nohands_d_launch_playerarms_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/bodies/nohands_d_mesh"
+  }
+ },
+ {
+  "id": "mi_nohands_d_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/bodies/nohands_d_mesh",
+  "out": "{REPO}/extracted/stage7/bodies/meshinfo/nohands_d_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_nohands_h_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/bodies/nohands_h_launch_playerarms_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/bodies/mvdb/content__characters__player__bodies__nohands_h_launch_playerarms_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/bodies/nohands_h_mesh"
+  }
+ },
+ {
+  "id": "mi_nohands_h_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/bodies/nohands_h_mesh",
+  "out": "{REPO}/extracted/stage7/bodies/meshinfo/nohands_h_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_nohands_m_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/bodies/nohands_m_launch_playerarms_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/bodies/mvdb/content__characters__player__bodies__nohands_m_launch_playerarms_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/bodies/nohands_m_mesh"
+  }
+ },
+ {
+  "id": "mi_nohands_m_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/bodies/nohands_m_mesh",
+  "out": "{REPO}/extracted/stage7/bodies/meshinfo/nohands_m_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_nohands_t_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/bodies/nohands_t_launch_playerarms_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/bodies/mvdb/content__characters__player__bodies__nohands_t_launch_playerarms_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/bodies/nohands_t_mesh"
+  }
+ },
+ {
+  "id": "mi_nohands_t_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/bodies/nohands_t_mesh",
+  "out": "{REPO}/extracted/stage7/bodies/meshinfo/nohands_t_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_oldfallback_fullarms_d_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/bodies/oldfallback/oldfallback_fullarms_d_launch_playerarms_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/bodies/mvdb/content__characters__player__bodies__oldfallback__oldfallback_fullarms_d_launch_playerarms_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/bodies/oldfallback/oldfallback_fullarms_d_mesh"
+  }
+ },
+ {
+  "id": "mi_oldfallback_fullarms_d_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/bodies/oldfallback/oldfallback_fullarms_d_mesh",
+  "out": "{REPO}/extracted/stage7/bodies/meshinfo/oldfallback_fullarms_d_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_oldfallback_fullarms_h_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/bodies/oldfallback/oldfallback_fullarms_h_launch_playerarms_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/bodies/mvdb/content__characters__player__bodies__oldfallback__oldfallback_fullarms_h_launch_playerarms_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/bodies/oldfallback/oldfallback_fullarms_h_mesh"
+  }
+ },
+ {
+  "id": "mi_oldfallback_fullarms_h_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/bodies/oldfallback/oldfallback_fullarms_h_mesh",
+  "out": "{REPO}/extracted/stage7/bodies/meshinfo/oldfallback_fullarms_h_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_oldfallback_fullarms_m_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/bodies/oldfallback/oldfallback_fullarms_m_launch_playerarms_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/bodies/mvdb/content__characters__player__bodies__oldfallback__oldfallback_fullarms_m_launch_playerarms_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/bodies/oldfallback/oldfallback_fullarms_m_mesh"
+  }
+ },
+ {
+  "id": "mi_oldfallback_fullarms_m_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/bodies/oldfallback/oldfallback_fullarms_m_mesh",
+  "out": "{REPO}/extracted/stage7/bodies/meshinfo/oldfallback_fullarms_m_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_oldfallback_fullarms_t_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/bodies/oldfallback/oldfallback_fullarms_t_launch_playerarms_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/bodies/mvdb/content__characters__player__bodies__oldfallback__oldfallback_fullarms_t_launch_playerarms_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/bodies/oldfallback/oldfallback_fullarms_t_mesh"
+  }
+ },
+ {
+  "id": "mi_oldfallback_fullarms_t_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/bodies/oldfallback/oldfallback_fullarms_t_mesh",
+  "out": "{REPO}/extracted/stage7/bodies/meshinfo/oldfallback_fullarms_t_mesh.meshinfo.json"
+ }
+]

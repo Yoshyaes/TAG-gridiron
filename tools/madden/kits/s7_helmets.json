@@ -1,0 +1,30 @@
+{
+ "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+ "ue_skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+ "skeleton_bones": 268,
+ "name": "s7_helmets",
+ "out": "stage7/helmets",
+ "ue_dir": "/Game/MaddenRef/Players/Helmets",
+ "mesh_patterns": [
+  "^content/characters/player/parts/helmets/.*_mesh$"
+ ],
+ "pattern_mode": "all",
+ "extra_textures": {
+  "dir": "content/characters/player/parts/uniforms/49ers/2018/",
+  "regex": "GOLALT_helmet_COL$"
+ },
+ "overrides": [
+  [
+   "/helmet_shell_[a-z0-9]+_mesh$",
+   {
+    "BaseColor": "nin_helmet_2018_golalt_helmet_col"
+   }
+  ]
+ ],
+ "preview": {
+  "mode": "groups",
+  "group_regex": "/helmets/([^/]+)/",
+  "spacing": 60,
+  "level": "Stage7Helmets"
+ }
+}

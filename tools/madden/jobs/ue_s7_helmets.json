@@ -1,0 +1,1330 @@
+[
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_accessories_airxp_mesh.fbx",
+  "dest": "/Game/MaddenRef/Skeleton",
+  "name": "MaddenFB_Hero",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_accessories_airxp_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_accessories_airxp",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_greendot_airxp_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_greendot_airxp",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_shell_airxp_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_shell_airxp",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_visor_airxp_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_visor_airxp",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/ballcap_backward_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_ballcap_backward",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/ballcap_forward_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_ballcap_forward",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/visorhat_d_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_visorhat_d",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_vintagelong_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_vintagelong",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_vintageonebar_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_vintageonebar",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_vintagestandard_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_vintagestandard",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_vintagetowbar_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_vintagetowbar",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_accessories_pill_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_accessories_pill",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_shell_pill_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_shell_pill",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_g2b_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_g2b",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_g2bd_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_g2bd",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_g2eg_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_g2eg",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_g3b_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_g3b",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_g3bd_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_g3bd",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_g3bdu_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_g3bdu",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_g3bn_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_g3bn",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revo3bar_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_revo3bar",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revo3barlb_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_revo3barlb",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revo3barrb_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_revo3barrb",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revofullcage2_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_revofullcage2",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revofullcage3_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_revofullcage3",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revofullcage_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_revofullcage",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revokicker_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_revokicker",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revorobot2_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_revorobot2",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revorobot_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_revorobot",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_accessories_revo_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_accessories_revo",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_greendot_revo_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_greendot_revo",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_shell_revo_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_shell_revo",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_visor_revo_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_visor_revo",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_visorclips_g3b_revo_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_visorclips_g3b_revo",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_visorclips_kicker_revo_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_visorclips_kicker_revo",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_visorclips_revo3barrbclip_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_visorclips_revo3barrbclip",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_visorclips_revoclip_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_visorclips_revoclip",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_visorclips_revofullcage3clip_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_visorclips_revofullcage3clip",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revospeed2bar_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_revospeed2bar",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revospeed2barsingle_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_revospeed2barsingle",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revospeed2barwr_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_revospeed2barwr",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revospeed3bar_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_revospeed3bar",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revospeed3barlb_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_revospeed3barlb",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revospeed3barlbstraight_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_revospeed3barlbstraight",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revospeed3barqb_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_revospeed3barqb",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revospeed3barsingle_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_revospeed3barsingle",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revospeed3barstraight_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_revospeed3barstraight",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revospeed808_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_revospeed808",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revospeedcage_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_revospeedcage",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revospeedfullcage2_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_revospeedfullcage2",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revospeedfullcage_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_revospeedfullcage",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revospeedfullcagehook_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_revospeedfullcagehook",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revospeedgrid_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_revospeedgrid",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revospeedkicker_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_revospeedkicker",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revospeedrobot2_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_revospeedrobot2",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revospeedrobot_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_revospeedrobot",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revospeedrobotrb_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_revospeedrobotrb",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_accessories_revospeed_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_accessories_revospeed",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_greendot_revospeed_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_greendot_revospeed",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_shell_revospeed_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_shell_revospeed",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_visor_revospeed_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_visor_revospeed",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_visorclips_revospeed2barwrclip_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_visorclips_revospeed2barwrclip",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_visorclips_revospeedcageclip_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_visorclips_revospeedcageclip",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_visorclips_revospeedclip_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_visorclips_revospeedclip",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_visorclips_revospeedrobotclip_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_visorclips_revospeedrobotclip",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_riddell3603barlb_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_riddell3603barlb",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_riddell360fullcage_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_riddell360fullcage",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_riddell360robot2_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_riddell360robot2",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_riddell360robot_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_riddell360robot",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_accessories_riddell360_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_accessories_riddell360",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_greendot_riddell360_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_greendot_riddell360",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_shell_riddell360_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_shell_riddell360",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_visor_riddell360_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_visor_riddell360",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_visorclips_riddell360clip_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_visorclips_riddell360clip",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_accessories_schutt_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_accessories_schutt",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_greendot_schutt_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_greendot_schutt",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_shell_schutt_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_shell_schutt",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_visor_schutt_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_visor_schutt",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_accessories_schuttvengeancez10_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_accessories_schuttvengeancez10",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_shell_schuttvengeancez10_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_shell_schuttvengeancez10",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_visor_schuttvengeancez10_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_visor_schuttvengeancez10",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_visorclips_schuttvengeancez10clip_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_visorclips_schuttvengeancez10clip",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_speedflex2bar_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_speedflex2bar",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_speedflex2barqb_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_speedflex2barqb",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_speedflex2barsingle_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_speedflex2barsingle",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_speedflex3barlb_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_speedflex3barlb",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_speedflex3barqb_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_speedflex3barqb",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_speedflex3barrb_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_speedflex3barrb",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_speedflex3barsingle_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_speedflex3barsingle",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_speedflexcage_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_speedflexcage",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_speedflexfullcage_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_speedflexfullcage",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_speedflexrobot_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_speedflexrobot",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_speedflexrobotrb_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_speedflexrobotrb",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_speedflexrobotrbjagged_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_speedflexrobotrbjagged",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_accessories_speedflex_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_accessories_speedflex",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_greendot_speedflex_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_greendot_speedflex",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_shell_speedflex_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_shell_speedflex",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_visor_speedflex_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_visor_speedflex",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_visorclips_speedflexcageclip_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_visorclips_speedflexcageclip",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_visorclips_speedflexclip_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_visorclips_speedflexclip",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_3barrb_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_3barrb",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_3barrbjagged_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_3barrbjagged",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_bullrb_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_bullrb",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_egjop_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_egjop",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_egop_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_egop",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_egopii_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_egopii",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_fullcage2_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_fullcage2",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_fullcage_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_fullcage",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_fullcagesingle_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_fullcagesingle",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_njop_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_njop",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_njopdw_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_njopdw",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_opo_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_opo",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_opodw_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_opodw",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_oposw_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_oposw",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_rjop_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_rjop",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_rjopdw_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_rjopdw",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_rjopubdw_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_rjopubdw",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_rkop_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_rkop",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_ropo_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_ropo",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_ropodw_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_ropodw",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_ropodwxl_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_ropodwxl",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_roposw_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_roposw",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_ropoubdw_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_ropoubdw",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_standard2barwr_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_standard2barwr",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_stdbulldog_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_stdbulldog",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_accessories_standard_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_accessories_standard",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_accessories_standardbrady_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_accessories_standardbrady",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_greendot_standard_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_greendot_standard",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_greendot_standardbrady_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_greendot_standardbrady",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_shell_standard_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_shell_standard",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_shell_standardbrady_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_shell_standardbrady",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_visor_standard_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_visor_standard",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_visor_standardbrady_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_visor_standardbrady",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_visorclips_standard2clip_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_visorclips_standard2clip",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_visorclips_standardbrady2clip_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_visorclips_standardbrady2clip",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_visorclips_standardbradyclip_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_visorclips_standardbradyclip",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_visorclips_standardclip_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_visorclips_standardclip",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_vengeance3barrb_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_vengeance3barrb",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_vengeancecage_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_vengeancecage",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_vengeancefullcage_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_vengeancefullcage",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_vengeancefullcagebulldog_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_vengeancefullcagebulldog",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_vengeancekicker_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_vengeancekicker",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_vengeanceqb_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_vengeanceqb",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_vengeancerobot_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_vengeancerobot",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_vengeancerobotrb_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_vengeancerobotrb",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_vengeancez102bar_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_vengeancez102bar",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_vengeancez103barlb_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_vengeancez103barlb",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_vengeancez10cage_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_vengeancez10cage",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_vengeancez10robot_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_vengeancez10robot",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_vengeancez10robotrb_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_vengeancez10robotrb",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_accessories_schuttvengeance_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_accessories_schuttvengeance",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_greendot_schuttvengeance_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_greendot_schuttvengeance",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_shell_schuttvengeance_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_shell_schuttvengeance",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_visor_schuttvengeance_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_visor_schuttvengeance",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_visorclips_vengeanceclip_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_visorclips_vengeanceclip",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_viciszero12bar_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_viciszero12bar",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_viciszero13bar_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_viciszero13bar",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_viciszero13barlb_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_viciszero13barlb",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_viciszero13barrb_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_viciszero13barrb",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_viciszero1bullrb_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_viciszero1bullrb",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_viciszero1fullcage_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_viciszero1fullcage",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_viciszero1robot_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_viciszero1robot",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_viciszero1robotrb_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_viciszero1robotrb",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_accessories_viciszero1_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_accessories_viciszero1",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_greendot_viciszero1_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_greendot_viciszero1",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_shell_viciszero1_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_shell_viciszero1",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_visor_viciszero1_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_visor_viciszero1",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_visorclips_viciszero1clip_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_visorclips_viciszero1clip",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_s2egfacemask_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_s2egfacemask",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_xenith3barrb_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_xenith3barrb",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_xenithfullcage_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_xenithfullcage",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_xenithpredator_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_xenithpredator",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_xenithprism_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_xenithprism",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_xenithrobot_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_xenithrobot",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_xenithrobotrb_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_facemask_xenithrobotrb",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_accessories_xenith_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_accessories_xenith",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_greendot_xenith_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_greendot_xenith",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_shell_xenith_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_shell_xenith",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_visor_xenith_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_visor_xenith",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_visorclips_xenithclip_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_visorclips_xenithclip",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_visorclips_xenithprismclip_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_visorclips_xenithprismclip",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_accessories_xenithepic_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_accessories_xenithepic",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_shell_xenithepic_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_shell_xenithepic",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_visor_xenithepic_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_visor_xenithepic",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/helmets/meshes/helmet_visorclips_xenithepicclip_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Helmets",
+  "name": "SK_helmet_visorclips_xenithepicclip",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/helmets/textures/helmetaccessories_rsm.png",
+  "dest": "/Game/MaddenRef/Players/Helmets/Textures",
+  "name": "T_helmetaccessories_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/helmets/textures_ue/venthole_norm_ue.png",
+  "dest": "/Game/MaddenRef/Players/Helmets/Textures",
+  "name": "T_venthole_norm",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/helmets/textures/nin_helmet_2018_golalt_helmet_col.png",
+  "dest": "/Game/MaddenRef/Players/Helmets/Textures",
+  "name": "T_nin_helmet_2018_golalt_helmet_col"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/helmets/textures/flatwhite_color.png",
+  "dest": "/Game/MaddenRef/Players/Helmets/Textures",
+  "name": "T_flatwhite_color"
+ }
+]

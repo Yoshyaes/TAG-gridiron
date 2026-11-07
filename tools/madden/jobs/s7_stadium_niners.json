@@ -1,0 +1,2318 @@
+[
+ {
+  "id": "m_niners_bgfacility_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/background/niners_bgfacility_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/niners_bgfacility_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_niners_bggameplay_buildings_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/background/niners_bggameplay_buildings_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/niners_bggameplay_buildings_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_niners_bggameplay_panorama_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/background/niners_bggameplay_panorama_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/niners_bggameplay_panorama_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_niners_bglevibridge_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/background/niners_bglevibridge_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/niners_bglevibridge_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_niners_bgnis_buildings_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/background/niners_bgnis_buildings_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/niners_bgnis_buildings_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_niners_bgnis_cars_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/background/niners_bgnis_cars_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/niners_bgnis_cars_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_niners_bgnis_cars_side_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/background/niners_bgnis_cars_side_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/niners_bgnis_cars_side_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_niners_bgnis_highways_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/background/niners_bgnis_highways_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/niners_bgnis_highways_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_niners_bgnis_movingboats_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/background/niners_bgnis_movingboats_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/niners_bgnis_movingboats_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_niners_bgnis_neighbourhoods_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/background/niners_bgnis_neighbourhoods_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/niners_bgnis_neighbourhoods_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_niners_bgnis_terrain_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/background/niners_bgnis_terrain_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/niners_bgnis_terrain_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_niners_bgnis_trees_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/background/niners_bgnis_trees_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/niners_bgnis_trees_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_niners_bgparkinggarage_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/background/niners_bgparkinggarage_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/niners_bgparkinggarage_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_advertisement_northwest_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_advertisement_northwest_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_advertisement_northwest_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_advertising_north_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_advertising_north_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_advertising_north_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_advertising_south_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_advertising_south_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_advertising_south_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_advertising_southwest_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_advertising_southwest_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_advertising_southwest_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_concourse_concessionstand_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_concourse_concessionstand_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_concourse_concessionstand_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_concourse_elements_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_concourse_elements_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_concourse_elements_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_concourse_glasses_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_concourse_glasses_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_concourse_glasses_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_concourse_light_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_concourse_light_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_concourse_light_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_concourse_shop_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_concourse_shop_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_concourse_shop_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_concourse_shopmetal_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_concourse_shopmetal_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_concourse_shopmetal_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_concourse_structure_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_concourse_structure_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_concourse_structure_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_concoursestairs01_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_concoursestairs01_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_concoursestairs01_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_concoursestairs02_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_concoursestairs02_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_concoursestairs02_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_concoursestairs03_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_concoursestairs03_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_concoursestairs03_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_edgewalls_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_edgewalls_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_edgewalls_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_facadealpha_railings_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_facadealpha_railings_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_facadealpha_railings_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_facadeconcrete_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_facadeconcrete_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_facadeconcrete_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_facadeemmisive_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_facadeemmisive_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_facadeemmisive_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_facadeglass_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_facadeglass_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_facadeglass_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_facadeinterior_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_facadeinterior_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_facadeinterior_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_facademetal_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_facademetal_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_facademetal_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_facadeupper_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_facadeupper_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_facadeupper_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_field_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_field_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_field_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_fieldskirt_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_fieldskirt_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_fieldskirt_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_fiftysign_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_fiftysign_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_fiftysign_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_flagpole_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_flagpole_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_flagpole_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_hangingspeaker_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_hangingspeaker_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_hangingspeaker_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_jumbotron_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_jumbotron_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_jumbotron_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_jumbotron_screen_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_jumbotron_screen_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_jumbotron_screen_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_lightingstructure_east_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_lightingstructure_east_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_lightingstructure_east_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_lightingstructure_west_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_lightingstructure_west_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_lightingstructure_west_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_lowertunnel_northeast_emmisive_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_lowertunnel_northeast_emmisive_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_lowertunnel_northeast_emmisive_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_lowertunnel_northeastelements_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_lowertunnel_northeastelements_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_lowertunnel_northeastelements_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_lowertunnel_northeaststructure_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_lowertunnel_northeaststructure_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_lowertunnel_northeaststructure_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_lowertunnel_northwest_emmesive_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_lowertunnel_northwest_emmesive_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_lowertunnel_northwest_emmesive_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_lowertunnel_northwestelements_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_lowertunnel_northwestelements_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_lowertunnel_northwestelements_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_lowertunnel_northweststructure_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_lowertunnel_northweststructure_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_lowertunnel_northweststructure_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_lowertunnel_southelements_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_lowertunnel_southelements_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_lowertunnel_southelements_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_lowertunnel_southemmesive_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_lowertunnel_southemmesive_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_lowertunnel_southemmesive_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_lowertunnel_southstructure_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_lowertunnel_southstructure_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_lowertunnel_southstructure_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_pillars_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_pillars_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_pillars_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_playclockupper_north_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_playclockupper_north_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_playclockupper_north_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_playclockupper_south_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_playclockupper_south_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_playclockupper_south_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_poi_terrain_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_poi_terrain_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_poi_terrain_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_polelight_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_polelight_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_polelight_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_rail_lower_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_rail_lower_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_rail_lower_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_railing_01_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_railing_01_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_railing_01_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_railing_01_tall_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_railing_01_tall_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_railing_01_tall_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_railing_02_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_railing_02_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_railing_02_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_railing_02_tall_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_railing_02_tall_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_railing_02_tall_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_railing_03_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_railing_03_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_railing_03_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_railing_04_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_railing_04_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_railing_04_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_railingalpha_01_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_railingalpha_01_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_railingalpha_01_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_railingalpha_02_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_railingalpha_02_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_railingalpha_02_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_railingalpha_03_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_railingalpha_03_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_railingalpha_03_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_ribbonboards_frame_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_ribbonboards_frame_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_ribbonboards_frame_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_ribbonboards_screen_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_ribbonboards_screen_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_ribbonboards_screen_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_roof_light_main_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_roof_light_main_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_roof_light_main_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_southtunnelrollupdoors_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_southtunnelrollupdoors_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_southtunnelrollupdoors_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_standslower_entryshop_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_standslower_entryshop_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standslower_entryshop_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_standslower_glass_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_standslower_glass_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standslower_glass_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_standslower_glassalpha_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_standslower_glassalpha_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standslower_glassalpha_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_standslower_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_standslower_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standslower_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_standslower_room_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_standslower_room_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standslower_room_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_standslower_text_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_standslower_text_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standslower_text_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_standsloweralpha_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_standsloweralpha_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standsloweralpha_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_standslowerentry_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_standslowerentry_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standslowerentry_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_standslowerentry_railing_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_standslowerentry_railing_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standslowerentry_railing_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_standslowerexterior_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_standslowerexterior_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standslowerexterior_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_standslowerexterioremmesive_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_standslowerexterioremmesive_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standslowerexterioremmesive_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_standslowerexteriorstairs_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_standslowerexteriorstairs_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standslowerexteriorstairs_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_standslowerglass_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_standslowerglass_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standslowerglass_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_standslowerglassframe_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_standslowerglassframe_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standslowerglassframe_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_standsupper_easportsemissive_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_standsupper_easportsemissive_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standsupper_easportsemissive_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_standsupper_levisemissive_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_standsupper_levisemissive_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standsupper_levisemissive_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_standsupper_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_standsupper_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standsupper_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_standsuppercafe_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_standsuppercafe_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standsuppercafe_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_standsuppercafeshopinterior_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_standsuppercafeshopinterior_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standsuppercafeshopinterior_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_standsupperelements_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_standsupperelements_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standsupperelements_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_standsupperglass_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_standsupperglass_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standsupperglass_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_standsupperrailingcard_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_standsupperrailingcard_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standsupperrailingcard_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_standsupperstairs01_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_standsupperstairs01_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standsupperstairs01_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_standsupperstairs_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_standsupperstairs_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standsupperstairs_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_standsupperstructure_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_standsupperstructure_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standsupperstructure_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_standsupperstruturestairs_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_standsupperstruturestairs_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standsupperstruturestairs_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_standsuppersuit_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_standsuppersuit_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standsuppersuit_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_suites_ceilinglight_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_suites_ceilinglight_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_suites_ceilinglight_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_suites_exterior_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_suites_exterior_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_suites_exterior_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_suites_exteriorlogo_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_suites_exteriorlogo_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_suites_exteriorlogo_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_suites_exteriorraling_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_suites_exteriorraling_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_suites_exteriorraling_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_suites_glass_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_suites_glass_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_suites_glass_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_suites_glassrailing_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_suites_glassrailing_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_suites_glassrailing_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_suites_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_suites_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_suites_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_suites_structureelements_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_suites_structureelements_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_suites_structureelements_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_suites_terraceelements_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_suites_terraceelements_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_suites_terraceelements_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_terrain_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_terrain_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_terrain_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_terrainadpole_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_terrainadpole_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_terrainadpole_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_terrainelements_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_terrainelements_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_terrainelements_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_terrainhalmet_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_terrainhalmet_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_terrainhalmet_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_nin_terrainrailingalpha_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/stadiums/niners/nin_terrainrailingalpha_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_terrainrailingalpha_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_anvilbox_low_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/anvilbox/anvilbox_low_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/anvilbox_low_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_anvilboxlarge_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/anvilbox/anvilboxlarge_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/anvilboxlarge_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_anvilboxmedium_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/anvilbox/anvilboxmedium_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/anvilboxmedium_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_anvilboxmediumrec_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/anvilbox/anvilboxmediumrec_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/anvilboxmediumrec_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_anvilboxsmall_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/anvilbox/anvilboxsmall_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/anvilboxsmall_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_anvilboxsmallrec_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/anvilbox/anvilboxsmallrec_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/anvilboxsmallrec_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_anvilboxxlarge_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/anvilbox/anvilboxxlarge_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/anvilboxxlarge_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_anvilwheels_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/anvilbox/anvilwheels_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/anvilwheels_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_ballmachine_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/ballmachine_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/ballmachine_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_bench_dynamic_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/bench/bench_dynamic_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/bench_dynamic_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_bench_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/bench/bench_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/bench_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_bench_cold_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/bench_cold_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/bench_cold_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_bench_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/bench_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/bench_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_blockingsled_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/blockingsled_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/blockingsled_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_cardlinemarkersfifty_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/cardlinemarkersfifty_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/cardlinemarkersfifty_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_cardlinemarkersforty_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/cardlinemarkersforty_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/cardlinemarkersforty_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_cardlinemarkersten_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/cardlinemarkersten_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/cardlinemarkersten_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_cardlinemarkersthirty_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/cardlinemarkersthirty_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/cardlinemarkersthirty_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_cardlinemarkerstwenty_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/cardlinemarkerstwenty_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/cardlinemarkerstwenty_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_communicationscart_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/communicationscart_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/communicationscart_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_drillpad_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/drillpad_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/drillpad_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_duffle_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/duffle_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/duffle_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_equipmentcaselarge_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/equipmentcaselarge_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/equipmentcaselarge_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_exercisebike_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/exercisebike/exercisebike_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/exercisebike_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_exercisebike_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/exercisebike_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/exercisebike_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_football_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/football_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/football_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_garbageplasticlarge_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/garbageplasticlarge/garbageplasticlarge_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/garbageplasticlarge_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_gatoradebasket_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/gatoradebasket_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradebasket_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_gatoradebasketholder_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/gatoradebasketholder/gatoradebasketholder_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradebasketholder_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_gatoradebottleholder_dynamic_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/gatoradebottleholder/gatoradebottleholder_dynamic_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradebottleholder_dynamic_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_gatoradebottleholder_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/gatoradebottleholder/gatoradebottleholder_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradebottleholder_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_gatoradecontainer_dynamic_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/gatoradecontainer/gatoradecontainer_dynamic_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradecontainer_dynamic_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_gatoradecontainer_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/gatoradecontainer/gatoradecontainer_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradecontainer_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_gatoradecontainer_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/gatoradecontainer_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradecontainer_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_gatoradecooler_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/gatoradecooler_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradecooler_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_gatoradecoolerlarge_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/gatoradecoolerlarge_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradecoolerlarge_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_gatoradecoolerlong_dynamic_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/gatoradecoolerlong/gatoradecoolerlong_dynamic_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradecoolerlong_dynamic_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_gatoradecoolerlong_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/gatoradecoolerlong/gatoradecoolerlong_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradecoolerlong_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_gatoradecoolersmall_dynamic_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/gatoradecoolersmall/gatoradecoolersmall_dynamic_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradecoolersmall_dynamic_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_gatoradecoolersmall_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/gatoradecoolersmall/gatoradecoolersmall_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradecoolersmall_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_gatoradecoolersmall_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/gatoradecoolersmall_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradecoolersmall_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_gatoradecup_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/gatoradecup_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradecup_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_gatoradecup_dynamic_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/gatoradecups/gatoradecup_dynamic_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradecup_dynamic_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_gatoradecup_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/gatoradecups/gatoradecup_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradecup_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_gatoradedrink_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/gatoradedrink_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradedrink_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_gatoradedrinkbottle_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/gatoradedrinkbottle_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradedrinkbottle_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_gatoradedrinkholder_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/gatoradedrinkholder_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradedrinkholder_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_gatoradeicecooler_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/gatoradeicecooler/gatoradeicecooler_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradeicecooler_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_gatoradesquirtbottle_dynamic_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/gatoradesquirtbottle/gatoradesquirtbottle_dynamic_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradesquirtbottle_dynamic_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_gatoradesquirtbottle_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/gatoradesquirtbottle/gatoradesquirtbottle_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradesquirtbottle_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_gatoradesquirtbottle_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/gatoradesquirtbottle_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradesquirtbottle_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_gatoradestand_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/gatoradestand_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradestand_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_gatoradetable_dynamic_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/gatoradetable/gatoradetable_dynamic_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradetable_dynamic_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_gatoradetable_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/gatoradetable/gatoradetable_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradetable_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_gatoradetowels_dynamic_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/gatoradetowels_dynamic_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradetowels_dynamic_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_gatoradetowels_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/gatoradetowels_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradetowels_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_icecooler_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/icecooler_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/icecooler_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_longbag_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/longbag/longbag_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/longbag_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_longbag_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/longbag_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/longbag_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_massagetable_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/massagetable/massagetable_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/massagetable_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_medicalcabinetopen_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/medicalcabinetopen_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/medicalcabinetopen_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_medicalcabinetclosed_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/medicinecabinet/medicalcabinetclosed_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/medicalcabinetclosed_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_medicinecabinet_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/medicinecabinet/medicinecabinet_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/medicinecabinet_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_mediumequipment_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/mediumequipment_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/mediumequipment_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_medkit_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/medkit_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/medkit_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_mscommunicationcart_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/mscommunicationcart/mscommunicationcart_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/mscommunicationcart_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_practicecone_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/practicecone_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/practicecone_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_practiceramped_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/practiceramped_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/practiceramped_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_runpads_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/runpads_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/runpads_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_sportsbag_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/sportsbag/sportsbag_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/sportsbag_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_table_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/table_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/table_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_tackledummy_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/tackledummy_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/tackledummy_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_tacklesled_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/tacklesled_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/tacklesled_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_titanwobblea_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/titanwobblea_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/titanwobblea_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_titanwobbleb_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/titanwobbleb_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/titanwobbleb_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_trainerstable_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/trainerstable_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/trainerstable_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_trashcanplastic_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/trashcanplastic/trashcanplastic_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/trashcanplastic_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_trunkd_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/trunkd_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/trunkd_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_umbrella_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/umbrella_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/umbrella_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ },
+ {
+  "id": "m_woodsled_mesh",
+  "op": "mesh",
+  "asset": "content/worlds/components/objects/sidelineobjects/woodsled_mesh",
+  "out": "{REPO}/extracted/stage7/stadium_niners/meshes/woodsled_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": null,
+   "materials": null
+  }
+ }
+]

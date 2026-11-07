@@ -142,12 +142,18 @@ def build_preview(spec):
     les.new_level(path)
     for m in spec["meshes"]:
         if isinstance(m, dict):
-            mpath, x, label = m["mesh"], float(m.get("x", 0.0)), m.get("label", "")
+            mpath, x, y, label = m["mesh"], float(m.get("x", 0.0)), float(m.get("y", 0.0)), m.get("label", "")
         else:
-            mpath, x, label = m, 0.0, ""
+            mpath, x, y, label = m, 0.0, 0.0, ""
         mesh = unreal.load_asset(mpath)
-        actor = eas.spawn_actor_from_class(unreal.SkeletalMeshActor, unreal.Vector(x, 0, 0))
-        actor.skeletal_mesh_component.set_skeletal_mesh_asset(mesh)
+        if mesh is None:
+            continue
+        if isinstance(mesh, unreal.StaticMesh):
+            actor = eas.spawn_actor_from_class(unreal.StaticMeshActor, unreal.Vector(x, y, 0))
+            actor.static_mesh_component.set_static_mesh(mesh)
+        else:
+            actor = eas.spawn_actor_from_class(unreal.SkeletalMeshActor, unreal.Vector(x, y, 0))
+            actor.skeletal_mesh_component.set_skeletal_mesh_asset(mesh)
         actor.set_actor_label((label + "_" if label else "") + mpath.rsplit("/", 1)[1])
     les.save_current_level()
     return {"preview": path}

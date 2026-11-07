@@ -1,0 +1,26 @@
+[
+ {
+  "id": "mi_c1",
+  "op": "meshinfo",
+  "asset": "content/characters/coach/coaches/z/zimmermike/zimmermike_body_warm_mesh",
+  "out": "{REPO}/extracted/stage7/research/zimmermike_body_warm.meshinfo.json"
+ },
+ {
+  "id": "mi_c2",
+  "op": "meshinfo",
+  "asset": "content/characters/coach/coaches/z/zornjim/zornjim_head_mesh",
+  "out": "{REPO}/extracted/stage7/research/zornjim_head.meshinfo.json"
+ },
+ {
+  "id": "mi_c3",
+  "op": "meshinfo",
+  "asset": "content/characters/coach/coaches/z/zornjim/zornjim_headset_mesh",
+  "out": "{REPO}/extracted/stage7/research/zornjim_headset.meshinfo.json"
+ },
+ {
+  "id": "e_s1",
+  "op": "ebx",
+  "asset": "content/characters/rig/skeleton/actor/Male_Skeleton_6ft",
+  "out": "{REPO}/extracted/stage7/research/Male_Skeleton_6ft.ebx.json"
+ }
+]

@@ -1,0 +1,826 @@
+[
+ {
+  "id": "m_fullarms_d_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/bodies/fullarms_d_mesh",
+  "out": "{REPO}/extracted/stage7/bodies/meshes/fullarms_d_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/bodies/fullarms_d_launch_playerarms_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/characters/common/textures/skintones/arm_skintone1",
+      "normalClampTexture": "content/characters/common/textures/skintones/arm_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/SkinNoise",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/arm_RSM_skintone2",
+      "sweatNormalTexture": "content/characters/common/textures/skintones/arm-sweat-packed"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/characters/common/textures/skintones/arm_skintone1",
+      "normalClampTexture": "content/characters/common/textures/skintones/arm_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/SkinNoise",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/arm_RSM_skintone2",
+      "sweatNormalTexture": "content/characters/common/textures/skintones/arm-sweat-packed"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/characters/common/textures/skintones/arm_skintone1",
+      "normalClampTexture": "content/characters/common/textures/skintones/arm_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/SkinNoise",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/arm_RSM_skintone2",
+      "sweatNormalTexture": "content/characters/common/textures/skintones/arm-sweat-packed"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_fullarms_h_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/bodies/fullarms_h_mesh",
+  "out": "{REPO}/extracted/stage7/bodies/meshes/fullarms_h_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/bodies/fullarms_h_launch_playerarms_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/characters/common/textures/skintones/arm_skintone1",
+      "normalClampTexture": "content/characters/common/textures/skintones/arm_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/SkinNoise",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/arm_RSM_skintone2",
+      "sweatNormalTexture": "content/characters/common/textures/skintones/arm-sweat-packed"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/characters/common/textures/skintones/arm_skintone1",
+      "normalClampTexture": "content/characters/common/textures/skintones/arm_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/SkinNoise",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/arm_RSM_skintone2",
+      "sweatNormalTexture": "content/characters/common/textures/skintones/arm-sweat-packed"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/characters/common/textures/skintones/arm_skintone1",
+      "normalClampTexture": "content/characters/common/textures/skintones/arm_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/SkinNoise",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/arm_RSM_skintone2",
+      "sweatNormalTexture": "content/characters/common/textures/skintones/arm-sweat-packed"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_fullarms_m_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/bodies/fullarms_m_mesh",
+  "out": "{REPO}/extracted/stage7/bodies/meshes/fullarms_m_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/bodies/fullarms_m_launch_playerarms_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/characters/common/textures/skintones/arm_skintone1",
+      "normalClampTexture": "content/characters/common/textures/skintones/arm_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/SkinNoise",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/arm_RSM_skintone2",
+      "sweatNormalTexture": "content/characters/common/textures/skintones/arm-sweat-packed"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/characters/common/textures/skintones/arm_skintone1",
+      "normalClampTexture": "content/characters/common/textures/skintones/arm_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/SkinNoise",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/arm_RSM_skintone2",
+      "sweatNormalTexture": "content/characters/common/textures/skintones/arm-sweat-packed"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/characters/common/textures/skintones/arm_skintone1",
+      "normalClampTexture": "content/characters/common/textures/skintones/arm_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/SkinNoise",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/arm_RSM_skintone2",
+      "sweatNormalTexture": "content/characters/common/textures/skintones/arm-sweat-packed"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_fullarms_t_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/bodies/fullarms_t_mesh",
+  "out": "{REPO}/extracted/stage7/bodies/meshes/fullarms_t_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/bodies/fullarms_t_launch_playerarms_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/characters/common/textures/skintones/arm_skintone1",
+      "normalClampTexture": "content/characters/common/textures/skintones/arm_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/SkinNoise",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/arm_RSM_skintone2",
+      "sweatNormalTexture": "content/characters/common/textures/skintones/arm-sweat-packed"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/characters/common/textures/skintones/arm_skintone1",
+      "normalClampTexture": "content/characters/common/textures/skintones/arm_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/SkinNoise",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/arm_RSM_skintone2",
+      "sweatNormalTexture": "content/characters/common/textures/skintones/arm-sweat-packed"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/characters/common/textures/skintones/arm_skintone1",
+      "normalClampTexture": "content/characters/common/textures/skintones/arm_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/SkinNoise",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/arm_RSM_skintone2",
+      "sweatNormalTexture": "content/characters/common/textures/skintones/arm-sweat-packed"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_legs_d_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/bodies/legs_d_mesh",
+  "out": "{REPO}/extracted/stage7/bodies/meshes/legs_d_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/bodies/legs_d_launch_playerarms_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "normalWrapTexture": "content/characters/common/textures/skintones/SkinNoise",
+      "normalClampTexture": "Longshot/Characters/Common/Textures/ls_common_legs_normal",
+      "R_S_SSR_T_Texture": "Longshot/Characters/Common/Textures/ls_common_legs_RSM",
+      "colorTexture": "content/characters/common/textures/skintones/GenericPadless_Legs_ST1",
+      "sweatNormalTexture": "content/common/textures/default/flatSweat"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_legs_h_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/bodies/legs_h_mesh",
+  "out": "{REPO}/extracted/stage7/bodies/meshes/legs_h_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/bodies/legs_h_launch_playerarms_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "normalWrapTexture": "content/characters/common/textures/skintones/SkinNoise",
+      "normalClampTexture": "Longshot/Characters/Common/Textures/ls_common_legs_normal",
+      "R_S_SSR_T_Texture": "Longshot/Characters/Common/Textures/ls_common_legs_RSM",
+      "colorTexture": "content/characters/common/textures/skintones/GenericPadless_Legs_ST1",
+      "sweatNormalTexture": "content/common/textures/default/flatSweat"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_legs_m_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/bodies/legs_m_mesh",
+  "out": "{REPO}/extracted/stage7/bodies/meshes/legs_m_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/bodies/legs_m_launch_playerarms_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "normalWrapTexture": "content/characters/common/textures/skintones/SkinNoise",
+      "normalClampTexture": "Longshot/Characters/Common/Textures/ls_common_legs_normal",
+      "R_S_SSR_T_Texture": "Longshot/Characters/Common/Textures/ls_common_legs_RSM",
+      "colorTexture": "content/characters/common/textures/skintones/GenericPadless_Legs_ST1",
+      "sweatNormalTexture": "content/common/textures/default/flatSweat"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_legs_t_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/bodies/legs_t_mesh",
+  "out": "{REPO}/extracted/stage7/bodies/meshes/legs_t_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/bodies/legs_t_launch_playerarms_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "normalWrapTexture": "content/characters/common/textures/skintones/SkinNoise",
+      "normalClampTexture": "Longshot/Characters/Common/Textures/ls_common_legs_normal",
+      "R_S_SSR_T_Texture": "Longshot/Characters/Common/Textures/ls_common_legs_RSM",
+      "colorTexture": "content/characters/common/textures/skintones/GenericPadless_Legs_ST1",
+      "sweatNormalTexture": "content/common/textures/default/flatSweat"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_nohands_d_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/bodies/nohands_d_mesh",
+  "out": "{REPO}/extracted/stage7/bodies/meshes/nohands_d_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/bodies/nohands_d_launch_playerarms_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/characters/common/textures/skintones/arm_skintone6",
+      "normalClampTexture": "content/characters/common/textures/skintones/arm_normal",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/arm_RSM_skintone6",
+      "normalWrapTexture": "content/characters/common/textures/skintones/SkinNoise",
+      "sweatNormalTexture": "content/characters/common/textures/skintones/arm-sweat-packed"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/characters/common/textures/skintones/arm_skintone6",
+      "normalClampTexture": "content/characters/common/textures/skintones/arm_normal",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/arm_RSM_skintone6",
+      "normalWrapTexture": "content/characters/common/textures/skintones/SkinNoise",
+      "sweatNormalTexture": "content/characters/common/textures/skintones/arm-sweat-packed"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/characters/common/textures/skintones/arm_skintone6",
+      "normalClampTexture": "content/characters/common/textures/skintones/arm_normal",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/arm_RSM_skintone6",
+      "normalWrapTexture": "content/characters/common/textures/skintones/SkinNoise",
+      "sweatNormalTexture": "content/characters/common/textures/skintones/arm-sweat-packed"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_nohands_h_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/bodies/nohands_h_mesh",
+  "out": "{REPO}/extracted/stage7/bodies/meshes/nohands_h_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/bodies/nohands_h_launch_playerarms_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/characters/common/textures/skintones/arm_skintone6",
+      "normalClampTexture": "content/characters/common/textures/skintones/arm_normal",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/arm_RSM_skintone6",
+      "normalWrapTexture": "content/characters/common/textures/skintones/SkinNoise",
+      "sweatNormalTexture": "content/characters/common/textures/skintones/arm-sweat-packed"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/characters/common/textures/skintones/arm_skintone6",
+      "normalClampTexture": "content/characters/common/textures/skintones/arm_normal",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/arm_RSM_skintone6",
+      "normalWrapTexture": "content/characters/common/textures/skintones/SkinNoise",
+      "sweatNormalTexture": "content/characters/common/textures/skintones/arm-sweat-packed"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/characters/common/textures/skintones/arm_skintone6",
+      "normalClampTexture": "content/characters/common/textures/skintones/arm_normal",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/arm_RSM_skintone6",
+      "normalWrapTexture": "content/characters/common/textures/skintones/SkinNoise",
+      "sweatNormalTexture": "content/characters/common/textures/skintones/arm-sweat-packed"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_nohands_m_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/bodies/nohands_m_mesh",
+  "out": "{REPO}/extracted/stage7/bodies/meshes/nohands_m_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/bodies/nohands_m_launch_playerarms_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/characters/common/textures/skintones/arm_skintone6",
+      "normalClampTexture": "content/characters/common/textures/skintones/arm_normal",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/arm_RSM_skintone6",
+      "normalWrapTexture": "content/characters/common/textures/skintones/SkinNoise",
+      "sweatNormalTexture": "content/characters/common/textures/skintones/arm-sweat-packed"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/characters/common/textures/skintones/arm_skintone6",
+      "normalClampTexture": "content/characters/common/textures/skintones/arm_normal",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/arm_RSM_skintone6",
+      "normalWrapTexture": "content/characters/common/textures/skintones/SkinNoise",
+      "sweatNormalTexture": "content/characters/common/textures/skintones/arm-sweat-packed"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/characters/common/textures/skintones/arm_skintone6",
+      "normalClampTexture": "content/characters/common/textures/skintones/arm_normal",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/arm_RSM_skintone6",
+      "normalWrapTexture": "content/characters/common/textures/skintones/SkinNoise",
+      "sweatNormalTexture": "content/characters/common/textures/skintones/arm-sweat-packed"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_nohands_t_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/bodies/nohands_t_mesh",
+  "out": "{REPO}/extracted/stage7/bodies/meshes/nohands_t_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/bodies/nohands_t_launch_playerarms_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/characters/common/textures/skintones/arm_skintone6",
+      "normalClampTexture": "content/characters/common/textures/skintones/arm_normal",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/arm_RSM_skintone6",
+      "normalWrapTexture": "content/characters/common/textures/skintones/SkinNoise",
+      "sweatNormalTexture": "content/characters/common/textures/skintones/arm-sweat-packed"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/characters/common/textures/skintones/arm_skintone6",
+      "normalClampTexture": "content/characters/common/textures/skintones/arm_normal",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/arm_RSM_skintone6",
+      "normalWrapTexture": "content/characters/common/textures/skintones/SkinNoise",
+      "sweatNormalTexture": "content/characters/common/textures/skintones/arm-sweat-packed"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/characters/common/textures/skintones/arm_skintone6",
+      "normalClampTexture": "content/characters/common/textures/skintones/arm_normal",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/arm_RSM_skintone6",
+      "normalWrapTexture": "content/characters/common/textures/skintones/SkinNoise",
+      "sweatNormalTexture": "content/characters/common/textures/skintones/arm-sweat-packed"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_oldfallback_fullarms_d_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/bodies/oldfallback/oldfallback_fullarms_d_mesh",
+  "out": "{REPO}/extracted/stage7/bodies/meshes/oldfallback_fullarms_d_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/bodies/oldfallback/oldfallback_fullarms_d_launch_playerarms_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/characters/common/textures/skintones/arm_skintone1",
+      "normalClampTexture": "content/characters/common/textures/skintones/arm_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/SkinNoise",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/arm_RSM_skintone2",
+      "sweatNormalTexture": "content/characters/common/textures/skintones/arm-sweat-packed"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/characters/common/textures/skintones/arm_skintone1",
+      "normalClampTexture": "content/characters/common/textures/skintones/arm_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/SkinNoise",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/arm_RSM_skintone2",
+      "sweatNormalTexture": "content/characters/common/textures/skintones/arm-sweat-packed"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/characters/common/textures/skintones/arm_skintone1",
+      "normalClampTexture": "content/characters/common/textures/skintones/arm_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/SkinNoise",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/arm_RSM_skintone2",
+      "sweatNormalTexture": "content/characters/common/textures/skintones/arm-sweat-packed"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_oldfallback_fullarms_h_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/bodies/oldfallback/oldfallback_fullarms_h_mesh",
+  "out": "{REPO}/extracted/stage7/bodies/meshes/oldfallback_fullarms_h_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/bodies/oldfallback/oldfallback_fullarms_h_launch_playerarms_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/characters/common/textures/skintones/arm_skintone1",
+      "normalClampTexture": "content/characters/common/textures/skintones/arm_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/SkinNoise",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/arm_RSM_skintone2",
+      "sweatNormalTexture": "content/characters/common/textures/skintones/arm-sweat-packed"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/characters/common/textures/skintones/arm_skintone1",
+      "normalClampTexture": "content/characters/common/textures/skintones/arm_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/SkinNoise",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/arm_RSM_skintone2",
+      "sweatNormalTexture": "content/characters/common/textures/skintones/arm-sweat-packed"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/characters/common/textures/skintones/arm_skintone1",
+      "normalClampTexture": "content/characters/common/textures/skintones/arm_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/SkinNoise",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/arm_RSM_skintone2",
+      "sweatNormalTexture": "content/characters/common/textures/skintones/arm-sweat-packed"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_oldfallback_fullarms_m_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/bodies/oldfallback/oldfallback_fullarms_m_mesh",
+  "out": "{REPO}/extracted/stage7/bodies/meshes/oldfallback_fullarms_m_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/bodies/oldfallback/oldfallback_fullarms_m_launch_playerarms_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/characters/common/textures/skintones/arm_skintone1",
+      "normalClampTexture": "content/characters/common/textures/skintones/arm_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/SkinNoise",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/arm_RSM_skintone2",
+      "sweatNormalTexture": "content/characters/common/textures/skintones/arm-sweat-packed"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/characters/common/textures/skintones/arm_skintone1",
+      "normalClampTexture": "content/characters/common/textures/skintones/arm_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/SkinNoise",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/arm_RSM_skintone2",
+      "sweatNormalTexture": "content/characters/common/textures/skintones/arm-sweat-packed"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/characters/common/textures/skintones/arm_skintone1",
+      "normalClampTexture": "content/characters/common/textures/skintones/arm_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/SkinNoise",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/arm_RSM_skintone2",
+      "sweatNormalTexture": "content/characters/common/textures/skintones/arm-sweat-packed"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_oldfallback_fullarms_t_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/bodies/oldfallback/oldfallback_fullarms_t_mesh",
+  "out": "{REPO}/extracted/stage7/bodies/meshes/oldfallback_fullarms_t_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/bodies/oldfallback/oldfallback_fullarms_t_launch_playerarms_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/characters/common/textures/skintones/arm_skintone1",
+      "normalClampTexture": "content/characters/common/textures/skintones/arm_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/SkinNoise",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/arm_RSM_skintone2",
+      "sweatNormalTexture": "content/characters/common/textures/skintones/arm-sweat-packed"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/characters/common/textures/skintones/arm_skintone1",
+      "normalClampTexture": "content/characters/common/textures/skintones/arm_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/SkinNoise",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/arm_RSM_skintone2",
+      "sweatNormalTexture": "content/characters/common/textures/skintones/arm-sweat-packed"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/characters/common/textures/skintones/arm_skintone1",
+      "normalClampTexture": "content/characters/common/textures/skintones/arm_normal",
+      "normalWrapTexture": "content/characters/common/textures/skintones/SkinNoise",
+      "R_S_SSR_T_Texture": "content/characters/common/textures/skintones/arm_RSM_skintone2",
+      "sweatNormalTexture": "content/characters/common/textures/skintones/arm-sweat-packed"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "t_ls_common_legs_rsm",
+  "op": "texture",
+  "asset": "Longshot/Characters/Common/Textures/ls_common_legs_RSM",
+  "out": "{REPO}/extracted/stage7/bodies/textures/ls_common_legs_rsm",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "legs_d_mesh",
+    "legs_h_mesh",
+    "legs_m_mesh",
+    "legs_t_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_ls_common_legs_normal",
+  "op": "texture",
+  "asset": "Longshot/Characters/Common/Textures/ls_common_legs_normal",
+  "out": "{REPO}/extracted/stage7/bodies/textures/ls_common_legs_normal",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "legs_d_mesh",
+    "legs_h_mesh",
+    "legs_m_mesh",
+    "legs_t_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_genericpadless_legs_st1",
+  "op": "texture",
+  "asset": "content/characters/common/textures/skintones/GenericPadless_Legs_ST1",
+  "out": "{REPO}/extracted/stage7/bodies/textures/genericpadless_legs_st1",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "legs_d_mesh",
+    "legs_h_mesh",
+    "legs_m_mesh",
+    "legs_t_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_arm_rsm_skintone2",
+  "op": "texture",
+  "asset": "content/characters/common/textures/skintones/arm_RSM_skintone2",
+  "out": "{REPO}/extracted/stage7/bodies/textures/arm_rsm_skintone2",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "fullarms_d_mesh",
+    "fullarms_h_mesh",
+    "fullarms_m_mesh",
+    "fullarms_t_mesh",
+    "oldfallback_fullarms_d_mesh",
+    "oldfallback_fullarms_h_mesh",
+    "oldfallback_fullarms_m_mesh",
+    "oldfallback_fullarms_t_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_arm_rsm_skintone6",
+  "op": "texture",
+  "asset": "content/characters/common/textures/skintones/arm_RSM_skintone6",
+  "out": "{REPO}/extracted/stage7/bodies/textures/arm_rsm_skintone6",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "nohands_d_mesh",
+    "nohands_h_mesh",
+    "nohands_m_mesh",
+    "nohands_t_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_arm_normal",
+  "op": "texture",
+  "asset": "content/characters/common/textures/skintones/arm_normal",
+  "out": "{REPO}/extracted/stage7/bodies/textures/arm_normal",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "fullarms_d_mesh",
+    "fullarms_h_mesh",
+    "fullarms_m_mesh",
+    "fullarms_t_mesh",
+    "nohands_d_mesh",
+    "nohands_h_mesh",
+    "nohands_m_mesh",
+    "nohands_t_mesh",
+    "oldfallback_fullarms_d_mesh",
+    "oldfallback_fullarms_h_mesh",
+    "oldfallback_fullarms_m_mesh",
+    "oldfallback_fullarms_t_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_arm_skintone1",
+  "op": "texture",
+  "asset": "content/characters/common/textures/skintones/arm_skintone1",
+  "out": "{REPO}/extracted/stage7/bodies/textures/arm_skintone1",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "fullarms_d_mesh",
+    "fullarms_h_mesh",
+    "fullarms_m_mesh",
+    "fullarms_t_mesh",
+    "oldfallback_fullarms_d_mesh",
+    "oldfallback_fullarms_h_mesh",
+    "oldfallback_fullarms_m_mesh",
+    "oldfallback_fullarms_t_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_arm_skintone6",
+  "op": "texture",
+  "asset": "content/characters/common/textures/skintones/arm_skintone6",
+  "out": "{REPO}/extracted/stage7/bodies/textures/arm_skintone6",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "nohands_d_mesh",
+    "nohands_h_mesh",
+    "nohands_m_mesh",
+    "nohands_t_mesh"
+   ]
+  }
+ }
+]

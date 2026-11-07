@@ -111,9 +111,20 @@ def kit_meshes(spec):
         smp = spec["sample"]
         rx = re.compile(smp["pattern"], re.I)
         pool = sorted(v[0] for k, v in inv.items() if v[1] == mt and not k.startswith("res:") and rx.search(k))
-        random.Random(smp.get("seed", 19)).shuffle(pool)
-        for h in pool[:smp["count"]]:
-            add(h)
+        if smp.get("group"):
+            # Sample whole groups (for example every mesh of one coach). The regex's first capture is the group.
+            grx = re.compile(smp["group"], re.I)
+            groups = sorted({grx.search(p.lower()).group(1) for p in pool if grx.search(p.lower())})
+            random.Random(smp.get("seed", 19)).shuffle(groups)
+            chosen = set(groups[:smp["count"]])
+            for h in pool:
+                g = grx.search(h.lower())
+                if g and g.group(1) in chosen:
+                    add(h)
+        else:
+            random.Random(smp.get("seed", 19)).shuffle(pool)
+            for h in pool[:smp["count"]]:
+                add(h)
     if spec.get("limit"):
         out = out[:spec["limit"]]
     return out
@@ -122,7 +133,13 @@ def kit_meshes(spec):
 def mvdb_for(mesh):
     inv = inventory()
     base = mesh.lower()[:-len("_mesh")] + "_" if mesh.lower().endswith("_mesh") else mesh.lower() + "_"
-    cands = sorted(v[0] for k, v in inv.items() if v[1] == "MeshVariationDatabase" and k.startswith(base) and "_brt/" in k)
+    cands = [v[0] for k, v in inv.items() if v[1] == "MeshVariationDatabase" and k.startswith(base) and "_brt/" in k]
+    # Prefer the DB whose folder adds the fewest name tokens after the mesh base. Otherwise a sibling part's
+    # DB wins (for heads, <base>_hair_playerhead_brt sorts before <base>_playerhead_brt).
+    def rank(c):
+        rest = c.lower()[len(base):].split("/")[0]
+        return (rest.count("_"), rest)
+    cands.sort(key=rank)
     return cands[0] if cands else None
 
 
@@ -327,9 +344,20 @@ def cmd_mat(spec):
             for n in names:
                 if n.startswith(prefix(spec) + "helmet_") and pv["helmets"][b] in n:
                     preview.append({"mesh": ue_dir + "/" + n, "x": x, "label": b})
+    elif pv["mode"] == "groups":
+        grx = re.compile(pv["group_regex"], re.I)
+        order = []
+        for m, n in zip(meshes, names):
+            g = grx.search(m.lower())
+            key = g.group(1) if g else n
+            if key not in order:
+                order.append(key)
+            preview.append({"mesh": ue_dir + "/" + n, "x": float(order.index(key) * pv.get("spacing", 100)), "label": key})
     else:
+        per_row = pv.get("per_row", 20)
+        sp = pv.get("spacing", 80)
         for i, n in enumerate(names):
-            preview.append({"mesh": ue_dir + "/" + n, "x": float(i * pv.get("spacing", 80)), "label": "%03d" % i})
+            preview.append({"mesh": ue_dir + "/" + n, "x": float((i % per_row) * sp), "y": float((i // per_row) * sp), "label": "%03d" % i})
     out = {"bindings": binds, "preview_level": {"path": "/Game/MaddenRef/Maps/L_MaddenRef_" + pv.get("level", spec["name"].title().replace("_", "")), "meshes": preview}}
     json.dump(out, open(os.path.join(JOBS, "mat_" + spec["name"] + ".json"), "w"), indent=1)
     print("bindings", len(binds), "preview actors", len(preview))

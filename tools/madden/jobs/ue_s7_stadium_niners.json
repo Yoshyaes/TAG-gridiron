@@ -1,0 +1,1160 @@
+[
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/niners_bgfacility_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_niners_bgfacility"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/niners_bggameplay_buildings_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_niners_bggameplay_buildings"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/niners_bggameplay_panorama_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_niners_bggameplay_panorama"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/niners_bglevibridge_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_niners_bglevibridge"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/niners_bgnis_buildings_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_niners_bgnis_buildings"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/niners_bgnis_cars_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_niners_bgnis_cars"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/niners_bgnis_cars_side_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_niners_bgnis_cars_side"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/niners_bgnis_highways_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_niners_bgnis_highways"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/niners_bgnis_movingboats_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_niners_bgnis_movingboats"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/niners_bgnis_neighbourhoods_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_niners_bgnis_neighbourhoods"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/niners_bgnis_terrain_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_niners_bgnis_terrain"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/niners_bgnis_trees_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_niners_bgnis_trees"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/niners_bgparkinggarage_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_niners_bgparkinggarage"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_advertisement_northwest_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_advertisement_northwest"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_advertising_north_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_advertising_north"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_advertising_south_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_advertising_south"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_advertising_southwest_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_advertising_southwest"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_concourse_concessionstand_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_concourse_concessionstand"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_concourse_elements_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_concourse_elements"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_concourse_glasses_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_concourse_glasses"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_concourse_light_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_concourse_light"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_concourse_shop_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_concourse_shop"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_concourse_shopmetal_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_concourse_shopmetal"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_concourse_structure_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_concourse_structure"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_concoursestairs01_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_concoursestairs01"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_concoursestairs02_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_concoursestairs02"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_concoursestairs03_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_concoursestairs03"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_edgewalls_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_edgewalls"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_facadealpha_railings_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_facadealpha_railings"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_facadeconcrete_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_facadeconcrete"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_facadeemmisive_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_facadeemmisive"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_facadeglass_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_facadeglass"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_facadeinterior_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_facadeinterior"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_facademetal_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_facademetal"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_facadeupper_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_facadeupper"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_field_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_field"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_fieldskirt_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_fieldskirt"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_fiftysign_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_fiftysign"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_flagpole_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_flagpole"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_hangingspeaker_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_hangingspeaker"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_jumbotron_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_jumbotron"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_jumbotron_screen_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_jumbotron_screen"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_lightingstructure_east_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_lightingstructure_east"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_lightingstructure_west_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_lightingstructure_west"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_lowertunnel_northeast_emmisive_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_lowertunnel_northeast_emmisive"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_lowertunnel_northeastelements_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_lowertunnel_northeastelements"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_lowertunnel_northeaststructure_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_lowertunnel_northeaststructure"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_lowertunnel_northwest_emmesive_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_lowertunnel_northwest_emmesive"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_lowertunnel_northwestelements_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_lowertunnel_northwestelements"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_lowertunnel_northweststructure_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_lowertunnel_northweststructure"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_lowertunnel_southelements_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_lowertunnel_southelements"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_lowertunnel_southemmesive_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_lowertunnel_southemmesive"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_lowertunnel_southstructure_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_lowertunnel_southstructure"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_pillars_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_pillars"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_playclockupper_north_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_playclockupper_north"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_playclockupper_south_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_playclockupper_south"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_poi_terrain_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_poi_terrain"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_polelight_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_polelight"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_rail_lower_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_rail_lower"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_railing_01_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_railing_01"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_railing_01_tall_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_railing_01_tall"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_railing_02_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_railing_02"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_railing_02_tall_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_railing_02_tall"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_railing_03_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_railing_03"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_railing_04_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_railing_04"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_railingalpha_01_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_railingalpha_01"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_railingalpha_02_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_railingalpha_02"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_railingalpha_03_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_railingalpha_03"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_ribbonboards_frame_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_ribbonboards_frame"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_ribbonboards_screen_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_ribbonboards_screen"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_roof_light_main_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_roof_light_main"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_southtunnelrollupdoors_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_southtunnelrollupdoors"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standslower_entryshop_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_standslower_entryshop"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standslower_glass_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_standslower_glass"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standslower_glassalpha_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_standslower_glassalpha"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standslower_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_standslower"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standslower_room_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_standslower_room"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standslower_text_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_standslower_text"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standsloweralpha_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_standsloweralpha"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standslowerentry_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_standslowerentry"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standslowerentry_railing_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_standslowerentry_railing"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standslowerexterior_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_standslowerexterior"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standslowerexterioremmesive_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_standslowerexterioremmesive"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standslowerexteriorstairs_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_standslowerexteriorstairs"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standslowerglass_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_standslowerglass"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standslowerglassframe_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_standslowerglassframe"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standsupper_easportsemissive_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_standsupper_easportsemissive"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standsupper_levisemissive_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_standsupper_levisemissive"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standsupper_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_standsupper"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standsuppercafe_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_standsuppercafe"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standsuppercafeshopinterior_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_standsuppercafeshopinterior"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standsupperelements_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_standsupperelements"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standsupperglass_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_standsupperglass"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standsupperrailingcard_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_standsupperrailingcard"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standsupperstairs01_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_standsupperstairs01"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standsupperstairs_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_standsupperstairs"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standsupperstructure_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_standsupperstructure"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standsupperstruturestairs_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_standsupperstruturestairs"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_standsuppersuit_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_standsuppersuit"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_suites_ceilinglight_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_suites_ceilinglight"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_suites_exterior_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_suites_exterior"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_suites_exteriorlogo_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_suites_exteriorlogo"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_suites_exteriorraling_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_suites_exteriorraling"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_suites_glass_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_suites_glass"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_suites_glassrailing_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_suites_glassrailing"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_suites_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_suites"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_suites_structureelements_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_suites_structureelements"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_suites_terraceelements_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_suites_terraceelements"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_terrain_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_terrain"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_terrainadpole_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_terrainadpole"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_terrainelements_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_terrainelements"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_terrainhalmet_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_terrainhalmet"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/nin_terrainrailingalpha_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_nin_terrainrailingalpha"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/anvilbox_low_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_anvilbox_low"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/anvilboxlarge_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_anvilboxlarge"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/anvilboxmedium_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_anvilboxmedium"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/anvilboxmediumrec_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_anvilboxmediumrec"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/anvilboxsmall_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_anvilboxsmall"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/anvilboxsmallrec_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_anvilboxsmallrec"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/anvilboxxlarge_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_anvilboxxlarge"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/anvilwheels_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_anvilwheels"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/ballmachine_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_ballmachine"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/bench_dynamic_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_bench_dynamic"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/bench_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_bench"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/bench_cold_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_bench_cold"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/bench_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_bench"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/blockingsled_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_blockingsled"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/cardlinemarkersfifty_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_cardlinemarkersfifty"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/cardlinemarkersforty_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_cardlinemarkersforty"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/cardlinemarkersten_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_cardlinemarkersten"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/cardlinemarkersthirty_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_cardlinemarkersthirty"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/cardlinemarkerstwenty_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_cardlinemarkerstwenty"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/communicationscart_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_communicationscart"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/drillpad_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_drillpad"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/duffle_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_duffle"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/equipmentcaselarge_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_equipmentcaselarge"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/exercisebike_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_exercisebike"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/exercisebike_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_exercisebike"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/football_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_football"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/garbageplasticlarge_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_garbageplasticlarge"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradebasket_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_gatoradebasket"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradebasketholder_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_gatoradebasketholder"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradebottleholder_dynamic_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_gatoradebottleholder_dynamic"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradebottleholder_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_gatoradebottleholder"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradecontainer_dynamic_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_gatoradecontainer_dynamic"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradecontainer_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_gatoradecontainer"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradecontainer_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_gatoradecontainer"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradecooler_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_gatoradecooler"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradecoolerlarge_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_gatoradecoolerlarge"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradecoolerlong_dynamic_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_gatoradecoolerlong_dynamic"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradecoolerlong_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_gatoradecoolerlong"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradecoolersmall_dynamic_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_gatoradecoolersmall_dynamic"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradecoolersmall_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_gatoradecoolersmall"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradecoolersmall_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_gatoradecoolersmall"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradecup_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_gatoradecup"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradecup_dynamic_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_gatoradecup_dynamic"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradecup_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_gatoradecup"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradedrink_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_gatoradedrink"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradedrinkbottle_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_gatoradedrinkbottle"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradedrinkholder_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_gatoradedrinkholder"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradeicecooler_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_gatoradeicecooler"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradesquirtbottle_dynamic_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_gatoradesquirtbottle_dynamic"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradesquirtbottle_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_gatoradesquirtbottle"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradesquirtbottle_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_gatoradesquirtbottle"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradestand_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_gatoradestand"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradetable_dynamic_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_gatoradetable_dynamic"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradetable_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_gatoradetable"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradetowels_dynamic_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_gatoradetowels_dynamic"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/gatoradetowels_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_gatoradetowels"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/icecooler_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_icecooler"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/longbag_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_longbag"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/longbag_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_longbag"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/massagetable_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_massagetable"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/medicalcabinetopen_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_medicalcabinetopen"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/medicalcabinetclosed_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_medicalcabinetclosed"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/medicinecabinet_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_medicinecabinet"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/mediumequipment_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_mediumequipment"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/medkit_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_medkit"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/mscommunicationcart_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_mscommunicationcart"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/practicecone_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_practicecone"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/practiceramped_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_practiceramped"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/runpads_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_runpads"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/sportsbag_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_sportsbag"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/table_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_table"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/tackledummy_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_tackledummy"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/tacklesled_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_tacklesled"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/titanwobblea_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_titanwobblea"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/titanwobbleb_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_titanwobbleb"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/trainerstable_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_trainerstable"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/trashcanplastic_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_trashcanplastic"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/trunkd_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_trunkd"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/umbrella_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_umbrella"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/stadium_niners/meshes/woodsled_mesh.fbx",
+  "dest": "/Game/MaddenRef/Stadiums/Niners",
+  "name": "SM_woodsled"
+ }
+]

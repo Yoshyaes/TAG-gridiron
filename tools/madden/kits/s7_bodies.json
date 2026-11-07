@@ -1,0 +1,18 @@
+{
+ "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+ "ue_skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+ "skeleton_bones": 268,
+ "name": "s7_bodies",
+ "out": "stage7/bodies",
+ "ue_dir": "/Game/MaddenRef/Players/Bodies",
+ "mesh_patterns": [
+  "^content/characters/player/bodies/.*_mesh$"
+ ],
+ "pattern_mode": "all",
+ "preview": {
+  "mode": "grid",
+  "spacing": 170,
+  "per_row": 8,
+  "level": "Stage7Bodies"
+ }
+}

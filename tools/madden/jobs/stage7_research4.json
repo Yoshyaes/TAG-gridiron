@@ -1,0 +1,29 @@
+[
+ {
+  "id": "t1",
+  "op": "texture",
+  "asset": "content/worlds/textures/concrete/concrete_CleanLight_2mX2m_NSM",
+  "out": "{REPO}/extracted/stage7/research/concrete_nsm",
+  "formats": [
+   "png"
+  ]
+ },
+ {
+  "id": "t2",
+  "op": "texture",
+  "asset": "content/common/textures/default/default_nsm_NSM",
+  "out": "{REPO}/extracted/stage7/research/default_nsm",
+  "formats": [
+   "png"
+  ]
+ },
+ {
+  "id": "t3",
+  "op": "texture",
+  "asset": "content/worlds/textures/concrete/concrete_lightClean_2mx2m_colorAO",
+  "out": "{REPO}/extracted/stage7/research/concrete_colorao",
+  "formats": [
+   "png"
+  ]
+ }
+]

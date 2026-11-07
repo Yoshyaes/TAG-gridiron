@@ -1,0 +1,1166 @@
+{
+ "bindings": [],
+ "preview_level": {
+  "path": "/Game/MaddenRef/Maps/L_MaddenRef_Stage7StadiumNiners",
+  "meshes": [
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_niners_bgfacility",
+    "x": 0.0,
+    "y": 0.0,
+    "label": "000"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_niners_bggameplay_buildings",
+    "x": 5000.0,
+    "y": 0.0,
+    "label": "001"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_niners_bggameplay_panorama",
+    "x": 10000.0,
+    "y": 0.0,
+    "label": "002"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_niners_bglevibridge",
+    "x": 15000.0,
+    "y": 0.0,
+    "label": "003"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_niners_bgnis_buildings",
+    "x": 20000.0,
+    "y": 0.0,
+    "label": "004"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_niners_bgnis_cars",
+    "x": 25000.0,
+    "y": 0.0,
+    "label": "005"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_niners_bgnis_cars_side",
+    "x": 30000.0,
+    "y": 0.0,
+    "label": "006"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_niners_bgnis_highways",
+    "x": 35000.0,
+    "y": 0.0,
+    "label": "007"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_niners_bgnis_movingboats",
+    "x": 40000.0,
+    "y": 0.0,
+    "label": "008"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_niners_bgnis_neighbourhoods",
+    "x": 45000.0,
+    "y": 0.0,
+    "label": "009"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_niners_bgnis_terrain",
+    "x": 50000.0,
+    "y": 0.0,
+    "label": "010"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_niners_bgnis_trees",
+    "x": 55000.0,
+    "y": 0.0,
+    "label": "011"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_niners_bgparkinggarage",
+    "x": 60000.0,
+    "y": 0.0,
+    "label": "012"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_advertisement_northwest",
+    "x": 65000.0,
+    "y": 0.0,
+    "label": "013"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_advertising_north",
+    "x": 0.0,
+    "y": 5000.0,
+    "label": "014"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_advertising_south",
+    "x": 5000.0,
+    "y": 5000.0,
+    "label": "015"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_advertising_southwest",
+    "x": 10000.0,
+    "y": 5000.0,
+    "label": "016"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_concourse_concessionstand",
+    "x": 15000.0,
+    "y": 5000.0,
+    "label": "017"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_concourse_elements",
+    "x": 20000.0,
+    "y": 5000.0,
+    "label": "018"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_concourse_glasses",
+    "x": 25000.0,
+    "y": 5000.0,
+    "label": "019"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_concourse_light",
+    "x": 30000.0,
+    "y": 5000.0,
+    "label": "020"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_concourse_shop",
+    "x": 35000.0,
+    "y": 5000.0,
+    "label": "021"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_concourse_shopmetal",
+    "x": 40000.0,
+    "y": 5000.0,
+    "label": "022"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_concourse_structure",
+    "x": 45000.0,
+    "y": 5000.0,
+    "label": "023"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_concoursestairs01",
+    "x": 50000.0,
+    "y": 5000.0,
+    "label": "024"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_concoursestairs02",
+    "x": 55000.0,
+    "y": 5000.0,
+    "label": "025"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_concoursestairs03",
+    "x": 60000.0,
+    "y": 5000.0,
+    "label": "026"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_edgewalls",
+    "x": 65000.0,
+    "y": 5000.0,
+    "label": "027"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_facadealpha_railings",
+    "x": 0.0,
+    "y": 10000.0,
+    "label": "028"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_facadeconcrete",
+    "x": 5000.0,
+    "y": 10000.0,
+    "label": "029"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_facadeemmisive",
+    "x": 10000.0,
+    "y": 10000.0,
+    "label": "030"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_facadeglass",
+    "x": 15000.0,
+    "y": 10000.0,
+    "label": "031"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_facadeinterior",
+    "x": 20000.0,
+    "y": 10000.0,
+    "label": "032"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_facademetal",
+    "x": 25000.0,
+    "y": 10000.0,
+    "label": "033"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_facadeupper",
+    "x": 30000.0,
+    "y": 10000.0,
+    "label": "034"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_field",
+    "x": 35000.0,
+    "y": 10000.0,
+    "label": "035"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_fieldskirt",
+    "x": 40000.0,
+    "y": 10000.0,
+    "label": "036"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_fiftysign",
+    "x": 45000.0,
+    "y": 10000.0,
+    "label": "037"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_flagpole",
+    "x": 50000.0,
+    "y": 10000.0,
+    "label": "038"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_hangingspeaker",
+    "x": 55000.0,
+    "y": 10000.0,
+    "label": "039"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_jumbotron",
+    "x": 60000.0,
+    "y": 10000.0,
+    "label": "040"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_jumbotron_screen",
+    "x": 65000.0,
+    "y": 10000.0,
+    "label": "041"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_lightingstructure_east",
+    "x": 0.0,
+    "y": 15000.0,
+    "label": "042"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_lightingstructure_west",
+    "x": 5000.0,
+    "y": 15000.0,
+    "label": "043"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_lowertunnel_northeast_emmisive",
+    "x": 10000.0,
+    "y": 15000.0,
+    "label": "044"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_lowertunnel_northeastelements",
+    "x": 15000.0,
+    "y": 15000.0,
+    "label": "045"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_lowertunnel_northeaststructure",
+    "x": 20000.0,
+    "y": 15000.0,
+    "label": "046"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_lowertunnel_northwest_emmesive",
+    "x": 25000.0,
+    "y": 15000.0,
+    "label": "047"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_lowertunnel_northwestelements",
+    "x": 30000.0,
+    "y": 15000.0,
+    "label": "048"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_lowertunnel_northweststructure",
+    "x": 35000.0,
+    "y": 15000.0,
+    "label": "049"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_lowertunnel_southelements",
+    "x": 40000.0,
+    "y": 15000.0,
+    "label": "050"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_lowertunnel_southemmesive",
+    "x": 45000.0,
+    "y": 15000.0,
+    "label": "051"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_lowertunnel_southstructure",
+    "x": 50000.0,
+    "y": 15000.0,
+    "label": "052"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_pillars",
+    "x": 55000.0,
+    "y": 15000.0,
+    "label": "053"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_playclockupper_north",
+    "x": 60000.0,
+    "y": 15000.0,
+    "label": "054"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_playclockupper_south",
+    "x": 65000.0,
+    "y": 15000.0,
+    "label": "055"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_poi_terrain",
+    "x": 0.0,
+    "y": 20000.0,
+    "label": "056"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_polelight",
+    "x": 5000.0,
+    "y": 20000.0,
+    "label": "057"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_rail_lower",
+    "x": 10000.0,
+    "y": 20000.0,
+    "label": "058"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_railing_01",
+    "x": 15000.0,
+    "y": 20000.0,
+    "label": "059"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_railing_01_tall",
+    "x": 20000.0,
+    "y": 20000.0,
+    "label": "060"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_railing_02",
+    "x": 25000.0,
+    "y": 20000.0,
+    "label": "061"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_railing_02_tall",
+    "x": 30000.0,
+    "y": 20000.0,
+    "label": "062"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_railing_03",
+    "x": 35000.0,
+    "y": 20000.0,
+    "label": "063"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_railing_04",
+    "x": 40000.0,
+    "y": 20000.0,
+    "label": "064"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_railingalpha_01",
+    "x": 45000.0,
+    "y": 20000.0,
+    "label": "065"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_railingalpha_02",
+    "x": 50000.0,
+    "y": 20000.0,
+    "label": "066"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_railingalpha_03",
+    "x": 55000.0,
+    "y": 20000.0,
+    "label": "067"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_ribbonboards_frame",
+    "x": 60000.0,
+    "y": 20000.0,
+    "label": "068"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_ribbonboards_screen",
+    "x": 65000.0,
+    "y": 20000.0,
+    "label": "069"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_roof_light_main",
+    "x": 0.0,
+    "y": 25000.0,
+    "label": "070"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_southtunnelrollupdoors",
+    "x": 5000.0,
+    "y": 25000.0,
+    "label": "071"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standslower_entryshop",
+    "x": 10000.0,
+    "y": 25000.0,
+    "label": "072"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standslower_glass",
+    "x": 15000.0,
+    "y": 25000.0,
+    "label": "073"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standslower_glassalpha",
+    "x": 20000.0,
+    "y": 25000.0,
+    "label": "074"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standslower",
+    "x": 25000.0,
+    "y": 25000.0,
+    "label": "075"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standslower_room",
+    "x": 30000.0,
+    "y": 25000.0,
+    "label": "076"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standslower_text",
+    "x": 35000.0,
+    "y": 25000.0,
+    "label": "077"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standsloweralpha",
+    "x": 40000.0,
+    "y": 25000.0,
+    "label": "078"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standslowerentry",
+    "x": 45000.0,
+    "y": 25000.0,
+    "label": "079"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standslowerentry_railing",
+    "x": 50000.0,
+    "y": 25000.0,
+    "label": "080"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standslowerexterior",
+    "x": 55000.0,
+    "y": 25000.0,
+    "label": "081"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standslowerexterioremmesive",
+    "x": 60000.0,
+    "y": 25000.0,
+    "label": "082"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standslowerexteriorstairs",
+    "x": 65000.0,
+    "y": 25000.0,
+    "label": "083"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standslowerglass",
+    "x": 0.0,
+    "y": 30000.0,
+    "label": "084"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standslowerglassframe",
+    "x": 5000.0,
+    "y": 30000.0,
+    "label": "085"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standsupper_easportsemissive",
+    "x": 10000.0,
+    "y": 30000.0,
+    "label": "086"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standsupper_levisemissive",
+    "x": 15000.0,
+    "y": 30000.0,
+    "label": "087"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standsupper",
+    "x": 20000.0,
+    "y": 30000.0,
+    "label": "088"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standsuppercafe",
+    "x": 25000.0,
+    "y": 30000.0,
+    "label": "089"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standsuppercafeshopinterior",
+    "x": 30000.0,
+    "y": 30000.0,
+    "label": "090"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standsupperelements",
+    "x": 35000.0,
+    "y": 30000.0,
+    "label": "091"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standsupperglass",
+    "x": 40000.0,
+    "y": 30000.0,
+    "label": "092"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standsupperrailingcard",
+    "x": 45000.0,
+    "y": 30000.0,
+    "label": "093"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standsupperstairs01",
+    "x": 50000.0,
+    "y": 30000.0,
+    "label": "094"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standsupperstairs",
+    "x": 55000.0,
+    "y": 30000.0,
+    "label": "095"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standsupperstructure",
+    "x": 60000.0,
+    "y": 30000.0,
+    "label": "096"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standsupperstruturestairs",
+    "x": 65000.0,
+    "y": 30000.0,
+    "label": "097"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_standsuppersuit",
+    "x": 0.0,
+    "y": 35000.0,
+    "label": "098"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_suites_ceilinglight",
+    "x": 5000.0,
+    "y": 35000.0,
+    "label": "099"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_suites_exterior",
+    "x": 10000.0,
+    "y": 35000.0,
+    "label": "100"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_suites_exteriorlogo",
+    "x": 15000.0,
+    "y": 35000.0,
+    "label": "101"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_suites_exteriorraling",
+    "x": 20000.0,
+    "y": 35000.0,
+    "label": "102"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_suites_glass",
+    "x": 25000.0,
+    "y": 35000.0,
+    "label": "103"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_suites_glassrailing",
+    "x": 30000.0,
+    "y": 35000.0,
+    "label": "104"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_suites",
+    "x": 35000.0,
+    "y": 35000.0,
+    "label": "105"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_suites_structureelements",
+    "x": 40000.0,
+    "y": 35000.0,
+    "label": "106"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_suites_terraceelements",
+    "x": 45000.0,
+    "y": 35000.0,
+    "label": "107"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_terrain",
+    "x": 50000.0,
+    "y": 35000.0,
+    "label": "108"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_terrainadpole",
+    "x": 55000.0,
+    "y": 35000.0,
+    "label": "109"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_terrainelements",
+    "x": 60000.0,
+    "y": 35000.0,
+    "label": "110"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_terrainhalmet",
+    "x": 65000.0,
+    "y": 35000.0,
+    "label": "111"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_nin_terrainrailingalpha",
+    "x": 0.0,
+    "y": 40000.0,
+    "label": "112"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_anvilbox_low",
+    "x": 5000.0,
+    "y": 40000.0,
+    "label": "113"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_anvilboxlarge",
+    "x": 10000.0,
+    "y": 40000.0,
+    "label": "114"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_anvilboxmedium",
+    "x": 15000.0,
+    "y": 40000.0,
+    "label": "115"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_anvilboxmediumrec",
+    "x": 20000.0,
+    "y": 40000.0,
+    "label": "116"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_anvilboxsmall",
+    "x": 25000.0,
+    "y": 40000.0,
+    "label": "117"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_anvilboxsmallrec",
+    "x": 30000.0,
+    "y": 40000.0,
+    "label": "118"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_anvilboxxlarge",
+    "x": 35000.0,
+    "y": 40000.0,
+    "label": "119"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_anvilwheels",
+    "x": 40000.0,
+    "y": 40000.0,
+    "label": "120"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_ballmachine",
+    "x": 45000.0,
+    "y": 40000.0,
+    "label": "121"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_bench_dynamic",
+    "x": 50000.0,
+    "y": 40000.0,
+    "label": "122"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_bench",
+    "x": 55000.0,
+    "y": 40000.0,
+    "label": "123"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_bench_cold",
+    "x": 60000.0,
+    "y": 40000.0,
+    "label": "124"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_bench",
+    "x": 65000.0,
+    "y": 40000.0,
+    "label": "125"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_blockingsled",
+    "x": 0.0,
+    "y": 45000.0,
+    "label": "126"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_cardlinemarkersfifty",
+    "x": 5000.0,
+    "y": 45000.0,
+    "label": "127"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_cardlinemarkersforty",
+    "x": 10000.0,
+    "y": 45000.0,
+    "label": "128"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_cardlinemarkersten",
+    "x": 15000.0,
+    "y": 45000.0,
+    "label": "129"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_cardlinemarkersthirty",
+    "x": 20000.0,
+    "y": 45000.0,
+    "label": "130"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_cardlinemarkerstwenty",
+    "x": 25000.0,
+    "y": 45000.0,
+    "label": "131"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_communicationscart",
+    "x": 30000.0,
+    "y": 45000.0,
+    "label": "132"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_drillpad",
+    "x": 35000.0,
+    "y": 45000.0,
+    "label": "133"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_duffle",
+    "x": 40000.0,
+    "y": 45000.0,
+    "label": "134"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_equipmentcaselarge",
+    "x": 45000.0,
+    "y": 45000.0,
+    "label": "135"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_exercisebike",
+    "x": 50000.0,
+    "y": 45000.0,
+    "label": "136"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_exercisebike",
+    "x": 55000.0,
+    "y": 45000.0,
+    "label": "137"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_football",
+    "x": 60000.0,
+    "y": 45000.0,
+    "label": "138"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_garbageplasticlarge",
+    "x": 65000.0,
+    "y": 45000.0,
+    "label": "139"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_gatoradebasket",
+    "x": 0.0,
+    "y": 50000.0,
+    "label": "140"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_gatoradebasketholder",
+    "x": 5000.0,
+    "y": 50000.0,
+    "label": "141"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_gatoradebottleholder_dynamic",
+    "x": 10000.0,
+    "y": 50000.0,
+    "label": "142"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_gatoradebottleholder",
+    "x": 15000.0,
+    "y": 50000.0,
+    "label": "143"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_gatoradecontainer_dynamic",
+    "x": 20000.0,
+    "y": 50000.0,
+    "label": "144"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_gatoradecontainer",
+    "x": 25000.0,
+    "y": 50000.0,
+    "label": "145"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_gatoradecontainer",
+    "x": 30000.0,
+    "y": 50000.0,
+    "label": "146"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_gatoradecooler",
+    "x": 35000.0,
+    "y": 50000.0,
+    "label": "147"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_gatoradecoolerlarge",
+    "x": 40000.0,
+    "y": 50000.0,
+    "label": "148"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_gatoradecoolerlong_dynamic",
+    "x": 45000.0,
+    "y": 50000.0,
+    "label": "149"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_gatoradecoolerlong",
+    "x": 50000.0,
+    "y": 50000.0,
+    "label": "150"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_gatoradecoolersmall_dynamic",
+    "x": 55000.0,
+    "y": 50000.0,
+    "label": "151"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_gatoradecoolersmall",
+    "x": 60000.0,
+    "y": 50000.0,
+    "label": "152"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_gatoradecoolersmall",
+    "x": 65000.0,
+    "y": 50000.0,
+    "label": "153"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_gatoradecup",
+    "x": 0.0,
+    "y": 55000.0,
+    "label": "154"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_gatoradecup_dynamic",
+    "x": 5000.0,
+    "y": 55000.0,
+    "label": "155"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_gatoradecup",
+    "x": 10000.0,
+    "y": 55000.0,
+    "label": "156"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_gatoradedrink",
+    "x": 15000.0,
+    "y": 55000.0,
+    "label": "157"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_gatoradedrinkbottle",
+    "x": 20000.0,
+    "y": 55000.0,
+    "label": "158"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_gatoradedrinkholder",
+    "x": 25000.0,
+    "y": 55000.0,
+    "label": "159"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_gatoradeicecooler",
+    "x": 30000.0,
+    "y": 55000.0,
+    "label": "160"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_gatoradesquirtbottle_dynamic",
+    "x": 35000.0,
+    "y": 55000.0,
+    "label": "161"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_gatoradesquirtbottle",
+    "x": 40000.0,
+    "y": 55000.0,
+    "label": "162"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_gatoradesquirtbottle",
+    "x": 45000.0,
+    "y": 55000.0,
+    "label": "163"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_gatoradestand",
+    "x": 50000.0,
+    "y": 55000.0,
+    "label": "164"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_gatoradetable_dynamic",
+    "x": 55000.0,
+    "y": 55000.0,
+    "label": "165"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_gatoradetable",
+    "x": 60000.0,
+    "y": 55000.0,
+    "label": "166"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_gatoradetowels_dynamic",
+    "x": 65000.0,
+    "y": 55000.0,
+    "label": "167"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_gatoradetowels",
+    "x": 0.0,
+    "y": 60000.0,
+    "label": "168"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_icecooler",
+    "x": 5000.0,
+    "y": 60000.0,
+    "label": "169"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_longbag",
+    "x": 10000.0,
+    "y": 60000.0,
+    "label": "170"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_longbag",
+    "x": 15000.0,
+    "y": 60000.0,
+    "label": "171"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_massagetable",
+    "x": 20000.0,
+    "y": 60000.0,
+    "label": "172"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_medicalcabinetopen",
+    "x": 25000.0,
+    "y": 60000.0,
+    "label": "173"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_medicalcabinetclosed",
+    "x": 30000.0,
+    "y": 60000.0,
+    "label": "174"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_medicinecabinet",
+    "x": 35000.0,
+    "y": 60000.0,
+    "label": "175"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_mediumequipment",
+    "x": 40000.0,
+    "y": 60000.0,
+    "label": "176"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_medkit",
+    "x": 45000.0,
+    "y": 60000.0,
+    "label": "177"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_mscommunicationcart",
+    "x": 50000.0,
+    "y": 60000.0,
+    "label": "178"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_practicecone",
+    "x": 55000.0,
+    "y": 60000.0,
+    "label": "179"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_practiceramped",
+    "x": 60000.0,
+    "y": 60000.0,
+    "label": "180"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_runpads",
+    "x": 65000.0,
+    "y": 60000.0,
+    "label": "181"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_sportsbag",
+    "x": 0.0,
+    "y": 65000.0,
+    "label": "182"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_table",
+    "x": 5000.0,
+    "y": 65000.0,
+    "label": "183"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_tackledummy",
+    "x": 10000.0,
+    "y": 65000.0,
+    "label": "184"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_tacklesled",
+    "x": 15000.0,
+    "y": 65000.0,
+    "label": "185"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_titanwobblea",
+    "x": 20000.0,
+    "y": 65000.0,
+    "label": "186"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_titanwobbleb",
+    "x": 25000.0,
+    "y": 65000.0,
+    "label": "187"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_trainerstable",
+    "x": 30000.0,
+    "y": 65000.0,
+    "label": "188"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_trashcanplastic",
+    "x": 35000.0,
+    "y": 65000.0,
+    "label": "189"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_trunkd",
+    "x": 40000.0,
+    "y": 65000.0,
+    "label": "190"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_umbrella",
+    "x": 45000.0,
+    "y": 65000.0,
+    "label": "191"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Stadiums/Niners/SM_woodsled",
+    "x": 50000.0,
+    "y": 65000.0,
+    "label": "192"
+   }
+  ]
+ }
+}

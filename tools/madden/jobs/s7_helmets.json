@@ -1,0 +1,6284 @@
+[
+ {
+  "id": "m_helmet_accessories_airxp_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/airxp/helmet_accessories_airxp_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_accessories_airxp_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/airxp/helmet_accessories_airxp_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 3,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 4,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 5,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 6,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 7,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 8,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_greendot_airxp_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/airxp/helmet_greendot_airxp_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_greendot_airxp_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/airxp/helmet_greendot_airxp_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_shell_airxp_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/airxp/helmet_shell_airxp_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_shell_airxp_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/airxp/helmet_shell_airxp_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "helmetBackNumberTexture": "content/common/textures/default/invisible_color_array",
+      "helmetFrontNumberTexture": "content/common/textures/default/invisible_color_array",
+      "colorBorderTexture": "content/common/textures/default/invisible_color",
+      "normalClampTexture": "content/characters/player/commonTextures/Helmet/ventHole_NORM",
+      "metalFlakeNormalTexture": "content/characters/player/parts/uniforms/commonTextures/helmet/metalFlake_color",
+      "greendot": "content/common/textures/default/invisible_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "helmetBackNumberTexture": "content/common/textures/default/invisible_color_array",
+      "helmetFrontNumberTexture": "content/common/textures/default/invisible_color_array",
+      "colorBorderTexture": "content/common/textures/default/invisible_color",
+      "normalClampTexture": "content/characters/player/commonTextures/Helmet/ventHole_NORM",
+      "metalFlakeNormalTexture": "content/characters/player/parts/uniforms/commonTextures/helmet/metalFlake_color",
+      "greendot": "content/common/textures/default/invisible_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "helmetBackNumberTexture": "content/common/textures/default/invisible_color_array",
+      "helmetFrontNumberTexture": "content/common/textures/default/invisible_color_array",
+      "colorBorderTexture": "content/common/textures/default/invisible_color",
+      "normalClampTexture": "content/characters/player/commonTextures/Helmet/ventHole_NORM",
+      "metalFlakeNormalTexture": "content/characters/player/parts/uniforms/commonTextures/helmet/metalFlake_color",
+      "greendot": "content/common/textures/default/invisible_color"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_visor_airxp_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/airxp/helmet_visor_airxp_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_visor_airxp_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/airxp/helmet_visor_airxp_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_ballcap_backward_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/hats/ballcap_backward_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/ballcap_backward_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/hats/ballcap_backward_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal",
+      "RSMTexture": "content/common/textures/default/flatGrey_color"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_ballcap_forward_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/hats/ballcap_forward_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/ballcap_forward_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/hats/ballcap_forward_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal",
+      "RSMTexture": "content/common/textures/default/flatGrey_color"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_visorhat_d_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/hats/visorhat_d_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/visorhat_d_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/hats/visorhat_d_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal",
+      "RSMTexture": "content/common/textures/default/flatGrey_color"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_vintagelong_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/pill/facemasks/helmet_facemask_vintagelong_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_vintagelong_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/pill/facemasks/helmet_facemask_vintagelong_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 3,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 4,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 5,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 6,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 7,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 8,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_vintageonebar_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/pill/facemasks/helmet_facemask_vintageonebar_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_vintageonebar_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/pill/facemasks/helmet_facemask_vintageonebar_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_vintagestandard_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/pill/facemasks/helmet_facemask_vintagestandard_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_vintagestandard_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/pill/facemasks/helmet_facemask_vintagestandard_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 3,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 4,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 5,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 6,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 7,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 8,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_vintagetowbar_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/pill/facemasks/helmet_facemask_vintagetowbar_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_vintagetowbar_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/pill/facemasks/helmet_facemask_vintagetowbar_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_accessories_pill_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/pill/helmet_accessories_pill_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_accessories_pill_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/pill/helmet_accessories_pill_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_shell_pill_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/pill/helmet_shell_pill_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_shell_pill_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/pill/helmet_shell_pill_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "helmetBackNumberTexture": "content/common/textures/default/invisible_color_array",
+      "helmetFrontNumberTexture": "content/common/textures/default/invisible_color_array",
+      "colorBorderTexture": "content/common/textures/default/invisible_color",
+      "normalClampTexture": "content/characters/player/commonTextures/Helmet/ventHole_NORM",
+      "metalFlakeNormalTexture": "content/characters/player/parts/uniforms/commonTextures/helmet/metalFlake_color",
+      "greendot": "content/common/textures/default/invisible_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "helmetBackNumberTexture": "content/common/textures/default/invisible_color_array",
+      "helmetFrontNumberTexture": "content/common/textures/default/invisible_color_array",
+      "colorBorderTexture": "content/common/textures/default/invisible_color",
+      "normalClampTexture": "content/characters/player/commonTextures/Helmet/ventHole_NORM",
+      "metalFlakeNormalTexture": "content/characters/player/parts/uniforms/commonTextures/helmet/metalFlake_color",
+      "greendot": "content/common/textures/default/invisible_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "helmetBackNumberTexture": "content/common/textures/default/invisible_color_array",
+      "helmetFrontNumberTexture": "content/common/textures/default/invisible_color_array",
+      "colorBorderTexture": "content/common/textures/default/invisible_color",
+      "normalClampTexture": "content/characters/player/commonTextures/Helmet/ventHole_NORM",
+      "metalFlakeNormalTexture": "content/characters/player/parts/uniforms/commonTextures/helmet/metalFlake_color",
+      "greendot": "content/common/textures/default/invisible_color"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_g2b_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_g2b_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_g2b_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_g2b_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_g2bd_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_g2bd_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_g2bd_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_g2bd_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_g2eg_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_g2eg_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_g2eg_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_g2eg_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_g3b_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_g3b_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_g3b_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_g3b_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_g3bd_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_g3bd_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_g3bd_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_g3bd_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_g3bdu_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_g3bdu_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_g3bdu_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_g3bdu_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_g3bn_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_g3bn_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_g3bn_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_g3bn_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_revo3bar_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_revo3bar_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revo3bar_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_revo3bar_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_revo3barlb_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_revo3barlb_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revo3barlb_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_revo3barlb_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_revo3barrb_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_revo3barrb_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revo3barrb_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_revo3barrb_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_revofullcage2_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_revofullcage2_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revofullcage2_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_revofullcage2_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_revofullcage3_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_revofullcage3_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revofullcage3_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_revofullcage3_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_revofullcage_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_revofullcage_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revofullcage_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_revofullcage_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_revokicker_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_revokicker_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revokicker_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_revokicker_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_revorobot2_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_revorobot2_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revorobot2_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_revorobot2_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_revorobot_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_revorobot_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revorobot_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/revo/facemasks/helmet_facemask_revorobot_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_accessories_revo_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/revo/helmet_accessories_revo_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_accessories_revo_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/revo/helmet_accessories_revo_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 3,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 4,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 5,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 6,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 7,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 8,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_greendot_revo_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/revo/helmet_greendot_revo_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_greendot_revo_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/revo/helmet_greendot_revo_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_shell_revo_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/revo/helmet_shell_revo_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_shell_revo_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/revo/helmet_shell_revo_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "helmetBackNumberTexture": "content/common/textures/default/invisible_color_array",
+      "helmetFrontNumberTexture": "content/common/textures/default/invisible_color_array",
+      "colorBorderTexture": "content/common/textures/default/invisible_color",
+      "normalClampTexture": "content/characters/player/commonTextures/Helmet/ventHole_NORM",
+      "metalFlakeNormalTexture": "content/characters/player/parts/uniforms/commonTextures/helmet/metalFlake_color",
+      "greendot": "content/common/textures/default/invisible_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "helmetBackNumberTexture": "content/common/textures/default/invisible_color_array",
+      "helmetFrontNumberTexture": "content/common/textures/default/invisible_color_array",
+      "colorBorderTexture": "content/common/textures/default/invisible_color",
+      "normalClampTexture": "content/characters/player/commonTextures/Helmet/ventHole_NORM",
+      "metalFlakeNormalTexture": "content/characters/player/parts/uniforms/commonTextures/helmet/metalFlake_color",
+      "greendot": "content/common/textures/default/invisible_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "helmetBackNumberTexture": "content/common/textures/default/invisible_color_array",
+      "helmetFrontNumberTexture": "content/common/textures/default/invisible_color_array",
+      "colorBorderTexture": "content/common/textures/default/invisible_color",
+      "normalClampTexture": "content/characters/player/commonTextures/Helmet/ventHole_NORM",
+      "metalFlakeNormalTexture": "content/characters/player/parts/uniforms/commonTextures/helmet/metalFlake_color",
+      "greendot": "content/common/textures/default/invisible_color"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_visor_revo_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/revo/helmet_visor_revo_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_visor_revo_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/revo/helmet_visor_revo_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_visorclips_g3b_revo_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/revo/helmet_visorclips_g3b_revo_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_visorclips_g3b_revo_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/revo/helmet_visorclips_g3b_revo_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_visorclips_kicker_revo_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/revo/helmet_visorclips_kicker_revo_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_visorclips_kicker_revo_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/revo/helmet_visorclips_kicker_revo_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_visorclips_revo3barrbclip_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/revo/helmet_visorclips_revo3barrbclip_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_visorclips_revo3barrbclip_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/revo/helmet_visorclips_revo3barrbclip_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_visorclips_revoclip_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/revo/helmet_visorclips_revoclip_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_visorclips_revoclip_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/revo/helmet_visorclips_revoclip_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_visorclips_revofullcage3clip_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/revo/helmet_visorclips_revofullcage3clip_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_visorclips_revofullcage3clip_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/revo/helmet_visorclips_revofullcage3clip_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_revospeed2bar_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeed2bar_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revospeed2bar_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeed2bar_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_revospeed2barsingle_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeed2barsingle_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revospeed2barsingle_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeed2barsingle_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_revospeed2barwr_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeed2barwr_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revospeed2barwr_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeed2barwr_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_revospeed3bar_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeed3bar_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revospeed3bar_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeed3bar_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_revospeed3barlb_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeed3barlb_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revospeed3barlb_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeed3barlb_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_revospeed3barlbstraight_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeed3barlbstraight_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revospeed3barlbstraight_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeed3barlbstraight_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_revospeed3barqb_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeed3barqb_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revospeed3barqb_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeed3barqb_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_revospeed3barsingle_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeed3barsingle_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revospeed3barsingle_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeed3barsingle_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_revospeed3barstraight_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeed3barstraight_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revospeed3barstraight_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeed3barstraight_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_revospeed808_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeed808_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revospeed808_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeed808_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_revospeedcage_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeedcage_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revospeedcage_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeedcage_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_revospeedfullcage2_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeedfullcage2_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revospeedfullcage2_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeedfullcage2_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_revospeedfullcage_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeedfullcage_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revospeedfullcage_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeedfullcage_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_revospeedfullcagehook_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeedfullcagehook_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revospeedfullcagehook_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeedfullcagehook_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_revospeedgrid_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeedgrid_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revospeedgrid_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeedgrid_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_revospeedkicker_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeedkicker_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revospeedkicker_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeedkicker_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_revospeedrobot2_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeedrobot2_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revospeedrobot2_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeedrobot2_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_revospeedrobot_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeedrobot_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revospeedrobot_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeedrobot_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_revospeedrobotrb_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeedrobotrb_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_revospeedrobotrb_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/revospeed/facemasks/helmet_facemask_revospeedrobotrb_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_accessories_revospeed_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/revospeed/helmet_accessories_revospeed_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_accessories_revospeed_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/revospeed/helmet_accessories_revospeed_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 3,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 4,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 5,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 6,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 7,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 8,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_greendot_revospeed_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/revospeed/helmet_greendot_revospeed_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_greendot_revospeed_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/revospeed/helmet_greendot_revospeed_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_shell_revospeed_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/revospeed/helmet_shell_revospeed_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_shell_revospeed_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/revospeed/helmet_shell_revospeed_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "helmetBackNumberTexture": "content/common/textures/default/invisible_color_array",
+      "helmetFrontNumberTexture": "content/common/textures/default/invisible_color_array",
+      "colorBorderTexture": "content/common/textures/default/invisible_color",
+      "normalClampTexture": "content/characters/player/commonTextures/Helmet/ventHole_NORM",
+      "metalFlakeNormalTexture": "content/characters/player/parts/uniforms/commonTextures/helmet/metalFlake_color",
+      "greendot": "content/common/textures/default/invisible_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "helmetBackNumberTexture": "content/common/textures/default/invisible_color_array",
+      "helmetFrontNumberTexture": "content/common/textures/default/invisible_color_array",
+      "colorBorderTexture": "content/common/textures/default/invisible_color",
+      "normalClampTexture": "content/characters/player/commonTextures/Helmet/ventHole_NORM",
+      "metalFlakeNormalTexture": "content/characters/player/parts/uniforms/commonTextures/helmet/metalFlake_color",
+      "greendot": "content/common/textures/default/invisible_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "helmetBackNumberTexture": "content/common/textures/default/invisible_color_array",
+      "helmetFrontNumberTexture": "content/common/textures/default/invisible_color_array",
+      "colorBorderTexture": "content/common/textures/default/invisible_color",
+      "normalClampTexture": "content/characters/player/commonTextures/Helmet/ventHole_NORM",
+      "metalFlakeNormalTexture": "content/characters/player/parts/uniforms/commonTextures/helmet/metalFlake_color",
+      "greendot": "content/common/textures/default/invisible_color"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_visor_revospeed_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/revospeed/helmet_visor_revospeed_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_visor_revospeed_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/revospeed/helmet_visor_revospeed_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_visorclips_revospeed2barwrclip_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/revospeed/helmet_visorclips_revospeed2barwrclip_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_visorclips_revospeed2barwrclip_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/revospeed/helmet_visorclips_revospeed2barwrclip_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_visorclips_revospeedcageclip_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/revospeed/helmet_visorclips_revospeedcageclip_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_visorclips_revospeedcageclip_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/revospeed/helmet_visorclips_revospeedcageclip_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_visorclips_revospeedclip_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/revospeed/helmet_visorclips_revospeedclip_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_visorclips_revospeedclip_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/revospeed/helmet_visorclips_revospeedclip_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_visorclips_revospeedrobotclip_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/revospeed/helmet_visorclips_revospeedrobotclip_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_visorclips_revospeedrobotclip_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/revospeed/helmet_visorclips_revospeedrobotclip_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_riddell3603barlb_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/riddell360/facemasks/helmet_facemask_riddell3603barlb_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_riddell3603barlb_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/riddell360/facemasks/helmet_facemask_riddell3603barlb_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_riddell360fullcage_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/riddell360/facemasks/helmet_facemask_riddell360fullcage_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_riddell360fullcage_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/riddell360/facemasks/helmet_facemask_riddell360fullcage_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_riddell360robot2_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/riddell360/facemasks/helmet_facemask_riddell360robot2_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_riddell360robot2_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/riddell360/facemasks/helmet_facemask_riddell360robot2_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_riddell360robot_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/riddell360/facemasks/helmet_facemask_riddell360robot_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_riddell360robot_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/riddell360/facemasks/helmet_facemask_riddell360robot_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_accessories_riddell360_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/riddell360/helmet_accessories_riddell360_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_accessories_riddell360_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/riddell360/helmet_accessories_riddell360_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 3,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 4,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 5,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 6,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 7,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 8,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_greendot_riddell360_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/riddell360/helmet_greendot_riddell360_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_greendot_riddell360_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/riddell360/helmet_greendot_riddell360_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_shell_riddell360_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/riddell360/helmet_shell_riddell360_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_shell_riddell360_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/riddell360/helmet_shell_riddell360_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "helmetBackNumberTexture": "content/common/textures/default/invisible_color_array",
+      "helmetFrontNumberTexture": "content/common/textures/default/invisible_color_array",
+      "colorBorderTexture": "content/common/textures/default/invisible_color",
+      "normalClampTexture": "content/characters/player/commonTextures/Helmet/ventHole_NORM",
+      "metalFlakeNormalTexture": "content/characters/player/parts/uniforms/commonTextures/helmet/metalFlake_color",
+      "greendot": "content/common/textures/default/invisible_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "helmetBackNumberTexture": "content/common/textures/default/invisible_color_array",
+      "helmetFrontNumberTexture": "content/common/textures/default/invisible_color_array",
+      "colorBorderTexture": "content/common/textures/default/invisible_color",
+      "normalClampTexture": "content/characters/player/commonTextures/Helmet/ventHole_NORM",
+      "metalFlakeNormalTexture": "content/characters/player/parts/uniforms/commonTextures/helmet/metalFlake_color",
+      "greendot": "content/common/textures/default/invisible_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "helmetBackNumberTexture": "content/common/textures/default/invisible_color_array",
+      "helmetFrontNumberTexture": "content/common/textures/default/invisible_color_array",
+      "colorBorderTexture": "content/common/textures/default/invisible_color",
+      "normalClampTexture": "content/characters/player/commonTextures/Helmet/ventHole_NORM",
+      "metalFlakeNormalTexture": "content/characters/player/parts/uniforms/commonTextures/helmet/metalFlake_color",
+      "greendot": "content/common/textures/default/invisible_color"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_visor_riddell360_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/riddell360/helmet_visor_riddell360_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_visor_riddell360_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/riddell360/helmet_visor_riddell360_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_visorclips_riddell360clip_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/riddell360/helmet_visorclips_riddell360clip_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_visorclips_riddell360clip_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/riddell360/helmet_visorclips_riddell360clip_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_accessories_schutt_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/schutt/helmet_accessories_schutt_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_accessories_schutt_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/schutt/helmet_accessories_schutt_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 3,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 4,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 5,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 6,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_greendot_schutt_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/schutt/helmet_greendot_schutt_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_greendot_schutt_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/schutt/helmet_greendot_schutt_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_shell_schutt_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/schutt/helmet_shell_schutt_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_shell_schutt_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/schutt/helmet_shell_schutt_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "helmetBackNumberTexture": "content/common/textures/default/invisible_color_array",
+      "helmetFrontNumberTexture": "content/common/textures/default/invisible_color_array",
+      "colorBorderTexture": "content/common/textures/default/invisible_color",
+      "normalClampTexture": "content/characters/player/commonTextures/Helmet/ventHole_NORM",
+      "metalFlakeNormalTexture": "content/characters/player/parts/uniforms/commonTextures/helmet/metalFlake_color",
+      "greendot": "content/common/textures/default/invisible_color"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_visor_schutt_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/schutt/helmet_visor_schutt_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_visor_schutt_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/schutt/helmet_visor_schutt_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_accessories_schuttvengeancez10_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/schuttvengeancez10/helmet_accessories_schuttvengeancez10_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_accessories_schuttvengeancez10_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/schuttvengeancez10/helmet_accessories_schuttvengeancez10_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 3,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 4,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 5,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 6,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 7,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 8,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_shell_schuttvengeancez10_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/schuttvengeancez10/helmet_shell_schuttvengeancez10_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_shell_schuttvengeancez10_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/schuttvengeancez10/helmet_shell_schuttvengeancez10_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "helmetBackNumberTexture": "content/common/textures/default/invisible_color_array",
+      "helmetFrontNumberTexture": "content/common/textures/default/invisible_color_array",
+      "colorBorderTexture": "content/common/textures/default/invisible_color",
+      "normalClampTexture": "content/characters/player/commonTextures/Helmet/ventHole_NORM",
+      "metalFlakeNormalTexture": "content/characters/player/parts/uniforms/commonTextures/helmet/metalFlake_color",
+      "greendot": "content/common/textures/default/invisible_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "helmetBackNumberTexture": "content/common/textures/default/invisible_color_array",
+      "helmetFrontNumberTexture": "content/common/textures/default/invisible_color_array",
+      "colorBorderTexture": "content/common/textures/default/invisible_color",
+      "normalClampTexture": "content/characters/player/commonTextures/Helmet/ventHole_NORM",
+      "metalFlakeNormalTexture": "content/characters/player/parts/uniforms/commonTextures/helmet/metalFlake_color",
+      "greendot": "content/common/textures/default/invisible_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "helmetBackNumberTexture": "content/common/textures/default/invisible_color_array",
+      "helmetFrontNumberTexture": "content/common/textures/default/invisible_color_array",
+      "colorBorderTexture": "content/common/textures/default/invisible_color",
+      "normalClampTexture": "content/characters/player/commonTextures/Helmet/ventHole_NORM",
+      "metalFlakeNormalTexture": "content/characters/player/parts/uniforms/commonTextures/helmet/metalFlake_color",
+      "greendot": "content/common/textures/default/invisible_color"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_visor_schuttvengeancez10_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/schuttvengeancez10/helmet_visor_schuttvengeancez10_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_visor_schuttvengeancez10_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/schuttvengeancez10/helmet_visor_schuttvengeancez10_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_visorclips_schuttvengeancez10clip_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/schuttvengeancez10/helmet_visorclips_schuttvengeancez10clip_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_visorclips_schuttvengeancez10clip_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/schuttvengeancez10/helmet_visorclips_schuttvengeancez10clip_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_speedflex2bar_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflex2bar_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_speedflex2bar_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflex2bar_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_speedflex2barqb_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflex2barqb_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_speedflex2barqb_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflex2barqb_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_speedflex2barsingle_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflex2barsingle_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_speedflex2barsingle_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflex2barsingle_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_speedflex3barlb_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflex3barlb_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_speedflex3barlb_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflex3barlb_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_speedflex3barqb_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflex3barqb_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_speedflex3barqb_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflex3barqb_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_speedflex3barrb_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflex3barrb_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_speedflex3barrb_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflex3barrb_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_speedflex3barsingle_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflex3barsingle_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_speedflex3barsingle_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflex3barsingle_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_speedflexcage_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflexcage_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_speedflexcage_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflexcage_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_speedflexfullcage_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflexfullcage_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_speedflexfullcage_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflexfullcage_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_speedflexrobot_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflexrobot_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_speedflexrobot_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflexrobot_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_speedflexrobotrb_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflexrobotrb_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_speedflexrobotrb_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflexrobotrb_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_speedflexrobotrbjagged_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflexrobotrbjagged_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_speedflexrobotrbjagged_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/speedflex/facemasks/helmet_facemask_speedflexrobotrbjagged_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_accessories_speedflex_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/speedflex/helmet_accessories_speedflex_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_accessories_speedflex_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/speedflex/helmet_accessories_speedflex_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 3,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 4,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 5,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_greendot_speedflex_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/speedflex/helmet_greendot_speedflex_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_greendot_speedflex_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/speedflex/helmet_greendot_speedflex_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_shell_speedflex_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/speedflex/helmet_shell_speedflex_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_shell_speedflex_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/speedflex/helmet_shell_speedflex_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "helmetBackNumberTexture": "content/common/textures/default/invisible_color_array",
+      "helmetFrontNumberTexture": "content/common/textures/default/invisible_color_array",
+      "colorBorderTexture": "content/common/textures/default/invisible_color",
+      "normalClampTexture": "content/characters/player/commonTextures/Helmet/ventHole_NORM",
+      "metalFlakeNormalTexture": "content/characters/player/parts/uniforms/commonTextures/helmet/metalFlake_color",
+      "greendot": "content/common/textures/default/invisible_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "helmetBackNumberTexture": "content/common/textures/default/invisible_color_array",
+      "helmetFrontNumberTexture": "content/common/textures/default/invisible_color_array",
+      "colorBorderTexture": "content/common/textures/default/invisible_color",
+      "normalClampTexture": "content/characters/player/commonTextures/Helmet/ventHole_NORM",
+      "metalFlakeNormalTexture": "content/characters/player/parts/uniforms/commonTextures/helmet/metalFlake_color",
+      "greendot": "content/common/textures/default/invisible_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "helmetBackNumberTexture": "content/common/textures/default/invisible_color_array",
+      "helmetFrontNumberTexture": "content/common/textures/default/invisible_color_array",
+      "colorBorderTexture": "content/common/textures/default/invisible_color",
+      "normalClampTexture": "content/characters/player/commonTextures/Helmet/ventHole_NORM",
+      "metalFlakeNormalTexture": "content/characters/player/parts/uniforms/commonTextures/helmet/metalFlake_color",
+      "greendot": "content/common/textures/default/invisible_color"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_visor_speedflex_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/speedflex/helmet_visor_speedflex_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_visor_speedflex_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/speedflex/helmet_visor_speedflex_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_visorclips_speedflexcageclip_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/speedflex/helmet_visorclips_speedflexcageclip_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_visorclips_speedflexcageclip_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/speedflex/helmet_visorclips_speedflexcageclip_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_visorclips_speedflexclip_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/speedflex/helmet_visorclips_speedflexclip_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_visorclips_speedflexclip_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/speedflex/helmet_visorclips_speedflexclip_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_3barrb_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_3barrb_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_3barrb_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_3barrb_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_3barrbjagged_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_3barrbjagged_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_3barrbjagged_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_3barrbjagged_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_bullrb_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_bullrb_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_bullrb_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_bullrb_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_egjop_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_egjop_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_egjop_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_egjop_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_egop_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_egop_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_egop_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_egop_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_egopii_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_egopii_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_egopii_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_egopii_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_fullcage2_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_fullcage2_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_fullcage2_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_fullcage2_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_fullcage_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_fullcage_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_fullcage_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_fullcage_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_fullcagesingle_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_fullcagesingle_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_fullcagesingle_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_fullcagesingle_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_njop_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_njop_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_njop_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_njop_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_njopdw_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_njopdw_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_njopdw_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_njopdw_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_opo_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_opo_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_opo_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_opo_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_opodw_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_opodw_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_opodw_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_opodw_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_oposw_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_oposw_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_oposw_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_oposw_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_rjop_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_rjop_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_rjop_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_rjop_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_rjopdw_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_rjopdw_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_rjopdw_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_rjopdw_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_rjopubdw_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_rjopubdw_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_rjopubdw_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_rjopubdw_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_rkop_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_rkop_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_rkop_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_rkop_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_ropo_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_ropo_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_ropo_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_ropo_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_ropodw_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_ropodw_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_ropodw_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_ropodw_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_ropodwxl_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_ropodwxl_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_ropodwxl_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_ropodwxl_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_roposw_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_roposw_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_roposw_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_roposw_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_ropoubdw_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_ropoubdw_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_ropoubdw_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_ropoubdw_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_standard2barwr_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_standard2barwr_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_standard2barwr_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_standard2barwr_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_stdbulldog_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_stdbulldog_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_stdbulldog_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/standard/facemasks/helmet_facemask_stdbulldog_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_accessories_standard_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/standard/helmet_accessories_standard_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_accessories_standard_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/standard/helmet_accessories_standard_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 3,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 4,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 5,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 6,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 7,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 8,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_accessories_standardbrady_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/standard/helmet_accessories_standardbrady_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_accessories_standardbrady_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/standard/helmet_accessories_standardbrady_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 3,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 4,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 5,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 6,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 7,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 8,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_greendot_standard_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/standard/helmet_greendot_standard_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_greendot_standard_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/standard/helmet_greendot_standard_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_greendot_standardbrady_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/standard/helmet_greendot_standardbrady_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_greendot_standardbrady_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/standard/helmet_greendot_standardbrady_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_shell_standard_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/standard/helmet_shell_standard_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_shell_standard_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/standard/helmet_shell_standard_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "helmetBackNumberTexture": "content/common/textures/default/invisible_color_array",
+      "helmetFrontNumberTexture": "content/common/textures/default/invisible_color_array",
+      "colorBorderTexture": "content/common/textures/default/invisible_color",
+      "normalClampTexture": "content/characters/player/commonTextures/Helmet/ventHole_NORM",
+      "metalFlakeNormalTexture": "content/characters/player/parts/uniforms/commonTextures/helmet/metalFlake_color",
+      "greendot": "content/common/textures/default/invisible_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "helmetBackNumberTexture": "content/common/textures/default/invisible_color_array",
+      "helmetFrontNumberTexture": "content/common/textures/default/invisible_color_array",
+      "colorBorderTexture": "content/common/textures/default/invisible_color",
+      "normalClampTexture": "content/characters/player/commonTextures/Helmet/ventHole_NORM",
+      "metalFlakeNormalTexture": "content/characters/player/parts/uniforms/commonTextures/helmet/metalFlake_color",
+      "greendot": "content/common/textures/default/invisible_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "helmetBackNumberTexture": "content/common/textures/default/invisible_color_array",
+      "helmetFrontNumberTexture": "content/common/textures/default/invisible_color_array",
+      "colorBorderTexture": "content/common/textures/default/invisible_color",
+      "normalClampTexture": "content/characters/player/commonTextures/Helmet/ventHole_NORM",
+      "metalFlakeNormalTexture": "content/characters/player/parts/uniforms/commonTextures/helmet/metalFlake_color",
+      "greendot": "content/common/textures/default/invisible_color"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_shell_standardbrady_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/standard/helmet_shell_standardbrady_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_shell_standardbrady_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/standard/helmet_shell_standardbrady_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "helmetBackNumberTexture": "content/common/textures/default/invisible_color_array",
+      "helmetFrontNumberTexture": "content/common/textures/default/invisible_color_array",
+      "colorBorderTexture": "content/common/textures/default/invisible_color",
+      "normalClampTexture": "content/characters/player/commonTextures/Helmet/ventHole_NORM",
+      "metalFlakeNormalTexture": "content/characters/player/parts/uniforms/commonTextures/helmet/metalFlake_color",
+      "greendot": "content/common/textures/default/invisible_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "helmetBackNumberTexture": "content/common/textures/default/invisible_color_array",
+      "helmetFrontNumberTexture": "content/common/textures/default/invisible_color_array",
+      "colorBorderTexture": "content/common/textures/default/invisible_color",
+      "normalClampTexture": "content/characters/player/commonTextures/Helmet/ventHole_NORM",
+      "metalFlakeNormalTexture": "content/characters/player/parts/uniforms/commonTextures/helmet/metalFlake_color",
+      "greendot": "content/common/textures/default/invisible_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "helmetBackNumberTexture": "content/common/textures/default/invisible_color_array",
+      "helmetFrontNumberTexture": "content/common/textures/default/invisible_color_array",
+      "colorBorderTexture": "content/common/textures/default/invisible_color",
+      "normalClampTexture": "content/characters/player/commonTextures/Helmet/ventHole_NORM",
+      "metalFlakeNormalTexture": "content/characters/player/parts/uniforms/commonTextures/helmet/metalFlake_color",
+      "greendot": "content/common/textures/default/invisible_color"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_visor_standard_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/standard/helmet_visor_standard_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_visor_standard_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/standard/helmet_visor_standard_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_visor_standardbrady_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/standard/helmet_visor_standardbrady_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_visor_standardbrady_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/standard/helmet_visor_standardbrady_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_visorclips_standard2clip_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/standard/helmet_visorclips_standard2clip_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_visorclips_standard2clip_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/standard/helmet_visorclips_standard2clip_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_visorclips_standardbrady2clip_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/standard/helmet_visorclips_standardbrady2clip_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_visorclips_standardbrady2clip_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/standard/helmet_visorclips_standardbrady2clip_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_visorclips_standardbradyclip_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/standard/helmet_visorclips_standardbradyclip_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_visorclips_standardbradyclip_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/standard/helmet_visorclips_standardbradyclip_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_visorclips_standardclip_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/standard/helmet_visorclips_standardclip_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_visorclips_standardclip_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/standard/helmet_visorclips_standardclip_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_vengeance3barrb_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeance3barrb_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_vengeance3barrb_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeance3barrb_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_vengeancecage_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancecage_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_vengeancecage_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancecage_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_vengeancefullcage_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancefullcage_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_vengeancefullcage_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancefullcage_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_vengeancefullcagebulldog_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancefullcagebulldog_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_vengeancefullcagebulldog_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancefullcagebulldog_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_vengeancekicker_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancekicker_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_vengeancekicker_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancekicker_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_vengeanceqb_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeanceqb_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_vengeanceqb_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeanceqb_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_vengeancerobot_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancerobot_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_vengeancerobot_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancerobot_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_vengeancerobotrb_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancerobotrb_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_vengeancerobotrb_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancerobotrb_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_vengeancez102bar_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancez102bar_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_vengeancez102bar_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancez102bar_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_vengeancez103barlb_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancez103barlb_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_vengeancez103barlb_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancez103barlb_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_vengeancez10cage_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancez10cage_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_vengeancez10cage_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancez10cage_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_vengeancez10robot_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancez10robot_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_vengeancez10robot_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancez10robot_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_vengeancez10robotrb_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancez10robotrb_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_vengeancez10robotrb_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/vengeance/facemasks/helmet_facemask_vengeancez10robotrb_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_accessories_schuttvengeance_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/vengeance/helmet_accessories_schuttvengeance_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_accessories_schuttvengeance_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/vengeance/helmet_accessories_schuttvengeance_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 3,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 4,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 5,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 6,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 7,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 8,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_greendot_schuttvengeance_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/vengeance/helmet_greendot_schuttvengeance_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_greendot_schuttvengeance_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/vengeance/helmet_greendot_schuttvengeance_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_shell_schuttvengeance_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/vengeance/helmet_shell_schuttvengeance_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_shell_schuttvengeance_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/vengeance/helmet_shell_schuttvengeance_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "helmetBackNumberTexture": "content/common/textures/default/invisible_color_array",
+      "helmetFrontNumberTexture": "content/common/textures/default/invisible_color_array",
+      "colorBorderTexture": "content/common/textures/default/invisible_color",
+      "normalClampTexture": "content/characters/player/commonTextures/Helmet/ventHole_NORM",
+      "metalFlakeNormalTexture": "content/characters/player/parts/uniforms/commonTextures/helmet/metalFlake_color",
+      "greendot": "content/common/textures/default/invisible_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "helmetBackNumberTexture": "content/common/textures/default/invisible_color_array",
+      "helmetFrontNumberTexture": "content/common/textures/default/invisible_color_array",
+      "colorBorderTexture": "content/common/textures/default/invisible_color",
+      "normalClampTexture": "content/characters/player/commonTextures/Helmet/ventHole_NORM",
+      "metalFlakeNormalTexture": "content/characters/player/parts/uniforms/commonTextures/helmet/metalFlake_color",
+      "greendot": "content/common/textures/default/invisible_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "helmetBackNumberTexture": "content/common/textures/default/invisible_color_array",
+      "helmetFrontNumberTexture": "content/common/textures/default/invisible_color_array",
+      "colorBorderTexture": "content/common/textures/default/invisible_color",
+      "normalClampTexture": "content/characters/player/commonTextures/Helmet/ventHole_NORM",
+      "metalFlakeNormalTexture": "content/characters/player/parts/uniforms/commonTextures/helmet/metalFlake_color",
+      "greendot": "content/common/textures/default/invisible_color"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_visor_schuttvengeance_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/vengeance/helmet_visor_schuttvengeance_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_visor_schuttvengeance_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/vengeance/helmet_visor_schuttvengeance_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_visorclips_vengeanceclip_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/vengeance/helmet_visorclips_vengeanceclip_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_visorclips_vengeanceclip_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/vengeance/helmet_visorclips_vengeanceclip_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_viciszero12bar_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/viciszero1/facemasks/helmet_facemask_viciszero12bar_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_viciszero12bar_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/viciszero1/facemasks/helmet_facemask_viciszero12bar_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_viciszero13bar_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/viciszero1/facemasks/helmet_facemask_viciszero13bar_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_viciszero13bar_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/viciszero1/facemasks/helmet_facemask_viciszero13bar_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_viciszero13barlb_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/viciszero1/facemasks/helmet_facemask_viciszero13barlb_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_viciszero13barlb_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/viciszero1/facemasks/helmet_facemask_viciszero13barlb_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_viciszero13barrb_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/viciszero1/facemasks/helmet_facemask_viciszero13barrb_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_viciszero13barrb_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/viciszero1/facemasks/helmet_facemask_viciszero13barrb_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_viciszero1bullrb_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/viciszero1/facemasks/helmet_facemask_viciszero1bullrb_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_viciszero1bullrb_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/viciszero1/facemasks/helmet_facemask_viciszero1bullrb_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_viciszero1fullcage_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/viciszero1/facemasks/helmet_facemask_viciszero1fullcage_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_viciszero1fullcage_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/viciszero1/facemasks/helmet_facemask_viciszero1fullcage_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_viciszero1robot_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/viciszero1/facemasks/helmet_facemask_viciszero1robot_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_viciszero1robot_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/viciszero1/facemasks/helmet_facemask_viciszero1robot_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_viciszero1robotrb_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/viciszero1/facemasks/helmet_facemask_viciszero1robotrb_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_viciszero1robotrb_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/viciszero1/facemasks/helmet_facemask_viciszero1robotrb_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_accessories_viciszero1_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/viciszero1/helmet_accessories_viciszero1_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_accessories_viciszero1_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/viciszero1/helmet_accessories_viciszero1_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 3,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 4,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 5,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 6,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_greendot_viciszero1_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/viciszero1/helmet_greendot_viciszero1_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_greendot_viciszero1_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/viciszero1/helmet_greendot_viciszero1_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_shell_viciszero1_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/viciszero1/helmet_shell_viciszero1_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_shell_viciszero1_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/viciszero1/helmet_shell_viciszero1_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "helmetBackNumberTexture": "content/common/textures/default/invisible_color_array",
+      "helmetFrontNumberTexture": "content/common/textures/default/invisible_color_array",
+      "colorBorderTexture": "content/common/textures/default/invisible_color",
+      "normalClampTexture": "content/characters/player/commonTextures/Helmet/ventHole_NORM",
+      "metalFlakeNormalTexture": "content/characters/player/parts/uniforms/commonTextures/helmet/metalFlake_color",
+      "greendot": "content/common/textures/default/invisible_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "helmetBackNumberTexture": "content/common/textures/default/invisible_color_array",
+      "helmetFrontNumberTexture": "content/common/textures/default/invisible_color_array",
+      "colorBorderTexture": "content/common/textures/default/invisible_color",
+      "normalClampTexture": "content/characters/player/commonTextures/Helmet/ventHole_NORM",
+      "metalFlakeNormalTexture": "content/characters/player/parts/uniforms/commonTextures/helmet/metalFlake_color",
+      "greendot": "content/common/textures/default/invisible_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "helmetBackNumberTexture": "content/common/textures/default/invisible_color_array",
+      "helmetFrontNumberTexture": "content/common/textures/default/invisible_color_array",
+      "colorBorderTexture": "content/common/textures/default/invisible_color",
+      "normalClampTexture": "content/characters/player/commonTextures/Helmet/ventHole_NORM",
+      "metalFlakeNormalTexture": "content/characters/player/parts/uniforms/commonTextures/helmet/metalFlake_color",
+      "greendot": "content/common/textures/default/invisible_color"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_visor_viciszero1_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/viciszero1/helmet_visor_viciszero1_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_visor_viciszero1_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/viciszero1/helmet_visor_viciszero1_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_visorclips_viciszero1clip_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/viciszero1/helmet_visorclips_viciszero1clip_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_visorclips_viciszero1clip_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/viciszero1/helmet_visorclips_viciszero1clip_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_s2egfacemask_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/xenith/facemasks/helmet_facemask_s2egfacemask_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_s2egfacemask_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/xenith/facemasks/helmet_facemask_s2egfacemask_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_xenith3barrb_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/xenith/facemasks/helmet_facemask_xenith3barrb_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_xenith3barrb_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/xenith/facemasks/helmet_facemask_xenith3barrb_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_xenithfullcage_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/xenith/facemasks/helmet_facemask_xenithfullcage_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_xenithfullcage_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/xenith/facemasks/helmet_facemask_xenithfullcage_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_xenithpredator_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/xenith/facemasks/helmet_facemask_xenithpredator_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_xenithpredator_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/xenith/facemasks/helmet_facemask_xenithpredator_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_xenithprism_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/xenith/facemasks/helmet_facemask_xenithprism_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_xenithprism_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/xenith/facemasks/helmet_facemask_xenithprism_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_xenithrobot_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/xenith/facemasks/helmet_facemask_xenithrobot_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_xenithrobot_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/xenith/facemasks/helmet_facemask_xenithrobot_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_facemask_xenithrobotrb_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/xenith/facemasks/helmet_facemask_xenithrobotrb_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_facemask_xenithrobotrb_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/xenith/facemasks/helmet_facemask_xenithrobotrb_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_accessories_xenith_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/xenith/helmet_accessories_xenith_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_accessories_xenith_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/xenith/helmet_accessories_xenith_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 3,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 4,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 5,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 6,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 7,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 8,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_greendot_xenith_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/xenith/helmet_greendot_xenith_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_greendot_xenith_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/xenith/helmet_greendot_xenith_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "normalClampTexture": "content/common/textures/default/flatNormal_normal"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_shell_xenith_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/xenith/helmet_shell_xenith_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_shell_xenith_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/xenith/helmet_shell_xenith_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "helmetBackNumberTexture": "content/common/textures/default/invisible_color_array",
+      "helmetFrontNumberTexture": "content/common/textures/default/invisible_color_array",
+      "colorBorderTexture": "content/common/textures/default/invisible_color",
+      "normalClampTexture": "content/characters/player/commonTextures/Helmet/ventHole_NORM",
+      "metalFlakeNormalTexture": "content/characters/player/parts/uniforms/commonTextures/helmet/metalFlake_color",
+      "greendot": "content/common/textures/default/invisible_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "helmetBackNumberTexture": "content/common/textures/default/invisible_color_array",
+      "helmetFrontNumberTexture": "content/common/textures/default/invisible_color_array",
+      "colorBorderTexture": "content/common/textures/default/invisible_color",
+      "normalClampTexture": "content/characters/player/commonTextures/Helmet/ventHole_NORM",
+      "metalFlakeNormalTexture": "content/characters/player/parts/uniforms/commonTextures/helmet/metalFlake_color",
+      "greendot": "content/common/textures/default/invisible_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "helmetBackNumberTexture": "content/common/textures/default/invisible_color_array",
+      "helmetFrontNumberTexture": "content/common/textures/default/invisible_color_array",
+      "colorBorderTexture": "content/common/textures/default/invisible_color",
+      "normalClampTexture": "content/characters/player/commonTextures/Helmet/ventHole_NORM",
+      "metalFlakeNormalTexture": "content/characters/player/parts/uniforms/commonTextures/helmet/metalFlake_color",
+      "greendot": "content/common/textures/default/invisible_color"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_visor_xenith_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/xenith/helmet_visor_xenith_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_visor_xenith_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/xenith/helmet_visor_xenith_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_visorclips_xenithclip_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/xenith/helmet_visorclips_xenithclip_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_visorclips_xenithclip_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/xenith/helmet_visorclips_xenithclip_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_visorclips_xenithprismclip_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/xenith/helmet_visorclips_xenithprismclip_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_visorclips_xenithprismclip_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/xenith/helmet_visorclips_xenithprismclip_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_accessories_xenithepic_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/xenithepic/helmet_accessories_xenithepic_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_accessories_xenithepic_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/xenithepic/helmet_accessories_xenithepic_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 3,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 4,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 5,
+     "textures": {
+      "RSMTexture": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+      "colorTexture": "content/common/textures/default/flatWhite_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 6,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 7,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 8,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_shell_xenithepic_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/xenithepic/helmet_shell_xenithepic_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_shell_xenithepic_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/xenithepic/helmet_shell_xenithepic_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "helmetBackNumberTexture": "content/common/textures/default/invisible_color_array",
+      "helmetFrontNumberTexture": "content/common/textures/default/invisible_color_array",
+      "colorBorderTexture": "content/common/textures/default/invisible_color",
+      "normalClampTexture": "content/characters/player/commonTextures/Helmet/ventHole_NORM",
+      "metalFlakeNormalTexture": "content/characters/player/parts/uniforms/commonTextures/helmet/metalFlake_color",
+      "greendot": "content/common/textures/default/invisible_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "helmetBackNumberTexture": "content/common/textures/default/invisible_color_array",
+      "helmetFrontNumberTexture": "content/common/textures/default/invisible_color_array",
+      "colorBorderTexture": "content/common/textures/default/invisible_color",
+      "normalClampTexture": "content/characters/player/commonTextures/Helmet/ventHole_NORM",
+      "metalFlakeNormalTexture": "content/characters/player/parts/uniforms/commonTextures/helmet/metalFlake_color",
+      "greendot": "content/common/textures/default/invisible_color"
+     },
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {
+      "colorTexture": "content/common/textures/default/flatGrey_color",
+      "helmetBackNumberTexture": "content/common/textures/default/invisible_color_array",
+      "helmetFrontNumberTexture": "content/common/textures/default/invisible_color_array",
+      "colorBorderTexture": "content/common/textures/default/invisible_color",
+      "normalClampTexture": "content/characters/player/commonTextures/Helmet/ventHole_NORM",
+      "metalFlakeNormalTexture": "content/characters/player/parts/uniforms/commonTextures/helmet/metalFlake_color",
+      "greendot": "content/common/textures/default/invisible_color"
+     },
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_visor_xenithepic_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/xenithepic/helmet_visor_xenithepic_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_visor_xenithepic_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/xenithepic/helmet_visor_xenithepic_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 1,
+     "textures": {},
+     "vectors": {}
+    },
+    {
+     "slot": 2,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "m_helmet_visorclips_xenithepicclip_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/xenithepic/helmet_visorclips_xenithepicclip_mesh",
+  "out": "{REPO}/extracted/stage7/helmets/meshes/helmet_visorclips_xenithepicclip_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true,
+  "meta": {
+   "mvdb": "content/characters/player/parts/helmets/xenithepic/helmet_visorclips_xenithepicclip_launch_playerheadgear_brt/MeshVariationDb_Win32",
+   "materials": [
+    {
+     "slot": 0,
+     "textures": {},
+     "vectors": {}
+    }
+   ]
+  },
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "id": "t_helmetaccessories_rsm",
+  "op": "texture",
+  "asset": "content/characters/player/commonTextures/Helmet/helmetAccessories_RSM",
+  "out": "{REPO}/extracted/stage7/helmets/textures/helmetaccessories_rsm",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "helmet_accessories_airxp_mesh",
+    "helmet_accessories_pill_mesh",
+    "helmet_accessories_revo_mesh",
+    "helmet_accessories_revospeed_mesh",
+    "helmet_accessories_riddell360_mesh",
+    "helmet_accessories_schutt_mesh",
+    "helmet_accessories_schuttvengeance_mesh",
+    "helmet_accessories_schuttvengeancez10_mesh",
+    "helmet_accessories_speedflex_mesh",
+    "helmet_accessories_standard_mesh",
+    "helmet_accessories_standardbrady_mesh",
+    "helmet_accessories_viciszero1_mesh",
+    "helmet_accessories_xenith_mesh",
+    "helmet_accessories_xenithepic_mesh",
+    "helmet_facemask_vintagelong_mesh",
+    "helmet_facemask_vintagestandard_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_venthole_norm",
+  "op": "texture",
+  "asset": "content/characters/player/commonTextures/Helmet/ventHole_NORM",
+  "out": "{REPO}/extracted/stage7/helmets/textures/venthole_norm",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "helmet_shell_airxp_mesh",
+    "helmet_shell_pill_mesh",
+    "helmet_shell_revo_mesh",
+    "helmet_shell_revospeed_mesh",
+    "helmet_shell_riddell360_mesh",
+    "helmet_shell_schutt_mesh",
+    "helmet_shell_schuttvengeance_mesh",
+    "helmet_shell_schuttvengeancez10_mesh",
+    "helmet_shell_speedflex_mesh",
+    "helmet_shell_standard_mesh",
+    "helmet_shell_standardbrady_mesh",
+    "helmet_shell_viciszero1_mesh",
+    "helmet_shell_xenith_mesh",
+    "helmet_shell_xenithepic_mesh"
+   ]
+  }
+ },
+ {
+  "id": "t_nin_helmet_2018_golalt_helmet_col",
+  "op": "texture",
+  "asset": "content/characters/player/parts/uniforms/49ers/2018/NIN_HELMET_2018_GOLALT_helmet_COL",
+  "out": "{REPO}/extracted/stage7/helmets/textures/nin_helmet_2018_golalt_helmet_col",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "kit extra"
+   ]
+  }
+ },
+ {
+  "id": "t_flatwhite_color",
+  "op": "texture",
+  "asset": "content/common/textures/default/flatWhite_color",
+  "out": "{REPO}/extracted/stage7/helmets/textures/flatwhite_color",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "helmet_accessories_airxp_mesh",
+    "helmet_accessories_pill_mesh",
+    "helmet_accessories_revo_mesh",
+    "helmet_accessories_revospeed_mesh",
+    "helmet_accessories_riddell360_mesh",
+    "helmet_accessories_schutt_mesh",
+    "helmet_accessories_schuttvengeance_mesh",
+    "helmet_accessories_schuttvengeancez10_mesh",
+    "helmet_accessories_speedflex_mesh",
+    "helmet_accessories_standard_mesh",
+    "helmet_accessories_standardbrady_mesh",
+    "helmet_accessories_viciszero1_mesh",
+    "helmet_accessories_xenith_mesh",
+    "helmet_accessories_xenithepic_mesh",
+    "helmet_facemask_vintagelong_mesh",
+    "helmet_facemask_vintagestandard_mesh"
+   ]
+  }
+ }
+]
