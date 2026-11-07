@@ -7,13 +7,16 @@ Updated after every gate. Branch `madden-extraction`, nothing pushed.
 | --- | --- |
 | 0b Host bring up | PASS |
 | 1 Inventory | PASS (523,630 rows, 19 skeletons, 2,374 heads) |
-| 2 Skeleton and one player | running |
+| 2 Skeleton and one player | PASS (268 bone MaddenFB_Hero skeleton, 13 parts, 189.7 cm) |
+| 3 Animation probe | running (2 hour box) |
 
 ## On disk
 - `D:\MaddenRef\extracted` (junction `extracted\`). 192 MB (inventory 188 MB, Stage 0b test head).
 
 ## In Unreal under /Game/MaddenRef
-- `Stage0b/SM_faulkmarshall_11413_head__head_lod0_mat` and `__eyes_lod0_mat` (static, 25.5 x 22.8 x 37.4 cm).
+- `Skeleton/MaddenFB_Hero_Skeleton` (268 bones).
+- `Players/Stage2/` 13 skeletal meshes, 18 textures, 9 material instances.
+- `Maps/L_MaddenRef_Stage2Player` preview level with the dressed player at the origin.
 
 ## Open items
 1. Provenance of the Madden 19 install (`codex.cfg`, `OrangeEmu64.dll` present). Please confirm where this copy came from.

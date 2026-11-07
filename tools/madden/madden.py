@@ -11,6 +11,7 @@ Commands
   inventory                 FrostyHost inventory into extracted\\inventory, then the summary
   host <jobs.json> <stage>  run FrostyHost jobs in chunks, merge manifest.json and failures.csv
   ue <jobs.json> <stage>    headless Unreal import (maddenref_import.py)
+  materials <spec> <stage>  headless reference materials and preview level (maddenref_materials.py)
   audit <stage>             headless MaddenRef audit (maddenref_audit.py), exit 5 on fail
   verify                    manifest counts and hashes against the disk, exit 6 on mismatch
 """
@@ -34,6 +35,7 @@ ART = os.path.join(REPO, "Unreal", "TAGGridiron", "Tools", "Art")
 MANIFEST = os.path.join(EXTRACTED, "manifest.json")
 FAILURES = os.path.join(EXTRACTED, "failures.csv")
 FLOOR = 50 * 1024 ** 3
+csv.field_size_limit(sys.maxsize)
 STEP_TIMEOUT = 540
 CHUNK = 40
 EXCLUDE_NAMES = {"codex.cfg", "orangeemu64.dll"}
@@ -99,7 +101,9 @@ def bundle_lookup(asset):
             with open(p, encoding="utf-8") as fh:
                 for row in csv.DictReader(fh):
                     if row["kind"] == "ebx":
-                        _inventory[row["path"].lower()] = (row["bundles"], row["superbundles"])
+                        b = row["bundles"].split(";")
+                        short = ";".join(b[:8]) + (";+%d more" % (len(b) - 8) if len(b) > 8 else "")
+                        _inventory[row["path"].lower()] = (short, row["superbundles"])
     return _inventory.get((asset or "").lower(), ("", ""))
 
 
@@ -259,6 +263,22 @@ def cmd_ue(jobs_path, stage):
     return 0
 
 
+def cmd_materials(spec_path, stage):
+    report = os.path.join(LOGS, "mat_%s_report.json" % stage)
+    if os.path.exists(report):
+        os.remove(report)
+    run_ue("maddenref_materials.py", {"MADDENREF_MATERIALS": os.path.abspath(spec_path), "MADDENREF_REPORT": report}, "mat_%s.log" % stage)
+    if not os.path.exists(report):
+        log("materials %s produced no report" % stage)
+        return 7
+    r = json.load(open(report))
+    bad = [x for x in r["results"] if x["status"] != "ok"]
+    for x in bad:
+        append_failure(stage, x.get("binding", {}).get("mesh"), "ue_material", x.get("error"))
+    log("materials %s ok=%d fail=%d preview=%s" % (stage, len(r["results"]) - len(bad), len(bad), r.get("preview")))
+    return 0
+
+
 def cmd_audit(stage):
     out = os.path.join(LOGS, "audit_%s.json" % stage)
     if os.path.exists(out):
@@ -313,6 +333,8 @@ def main(argv):
         return cmd_host(argv[2], argv[3])
     if c == "ue":
         return cmd_ue(argv[2], argv[3])
+    if c == "materials":
+        return cmd_materials(argv[2], argv[3])
     if c == "audit":
         return cmd_audit(argv[2])
     if c == "verify":

@@ -8,7 +8,8 @@
 #   file        absolute path to the FBX, PNG or TGA
 #   dest        content folder, must start with /Game/MaddenRef
 #   name        asset name to create
-#   skeleton    optional skeleton asset path, for skeletal meshes sharing one skeleton and for anims
+#   skeleton    optional skeleton asset path, for skeletal meshes sharing one skeleton and for anims.
+#               A bootstrap job (name X, dest D, skeleton D/X_Skeleton) creates it on the first run.
 #   normal      optional bool, texture is a normal map
 #   srgb        optional bool, texture colour space
 #
@@ -25,45 +26,80 @@ EAL = unreal.EditorAssetLibrary
 tools = unreal.AssetToolsHelpers.get_asset_tools()
 
 
-def import_with_task(job):
-    """Import into a staging folder, then move each asset to dest as <name> or <name>__<node>.
+def _pipeline(kind, skeleton):
+    """Saved Interchange pipeline asset (AssetImportTask.options is ignored by Interchange in 5.8)."""
+    pipe_path = ROOT + "/_Pipelines/P_MaddenRef_" + kind
+    pipe = unreal.load_asset(pipe_path) if EAL.does_asset_exist(pipe_path) else None
+    if pipe is None:
+        base = unreal.load_asset("/Interchange/Pipelines/DefaultAssetsPipeline")
+        pkg, name = pipe_path.rsplit("/", 1)
+        pipe = tools.duplicate_asset(name, pkg, base)
+    if pipe is None:
+        raise RuntimeError("could not create pipeline asset " + pipe_path)
+    mesh_p = pipe.get_editor_property("mesh_pipeline")
+    mesh_p.set_editor_property("create_physics_asset", False)
+    mesh_p.set_editor_property("import_static_meshes", kind == "mesh")
+    mesh_p.set_editor_property("import_skeletal_meshes", kind == "mesh")
+    cur = mesh_p.get_editor_property("combine_static_meshes_behavior")
+    members = [m for m in dir(type(cur)) if m.isupper()]
+    unreal.log("MADDENREF combine behaviors " + ",".join(members))
+    pick = next((m for m in members if "ALL" in m), None) or next((m for m in members if "COMBINE" in m and "NOT" not in m and "NEVER" not in m), None)
+    if pick:
+        mesh_p.set_editor_property("combine_static_meshes_behavior", getattr(type(cur), pick))
+    common = pipe.get_editor_property("common_skeletal_meshes_and_animations_properties")
+    common.set_editor_property("skeleton", skeleton)
+    common.set_editor_property("import_only_animations", kind == "anim")
+    anim_p = pipe.get_editor_property("animation_pipeline")
+    anim_p.set_editor_property("import_animations", kind == "anim")
+    mat_p = pipe.get_editor_property("material_pipeline")
+    mat_p.set_editor_property("import_materials", False)
+    EAL.save_loaded_asset(pipe, only_if_is_dirty=False)
+    return pipe_path + "." + pipe_path.rsplit("/", 1)[1]
 
-    FBX files with several mesh nodes produce one asset per node named after the material node
-    (known issue 2). Renaming here gives every asset a name derived from its source asset path,
-    and deleting the old target first keeps re-runs idempotent.
+
+def import_with_task(job):
+    """Import straight into dest so Interchange names the asset after the file.
+
+    Meshes and anims are copied to a temp file called <name>.fbx first. Interchange names a combined
+    mesh after its source file, so the asset lands as dest/<name> and a re-run replaces it in place.
+    No delete or rename of existing assets is needed (deleting and renaming in one commandlet session
+    collides with objects that are still in memory, and renames leave redirectors). The shared skeleton
+    comes from a bootstrap job whose mesh is named after the skeleton, so Interchange creates
+    dest/<name>_Skeleton itself and every other job points its skeleton field at that path.
     """
-    stage = ROOT + "/_Incoming/" + job["name"]
-    if EAL.does_directory_exist(stage):
-        EAL.delete_directory(stage)
-    task = unreal.AssetImportTask()
-    task.filename = job["file"]
-    task.destination_path = stage
-    task.destination_name = job["name"]
-    task.replace_existing = True
-    task.automated = True
-    task.save = False
-    if job.get("skeleton") and job.get("kind") in ("mesh", "anim"):
-        task.options = None
-    tools.import_asset_tasks([task])
-    staged = [p.split(".")[0] for p in (task.imported_object_paths or [])]
-    primary = [p for p in staged if isinstance(unreal.load_asset(p), (unreal.StaticMesh, unreal.SkeletalMesh, unreal.Texture2D, unreal.AnimSequence))]
+    import shutil
+    kind = job.get("kind")
+    skel_path = job.get("skeleton")
+    existing_skel = unreal.load_asset(skel_path) if skel_path and EAL.does_asset_exist(skel_path) else None
+    if kind in ("mesh", "anim"):
+        tmp_dir = os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_saved_dir()), "MaddenRefImport")
+        os.makedirs(tmp_dir, exist_ok=True)
+        tmp = os.path.join(tmp_dir, job["name"] + os.path.splitext(job["file"])[1])
+        shutil.copyfile(job["file"], tmp)
+        params = unreal.ImportAssetParameters()
+        params.is_automated = True
+        params.replace_existing = True
+        params.override_pipelines = [unreal.SoftObjectPath(_pipeline(kind, existing_skel))]
+        src = unreal.InterchangeManager.create_source_data(tmp)
+        mgr = unreal.InterchangeManager.get_interchange_manager_scripted()
+        if not mgr.import_asset(job["dest"], src, params):
+            raise RuntimeError("interchange import_asset returned false")
+    else:
+        task = unreal.AssetImportTask()
+        task.filename = job["file"]
+        task.destination_path = job["dest"]
+        task.destination_name = job["name"]
+        task.replace_existing = True
+        task.automated = True
+        task.save = False
+        tools.import_asset_tasks([task])
     out = []
-    for p in staged:
-        node = p.rsplit("/", 1)[1]
-        is_primary = p in primary
-        if is_primary and len(primary) == 1:
-            new_name = job["name"]
-        else:
-            new_name = job["name"] + "__" + node
-        target = job["dest"] + "/" + new_name
-        if EAL.does_asset_exist(target):
-            EAL.delete_asset(target)
-        if not EAL.rename_asset(p, target):
-            raise RuntimeError("rename failed " + p + " -> " + target)
-        EAL.save_asset(target, only_if_is_dirty=False)
-        out.append(target)
-    if EAL.does_directory_exist(stage):
-        EAL.delete_directory(stage)
+    for p in EAL.list_assets(job["dest"], recursive=False, include_folder=False):
+        p = p.split(".")[0]
+        leaf = p.rsplit("/", 1)[1]
+        if leaf == job["name"] or leaf == job["name"] + "_Skeleton":
+            EAL.save_asset(p, only_if_is_dirty=False)
+            out.append(p)
     return out
 
 
@@ -91,11 +127,18 @@ def mesh_report(path):
         r["bbox_cm"] = [round(b.box_extent.x * 2, 2), round(b.box_extent.y * 2, 2), round(b.box_extent.z * 2, 2)]
         sk = a.skeleton
         r["skeleton"] = sk.get_path_name() if sk else None
+        r["bones"] = None
         try:
-            r["bones"] = a.get_editor_property("ref_skeleton").get_num() if hasattr(a.get_editor_property("ref_skeleton"), "get_num") else None
-        except Exception:
-            r["bones"] = None
+            pose = unreal.AnimPoseExtensions.get_reference_pose(sk)
+            names = unreal.AnimPoseExtensions.get_bone_names(pose)
+            r["bones"] = len(names)
+            if "Head" in [str(n) for n in names]:
+                head = unreal.AnimPoseExtensions.get_bone_pose(pose, "Head", unreal.AnimPoseSpaces.WORLD)
+                r["head_bone_z_cm"] = round(head.translation.z, 2)
+        except Exception as e:
+            r["bones_error"] = repr(e)[:200]
         r["material_slots"] = [str(m.material_slot_name) for m in a.materials]
+        r["lods"] = a.get_lod_num() if hasattr(a, "get_lod_num") else None
     elif isinstance(a, unreal.Texture2D):
         r["size"] = [a.blueprint_get_size_x(), a.blueprint_get_size_y()]
         r["srgb"] = a.srgb
@@ -104,6 +147,8 @@ def mesh_report(path):
 
 
 def run():
+    # The commandlet starts before the asset registry has scanned /Game, so scan synchronously first.
+    unreal.AssetRegistryHelpers.get_asset_registry().search_all_assets(True)
     jobs = json.load(open(os.environ["MADDENREF_JOBS"]))
     report = {"engine": unreal.SystemLibrary.get_engine_version(), "results": []}
     for job in jobs:

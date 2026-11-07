@@ -1,0 +1,377 @@
+[
+ {
+  "id": "m_faulkmarshall_11413_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/players/f/faulkmarshall_11413/faulkmarshall_11413_mesh",
+  "out": "{REPO}/extracted/stage2/meshes/faulkmarshall_11413_mesh.fbx",
+  "units": "Meters",
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+  "single_lod": true
+ },
+ {
+  "id": "mi_faulkmarshall_11413_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/players/f/faulkmarshall_11413/faulkmarshall_11413_mesh",
+  "out": "{REPO}/extracted/stage2/meshinfo/faulkmarshall_11413_mesh.meshinfo.json"
+ },
+ {
+  "id": "m_fullarms_d_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/bodies/fullarms_d_mesh",
+  "out": "{REPO}/extracted/stage2/meshes/fullarms_d_mesh.fbx",
+  "units": "Meters",
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+  "single_lod": true
+ },
+ {
+  "id": "mi_fullarms_d_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/bodies/fullarms_d_mesh",
+  "out": "{REPO}/extracted/stage2/meshinfo/fullarms_d_mesh.meshinfo.json"
+ },
+ {
+  "id": "m_legs_d_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/bodies/legs_d_mesh",
+  "out": "{REPO}/extracted/stage2/meshes/legs_d_mesh.fbx",
+  "units": "Meters",
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+  "single_lod": true
+ },
+ {
+  "id": "mi_legs_d_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/bodies/legs_d_mesh",
+  "out": "{REPO}/extracted/stage2/meshinfo/legs_d_mesh.meshinfo.json"
+ },
+ {
+  "id": "m_jersey_d_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/torsoapparel/jersey/jersey_d_mesh",
+  "out": "{REPO}/extracted/stage2/meshes/jersey_d_mesh.fbx",
+  "units": "Meters",
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+  "single_lod": true
+ },
+ {
+  "id": "mi_jersey_d_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/torsoapparel/jersey/jersey_d_mesh",
+  "out": "{REPO}/extracted/stage2/meshinfo/jersey_d_mesh.meshinfo.json"
+ },
+ {
+  "id": "m_pants_d_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/legsapparel/pants/pants_d_mesh",
+  "out": "{REPO}/extracted/stage2/meshes/pants_d_mesh.fbx",
+  "units": "Meters",
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+  "single_lod": true
+ },
+ {
+  "id": "mi_pants_d_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/legsapparel/pants/pants_d_mesh",
+  "out": "{REPO}/extracted/stage2/meshinfo/pants_d_mesh.meshinfo.json"
+ },
+ {
+  "id": "m_socks_mid_d_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/legsapparel/socks_mid/socks_mid_d_mesh",
+  "out": "{REPO}/extracted/stage2/meshes/socks_mid_d_mesh.fbx",
+  "units": "Meters",
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+  "single_lod": true
+ },
+ {
+  "id": "mi_socks_mid_d_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/legsapparel/socks_mid/socks_mid_d_mesh",
+  "out": "{REPO}/extracted/stage2/meshinfo/socks_mid_d_mesh.meshinfo.json"
+ },
+ {
+  "id": "m_helmet_shell_xenith_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/xenith/helmet_shell_xenith_mesh",
+  "out": "{REPO}/extracted/stage2/meshes/helmet_shell_xenith_mesh.fbx",
+  "units": "Meters",
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+  "single_lod": true
+ },
+ {
+  "id": "mi_helmet_shell_xenith_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/xenith/helmet_shell_xenith_mesh",
+  "out": "{REPO}/extracted/stage2/meshinfo/helmet_shell_xenith_mesh.meshinfo.json"
+ },
+ {
+  "id": "m_helmet_facemask_xenithprism_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/helmets/xenith/facemasks/helmet_facemask_xenithprism_mesh",
+  "out": "{REPO}/extracted/stage2/meshes/helmet_facemask_xenithprism_mesh.fbx",
+  "units": "Meters",
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+  "single_lod": true
+ },
+ {
+  "id": "mi_helmet_facemask_xenithprism_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/xenith/facemasks/helmet_facemask_xenithprism_mesh",
+  "out": "{REPO}/extracted/stage2/meshinfo/helmet_facemask_xenithprism_mesh.meshinfo.json"
+ },
+ {
+  "id": "m_shoe_low_nikealphamenaceelite99clubr_d_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/footwear/shoe_low_nikealphamenaceelite99club/shoe_low_nikealphamenaceelite99clubr_d_mesh",
+  "out": "{REPO}/extracted/stage2/meshes/shoe_low_nikealphamenaceelite99clubr_d_mesh.fbx",
+  "units": "Meters",
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+  "single_lod": true
+ },
+ {
+  "id": "mi_shoe_low_nikealphamenaceelite99clubr_d_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/footwear/shoe_low_nikealphamenaceelite99club/shoe_low_nikealphamenaceelite99clubr_d_mesh",
+  "out": "{REPO}/extracted/stage2/meshinfo/shoe_low_nikealphamenaceelite99clubr_d_mesh.meshinfo.json"
+ },
+ {
+  "id": "m_shoe_low_nikealphamenaceelite99clubl_d_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/footwear/shoe_low_nikealphamenaceelite99club/shoe_low_nikealphamenaceelite99clubl_d_mesh",
+  "out": "{REPO}/extracted/stage2/meshes/shoe_low_nikealphamenaceelite99clubl_d_mesh.fbx",
+  "units": "Meters",
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+  "single_lod": true
+ },
+ {
+  "id": "mi_shoe_low_nikealphamenaceelite99clubl_d_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/footwear/shoe_low_nikealphamenaceelite99club/shoe_low_nikealphamenaceelite99clubl_d_mesh",
+  "out": "{REPO}/extracted/stage2/meshinfo/shoe_low_nikealphamenaceelite99clubl_d_mesh.meshinfo.json"
+ },
+ {
+  "id": "m_glover_d_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/armgear/glover/glover_d_mesh",
+  "out": "{REPO}/extracted/stage2/meshes/glover_d_mesh.fbx",
+  "units": "Meters",
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+  "single_lod": true
+ },
+ {
+  "id": "mi_glover_d_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/armgear/glover/glover_d_mesh",
+  "out": "{REPO}/extracted/stage2/meshinfo/glover_d_mesh.meshinfo.json"
+ },
+ {
+  "id": "m_glovel_d_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/armgear/glovel/glovel_d_mesh",
+  "out": "{REPO}/extracted/stage2/meshes/glovel_d_mesh.fbx",
+  "units": "Meters",
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+  "single_lod": true
+ },
+ {
+  "id": "mi_glovel_d_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/armgear/glovel/glovel_d_mesh",
+  "out": "{REPO}/extracted/stage2/meshinfo/glovel_d_mesh.meshinfo.json"
+ },
+ {
+  "id": "m_sleeve_tight_d_mesh",
+  "op": "mesh",
+  "asset": "content/characters/player/parts/torsoapparel/sleeve_tight/sleeve_tight_d_mesh",
+  "out": "{REPO}/extracted/stage2/meshes/sleeve_tight_d_mesh.fbx",
+  "units": "Meters",
+  "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+  "single_lod": true
+ },
+ {
+  "id": "mi_sleeve_tight_d_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/torsoapparel/sleeve_tight/sleeve_tight_d_mesh",
+  "out": "{REPO}/extracted/stage2/meshinfo/sleeve_tight_d_mesh.meshinfo.json"
+ },
+ {
+  "id": "t_faulkmarshall_11413_color",
+  "op": "texture",
+  "asset": "content/characters/player/players/f/faulkMarshall_11413/faulkMarshall_11413_color",
+  "out": "{REPO}/extracted/stage2/textures/faulkmarshall_11413_color",
+  "formats": [
+   "dds",
+   "png"
+  ]
+ },
+ {
+  "id": "t_faulkmarshall_11413_normal",
+  "op": "texture",
+  "asset": "content/characters/player/players/f/faulkMarshall_11413/faulkMarshall_11413_normal",
+  "out": "{REPO}/extracted/stage2/textures/faulkmarshall_11413_normal",
+  "formats": [
+   "dds",
+   "png"
+  ]
+ },
+ {
+  "id": "t_arm_skintone7",
+  "op": "texture",
+  "asset": "content/characters/common/textures/skintones/arm_skintone7",
+  "out": "{REPO}/extracted/stage2/textures/arm_skintone7",
+  "formats": [
+   "dds",
+   "png"
+  ]
+ },
+ {
+  "id": "t_arm_normal",
+  "op": "texture",
+  "asset": "content/characters/common/textures/skintones/arm_normal",
+  "out": "{REPO}/extracted/stage2/textures/arm_normal",
+  "formats": [
+   "dds",
+   "png"
+  ]
+ },
+ {
+  "id": "t_arm_rsm_skintone7",
+  "op": "texture",
+  "asset": "content/characters/common/textures/skintones/arm_RSM_skintone7",
+  "out": "{REPO}/extracted/stage2/textures/arm_rsm_skintone7",
+  "formats": [
+   "dds",
+   "png"
+  ]
+ },
+ {
+  "id": "t_genericpadless_legs_st7",
+  "op": "texture",
+  "asset": "content/characters/common/textures/skintones/GenericPadless_Legs_ST7",
+  "out": "{REPO}/extracted/stage2/textures/genericpadless_legs_st7",
+  "formats": [
+   "dds",
+   "png"
+  ]
+ },
+ {
+  "id": "t_nin_jersey_2018_whialt_jersey_col",
+  "op": "texture",
+  "asset": "content/characters/player/parts/uniforms/49ers/2018/NIN_JERSEY_2018_WHIALT_Jersey_COL",
+  "out": "{REPO}/extracted/stage2/textures/nin_jersey_2018_whialt_jersey_col",
+  "formats": [
+   "dds",
+   "png"
+  ]
+ },
+ {
+  "id": "t_nin_jersey_2018_whialt_jersey_norm",
+  "op": "texture",
+  "asset": "content/characters/player/parts/uniforms/49ers/2018/NIN_JERSEY_2018_WHIALT_Jersey_NORM",
+  "out": "{REPO}/extracted/stage2/textures/nin_jersey_2018_whialt_jersey_norm",
+  "formats": [
+   "dds",
+   "png"
+  ]
+ },
+ {
+  "id": "t_nin_jersey_2018_whialt_jersey_rsm",
+  "op": "texture",
+  "asset": "content/characters/player/parts/uniforms/49ers/2018/NIN_JERSEY_2018_WHIALT_Jersey_RSM",
+  "out": "{REPO}/extracted/stage2/textures/nin_jersey_2018_whialt_jersey_rsm",
+  "formats": [
+   "dds",
+   "png"
+  ]
+ },
+ {
+  "id": "t_nin_pants_2018_whialt_pants_col",
+  "op": "texture",
+  "asset": "content/characters/player/parts/uniforms/49ers/2018/NIN_PANTS_2018_WHIALT_Pants_COL",
+  "out": "{REPO}/extracted/stage2/textures/nin_pants_2018_whialt_pants_col",
+  "formats": [
+   "dds",
+   "png"
+  ]
+ },
+ {
+  "id": "t_nin_pants_2018_whialt_pants_norm",
+  "op": "texture",
+  "asset": "content/characters/player/parts/uniforms/49ers/2018/NIN_PANTS_2018_WHIALT_Pants_NORM",
+  "out": "{REPO}/extracted/stage2/textures/nin_pants_2018_whialt_pants_norm",
+  "formats": [
+   "dds",
+   "png"
+  ]
+ },
+ {
+  "id": "t_nin_pants_2018_whialt_pants_rsm",
+  "op": "texture",
+  "asset": "content/characters/player/parts/uniforms/49ers/2018/NIN_PANTS_2018_WHIALT_Pants_RSM",
+  "out": "{REPO}/extracted/stage2/textures/nin_pants_2018_whialt_pants_rsm",
+  "formats": [
+   "dds",
+   "png"
+  ]
+ },
+ {
+  "id": "t_nin_helmet_2018_golalt_helmet_col",
+  "op": "texture",
+  "asset": "content/characters/player/parts/uniforms/49ers/2018/NIN_HELMET_2018_GOLALT_helmet_COL",
+  "out": "{REPO}/extracted/stage2/textures/nin_helmet_2018_golalt_helmet_col",
+  "formats": [
+   "dds",
+   "png"
+  ]
+ },
+ {
+  "id": "t_nin_helmet_2018_golalt_sticker_col",
+  "op": "texture",
+  "asset": "content/characters/player/parts/uniforms/49ers/2018/NIN_HELMET_2018_GOLALT_Sticker_COL",
+  "out": "{REPO}/extracted/stage2/textures/nin_helmet_2018_golalt_sticker_col",
+  "formats": [
+   "dds",
+   "png"
+  ]
+ },
+ {
+  "id": "t_nin_socks_2018_whi_socksunder_col",
+  "op": "texture",
+  "asset": "content/characters/player/parts/uniforms/49ers/2018/NIN_SOCKS_2018_WHI_socksUnder_COL",
+  "out": "{REPO}/extracted/stage2/textures/nin_socks_2018_whi_socksunder_col",
+  "formats": [
+   "dds",
+   "png"
+  ]
+ },
+ {
+  "id": "t_shoe_low_nikealphamenaceelite99club_black_col",
+  "op": "texture",
+  "asset": "content/characters/player/parts/footwear/shoe_low_NikeAlphaMenaceElite99Club/shoe_low_NikeAlphaMenaceElite99Club_black_COL",
+  "out": "{REPO}/extracted/stage2/textures/shoe_low_nikealphamenaceelite99club_black_col",
+  "formats": [
+   "dds",
+   "png"
+  ]
+ },
+ {
+  "id": "t_shoe_low_nikealphamenaceelite99club_norm",
+  "op": "texture",
+  "asset": "content/characters/player/parts/footwear/shoe_low_NikeAlphaMenaceElite99Club/shoe_low_NikeAlphaMenaceElite99Club_NORM",
+  "out": "{REPO}/extracted/stage2/textures/shoe_low_nikealphamenaceelite99club_norm",
+  "formats": [
+   "dds",
+   "png"
+  ]
+ },
+ {
+  "id": "t_shoe_low_nikealphamenaceelite99club_rsm",
+  "op": "texture",
+  "asset": "content/characters/player/parts/footwear/shoe_low_NikeAlphaMenaceElite99Club/shoe_low_NikeAlphaMenaceElite99Club_RSM",
+  "out": "{REPO}/extracted/stage2/textures/shoe_low_nikealphamenaceelite99club_rsm",
+  "formats": [
+   "dds",
+   "png"
+  ]
+ }
+]

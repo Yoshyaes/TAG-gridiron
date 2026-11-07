@@ -34,3 +34,4 @@ Unreal/TAGGridiron/Content/MaddenRef/
 codex.cfg
 OrangeEmu64.dll
 tools/madden/FrostyHost/bin/
+__pycache__/

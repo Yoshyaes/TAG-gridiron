@@ -142,6 +142,8 @@ def info(path):
     if geoms and lo[0] != float("inf"):
         out["bbox_file_units"] = [round(h - l, 5) for l, h in zip(lo, hi)]
         out["bbox_cm"] = [round((h - l) * unit, 3) for l, h in zip(lo, hi)]
+        out["min_cm"] = [round(l * unit, 3) for l in lo]
+        out["max_cm"] = [round(h * unit, 3) for h in hi]
     return out
 
 

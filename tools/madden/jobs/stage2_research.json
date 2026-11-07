@@ -1,0 +1,98 @@
+[
+ {
+  "id": "e_MaddenFB_Hero_Skeleton",
+  "op": "ebx",
+  "asset": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+  "out": "{REPO}/extracted/stage2/research/content__characters__rig__skeleton__player__MaddenFB_Hero_Skeleton.ebx.json"
+ },
+ {
+  "id": "e_MaddenFB_Skeleton_SidelinePlayer",
+  "op": "ebx",
+  "asset": "content/characters/Rig/skeleton/Player/MaddenFB_Skeleton_SidelinePlayer",
+  "out": "{REPO}/extracted/stage2/research/content__characters__Rig__skeleton__Player__MaddenFB_Skeleton_SidelinePlayer.ebx.json"
+ },
+ {
+  "id": "e_faulkMarshall_11413",
+  "op": "ebx",
+  "asset": "content/characters/player/players/f/faulkMarshall_11413/faulkMarshall_11413",
+  "out": "{REPO}/extracted/stage2/research/content__characters__player__players__f__faulkMarshall_11413__faulkMarshall_11413.ebx.json"
+ },
+ {
+  "id": "e_MeshVariationDb_Win32",
+  "op": "ebx",
+  "asset": "content/characters/player/players/f/faulkmarshall_11413/faulkmarshall_11413_playerhead_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage2/research/content__characters__player__players__f__faulkmarshall_11413__faulkmarshall_11413_playerhead_brt__MeshVariationDb_Win32.ebx.json"
+ },
+ {
+  "id": "e_faulkMarshall_11413_ST_preset",
+  "op": "ebx",
+  "asset": "content/common/presets/characters/players/faulkMarshall_11413_ST_preset",
+  "out": "{REPO}/extracted/stage2/research/content__common__presets__characters__players__faulkMarshall_11413_ST_preset.ebx.json"
+ },
+ {
+  "id": "e_FullArms_D",
+  "op": "ebx",
+  "asset": "content/characters/player/bodies/FullArms_D",
+  "out": "{REPO}/extracted/stage2/research/content__characters__player__bodies__FullArms_D.ebx.json"
+ },
+ {
+  "id": "e_legs_D",
+  "op": "ebx",
+  "asset": "content/characters/player/bodies/legs_D",
+  "out": "{REPO}/extracted/stage2/research/content__characters__player__bodies__legs_D.ebx.json"
+ },
+ {
+  "id": "e_fullarms_d_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/bodies/fullarms_d_mesh",
+  "out": "{REPO}/extracted/stage2/research/content__characters__player__bodies__fullarms_d_mesh.ebx.json"
+ },
+ {
+  "id": "e_legs_d_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/bodies/legs_d_mesh",
+  "out": "{REPO}/extracted/stage2/research/content__characters__player__bodies__legs_d_mesh.ebx.json"
+ },
+ {
+  "id": "mi_fullarms_d_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/bodies/fullarms_d_mesh",
+  "out": "{REPO}/extracted/stage2/research/fullarms_d_mesh.meshinfo.json"
+ },
+ {
+  "id": "mi_legs_d_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/bodies/legs_d_mesh",
+  "out": "{REPO}/extracted/stage2/research/legs_d_mesh.meshinfo.json"
+ },
+ {
+  "id": "mi_nohands_d_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/bodies/nohands_d_mesh",
+  "out": "{REPO}/extracted/stage2/research/nohands_d_mesh.meshinfo.json"
+ },
+ {
+  "id": "mi_helmet_shell_xenith_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/xenith/helmet_shell_xenith_mesh",
+  "out": "{REPO}/extracted/stage2/research/helmet_shell_xenith_mesh.meshinfo.json"
+ },
+ {
+  "id": "mi_helmet_facemask_xenithprism_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/xenith/facemasks/helmet_facemask_xenithprism_mesh",
+  "out": "{REPO}/extracted/stage2/research/helmet_facemask_xenithprism_mesh.meshinfo.json"
+ },
+ {
+  "id": "mi_sleeve_tight_d_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/torsoapparel/sleeve_tight/sleeve_tight_d_mesh",
+  "out": "{REPO}/extracted/stage2/research/sleeve_tight_d_mesh.meshinfo.json"
+ },
+ {
+  "id": "mi_socks_mid_d_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/legsapparel/socks_mid/socks_mid_d_mesh",
+  "out": "{REPO}/extracted/stage2/research/socks_mid_d_mesh.meshinfo.json"
+ }
+]
