@@ -45,6 +45,31 @@ def local_frames(ev, poses):
     return out
 
 
+def make_in_place(ev, frames):
+    """Preview only. Locks the horizontal Hips position at the origin on every frame and turns the clip so
+    frame 0 faces the mesh's forward axis (+Z in FBX space). Done by a per frame world transform on
+    AITrajectory, whose parent (Reference) is the identity, so every other joint, all rotations and the
+    vertical motion are unchanged. The source clip is not modified."""
+    h = ev.hero
+    ti, hi, lu, ru = h.index["AITrajectory"], h.index["Hips"], h.index["LeftUpLeg"], h.index["RightUpLeg"]
+    _, G0 = ev.fk(*frames[0])
+    f = np.cross(G0[lu] - G0[ru], [0.0, 1.0, 0.0])
+    f[1] = 0.0
+    phi = math.atan2(f[0], f[2]) if np.linalg.norm(f) > 1e-6 else 0.0
+    c, s = math.cos(-phi), math.sin(-phi)
+    yaw = np.array([[c, 0.0, s], [0.0, 1.0, 0.0], [-s, 0.0, c]])
+    out = []
+    for R, T in frames:
+        _, G = ev.fk(R, T)
+        hips = G[hi].copy()
+        hips[1] = 0.0
+        R2, T2 = list(R), list(T)
+        R2[ti] = yaw @ R[ti]
+        T2[ti] = yaw @ (np.asarray(T[ti]) - hips)
+        out.append((R2, T2))
+    return out
+
+
 def fmt(v):
     return ("%.7g" % v).replace("e+0", "e+").replace("e-0", "e-")
 
@@ -171,7 +196,7 @@ class Exporter:
                 if o.get(role):
                     self.ctrl.setdefault(o[role], o)
 
-    def export(self, out_dir, key, layer=None, skip_existing=True, sparse=False, fname=None):
+    def export(self, out_dir, key, layer=None, skip_existing=True, sparse=False, fname=None, in_place=False):
         c = self.ctrl.get(key)
         name = fname or (safe(c["__name"]) if c else "%016x" % key)
         src_fps = float(c.get("FPS") or 30.0) if c else 30.0
@@ -190,9 +215,13 @@ class Exporter:
                 for k, v in lp.items():
                     p.setdefault(k, v)
         frames = local_frames(self.ev, poses)
+        if in_place:
+            frames = make_in_place(self.ev, frames)
         keyed = None
         if sparse:
             driven = {n.rsplit(".", 1)[0] for n in poses[0] if n.endswith((".q", ".t"))}
+            if in_place:
+                driven.add("AITrajectory")
             keyed = [i for i, n in enumerate(self.ev.hero.names) if n in driven]
         write_fbx(path, self.ev.hero, frames, fps, keyed=keyed)
         meta = {"name": c["__name"] if c else None, "clip_key": "%016x" % key, "layer_key": "%016x" % layer if layer else None,

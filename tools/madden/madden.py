@@ -381,9 +381,13 @@ def cmd_animkit(spec_path, spec):
     if step("export", subprocess.run(ak + ["export", spec_path], timeout=STEP_TIMEOUT).returncode):
         save()
         return 1
-    step("ue", cmd_ue(os.path.join(LOGS, "ue_%s_gated.json" % name), name))
-    step("mat", subprocess.run(ak + ["mat", spec_path], timeout=STEP_TIMEOUT).returncode)
+    if not spec.get("skip_main"):
+        step("ue", cmd_ue(os.path.join(LOGS, "ue_%s_gated.json" % name), name))
     if spec.get("preview"):
+        # Preview levels play in place copies (root and Hips travel locked), never the real clips.
+        step("inplace", subprocess.run(ak + ["inplace", spec_path], timeout=STEP_TIMEOUT).returncode)
+        step("ue_inplace", cmd_ue(os.path.join(LOGS, "ue_%s_inplace.json" % name), name + "_inplace"))
+        step("mat", subprocess.run(ak + ["mat", spec_path], timeout=STEP_TIMEOUT).returncode)
         step("preview", cmd_materials(os.path.join(TOOLS, "jobs", "mat_" + name + ".json"), name))
     step("verify", cmd_verify(name if spec.get("quick_verify") else None))
     g = step("guard", cmd_guard())

@@ -128,6 +128,12 @@ def cmd_export(spec):
     import fbxanim
     t0 = time.time()
     jobs = json.load(open(os.path.join(JOBS, spec["name"] + "_anim.json")))
+    if spec.get("skip_main"):
+        # Preview only kit (the clips were exported and imported elsewhere). Gate list = the plan.
+        json.dump(json.load(open(os.path.join(JOBS, "ue_" + spec["name"] + ".json"))),
+                  open(os.path.join(LOGS, "ue_%s_gated.json" % spec["name"]), "w"), indent=1)
+        print("anim export %s skipped (preview only kit)" % spec["name"])
+        return 0
     os.makedirs(spec["OUTDIR"], exist_ok=True)
     checks_path = os.path.join(LOGS, "kit_%s_checks.json" % spec["name"])
     checks = json.load(open(checks_path)) if os.path.exists(checks_path) else {}
@@ -181,23 +187,70 @@ def cmd_export(spec):
     return 0
 
 
+def preview_dir(spec):
+    pv = spec["preview"]
+    return "/Game/MaddenRef/Animations/PreviewInPlace/" + pv.get("level", safe(spec["name"].title()))
+
+
+def cmd_inplace(spec):
+    """Preview only copies of the gated clips that play in place (horizontal Hips locked at the origin, frame 0
+    facing the mesh forward axis). Written to extracted/animation/preview_inplace/<kit>, imported to
+    /Game/MaddenRef/Animations/PreviewInPlace/<level>. The real clips are not touched."""
+    import madden
+    import fbxanim
+    if not spec.get("preview"):
+        return 0
+    t0 = time.time()
+    plan = {j["file"]: j for j in json.load(open(os.path.join(JOBS, spec["name"] + "_anim.json")))}
+    gated = json.load(open(os.path.join(LOGS, "ue_%s_gated.json" % spec["name"])))
+    out_dir = os.path.join(REPO, "extracted", "animation", "preview_inplace", spec["name"])
+    os.makedirs(out_dir, exist_ok=True)
+    m = madden.load_manifest()
+    ex = None
+    ue, done, skipped = [], 0, 0
+    for u in gated:
+        j = plan[os.path.basename(u["file"])[:-4]]
+        fname = j["file"] + "_InPlace"
+        fbx, meta = os.path.join(out_dir, fname + ".fbx"), os.path.join(out_dir, fname + ".json")
+        rec = m["files"].get(madden.rel(fbx))
+        if os.path.exists(fbx) and rec and rec.get("sha256") == madden.sha256(fbx):
+            skipped += 1
+        else:
+            if ex is None:
+                ex = fbxanim.Exporter()
+            ex.export(out_dir, int(j["clip_key"], 16), int(j["layer_key"], 16) if j["layer_key"] else None, skip_existing=False,
+                      sparse=True, fname=fname, in_place=True)
+            for p, op in ((fbx, "fbxanim_inplace_preview"), (meta, "fbxanim_inplace_preview_meta")):
+                m["files"][madden.rel(p)] = {"op": op, "stage": spec["name"] + "_preview", "source_asset": "%s (clip %s, layer %s)" % (j["name"], j["clip_key"], j["layer_key"]),
+                                             "bundles": "levels/maddengame + launch_sba AssetBanks", "superbundles": "",
+                                             "size": os.path.getsize(p), "sha256": madden.sha256(p), "params": {"fps": j["fps"], "in_place": True}}
+            done += 1
+        ue.append({"kind": "anim", "file": "{REPO}/extracted/animation/preview_inplace/%s/%s.fbx" % (spec["name"], fname),
+                   "dest": preview_dir(spec), "name": ue_name("A_" + fname), "skeleton": spec["ue_skeleton"], "fps": int_fps(j["fps"])})
+    madden.save_manifest(m)
+    json.dump(ue, open(os.path.join(LOGS, "ue_%s_inplace.json" % spec["name"]), "w"), indent=1)
+    print("in place previews %s done=%d skipped=%d in %.0fs" % (spec["name"], done, skipped, time.time() - t0))
+    return 0
+
+
 def cmd_mat(spec):
     pv = spec.get("preview")
     if not pv:
         json.dump({"bindings": []}, open(os.path.join(JOBS, "mat_" + spec["name"] + ".json"), "w"))
         return 0
-    gated = json.load(open(os.path.join(LOGS, "ue_%s_gated.json" % spec["name"])))
+    gated = json.load(open(os.path.join(LOGS, "ue_%s_inplace.json" % spec["name"])))
     sp, per = pv.get("spacing", 300.0), pv.get("per_row", 10)
     meshes = []
     for i, u in enumerate(gated):
         x, y = (i % per) * sp, (i // per) * sp
         for p in STAGE2_PARTS:
-            meshes.append({"mesh": pv["dressed"] + "/" + p, "x": x, "y": y, "label": u["name"][2:30], "anim": u["dest"] + "/" + u["name"]})
+            meshes.append({"mesh": pv["dressed"] + "/" + p, "x": x, "y": y, "label": u["name"][2:30], "anim": u["dest"] + "/" + u["name"], "group": i})
     level = "/Game/MaddenRef/Maps/L_MaddenRef_" + pv.get("level", safe(spec["name"].title()))
-    json.dump({"bindings": [], "preview_level": {"path": level, "meshes": meshes}}, open(os.path.join(JOBS, "mat_" + spec["name"] + ".json"), "w"), indent=1)
+    json.dump({"bindings": [], "preview_level": {"path": level, "meshes": meshes, "staging": pv.get("staging", {})}},
+              open(os.path.join(JOBS, "mat_" + spec["name"] + ".json"), "w"), indent=1)
     print("preview", level, len(gated), "clips")
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit({"plan": cmd_plan, "export": cmd_export, "mat": cmd_mat}[sys.argv[1]](load_spec(sys.argv[2])))
+    sys.exit({"plan": cmd_plan, "export": cmd_export, "inplace": cmd_inplace, "mat": cmd_mat}[sys.argv[1]](load_spec(sys.argv[2])))

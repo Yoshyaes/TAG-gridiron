@@ -16,6 +16,7 @@
 #   RSMIsSkin switch. Skin maps are R_S_SSR_T (B is subsurface), so Metallic falls back to the scalar.
 #   When UseRSM is off, the Roughness, Specular and Metallic scalars are used.
 import json
+import math
 import os
 import traceback
 
@@ -143,9 +144,119 @@ def apply_binding(b, master):
     return {"mi": b["mi"], "mesh": b["mesh"], "slots": list(slots)}
 
 
+HFOV = 90.0          # camera horizontal field of view
+ASPECT = 16.0 / 9.0
+FILL = 1.0 / 3.0     # share of the view height the subject should fill
+
+
+def _bounds_z(mesh):
+    if isinstance(mesh, unreal.StaticMesh):
+        b = mesh.get_bounding_box()
+        return b.min.z, b.max.z
+    b = mesh.get_bounds()
+    return b.origin.z - b.box_extent.z, b.origin.z + b.box_extent.z
+
+
+def _forward(meshes):
+    """Mesh forward axis in Unreal space, from the skeleton's reference pose (toe ahead of ankle)."""
+    for mesh in meshes:
+        sk = mesh.skeleton if isinstance(mesh, unreal.SkeletalMesh) else None
+        if sk is None:
+            continue
+        try:
+            pose = unreal.AnimPoseExtensions.get_reference_pose(sk)
+            toe = unreal.AnimPoseExtensions.get_bone_pose(pose, "LeftToeBase", unreal.AnimPoseSpaces.WORLD).translation
+            foot = unreal.AnimPoseExtensions.get_bone_pose(pose, "LeftFoot", unreal.AnimPoseSpaces.WORLD).translation
+            fx, fy = toe.x - foot.x, toe.y - foot.y
+            n = math.hypot(fx, fy)
+            if n > 1e-3:
+                return fx / n, fy / n
+        except Exception:
+            pass
+    return 1.0, 0.0
+
+
+def _component(actor, cls):
+    return actor.get_component_by_class(cls)
+
+
+def stage_level(placed, staging):
+    """Lights, a grid ground plane, the GameModeBase override, and a camera where the subject's height fills
+    about a third of the view. placed = [(mesh, x, y, group)]."""
+    eas = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
+    ues = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem)
+    info = {}
+    # GameModeBase override, so the preview never runs the game's own GridironGameMode
+    ws = ues.get_editor_world().get_world_settings()
+    ws.set_editor_property("default_game_mode", unreal.GameModeBase.static_class())
+    info["game_mode"] = "GameModeBase"
+    if not placed:
+        return info
+    # groups (one dressed player, one helmet model, ...) and the subject height
+    groups = {}
+    for mesh, x, y, g in placed:
+        lo, hi = _bounds_z(mesh)
+        e = groups.setdefault(g, {"x": x, "y": y, "lo": lo, "hi": hi})
+        e["lo"], e["hi"] = min(e["lo"], lo), max(e["hi"], hi)
+    fx, fy = _forward([p[0] for p in placed])
+    c45 = math.cos(math.radians(45))
+    dx, dy = fx * c45 - fy * c45, fx * c45 + fy * c45          # three quarter view of the players' front
+    rows = {}
+    for g in groups.values():
+        rows.setdefault(round(g["y"], 1), []).append(g)
+    row = max(rows.values(), key=lambda r: sum(g["x"] * dx + g["y"] * dy for g in r) / len(r))
+    tx = sum(g["x"] for g in row) / len(row)
+    ty = sum(g["y"] for g in row) / len(row)
+    lo = min(g["lo"] for g in row)
+    height = float(staging.get("subject_height_cm") or max(g["hi"] - g["lo"] for g in row))
+    tz = lo + 0.5 * height
+    vfov_half = math.atan(math.tan(math.radians(HFOV / 2)) / ASPECT)
+    dist = height / (FILL * 2.0 * math.tan(vfov_half))
+    cam = unreal.Vector(tx + dx * dist, ty + dy * dist, tz + 0.15 * height)
+    target = unreal.Vector(tx, ty, tz)
+    rot = unreal.MathLibrary.find_look_at_rotation(cam, target)
+    camera = eas.spawn_actor_from_class(unreal.CameraActor, cam, rot)
+    camera.set_actor_label("PreviewCamera")
+    cc = _component(camera, unreal.CameraComponent)
+    cc.set_editor_property("field_of_view", HFOV)
+    cc.set_editor_property("aspect_ratio", ASPECT)
+    cc.set_editor_property("constrain_aspect_ratio", False)
+    camera.set_editor_property("auto_activate_for_player", unreal.AutoReceiveInput.PLAYER0)
+    ps = eas.spawn_actor_from_class(unreal.PlayerStart, cam, unreal.Rotator(0.0, 0.0, rot.yaw))
+    ps.set_actor_label("PreviewPlayerStart")
+    info.update({"subject_height_cm": round(height, 1), "camera_distance_cm": round(dist, 1),
+                 "camera": [round(cam.x, 1), round(cam.y, 1), round(cam.z, 1)], "target": [round(tx, 1), round(ty, 1), round(tz, 1)],
+                 "forward": [round(fx, 3), round(fy, 3)]})
+    # grid ground plane under everything (and under the camera)
+    xs = [p[1] for p in placed] + [cam.x]
+    ys = [p[2] for p in placed] + [cam.y]
+    margin = max(500.0, 2.0 * height)
+    sx, sy = (max(xs) - min(xs)) + 2 * margin, (max(ys) - min(ys)) + 2 * margin
+    plane = eas.spawn_actor_from_class(unreal.StaticMeshActor, unreal.Vector((max(xs) + min(xs)) / 2, (max(ys) + min(ys)) / 2, 0.0))
+    plane.set_actor_label("PreviewGround")
+    pc = plane.static_mesh_component
+    pc.set_static_mesh(unreal.load_asset("/Engine/BasicShapes/Plane"))
+    pc.set_material(0, unreal.load_asset("/Engine/EngineMaterials/WorldGridMaterial"))
+    plane.set_actor_scale3d(unreal.Vector(sx / 100.0, sy / 100.0, 1.0))
+    info["ground_m"] = [round(sx / 100.0, 1), round(sy / 100.0, 1)]
+    # lights: atmosphere, a movable sun from the camera side, and a real time sky light (no lighting build needed)
+    eas.spawn_actor_from_class(unreal.SkyAtmosphere, unreal.Vector(0, 0, 0)).set_actor_label("PreviewSkyAtmosphere")
+    sun = eas.spawn_actor_from_class(unreal.DirectionalLight, unreal.Vector(tx, ty, tz + 500), unreal.Rotator(0.0, -40.0, rot.yaw - 30.0))
+    sun.set_actor_label("PreviewSun")
+    sun.root_component.set_mobility(unreal.ComponentMobility.MOVABLE)
+    lc = _component(sun, unreal.DirectionalLightComponent)
+    lc.set_editor_property("atmosphere_sun_light", True)
+    sky = eas.spawn_actor_from_class(unreal.SkyLight, unreal.Vector(tx, ty, tz + 300))
+    sky.set_actor_label("PreviewSkyLight")
+    sky.root_component.set_mobility(unreal.ComponentMobility.MOVABLE)
+    _component(sky, unreal.SkyLightComponent).set_editor_property("real_time_capture", True)
+    info["lights"] = ["SkyAtmosphere", "DirectionalLight (movable)", "SkyLight (real time capture)"]
+    return info
+
+
 def build_preview(spec):
-    """Level with every part as a SkeletalMeshActor at the origin. All parts share one skeleton and bind
-    pose, so they line up into one dressed player without any animation setup."""
+    """Preview level. Every part as a SkeletalMeshActor (all parts share one skeleton and bind pose, so they
+    line up into one dressed player), then staged with lights, ground, camera and the GameModeBase override."""
     path = spec["path"]
     les = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)
     eas = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
@@ -154,7 +265,8 @@ def build_preview(spec):
     if EAL.does_asset_exist(path):
         EAL.delete_asset(path)
     les.new_level(path)
-    for m in spec["meshes"]:
+    placed = []
+    for i, m in enumerate(spec["meshes"]):
         if isinstance(m, dict):
             mpath, x, y, label = m["mesh"], float(m.get("x", 0.0)), float(m.get("y", 0.0)), m.get("label", "")
         else:
@@ -177,8 +289,11 @@ def build_preview(spec):
                     comp.set_animation(anim)
                     comp.set_editor_property("animation_data", unreal.SingleAnimationPlayData(anim_to_play=anim, saved_looping=True, saved_playing=True))
         actor.set_actor_label((label + "_" if label else "") + mpath.rsplit("/", 1)[1])
+        group = m.get("group", label or i) if isinstance(m, dict) else i
+        placed.append((mesh, x, y, group))
+    staged = stage_level(placed, spec.get("staging", {}))
     les.save_current_level()
-    return {"preview": path}
+    return {"preview": path, "staging": staged}
 
 
 def run():
