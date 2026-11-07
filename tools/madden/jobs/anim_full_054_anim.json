@@ -1,0 +1,623 @@
+[
+ {
+  "name": "PostPlay_NonBC_2Man0_18_Avoidance_Bump_WalkVsStand_D6_v2__P01",
+  "file": "PostPlay_NonBC_2Man0_18_Avoidance_Bump_WalkVsStand_D6_v2__P01",
+  "clip_key": "5291edc15900dd1b",
+  "layer_key": "55073d19eeeaa26a",
+  "fps": 60.0,
+  "frames": 423,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_2Man0_18_Avoidance_Bump_WalkVsStand_D6_v2__P02",
+  "file": "PostPlay_NonBC_2Man0_18_Avoidance_Bump_WalkVsStand_D6_v2__P02",
+  "clip_key": "b807df173aedaeb4",
+  "layer_key": "3e5c7f4d221484f3",
+  "fps": 60.0,
+  "frames": 423,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_2Man0_18_Avoidance_Bump_WalkVsStand_D7_v3__P01",
+  "file": "PostPlay_NonBC_2Man0_18_Avoidance_Bump_WalkVsStand_D7_v3__P01",
+  "clip_key": "2003a8a7b118e7f3",
+  "layer_key": "d7d22fffd00c9ff4",
+  "fps": 60.0,
+  "frames": 223,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_2Man0_18_Avoidance_Bump_WalkVsStand_D7_v3__P02",
+  "file": "PostPlay_NonBC_2Man0_18_Avoidance_Bump_WalkVsStand_D7_v3__P02",
+  "clip_key": "dd8dffd0553db46d",
+  "layer_key": "845edb6fde17d007",
+  "fps": 60.0,
+  "frames": 217,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_2Man0_18_Avoidance_Bump_WalkVsStand_D8_v2__P01",
+  "file": "PostPlay_NonBC_2Man0_18_Avoidance_Bump_WalkVsStand_D8_v2__P01",
+  "clip_key": "5bf169b53eb63b58",
+  "layer_key": "7730495855506e86",
+  "fps": 60.0,
+  "frames": 263,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_2Man0_18_Avoidance_Bump_WalkVsStand_D8_v2__P02",
+  "file": "PostPlay_NonBC_2Man0_18_Avoidance_Bump_WalkVsStand_D8_v2__P02",
+  "clip_key": "bbc10fcf20c601e1",
+  "layer_key": "fdfa3aba5ade8d9a",
+  "fps": 60.0,
+  "frames": 263,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_EmoReaction_Happy_Getup_All_Fours_1__P01",
+  "file": "PostPlay_NonBC_EmoReaction_Happy_Getup_All_Fours_1__P01",
+  "clip_key": "726567c77d02048e",
+  "layer_key": "05cd68b34b1e555b",
+  "fps": 30.0,
+  "frames": 166,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_EmoReaction_Joy_Run_1__P01",
+  "file": "PostPlay_NonBC_EmoReaction_Joy_Run_1__P01",
+  "clip_key": "f4e9add6ef1da4b8",
+  "layer_key": "26288efea551fba3",
+  "fps": 30.0,
+  "frames": 169,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_INT_Celeb_49ers_TwoArm_PoundChest",
+  "file": "PostPlay_NonBC_INT_Celeb_49ers_TwoArm_PoundChest",
+  "clip_key": "dbf59a6a9b278e56",
+  "layer_key": "ab0a5646baafb3f5",
+  "fps": 60.0,
+  "frames": 753,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_INT_Celeb_Broncos_Run_spin_with_arms_out",
+  "file": "PostPlay_NonBC_INT_Celeb_Broncos_Run_spin_with_arms_out",
+  "clip_key": "4cf997e72ea670ae",
+  "layer_key": "3d334d39a8335fec",
+  "fps": 60.0,
+  "frames": 576,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_INT_Celeb_Falcons_Run_with_arms_out",
+  "file": "PostPlay_NonBC_INT_Celeb_Falcons_Run_with_arms_out",
+  "clip_key": "989e8b68bd5ba42b",
+  "layer_key": "d436977482ece13f",
+  "fps": 60.0,
+  "frames": 371,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_Reactions_FirstDown_1__P01",
+  "file": "PostPlay_NonBC_Reactions_FirstDown_1__P01",
+  "clip_key": "bc01abde05c98b3e",
+  "layer_key": "1311e1d1f952736f",
+  "fps": 30.0,
+  "frames": 258,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_Reactions_FirstDown_2__P01",
+  "file": "PostPlay_NonBC_Reactions_FirstDown_2__P01",
+  "clip_key": "d7a82029947406ed",
+  "layer_key": "ed3ad3eada3ffdc6",
+  "fps": 30.0,
+  "frames": 242,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_Reactions_FirstDown_3__P01",
+  "file": "PostPlay_NonBC_Reactions_FirstDown_3__P01",
+  "clip_key": "f054fdb28643bd69",
+  "layer_key": "a3fb839090768752",
+  "fps": 30.0,
+  "frames": 170,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_Reactions_Incomplete_1__P01",
+  "file": "PostPlay_NonBC_Reactions_Incomplete_1__P01",
+  "clip_key": "2605ca260c220f5c",
+  "layer_key": "873cdf7df64f878f",
+  "fps": 30.0,
+  "frames": 124,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_Reactions_Incomplete_2__P01",
+  "file": "PostPlay_NonBC_Reactions_Incomplete_2__P01",
+  "clip_key": "ae8fe8df78d263a1",
+  "layer_key": "2f291fc44777bcb7",
+  "fps": 30.0,
+  "frames": 112,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_Reactions_Incomplete_3__P01",
+  "file": "PostPlay_NonBC_Reactions_Incomplete_3__P01",
+  "clip_key": "ba8c5e2834f48927",
+  "layer_key": "cf8a96b03ce652c5",
+  "fps": 30.0,
+  "frames": 143,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_Reactions_Safety_From_All_Fours__P01",
+  "file": "PostPlay_NonBC_Reactions_Safety_From_All_Fours__P01",
+  "clip_key": "71c7591bcf791fbf",
+  "layer_key": "a6d559bef3a5387a",
+  "fps": 30.0,
+  "frames": 101,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_Reactions_Safety_From_Backsplat__P01",
+  "file": "PostPlay_NonBC_Reactions_Safety_From_Backsplat__P01",
+  "clip_key": "6fa79e7951a3bf34",
+  "layer_key": "252d77a7929684c2",
+  "fps": 30.0,
+  "frames": 213,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_Reactions_Safety_From_Stand__P01",
+  "file": "PostPlay_NonBC_Reactions_Safety_From_Stand__P01",
+  "clip_key": "1bcd17e9df4fa85f",
+  "layer_key": "c1e94e45a4436520",
+  "fps": 30.0,
+  "frames": 42,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_Sack_Celeb_49ers_Arms_Behind_Back_Swag_Walk__P01",
+  "file": "PostPlay_NonBC_Sack_Celeb_49ers_Arms_Behind_Back_Swag_Walk__P01",
+  "clip_key": "5f81eacb783cfa20",
+  "layer_key": "0a7fd7835825bff4",
+  "fps": 60.0,
+  "frames": 529,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_Sack_Celeb_49ers_Low_Lasso",
+  "file": "PostPlay_NonBC_Sack_Celeb_49ers_Low_Lasso",
+  "clip_key": "a281a18a010cbd0f",
+  "layer_key": "83d9c8a1982289d8",
+  "fps": 60.0,
+  "frames": 525,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_Sack_Celeb_Bears_Fishing",
+  "file": "PostPlay_NonBC_Sack_Celeb_Bears_Fishing",
+  "clip_key": "4ed5ab60912839ae",
+  "layer_key": "90f95a34943d5451",
+  "fps": 60.0,
+  "frames": 473,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_Sack_Celeb_Broncos_Drive__P01",
+  "file": "PostPlay_NonBC_Sack_Celeb_Broncos_Drive__P01",
+  "clip_key": "3b6eb550ac667f41",
+  "layer_key": "81266132edfbb7ee",
+  "fps": 60.0,
+  "frames": 673,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_Sack_Celeb_Browns_Generic_Sack__P01",
+  "file": "PostPlay_NonBC_Sack_Celeb_Browns_Generic_Sack__P01",
+  "clip_key": "ce61644dcd5227b4",
+  "layer_key": "5672c480bc487c84",
+  "fps": 60.0,
+  "frames": 455,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_Sack_Celeb_Bucs_Point_Uppercut",
+  "file": "PostPlay_NonBC_Sack_Celeb_Bucs_Point_Uppercut",
+  "clip_key": "f9e8934e14be430c",
+  "layer_key": "b6f8da30d4f72d5e",
+  "fps": 60.0,
+  "frames": 429,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_Sack_Celeb_Cadinals_Clap_Point_at_bicep",
+  "file": "PostPlay_NonBC_Sack_Celeb_Cadinals_Clap_Point_at_bicep",
+  "clip_key": "c6df26cd8b4fd011",
+  "layer_key": "9671d590b7052a1e",
+  "fps": 60.0,
+  "frames": 462,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_Sack_Celeb_Chargers_Arm_Pump__P01",
+  "file": "PostPlay_NonBC_Sack_Celeb_Chargers_Arm_Pump__P01",
+  "clip_key": "11b8282f3ea18f0d",
+  "layer_key": "0956e819d9721245",
+  "fps": 60.0,
+  "frames": 435,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_Sack_Celeb_Chargers_Hand_Wiggle__P01",
+  "file": "PostPlay_NonBC_Sack_Celeb_Chargers_Hand_Wiggle__P01",
+  "clip_key": "9d996809f0383524",
+  "layer_key": "792266fc6ccd6433",
+  "fps": 60.0,
+  "frames": 491,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_Sack_Celeb_Cheifs_Open_Close_Hand_55__P01",
+  "file": "PostPlay_NonBC_Sack_Celeb_Cheifs_Open_Close_Hand_55__P01",
+  "clip_key": "9a3127f6f7d6d363",
+  "layer_key": "5f0253a4f5b191aa",
+  "fps": 60.0,
+  "frames": 473,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_Sack_Celeb_Colts_High_Knees_Flex__P01",
+  "file": "PostPlay_NonBC_Sack_Celeb_Colts_High_Knees_Flex__P01",
+  "clip_key": "777552c8c0a010ba",
+  "layer_key": "4e6ca91946acbcbc",
+  "fps": 60.0,
+  "frames": 467,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_Sack_Celeb_Cowboys_Highstep_Bow_and_Arrow__P01",
+  "file": "PostPlay_NonBC_Sack_Celeb_Cowboys_Highstep_Bow_and_Arrow__P01",
+  "clip_key": "3ff2961ef9739aac",
+  "layer_key": "e27d2c97d53918e1",
+  "fps": 60.0,
+  "frames": 489,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_Sack_Celeb_Dolphins_Kick_Dance__P01",
+  "file": "PostPlay_NonBC_Sack_Celeb_Dolphins_Kick_Dance__P01",
+  "clip_key": "1a9f9ca99d416229",
+  "layer_key": "1937a6c3cefecd5b",
+  "fps": 60.0,
+  "frames": 667,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_Sack_Celeb_Jags_Comb_Hair__P01",
+  "file": "PostPlay_NonBC_Sack_Celeb_Jags_Comb_Hair__P01",
+  "clip_key": "b54ebeb188514ae3",
+  "layer_key": "3c65ad8551d9789b",
+  "fps": 60.0,
+  "frames": 543,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_Sack_Celeb_Jags_Head_Bob_and_Swipe__P01",
+  "file": "PostPlay_NonBC_Sack_Celeb_Jags_Head_Bob_and_Swipe__P01",
+  "clip_key": "ba8aab2ad3501d24",
+  "layer_key": "a6b384a121641984",
+  "fps": 60.0,
+  "frames": 525,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_Sack_Celeb_Jags_Ride_Pony",
+  "file": "PostPlay_NonBC_Sack_Celeb_Jags_Ride_Pony",
+  "clip_key": "73f70db1e7f22f1d",
+  "layer_key": "46f03971accb7601",
+  "fps": 60.0,
+  "frames": 599,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_Sack_Celeb_Jags_Swipe_fall__P01",
+  "file": "PostPlay_NonBC_Sack_Celeb_Jags_Swipe_fall__P01",
+  "clip_key": "f2a1c602e9ecba15",
+  "layer_key": "a412ac46318cb909",
+  "fps": 60.0,
+  "frames": 543,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_Sack_Celeb_Jags_Toss_BaseBall_and_Hit_with_Bat__P01",
+  "file": "PostPlay_NonBC_Sack_Celeb_Jags_Toss_BaseBall_and_Hit_with_Bat__P01",
+  "clip_key": "b5304ae60d9ba1ec",
+  "layer_key": "8d61884f61813e2a",
+  "fps": 60.0,
+  "frames": 593,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_Sack_Celeb_Jets_Airplane_Point2Sky__P01",
+  "file": "PostPlay_NonBC_Sack_Celeb_Jets_Airplane_Point2Sky__P01",
+  "clip_key": "ff83b52f6419ee66",
+  "layer_key": "7cf86bb7a8808f73",
+  "fps": 60.0,
+  "frames": 473,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_Sack_Celeb_Jets_Pump_Up_Crowd__P01",
+  "file": "PostPlay_NonBC_Sack_Celeb_Jets_Pump_Up_Crowd__P01",
+  "clip_key": "0b80fce3dd8b603b",
+  "layer_key": "72f89e512630a927",
+  "fps": 60.0,
+  "frames": 507,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_Sack_Celeb_None_Fishing_Drink__P01",
+  "file": "PostPlay_NonBC_Sack_Celeb_None_Fishing_Drink__P01",
+  "clip_key": "fa12c1e0e6496ec2",
+  "layer_key": "5865de5337c27b56",
+  "fps": 60.0,
+  "frames": 737,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_Sack_Celeb_Packers_Arm_Flex_and_Shake_Fired_Up__P01",
+  "file": "PostPlay_NonBC_Sack_Celeb_Packers_Arm_Flex_and_Shake_Fired_Up__P01",
+  "clip_key": "25051c963ebfa44b",
+  "layer_key": "ddf3eee25d1d1e6b",
+  "fps": 60.0,
+  "frames": 467,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_Sack_Celeb_Packers_Make_it_Rain__P01",
+  "file": "PostPlay_NonBC_Sack_Celeb_Packers_Make_it_Rain__P01",
+  "clip_key": "02313c30241b8d4d",
+  "layer_key": "328431269b642e91",
+  "fps": 60.0,
+  "frames": 519,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_Sack_Celeb_Panthers_Omega__P01",
+  "file": "PostPlay_NonBC_Sack_Celeb_Panthers_Omega__P01",
+  "clip_key": "a9d504217b1e2b65",
+  "layer_key": "5066d2ca10fe3531",
+  "fps": 60.0,
+  "frames": 667,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_Sack_Celeb_Patrioits_Wiggle__P01",
+  "file": "PostPlay_NonBC_Sack_Celeb_Patrioits_Wiggle__P01",
+  "clip_key": "450f39446163c749",
+  "layer_key": "2d212b065b755c04",
+  "fps": 60.0,
+  "frames": 443,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_Sack_Celeb_Raiders_Stand_arms_folded",
+  "file": "PostPlay_NonBC_Sack_Celeb_Raiders_Stand_arms_folded",
+  "clip_key": "64fcf64aa2ab1d1f",
+  "layer_key": "c6c232124a820a5b",
+  "fps": 60.0,
+  "frames": 527,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_Sack_Celeb_Rams_Bow__P01",
+  "file": "PostPlay_NonBC_Sack_Celeb_Rams_Bow__P01",
+  "clip_key": "a4fd51c5f8d4df6a",
+  "layer_key": "709bd9cae2b8d06b",
+  "fps": 60.0,
+  "frames": 511,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_Sack_Celeb_Rams_Helmet_Slap_and_Punch__P01",
+  "file": "PostPlay_NonBC_Sack_Celeb_Rams_Helmet_Slap_and_Punch__P01",
+  "clip_key": "cf470be02464acc8",
+  "layer_key": "5fb189c4c57640ae",
+  "fps": 60.0,
+  "frames": 415,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_Sack_Celeb_Ravens_Flex__P01",
+  "file": "PostPlay_NonBC_Sack_Celeb_Ravens_Flex__P01",
+  "clip_key": "437c4068edcf47fd",
+  "layer_key": "18b34089031cd274",
+  "fps": 60.0,
+  "frames": 377,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_Sack_Celeb_Redskins_Fired_up_pound_ground__P01",
+  "file": "PostPlay_NonBC_Sack_Celeb_Redskins_Fired_up_pound_ground__P01",
+  "clip_key": "427506c392812ca3",
+  "layer_key": "e70b2cc099b32cf6",
+  "fps": 60.0,
+  "frames": 361,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_Sack_Celeb_Redskins_Pound_Ground__P01",
+  "file": "PostPlay_NonBC_Sack_Celeb_Redskins_Pound_Ground__P01",
+  "clip_key": "74b24da96b198913",
+  "layer_key": "6290a076900c65e3",
+  "fps": 60.0,
+  "frames": 365,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_Sack_Celeb_Saints_Kick__P01",
+  "file": "PostPlay_NonBC_Sack_Celeb_Saints_Kick__P01",
+  "clip_key": "3e51b6a6cca587cf",
+  "layer_key": "7c52f008777fea64",
+  "fps": 60.0,
+  "frames": 439,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_Sack_Celeb_Saints_Levels__P01",
+  "file": "PostPlay_NonBC_Sack_Celeb_Saints_Levels__P01",
+  "clip_key": "ef37f951206f1c67",
+  "layer_key": "ffab7ecba6a26679",
+  "fps": 60.0,
+  "frames": 469,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_Sack_Celeb_Seahawks_Arm_Pump_and_Flex__P01",
+  "file": "PostPlay_NonBC_Sack_Celeb_Seahawks_Arm_Pump_and_Flex__P01",
+  "clip_key": "8ff2c80f263a3a9b",
+  "layer_key": "c06cd2f5970c6892",
+  "fps": 60.0,
+  "frames": 583,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_Sack_Celeb_Steelers_Arms_Wide__P01",
+  "file": "PostPlay_NonBC_Sack_Celeb_Steelers_Arms_Wide__P01",
+  "clip_key": "5d322504e5d16645",
+  "layer_key": "5405ec392ef20901",
+  "fps": 60.0,
+  "frames": 377,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_Sack_Celeb_Steelers_Flex_Break_Over_Knee__P01",
+  "file": "PostPlay_NonBC_Sack_Celeb_Steelers_Flex_Break_Over_Knee__P01",
+  "clip_key": "5be6a86878f05f1a",
+  "layer_key": "e464341d35680ea8",
+  "fps": 60.0,
+  "frames": 475,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_Sack_Celeb_Texans_Arm_Wave_and_Flex__P01",
+  "file": "PostPlay_NonBC_Sack_Celeb_Texans_Arm_Wave_and_Flex__P01",
+  "clip_key": "f8386d2cce8362fb",
+  "layer_key": "6ac5e8189d7c91dc",
+  "fps": 60.0,
+  "frames": 445,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_Sack_Celeb_Titans_Pray_and_Point_to_Sky__P01",
+  "file": "PostPlay_NonBC_Sack_Celeb_Titans_Pray_and_Point_to_Sky__P01",
+  "clip_key": "25e123e519551916",
+  "layer_key": "38b0652630d4119a",
+  "fps": 60.0,
+  "frames": 525,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_Sack_Celeb_Vikings_Leg_Slap_Dance__P01",
+  "file": "PostPlay_NonBC_Sack_Celeb_Vikings_Leg_Slap_Dance__P01",
+  "clip_key": "456e9d4c08aa94e7",
+  "layer_key": "a30fd6f475bd8d3b",
+  "fps": 60.0,
+  "frames": 553,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_NonBC_TD_Celeb_Point_to_sky_spike_v01__P01",
+  "file": "PostPlay_NonBC_TD_Celeb_Point_to_sky_spike_v01__P01",
+  "clip_key": "6ecbc424a2de9244",
+  "layer_key": "04cacd90eadc2c5d",
+  "fps": 60.0,
+  "frames": 250,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_RallyIdle_BC_WaveOver_180_V2__P01",
+  "file": "PostPlay_RallyIdle_BC_WaveOver_180_V2__P01",
+  "clip_key": "651ca8aa952a42d2",
+  "layer_key": "8e42446daf364b5b",
+  "fps": 60.0,
+  "frames": 526,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_RallyIdle_BC_WaveOver_180_V3__P01",
+  "file": "PostPlay_RallyIdle_BC_WaveOver_180_V3__P01",
+  "clip_key": "769bb7b1c973bea5",
+  "layer_key": "37090aa641ae9c52",
+  "fps": 60.0,
+  "frames": 688,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_RallyIdle_BC_WaveOver_180__P01",
+  "file": "PostPlay_RallyIdle_BC_WaveOver_180__P01",
+  "clip_key": "7f3219749418edc7",
+  "layer_key": "75f109adbf3d9a21",
+  "fps": 60.0,
+  "frames": 457,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_RallyIdle_BC_WaveOver_FWD_ArmsOpen_V2__P01",
+  "file": "PostPlay_RallyIdle_BC_WaveOver_FWD_ArmsOpen_V2__P01",
+  "clip_key": "1d5509eb05ca8577",
+  "layer_key": "0e150a6a702bf662",
+  "fps": 60.0,
+  "frames": 688,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_RallyIdle_BC_WaveOver_FWD_ArmsOpen__P01",
+  "file": "PostPlay_RallyIdle_BC_WaveOver_FWD_ArmsOpen__P01",
+  "clip_key": "b27887cb028edc39",
+  "layer_key": "3cb053416280fef7",
+  "fps": 60.0,
+  "frames": 566,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_RallyIdle_BC_WaveOver_FWD_V2__P01",
+  "file": "PostPlay_RallyIdle_BC_WaveOver_FWD_V2__P01",
+  "clip_key": "af1bd5555fda5976",
+  "layer_key": "78f0bcd7f54e8d50",
+  "fps": 60.0,
+  "frames": 636,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_RallyIdle_BC_WaveOver_FWD__P01",
+  "file": "PostPlay_RallyIdle_BC_WaveOver_FWD__P01",
+  "clip_key": "2469500c3b859faa",
+  "layer_key": "11071aabca4b25e2",
+  "fps": 60.0,
+  "frames": 363,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_RallyIdle_BC_WaveOver_Left_135__P01",
+  "file": "PostPlay_RallyIdle_BC_WaveOver_Left_135__P01",
+  "clip_key": "bbbd987fda829671",
+  "layer_key": "95574e34d39bffb7",
+  "fps": 60.0,
+  "frames": 467,
+  "additive": false
+ },
+ {
+  "name": "PostPlay_RallyIdle_BC_WaveOver_Left_45__P01",
+  "file": "PostPlay_RallyIdle_BC_WaveOver_Left_45__P01",
+  "clip_key": "a8d87cf006fa4d06",
+  "layer_key": "5b5672d6796d9128",
+  "fps": 60.0,
+  "frames": 363,
+  "additive": false
+ }
+]

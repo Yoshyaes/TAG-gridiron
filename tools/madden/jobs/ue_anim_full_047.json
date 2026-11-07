@@ -1,0 +1,242 @@
+[
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c047/PostPlay_Group_TD_Celeb_ABrown_Old_School_Dance_Pepsi_1Man3__P04.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C047",
+  "name": "A_PostPlay_Group_TD_Celeb_ABrown_Old_School_Dance_Pepsi_1Man3__P04",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c047/PostPlay_Group_TD_Celeb_Baseball_Eagles_1Man8__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C047",
+  "name": "A_PostPlay_Group_TD_Celeb_Baseball_Eagles_1Man8__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c047/PostPlay_Group_TD_Celeb_Baseball_Eagles_1Man8__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C047",
+  "name": "A_PostPlay_Group_TD_Celeb_Baseball_Eagles_1Man8__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c047/PostPlay_Group_TD_Celeb_Baseball_Eagles_1Man8__P03.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C047",
+  "name": "A_PostPlay_Group_TD_Celeb_Baseball_Eagles_1Man8__P03",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c047/PostPlay_Group_TD_Celeb_Baseball_Eagles_1Man8__P04.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C047",
+  "name": "A_PostPlay_Group_TD_Celeb_Baseball_Eagles_1Man8__P04",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c047/PostPlay_Group_TD_Celeb_Baseball_Eagles_1Man8__P05.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C047",
+  "name": "A_PostPlay_Group_TD_Celeb_Baseball_Eagles_1Man8__P05",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c047/PostPlay_Group_TD_Celeb_Baseball_Eagles_1Man8__P06.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C047",
+  "name": "A_PostPlay_Group_TD_Celeb_Baseball_Eagles_1Man8__P06",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c047/PostPlay_Group_TD_Celeb_Baseball_Eagles_1Man8__P07.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C047",
+  "name": "A_PostPlay_Group_TD_Celeb_Baseball_Eagles_1Man8__P07",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c047/PostPlay_Group_TD_Celeb_Baseball_Eagles_1Man8__P08.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C047",
+  "name": "A_PostPlay_Group_TD_Celeb_Baseball_Eagles_1Man8__P08",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c047/PostPlay_Group_TD_Celeb_Baseball_Eagles_1Man8__P09.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C047",
+  "name": "A_PostPlay_Group_TD_Celeb_Baseball_Eagles_1Man8__P09",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c047/PostPlay_Group_TD_Celeb_Bengals_Dalton_B_La_Fell_Dance_1man0__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C047",
+  "name": "A_PostPlay_Group_TD_Celeb_Bengals_Dalton_B_La_Fell_Dance_1man0__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c047/PostPlay_Group_TD_Celeb_Bills_Zay_Jone_Star_Wars_Lightsaber_Force_Choke_2man0__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C047",
+  "name": "A_PostPlay_Group_TD_Celeb_Bills_Zay_Jone_Star_Wars_Lightsaber_Force_Choke_2man0__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c047/PostPlay_Group_TD_Celeb_Bills_Zay_Jone_Star_Wars_Lightsaber_Force_Choke_2man0__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C047",
+  "name": "A_PostPlay_Group_TD_Celeb_Bills_Zay_Jone_Star_Wars_Lightsaber_Force_Choke_2man0__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c047/PostPlay_Group_TD_Celeb_Bobsled_Packers_4Man5__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C047",
+  "name": "A_PostPlay_Group_TD_Celeb_Bobsled_Packers_4Man5__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c047/PostPlay_Group_TD_Celeb_Bobsled_Packers_4Man5__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C047",
+  "name": "A_PostPlay_Group_TD_Celeb_Bobsled_Packers_4Man5__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c047/PostPlay_Group_TD_Celeb_Bobsled_Packers_4Man5__P03.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C047",
+  "name": "A_PostPlay_Group_TD_Celeb_Bobsled_Packers_4Man5__P03",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c047/PostPlay_Group_TD_Celeb_Bobsled_Packers_4Man5__P04.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C047",
+  "name": "A_PostPlay_Group_TD_Celeb_Bobsled_Packers_4Man5__P04",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c047/PostPlay_Group_TD_Celeb_Bobsled_Packers_4Man5__P05.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C047",
+  "name": "A_PostPlay_Group_TD_Celeb_Bobsled_Packers_4Man5__P05",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c047/PostPlay_Group_TD_Celeb_Bobsled_Packers_4Man5__P06.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C047",
+  "name": "A_PostPlay_Group_TD_Celeb_Bobsled_Packers_4Man5__P06",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c047/PostPlay_Group_TD_Celeb_Bobsled_Packers_4Man5__P07.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C047",
+  "name": "A_PostPlay_Group_TD_Celeb_Bobsled_Packers_4Man5__P07",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c047/PostPlay_Group_TD_Celeb_Bobsled_Packers_4Man5__P08.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C047",
+  "name": "A_PostPlay_Group_TD_Celeb_Bobsled_Packers_4Man5__P08",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c047/PostPlay_Group_TD_Celeb_Bobsled_Packers_4Man5__P09.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C047",
+  "name": "A_PostPlay_Group_TD_Celeb_Bobsled_Packers_4Man5__P09",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c047/PostPlay_Group_TD_Celeb_Cardinals_Pull_on_Mask_2man4__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C047",
+  "name": "A_PostPlay_Group_TD_Celeb_Cardinals_Pull_on_Mask_2man4__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c047/PostPlay_Group_TD_Celeb_Cardinals_Pull_on_Mask_2man4__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C047",
+  "name": "A_PostPlay_Group_TD_Celeb_Cardinals_Pull_on_Mask_2man4__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c047/PostPlay_Group_TD_Celeb_Cardinals_Pull_on_Mask_2man4__P03.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C047",
+  "name": "A_PostPlay_Group_TD_Celeb_Cardinals_Pull_on_Mask_2man4__P03",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c047/PostPlay_Group_TD_Celeb_Cardinals_Pull_on_Mask_2man4__P04.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C047",
+  "name": "A_PostPlay_Group_TD_Celeb_Cardinals_Pull_on_Mask_2man4__P04",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c047/PostPlay_Group_TD_Celeb_Cardinals_Pull_on_Mask_2man4__P05.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C047",
+  "name": "A_PostPlay_Group_TD_Celeb_Cardinals_Pull_on_Mask_2man4__P05",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c047/PostPlay_Group_TD_Celeb_Cardinals_Pull_on_Mask_2man4__P06.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C047",
+  "name": "A_PostPlay_Group_TD_Celeb_Cardinals_Pull_on_Mask_2man4__P06",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c047/PostPlay_Group_TD_Celeb_Chiefs_Dance_1Man3__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C047",
+  "name": "A_PostPlay_Group_TD_Celeb_Chiefs_Dance_1Man3__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c047/PostPlay_Group_TD_Celeb_Chiefs_Dance_1Man3__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C047",
+  "name": "A_PostPlay_Group_TD_Celeb_Chiefs_Dance_1Man3__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ }
+]

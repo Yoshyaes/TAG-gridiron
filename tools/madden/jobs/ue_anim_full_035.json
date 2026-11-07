@@ -1,0 +1,2778 @@
+[
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_BC_SquaredUp_D3_Jog__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_BC_SquaredUp_D3_Jog__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_BC_SquaredUp_D3_Run__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_BC_SquaredUp_D3_Run__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_BC_SquaredUp_D3_Walk__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_BC_SquaredUp_D3_Walk__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_BC_SquaredUp_D4_Jog__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_BC_SquaredUp_D4_Jog__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_BC_SquaredUp_D4_Run__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_BC_SquaredUp_D4_Run__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_BC_SquaredUp_D4_Sprint__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_BC_SquaredUp_D4_Sprint__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_BC_SquaredUp_D4_Walk__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_BC_SquaredUp_D4_Walk__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_BC_SquaredUp_D6_Jog__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_BC_SquaredUp_D6_Jog__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_BC_SquaredUp_D6_Run__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_BC_SquaredUp_D6_Run__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_BC_SquaredUp_D6_Sprint__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_BC_SquaredUp_D6_Sprint__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_BC_SquaredUp_D6_Walk__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_BC_SquaredUp_D6_Walk__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_BC_SquaredUp_D7_Jog__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_BC_SquaredUp_D7_Jog__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_BC_SquaredUp_D7_Run__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_BC_SquaredUp_D7_Run__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_BC_SquaredUp_D7_Walk__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_BC_SquaredUp_D7_Walk__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_BC_Walk_0__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_BC_Walk_0__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_BC_Walk_135__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_BC_Walk_135__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_BC_Walk_180__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_BC_Walk_180__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_BC_Walk_225__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_BC_Walk_225__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_BC_Walk_270__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_BC_Walk_270__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_BC_Walk_315__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_BC_Walk_315__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_BC_Walk_45__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_BC_Walk_45__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_BC_Walk_90__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_BC_Walk_90__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_BC_Walk_D1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_BC_Walk_D1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_BIGMAN_NonBC_RUN_D2_s40__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_BIGMAN_NonBC_RUN_D2_s40__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_BIGMAN_NonBC_RUN_D2_s99__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_BIGMAN_NonBC_RUN_D2_s99__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_BIGMAN_NonBC_RUN_D5_s40__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_BIGMAN_NonBC_RUN_D5_s40__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_BIGMAN_NonBC_RUN_D5_s99__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_BIGMAN_NonBC_RUN_D5_s99__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_BIGMAN_NonBC_SPRINT_D1_s50__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_BIGMAN_NonBC_SPRINT_D1_s50__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_BIGMAN_NonBC_SPRINT_D1_s99__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_BIGMAN_NonBC_SPRINT_D1_s99__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_BIGMAN_NonBC_SPRINT_D2_s99__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_BIGMAN_NonBC_SPRINT_D2_s99__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_BIGMAN_NonBC_SPRINT_D3_s99__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_BIGMAN_NonBC_SPRINT_D3_s99__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_Dline_FastJog_D3__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_Dline_FastJog_D3__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_Dline_Jog_D3__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_Dline_Jog_D3__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_LB_Idle_v4__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_LB_Idle_v4__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_LB_Jog_D3_Shuffle_MLB__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_LB_Jog_D3_Shuffle_MLB__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_LB_Jog_D7_Shuffle_MLB__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_LB_Jog_D7_Shuffle_MLB__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_LB_Med_Jog_D1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_LB_Med_Jog_D1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_LB_Med_Jog_D6__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_LB_Med_Jog_D6__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_LB_Med_Jog_D7__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_LB_Med_Jog_D7__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_LB_Med_Run_s40_D1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_LB_Med_Run_s40_D1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_LB_Med_Run_s40_D3__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_LB_Med_Run_s40_D3__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_LB_Med_Run_s40_D4__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_LB_Med_Run_s40_D4__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_LB_Med_Run_s40_D5__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_LB_Med_Run_s40_D5__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_LB_Med_Run_s99_D1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_LB_Med_Run_s99_D1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_LB_Med_Run_s99_D4__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_LB_Med_Run_s99_D4__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_LB_Med_Run_s99_D5__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_LB_Med_Run_s99_D5__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_LB_Med_Run_s99_D7__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_LB_Med_Run_s99_D7__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_LB_Med_Stand__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_LB_Med_Stand__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_LB_Run_D2__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_LB_Run_D2__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_LB_Run_D2_v2__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_LB_Run_D2_v2__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_LB_Run_D3__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_LB_Run_D3__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_LB_Run_D3_slow__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_LB_Run_D3_slow__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_LB_Run_D4_Slow__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_LB_Run_D4_Slow__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_LB_Run_D6__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_LB_Run_D6__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_LB_Run_D7__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_LB_Run_D7__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_LB_Run_D7_slow__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_LB_Run_D7_slow__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_LB_Sprint_D4__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_LB_Sprint_D4__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_LB_Sprint_D6__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_LB_Sprint_D6__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_LB_Walk_D1_Bounce__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_LB_Walk_D1_Bounce__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_LB_Walk_D3_Bounce__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_LB_Walk_D3_Bounce__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_LB_Walk_D3_Shuffle_MLB__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_LB_Walk_D3_Shuffle_MLB__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_LB_Walk_D4_Bounce_158__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_LB_Walk_D4_Bounce_158__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_LB_Walk_D4_Bounce__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_LB_Walk_D4_Bounce__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_LB_Walk_D5_Shuffle__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_LB_Walk_D5_Shuffle__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_LB_Walk_D6_Bounce_158__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_LB_Walk_D6_Bounce_158__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_LB_Walk_D6_Bounce__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_LB_Walk_D6_Bounce__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_LB_Walk_D7_Bounce__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_LB_Walk_D7_Bounce__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_LB_Walk_D7_Shuffle_MLB__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_LB_Walk_D7_Shuffle_MLB__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_LB_Walk_D8_Bounce__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_LB_Walk_D8_Bounce__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_LocoLayer_Celebrate__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_LocoLayer_Celebrate__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_LocoLayer_HandsUp__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_LocoLayer_HandsUp__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_Loco_Heavy_Jog_LeanFwd_D1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_Loco_Heavy_Jog_LeanFwd_D1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_Loco_Heavy_Jog_LeanFwd_D2__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_Loco_Heavy_Jog_LeanFwd_D2__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_Loco_Heavy_Run_Accl_D2__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_Loco_Heavy_Run_Accl_D2__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_Loco_Heavy_Run_Accl__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_Loco_Heavy_Run_Accl__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_Loco_QB_Run_ShortStride__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_Loco_QB_Run_ShortStride__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_Loco_QB_Scramble_Jog__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_Loco_QB_Scramble_Jog__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_Loco_Run_Average__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_Loco_Run_Average__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_Loco_Sprint_Normal__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_Loco_Sprint_Normal__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_Loco_Standard_Sprint_Burn__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_Loco_Standard_Sprint_Burn__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_15_Jog_Loop_D1_Neutral_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_15_Jog_Loop_D1_Neutral_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Agile_Jog_158__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Agile_Jog_158__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Agile_Jog_D1_BLEND__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Agile_Jog_D1_BLEND__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Agile_MC_158_MaxSpeed__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Agile_MC_158_MaxSpeed__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Agile_MC_Jog_D1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Agile_MC_Jog_D1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Agile_MC_Jog_D2__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Agile_MC_Jog_D2__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Agile_MC_Jog_D3__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Agile_MC_Jog_D3__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Agile_MC_Run_D4__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Agile_MC_Run_D4__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Agile_MC_Run_D5__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Agile_MC_Run_D5__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Agile_MC_ShortStride_Sprint_D1_s70__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Agile_MC_ShortStride_Sprint_D1_s70__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Agile_MC_Sprint_D1_s70__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Agile_MC_Sprint_D1_s70__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Agile_MC_Sprint_D2__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Agile_MC_Sprint_D2__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Agile_MC_Sprint_D2_s99__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Agile_MC_Sprint_D2_s99__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Agile_MC_Sprint_D3__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Agile_MC_Sprint_D3__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Agile_MC_Sprint_D3_s70__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Agile_MC_Sprint_D3_s70__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Agile_MC_Sprint_D3_s99__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Agile_MC_Sprint_D3_s99__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Agile_MC_Sprint_D4__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Agile_MC_Sprint_D4__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Agile_Run_158__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Agile_Run_158__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Agile_Run_D5_BLEND__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Agile_Run_D5_BLEND__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Agile_Slow_Jog_D4__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Agile_Slow_Jog_D4__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Agile_Slow_Walk_158__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Agile_Slow_Walk_158__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Agile_Slow_Walk_D4__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Agile_Slow_Walk_D4__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Agile_Sprint_135__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Agile_Sprint_135__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Agile_Sprint_158__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Agile_Sprint_158__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Agile_Sprint_D3_s70_BLEND__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Agile_Sprint_D3_s70_BLEND__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Agile_Sprint_D5_BLEND__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Agile_Sprint_D5_BLEND__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_BigGuy_MC_Sprint_D1_s50__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_BigGuy_MC_Sprint_D1_s50__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_BigGuy_MC_Sprint_D1_s99__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_BigGuy_MC_Sprint_D1_s99__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Both_ArmsUp_Jog_D1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Both_ArmsUp_Jog_D1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Both_ArmsUp_Sprint_D1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Both_ArmsUp_Sprint_D1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Both_ArmsUp_Sprint_s99_D1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Both_ArmsUp_Sprint_s99_D1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Bruiser_MC_Run_D5__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Bruiser_MC_Run_D5__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Bruiser_MC_Sprint_D1_s50__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Bruiser_MC_Sprint_D1_s50__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Bruiser_MC_Sprint_D2_s70__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Bruiser_MC_Sprint_D2_s70__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Bruiser_MC_Sprint_D2_s99__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Bruiser_MC_Sprint_D2_s99__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Bruiser_MC_Sprint_D3_s99__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Bruiser_MC_Sprint_D3_s99__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Bruiser_MC_Sprint_D5__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Bruiser_MC_Sprint_D5__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Crouch_Jog_158__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Crouch_Jog_158__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Crouch_MC_Jog_D5__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Crouch_MC_Jog_D5__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Crouch_MC_Run_D1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Crouch_MC_Run_D1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Crouch_MC_Run_D2__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Crouch_MC_Run_D2__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Crouch_MC_Run_D2_s99__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Crouch_MC_Run_D2_s99__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Crouch_MC_Run_D3_s99__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Crouch_MC_Run_D3_s99__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Crouch_MC_Run_D5__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Crouch_MC_Run_D5__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Crouch_MC_Sprint_D2_s99__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Crouch_MC_Sprint_D2_s99__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Crouch_MC_Sprint_D3_s99__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Crouch_MC_Sprint_D3_s99__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Crouch_MC_Sprint_D5__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Crouch_MC_Sprint_D5__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Crouch_MC_Walk_D3__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Crouch_MC_Walk_D3__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Crouch_MC_Walk_D4__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Crouch_MC_Walk_D4__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Crouch_Run_158__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Crouch_Run_158__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Crouch_Sprint_158__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Crouch_Sprint_158__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Fatigued_MC_Jog_D1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Fatigued_MC_Jog_D1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Fatigued_MC_Jog_D2__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Fatigued_MC_Jog_D2__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Fatigued_MC_Jog_D3__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Fatigued_MC_Jog_D3__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Fatigued_MC_Jog_D4__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Fatigued_MC_Jog_D4__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Fatigued_MC_Run_D1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Fatigued_MC_Run_D1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Fatigued_MC_Run_D2__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Fatigued_MC_Run_D2__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Fatigued_MC_Run_D3__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Fatigued_MC_Run_D3__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Fatigued_MC_Run_D4__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Fatigued_MC_Run_D4__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Fatigued_MC_Sprint_D1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Fatigued_MC_Sprint_D1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Fatigued_MC_Sprint_D2__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Fatigued_MC_Sprint_D2__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Fatigued_MC_Sprint_D3__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Fatigued_MC_Sprint_D3__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Fatigued_MC_Sprint_D4__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Fatigued_MC_Sprint_D4__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_HitPile_MC_Run_D1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_HitPile_MC_Run_D1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_HitPile_MC_Sprint_D1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_HitPile_MC_Sprint_D1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Idle_Crouched__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Idle_Crouched__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Jog_D1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Jog_D1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Jog_D5__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Jog_D5__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 24.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_KickReturn_Idle__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_KickReturn_Idle__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_KickReturn_Jog_D1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_KickReturn_Jog_D1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_KickReturn_Jog_D2__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_KickReturn_Jog_D2__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_KickReturn_Jog_D3__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_KickReturn_Jog_D3__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_KickReturn_Jog_D4__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_KickReturn_Jog_D4__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_KickReturn_Jog_D5__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_KickReturn_Jog_D5__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_KickReturn_Run_D2__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_KickReturn_Run_D2__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_KickReturn_Run_D3__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_KickReturn_Run_D3__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_KickReturn_Run_D5__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_KickReturn_Run_D5__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_KickReturn_Walk_D1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_KickReturn_Walk_D1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_KickReturn_Walk_D2__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_KickReturn_Walk_D2__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_KickReturn_Walk_D3__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_KickReturn_Walk_D3__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_KickReturn_Walk_D4__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_KickReturn_Walk_D4__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_KickReturn_Walk_D5__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_KickReturn_Walk_D5__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_PrePlay_DB_Jog_D1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_PrePlay_DB_Jog_D1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_PrePlay_DB_Jog_D2__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_PrePlay_DB_Jog_D2__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_PrePlay_DB_Jog_D3__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_PrePlay_DB_Jog_D3__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_PrePlay_DB_Jog_D4__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_PrePlay_DB_Jog_D4__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_PrePlay_DB_Jog_D5__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_PrePlay_DB_Jog_D5__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_PrePlay_DB_Run_D3__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_PrePlay_DB_Run_D3__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_PrePlay_DB_Walk_D1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_PrePlay_DB_Walk_D1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_PrePlay_DB_Walk_D2__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_PrePlay_DB_Walk_D2__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_PrePlay_DB_Walk_D3__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_PrePlay_DB_Walk_D3__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_PrePlay_DB_Walk_D4__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_PrePlay_DB_Walk_D4__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_PrePlay_DB_Walk_D5__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_PrePlay_DB_Walk_D5__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_PrePlay_Fast_SlightLean_Jog_D3__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_PrePlay_Fast_SlightLean_Jog_D3__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_PrePlay_LB_Jog_D2__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_PrePlay_LB_Jog_D2__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_PrePlay_LB_Jog_D3__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_PrePlay_LB_Jog_D3__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_PrePlay_LB_Walk_D1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_PrePlay_LB_Walk_D1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_PrePlay_LB_Walk_D2__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_PrePlay_LB_Walk_D2__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_PrePlay_LB_Walk_D3__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_PrePlay_LB_Walk_D3__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_PrePlay_Motion_Jog_D3__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_PrePlay_Motion_Jog_D3__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_PrePlay_Motion_Run_D3__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_PrePlay_Motion_Run_D3__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_PrePlay_Motion_Walk_D3__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_PrePlay_Motion_Walk_D3__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_PrePlay_Slow_SlightLean_Jog_D1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_PrePlay_Slow_SlightLean_Jog_D1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_PrePlay_Slow_SlightLean_Jog_D2__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_PrePlay_Slow_SlightLean_Jog_D2__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_PrePlay_Slow_SlightLean_Jog_D3__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_PrePlay_Slow_SlightLean_Jog_D3__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_PrePlay_Slow_SlightLean_Jog_D5__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_PrePlay_Slow_SlightLean_Jog_D5__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_PrePlay_Slow_SlightLean_Walk_D1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_PrePlay_Slow_SlightLean_Walk_D1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_PrePlay_Slow_SlightLean_Walk_D2__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_PrePlay_Slow_SlightLean_Walk_D2__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_PrePlay_Slow_SlightLean_Walk_D3__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_PrePlay_Slow_SlightLean_Walk_D3__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_PrePlay_Slow_SlightLean_Walk_D5__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_PrePlay_Slow_SlightLean_Walk_D5__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Prep4Hitstick_Sprint__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Prep4Hitstick_Sprint__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Prep4Tackle_MC_Run_D1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Prep4Tackle_MC_Run_D1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Prep4Tackle_MC_Sprint_D1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Prep4Tackle_MC_Sprint_D1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Run_D1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Run_D1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Run_D1_s40__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Run_D1_s40__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Run_D1_s99__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Run_D1_s99__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Shuffle_Slow_Walk_D3_135__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Shuffle_Slow_Walk_D3_135__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Sprint_D1_99_MC_Testv2__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Sprint_D1_99_MC_Testv2__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Tackle_Prep_ArmsUp_Jog_D1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Tackle_Prep_ArmsUp_Jog_D1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Upright_MC_Sprint_D4__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Upright_MC_Sprint_D4__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_WR_Idle_HandsUp__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_WR_Idle_HandsUp__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_WR_Jog_158__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_WR_Jog_158__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_WR_Jog_D4_50__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_WR_Jog_D4_50__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_WR_Jog_D4_99__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_WR_Jog_D4_99__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_WR_LookBack_Jog_D1_MC__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_WR_LookBack_Jog_D1_MC__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_WR_LookBack_Jog_s50_D1_MC__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_WR_LookBack_Jog_s50_D1_MC__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_WR_LookBack_Run_D1_MC__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_WR_LookBack_Run_D1_MC__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_WR_LookBack_Sprint_D1_MC__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_WR_LookBack_Sprint_D1_MC__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_WR_LookBack_Sprint_MaxSpeed_D1_MC__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_WR_LookBack_Sprint_MaxSpeed_D1_MC__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_WR_Run_D4_MaxSpd_158__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_WR_Run_D4_MaxSpd_158__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_WR_Run_D4_MaxSpd__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_WR_Run_D4_MaxSpd__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_WR_Slow_SlightLean_Jog_D5__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_WR_Slow_SlightLean_Jog_D5__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_WR_Slow_SlightLean_Walk_D5__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_WR_Slow_SlightLean_Walk_D5__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_WR_Walk_D1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_WR_Walk_D1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_WR_Walk_D2__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_WR_Walk_D2__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_WR_Walk_D4__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_WR_Walk_D4__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC_Walk_D5__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC_Walk_D5__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC__WR_Jog_D3__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC__WR_Jog_D3__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_NonBC__WR_Run_D3__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_NonBC__WR_Run_D3__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_PASSBLOCK_RUN_0__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_PASSBLOCK_RUN_0__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_PASSBLOCK_RUN_135__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_PASSBLOCK_RUN_135__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_PASSBLOCK_RUN_180__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_PASSBLOCK_RUN_180__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_PASSBLOCK_RUN_90__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_PASSBLOCK_RUN_90__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_PASSBLOCK_STAND__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_PASSBLOCK_STAND__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_PASSBLOCK_WALK_0__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_PASSBLOCK_WALK_0__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_PASSBLOCK_WALK_135__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_PASSBLOCK_WALK_135__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_PASSBLOCK_WALK_180__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_PASSBLOCK_WALK_180__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_PASSBLOCK_WALK_90__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_PASSBLOCK_WALK_90__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_PASSBLOCK_WALK_D1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_PASSBLOCK_WALK_D1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_PASSBLOCK_WALK_D3__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_PASSBLOCK_WALK_D3__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_PREHANDOFF_RUN_D1_s50__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_PREHANDOFF_RUN_D1_s50__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_PREHANDOFF_RUN_D1_s99__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_PREHANDOFF_RUN_D1_s99__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_PREHANDOFF_WALK_D1_s50__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_PREHANDOFF_WALK_D1_s50__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_InPocket_BallHigh_Jog_D1_upperbodyrig__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_InPocket_BallHigh_Jog_D1_upperbodyrig__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_InPocket_BallHigh_Walk_D1_UBRig__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_InPocket_BallHigh_Walk_D1_UBRig__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_InPocket_BallHigh_Walk_D1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_InPocket_BallHigh_Walk_D1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_InPocket_BallHigh_Walk_D3__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_InPocket_BallHigh_Walk_D3__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_InPocket_BallHigh_Walk_D55__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_InPocket_BallHigh_Walk_D55__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_InPocket_BallHigh_Walk_D5__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_InPocket_BallHigh_Walk_D5__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_InPocket_BallHigh_Walk_D6__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_InPocket_BallHigh_Walk_D6__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_InPocket_BallHigh_Walk_D7__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_InPocket_BallHigh_Walk_D7__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_InPocket_BallHigh_Walk_D8__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_InPocket_BallHigh_Walk_D8__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_InPocket_BallLow_Idle__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_InPocket_BallLow_Idle__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_InPocket_BallLow_Jog_D1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_InPocket_BallLow_Jog_D1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_InPocket_Jog_D1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_InPocket_Jog_D1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_InPocket_Jog_D2__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_InPocket_Jog_D2__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_InPocket_Jog_D3__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_InPocket_Jog_D3__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_InPocket_Jog_D4__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_InPocket_Jog_D4__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_InPocket_Jog_D55__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_InPocket_Jog_D55__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_InPocket_Jog_D5__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_InPocket_Jog_D5__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_InPocket_Jog_D6__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_InPocket_Jog_D6__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_InPocket_Jog_D7__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_InPocket_Jog_D7__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_InPocket_Jog_D8__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_InPocket_Jog_D8__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_InPocket_Slinger_Idle__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_InPocket_Slinger_Idle__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_InPocket_Slinger_Jog_D1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_InPocket_Slinger_Jog_D1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_InPocket_Stand__P01_NEW.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_InPocket_Stand__P01_NEW",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_InPocket_Walk_D1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_InPocket_Walk_D1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_InPocket_Walk_D2__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_InPocket_Walk_D2__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_InPocket_Walk_D3__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_InPocket_Walk_D3__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_InPocket_Walk_D4__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_InPocket_Walk_D4__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_InPocket_Walk_D55__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_InPocket_Walk_D55__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_InPocket_Walk_D5__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_InPocket_Walk_D5__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_InPocket_Walk_D6__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_InPocket_Walk_D6__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_InPocket_Walk_D7__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_InPocket_Walk_D7__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_InPocket_Walk_D8__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_InPocket_Walk_D8__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_In_Pocket_BallHigh_Idle__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_In_Pocket_BallHigh_Idle__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_Option_Jog_D1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_Option_Jog_D1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_Option_Jog_D2__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_Option_Jog_D2__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_Option_Jog_D3__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_Option_Jog_D3__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_Option_Jog_D5__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_Option_Jog_D5__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_Option_Run_D1_s40__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_Option_Run_D1_s40__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_Option_Run_D1_s70__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_Option_Run_D1_s70__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_Option_Run_D1_s99__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_Option_Run_D1_s99__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_Option_Run_D2__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_Option_Run_D2__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_Option_Run_D3__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_Option_Run_D3__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_Option_Run_D5__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_Option_Run_D5__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_Option_Shuffle_Jog_D4__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_Option_Shuffle_Jog_D4__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_Option_Shuffle_Run_D4__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_Option_Shuffle_Run_D4__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_Option_Shuffle_Sprint_D4__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_Option_Shuffle_Sprint_D4__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_Option_Sprint_D1_s99__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_Option_Sprint_D1_s99__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_Option_Sprint_D2_s99__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_Option_Sprint_D2_s99__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_Option_Sprint_D3_s99__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_Option_Sprint_D3_s99__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_Option_Sprint_D5_s99__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_Option_Sprint_D5_s99__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_Scramble_Jog_D5__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_Scramble_Jog_D5__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_Scramble_Run_D5__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_Scramble_Run_D5__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_Scramble_Sprint_D1_s70__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_Scramble_Sprint_D1_s70__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_QB_Scramble_Sprint_D5_s99__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_QB_Scramble_Sprint_D5_s99__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_Ref_D1_Jog__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_Ref_D1_Jog__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_Ref_D1_Run__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_Ref_D1_Run__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_Ref_D1_Sprint__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_Ref_D1_Sprint__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_Ref_D2_Jog__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_Ref_D2_Jog__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_Ref_D2_Run__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_Ref_D2_Run__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_Ref_D3_Jog__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_Ref_D3_Jog__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_Ref_D3_Run__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_Ref_D3_Run__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_Ref_D4_Run__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_Ref_D4_Run__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_Ref_D4_Sprint__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_Ref_D4_Sprint__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_Ref_D5_Run__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_Ref_D5_Run__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_Ref_D5_Sprint__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_Ref_D5_Sprint__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_TIGHTROPE_LEFT_s40__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_TIGHTROPE_LEFT_s40__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_TIGHTROPE_LEFT_s99__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_TIGHTROPE_LEFT_s99__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_TIGHTROPE_RIGHT_s40__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_TIGHTROPE_RIGHT_s40__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_TIGHTROPE_RIGHT_s99__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_TIGHTROPE_RIGHT_s99__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_motionshuffle_jog_D3__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_motionshuffle_jog_D3__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_motionshuffle_run_D3__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_motionshuffle_run_D3__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_motionshuffle_sprint_D3__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_motionshuffle_sprint_D3__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MG_motionshuffle_walk_D3__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MG_motionshuffle_walk_D3__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 30.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MPCI_Drop_FaceLOS_DefD1_Jump_KarateChopOut_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MPCI_Drop_FaceLOS_DefD1_Jump_KarateChopOut_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MPCI_Drop_FaceLOS_DefD1_Jump_KarateChopOut_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MPCI_Drop_FaceLOS_DefD1_Jump_KarateChopOut_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MPCI_Drop_FaceLOS_DefD2_Jump_KarateChopOut_v2__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MPCI_Drop_FaceLOS_DefD2_Jump_KarateChopOut_v2__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MPCI_Drop_FaceLOS_DefD2_Jump_KarateChopOut_v2__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MPCI_Drop_FaceLOS_DefD2_Jump_KarateChopOut_v2__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MPCI_Drop_FaceLOS_Jump_D1_Tackle_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MPCI_Drop_FaceLOS_Jump_D1_Tackle_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MPCI_Drop_FaceLOS_Jump_D1_Tackle_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MPCI_Drop_FaceLOS_Jump_D1_Tackle_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MPCI_Drop_FaceLOS_Jump_D1_Tackle_v3__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MPCI_Drop_FaceLOS_Jump_D1_Tackle_v3__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MPCI_Drop_FaceLOS_Jump_D1_Tackle_v3__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MPCI_Drop_FaceLOS_Jump_D1_Tackle_v3__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MPCI_Drop_FaceLOS_Jump_D1_Tackle_v4__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MPCI_Drop_FaceLOS_Jump_D1_Tackle_v4__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MPCI_Drop_FaceLOS_Jump_D1_Tackle_v4__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MPCI_Drop_FaceLOS_Jump_D1_Tackle_v4__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MPCI_Drop_FaceLOS_Jump_D1_Tackle_v5__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MPCI_Drop_FaceLOS_Jump_D1_Tackle_v5__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MPCI_Drop_FaceLOS_Jump_D1_Tackle_v5__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MPCI_Drop_FaceLOS_Jump_D1_Tackle_v5__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MPCI_Drop_FaceLOS_Jump_D6_Tackle_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MPCI_Drop_FaceLOS_Jump_D6_Tackle_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MPCI_Drop_FaceLOS_Jump_D6_Tackle_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MPCI_Drop_FaceLOS_Jump_D6_Tackle_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MPCI_Drop_FaceLOS_Jump_D8_Tackle_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MPCI_Drop_FaceLOS_Jump_D8_Tackle_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MPCI_Drop_FaceLOS_Jump_D8_Tackle_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MPCI_Drop_FaceLOS_Jump_D8_Tackle_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MPCI_Drop_FaceLOS_Jump_DefD5_JudoChop_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MPCI_Drop_FaceLOS_Jump_DefD5_JudoChop_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MPCI_Drop_FaceLOS_Jump_DefD5_JudoChop_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MPCI_Drop_FaceLOS_Jump_DefD5_JudoChop_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MPCI_INT_FaceLOS_Jump_OffD2_ForMe_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MPCI_INT_FaceLOS_Jump_OffD2_ForMe_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MPCI_INT_FaceLOS_Jump_OffD2_ForMe_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MPCI_INT_FaceLOS_Jump_OffD2_ForMe_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MPCI_INT_FaceLOS_Jump_OffD2_GiftWrapped_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MPCI_INT_FaceLOS_Jump_OffD2_GiftWrapped_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MPCI_INT_FaceLOS_Jump_OffD2_GiftWrapped_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MPCI_INT_FaceLOS_Jump_OffD2_GiftWrapped_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MPCI_INT_FaceLOS_Jump_OffD2_LateSwat_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MPCI_INT_FaceLOS_Jump_OffD2_LateSwat_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MPCI_INT_FaceLOS_Jump_OffD2_LateSwat_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MPCI_INT_FaceLOS_Jump_OffD2_LateSwat_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MPCI_INT_FaceLOS_Jump_OffD3_LateTackle_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MPCI_INT_FaceLOS_Jump_OffD3_LateTackle_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MPCI_INT_FaceLOS_Jump_OffD3_LateTackle_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MPCI_INT_FaceLOS_Jump_OffD3_LateTackle_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MPCI_INT_FaceLOS_Jump_OffD3_NoSwat_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MPCI_INT_FaceLOS_Jump_OffD3_NoSwat_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MPCI_INT_FaceLOS_Jump_OffD3_NoSwat_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MPCI_INT_FaceLOS_Jump_OffD3_NoSwat_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MPCI_INT_FaceLOS_Jump_OffD4_HardSwat_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MPCI_INT_FaceLOS_Jump_OffD4_HardSwat_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MPCI_INT_FaceLOS_Jump_OffD4_HardSwat_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MPCI_INT_FaceLOS_Jump_OffD4_HardSwat_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MPCI_INT_FaceLOS_Jump_OffD4_TooLate_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MPCI_INT_FaceLOS_Jump_OffD4_TooLate_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MPCI_INT_FaceLOS_Jump_OffD4_TooLate_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MPCI_INT_FaceLOS_Jump_OffD4_TooLate_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MPCI_INT_FaceLOS_Jump_OffD5_BoxedOut_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MPCI_INT_FaceLOS_Jump_OffD5_BoxedOut_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MPCI_INT_FaceLOS_Jump_OffD5_BoxedOut_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MPCI_INT_FaceLOS_Jump_OffD5_BoxedOut_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MPCI_INT_FaceLOS_Jump_OffD5_KarateChop_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MPCI_INT_FaceLOS_Jump_OffD5_KarateChop_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MPCI_INT_FaceLOS_Jump_OffD5_KarateChop_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MPCI_INT_FaceLOS_Jump_OffD5_KarateChop_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MPCI_INT_FaceLOS_Jump_OffD5_LateSwat_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MPCI_INT_FaceLOS_Jump_OffD5_LateSwat_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MPCI_INT_FaceLOS_Jump_OffD5_LateSwat_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MPCI_INT_FaceLOS_Jump_OffD5_LateSwat_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MPCI_INT_FaceLOS_Jump_OffD6_BigHit_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MPCI_INT_FaceLOS_Jump_OffD6_BigHit_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MPCI_INT_FaceLOS_Jump_OffD6_BigHit_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MPCI_INT_FaceLOS_Jump_OffD6_BigHit_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c035/MPCI_INT_FaceLOS_Jump_OffD6_LateTackle_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C035",
+  "name": "A_MPCI_INT_FaceLOS_Jump_OffD6_LateTackle_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ }
+]

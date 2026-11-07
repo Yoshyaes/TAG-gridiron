@@ -1,0 +1,674 @@
+[
+ {
+  "name": "PassBlock_Reach_Brkn_Sack_from_90_D7_v1__P02",
+  "file": "PassBlock_Reach_Brkn_Sack_from_90_D7_v1__P02",
+  "clip_key": "c8f9ad302df57b9a",
+  "layer_key": "d063fdf877cb2a44",
+  "fps": 60.0,
+  "frames": 229
+ },
+ {
+  "name": "PassBlock_Reach_Brkn_Sack_from_90_D7_v1__P03",
+  "file": "PassBlock_Reach_Brkn_Sack_from_90_D7_v1__P03",
+  "clip_key": "e5eb6f5960f8cc4f",
+  "layer_key": "6930d6205e77cdae",
+  "fps": 60.0,
+  "frames": 209
+ },
+ {
+  "name": "PassBlock_Reach_Brkn_Sack_from_90_D7_v2__P01",
+  "file": "PassBlock_Reach_Brkn_Sack_from_90_D7_v2__P01",
+  "clip_key": "91e2908872944e43",
+  "layer_key": "4595a9bf993f461f",
+  "fps": 60.0,
+  "frames": 241
+ },
+ {
+  "name": "PassBlock_Reach_Brkn_Sack_from_90_D7_v2__P02",
+  "file": "PassBlock_Reach_Brkn_Sack_from_90_D7_v2__P02",
+  "clip_key": "f322efea7e4868dd",
+  "layer_key": "10e8249955703dd1",
+  "fps": 60.0,
+  "frames": 241
+ },
+ {
+  "name": "PassBlock_Reach_Brkn_Sack_from_90_D7_v2__P03",
+  "file": "PassBlock_Reach_Brkn_Sack_from_90_D7_v2__P03",
+  "clip_key": "9b0498cb00f75230",
+  "layer_key": "c7c8881aae87dedf",
+  "fps": 60.0,
+  "frames": 241
+ },
+ {
+  "name": "PassBlock_Reach_Brkn_Sack_from_90_D8_v1__P01",
+  "file": "PassBlock_Reach_Brkn_Sack_from_90_D8_v1__P01",
+  "clip_key": "b3f28920ab920785",
+  "layer_key": "135d309fc321da50",
+  "fps": 60.0,
+  "frames": 371
+ },
+ {
+  "name": "PassBlock_Reach_Brkn_Sack_from_90_D8_v1__P02",
+  "file": "PassBlock_Reach_Brkn_Sack_from_90_D8_v1__P02",
+  "clip_key": "6d6066acd9a4889e",
+  "layer_key": "b2114abff80067f8",
+  "fps": 60.0,
+  "frames": 371
+ },
+ {
+  "name": "PassBlock_Reach_Brkn_Sack_from_90_D8_v1__P03",
+  "file": "PassBlock_Reach_Brkn_Sack_from_90_D8_v1__P03",
+  "clip_key": "b7a0070076f26035",
+  "layer_key": "8fc8b175dff358b4",
+  "fps": 60.0,
+  "frames": 371
+ },
+ {
+  "name": "PassBlock_Reach_Brkn_Sack_from_90_D8_v2__P01",
+  "file": "PassBlock_Reach_Brkn_Sack_from_90_D8_v2__P01",
+  "clip_key": "8ddd5431f2da5354",
+  "layer_key": "318271681dbc03d7",
+  "fps": 60.0,
+  "frames": 181
+ },
+ {
+  "name": "PassBlock_Reach_Brkn_Sack_from_90_D8_v2__P02",
+  "file": "PassBlock_Reach_Brkn_Sack_from_90_D8_v2__P02",
+  "clip_key": "46619f12bc212ce8",
+  "layer_key": "d365df93234df979",
+  "fps": 60.0,
+  "frames": 181
+ },
+ {
+  "name": "PassBlock_Reach_Brkn_Sack_from_90_D8_v2__P03",
+  "file": "PassBlock_Reach_Brkn_Sack_from_90_D8_v2__P03",
+  "clip_key": "a5bc4e1ff8894713",
+  "layer_key": "51ab1aaae33e7c0c",
+  "fps": 60.0,
+  "frames": 181
+ },
+ {
+  "name": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D1_v1__P01",
+  "file": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D1_v1__P01",
+  "clip_key": "f95c3632577c08dd",
+  "layer_key": "a52b6fba89fd2c43",
+  "fps": 60.0,
+  "frames": 259
+ },
+ {
+  "name": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D1_v1__P02",
+  "file": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D1_v1__P02",
+  "clip_key": "2a6222970a45c4d1",
+  "layer_key": "8f4950a82c1dad48",
+  "fps": 60.0,
+  "frames": 259
+ },
+ {
+  "name": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D1_v1__P03",
+  "file": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D1_v1__P03",
+  "clip_key": "5dddf940d24727cf",
+  "layer_key": "5af907729f31ed63",
+  "fps": 60.0,
+  "frames": 259
+ },
+ {
+  "name": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D1_v2__P01",
+  "file": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D1_v2__P01",
+  "clip_key": "2f0095a0b14d4530",
+  "layer_key": "b9071a01131d84e0",
+  "fps": 60.0,
+  "frames": 322
+ },
+ {
+  "name": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D1_v2__P02",
+  "file": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D1_v2__P02",
+  "clip_key": "ac6eb41847bbfcb5",
+  "layer_key": "b57ab56d43b831e4",
+  "fps": 60.0,
+  "frames": 322
+ },
+ {
+  "name": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D1_v2__P03",
+  "file": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D1_v2__P03",
+  "clip_key": "6a03ceeb54698184",
+  "layer_key": "dfe6158ade900680",
+  "fps": 60.0,
+  "frames": 322
+ },
+ {
+  "name": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D1_v3__P01",
+  "file": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D1_v3__P01",
+  "clip_key": "a611302a795297fd",
+  "layer_key": "86bb977c199755bb",
+  "fps": 60.0,
+  "frames": 207
+ },
+ {
+  "name": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D1_v3__P02",
+  "file": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D1_v3__P02",
+  "clip_key": "1f6cd1d32bfabf1c",
+  "layer_key": "a552cabd647608c5",
+  "fps": 60.0,
+  "frames": 207
+ },
+ {
+  "name": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D1_v3__P03",
+  "file": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D1_v3__P03",
+  "clip_key": "42334756e1d73f99",
+  "layer_key": "14baf2dc8388fc4b",
+  "fps": 60.0,
+  "frames": 207
+ },
+ {
+  "name": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D1_v4__P01",
+  "file": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D1_v4__P01",
+  "clip_key": "e3b4b6b0d6bb2198",
+  "layer_key": "a33de3c456937e91",
+  "fps": 60.0,
+  "frames": 209
+ },
+ {
+  "name": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D1_v4__P02",
+  "file": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D1_v4__P02",
+  "clip_key": "b2d066c74dbc6b4e",
+  "layer_key": "462f37ccf24d9ce5",
+  "fps": 60.0,
+  "frames": 209
+ },
+ {
+  "name": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D1_v4__P03",
+  "file": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D1_v4__P03",
+  "clip_key": "7e758786b80decd4",
+  "layer_key": "9695e4c2297d810b",
+  "fps": 60.0,
+  "frames": 209
+ },
+ {
+  "name": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D5_v1__P01",
+  "file": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D5_v1__P01",
+  "clip_key": "acb27190d48c95e5",
+  "layer_key": "d26e34d9960a6d1e",
+  "fps": 60.0,
+  "frames": 544
+ },
+ {
+  "name": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D5_v1__P02",
+  "file": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D5_v1__P02",
+  "clip_key": "9a49f1f111932864",
+  "layer_key": "9ca9b621bfdc9334",
+  "fps": 60.0,
+  "frames": 544
+ },
+ {
+  "name": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D5_v1__P03",
+  "file": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D5_v1__P03",
+  "clip_key": "241794339266d2c4",
+  "layer_key": "6a430e62dba973d0",
+  "fps": 60.0,
+  "frames": 544
+ },
+ {
+  "name": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D5_v2__P01",
+  "file": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D5_v2__P01",
+  "clip_key": "355a8c7825c46ffe",
+  "layer_key": "1a23dbf201b9fe8e",
+  "fps": 60.0,
+  "frames": 201
+ },
+ {
+  "name": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D5_v2__P02",
+  "file": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D5_v2__P02",
+  "clip_key": "bb582fd92da0b444",
+  "layer_key": "4052e8d2fddb43ed",
+  "fps": 60.0,
+  "frames": 201
+ },
+ {
+  "name": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D5_v2__P03",
+  "file": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D5_v2__P03",
+  "clip_key": "905d434610f67591",
+  "layer_key": "994d2ebc4b334a84",
+  "fps": 60.0,
+  "frames": 201
+ },
+ {
+  "name": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D5_v3__P01",
+  "file": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D5_v3__P01",
+  "clip_key": "6e480ced91611ee3",
+  "layer_key": "c4550860e8f60c41",
+  "fps": 60.0,
+  "frames": 181
+ },
+ {
+  "name": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D5_v3__P02",
+  "file": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D5_v3__P02",
+  "clip_key": "6b4e3b5153a40e3f",
+  "layer_key": "eb6db48d512ee844",
+  "fps": 60.0,
+  "frames": 181
+ },
+ {
+  "name": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D5_v3__P03",
+  "file": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D5_v3__P03",
+  "clip_key": "5a6f532df7d9b99a",
+  "layer_key": "6b660e1849f353f2",
+  "fps": 60.0,
+  "frames": 181
+ },
+ {
+  "name": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D6_v1__P01",
+  "file": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D6_v1__P01",
+  "clip_key": "ad6dab70527aefce",
+  "layer_key": "499eb6f8fa533846",
+  "fps": 60.0,
+  "frames": 215
+ },
+ {
+  "name": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D6_v1__P02",
+  "file": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D6_v1__P02",
+  "clip_key": "230f65a882d012d7",
+  "layer_key": "019ee799ef53b1c5",
+  "fps": 60.0,
+  "frames": 215
+ },
+ {
+  "name": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D6_v1__P03",
+  "file": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D6_v1__P03",
+  "clip_key": "910c22ea557b0499",
+  "layer_key": "c8841db1e491e969",
+  "fps": 60.0,
+  "frames": 215
+ },
+ {
+  "name": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D6_v2__P01",
+  "file": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D6_v2__P01",
+  "clip_key": "f49f25b4323d2e90",
+  "layer_key": "6c9a27ea45f39c14",
+  "fps": 60.0,
+  "frames": 237
+ },
+ {
+  "name": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D6_v2__P02",
+  "file": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D6_v2__P02",
+  "clip_key": "713bec89ebd4325b",
+  "layer_key": "eb807a74b2902724",
+  "fps": 60.0,
+  "frames": 237
+ },
+ {
+  "name": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D6_v2__P03",
+  "file": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D6_v2__P03",
+  "clip_key": "c4a66cf9485a48f4",
+  "layer_key": "01cb541e4a79e00f",
+  "fps": 60.0,
+  "frames": 237
+ },
+ {
+  "name": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D6_v3__P01",
+  "file": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D6_v3__P01",
+  "clip_key": "94861bc592105ed6",
+  "layer_key": "aa741176dbb4fbae",
+  "fps": 60.0,
+  "frames": 163
+ },
+ {
+  "name": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D6_v3__P02",
+  "file": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D6_v3__P02",
+  "clip_key": "1267927d27fde4cc",
+  "layer_key": "45086bc9c41fd2f9",
+  "fps": 60.0,
+  "frames": 448
+ },
+ {
+  "name": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D6_v3__P03",
+  "file": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D6_v3__P03",
+  "clip_key": "6944580a391ea028",
+  "layer_key": "02c0c4febb73d525",
+  "fps": 60.0,
+  "frames": 334
+ },
+ {
+  "name": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D7_v1__P01",
+  "file": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D7_v1__P01",
+  "clip_key": "2ca8e4b0b6043453",
+  "layer_key": "85a7d3ef6ba03ef6",
+  "fps": 60.0,
+  "frames": 311
+ },
+ {
+  "name": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D7_v1__P02",
+  "file": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D7_v1__P02",
+  "clip_key": "3859eb97a8fb69a7",
+  "layer_key": "b7e7c9eeaf452ad3",
+  "fps": 60.0,
+  "frames": 275
+ },
+ {
+  "name": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D7_v1__P03",
+  "file": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D7_v1__P03",
+  "clip_key": "4f056a66ce9d3780",
+  "layer_key": "7def529126c57b16",
+  "fps": 60.0,
+  "frames": 311
+ },
+ {
+  "name": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D7_v2__P01",
+  "file": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D7_v2__P01",
+  "clip_key": "74b2ced19a270689",
+  "layer_key": "1820f29f760b93c9",
+  "fps": 60.0,
+  "frames": 131
+ },
+ {
+  "name": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D7_v2__P02",
+  "file": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D7_v2__P02",
+  "clip_key": "7c6360a6152e7b37",
+  "layer_key": "2d7efb298d3c0092",
+  "fps": 60.0,
+  "frames": 260
+ },
+ {
+  "name": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D7_v2__P03",
+  "file": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D7_v2__P03",
+  "clip_key": "fe00c0824627c72a",
+  "layer_key": "4bb1c1a853ead1d6",
+  "fps": 60.0,
+  "frames": 240
+ },
+ {
+  "name": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D8_v1__P01",
+  "file": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D8_v1__P01",
+  "clip_key": "415ca74d0d607bc4",
+  "layer_key": "f79c0aafa15417c3",
+  "fps": 60.0,
+  "frames": 269
+ },
+ {
+  "name": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D8_v1__P02",
+  "file": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D8_v1__P02",
+  "clip_key": "c138547dc3d913c6",
+  "layer_key": "2984bf0dfbd69935",
+  "fps": 60.0,
+  "frames": 269
+ },
+ {
+  "name": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D8_v1__P03",
+  "file": "PassBlock_Reach_Brkn_Sack_from_HeadsUp_D8_v1__P03",
+  "clip_key": "cc98eb9b7f8765dd",
+  "layer_key": "fe483d15431cef00",
+  "fps": 60.0,
+  "frames": 269
+ },
+ {
+  "name": "PassBlock_Reach_Sack_from_90_D1_v1__P01",
+  "file": "PassBlock_Reach_Sack_from_90_D1_v1__P01",
+  "clip_key": "eaba49f2d05c5fe0",
+  "layer_key": "4d6b75b300ed9c81",
+  "fps": 60.0,
+  "frames": 599
+ },
+ {
+  "name": "PassBlock_Reach_Sack_from_90_D1_v1__P02",
+  "file": "PassBlock_Reach_Sack_from_90_D1_v1__P02",
+  "clip_key": "9376ce0748496f4d",
+  "layer_key": "f801fa8627a820cf",
+  "fps": 60.0,
+  "frames": 599
+ },
+ {
+  "name": "PassBlock_Reach_Sack_from_90_D1_v1__P03",
+  "file": "PassBlock_Reach_Sack_from_90_D1_v1__P03",
+  "clip_key": "eb243ca945ed5cbc",
+  "layer_key": "2b60fae1f5ef5f20",
+  "fps": 60.0,
+  "frames": 599
+ },
+ {
+  "name": "PassBlock_Reach_Sack_from_90_D1_v2__P01",
+  "file": "PassBlock_Reach_Sack_from_90_D1_v2__P01",
+  "clip_key": "4f4fd84b3faea00b",
+  "layer_key": "506744b2ce5a375e",
+  "fps": 60.0,
+  "frames": 599
+ },
+ {
+  "name": "PassBlock_Reach_Sack_from_90_D1_v2__P02",
+  "file": "PassBlock_Reach_Sack_from_90_D1_v2__P02",
+  "clip_key": "5d13bde4de1422db",
+  "layer_key": "11221b4f6c68c893",
+  "fps": 60.0,
+  "frames": 599
+ },
+ {
+  "name": "PassBlock_Reach_Sack_from_90_D1_v2__P03",
+  "file": "PassBlock_Reach_Sack_from_90_D1_v2__P03",
+  "clip_key": "859e9c423dc0fe42",
+  "layer_key": "23ab18a02d41fa34",
+  "fps": 60.0,
+  "frames": 599
+ },
+ {
+  "name": "PassBlock_Reach_Sack_from_90_D5_v1__P01",
+  "file": "PassBlock_Reach_Sack_from_90_D5_v1__P01",
+  "clip_key": "6b165634df3b59c3",
+  "layer_key": "62dcbe807e4c66c4",
+  "fps": 60.0,
+  "frames": 449
+ },
+ {
+  "name": "PassBlock_Reach_Sack_from_90_D5_v1__P02",
+  "file": "PassBlock_Reach_Sack_from_90_D5_v1__P02",
+  "clip_key": "e3212eedc4026cf9",
+  "layer_key": "8e222add0909ba3e",
+  "fps": 60.0,
+  "frames": 449
+ },
+ {
+  "name": "PassBlock_Reach_Sack_from_90_D5_v1__P03",
+  "file": "PassBlock_Reach_Sack_from_90_D5_v1__P03",
+  "clip_key": "3642442d67b963d6",
+  "layer_key": "afe7003818abcb15",
+  "fps": 60.0,
+  "frames": 449
+ },
+ {
+  "name": "PassBlock_Reach_Sack_from_90_D5_v2__P01",
+  "file": "PassBlock_Reach_Sack_from_90_D5_v2__P01",
+  "clip_key": "17de2d9bdfbd69ae",
+  "layer_key": "e42c20d56a8b65db",
+  "fps": 60.0,
+  "frames": 593
+ },
+ {
+  "name": "PassBlock_Reach_Sack_from_90_D5_v2__P02",
+  "file": "PassBlock_Reach_Sack_from_90_D5_v2__P02",
+  "clip_key": "1637c50790a45361",
+  "layer_key": "fcddccb5b906d7d0",
+  "fps": 60.0,
+  "frames": 593
+ },
+ {
+  "name": "PassBlock_Reach_Sack_from_90_D5_v2__P03",
+  "file": "PassBlock_Reach_Sack_from_90_D5_v2__P03",
+  "clip_key": "41ab08ef5e4e3e49",
+  "layer_key": "0ec10831ce46ca8f",
+  "fps": 60.0,
+  "frames": 593
+ },
+ {
+  "name": "PassBlock_Reach_Sack_from_90_D6_v1__P01",
+  "file": "PassBlock_Reach_Sack_from_90_D6_v1__P01",
+  "clip_key": "5aa908748be445a0",
+  "layer_key": "49e14cd1a7bc66c0",
+  "fps": 60.0,
+  "frames": 421
+ },
+ {
+  "name": "PassBlock_Reach_Sack_from_90_D6_v1__P02",
+  "file": "PassBlock_Reach_Sack_from_90_D6_v1__P02",
+  "clip_key": "5ecca62949160cfd",
+  "layer_key": "e7de1d8f7d2fcd76",
+  "fps": 60.0,
+  "frames": 421
+ },
+ {
+  "name": "PassBlock_Reach_Sack_from_90_D6_v1__P03",
+  "file": "PassBlock_Reach_Sack_from_90_D6_v1__P03",
+  "clip_key": "bb16609b979b4cd3",
+  "layer_key": "93307061db58ef56",
+  "fps": 60.0,
+  "frames": 421
+ },
+ {
+  "name": "PassBlock_Reach_Sack_from_90_D6_v2__P01",
+  "file": "PassBlock_Reach_Sack_from_90_D6_v2__P01",
+  "clip_key": "4b331e7b6295a40f",
+  "layer_key": "d4f0a5eb48bbb75d",
+  "fps": 60.0,
+  "frames": 375
+ },
+ {
+  "name": "PassBlock_Reach_Sack_from_90_D6_v2__P02",
+  "file": "PassBlock_Reach_Sack_from_90_D6_v2__P02",
+  "clip_key": "cf7c2394cdde86d4",
+  "layer_key": "f4ef31713a97c4d5",
+  "fps": 60.0,
+  "frames": 375
+ },
+ {
+  "name": "PassBlock_Reach_Sack_from_90_D6_v2__P03",
+  "file": "PassBlock_Reach_Sack_from_90_D6_v2__P03",
+  "clip_key": "be85b6e09be9e725",
+  "layer_key": "e5a625ec83df25bb",
+  "fps": 60.0,
+  "frames": 375
+ },
+ {
+  "name": "PassBlock_Reach_Sack_from_90_D7_v1__P01",
+  "file": "PassBlock_Reach_Sack_from_90_D7_v1__P01",
+  "clip_key": "9b8bf5cdb1d95df2",
+  "layer_key": "f53386ec584eb0ea",
+  "fps": 60.0,
+  "frames": 405
+ },
+ {
+  "name": "PassBlock_Reach_Sack_from_90_D7_v1__P02",
+  "file": "PassBlock_Reach_Sack_from_90_D7_v1__P02",
+  "clip_key": "7de63e633448bfba",
+  "layer_key": "06761037922cf576",
+  "fps": 60.0,
+  "frames": 405
+ },
+ {
+  "name": "PassBlock_Reach_Sack_from_90_D7_v1__P03",
+  "file": "PassBlock_Reach_Sack_from_90_D7_v1__P03",
+  "clip_key": "189c4c6a1a813389",
+  "layer_key": "cbe6f2d88b032e48",
+  "fps": 60.0,
+  "frames": 405
+ },
+ {
+  "name": "PassBlock_Reach_Sack_from_90_D7_v2__P01",
+  "file": "PassBlock_Reach_Sack_from_90_D7_v2__P01",
+  "clip_key": "bc6468f2e278e764",
+  "layer_key": "0bdf19e67d8dfeb1",
+  "fps": 60.0,
+  "frames": 561
+ },
+ {
+  "name": "PassBlock_Reach_Sack_from_90_D7_v2__P02",
+  "file": "PassBlock_Reach_Sack_from_90_D7_v2__P02",
+  "clip_key": "783e0158ee35b6bd",
+  "layer_key": "eb2ae182d7db57f7",
+  "fps": 60.0,
+  "frames": 561
+ },
+ {
+  "name": "PassBlock_Reach_Sack_from_90_D7_v2__P03",
+  "file": "PassBlock_Reach_Sack_from_90_D7_v2__P03",
+  "clip_key": "a589323f65762b18",
+  "layer_key": "f6e27bcea4c091b8",
+  "fps": 60.0,
+  "frames": 561
+ },
+ {
+  "name": "PassBlock_Reach_Sack_from_90_D8_v1__P01",
+  "file": "PassBlock_Reach_Sack_from_90_D8_v1__P01",
+  "clip_key": "f3875fee68bb9f93",
+  "layer_key": "ec824cd179df9448",
+  "fps": 60.0,
+  "frames": 387
+ },
+ {
+  "name": "PassBlock_Reach_Sack_from_90_D8_v1__P02",
+  "file": "PassBlock_Reach_Sack_from_90_D8_v1__P02",
+  "clip_key": "90c3d9e620b6ae06",
+  "layer_key": "acdaea04b0c3579d",
+  "fps": 60.0,
+  "frames": 387
+ },
+ {
+  "name": "PassBlock_Reach_Sack_from_90_D8_v1__P03",
+  "file": "PassBlock_Reach_Sack_from_90_D8_v1__P03",
+  "clip_key": "298449ab14e4bf43",
+  "layer_key": "3b369deffb6b0a95",
+  "fps": 60.0,
+  "frames": 387
+ },
+ {
+  "name": "PassBlock_Reach_Sack_from_90_D8_v2__P01",
+  "file": "PassBlock_Reach_Sack_from_90_D8_v2__P01",
+  "clip_key": "10fbf4e6a91105e6",
+  "layer_key": "db0d7f6760596fb7",
+  "fps": 60.0,
+  "frames": 603
+ },
+ {
+  "name": "PassBlock_Reach_Sack_from_90_D8_v2__P02",
+  "file": "PassBlock_Reach_Sack_from_90_D8_v2__P02",
+  "clip_key": "8c728c58c4a9c21a",
+  "layer_key": "796b737cef0d4d54",
+  "fps": 60.0,
+  "frames": 603
+ },
+ {
+  "name": "PassBlock_Reach_Sack_from_90_D8_v2__P03",
+  "file": "PassBlock_Reach_Sack_from_90_D8_v2__P03",
+  "clip_key": "ced8d524f8326e84",
+  "layer_key": "ab2efbd6a4b35b88",
+  "fps": 60.0,
+  "frames": 603
+ },
+ {
+  "name": "PassBlock_Reach_Sack_from_90_WhistleBlow_D5_v1__P01",
+  "file": "PassBlock_Reach_Sack_from_90_WhistleBlow_D5_v1__P01",
+  "clip_key": "df0212b7252def71",
+  "layer_key": "4db62bc98a77c28f",
+  "fps": 60.0,
+  "frames": 471
+ },
+ {
+  "name": "PassBlock_Reach_Sack_from_90_WhistleBlow_D5_v1__P02",
+  "file": "PassBlock_Reach_Sack_from_90_WhistleBlow_D5_v1__P02",
+  "clip_key": "e77ef184a7464133",
+  "layer_key": "8d5e7fd550d0a097",
+  "fps": 60.0,
+  "frames": 471
+ },
+ {
+  "name": "PassBlock_Reach_Sack_from_90_WhistleBlow_D5_v1__P03",
+  "file": "PassBlock_Reach_Sack_from_90_WhistleBlow_D5_v1__P03",
+  "clip_key": "be41001e889d560e",
+  "layer_key": "ea2664de03d9b2a3",
+  "fps": 60.0,
+  "frames": 471
+ },
+ {
+  "name": "PassBlock_Reach_Sack_from_90_WhistleBlow_D8_v2__P01",
+  "file": "PassBlock_Reach_Sack_from_90_WhistleBlow_D8_v2__P01",
+  "clip_key": "287bae35b0eea84b",
+  "layer_key": "8a3e56aca400bcab",
+  "fps": 60.0,
+  "frames": 347
+ }
+]

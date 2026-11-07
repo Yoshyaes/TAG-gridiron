@@ -45,6 +45,20 @@ def safe(name):
     return re.sub(r"[^A-Za-z0-9_]+", "_", name).strip("_")
 
 
+def ue_name(name):
+    """Unreal asset names over 120 characters break the Windows path limit (content path plus Interchange's
+    temporary files). Shorten to 100 characters plus a hash of the full name."""
+    if len(name) <= 120:
+        return name
+    import hashlib
+    return name[:100] + "_" + hashlib.sha1(name.encode()).hexdigest()[:8]
+
+
+def int_fps(f):
+    """Same rule as fbxanim: NTSC rates are written and baked at the nearest integer rate."""
+    return float(round(f)) if abs(f - round(f)) < 0.1 else f
+
+
 def cmd_plan(spec):
     rows = list(csv.DictReader(open(INV, encoding="utf-8")))
     maps = tuple(spec.get("channel_maps", BODY_MAPS))
@@ -78,7 +92,7 @@ def cmd_plan(spec):
         jobs.append({"name": n, "file": fname, "clip_key": b["clip_key"], "layer_key": l["clip_key"] if l else None,
                      "fps": float(b["fps"]), "frames": int(b["frames"]), "additive": b.get("additive") == "True"})
         ue.append({"kind": "anim", "file": "{REPO}/extracted/" + spec["out"] + "/" + fname + ".fbx", "dest": spec["ue_dir"],
-                   "name": "A_" + fname, "skeleton": spec["ue_skeleton"], "fps": float(b["fps"])})
+                   "name": ue_name("A_" + fname), "skeleton": spec["ue_skeleton"], "fps": int_fps(float(b["fps"]))})
         frames += int(b["frames"])
     json.dump(jobs, open(os.path.join(JOBS, spec["name"] + "_anim.json"), "w"), indent=1)
     json.dump(ue, open(os.path.join(JOBS, "ue_" + spec["name"] + ".json"), "w"), indent=1)
@@ -161,7 +175,7 @@ def cmd_export(spec):
     # leave failed clips out of the Unreal jobs
     ue_path = os.path.join(JOBS, "ue_" + spec["name"] + ".json")
     ue = json.load(open(ue_path))
-    bad = {"A_" + safe(n) for n, c in checks.items() if not c["ok"]}
+    bad = {ue_name("A_" + safe(n)) for n, c in checks.items() if not c["ok"]}
     json.dump([u for u in ue if u["name"] not in bad], open(os.path.join(LOGS, "ue_%s_gated.json" % spec["name"]), "w"), indent=1)
     print("anim export %s done=%d skipped=%d failed=%d in %.0fs" % (spec["name"], done, skipped, failed, time.time() - t0))
     return 0

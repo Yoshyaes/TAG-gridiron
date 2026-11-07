@@ -1,0 +1,562 @@
+[
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Broken_In_Under_SwerveGlitch_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Broken_In_Under_SwerveGlitch_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Broken_In_Under_SwerveGlitch_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Broken_In_Under_SwerveGlitch_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Catch_In_Under_InTheBreadBasket_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Catch_In_Under_InTheBreadBasket_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Catch_In_Under_InTheBreadBasket_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Catch_In_Under_InTheBreadBasket_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Catch_In_Under_InTheBreadBasket_v2__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Catch_In_Under_InTheBreadBasket_v2__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Catch_In_Under_InTheBreadBasket_v2__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Catch_In_Under_InTheBreadBasket_v2__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Catch_Out_Under_DeathFromAbove_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Catch_Out_Under_DeathFromAbove_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Catch_Out_Under_DeathFromAbove_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Catch_Out_Under_DeathFromAbove_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Catch_Out_Under_InTheBreadBasket_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Catch_Out_Under_InTheBreadBasket_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Catch_Out_Under_InTheBreadBasket_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Catch_Out_Under_InTheBreadBasket_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Catch_Out_Under_JustALittlePI_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Catch_Out_Under_JustALittlePI_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Catch_Out_Under_JustALittlePI_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Catch_Out_Under_JustALittlePI_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Catch_Out_YouGotMossed_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Catch_Out_YouGotMossed_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Catch_Out_YouGotMossed_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Catch_Out_YouGotMossed_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Drop_In_Under_AlmostPicked_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Drop_In_Under_AlmostPicked_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Drop_In_Under_AlmostPicked_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Drop_In_Under_AlmostPicked_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Drop_In_Under_ChildPlease_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Drop_In_Under_ChildPlease_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Drop_In_Under_ChildPlease_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Drop_In_Under_ChildPlease_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Drop_In_Under_HardlyTrying_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Drop_In_Under_HardlyTrying_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Drop_In_Under_HardlyTrying_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Drop_In_Under_HardlyTrying_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Drop_In_Under_JustCantGrabIt_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Drop_In_Under_JustCantGrabIt_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Drop_In_Under_JustCantGrabIt_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Drop_In_Under_JustCantGrabIt_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Drop_In_Under_LeapForIt_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Drop_In_Under_LeapForIt_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Drop_In_Under_LeapForIt_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Drop_In_Under_LeapForIt_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Drop_In_Under_MaybeAnotherTime_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Drop_In_Under_MaybeAnotherTime_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Drop_In_Under_MaybeAnotherTime_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Drop_In_Under_MaybeAnotherTime_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Drop_In_Under_MissedINT_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Drop_In_Under_MissedINT_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Drop_In_Under_MissedINT_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Drop_In_Under_MissedINT_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Drop_In_Under_NoCallRef_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Drop_In_Under_NoCallRef_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Drop_In_Under_NoCallRef_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Drop_In_Under_NoCallRef_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Drop_In_Under_NoLookSwat_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Drop_In_Under_NoLookSwat_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Drop_In_Under_NoLookSwat_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Drop_In_Under_NoLookSwat_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Drop_In_Under_NotToday_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Drop_In_Under_NotToday_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Drop_In_Under_NotToday_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Drop_In_Under_NotToday_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Drop_In_Under_PunchOut_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Drop_In_Under_PunchOut_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Drop_In_Under_PunchOut_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Drop_In_Under_PunchOut_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Drop_In_Under_StopBackShoulder_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Drop_In_Under_StopBackShoulder_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Drop_In_Under_StopBackShoulder_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Drop_In_Under_StopBackShoulder_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Drop_In_Under_UnderThrown_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Drop_In_Under_UnderThrown_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Drop_In_Under_UnderThrown_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Drop_In_Under_UnderThrown_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Drop_Out_Over_Sloppy_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Drop_Out_Over_Sloppy_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Drop_Out_Over_Sloppy_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Drop_Out_Over_Sloppy_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Drop_Out_Under_FindAnotherGuy_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Drop_Out_Under_FindAnotherGuy_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Drop_Out_Under_FindAnotherGuy_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Drop_Out_Under_FindAnotherGuy_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Drop_Out_Under_LuckyItWasNotPicked_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Drop_Out_Under_LuckyItWasNotPicked_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Drop_Out_Under_LuckyItWasNotPicked_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Drop_Out_Under_LuckyItWasNotPicked_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Drop_Out_Under_YouMadBro_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Drop_Out_Under_YouMadBro_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Drop_Out_Under_YouMadBro_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Drop_Out_Under_YouMadBro_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Drop_Over_NoChance_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Drop_Over_NoChance_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Drop_Over_NoChance_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Drop_Over_NoChance_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Drop_Over_NoDice_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Drop_Over_NoDice_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Drop_Over_NoDice_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Drop_Over_NoDice_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Drop_Over_No_No_No_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Drop_Over_No_No_No_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Drop_Over_No_No_No_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Drop_Over_No_No_No_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Drop_Over_OneDayYouWillLearn_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Drop_Over_OneDayYouWillLearn_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Drop_Over_OneDayYouWillLearn_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Drop_Over_OneDayYouWillLearn_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Drop_Over_StopTrying_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Drop_Over_StopTrying_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Drop_Over_StopTrying_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Drop_Over_StopTrying_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Drop_Over_YouShouldStop_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Drop_Over_YouShouldStop_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Drop_Over_YouShouldStop_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Drop_Over_YouShouldStop_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Drop_Over_YouWillLose_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Drop_Over_YouWillLose_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_Drop_Over_YouWillLose_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_Drop_Over_YouWillLose_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_EZ_Broken_Out_Under_PlayersMakePlays_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_EZ_Broken_Out_Under_PlayersMakePlays_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_EZ_Broken_Out_Under_PlayersMakePlays_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_EZ_Broken_Out_Under_PlayersMakePlays_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_EZ_Catch_In_Under_MakeAPlay_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_EZ_Catch_In_Under_MakeAPlay_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_EZ_Catch_In_Under_MakeAPlay_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_EZ_Catch_In_Under_MakeAPlay_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_INT_In_Under_Denied_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_INT_In_Under_Denied_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_INT_In_Under_Denied_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_INT_In_Under_Denied_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_INT_Out_Over_PicSix_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_INT_Out_Over_PicSix_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c010/2man_RAC_INT_Out_Over_PicSix_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C010",
+  "name": "A_2man_RAC_INT_Out_Over_PicSix_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ }
+]

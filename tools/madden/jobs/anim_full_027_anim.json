@@ -1,0 +1,682 @@
+[
+ {
+  "name": "Flea_Flicker_I_Form_Rt__P02",
+  "file": "Flea_Flicker_I_Form_Rt__P02",
+  "clip_key": "45cafb1eb9084755",
+  "layer_key": "27b1e3489b3241f0",
+  "fps": 60.0,
+  "frames": 255
+ },
+ {
+  "name": "Forte TD Baby 2__P01",
+  "file": "Forte_TD_Baby_2__P01",
+  "clip_key": "299091ca2ff32c59",
+  "layer_key": "f07de8b22d86039a",
+  "fps": 60.0,
+  "frames": 566
+ },
+ {
+  "name": "Gameplay_WR_DB_HandFighting_Defense_Near_D6__P01",
+  "file": "Gameplay_WR_DB_HandFighting_Defense_Near_D6__P01",
+  "clip_key": "15faf40cc143aee7",
+  "layer_key": "379790a876deec49",
+  "fps": 60.0,
+  "frames": 58
+ },
+ {
+  "name": "Gameplay_WR_DB_HandFighting_Defense_Near_D7__P01",
+  "file": "Gameplay_WR_DB_HandFighting_Defense_Near_D7__P01",
+  "clip_key": "b0c288fef00fb3d4",
+  "layer_key": "843214241b976e15",
+  "fps": 60.0,
+  "frames": 54
+ },
+ {
+  "name": "Gameplay_WR_DB_HandFighting_Far_L_D1__P01",
+  "file": "Gameplay_WR_DB_HandFighting_Far_L_D1__P01",
+  "clip_key": "04895537f6b2f75b",
+  "layer_key": "97f812a553a53a84",
+  "fps": 60.0,
+  "frames": 47
+ },
+ {
+  "name": "Gameplay_WR_DB_HandFighting_Near_D3__P01",
+  "file": "Gameplay_WR_DB_HandFighting_Near_D3__P01",
+  "clip_key": "a8f295bf81c34d24",
+  "layer_key": "7cedad1e20d65cb2",
+  "fps": 60.0,
+  "frames": 62
+ },
+ {
+  "name": "Gameplay_WR_DB_HandFighting_Near_D4__P01",
+  "file": "Gameplay_WR_DB_HandFighting_Near_D4__P01",
+  "clip_key": "af3faba058bbc269",
+  "layer_key": "ccb86617a8fd5295",
+  "fps": 60.0,
+  "frames": 55
+ },
+ {
+  "name": "Gameplay_WR_DB_HandFighting_Near_L_D1__P01",
+  "file": "Gameplay_WR_DB_HandFighting_Near_L_D1__P01",
+  "clip_key": "72dc2552cbc005b2",
+  "layer_key": "140d123bda9ca6d4",
+  "fps": 60.0,
+  "frames": 47
+ },
+ {
+  "name": "GangTackle_Concurrent_D1_and_D2_v1__P01",
+  "file": "GangTackle_Concurrent_D1_and_D2_v1__P01",
+  "clip_key": "fed48a0d54193d43",
+  "layer_key": "c80720063c6f9946",
+  "fps": 60.0,
+  "frames": 313
+ },
+ {
+  "name": "GangTackle_Concurrent_D1_and_D2_v1__P02",
+  "file": "GangTackle_Concurrent_D1_and_D2_v1__P02",
+  "clip_key": "44d11231cebe2df1",
+  "layer_key": "f539cb52c790d868",
+  "fps": 60.0,
+  "frames": 313
+ },
+ {
+  "name": "GangTackle_Concurrent_D1_and_D2_v1__P03",
+  "file": "GangTackle_Concurrent_D1_and_D2_v1__P03",
+  "clip_key": "8bd9859e22dac154",
+  "layer_key": "9c67cd3db302cc73",
+  "fps": 60.0,
+  "frames": 313
+ },
+ {
+  "name": "GangTackle_Concurrent_D1_and_D3_v1__P01",
+  "file": "GangTackle_Concurrent_D1_and_D3_v1__P01",
+  "clip_key": "59131585904a72e4",
+  "layer_key": "fdb34f7f4a62cd3a",
+  "fps": 60.0,
+  "frames": 347
+ },
+ {
+  "name": "GangTackle_Concurrent_D1_and_D3_v1__P02",
+  "file": "GangTackle_Concurrent_D1_and_D3_v1__P02",
+  "clip_key": "e8396e6d19bc5d92",
+  "layer_key": "fac3e40211442192",
+  "fps": 60.0,
+  "frames": 347
+ },
+ {
+  "name": "GangTackle_Concurrent_D1_and_D3_v1__P03",
+  "file": "GangTackle_Concurrent_D1_and_D3_v1__P03",
+  "clip_key": "0e7e3dfac7c41062",
+  "layer_key": "ad74e1be961705b8",
+  "fps": 60.0,
+  "frames": 347
+ },
+ {
+  "name": "GangTackle_Concurrent_D1_and_D7_v1__P01",
+  "file": "GangTackle_Concurrent_D1_and_D7_v1__P01",
+  "clip_key": "2ebb1806565e958a",
+  "layer_key": "d1ac7de1fe968a24",
+  "fps": 60.0,
+  "frames": 417
+ },
+ {
+  "name": "GangTackle_Concurrent_D1_and_D7_v1__P02",
+  "file": "GangTackle_Concurrent_D1_and_D7_v1__P02",
+  "clip_key": "78c5a5fdaf7ac932",
+  "layer_key": "43dd7abacbbbc107",
+  "fps": 60.0,
+  "frames": 417
+ },
+ {
+  "name": "GangTackle_Concurrent_D1_and_D7_v1__P03",
+  "file": "GangTackle_Concurrent_D1_and_D7_v1__P03",
+  "clip_key": "bc56df7d9e173404",
+  "layer_key": "824e1a59e147c493",
+  "fps": 60.0,
+  "frames": 417
+ },
+ {
+  "name": "GangTackle_Concurrent_D1_and_D8_v1__P01",
+  "file": "GangTackle_Concurrent_D1_and_D8_v1__P01",
+  "clip_key": "115fe5c68b11b0d8",
+  "layer_key": "3457c69fc8d1d9fd",
+  "fps": 60.0,
+  "frames": 397
+ },
+ {
+  "name": "GangTackle_Concurrent_D1_and_D8_v1__P02",
+  "file": "GangTackle_Concurrent_D1_and_D8_v1__P02",
+  "clip_key": "113b6665232e600f",
+  "layer_key": "d9821397c88d5c1a",
+  "fps": 60.0,
+  "frames": 397
+ },
+ {
+  "name": "GangTackle_Concurrent_D1_and_D8_v1__P03",
+  "file": "GangTackle_Concurrent_D1_and_D8_v1__P03",
+  "clip_key": "38adf566c3314858",
+  "layer_key": "6009de09d906c682",
+  "fps": 60.0,
+  "frames": 397
+ },
+ {
+  "name": "GangTackle_Concurrent_D2_and_D3_v1__P01",
+  "file": "GangTackle_Concurrent_D2_and_D3_v1__P01",
+  "clip_key": "f50c6a7e290e0260",
+  "layer_key": "54b53b0dd10104e9",
+  "fps": 60.0,
+  "frames": 421
+ },
+ {
+  "name": "GangTackle_Concurrent_D2_and_D3_v1__P02",
+  "file": "GangTackle_Concurrent_D2_and_D3_v1__P02",
+  "clip_key": "95e725134f322f57",
+  "layer_key": "5b386959fb7c8209",
+  "fps": 60.0,
+  "frames": 421
+ },
+ {
+  "name": "GangTackle_Concurrent_D2_and_D3_v1__P03",
+  "file": "GangTackle_Concurrent_D2_and_D3_v1__P03",
+  "clip_key": "32bdb8a84942df20",
+  "layer_key": "2b2f872123912ab1",
+  "fps": 60.0,
+  "frames": 421
+ },
+ {
+  "name": "GangTackle_Concurrent_D2_and_D7_v1__P01",
+  "file": "GangTackle_Concurrent_D2_and_D7_v1__P01",
+  "clip_key": "e481ffd6b3e6e581",
+  "layer_key": "fe7931da3a3138fb",
+  "fps": 60.0,
+  "frames": 433
+ },
+ {
+  "name": "GangTackle_Concurrent_D2_and_D7_v1__P02",
+  "file": "GangTackle_Concurrent_D2_and_D7_v1__P02",
+  "clip_key": "2a3dcc2cf2f111c4",
+  "layer_key": "37e7e153d76ef8fd",
+  "fps": 60.0,
+  "frames": 433
+ },
+ {
+  "name": "GangTackle_Concurrent_D2_and_D7_v1__P03",
+  "file": "GangTackle_Concurrent_D2_and_D7_v1__P03",
+  "clip_key": "d9662aea2348a02f",
+  "layer_key": "b404b28c2fc11ee8",
+  "fps": 60.0,
+  "frames": 433
+ },
+ {
+  "name": "GangTackle_Concurrent_D2_and_D8_v1__P01",
+  "file": "GangTackle_Concurrent_D2_and_D8_v1__P01",
+  "clip_key": "4af56e93f2cc1e91",
+  "layer_key": "d2f1feef3ac9e31f",
+  "fps": 60.0,
+  "frames": 437
+ },
+ {
+  "name": "GangTackle_Concurrent_D2_and_D8_v1__P02",
+  "file": "GangTackle_Concurrent_D2_and_D8_v1__P02",
+  "clip_key": "db01f8bf6d2a82e3",
+  "layer_key": "6dc4bae390326b31",
+  "fps": 60.0,
+  "frames": 437
+ },
+ {
+  "name": "GangTackle_Concurrent_D2_and_D8_v1__P03",
+  "file": "GangTackle_Concurrent_D2_and_D8_v1__P03",
+  "clip_key": "e6fd72ed9e036396",
+  "layer_key": "6215887640dafa1f",
+  "fps": 60.0,
+  "frames": 437
+ },
+ {
+  "name": "GangTackle_Concurrent_D3_and_D7_v1__P01",
+  "file": "GangTackle_Concurrent_D3_and_D7_v1__P01",
+  "clip_key": "1daf322dd9139ff4",
+  "layer_key": "b2c8b1cb1bccd7c2",
+  "fps": 60.0,
+  "frames": 355
+ },
+ {
+  "name": "GangTackle_Concurrent_D3_and_D7_v1__P02",
+  "file": "GangTackle_Concurrent_D3_and_D7_v1__P02",
+  "clip_key": "167c2c4f3c6c42f8",
+  "layer_key": "a5a8d5367504e43c",
+  "fps": 60.0,
+  "frames": 355
+ },
+ {
+  "name": "GangTackle_Concurrent_D3_and_D7_v1__P03",
+  "file": "GangTackle_Concurrent_D3_and_D7_v1__P03",
+  "clip_key": "4a367ca7c3988568",
+  "layer_key": "843eb0d10dc7b59b",
+  "fps": 60.0,
+  "frames": 355
+ },
+ {
+  "name": "GangTackle_Concurrent_D3_and_D8_v1__P01",
+  "file": "GangTackle_Concurrent_D3_and_D8_v1__P01",
+  "clip_key": "1c350b2f7be54f3f",
+  "layer_key": "9158162bfe64849e",
+  "fps": 60.0,
+  "frames": 675
+ },
+ {
+  "name": "GangTackle_Concurrent_D3_and_D8_v1__P02",
+  "file": "GangTackle_Concurrent_D3_and_D8_v1__P02",
+  "clip_key": "ad577b01867a3ae5",
+  "layer_key": "c2e43c31e4d87669",
+  "fps": 60.0,
+  "frames": 675
+ },
+ {
+  "name": "GangTackle_Concurrent_D3_and_D8_v1__P03",
+  "file": "GangTackle_Concurrent_D3_and_D8_v1__P03",
+  "clip_key": "f387aadb7f803e11",
+  "layer_key": "8a319971694285fb",
+  "fps": 60.0,
+  "frames": 675
+ },
+ {
+  "name": "Gang_Tackle_D1_Add_D2_HeadLeft_v1__P01",
+  "file": "Gang_Tackle_D1_Add_D2_HeadLeft_v1__P01",
+  "clip_key": "322c3cc0dc35f155",
+  "layer_key": "5164184284e190e2",
+  "fps": 60.0,
+  "frames": 271
+ },
+ {
+  "name": "Gang_Tackle_D1_Add_D2_HeadLeft_v1__P02",
+  "file": "Gang_Tackle_D1_Add_D2_HeadLeft_v1__P02",
+  "clip_key": "d2d67b6591bc15c4",
+  "layer_key": "dddc8356d71cfbb2",
+  "fps": 60.0,
+  "frames": 271
+ },
+ {
+  "name": "Gang_Tackle_D1_Add_D2_HeadLeft_v1__P03",
+  "file": "Gang_Tackle_D1_Add_D2_HeadLeft_v1__P03",
+  "clip_key": "0ce0b0a6b9f4cf2c",
+  "layer_key": "d15d179c28bed688",
+  "fps": 60.0,
+  "frames": 271
+ },
+ {
+  "name": "Gang_Tackle_D1_Add_D2_HeadLeft_v2__P02",
+  "file": "Gang_Tackle_D1_Add_D2_HeadLeft_v2__P02",
+  "clip_key": "4dbab9c53ef2d50f",
+  "layer_key": "5b1a6b5f0ce7dee0",
+  "fps": 60.0,
+  "frames": 451
+ },
+ {
+  "name": "Gang_Tackle_D1_Add_D2_HeadLeft_v3__P01",
+  "file": "Gang_Tackle_D1_Add_D2_HeadLeft_v3__P01",
+  "clip_key": "8e78fb355294c7a0",
+  "layer_key": "c11034b1abbd8cfc",
+  "fps": 60.0,
+  "frames": 461
+ },
+ {
+  "name": "Gang_Tackle_D1_Add_D2_HeadLeft_v3__P02",
+  "file": "Gang_Tackle_D1_Add_D2_HeadLeft_v3__P02",
+  "clip_key": "0affb5b3e25cabbf",
+  "layer_key": "d421773a681e6e20",
+  "fps": 60.0,
+  "frames": 491
+ },
+ {
+  "name": "Gang_Tackle_D1_Add_D2_HeadLeft_v3__P03",
+  "file": "Gang_Tackle_D1_Add_D2_HeadLeft_v3__P03",
+  "clip_key": "ee39c544eedafcca",
+  "layer_key": "f8b44ce9f78bfc69",
+  "fps": 60.0,
+  "frames": 359
+ },
+ {
+  "name": "Gang_Tackle_D1_Add_D2_HeadRight_v1__P02",
+  "file": "Gang_Tackle_D1_Add_D2_HeadRight_v1__P02",
+  "clip_key": "0c674282d6339a2e",
+  "layer_key": "6f4d2303134665f2",
+  "fps": 60.0,
+  "frames": 325
+ },
+ {
+  "name": "Gang_Tackle_D1_Add_D2_HeadRight_v1__P03",
+  "file": "Gang_Tackle_D1_Add_D2_HeadRight_v1__P03",
+  "clip_key": "34f7c60f0886d269",
+  "layer_key": "22cc9fc362b9c49b",
+  "fps": 60.0,
+  "frames": 325
+ },
+ {
+  "name": "Gang_Tackle_D1_Add_D2_HeadRight_v2__P01",
+  "file": "Gang_Tackle_D1_Add_D2_HeadRight_v2__P01",
+  "clip_key": "44efbba7ebf9acf6",
+  "layer_key": "75d59d38c9322407",
+  "fps": 60.0,
+  "frames": 491
+ },
+ {
+  "name": "Gang_Tackle_D1_Add_D2_HeadRight_v2__P02",
+  "file": "Gang_Tackle_D1_Add_D2_HeadRight_v2__P02",
+  "clip_key": "cf4897746aa50250",
+  "layer_key": "cc2431c3a8694188",
+  "fps": 60.0,
+  "frames": 491
+ },
+ {
+  "name": "Gang_Tackle_D1_Add_D2_HeadRight_v3__P02",
+  "file": "Gang_Tackle_D1_Add_D2_HeadRight_v3__P02",
+  "clip_key": "11a1c69f8b4731d1",
+  "layer_key": "60419a025e46c612",
+  "fps": 60.0,
+  "frames": 464
+ },
+ {
+  "name": "Gang_Tackle_D1_Add_D3_HeadLeft_v2__P01",
+  "file": "Gang_Tackle_D1_Add_D3_HeadLeft_v2__P01",
+  "clip_key": "f805fa932cdcf1eb",
+  "layer_key": "c1adcf2a9601eee6",
+  "fps": 60.0,
+  "frames": 220
+ },
+ {
+  "name": "Gang_Tackle_D1_Add_D3_HeadLeft_v2__P02",
+  "file": "Gang_Tackle_D1_Add_D3_HeadLeft_v2__P02",
+  "clip_key": "6a4f41af524687f7",
+  "layer_key": "a3ce8cf113659746",
+  "fps": 60.0,
+  "frames": 382
+ },
+ {
+  "name": "Gang_Tackle_D1_Add_D3_HeadRight_v01__P01",
+  "file": "Gang_Tackle_D1_Add_D3_HeadRight_v01__P01",
+  "clip_key": "5a073e4c44044837",
+  "layer_key": "cab921f70dfb7a7b",
+  "fps": 60.0,
+  "frames": 198
+ },
+ {
+  "name": "Gang_Tackle_D1_Add_D3_HeadRight_v01__P02",
+  "file": "Gang_Tackle_D1_Add_D3_HeadRight_v01__P02",
+  "clip_key": "332efa23574a7696",
+  "layer_key": "efbba4e965b2e794",
+  "fps": 60.0,
+  "frames": 345
+ },
+ {
+  "name": "Gang_Tackle_D1_Add_D3_HeadRight_v01__P03",
+  "file": "Gang_Tackle_D1_Add_D3_HeadRight_v01__P03",
+  "clip_key": "0d2ad9671790c4e4",
+  "layer_key": "d2755abcf247fca9",
+  "fps": 60.0,
+  "frames": 280
+ },
+ {
+  "name": "Gang_Tackle_D1_Add_D3_HeadRight_v02__P01",
+  "file": "Gang_Tackle_D1_Add_D3_HeadRight_v02__P01",
+  "clip_key": "b54d7b372dac305f",
+  "layer_key": "3720b38aa3b274c0",
+  "fps": 60.0,
+  "frames": 382
+ },
+ {
+  "name": "Gang_Tackle_D1_Add_D3_HeadRight_v02__P02",
+  "file": "Gang_Tackle_D1_Add_D3_HeadRight_v02__P02",
+  "clip_key": "f8566ecde04f6771",
+  "layer_key": "118baefe968caacd",
+  "fps": 60.0,
+  "frames": 418
+ },
+ {
+  "name": "Gang_Tackle_D1_Add_D3_HeadRight_v02__P03",
+  "file": "Gang_Tackle_D1_Add_D3_HeadRight_v02__P03",
+  "clip_key": "fc5e20780dbbb472",
+  "layer_key": "1ef91a1535379e0c",
+  "fps": 60.0,
+  "frames": 242
+ },
+ {
+  "name": "Gang_Tackle_D1_Add_D3_HeadRight_v3__P01",
+  "file": "Gang_Tackle_D1_Add_D3_HeadRight_v3__P01",
+  "clip_key": "e94af016a143044c",
+  "layer_key": "29f3dd20b9099f8c",
+  "fps": 60.0,
+  "frames": 233
+ },
+ {
+  "name": "Gang_Tackle_D1_Add_D3_HeadRight_v3__P02",
+  "file": "Gang_Tackle_D1_Add_D3_HeadRight_v3__P02",
+  "clip_key": "aa225cc6a2564821",
+  "layer_key": "c3694bb605fdc421",
+  "fps": 60.0,
+  "frames": 233
+ },
+ {
+  "name": "Gang_Tackle_D1_Add_D3_HeadRight_v3__P03",
+  "file": "Gang_Tackle_D1_Add_D3_HeadRight_v3__P03",
+  "clip_key": "70e7fb0e8d93975a",
+  "layer_key": "f2e64e6bd6037cb7",
+  "fps": 60.0,
+  "frames": 233
+ },
+ {
+  "name": "Gang_Tackle_D1_Add_D4_HeadLeft_v01__P01",
+  "file": "Gang_Tackle_D1_Add_D4_HeadLeft_v01__P01",
+  "clip_key": "c1fa9e2284684fcb",
+  "layer_key": "2876028e60d61ab1",
+  "fps": 60.0,
+  "frames": 311
+ },
+ {
+  "name": "Gang_Tackle_D1_Add_D4_HeadLeft_v01__P02",
+  "file": "Gang_Tackle_D1_Add_D4_HeadLeft_v01__P02",
+  "clip_key": "a6cab0ffe8a13408",
+  "layer_key": "491486e70558b6f8",
+  "fps": 60.0,
+  "frames": 331
+ },
+ {
+  "name": "Gang_Tackle_D1_Add_D4_HeadLeft_v01__P03",
+  "file": "Gang_Tackle_D1_Add_D4_HeadLeft_v01__P03",
+  "clip_key": "fe93a7283df75ab5",
+  "layer_key": "131b21f9782d140b",
+  "fps": 60.0,
+  "frames": 311
+ },
+ {
+  "name": "Gang_Tackle_D1_Add_D4_HeadLeft_v3__P01",
+  "file": "Gang_Tackle_D1_Add_D4_HeadLeft_v3__P01",
+  "clip_key": "e44c5ae5e0db4d18",
+  "layer_key": "47f30b682f7d1b0c",
+  "fps": 60.0,
+  "frames": 218
+ },
+ {
+  "name": "Gang_Tackle_D1_Add_D4_HeadLeft_v3__P02",
+  "file": "Gang_Tackle_D1_Add_D4_HeadLeft_v3__P02",
+  "clip_key": "e49c31e3e5d88ebc",
+  "layer_key": "00952b916c0bffaa",
+  "fps": 60.0,
+  "frames": 283
+ },
+ {
+  "name": "Gang_Tackle_D1_Add_D4_HeadLeft_v3__P03",
+  "file": "Gang_Tackle_D1_Add_D4_HeadLeft_v3__P03",
+  "clip_key": "d71fde2e0795f0e5",
+  "layer_key": "a3d4920169b65108",
+  "fps": 60.0,
+  "frames": 258
+ },
+ {
+  "name": "Gang_Tackle_D1_Add_D4_HeadRight_v01__P01",
+  "file": "Gang_Tackle_D1_Add_D4_HeadRight_v01__P01",
+  "clip_key": "c1a7233dbe9f32d1",
+  "layer_key": "a6b97c0db592e461",
+  "fps": 60.0,
+  "frames": 352
+ },
+ {
+  "name": "Gang_Tackle_D1_Add_D4_HeadRight_v01__P02",
+  "file": "Gang_Tackle_D1_Add_D4_HeadRight_v01__P02",
+  "clip_key": "21345aa895e5ff59",
+  "layer_key": "6f8d163f20dee368",
+  "fps": 60.0,
+  "frames": 352
+ },
+ {
+  "name": "Gang_Tackle_D1_Add_D4_HeadRight_v01__P03",
+  "file": "Gang_Tackle_D1_Add_D4_HeadRight_v01__P03",
+  "clip_key": "b3d2662db531bc50",
+  "layer_key": "04cad1f7b3202694",
+  "fps": 60.0,
+  "frames": 352
+ },
+ {
+  "name": "Gang_Tackle_D1_Add_D5_HeadLeft_v1__P01",
+  "file": "Gang_Tackle_D1_Add_D5_HeadLeft_v1__P01",
+  "clip_key": "a10883013220772b",
+  "layer_key": "2ad147efe7dd5865",
+  "fps": 60.0,
+  "frames": 355
+ },
+ {
+  "name": "Gang_Tackle_D1_Add_D5_HeadLeft_v1__P02",
+  "file": "Gang_Tackle_D1_Add_D5_HeadLeft_v1__P02",
+  "clip_key": "308dd3469298c682",
+  "layer_key": "0ccd4b31153801a2",
+  "fps": 60.0,
+  "frames": 355
+ },
+ {
+  "name": "Gang_Tackle_D1_Add_D8_HeadLeft_v01__P01",
+  "file": "Gang_Tackle_D1_Add_D8_HeadLeft_v01__P01",
+  "clip_key": "9d0e286fe4189e00",
+  "layer_key": "743128d9ec2e374a",
+  "fps": 60.0,
+  "frames": 425
+ },
+ {
+  "name": "Gang_Tackle_D1_Add_D8_HeadLeft_v01__P02",
+  "file": "Gang_Tackle_D1_Add_D8_HeadLeft_v01__P02",
+  "clip_key": "62a4110cab53bcbf",
+  "layer_key": "adf4197d65a0115a",
+  "fps": 60.0,
+  "frames": 425
+ },
+ {
+  "name": "Gang_Tackle_D1_Add_D8_HeadLeft_v01__P03",
+  "file": "Gang_Tackle_D1_Add_D8_HeadLeft_v01__P03",
+  "clip_key": "f029369c5cad91f6",
+  "layer_key": "c4bbbdb298403738",
+  "fps": 60.0,
+  "frames": 425
+ },
+ {
+  "name": "Gang_Tackle_D1_Add_D8_HeadLeft_v2__P01",
+  "file": "Gang_Tackle_D1_Add_D8_HeadLeft_v2__P01",
+  "clip_key": "17820daf1da38180",
+  "layer_key": "1b16b6720784e269",
+  "fps": 60.0,
+  "frames": 368
+ },
+ {
+  "name": "Gang_Tackle_D1_Add_D8_HeadLeft_v2__P02",
+  "file": "Gang_Tackle_D1_Add_D8_HeadLeft_v2__P02",
+  "clip_key": "eaab3acbff153832",
+  "layer_key": "96eabf3cd1572c20",
+  "fps": 60.0,
+  "frames": 368
+ },
+ {
+  "name": "Gang_Tackle_D1_Add_D8_HeadLeft_v2__P03",
+  "file": "Gang_Tackle_D1_Add_D8_HeadLeft_v2__P03",
+  "clip_key": "8eaac077e09a7463",
+  "layer_key": "0fe85a55d964e2c7",
+  "fps": 60.0,
+  "frames": 293
+ },
+ {
+  "name": "Gang_Tackle_D1_Add_D8_HeadRight_v1__P01",
+  "file": "Gang_Tackle_D1_Add_D8_HeadRight_v1__P01",
+  "clip_key": "d35a64bb3eb8f878",
+  "layer_key": "a1d9b91aa8c972fd",
+  "fps": 60.0,
+  "frames": 331
+ },
+ {
+  "name": "Gang_Tackle_D1_Add_D8_HeadRight_v1__P02",
+  "file": "Gang_Tackle_D1_Add_D8_HeadRight_v1__P02",
+  "clip_key": "fe8a7dd0ecbc4080",
+  "layer_key": "6c5f10c23797d612",
+  "fps": 60.0,
+  "frames": 331
+ },
+ {
+  "name": "Gang_Tackle_D1_Add_D8_HeadRight_v1__P03",
+  "file": "Gang_Tackle_D1_Add_D8_HeadRight_v1__P03",
+  "clip_key": "af2dd496549d7b79",
+  "layer_key": "ac11e4715dd582fc",
+  "fps": 60.0,
+  "frames": 331
+ },
+ {
+  "name": "Gang_Tackle_D1_add_D3_HeadLeft_v1__P01",
+  "file": "Gang_Tackle_D1_add_D3_HeadLeft_v1__P01",
+  "clip_key": "2d5f2ce6000a791f",
+  "layer_key": "93fcc70c80876fd5",
+  "fps": 60.0,
+  "frames": 451
+ },
+ {
+  "name": "Gang_Tackle_D1_add_D3_HeadLeft_v1__P02",
+  "file": "Gang_Tackle_D1_add_D3_HeadLeft_v1__P02",
+  "clip_key": "5a3f13c0dde14a02",
+  "layer_key": "8b878f00e1b4b701",
+  "fps": 60.0,
+  "frames": 451
+ },
+ {
+  "name": "Gang_Tackle_D1_add_D3_HeadLeft_v1__P03",
+  "file": "Gang_Tackle_D1_add_D3_HeadLeft_v1__P03",
+  "clip_key": "3318b1fde61a5c96",
+  "layer_key": "87d83120fc0b8e0a",
+  "fps": 60.0,
+  "frames": 451
+ },
+ {
+  "name": "Gang_Tackle_D1_add_D4_HeadLeft_v02__P01",
+  "file": "Gang_Tackle_D1_add_D4_HeadLeft_v02__P01",
+  "clip_key": "5ba4ce7b391ac78c",
+  "layer_key": "8aa4946bbeab2c35",
+  "fps": 60.0,
+  "frames": 271
+ },
+ {
+  "name": "Gang_Tackle_D1_add_D4_HeadLeft_v02__P02",
+  "file": "Gang_Tackle_D1_add_D4_HeadLeft_v02__P02",
+  "clip_key": "e425472bb54f3fca",
+  "layer_key": "b5bcd9fab00bbd28",
+  "fps": 60.0,
+  "frames": 271
+ },
+ {
+  "name": "Gang_Tackle_D1_add_D4_HeadLeft_v02__P03",
+  "file": "Gang_Tackle_D1_add_D4_HeadLeft_v02__P03",
+  "clip_key": "6cac654a66f9b5ea",
+  "layer_key": "ddee2d7e7fe47595",
+  "fps": 60.0,
+  "frames": 271
+ },
+ {
+  "name": "Gang_Tackle_D2_Add_D1_v01__P01",
+  "file": "Gang_Tackle_D2_Add_D1_v01__P01",
+  "clip_key": "dd2c02cbe0d197b1",
+  "layer_key": "7cea41f924be5a92",
+  "fps": 60.0,
+  "frames": 326
+ }
+]

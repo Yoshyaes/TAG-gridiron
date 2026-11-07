@@ -174,7 +174,10 @@ class Exporter:
     def export(self, out_dir, key, layer=None, skip_existing=True, sparse=False, fname=None):
         c = self.ctrl.get(key)
         name = fname or (safe(c["__name"]) if c else "%016x" % key)
-        fps = float(c.get("FPS") or 30.0) if c else 30.0
+        src_fps = float(c.get("FPS") or 30.0) if c else 30.0
+        # NTSC rates (29.97, 59.94) are written at the nearest integer rate. Unreal bakes at integer rates and
+        # refuses lengths that are not frame aligned. Duration changes by 0.1 percent (source rate kept in meta).
+        fps = float(round(src_fps)) if abs(src_fps - round(src_fps)) < 0.1 else src_fps
         path = os.path.join(out_dir, name + ".fbx")
         meta_path = os.path.join(out_dir, name + ".json")
         if skip_existing and os.path.exists(path) and os.path.exists(meta_path):
@@ -193,7 +196,7 @@ class Exporter:
             keyed = [i for i, n in enumerate(self.ev.hero.names) if n in driven]
         write_fbx(path, self.ev.hero, frames, fps, keyed=keyed)
         meta = {"name": c["__name"] if c else None, "clip_key": "%016x" % key, "layer_key": "%016x" % layer if layer else None,
-                "frames": len(poses), "fps": fps, "duration_s": round((len(poses) - 1) / fps, 4),
+                "frames": len(poses), "fps": fps, "source_fps": src_fps, "duration_s": round((len(poses) - 1) / fps, 4),
                 "animated": sorted({n.rsplit(".", 1)[0] for n in poses[0] if n.endswith((".q", ".t"))})}
         json.dump(meta, open(meta_path, "w"), indent=1)
         return path, meta

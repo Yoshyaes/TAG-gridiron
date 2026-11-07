@@ -1,0 +1,770 @@
+[
+ {
+  "name": "Drop_Run_Dive_v1__P01",
+  "file": "Drop_Run_Dive_v1__P01",
+  "clip_key": "548782b463c1357a",
+  "layer_key": "dd7c39ee7a4b7a39",
+  "fps": 60.0,
+  "frames": 285
+ },
+ {
+  "name": "Drop_Run_Dive_v2__P01",
+  "file": "Drop_Run_Dive_v2__P01",
+  "clip_key": "c5ca9ca97ceb4883",
+  "layer_key": "ec71900cb542cc15",
+  "fps": 60.0,
+  "frames": 347
+ },
+ {
+  "name": "Drop_Run_Dive_v3__P01",
+  "file": "Drop_Run_Dive_v3__P01",
+  "clip_key": "7c07531d886c559f",
+  "layer_key": "cc15d5581059a437",
+  "fps": 60.0,
+  "frames": 319
+ },
+ {
+  "name": "Drop_Run_Dive_v4__P01",
+  "file": "Drop_Run_Dive_v4__P01",
+  "clip_key": "ff9f0f5965deb89c",
+  "layer_key": "b5d1449b4feb6c51",
+  "fps": 60.0,
+  "frames": 421
+ },
+ {
+  "name": "Drop_Run_Dive_v5__P01",
+  "file": "Drop_Run_Dive_v5__P01",
+  "clip_key": "e4e3f372855eb4ed",
+  "layer_key": "26e52013e8b60bc3",
+  "fps": 60.0,
+  "frames": 403
+ },
+ {
+  "name": "Drop_Run_Dive_v6__P01",
+  "file": "Drop_Run_Dive_v6__P01",
+  "clip_key": "5c3c77db87c4ed6f",
+  "layer_key": "528668099dc06ef9",
+  "fps": 60.0,
+  "frames": 433
+ },
+ {
+  "name": "Drop_Run_Dive_v7__P01",
+  "file": "Drop_Run_Dive_v7__P01",
+  "clip_key": "33cd258e15d7f3bf",
+  "layer_key": "2ecd9159977ec376",
+  "fps": 60.0,
+  "frames": 341
+ },
+ {
+  "name": "Drop_Run_Dive_v8__P01",
+  "file": "Drop_Run_Dive_v8__P01",
+  "clip_key": "bc0e21d7e2cd19a8",
+  "layer_key": "eb11199a0dca7739",
+  "fps": 60.0,
+  "frames": 311
+ },
+ {
+  "name": "Drop_Run_Dive_v9__P01",
+  "file": "Drop_Run_Dive_v9__P01",
+  "clip_key": "04df8421f5562942",
+  "layer_key": "3982678f09971ca9",
+  "fps": 60.0,
+  "frames": 359
+ },
+ {
+  "name": "Drop_Run_Helmet_v1__P01",
+  "file": "Drop_Run_Helmet_v1__P01",
+  "clip_key": "d4af70dbfb9df928",
+  "layer_key": "4de4381a0565d0fb",
+  "fps": 60.0,
+  "frames": 263
+ },
+ {
+  "name": "Drop_Run_Helmet_v2__P01",
+  "file": "Drop_Run_Helmet_v2__P01",
+  "clip_key": "3949792ffc6a94af",
+  "layer_key": "5c538406044e4d9e",
+  "fps": 60.0,
+  "frames": 281
+ },
+ {
+  "name": "Drop_Run_Helmet_v3__P01",
+  "file": "Drop_Run_Helmet_v3__P01",
+  "clip_key": "804a718586bb565f",
+  "layer_key": "a4096426f65efc81",
+  "fps": 60.0,
+  "frames": 183
+ },
+ {
+  "name": "Drop_Run_Helmet_v4__P01",
+  "file": "Drop_Run_Helmet_v4__P01",
+  "clip_key": "060f0cb350ef7e49",
+  "layer_key": "403f141f27ab1cb1",
+  "fps": 60.0,
+  "frames": 249
+ },
+ {
+  "name": "Drop_Run_Helmet_v5__P01",
+  "file": "Drop_Run_Helmet_v5__P01",
+  "clip_key": "6bab288b2cd3ae50",
+  "layer_key": "685ef9fd5a5b8505",
+  "fps": 60.0,
+  "frames": 221
+ },
+ {
+  "name": "Drop_Run_Jump_v10__P01",
+  "file": "Drop_Run_Jump_v10__P01",
+  "clip_key": "8b5e4b36f183fb0c",
+  "layer_key": "ca8b65fc28e2454a",
+  "fps": 60.0,
+  "frames": 371
+ },
+ {
+  "name": "Drop_Run_Jump_v11__P01",
+  "file": "Drop_Run_Jump_v11__P01",
+  "clip_key": "5c35a6f5d4d07e8d",
+  "layer_key": "b6b97514353f1ccd",
+  "fps": 60.0,
+  "frames": 385
+ },
+ {
+  "name": "Drop_Run_Jump_v12__P01",
+  "file": "Drop_Run_Jump_v12__P01",
+  "clip_key": "1e7c735dc7d07e98",
+  "layer_key": "ae4592c5d3e24ad7",
+  "fps": 60.0,
+  "frames": 308
+ },
+ {
+  "name": "Drop_Run_Jump_v13__P01",
+  "file": "Drop_Run_Jump_v13__P01",
+  "clip_key": "015699c4417c3d75",
+  "layer_key": "f339a28c798541d8",
+  "fps": 60.0,
+  "frames": 467
+ },
+ {
+  "name": "Drop_Run_Jump_v15__P01",
+  "file": "Drop_Run_Jump_v15__P01",
+  "clip_key": "b12555c3e325eb9b",
+  "layer_key": "7abe231a3a15eacc",
+  "fps": 60.0,
+  "frames": 373
+ },
+ {
+  "name": "Drop_Run_Jump_v16__P01",
+  "file": "Drop_Run_Jump_v16__P01",
+  "clip_key": "a605728d05ce569a",
+  "layer_key": "23dd6a92aa36e3b4",
+  "fps": 60.0,
+  "frames": 543
+ },
+ {
+  "name": "Drop_Run_Jump_v1__P01",
+  "file": "Drop_Run_Jump_v1__P01",
+  "clip_key": "a740cd3f08f09e35",
+  "layer_key": "31d94d0a29d2cacd",
+  "fps": 60.0,
+  "frames": 305
+ },
+ {
+  "name": "Drop_Run_Jump_v2__P01",
+  "file": "Drop_Run_Jump_v2__P01",
+  "clip_key": "15002eab900588c7",
+  "layer_key": "8058361cbb99fd2b",
+  "fps": 60.0,
+  "frames": 281
+ },
+ {
+  "name": "Drop_Run_Jump_v3__P01",
+  "file": "Drop_Run_Jump_v3__P01",
+  "clip_key": "4327860976e23aaf",
+  "layer_key": "17d11c122a05b633",
+  "fps": 60.0,
+  "frames": 281
+ },
+ {
+  "name": "Drop_Run_Jump_v4__P01",
+  "file": "Drop_Run_Jump_v4__P01",
+  "clip_key": "55b4ce6c76e416dc",
+  "layer_key": "4a7c34524f153928",
+  "fps": 60.0,
+  "frames": 329
+ },
+ {
+  "name": "Drop_Run_Jump_v5__P01",
+  "file": "Drop_Run_Jump_v5__P01",
+  "clip_key": "67bd259f2fea574a",
+  "layer_key": "1e463872afc873ca",
+  "fps": 60.0,
+  "frames": 243
+ },
+ {
+  "name": "Drop_Run_Jump_v6__P01",
+  "file": "Drop_Run_Jump_v6__P01",
+  "clip_key": "59fbedd2c5d9ee77",
+  "layer_key": "86faeeb8cd18ebec",
+  "fps": 60.0,
+  "frames": 337
+ },
+ {
+  "name": "Drop_Run_Jump_v7__P01",
+  "file": "Drop_Run_Jump_v7__P01",
+  "clip_key": "fa746c20b087dbab",
+  "layer_key": "d04805a15d7457cf",
+  "fps": 60.0,
+  "frames": 225
+ },
+ {
+  "name": "Drop_Run_Jump_v8__P01",
+  "file": "Drop_Run_Jump_v8__P01",
+  "clip_key": "4e1006deee949da4",
+  "layer_key": "a308690706d75043",
+  "fps": 60.0,
+  "frames": 351
+ },
+ {
+  "name": "Drop_Run_Jump_v9__P01",
+  "file": "Drop_Run_Jump_v9__P01",
+  "clip_key": "f85ba9717468706b",
+  "layer_key": "59abecd6e065d713",
+  "fps": 60.0,
+  "frames": 335
+ },
+ {
+  "name": "Drop_Run_Knees_v1__P01",
+  "file": "Drop_Run_Knees_v1__P01",
+  "clip_key": "4596760406f40848",
+  "layer_key": "fb4fd5548e8af476",
+  "fps": 60.0,
+  "frames": 277
+ },
+ {
+  "name": "Drop_Run_Knees_v2__P01",
+  "file": "Drop_Run_Knees_v2__P01",
+  "clip_key": "5bb80b247911075c",
+  "layer_key": "817e9b63fd48caa7",
+  "fps": 60.0,
+  "frames": 227
+ },
+ {
+  "name": "Drop_Run_Knees_v3__P01",
+  "file": "Drop_Run_Knees_v3__P01",
+  "clip_key": "251e270c0201324e",
+  "layer_key": "23ed5ee2e6ba6d06",
+  "fps": 60.0,
+  "frames": 427
+ },
+ {
+  "name": "Drop_Run_Knees_v4__P01",
+  "file": "Drop_Run_Knees_v4__P01",
+  "clip_key": "07ea89f3226b7b55",
+  "layer_key": "f81d74f9482a52a9",
+  "fps": 60.0,
+  "frames": 265
+ },
+ {
+  "name": "Drop_Run_Knees_v5__P01",
+  "file": "Drop_Run_Knees_v5__P01",
+  "clip_key": "829d9fe88264c5f9",
+  "layer_key": "6ed56e94e965458d",
+  "fps": 60.0,
+  "frames": 269
+ },
+ {
+  "name": "Drop_Run_Knees_v6__P01",
+  "file": "Drop_Run_Knees_v6__P01",
+  "clip_key": "cef0a14d3e5a5feb",
+  "layer_key": "999434085a2155c1",
+  "fps": 60.0,
+  "frames": 359
+ },
+ {
+  "name": "Drop_Run_Waist_v10__P01",
+  "file": "Drop_Run_Waist_v10__P01",
+  "clip_key": "818ea424c219cfc3",
+  "layer_key": "9a4969afcf9abe9c",
+  "fps": 60.0,
+  "frames": 179
+ },
+ {
+  "name": "Drop_Run_Waist_v1__P01",
+  "file": "Drop_Run_Waist_v1__P01",
+  "clip_key": "3b2cac6095f673c5",
+  "layer_key": "619a6516022c9181",
+  "fps": 60.0,
+  "frames": 233
+ },
+ {
+  "name": "Drop_Run_Waist_v2__P01",
+  "file": "Drop_Run_Waist_v2__P01",
+  "clip_key": "4f669b8008633d94",
+  "layer_key": "d61311f7f79a435e",
+  "fps": 60.0,
+  "frames": 237
+ },
+ {
+  "name": "Drop_Run_Waist_v3__P01",
+  "file": "Drop_Run_Waist_v3__P01",
+  "clip_key": "0bab7c80aa716971",
+  "layer_key": "bfebfcc988e59c39",
+  "fps": 60.0,
+  "frames": 229
+ },
+ {
+  "name": "Drop_Run_Waist_v4__P01",
+  "file": "Drop_Run_Waist_v4__P01",
+  "clip_key": "d1234f7a35e581d1",
+  "layer_key": "44c3cbcfba8e434b",
+  "fps": 60.0,
+  "frames": 213
+ },
+ {
+  "name": "Drop_Run_Waist_v5__P01",
+  "file": "Drop_Run_Waist_v5__P01",
+  "clip_key": "da0ea078d91fca6b",
+  "layer_key": "1856d5eb46b84635",
+  "fps": 60.0,
+  "frames": 211
+ },
+ {
+  "name": "Drop_Run_Waist_v6__P01",
+  "file": "Drop_Run_Waist_v6__P01",
+  "clip_key": "89c861eb47d46ef8",
+  "layer_key": "2cef68f72ab7683f",
+  "fps": 60.0,
+  "frames": 203
+ },
+ {
+  "name": "Drop_Run_Waist_v7__P01",
+  "file": "Drop_Run_Waist_v7__P01",
+  "clip_key": "2fafe53f2725dd41",
+  "layer_key": "c02aa34fa7641f80",
+  "fps": 60.0,
+  "frames": 221
+ },
+ {
+  "name": "Drop_Run_Waist_v8__P01",
+  "file": "Drop_Run_Waist_v8__P01",
+  "clip_key": "70a814c742bcec4d",
+  "layer_key": "7381d6f380c9d080",
+  "fps": 60.0,
+  "frames": 231
+ },
+ {
+  "name": "Drop_Run_Waist_v9__P01",
+  "file": "Drop_Run_Waist_v9__P01",
+  "clip_key": "45d821d8be43aaf3",
+  "layer_key": "54e7f72336b9a9f0",
+  "fps": 60.0,
+  "frames": 217
+ },
+ {
+  "name": "Drop_Sideline_Chest_v1__P01",
+  "file": "Drop_Sideline_Chest_v1__P01",
+  "clip_key": "ca61b13ddcc89457",
+  "layer_key": "761ee22d7a6cfab9",
+  "fps": 60.0,
+  "frames": 347
+ },
+ {
+  "name": "Drop_Sideline_Chest_v2__P01",
+  "file": "Drop_Sideline_Chest_v2__P01",
+  "clip_key": "0aed05ba59fe2c19",
+  "layer_key": "6e42ed2394af6c9d",
+  "fps": 60.0,
+  "frames": 415
+ },
+ {
+  "name": "Drop_Sideline_Chest_v3__P01",
+  "file": "Drop_Sideline_Chest_v3__P01",
+  "clip_key": "9aea984bd8b641cb",
+  "layer_key": "f931f0e234725d61",
+  "fps": 60.0,
+  "frames": 197
+ },
+ {
+  "name": "Drop_Sideline_Chest_v4__P01",
+  "file": "Drop_Sideline_Chest_v4__P01",
+  "clip_key": "98ffa2bfe96e5eff",
+  "layer_key": "326eb62e4d34f13b",
+  "fps": 60.0,
+  "frames": 209
+ },
+ {
+  "name": "Drop_Sideline_Chest_v5__P01",
+  "file": "Drop_Sideline_Chest_v5__P01",
+  "clip_key": "246f97afcf41408f",
+  "layer_key": "f157c2e68df0e4e2",
+  "fps": 60.0,
+  "frames": 325
+ },
+ {
+  "name": "Drop_Sideline_Jump_v1__P01",
+  "file": "Drop_Sideline_Jump_v1__P01",
+  "clip_key": "ff4a53cb79437647",
+  "layer_key": "f32a694cd068c8ea",
+  "fps": 60.0,
+  "frames": 379
+ },
+ {
+  "name": "Drop_Sideline_Jump_v2__P01",
+  "file": "Drop_Sideline_Jump_v2__P01",
+  "clip_key": "ffaecf32caf82dd5",
+  "layer_key": "d22fd853b64c1f3b",
+  "fps": 60.0,
+  "frames": 383
+ },
+ {
+  "name": "Drop_Sideline_Jump_v3__P01",
+  "file": "Drop_Sideline_Jump_v3__P01",
+  "clip_key": "5daa694b4a180167",
+  "layer_key": "4b1a9e491684265a",
+  "fps": 60.0,
+  "frames": 305
+ },
+ {
+  "name": "Drop_Sideline_Jump_v4__P01",
+  "file": "Drop_Sideline_Jump_v4__P01",
+  "clip_key": "2f7229ff29404627",
+  "layer_key": "6bcd463f0ff6b4ff",
+  "fps": 60.0,
+  "frames": 227
+ },
+ {
+  "name": "Drop_Sideline_Jump_v5__P01",
+  "file": "Drop_Sideline_Jump_v5__P01",
+  "clip_key": "f0d34939d8c92cce",
+  "layer_key": "79e7eeae1461c223",
+  "fps": 60.0,
+  "frames": 251
+ },
+ {
+  "name": "Drop_Sideline_Knees_v1__P01",
+  "file": "Drop_Sideline_Knees_v1__P01",
+  "clip_key": "f9966171c51c9640",
+  "layer_key": "e1451826f2db516f",
+  "fps": 60.0,
+  "frames": 177
+ },
+ {
+  "name": "Drop_Sideline_Knees_v2__P01",
+  "file": "Drop_Sideline_Knees_v2__P01",
+  "clip_key": "196a8fa6a29e86c1",
+  "layer_key": "cbb1112bcbb3f6f0",
+  "fps": 60.0,
+  "frames": 361
+ },
+ {
+  "name": "Drop_Sideline_Knees_v3__P01",
+  "file": "Drop_Sideline_Knees_v3__P01",
+  "clip_key": "116e6c1a4a853682",
+  "layer_key": "c08079b15254d895",
+  "fps": 60.0,
+  "frames": 307
+ },
+ {
+  "name": "Drop_Sideline_Waist_v1__P01",
+  "file": "Drop_Sideline_Waist_v1__P01",
+  "clip_key": "a34bcf9704583f9a",
+  "layer_key": "c47ac757190e8cec",
+  "fps": 60.0,
+  "frames": 215
+ },
+ {
+  "name": "Drop_Sideline_Waist_v2__P01",
+  "file": "Drop_Sideline_Waist_v2__P01",
+  "clip_key": "c7ac6514a60eefbb",
+  "layer_key": "4c6abdf72eaf4e81",
+  "fps": 60.0,
+  "frames": 371
+ },
+ {
+  "name": "Drop_Sideline_Waist_v3__P01",
+  "file": "Drop_Sideline_Waist_v3__P01",
+  "clip_key": "9157f712e60b44c5",
+  "layer_key": "96458de05de23fab",
+  "fps": 60.0,
+  "frames": 241
+ },
+ {
+  "name": "Drop_Sideline_Waist_v4__P01",
+  "file": "Drop_Sideline_Waist_v4__P01",
+  "clip_key": "c5f618693233089f",
+  "layer_key": "556d86e216860f68",
+  "fps": 60.0,
+  "frames": 355
+ },
+ {
+  "name": "Drop_Sideline_Waist_v5__P01",
+  "file": "Drop_Sideline_Waist_v5__P01",
+  "clip_key": "6c83ad3f3185be4c",
+  "layer_key": "9e9d63fffaee9f05",
+  "fps": 60.0,
+  "frames": 509
+ },
+ {
+  "name": "Drop_Stand_AboveHead_v1__P01",
+  "file": "Drop_Stand_AboveHead_v1__P01",
+  "clip_key": "56124edccc4fae1a",
+  "layer_key": "a7a3b631756c3aa5",
+  "fps": 60.0,
+  "frames": 281
+ },
+ {
+  "name": "Drop_Stand_AboveHead_v2__P01",
+  "file": "Drop_Stand_AboveHead_v2__P01",
+  "clip_key": "95be6fc1519c610b",
+  "layer_key": "719ddef177c8025c",
+  "fps": 60.0,
+  "frames": 269
+ },
+ {
+  "name": "Drop_Stand_AboveHead_v3__P01",
+  "file": "Drop_Stand_AboveHead_v3__P01",
+  "clip_key": "2d68ec9911f7f508",
+  "layer_key": "057a4128964fc73e",
+  "fps": 60.0,
+  "frames": 457
+ },
+ {
+  "name": "Drop_Stand_AboveHead_v4__P01",
+  "file": "Drop_Stand_AboveHead_v4__P01",
+  "clip_key": "487f8eb3f4b6431f",
+  "layer_key": "a08dacb8c161f5df",
+  "fps": 60.0,
+  "frames": 227
+ },
+ {
+  "name": "Drop_Stand_AboveHead_v5__P01",
+  "file": "Drop_Stand_AboveHead_v5__P01",
+  "clip_key": "1e0f9030ebf0caec",
+  "layer_key": "b2e69fc420029a4e",
+  "fps": 60.0,
+  "frames": 377
+ },
+ {
+  "name": "Drop_Stand_AboveHead_v6__P01",
+  "file": "Drop_Stand_AboveHead_v6__P01",
+  "clip_key": "e649772b6dc69213",
+  "layer_key": "00dde8c61439b562",
+  "fps": 60.0,
+  "frames": 211
+ },
+ {
+  "name": "Drop_Stand_Ankles_v1__P01",
+  "file": "Drop_Stand_Ankles_v1__P01",
+  "clip_key": "26af20d0f7abd0f9",
+  "layer_key": "11323f8bae843d76",
+  "fps": 60.0,
+  "frames": 329
+ },
+ {
+  "name": "Drop_Stand_Chest_v1__P01",
+  "file": "Drop_Stand_Chest_v1__P01",
+  "clip_key": "9828c4233353af36",
+  "layer_key": "9c5669fcd53b7d2f",
+  "fps": 60.0,
+  "frames": 295
+ },
+ {
+  "name": "Drop_Stand_Chest_v2__P01",
+  "file": "Drop_Stand_Chest_v2__P01",
+  "clip_key": "abb529d9b3d398e2",
+  "layer_key": "89ecf35671eebce1",
+  "fps": 60.0,
+  "frames": 197
+ },
+ {
+  "name": "Drop_Stand_Helmet_v1__P01",
+  "file": "Drop_Stand_Helmet_v1__P01",
+  "clip_key": "df871166fc6220f4",
+  "layer_key": "31915e64d784b3df",
+  "fps": 60.0,
+  "frames": 269
+ },
+ {
+  "name": "Drop_Stand_Helmet_v2__P01",
+  "file": "Drop_Stand_Helmet_v2__P01",
+  "clip_key": "af1179138ca9fd31",
+  "layer_key": "49a8edde21c29a19",
+  "fps": 60.0,
+  "frames": 363
+ },
+ {
+  "name": "Drop_Stand_Helmet_v3__P01",
+  "file": "Drop_Stand_Helmet_v3__P01",
+  "clip_key": "9ca5b13d8ce2b494",
+  "layer_key": "3e53e479f26a9744",
+  "fps": 60.0,
+  "frames": 325
+ },
+ {
+  "name": "Drop_Stand_Jump_v1__P01",
+  "file": "Drop_Stand_Jump_v1__P01",
+  "clip_key": "a73505b730b793fc",
+  "layer_key": "8b2b6fa1546bb7b6",
+  "fps": 60.0,
+  "frames": 349
+ },
+ {
+  "name": "Drop_Stand_Jump_v2__P01",
+  "file": "Drop_Stand_Jump_v2__P01",
+  "clip_key": "0f98fb15827f4831",
+  "layer_key": "1b89c7cabe61a05d",
+  "fps": 60.0,
+  "frames": 301
+ },
+ {
+  "name": "Drop_Stand_Jump_v3__P01",
+  "file": "Drop_Stand_Jump_v3__P01",
+  "clip_key": "d907b833323c3406",
+  "layer_key": "b18c291e96032cc3",
+  "fps": 60.0,
+  "frames": 361
+ },
+ {
+  "name": "Drop_Stand_Jump_v4__P01",
+  "file": "Drop_Stand_Jump_v4__P01",
+  "clip_key": "af2981682a8f5b85",
+  "layer_key": "2fd3721f81bab2b2",
+  "fps": 60.0,
+  "frames": 283
+ },
+ {
+  "name": "Drop_Stand_Jump_v5__P01",
+  "file": "Drop_Stand_Jump_v5__P01",
+  "clip_key": "0b90350888a25828",
+  "layer_key": "cca6807a4251ed97",
+  "fps": 60.0,
+  "frames": 253
+ },
+ {
+  "name": "Drop_Stand_Knees_v1__P01",
+  "file": "Drop_Stand_Knees_v1__P01",
+  "clip_key": "5f259e177f9ddd3a",
+  "layer_key": "9b1bb10ef99f6958",
+  "fps": 60.0,
+  "frames": 331
+ },
+ {
+  "name": "Drop_Stand_Knees_v2__P01",
+  "file": "Drop_Stand_Knees_v2__P01",
+  "clip_key": "76d9738974d6e857",
+  "layer_key": "cfc8bc1cd25734a5",
+  "fps": 60.0,
+  "frames": 399
+ },
+ {
+  "name": "Drop_Stand_Knees_v3__P01",
+  "file": "Drop_Stand_Knees_v3__P01",
+  "clip_key": "dea3b9d1024d72ef",
+  "layer_key": "fd6429d4957567cf",
+  "fps": 60.0,
+  "frames": 257
+ },
+ {
+  "name": "Drop_Stand_Knees_v4__P01",
+  "file": "Drop_Stand_Knees_v4__P01",
+  "clip_key": "b3eca472f5927461",
+  "layer_key": "959dc4e8201afe02",
+  "fps": 60.0,
+  "frames": 277
+ },
+ {
+  "name": "Drop_Stand_Knees_v5__P01",
+  "file": "Drop_Stand_Knees_v5__P01",
+  "clip_key": "c59d8f6af85afef5",
+  "layer_key": "81440001e28b22d1",
+  "fps": 60.0,
+  "frames": 361
+ },
+ {
+  "name": "Drop_Stand_Knees_v6__P01",
+  "file": "Drop_Stand_Knees_v6__P01",
+  "clip_key": "ab339a03f0310402",
+  "layer_key": "5388e01ae66def0a",
+  "fps": 60.0,
+  "frames": 325
+ },
+ {
+  "name": "Drop_Stand_Waist_v1__P01",
+  "file": "Drop_Stand_Waist_v1__P01",
+  "clip_key": "29d58696c735018b",
+  "layer_key": "335be15f950a9fc8",
+  "fps": 60.0,
+  "frames": 351
+ },
+ {
+  "name": "Drop_Stand_Waist_v2__P01",
+  "file": "Drop_Stand_Waist_v2__P01",
+  "clip_key": "5906ca8c5775e340",
+  "layer_key": "bc282d186db7a4ca",
+  "fps": 60.0,
+  "frames": 333
+ },
+ {
+  "name": "Ebron TD Dance__P01",
+  "file": "Ebron_TD_Dance__P01",
+  "clip_key": "9e08041680b4e664",
+  "layer_key": "cbc5f72444929b2b",
+  "fps": 60.0,
+  "frames": 457
+ },
+ {
+  "name": "EffortCatch_AboveHead_Overthrow__P01",
+  "file": "EffortCatch_AboveHead_Overthrow__P01",
+  "clip_key": "85ce387f36dfe799",
+  "layer_key": "fd85f30704574891",
+  "fps": 60.0,
+  "frames": 410
+ },
+ {
+  "name": "EffortCatch_AboveHead_Stand_ReachLF__P01",
+  "file": "EffortCatch_AboveHead_Stand_ReachLF__P01",
+  "clip_key": "7ad21bf65304c31f",
+  "layer_key": "0d1d547cb0a35f42",
+  "fps": 60.0,
+  "frames": 328
+ },
+ {
+  "name": "EffortCatch_Chest_OutFront_v3__P01",
+  "file": "EffortCatch_Chest_OutFront_v3__P01",
+  "clip_key": "9e8ea3e2aa44fceb",
+  "layer_key": "204a59c3bbf7ce35",
+  "fps": 60.0,
+  "frames": 314
+ },
+ {
+  "name": "EffortCatch_Chest_OutFront_v4__P01",
+  "file": "EffortCatch_Chest_OutFront_v4__P01",
+  "clip_key": "b620b408a0f4dfc2",
+  "layer_key": "29381568a95f67db",
+  "fps": 60.0,
+  "frames": 296
+ },
+ {
+  "name": "EffortCatch_Helmet_Overthrown__P01",
+  "file": "EffortCatch_Helmet_Overthrown__P01",
+  "clip_key": "667882652904244a",
+  "layer_key": "bf9275e796e1aeb8",
+  "fps": 60.0,
+  "frames": 396
+ },
+ {
+  "name": "EffortCatch_Jump_Stand_LeapLF__P01",
+  "file": "EffortCatch_Jump_Stand_LeapLF__P01",
+  "clip_key": "27b144e222c1377a",
+  "layer_key": "181d9ba2fce2936c",
+  "fps": 60.0,
+  "frames": 357
+ },
+ {
+  "name": "EffortCatch_Knee_OverThrown_v1__P01",
+  "file": "EffortCatch_Knee_OverThrown_v1__P01",
+  "clip_key": "b3e3f3d668ddb57d",
+  "layer_key": "d7af3e8e156aaa12",
+  "fps": 60.0,
+  "frames": 339
+ }
+]

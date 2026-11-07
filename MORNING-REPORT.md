@@ -2,30 +2,35 @@
 
 Branch `madden-extraction`, local only, nothing pushed. Install guard clean at every gate.
 
-## Current job. Animation decoder port
+## Animation decoder port. Done
 | Checkpoint | Result |
 | --- | --- |
 | A Bank header and clip index | PASS. 25,349 clips in `extracted\animation\animation_inventory.csv` |
-| B Decode idle, run, tackle | PASS. Run root speed 7.06 m/s, bone lengths constant, knees bend forward, idle loop closes to 0.8 deg. Frame 0 against the T pose bind is interpreted (see FINDINGS) |
-| C FBX export and UE import of the three clips | PASS. UE log 0 errors, 0 warnings, 268 tracks, no missing bones. Preview level `L_MaddenRef_AnimCheckpoint` |
-| D Prototype batch (about 25 core clips) | PASS. 26 of 26 clips (stance, run, cut, tackle, throw, catch, celebrate), 0 UE errors, second run skips. Preview `L_MaddenRef_AnimPrototype` |
-| E Full clip list in chunks | running (12,187 clips, chunks of 400) |
+| B Decode idle, run, tackle | PASS. Run root speed 7.06 m/s, bone lengths constant, knees bend forward, idle loop closes to 0.8 deg. Frame 0 against the T pose bind judged by structure (see FINDINGS) |
+| C FBX and UE import of the three clips | PASS. 0 errors, 0 warnings, 268 tracks, no missing bones |
+| D Prototype batch | PASS. 26 core clips (stance, run, cut, tackle, throw, catch, celebrate) |
+| E Full clip list | PASS. 12,182 of 12,187 player clips in Unreal, 0 UE errors, 6 h 15 min |
 
-Key facts so far. Madden's ANT bank is FIFA 17's format with little endian GD streams, yard units, and the player rig in a second (launch) bank.
+How it works. Madden's ANT bank is FIFA 17's format with little endian GD streams, yard units, and the player rig in a second (launch) bank. The decoder is our own Python in `tools\madden\antbank\`, reading the banks the Frosty host exports. No executable reverse engineering.
 
-## Earlier stages (all done)
-0b host, 1 inventory, 2 one player, 4 prototype kit, 5 materials, 6 UE automation and 7 capped scale out passed. Stage 3 (the first animation probe) was a no go and is now superseded by this job.
+Held out (5, reasons in `failures.csv`). The four additive layer clips, which are deltas and not standalone motions, and one celebration with a single bad key (a 5 m Hips pop for one frame in the source data).
+
+## Where to look in Unreal
+- `Maps/L_MaddenRef_AnimCheckpoint` has the dressed player in idle, run and tackle.
+- `Maps/L_MaddenRef_AnimPrototype` has the 26 core clips on a grid.
+- `Animations/Full/C000` to `C082` hold every clip, named `A_<controller name>`.
 
 ## On disk
-`D:\MaddenRef\extracted` (junction `extracted\`) about 2.6 GB including the two ANT banks (635 MB and 137 MB). Manifest matches the disk. D has about 450 GB free.
-
-## In Unreal under /Game/MaddenRef
-Earlier content unchanged. New. `Animations/Checkpoint` (3 sequences) and `Maps/L_MaddenRef_AnimCheckpoint` (dressed player playing idle, run, tackle).
+- D. `extracted\` 27.6 GB (sparse animation FBX 25 GB), 426 GB free.
+- C. Unreal animations 20 GB, 70 GB free.
+- Manifest 27,521 files, all hashes match.
 
 ## Open items
 1. **Provenance.** Fred will answer separately. `codex.cfg` and `OrangeEmu64.dll` stay out of the tooling and git.
-2. **Frame 0 criterion.** The bind pose is a T pose, so Checkpoint B compares frame 0 by structure (bone lengths, joint frames, distance from a random decode), not by equality.
-3. **Known issue 5.** One UE material slot per mesh.
+2. **Frame 0 criterion.** The bind pose is a T pose, so Checkpoint B judged frame 0 by structure, not equality.
+3. **C drive.** C is 97 percent full (70 GB free) after 20 GB of animations.
+4. **Not done.** Retargeting to the UEFN mannequin or MetaHumans, root motion setup, additive clips, non player rigs.
 
 ## What I need from you
-Nothing yet. Visual checks of the meshes are with you.
+1. Watch `L_MaddenRef_AnimCheckpoint` and `L_MaddenRef_AnimPrototype` in the editor. They have only been checked by numbers so far.
+2. Say whether you want retargeting onto the UEFN mannequin or your MetaHumans next.

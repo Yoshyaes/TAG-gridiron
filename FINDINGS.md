@@ -194,3 +194,23 @@ Tooling is in `tools\madden\antbank\`. It is Python and reads the AssetBank RES 
 - **Sparse keying for Checkpoint E.** `fbxanim.py --sparse` keys only the bones a clip drives (about 70, body plus fingers). The rest keep the EBX bind in their Lcl values, which is also the reference pose Unreal falls back to. On the three Checkpoint C clips the FBX shrinks 3.4 times and Unreal gives identical results (head height, root travel and length, 0 errors, 0 warnings). Unreal still bakes a track for every bone, so Unreal assets stay at about 10 KB per frame.
 - **Scope of E.** 12,187 player body clips with 2,376,939 frames. That is about 30 GB of sparse FBX on D and about 23 GB of Unreal assets on C. About 400 clips use other rigs (camera, props, quadruped, sideline) and are out of scope for MaddenFB_Hero_Skeleton.
 - **Extra safety floor on C.** C is 95 percent full and holds the Unreal project, so each animation chunk also checks for 40 GB free on C after its projected Unreal size, on top of the 50 GB floor on D. A per chunk quick verify hashes that chunk's files and size checks the rest, with a full verify at the end.
+
+## Checkpoint E. Full clip list in chunks. PASS
+- **Scope.** Every player body clip on MaddenFB_Hero_Skeleton. That is 12,187 controller names (body channel maps `6a6eb813061beab6` and `e5b9c7b4b01de68d`), each merged with its finger layer. About 400 clips on other rigs (camera, props, quadruped, sideline actors) are out of scope.
+- **Chunks.** 83 kits `tools\madden\kits\anim_full_000.json` to `anim_full_082.json`, cut at 30,000 frames each. Three chunks with more than 290 clips (71, 75 and 77) were split in half into 80, 81 and 82, because Unreal import time grows with clip count. `tools\madden\anim_driver.py` runs pending chunks one 10 minute window at a time and stops everything on an install guard change. Wall time about 6 hours 15 minutes (09:21 to 15:36), under the 12 hour cap.
+- **Result.**
+  - 12,187 clips decoded, 12,182 passed the gate and are in `/Game/MaddenRef/Animations/Full/C000` to `C082` (2,372,513 frames).
+  - Every chunk's final Unreal log ends `Success - 0 error(s), 0 warning(s)`.
+  - The full verify hashed all 27,521 manifest files with no mismatch.
+  - Install guard unchanged, audit passes (13,495 packages).
+- **Held out, with reasons in `failures.csv`.**
+  1. `Pose_Accel_Anim__P01`, `Pose_Fatigue_Anim__P01`, `Pose_Fatigue_Idle_Anim__P01` and `Torso_Twist_Left_4_HeadTracking__P01` are the only four additive body clips. They store deltas for layering (fatigue posture, acceleration lean, head tracking twist), so played as absolute poses they collapse to the ground. Two of them had passed the gate and been imported before the additive rule existed. They were removed (FBX, metadata, manifest entries and Unreal assets) and the chunk was rerun.
+  2. `PostPlay_Group_TD_Celeb_Vikings_Drive_the_Car_1man5__P02` has one bad key in the source data. At frame 406 of 634 `Hips.t` jumps about 5 m and returns on the next key, inside one 8 key VBR block whose other keys decode cleanly. A decoder fault in that block would smear over all 8 keys, so this reads as a capture pop in the data. It was left unaltered and held out.
+- **Real fixes made during E.**
+  1. **Gate too strict for players lying down.** Injury clips keep the head at 0.16 m all clip long. The "head never rises" limit went from 0.2 m to 0.05 m.
+  2. **Frame codec layers.** Some finger layers are `FrameAnimationAsset` (FRAM), one stored pose. 323 are empty placeholders and 40 hold a pose. Layout is QuatCount x 4 floats, then Vec3Count x 4 floats, then the float block padded to whole groups of 4 (quaternion norms within 2.6e-7 of 1). Empty layers now add nothing.
+  3. **Additive clips** are held out (above).
+  4. **NTSC rates.** Eight clips run at 29.97 or 59.94 fps. Unreal bakes at integer rates and refused their lengths, so they are written at 30 or 60 fps (duration changes by 0.1 percent, source rate kept in each clip's JSON).
+  5. **Path length.** One clip name made a 126 character Unreal asset name that broke the Windows path limit. Unreal names over 120 characters are now shortened to 100 characters plus 8 hex of a hash of the full name.
+- **Sizes.** Sparse FBX `extracted\animation\full` 25 GB on D (426 GB free afterwards). Unreal animations 20 GB on C (70 GB free afterwards, above the 40 GB floor this job set for C).
+- **What is not done.** No retargeting to the UEFN mannequin or MetaHumans. No root motion setup (root motion sits on `AITrajectory` and `Hips`, under `Reference`). No additive clips. No clips for non player rigs. No state machines, blend spaces or tags from the bank (they decode but were not exported).
