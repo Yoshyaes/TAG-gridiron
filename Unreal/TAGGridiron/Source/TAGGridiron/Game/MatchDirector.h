@@ -112,6 +112,9 @@ private:
 	float AutoT = 0.f;
 	int32 AutoShot = 0;
 	bool bAutoEstablish = false;
+	UPROPERTY()
+	TObjectPtr<AActor> CloseupTarget;
+	int32 CloseupView = 0;
 	void TickAutomation(float Dt);
 
 	struct FKick

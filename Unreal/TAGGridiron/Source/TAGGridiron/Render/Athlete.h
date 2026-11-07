@@ -43,6 +43,7 @@ public:
 	void ResetPose();
 
 	void SetSelected(bool bSel);
+	FString DebugAnimState() const;
 	void SetLabel(const FString& Text);
 
 	const tag::Player* Player = nullptr;
@@ -74,9 +75,25 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UTextRenderComponent> Label;
 
+	/** MetaHuman body/face (visible) - pose retargeted from the hidden mocap mannequin `Body`. */
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<USkeletalMeshComponent> MHBody;
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<USkeletalMeshComponent> MHFace;
+
+	/** Facemask cage bars and shoulder-pad caps (created in Setup). */
+	UPROPERTY()
+	TArray<TObjectPtr<UStaticMeshComponent>> Gear;
+
+	/** The mesh the player actually sees (MetaHuman if available, otherwise the mannequin). */
+	USkeletalMeshComponent* Visible() const { return MHBody ? MHBody.Get() : Body.Get(); }
+
 private:
 	void PlayClip(UAnimationAsset* Clip, bool bLoop, float Rate = 1.f);
 	void StartRagdoll(const FVector& VelWorld);
+	void SetupMetaHuman(int32 Arch, const FUniform& U);
+	FVector VisRelScale = FVector::OneVector;
 
 	UPROPERTY()
 	TObjectPtr<UAnimationAsset> CurrentClip;
@@ -91,12 +108,28 @@ private:
 	FRotator BodyRelRot = FRotator(0, -90, 0);
 };
 
+/** One MetaHuman body type (lineman / skill / big). */
+struct FMHArchetype
+{
+	TObjectPtr<class USkeletalMesh> Body;
+	TObjectPtr<class USkeletalMesh> Face;
+	TObjectPtr<class UIKRetargeter> Retargeter;
+	TObjectPtr<class UTexture> SkinBC;
+	TObjectPtr<class UTexture> SkinN;
+	float HeightCm = 185.f;
+	float Depth = 1.f; // chest depth relative to the skill body (number placement)
+};
+
 /** Shared asset cache for athletes (loaded once). */
 struct FAthleteAssets
 {
 	static FAthleteAssets& Get();
 	bool bLoaded = false;
 	bool bMocap = false; // Game Animation Sample (UEFN mannequin) assets available
+	bool bMetaHumans = false; // TAG MetaHuman bodies available (retargeted from the mocap)
+	FMHArchetype MH[3]; // 0 lineman, 1 skill, 2 big
+	TObjectPtr<class UMaterialInterface> MHUniformMat;
+	static int32 ArchetypeFor(int32 PosIndex);
 	TObjectPtr<class USkeletalMesh> Mesh;
 	TObjectPtr<class UBlendSpace> Locomotion;
 	TObjectPtr<class UBlendSpace> Crouch;
@@ -109,6 +142,7 @@ struct FAthleteAssets
 	TObjectPtr<UAnimationAsset> Jump;
 	TObjectPtr<UAnimationAsset> Dash;
 	TObjectPtr<UAnimationAsset> Celebrate;
+	TObjectPtr<UAnimationAsset> Idle;
 	TObjectPtr<class UMaterialInterface> UniformMat;
 	float LocoMaxSpeed = 700.f;
 	float CrouchMaxSpeed = 225.f;

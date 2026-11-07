@@ -18,6 +18,11 @@ Unreal/**/build/
 # generated art (rebuilt by Unreal/TAGGridiron/Tools/setup_assets.bat)
 Unreal/TAGGridiron/RawArt/
 Unreal/TAGGridiron/Content/TAG/
+# copied from Epic's Game Animation Sample by setup_assets.bat; editor-generated folders
+Unreal/TAGGridiron/Content/MetaHumans/
+Unreal/TAGGridiron/Content/Misc/
+Unreal/TAGGridiron/Content/Collections/
+Unreal/TAGGridiron/Content/Developers/
 Unreal/**/mat.log
 Unreal/**/build_editor.log
 Assets/

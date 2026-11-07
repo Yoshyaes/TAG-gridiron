@@ -15,6 +15,15 @@ def load(path):
     return a
 
 
+def resample(bs):
+    """Build the runtime blend data (the blend space editor UI normally does this)."""
+    lib = getattr(unreal, "TagEditorLib", None)
+    if lib is None:
+        unreal.log_warning("TAG: TagEditorLib missing - build the C++ module first; blend space will not animate")
+        return False
+    return lib.resample_blend_space(bs)
+
+
 def speed_of(seq, fallback):
     """Average root-motion ground speed (cm/s) of a looping clip."""
     try:
@@ -90,8 +99,9 @@ def build():
     p1.set_editor_property("grid_num", 4)
     params[0] = p0
     params[1] = p1
-    bs.set_editor_property("blend_parameters", params)
-    bs.set_editor_property("sample_data", samples)
+    bs.set_editor_property("blend_parameters", params, unreal.PropertyAccessChangeNotifyMode.ALWAYS)
+    bs.set_editor_property("sample_data", samples, unreal.PropertyAccessChangeNotifyMode.ALWAYS)
+    resample(bs)
     EAL.save_loaded_asset(bs)
     msg = "TAG locomotion speeds walk=%.1f run=%.1f sprint=%.1f samples=%d" % (speeds["Walk"], speeds["Run"], speeds["Sprint"], len(samples))
     unreal.log(msg)
@@ -143,8 +153,9 @@ def build_crouch():
     p1.set_editor_property("grid_num", 2)
     params[0] = p0
     params[1] = p1
-    bs.set_editor_property("blend_parameters", params)
-    bs.set_editor_property("sample_data", samples)
+    bs.set_editor_property("blend_parameters", params, unreal.PropertyAccessChangeNotifyMode.ALWAYS)
+    bs.set_editor_property("sample_data", samples, unreal.PropertyAccessChangeNotifyMode.ALWAYS)
+    resample(bs)
     EAL.save_loaded_asset(bs)
     return sp
 

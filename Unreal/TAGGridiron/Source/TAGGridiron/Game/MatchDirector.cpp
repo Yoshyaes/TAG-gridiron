@@ -102,6 +102,11 @@ void AMatchDirector::TickAutomation(float Dt)
 		if (AutoShot == 4) CamMode = ECamMode::Sideline;
 		if (AutoShot == 6) CamMode = ECamMode::Skycam;
 		FScreenshotRequest::RequestScreenshot(FString::Printf(TEXT("tag_auto_%02d.png"), AutoShot), false, false);
+		int32 NLog = 0;
+		for (auto& KV : Athletes)
+		{
+			if (!KV.Value->IsHidden() && NLog++ < 3) UE_LOG(LogTemp, Display, TEXT("TAG athlete %d: %s"), KV.Key, *KV.Value->DebugAnimState());
+		}
 		UE_LOG(LogTemp, Display, TEXT("TAG auto screenshot %d state=%d"), AutoShot, static_cast<int32>(State));
 		++AutoShot;
 	}
@@ -115,7 +120,44 @@ void AMatchDirector::TickAutomation(float Dt)
 		FScreenshotRequest::RequestScreenshot(TEXT("tag_auto_stands.png"), false, false);
 		++AutoShot;
 	}
-	if (AutoT > 56.f) FPlatformMisc::RequestExit(false);
+	// close-up of one athlete (verifies character, uniform and equipment fit)
+	if (AutoShot == static_cast<int32>(UE_ARRAY_COUNT(Times)) + 1 && AutoT > 55.f)
+	{
+		bAutoEstablish = false;
+		for (auto& KV : Athletes)
+		{
+			if (!KV.Value->IsHidden())
+			{
+				CloseupTarget = KV.Value;
+				break;
+			}
+		}
+		if (AutoT >= 57.5f)
+		{
+			if (const AAthlete* CA = Cast<AAthlete>(CloseupTarget)) UE_LOG(LogTemp, Display, TEXT("TAG closeup athlete: %s"), *CA->DebugAnimState());
+			FScreenshotRequest::RequestScreenshot(TEXT("tag_auto_closeup.png"), false, false);
+			++AutoShot;
+		}
+	}
+	else if (AutoShot == static_cast<int32>(UE_ARRAY_COUNT(Times)) + 2 && AutoT >= 59.f)
+	{
+		CloseupView = 1; // full body
+		if (AutoT >= 60.5f)
+		{
+			FScreenshotRequest::RequestScreenshot(TEXT("tag_auto_closeup_full.png"), false, false);
+			++AutoShot;
+		}
+	}
+	else if (AutoShot == static_cast<int32>(UE_ARRAY_COUNT(Times)) + 3 && AutoT >= 61.f)
+	{
+		CloseupView = 2; // from behind
+		if (AutoT >= 62.5f)
+		{
+			FScreenshotRequest::RequestScreenshot(TEXT("tag_auto_closeup_back.png"), false, false);
+			++AutoShot;
+		}
+	}
+	if (AutoT > 63.5f) FPlatformMisc::RequestExit(false);
 }
 
 void AMatchDirector::EndPlay(const EEndPlayReason::Type Reason)
@@ -741,6 +783,27 @@ void AMatchDirector::UpdateCamera(float Dt, const FVector& Focus)
 	{
 		P = FVector(50 * Y, -30 * Y, 22 * Y);
 		CamLook = FVector(50 * Y, 70 * Y, 14 * Y);
+	}
+	else if (CloseupTarget)
+	{
+		const FVector Tgt = CloseupTarget->GetActorLocation() + FVector(0, 0, 140);
+		const FVector F = CloseupTarget->GetActorForwardVector();
+		const FVector R = CloseupTarget->GetActorRightVector();
+		if (CloseupView == 1)
+		{
+			P = Tgt + F * 380.f + R * 120.f - FVector(0, 0, 30);
+			CamLook = Tgt - FVector(0, 0, 60);
+		}
+		else if (CloseupView == 2)
+		{
+			P = Tgt - F * 260.f + R * 70.f;
+			CamLook = Tgt - FVector(0, 0, 25);
+		}
+		else
+		{
+			P = Tgt + F * 230.f + R * 90.f + FVector(0, 0, 10);
+			CamLook = Tgt - FVector(0, 0, 25);
+		}
 	}
 	Camera->SetActorLocation(P);
 	Camera->SetActorRotation((CamLook - P).Rotation());
