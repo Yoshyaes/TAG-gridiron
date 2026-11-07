@@ -1,0 +1,28 @@
+[
+ {
+  "id": "raw_small",
+  "op": "raw",
+  "kind": "res",
+  "asset": "animations/antanimations/content/nis/nis_18_inj_table_ankle_l/nis_18_inj_table_ankle_l_win32_antstate",
+  "out": "{REPO}/extracted/stage3/raw/nis_18_inj_table_ankle_l.assetbank"
+ },
+ {
+  "id": "ebx_small",
+  "op": "ebx",
+  "asset": "animations/antanimations/content/nis/nis_18_inj_table_ankle_l/nis_18_inj_table_ankle_l_win32_antstate",
+  "out": "{REPO}/extracted/stage3/raw/nis_18_inj_table_ankle_l.antstate.ebx.json"
+ },
+ {
+  "id": "ebx_game",
+  "op": "ebx",
+  "asset": "animations/antanimations/levels/maddengame/maddengame_win32_antstate",
+  "out": "{REPO}/extracted/stage3/raw/maddengame.antstate.ebx.json"
+ },
+ {
+  "id": "raw_game",
+  "op": "raw",
+  "kind": "res",
+  "asset": "animations/antanimations/levels/maddengame/maddengame_win32_antstate",
+  "out": "{REPO}/extracted/stage3/raw/maddengame.assetbank"
+ }
+]

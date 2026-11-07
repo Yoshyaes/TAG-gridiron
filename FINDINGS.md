@@ -57,3 +57,15 @@ Every surprise, with evidence. Newest stage last. Private reference work, see `e
   3. `delete_asset` returns True but the object stays in memory for the session, so delete then rename onto the same name fails. Renames also leave redirectors. The importer therefore copies each FBX to `<asset name>.fbx` and imports straight into the destination with replace existing. A bootstrap job named `MaddenFB_Hero` makes Interchange create `/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton` itself.
   4. The deprecated `combine_static_meshes` property raises in Python. Use `combine_static_meshes_behavior`.
 - Preview level `/Game/MaddenRef/Maps/L_MaddenRef_Stage2Player` places all 12 parts at the origin with basic material instances (`M_MaddenRef_Basic`, RSM wired behind a `UseRSM` switch until Stage 5 confirms channel meaning). Visual sign off is left for Fred, since `-nullrhi` cannot render.
+
+## Stage 3. Animation feasibility. NO GO (cut list taken at 01:20, inside the 2 hour box)
+- **Container.** Every AntStateAsset EBX is a stub (StreamingGuid, ChunkSize). The data is an `AssetBank` RES in EA GenericData format, big endian, with `GD.REFL` (type reflection), `GD.STRM` and one `GD.DATA` record per asset.
+- **Main gameplay bank.** `animations/antanimations/levels/maddengame/maddengame_win32_antstate`, 634,890,752 bytes raw, 471,492 `GD.DATA` records. Reflection declares `VbrAnimationAsset` and `FrameAnimationAsset` codecs, `ChannelToDofAsset`, 29 `DofSetList`, 34 BlendSpace, `ClipControllerAsset` and `LayoutHierarchyAsset`.
+- **Clip names.** Animation assets are keyed by 64 bit hex hashes (`b9da56b1f152dd2a` style). Some controller and state names are readable (`pt_standard_stance_loop`, `run2stance`, `org_tackle`, `slight_jogging`, `p_celebrate`), so a future decoder could map names to clips through the state graph.
+- **Why no go.** Nothing available decodes this today. Frosty 1.0.6.3 has no animation decoding. The only mature VBR decoder is the FIFA 17 edition FrostyAnimationEditor fork, which targets the FIFA 17 profile. Running it on Madden data means adapting its GenericData and VBR readers and the DOF to skeleton mapping, which is a decoder port, explicitly out of scope.
+- **Evidence kept.** `extracted\stage3\raw\maddengame.assetbank` and one small NIS bank, reproducible from `tools\madden\jobs\stage3_probe.json`.
+- **Options for Fred.**
+  1. Port the FIFA 17 edition decoder (GenericData reflection reader, VBR and Frame codecs, ChannelToDof mapping onto `MaddenFB_Hero_Skeleton`). 2 to 6 weeks, uncertain, because Madden's codec version may differ from FIFA 17.
+  2. Ask the Madden Modding Community whether their closed animation plugin can export clips. Unknown effort, depends on them.
+  3. Keep GASP plus the procedural layers in `docs\ANIMATION_SPEC.md` (current plan). Close to zero new effort. Recommended.
+- **Effect on later stages.** Stage 4 and Stage 6 drop animations. Skeleton, meshes and textures stay as visual and proportion reference.

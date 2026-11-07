@@ -8,7 +8,8 @@ Updated after every gate. Branch `madden-extraction`, nothing pushed.
 | 0b Host bring up | PASS |
 | 1 Inventory | PASS (523,630 rows, 19 skeletons, 2,374 heads) |
 | 2 Skeleton and one player | PASS (268 bone MaddenFB_Hero skeleton, 13 parts, 189.7 cm) |
-| 3 Animation probe | running (2 hour box) |
+| 3 Animation probe | NO GO, cut list taken (VBR AssetBank, no decoder without a port) |
+| 4 Prototype batch | running (meshes only) |
 
 ## On disk
 - `D:\MaddenRef\extracted` (junction `extracted\`). 192 MB (inventory 188 MB, Stage 0b test head).
