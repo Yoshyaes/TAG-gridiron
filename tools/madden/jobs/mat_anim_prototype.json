@@ -8,2367 +8,2706 @@
     "x": 0.0,
     "y": 0.0,
     "label": "Idle_Preplay_Crouch_Stance_v",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_Idle_Preplay_Crouch_Stance_var3__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_Idle_Preplay_Crouch_Stance_var3__P01_InPlace",
+    "group": 0
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_fullarms_d",
     "x": 0.0,
     "y": 0.0,
     "label": "Idle_Preplay_Crouch_Stance_v",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_Idle_Preplay_Crouch_Stance_var3__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_Idle_Preplay_Crouch_Stance_var3__P01_InPlace",
+    "group": 0
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_legs_d",
     "x": 0.0,
     "y": 0.0,
     "label": "Idle_Preplay_Crouch_Stance_v",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_Idle_Preplay_Crouch_Stance_var3__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_Idle_Preplay_Crouch_Stance_var3__P01_InPlace",
+    "group": 0
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_jersey_d",
     "x": 0.0,
     "y": 0.0,
     "label": "Idle_Preplay_Crouch_Stance_v",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_Idle_Preplay_Crouch_Stance_var3__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_Idle_Preplay_Crouch_Stance_var3__P01_InPlace",
+    "group": 0
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_pants_d",
     "x": 0.0,
     "y": 0.0,
     "label": "Idle_Preplay_Crouch_Stance_v",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_Idle_Preplay_Crouch_Stance_var3__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_Idle_Preplay_Crouch_Stance_var3__P01_InPlace",
+    "group": 0
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_socks_mid_d",
     "x": 0.0,
     "y": 0.0,
     "label": "Idle_Preplay_Crouch_Stance_v",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_Idle_Preplay_Crouch_Stance_var3__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_Idle_Preplay_Crouch_Stance_var3__P01_InPlace",
+    "group": 0
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_sleeve_tight_d",
     "x": 0.0,
     "y": 0.0,
     "label": "Idle_Preplay_Crouch_Stance_v",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_Idle_Preplay_Crouch_Stance_var3__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_Idle_Preplay_Crouch_Stance_var3__P01_InPlace",
+    "group": 0
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_shell_xenith",
     "x": 0.0,
     "y": 0.0,
     "label": "Idle_Preplay_Crouch_Stance_v",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_Idle_Preplay_Crouch_Stance_var3__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_Idle_Preplay_Crouch_Stance_var3__P01_InPlace",
+    "group": 0
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_facemask_xenithprism",
     "x": 0.0,
     "y": 0.0,
     "label": "Idle_Preplay_Crouch_Stance_v",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_Idle_Preplay_Crouch_Stance_var3__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_Idle_Preplay_Crouch_Stance_var3__P01_InPlace",
+    "group": 0
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubr_d",
     "x": 0.0,
     "y": 0.0,
     "label": "Idle_Preplay_Crouch_Stance_v",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_Idle_Preplay_Crouch_Stance_var3__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_Idle_Preplay_Crouch_Stance_var3__P01_InPlace",
+    "group": 0
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubl_d",
     "x": 0.0,
     "y": 0.0,
     "label": "Idle_Preplay_Crouch_Stance_v",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_Idle_Preplay_Crouch_Stance_var3__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_Idle_Preplay_Crouch_Stance_var3__P01_InPlace",
+    "group": 0
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_glover_d",
     "x": 0.0,
     "y": 0.0,
     "label": "Idle_Preplay_Crouch_Stance_v",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_Idle_Preplay_Crouch_Stance_var3__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_Idle_Preplay_Crouch_Stance_var3__P01_InPlace",
+    "group": 0
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_glovel_d",
     "x": 0.0,
     "y": 0.0,
     "label": "Idle_Preplay_Crouch_Stance_v",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_Idle_Preplay_Crouch_Stance_var3__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_Idle_Preplay_Crouch_Stance_var3__P01_InPlace",
+    "group": 0
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_faulkmarshall_11413",
     "x": 300.0,
     "y": 0.0,
     "label": "MADNAUG04_0054_1_1_PrePlay_3",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MADNAUG04_0054_1_1_PrePlay_3ptStance_quick_LookAround__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MADNAUG04_0054_1_1_PrePlay_3ptStance_quick_LookAround__P01_InPlace",
+    "group": 1
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_fullarms_d",
     "x": 300.0,
     "y": 0.0,
     "label": "MADNAUG04_0054_1_1_PrePlay_3",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MADNAUG04_0054_1_1_PrePlay_3ptStance_quick_LookAround__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MADNAUG04_0054_1_1_PrePlay_3ptStance_quick_LookAround__P01_InPlace",
+    "group": 1
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_legs_d",
     "x": 300.0,
     "y": 0.0,
     "label": "MADNAUG04_0054_1_1_PrePlay_3",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MADNAUG04_0054_1_1_PrePlay_3ptStance_quick_LookAround__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MADNAUG04_0054_1_1_PrePlay_3ptStance_quick_LookAround__P01_InPlace",
+    "group": 1
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_jersey_d",
     "x": 300.0,
     "y": 0.0,
     "label": "MADNAUG04_0054_1_1_PrePlay_3",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MADNAUG04_0054_1_1_PrePlay_3ptStance_quick_LookAround__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MADNAUG04_0054_1_1_PrePlay_3ptStance_quick_LookAround__P01_InPlace",
+    "group": 1
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_pants_d",
     "x": 300.0,
     "y": 0.0,
     "label": "MADNAUG04_0054_1_1_PrePlay_3",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MADNAUG04_0054_1_1_PrePlay_3ptStance_quick_LookAround__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MADNAUG04_0054_1_1_PrePlay_3ptStance_quick_LookAround__P01_InPlace",
+    "group": 1
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_socks_mid_d",
     "x": 300.0,
     "y": 0.0,
     "label": "MADNAUG04_0054_1_1_PrePlay_3",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MADNAUG04_0054_1_1_PrePlay_3ptStance_quick_LookAround__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MADNAUG04_0054_1_1_PrePlay_3ptStance_quick_LookAround__P01_InPlace",
+    "group": 1
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_sleeve_tight_d",
     "x": 300.0,
     "y": 0.0,
     "label": "MADNAUG04_0054_1_1_PrePlay_3",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MADNAUG04_0054_1_1_PrePlay_3ptStance_quick_LookAround__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MADNAUG04_0054_1_1_PrePlay_3ptStance_quick_LookAround__P01_InPlace",
+    "group": 1
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_shell_xenith",
     "x": 300.0,
     "y": 0.0,
     "label": "MADNAUG04_0054_1_1_PrePlay_3",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MADNAUG04_0054_1_1_PrePlay_3ptStance_quick_LookAround__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MADNAUG04_0054_1_1_PrePlay_3ptStance_quick_LookAround__P01_InPlace",
+    "group": 1
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_facemask_xenithprism",
     "x": 300.0,
     "y": 0.0,
     "label": "MADNAUG04_0054_1_1_PrePlay_3",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MADNAUG04_0054_1_1_PrePlay_3ptStance_quick_LookAround__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MADNAUG04_0054_1_1_PrePlay_3ptStance_quick_LookAround__P01_InPlace",
+    "group": 1
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubr_d",
     "x": 300.0,
     "y": 0.0,
     "label": "MADNAUG04_0054_1_1_PrePlay_3",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MADNAUG04_0054_1_1_PrePlay_3ptStance_quick_LookAround__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MADNAUG04_0054_1_1_PrePlay_3ptStance_quick_LookAround__P01_InPlace",
+    "group": 1
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubl_d",
     "x": 300.0,
     "y": 0.0,
     "label": "MADNAUG04_0054_1_1_PrePlay_3",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MADNAUG04_0054_1_1_PrePlay_3ptStance_quick_LookAround__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MADNAUG04_0054_1_1_PrePlay_3ptStance_quick_LookAround__P01_InPlace",
+    "group": 1
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_glover_d",
     "x": 300.0,
     "y": 0.0,
     "label": "MADNAUG04_0054_1_1_PrePlay_3",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MADNAUG04_0054_1_1_PrePlay_3ptStance_quick_LookAround__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MADNAUG04_0054_1_1_PrePlay_3ptStance_quick_LookAround__P01_InPlace",
+    "group": 1
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_glovel_d",
     "x": 300.0,
     "y": 0.0,
     "label": "MADNAUG04_0054_1_1_PrePlay_3",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MADNAUG04_0054_1_1_PrePlay_3ptStance_quick_LookAround__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MADNAUG04_0054_1_1_PrePlay_3ptStance_quick_LookAround__P01_InPlace",
+    "group": 1
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_faulkmarshall_11413",
     "x": 600.0,
     "y": 0.0,
     "label": "FATIGUED_STANCE_P_QB_shotgun",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_FATIGUED_STANCE_P_QB_shotgun_looping__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_FATIGUED_STANCE_P_QB_shotgun_looping__P01_InPlace",
+    "group": 2
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_fullarms_d",
     "x": 600.0,
     "y": 0.0,
     "label": "FATIGUED_STANCE_P_QB_shotgun",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_FATIGUED_STANCE_P_QB_shotgun_looping__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_FATIGUED_STANCE_P_QB_shotgun_looping__P01_InPlace",
+    "group": 2
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_legs_d",
     "x": 600.0,
     "y": 0.0,
     "label": "FATIGUED_STANCE_P_QB_shotgun",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_FATIGUED_STANCE_P_QB_shotgun_looping__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_FATIGUED_STANCE_P_QB_shotgun_looping__P01_InPlace",
+    "group": 2
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_jersey_d",
     "x": 600.0,
     "y": 0.0,
     "label": "FATIGUED_STANCE_P_QB_shotgun",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_FATIGUED_STANCE_P_QB_shotgun_looping__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_FATIGUED_STANCE_P_QB_shotgun_looping__P01_InPlace",
+    "group": 2
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_pants_d",
     "x": 600.0,
     "y": 0.0,
     "label": "FATIGUED_STANCE_P_QB_shotgun",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_FATIGUED_STANCE_P_QB_shotgun_looping__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_FATIGUED_STANCE_P_QB_shotgun_looping__P01_InPlace",
+    "group": 2
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_socks_mid_d",
     "x": 600.0,
     "y": 0.0,
     "label": "FATIGUED_STANCE_P_QB_shotgun",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_FATIGUED_STANCE_P_QB_shotgun_looping__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_FATIGUED_STANCE_P_QB_shotgun_looping__P01_InPlace",
+    "group": 2
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_sleeve_tight_d",
     "x": 600.0,
     "y": 0.0,
     "label": "FATIGUED_STANCE_P_QB_shotgun",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_FATIGUED_STANCE_P_QB_shotgun_looping__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_FATIGUED_STANCE_P_QB_shotgun_looping__P01_InPlace",
+    "group": 2
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_shell_xenith",
     "x": 600.0,
     "y": 0.0,
     "label": "FATIGUED_STANCE_P_QB_shotgun",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_FATIGUED_STANCE_P_QB_shotgun_looping__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_FATIGUED_STANCE_P_QB_shotgun_looping__P01_InPlace",
+    "group": 2
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_facemask_xenithprism",
     "x": 600.0,
     "y": 0.0,
     "label": "FATIGUED_STANCE_P_QB_shotgun",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_FATIGUED_STANCE_P_QB_shotgun_looping__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_FATIGUED_STANCE_P_QB_shotgun_looping__P01_InPlace",
+    "group": 2
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubr_d",
     "x": 600.0,
     "y": 0.0,
     "label": "FATIGUED_STANCE_P_QB_shotgun",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_FATIGUED_STANCE_P_QB_shotgun_looping__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_FATIGUED_STANCE_P_QB_shotgun_looping__P01_InPlace",
+    "group": 2
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubl_d",
     "x": 600.0,
     "y": 0.0,
     "label": "FATIGUED_STANCE_P_QB_shotgun",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_FATIGUED_STANCE_P_QB_shotgun_looping__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_FATIGUED_STANCE_P_QB_shotgun_looping__P01_InPlace",
+    "group": 2
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_glover_d",
     "x": 600.0,
     "y": 0.0,
     "label": "FATIGUED_STANCE_P_QB_shotgun",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_FATIGUED_STANCE_P_QB_shotgun_looping__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_FATIGUED_STANCE_P_QB_shotgun_looping__P01_InPlace",
+    "group": 2
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_glovel_d",
     "x": 600.0,
     "y": 0.0,
     "label": "FATIGUED_STANCE_P_QB_shotgun",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_FATIGUED_STANCE_P_QB_shotgun_looping__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_FATIGUED_STANCE_P_QB_shotgun_looping__P01_InPlace",
+    "group": 2
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_faulkmarshall_11413",
     "x": 900.0,
     "y": 0.0,
     "label": "FATIGUED_STANCE_P_WR_2pt_arm",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_FATIGUED_STANCE_P_WR_2pt_armsDN_looping__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_FATIGUED_STANCE_P_WR_2pt_armsDN_looping__P01_InPlace",
+    "group": 3
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_fullarms_d",
     "x": 900.0,
     "y": 0.0,
     "label": "FATIGUED_STANCE_P_WR_2pt_arm",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_FATIGUED_STANCE_P_WR_2pt_armsDN_looping__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_FATIGUED_STANCE_P_WR_2pt_armsDN_looping__P01_InPlace",
+    "group": 3
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_legs_d",
     "x": 900.0,
     "y": 0.0,
     "label": "FATIGUED_STANCE_P_WR_2pt_arm",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_FATIGUED_STANCE_P_WR_2pt_armsDN_looping__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_FATIGUED_STANCE_P_WR_2pt_armsDN_looping__P01_InPlace",
+    "group": 3
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_jersey_d",
     "x": 900.0,
     "y": 0.0,
     "label": "FATIGUED_STANCE_P_WR_2pt_arm",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_FATIGUED_STANCE_P_WR_2pt_armsDN_looping__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_FATIGUED_STANCE_P_WR_2pt_armsDN_looping__P01_InPlace",
+    "group": 3
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_pants_d",
     "x": 900.0,
     "y": 0.0,
     "label": "FATIGUED_STANCE_P_WR_2pt_arm",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_FATIGUED_STANCE_P_WR_2pt_armsDN_looping__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_FATIGUED_STANCE_P_WR_2pt_armsDN_looping__P01_InPlace",
+    "group": 3
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_socks_mid_d",
     "x": 900.0,
     "y": 0.0,
     "label": "FATIGUED_STANCE_P_WR_2pt_arm",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_FATIGUED_STANCE_P_WR_2pt_armsDN_looping__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_FATIGUED_STANCE_P_WR_2pt_armsDN_looping__P01_InPlace",
+    "group": 3
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_sleeve_tight_d",
     "x": 900.0,
     "y": 0.0,
     "label": "FATIGUED_STANCE_P_WR_2pt_arm",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_FATIGUED_STANCE_P_WR_2pt_armsDN_looping__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_FATIGUED_STANCE_P_WR_2pt_armsDN_looping__P01_InPlace",
+    "group": 3
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_shell_xenith",
     "x": 900.0,
     "y": 0.0,
     "label": "FATIGUED_STANCE_P_WR_2pt_arm",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_FATIGUED_STANCE_P_WR_2pt_armsDN_looping__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_FATIGUED_STANCE_P_WR_2pt_armsDN_looping__P01_InPlace",
+    "group": 3
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_facemask_xenithprism",
     "x": 900.0,
     "y": 0.0,
     "label": "FATIGUED_STANCE_P_WR_2pt_arm",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_FATIGUED_STANCE_P_WR_2pt_armsDN_looping__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_FATIGUED_STANCE_P_WR_2pt_armsDN_looping__P01_InPlace",
+    "group": 3
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubr_d",
     "x": 900.0,
     "y": 0.0,
     "label": "FATIGUED_STANCE_P_WR_2pt_arm",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_FATIGUED_STANCE_P_WR_2pt_armsDN_looping__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_FATIGUED_STANCE_P_WR_2pt_armsDN_looping__P01_InPlace",
+    "group": 3
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubl_d",
     "x": 900.0,
     "y": 0.0,
     "label": "FATIGUED_STANCE_P_WR_2pt_arm",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_FATIGUED_STANCE_P_WR_2pt_armsDN_looping__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_FATIGUED_STANCE_P_WR_2pt_armsDN_looping__P01_InPlace",
+    "group": 3
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_glover_d",
     "x": 900.0,
     "y": 0.0,
     "label": "FATIGUED_STANCE_P_WR_2pt_arm",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_FATIGUED_STANCE_P_WR_2pt_armsDN_looping__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_FATIGUED_STANCE_P_WR_2pt_armsDN_looping__P01_InPlace",
+    "group": 3
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_glovel_d",
     "x": 900.0,
     "y": 0.0,
     "label": "FATIGUED_STANCE_P_WR_2pt_arm",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_FATIGUED_STANCE_P_WR_2pt_armsDN_looping__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_FATIGUED_STANCE_P_WR_2pt_armsDN_looping__P01_InPlace",
+    "group": 3
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_faulkmarshall_11413",
     "x": 1200.0,
     "y": 0.0,
-    "label": "MG_Loco_Run_Average__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MG_Loco_Run_Average__P01"
+    "label": "MG_Loco_Run_Average__P01_InP",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MG_Loco_Run_Average__P01_InPlace",
+    "group": 4
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_fullarms_d",
     "x": 1200.0,
     "y": 0.0,
-    "label": "MG_Loco_Run_Average__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MG_Loco_Run_Average__P01"
+    "label": "MG_Loco_Run_Average__P01_InP",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MG_Loco_Run_Average__P01_InPlace",
+    "group": 4
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_legs_d",
     "x": 1200.0,
     "y": 0.0,
-    "label": "MG_Loco_Run_Average__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MG_Loco_Run_Average__P01"
+    "label": "MG_Loco_Run_Average__P01_InP",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MG_Loco_Run_Average__P01_InPlace",
+    "group": 4
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_jersey_d",
     "x": 1200.0,
     "y": 0.0,
-    "label": "MG_Loco_Run_Average__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MG_Loco_Run_Average__P01"
+    "label": "MG_Loco_Run_Average__P01_InP",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MG_Loco_Run_Average__P01_InPlace",
+    "group": 4
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_pants_d",
     "x": 1200.0,
     "y": 0.0,
-    "label": "MG_Loco_Run_Average__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MG_Loco_Run_Average__P01"
+    "label": "MG_Loco_Run_Average__P01_InP",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MG_Loco_Run_Average__P01_InPlace",
+    "group": 4
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_socks_mid_d",
     "x": 1200.0,
     "y": 0.0,
-    "label": "MG_Loco_Run_Average__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MG_Loco_Run_Average__P01"
+    "label": "MG_Loco_Run_Average__P01_InP",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MG_Loco_Run_Average__P01_InPlace",
+    "group": 4
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_sleeve_tight_d",
     "x": 1200.0,
     "y": 0.0,
-    "label": "MG_Loco_Run_Average__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MG_Loco_Run_Average__P01"
+    "label": "MG_Loco_Run_Average__P01_InP",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MG_Loco_Run_Average__P01_InPlace",
+    "group": 4
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_shell_xenith",
     "x": 1200.0,
     "y": 0.0,
-    "label": "MG_Loco_Run_Average__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MG_Loco_Run_Average__P01"
+    "label": "MG_Loco_Run_Average__P01_InP",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MG_Loco_Run_Average__P01_InPlace",
+    "group": 4
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_facemask_xenithprism",
     "x": 1200.0,
     "y": 0.0,
-    "label": "MG_Loco_Run_Average__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MG_Loco_Run_Average__P01"
+    "label": "MG_Loco_Run_Average__P01_InP",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MG_Loco_Run_Average__P01_InPlace",
+    "group": 4
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubr_d",
     "x": 1200.0,
     "y": 0.0,
-    "label": "MG_Loco_Run_Average__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MG_Loco_Run_Average__P01"
+    "label": "MG_Loco_Run_Average__P01_InP",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MG_Loco_Run_Average__P01_InPlace",
+    "group": 4
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubl_d",
     "x": 1200.0,
     "y": 0.0,
-    "label": "MG_Loco_Run_Average__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MG_Loco_Run_Average__P01"
+    "label": "MG_Loco_Run_Average__P01_InP",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MG_Loco_Run_Average__P01_InPlace",
+    "group": 4
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_glover_d",
     "x": 1200.0,
     "y": 0.0,
-    "label": "MG_Loco_Run_Average__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MG_Loco_Run_Average__P01"
+    "label": "MG_Loco_Run_Average__P01_InP",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MG_Loco_Run_Average__P01_InPlace",
+    "group": 4
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_glovel_d",
     "x": 1200.0,
     "y": 0.0,
-    "label": "MG_Loco_Run_Average__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MG_Loco_Run_Average__P01"
+    "label": "MG_Loco_Run_Average__P01_InP",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MG_Loco_Run_Average__P01_InPlace",
+    "group": 4
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_faulkmarshall_11413",
     "x": 1500.0,
     "y": 0.0,
-    "label": "MG_Loco_Sprint_Normal__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MG_Loco_Sprint_Normal__P01"
+    "label": "MG_Loco_Sprint_Normal__P01_I",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MG_Loco_Sprint_Normal__P01_InPlace",
+    "group": 5
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_fullarms_d",
     "x": 1500.0,
     "y": 0.0,
-    "label": "MG_Loco_Sprint_Normal__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MG_Loco_Sprint_Normal__P01"
+    "label": "MG_Loco_Sprint_Normal__P01_I",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MG_Loco_Sprint_Normal__P01_InPlace",
+    "group": 5
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_legs_d",
     "x": 1500.0,
     "y": 0.0,
-    "label": "MG_Loco_Sprint_Normal__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MG_Loco_Sprint_Normal__P01"
+    "label": "MG_Loco_Sprint_Normal__P01_I",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MG_Loco_Sprint_Normal__P01_InPlace",
+    "group": 5
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_jersey_d",
     "x": 1500.0,
     "y": 0.0,
-    "label": "MG_Loco_Sprint_Normal__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MG_Loco_Sprint_Normal__P01"
+    "label": "MG_Loco_Sprint_Normal__P01_I",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MG_Loco_Sprint_Normal__P01_InPlace",
+    "group": 5
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_pants_d",
     "x": 1500.0,
     "y": 0.0,
-    "label": "MG_Loco_Sprint_Normal__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MG_Loco_Sprint_Normal__P01"
+    "label": "MG_Loco_Sprint_Normal__P01_I",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MG_Loco_Sprint_Normal__P01_InPlace",
+    "group": 5
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_socks_mid_d",
     "x": 1500.0,
     "y": 0.0,
-    "label": "MG_Loco_Sprint_Normal__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MG_Loco_Sprint_Normal__P01"
+    "label": "MG_Loco_Sprint_Normal__P01_I",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MG_Loco_Sprint_Normal__P01_InPlace",
+    "group": 5
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_sleeve_tight_d",
     "x": 1500.0,
     "y": 0.0,
-    "label": "MG_Loco_Sprint_Normal__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MG_Loco_Sprint_Normal__P01"
+    "label": "MG_Loco_Sprint_Normal__P01_I",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MG_Loco_Sprint_Normal__P01_InPlace",
+    "group": 5
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_shell_xenith",
     "x": 1500.0,
     "y": 0.0,
-    "label": "MG_Loco_Sprint_Normal__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MG_Loco_Sprint_Normal__P01"
+    "label": "MG_Loco_Sprint_Normal__P01_I",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MG_Loco_Sprint_Normal__P01_InPlace",
+    "group": 5
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_facemask_xenithprism",
     "x": 1500.0,
     "y": 0.0,
-    "label": "MG_Loco_Sprint_Normal__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MG_Loco_Sprint_Normal__P01"
+    "label": "MG_Loco_Sprint_Normal__P01_I",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MG_Loco_Sprint_Normal__P01_InPlace",
+    "group": 5
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubr_d",
     "x": 1500.0,
     "y": 0.0,
-    "label": "MG_Loco_Sprint_Normal__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MG_Loco_Sprint_Normal__P01"
+    "label": "MG_Loco_Sprint_Normal__P01_I",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MG_Loco_Sprint_Normal__P01_InPlace",
+    "group": 5
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubl_d",
     "x": 1500.0,
     "y": 0.0,
-    "label": "MG_Loco_Sprint_Normal__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MG_Loco_Sprint_Normal__P01"
+    "label": "MG_Loco_Sprint_Normal__P01_I",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MG_Loco_Sprint_Normal__P01_InPlace",
+    "group": 5
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_glover_d",
     "x": 1500.0,
     "y": 0.0,
-    "label": "MG_Loco_Sprint_Normal__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MG_Loco_Sprint_Normal__P01"
+    "label": "MG_Loco_Sprint_Normal__P01_I",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MG_Loco_Sprint_Normal__P01_InPlace",
+    "group": 5
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_glovel_d",
     "x": 1500.0,
     "y": 0.0,
-    "label": "MG_Loco_Sprint_Normal__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MG_Loco_Sprint_Normal__P01"
+    "label": "MG_Loco_Sprint_Normal__P01_I",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MG_Loco_Sprint_Normal__P01_InPlace",
+    "group": 5
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_faulkmarshall_11413",
     "x": 1800.0,
     "y": 0.0,
     "label": "MG_Loco_Standard_Sprint_Burn",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MG_Loco_Standard_Sprint_Burn__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MG_Loco_Standard_Sprint_Burn__P01_InPlace",
+    "group": 6
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_fullarms_d",
     "x": 1800.0,
     "y": 0.0,
     "label": "MG_Loco_Standard_Sprint_Burn",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MG_Loco_Standard_Sprint_Burn__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MG_Loco_Standard_Sprint_Burn__P01_InPlace",
+    "group": 6
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_legs_d",
     "x": 1800.0,
     "y": 0.0,
     "label": "MG_Loco_Standard_Sprint_Burn",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MG_Loco_Standard_Sprint_Burn__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MG_Loco_Standard_Sprint_Burn__P01_InPlace",
+    "group": 6
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_jersey_d",
     "x": 1800.0,
     "y": 0.0,
     "label": "MG_Loco_Standard_Sprint_Burn",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MG_Loco_Standard_Sprint_Burn__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MG_Loco_Standard_Sprint_Burn__P01_InPlace",
+    "group": 6
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_pants_d",
     "x": 1800.0,
     "y": 0.0,
     "label": "MG_Loco_Standard_Sprint_Burn",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MG_Loco_Standard_Sprint_Burn__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MG_Loco_Standard_Sprint_Burn__P01_InPlace",
+    "group": 6
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_socks_mid_d",
     "x": 1800.0,
     "y": 0.0,
     "label": "MG_Loco_Standard_Sprint_Burn",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MG_Loco_Standard_Sprint_Burn__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MG_Loco_Standard_Sprint_Burn__P01_InPlace",
+    "group": 6
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_sleeve_tight_d",
     "x": 1800.0,
     "y": 0.0,
     "label": "MG_Loco_Standard_Sprint_Burn",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MG_Loco_Standard_Sprint_Burn__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MG_Loco_Standard_Sprint_Burn__P01_InPlace",
+    "group": 6
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_shell_xenith",
     "x": 1800.0,
     "y": 0.0,
     "label": "MG_Loco_Standard_Sprint_Burn",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MG_Loco_Standard_Sprint_Burn__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MG_Loco_Standard_Sprint_Burn__P01_InPlace",
+    "group": 6
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_facemask_xenithprism",
     "x": 1800.0,
     "y": 0.0,
     "label": "MG_Loco_Standard_Sprint_Burn",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MG_Loco_Standard_Sprint_Burn__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MG_Loco_Standard_Sprint_Burn__P01_InPlace",
+    "group": 6
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubr_d",
     "x": 1800.0,
     "y": 0.0,
     "label": "MG_Loco_Standard_Sprint_Burn",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MG_Loco_Standard_Sprint_Burn__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MG_Loco_Standard_Sprint_Burn__P01_InPlace",
+    "group": 6
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubl_d",
     "x": 1800.0,
     "y": 0.0,
     "label": "MG_Loco_Standard_Sprint_Burn",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MG_Loco_Standard_Sprint_Burn__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MG_Loco_Standard_Sprint_Burn__P01_InPlace",
+    "group": 6
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_glover_d",
     "x": 1800.0,
     "y": 0.0,
     "label": "MG_Loco_Standard_Sprint_Burn",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MG_Loco_Standard_Sprint_Burn__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MG_Loco_Standard_Sprint_Burn__P01_InPlace",
+    "group": 6
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_glovel_d",
     "x": 1800.0,
     "y": 0.0,
     "label": "MG_Loco_Standard_Sprint_Burn",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MG_Loco_Standard_Sprint_Burn__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MG_Loco_Standard_Sprint_Burn__P01_InPlace",
+    "group": 6
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_faulkmarshall_11413",
     "x": 2100.0,
     "y": 0.0,
-    "label": "Loco_NonBC_15_Jog_Loop__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_Loco_NonBC_15_Jog_Loop__P01"
+    "label": "Loco_NonBC_15_Jog_Loop__P01_",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_Loco_NonBC_15_Jog_Loop__P01_InPlace",
+    "group": 7
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_fullarms_d",
     "x": 2100.0,
     "y": 0.0,
-    "label": "Loco_NonBC_15_Jog_Loop__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_Loco_NonBC_15_Jog_Loop__P01"
+    "label": "Loco_NonBC_15_Jog_Loop__P01_",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_Loco_NonBC_15_Jog_Loop__P01_InPlace",
+    "group": 7
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_legs_d",
     "x": 2100.0,
     "y": 0.0,
-    "label": "Loco_NonBC_15_Jog_Loop__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_Loco_NonBC_15_Jog_Loop__P01"
+    "label": "Loco_NonBC_15_Jog_Loop__P01_",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_Loco_NonBC_15_Jog_Loop__P01_InPlace",
+    "group": 7
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_jersey_d",
     "x": 2100.0,
     "y": 0.0,
-    "label": "Loco_NonBC_15_Jog_Loop__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_Loco_NonBC_15_Jog_Loop__P01"
+    "label": "Loco_NonBC_15_Jog_Loop__P01_",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_Loco_NonBC_15_Jog_Loop__P01_InPlace",
+    "group": 7
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_pants_d",
     "x": 2100.0,
     "y": 0.0,
-    "label": "Loco_NonBC_15_Jog_Loop__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_Loco_NonBC_15_Jog_Loop__P01"
+    "label": "Loco_NonBC_15_Jog_Loop__P01_",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_Loco_NonBC_15_Jog_Loop__P01_InPlace",
+    "group": 7
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_socks_mid_d",
     "x": 2100.0,
     "y": 0.0,
-    "label": "Loco_NonBC_15_Jog_Loop__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_Loco_NonBC_15_Jog_Loop__P01"
+    "label": "Loco_NonBC_15_Jog_Loop__P01_",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_Loco_NonBC_15_Jog_Loop__P01_InPlace",
+    "group": 7
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_sleeve_tight_d",
     "x": 2100.0,
     "y": 0.0,
-    "label": "Loco_NonBC_15_Jog_Loop__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_Loco_NonBC_15_Jog_Loop__P01"
+    "label": "Loco_NonBC_15_Jog_Loop__P01_",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_Loco_NonBC_15_Jog_Loop__P01_InPlace",
+    "group": 7
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_shell_xenith",
     "x": 2100.0,
     "y": 0.0,
-    "label": "Loco_NonBC_15_Jog_Loop__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_Loco_NonBC_15_Jog_Loop__P01"
+    "label": "Loco_NonBC_15_Jog_Loop__P01_",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_Loco_NonBC_15_Jog_Loop__P01_InPlace",
+    "group": 7
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_facemask_xenithprism",
     "x": 2100.0,
     "y": 0.0,
-    "label": "Loco_NonBC_15_Jog_Loop__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_Loco_NonBC_15_Jog_Loop__P01"
+    "label": "Loco_NonBC_15_Jog_Loop__P01_",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_Loco_NonBC_15_Jog_Loop__P01_InPlace",
+    "group": 7
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubr_d",
     "x": 2100.0,
     "y": 0.0,
-    "label": "Loco_NonBC_15_Jog_Loop__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_Loco_NonBC_15_Jog_Loop__P01"
+    "label": "Loco_NonBC_15_Jog_Loop__P01_",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_Loco_NonBC_15_Jog_Loop__P01_InPlace",
+    "group": 7
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubl_d",
     "x": 2100.0,
     "y": 0.0,
-    "label": "Loco_NonBC_15_Jog_Loop__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_Loco_NonBC_15_Jog_Loop__P01"
+    "label": "Loco_NonBC_15_Jog_Loop__P01_",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_Loco_NonBC_15_Jog_Loop__P01_InPlace",
+    "group": 7
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_glover_d",
     "x": 2100.0,
     "y": 0.0,
-    "label": "Loco_NonBC_15_Jog_Loop__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_Loco_NonBC_15_Jog_Loop__P01"
+    "label": "Loco_NonBC_15_Jog_Loop__P01_",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_Loco_NonBC_15_Jog_Loop__P01_InPlace",
+    "group": 7
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_glovel_d",
     "x": 2100.0,
     "y": 0.0,
-    "label": "Loco_NonBC_15_Jog_Loop__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_Loco_NonBC_15_Jog_Loop__P01"
+    "label": "Loco_NonBC_15_Jog_Loop__P01_",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_Loco_NonBC_15_Jog_Loop__P01_InPlace",
+    "group": 7
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_faulkmarshall_11413",
     "x": 2400.0,
     "y": 0.0,
     "label": "MG_Loco_QB_Run_ShortStride__",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MG_Loco_QB_Run_ShortStride__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MG_Loco_QB_Run_ShortStride__P01_InPlace",
+    "group": 8
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_fullarms_d",
     "x": 2400.0,
     "y": 0.0,
     "label": "MG_Loco_QB_Run_ShortStride__",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MG_Loco_QB_Run_ShortStride__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MG_Loco_QB_Run_ShortStride__P01_InPlace",
+    "group": 8
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_legs_d",
     "x": 2400.0,
     "y": 0.0,
     "label": "MG_Loco_QB_Run_ShortStride__",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MG_Loco_QB_Run_ShortStride__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MG_Loco_QB_Run_ShortStride__P01_InPlace",
+    "group": 8
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_jersey_d",
     "x": 2400.0,
     "y": 0.0,
     "label": "MG_Loco_QB_Run_ShortStride__",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MG_Loco_QB_Run_ShortStride__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MG_Loco_QB_Run_ShortStride__P01_InPlace",
+    "group": 8
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_pants_d",
     "x": 2400.0,
     "y": 0.0,
     "label": "MG_Loco_QB_Run_ShortStride__",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MG_Loco_QB_Run_ShortStride__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MG_Loco_QB_Run_ShortStride__P01_InPlace",
+    "group": 8
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_socks_mid_d",
     "x": 2400.0,
     "y": 0.0,
     "label": "MG_Loco_QB_Run_ShortStride__",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MG_Loco_QB_Run_ShortStride__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MG_Loco_QB_Run_ShortStride__P01_InPlace",
+    "group": 8
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_sleeve_tight_d",
     "x": 2400.0,
     "y": 0.0,
     "label": "MG_Loco_QB_Run_ShortStride__",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MG_Loco_QB_Run_ShortStride__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MG_Loco_QB_Run_ShortStride__P01_InPlace",
+    "group": 8
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_shell_xenith",
     "x": 2400.0,
     "y": 0.0,
     "label": "MG_Loco_QB_Run_ShortStride__",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MG_Loco_QB_Run_ShortStride__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MG_Loco_QB_Run_ShortStride__P01_InPlace",
+    "group": 8
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_facemask_xenithprism",
     "x": 2400.0,
     "y": 0.0,
     "label": "MG_Loco_QB_Run_ShortStride__",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MG_Loco_QB_Run_ShortStride__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MG_Loco_QB_Run_ShortStride__P01_InPlace",
+    "group": 8
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubr_d",
     "x": 2400.0,
     "y": 0.0,
     "label": "MG_Loco_QB_Run_ShortStride__",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MG_Loco_QB_Run_ShortStride__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MG_Loco_QB_Run_ShortStride__P01_InPlace",
+    "group": 8
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubl_d",
     "x": 2400.0,
     "y": 0.0,
     "label": "MG_Loco_QB_Run_ShortStride__",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MG_Loco_QB_Run_ShortStride__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MG_Loco_QB_Run_ShortStride__P01_InPlace",
+    "group": 8
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_glover_d",
     "x": 2400.0,
     "y": 0.0,
     "label": "MG_Loco_QB_Run_ShortStride__",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MG_Loco_QB_Run_ShortStride__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MG_Loco_QB_Run_ShortStride__P01_InPlace",
+    "group": 8
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_glovel_d",
     "x": 2400.0,
     "y": 0.0,
     "label": "MG_Loco_QB_Run_ShortStride__",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MG_Loco_QB_Run_ShortStride__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MG_Loco_QB_Run_ShortStride__P01_InPlace",
+    "group": 8
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_faulkmarshall_11413",
     "x": 0.0,
     "y": 300.0,
-    "label": "BC_JUKE_AGILE_LEFT__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_BC_JUKE_AGILE_LEFT__P01"
+    "label": "BC_JUKE_AGILE_LEFT__P01_InPl",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_BC_JUKE_AGILE_LEFT__P01_InPlace",
+    "group": 9
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_fullarms_d",
     "x": 0.0,
     "y": 300.0,
-    "label": "BC_JUKE_AGILE_LEFT__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_BC_JUKE_AGILE_LEFT__P01"
+    "label": "BC_JUKE_AGILE_LEFT__P01_InPl",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_BC_JUKE_AGILE_LEFT__P01_InPlace",
+    "group": 9
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_legs_d",
     "x": 0.0,
     "y": 300.0,
-    "label": "BC_JUKE_AGILE_LEFT__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_BC_JUKE_AGILE_LEFT__P01"
+    "label": "BC_JUKE_AGILE_LEFT__P01_InPl",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_BC_JUKE_AGILE_LEFT__P01_InPlace",
+    "group": 9
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_jersey_d",
     "x": 0.0,
     "y": 300.0,
-    "label": "BC_JUKE_AGILE_LEFT__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_BC_JUKE_AGILE_LEFT__P01"
+    "label": "BC_JUKE_AGILE_LEFT__P01_InPl",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_BC_JUKE_AGILE_LEFT__P01_InPlace",
+    "group": 9
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_pants_d",
     "x": 0.0,
     "y": 300.0,
-    "label": "BC_JUKE_AGILE_LEFT__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_BC_JUKE_AGILE_LEFT__P01"
+    "label": "BC_JUKE_AGILE_LEFT__P01_InPl",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_BC_JUKE_AGILE_LEFT__P01_InPlace",
+    "group": 9
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_socks_mid_d",
     "x": 0.0,
     "y": 300.0,
-    "label": "BC_JUKE_AGILE_LEFT__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_BC_JUKE_AGILE_LEFT__P01"
+    "label": "BC_JUKE_AGILE_LEFT__P01_InPl",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_BC_JUKE_AGILE_LEFT__P01_InPlace",
+    "group": 9
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_sleeve_tight_d",
     "x": 0.0,
     "y": 300.0,
-    "label": "BC_JUKE_AGILE_LEFT__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_BC_JUKE_AGILE_LEFT__P01"
+    "label": "BC_JUKE_AGILE_LEFT__P01_InPl",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_BC_JUKE_AGILE_LEFT__P01_InPlace",
+    "group": 9
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_shell_xenith",
     "x": 0.0,
     "y": 300.0,
-    "label": "BC_JUKE_AGILE_LEFT__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_BC_JUKE_AGILE_LEFT__P01"
+    "label": "BC_JUKE_AGILE_LEFT__P01_InPl",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_BC_JUKE_AGILE_LEFT__P01_InPlace",
+    "group": 9
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_facemask_xenithprism",
     "x": 0.0,
     "y": 300.0,
-    "label": "BC_JUKE_AGILE_LEFT__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_BC_JUKE_AGILE_LEFT__P01"
+    "label": "BC_JUKE_AGILE_LEFT__P01_InPl",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_BC_JUKE_AGILE_LEFT__P01_InPlace",
+    "group": 9
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubr_d",
     "x": 0.0,
     "y": 300.0,
-    "label": "BC_JUKE_AGILE_LEFT__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_BC_JUKE_AGILE_LEFT__P01"
+    "label": "BC_JUKE_AGILE_LEFT__P01_InPl",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_BC_JUKE_AGILE_LEFT__P01_InPlace",
+    "group": 9
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubl_d",
     "x": 0.0,
     "y": 300.0,
-    "label": "BC_JUKE_AGILE_LEFT__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_BC_JUKE_AGILE_LEFT__P01"
+    "label": "BC_JUKE_AGILE_LEFT__P01_InPl",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_BC_JUKE_AGILE_LEFT__P01_InPlace",
+    "group": 9
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_glover_d",
     "x": 0.0,
     "y": 300.0,
-    "label": "BC_JUKE_AGILE_LEFT__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_BC_JUKE_AGILE_LEFT__P01"
+    "label": "BC_JUKE_AGILE_LEFT__P01_InPl",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_BC_JUKE_AGILE_LEFT__P01_InPlace",
+    "group": 9
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_glovel_d",
     "x": 0.0,
     "y": 300.0,
-    "label": "BC_JUKE_AGILE_LEFT__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_BC_JUKE_AGILE_LEFT__P01"
+    "label": "BC_JUKE_AGILE_LEFT__P01_InPl",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_BC_JUKE_AGILE_LEFT__P01_InPlace",
+    "group": 9
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_faulkmarshall_11413",
     "x": 300.0,
     "y": 300.0,
-    "label": "BC_JUKE_AGILE_RIGHT__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_BC_JUKE_AGILE_RIGHT__P01"
+    "label": "BC_JUKE_AGILE_RIGHT__P01_InP",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_BC_JUKE_AGILE_RIGHT__P01_InPlace",
+    "group": 10
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_fullarms_d",
     "x": 300.0,
     "y": 300.0,
-    "label": "BC_JUKE_AGILE_RIGHT__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_BC_JUKE_AGILE_RIGHT__P01"
+    "label": "BC_JUKE_AGILE_RIGHT__P01_InP",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_BC_JUKE_AGILE_RIGHT__P01_InPlace",
+    "group": 10
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_legs_d",
     "x": 300.0,
     "y": 300.0,
-    "label": "BC_JUKE_AGILE_RIGHT__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_BC_JUKE_AGILE_RIGHT__P01"
+    "label": "BC_JUKE_AGILE_RIGHT__P01_InP",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_BC_JUKE_AGILE_RIGHT__P01_InPlace",
+    "group": 10
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_jersey_d",
     "x": 300.0,
     "y": 300.0,
-    "label": "BC_JUKE_AGILE_RIGHT__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_BC_JUKE_AGILE_RIGHT__P01"
+    "label": "BC_JUKE_AGILE_RIGHT__P01_InP",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_BC_JUKE_AGILE_RIGHT__P01_InPlace",
+    "group": 10
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_pants_d",
     "x": 300.0,
     "y": 300.0,
-    "label": "BC_JUKE_AGILE_RIGHT__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_BC_JUKE_AGILE_RIGHT__P01"
+    "label": "BC_JUKE_AGILE_RIGHT__P01_InP",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_BC_JUKE_AGILE_RIGHT__P01_InPlace",
+    "group": 10
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_socks_mid_d",
     "x": 300.0,
     "y": 300.0,
-    "label": "BC_JUKE_AGILE_RIGHT__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_BC_JUKE_AGILE_RIGHT__P01"
+    "label": "BC_JUKE_AGILE_RIGHT__P01_InP",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_BC_JUKE_AGILE_RIGHT__P01_InPlace",
+    "group": 10
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_sleeve_tight_d",
     "x": 300.0,
     "y": 300.0,
-    "label": "BC_JUKE_AGILE_RIGHT__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_BC_JUKE_AGILE_RIGHT__P01"
+    "label": "BC_JUKE_AGILE_RIGHT__P01_InP",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_BC_JUKE_AGILE_RIGHT__P01_InPlace",
+    "group": 10
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_shell_xenith",
     "x": 300.0,
     "y": 300.0,
-    "label": "BC_JUKE_AGILE_RIGHT__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_BC_JUKE_AGILE_RIGHT__P01"
+    "label": "BC_JUKE_AGILE_RIGHT__P01_InP",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_BC_JUKE_AGILE_RIGHT__P01_InPlace",
+    "group": 10
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_facemask_xenithprism",
     "x": 300.0,
     "y": 300.0,
-    "label": "BC_JUKE_AGILE_RIGHT__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_BC_JUKE_AGILE_RIGHT__P01"
+    "label": "BC_JUKE_AGILE_RIGHT__P01_InP",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_BC_JUKE_AGILE_RIGHT__P01_InPlace",
+    "group": 10
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubr_d",
     "x": 300.0,
     "y": 300.0,
-    "label": "BC_JUKE_AGILE_RIGHT__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_BC_JUKE_AGILE_RIGHT__P01"
+    "label": "BC_JUKE_AGILE_RIGHT__P01_InP",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_BC_JUKE_AGILE_RIGHT__P01_InPlace",
+    "group": 10
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubl_d",
     "x": 300.0,
     "y": 300.0,
-    "label": "BC_JUKE_AGILE_RIGHT__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_BC_JUKE_AGILE_RIGHT__P01"
+    "label": "BC_JUKE_AGILE_RIGHT__P01_InP",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_BC_JUKE_AGILE_RIGHT__P01_InPlace",
+    "group": 10
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_glover_d",
     "x": 300.0,
     "y": 300.0,
-    "label": "BC_JUKE_AGILE_RIGHT__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_BC_JUKE_AGILE_RIGHT__P01"
+    "label": "BC_JUKE_AGILE_RIGHT__P01_InP",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_BC_JUKE_AGILE_RIGHT__P01_InPlace",
+    "group": 10
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_glovel_d",
     "x": 300.0,
     "y": 300.0,
-    "label": "BC_JUKE_AGILE_RIGHT__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_BC_JUKE_AGILE_RIGHT__P01"
+    "label": "BC_JUKE_AGILE_RIGHT__P01_InP",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_BC_JUKE_AGILE_RIGHT__P01_InPlace",
+    "group": 10
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_faulkmarshall_11413",
     "x": 600.0,
     "y": 300.0,
     "label": "BC_Agile_Juke_Left_Precision",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_BC_Agile_Juke_Left_Precision_v01__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_BC_Agile_Juke_Left_Precision_v01__P01_InPlace",
+    "group": 11
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_fullarms_d",
     "x": 600.0,
     "y": 300.0,
     "label": "BC_Agile_Juke_Left_Precision",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_BC_Agile_Juke_Left_Precision_v01__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_BC_Agile_Juke_Left_Precision_v01__P01_InPlace",
+    "group": 11
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_legs_d",
     "x": 600.0,
     "y": 300.0,
     "label": "BC_Agile_Juke_Left_Precision",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_BC_Agile_Juke_Left_Precision_v01__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_BC_Agile_Juke_Left_Precision_v01__P01_InPlace",
+    "group": 11
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_jersey_d",
     "x": 600.0,
     "y": 300.0,
     "label": "BC_Agile_Juke_Left_Precision",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_BC_Agile_Juke_Left_Precision_v01__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_BC_Agile_Juke_Left_Precision_v01__P01_InPlace",
+    "group": 11
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_pants_d",
     "x": 600.0,
     "y": 300.0,
     "label": "BC_Agile_Juke_Left_Precision",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_BC_Agile_Juke_Left_Precision_v01__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_BC_Agile_Juke_Left_Precision_v01__P01_InPlace",
+    "group": 11
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_socks_mid_d",
     "x": 600.0,
     "y": 300.0,
     "label": "BC_Agile_Juke_Left_Precision",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_BC_Agile_Juke_Left_Precision_v01__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_BC_Agile_Juke_Left_Precision_v01__P01_InPlace",
+    "group": 11
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_sleeve_tight_d",
     "x": 600.0,
     "y": 300.0,
     "label": "BC_Agile_Juke_Left_Precision",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_BC_Agile_Juke_Left_Precision_v01__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_BC_Agile_Juke_Left_Precision_v01__P01_InPlace",
+    "group": 11
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_shell_xenith",
     "x": 600.0,
     "y": 300.0,
     "label": "BC_Agile_Juke_Left_Precision",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_BC_Agile_Juke_Left_Precision_v01__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_BC_Agile_Juke_Left_Precision_v01__P01_InPlace",
+    "group": 11
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_facemask_xenithprism",
     "x": 600.0,
     "y": 300.0,
     "label": "BC_Agile_Juke_Left_Precision",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_BC_Agile_Juke_Left_Precision_v01__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_BC_Agile_Juke_Left_Precision_v01__P01_InPlace",
+    "group": 11
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubr_d",
     "x": 600.0,
     "y": 300.0,
     "label": "BC_Agile_Juke_Left_Precision",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_BC_Agile_Juke_Left_Precision_v01__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_BC_Agile_Juke_Left_Precision_v01__P01_InPlace",
+    "group": 11
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubl_d",
     "x": 600.0,
     "y": 300.0,
     "label": "BC_Agile_Juke_Left_Precision",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_BC_Agile_Juke_Left_Precision_v01__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_BC_Agile_Juke_Left_Precision_v01__P01_InPlace",
+    "group": 11
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_glover_d",
     "x": 600.0,
     "y": 300.0,
     "label": "BC_Agile_Juke_Left_Precision",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_BC_Agile_Juke_Left_Precision_v01__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_BC_Agile_Juke_Left_Precision_v01__P01_InPlace",
+    "group": 11
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_glovel_d",
     "x": 600.0,
     "y": 300.0,
     "label": "BC_Agile_Juke_Left_Precision",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_BC_Agile_Juke_Left_Precision_v01__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_BC_Agile_Juke_Left_Precision_v01__P01_InPlace",
+    "group": 11
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_faulkmarshall_11413",
     "x": 900.0,
     "y": 300.0,
-    "label": "BC_Cut_Test_D1_to_D7__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_BC_Cut_Test_D1_to_D7__P01"
+    "label": "BC_Cut_Test_D1_to_D7__P01_In",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_BC_Cut_Test_D1_to_D7__P01_InPlace",
+    "group": 12
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_fullarms_d",
     "x": 900.0,
     "y": 300.0,
-    "label": "BC_Cut_Test_D1_to_D7__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_BC_Cut_Test_D1_to_D7__P01"
+    "label": "BC_Cut_Test_D1_to_D7__P01_In",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_BC_Cut_Test_D1_to_D7__P01_InPlace",
+    "group": 12
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_legs_d",
     "x": 900.0,
     "y": 300.0,
-    "label": "BC_Cut_Test_D1_to_D7__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_BC_Cut_Test_D1_to_D7__P01"
+    "label": "BC_Cut_Test_D1_to_D7__P01_In",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_BC_Cut_Test_D1_to_D7__P01_InPlace",
+    "group": 12
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_jersey_d",
     "x": 900.0,
     "y": 300.0,
-    "label": "BC_Cut_Test_D1_to_D7__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_BC_Cut_Test_D1_to_D7__P01"
+    "label": "BC_Cut_Test_D1_to_D7__P01_In",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_BC_Cut_Test_D1_to_D7__P01_InPlace",
+    "group": 12
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_pants_d",
     "x": 900.0,
     "y": 300.0,
-    "label": "BC_Cut_Test_D1_to_D7__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_BC_Cut_Test_D1_to_D7__P01"
+    "label": "BC_Cut_Test_D1_to_D7__P01_In",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_BC_Cut_Test_D1_to_D7__P01_InPlace",
+    "group": 12
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_socks_mid_d",
     "x": 900.0,
     "y": 300.0,
-    "label": "BC_Cut_Test_D1_to_D7__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_BC_Cut_Test_D1_to_D7__P01"
+    "label": "BC_Cut_Test_D1_to_D7__P01_In",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_BC_Cut_Test_D1_to_D7__P01_InPlace",
+    "group": 12
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_sleeve_tight_d",
     "x": 900.0,
     "y": 300.0,
-    "label": "BC_Cut_Test_D1_to_D7__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_BC_Cut_Test_D1_to_D7__P01"
+    "label": "BC_Cut_Test_D1_to_D7__P01_In",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_BC_Cut_Test_D1_to_D7__P01_InPlace",
+    "group": 12
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_shell_xenith",
     "x": 900.0,
     "y": 300.0,
-    "label": "BC_Cut_Test_D1_to_D7__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_BC_Cut_Test_D1_to_D7__P01"
+    "label": "BC_Cut_Test_D1_to_D7__P01_In",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_BC_Cut_Test_D1_to_D7__P01_InPlace",
+    "group": 12
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_facemask_xenithprism",
     "x": 900.0,
     "y": 300.0,
-    "label": "BC_Cut_Test_D1_to_D7__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_BC_Cut_Test_D1_to_D7__P01"
+    "label": "BC_Cut_Test_D1_to_D7__P01_In",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_BC_Cut_Test_D1_to_D7__P01_InPlace",
+    "group": 12
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubr_d",
     "x": 900.0,
     "y": 300.0,
-    "label": "BC_Cut_Test_D1_to_D7__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_BC_Cut_Test_D1_to_D7__P01"
+    "label": "BC_Cut_Test_D1_to_D7__P01_In",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_BC_Cut_Test_D1_to_D7__P01_InPlace",
+    "group": 12
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubl_d",
     "x": 900.0,
     "y": 300.0,
-    "label": "BC_Cut_Test_D1_to_D7__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_BC_Cut_Test_D1_to_D7__P01"
+    "label": "BC_Cut_Test_D1_to_D7__P01_In",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_BC_Cut_Test_D1_to_D7__P01_InPlace",
+    "group": 12
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_glover_d",
     "x": 900.0,
     "y": 300.0,
-    "label": "BC_Cut_Test_D1_to_D7__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_BC_Cut_Test_D1_to_D7__P01"
+    "label": "BC_Cut_Test_D1_to_D7__P01_In",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_BC_Cut_Test_D1_to_D7__P01_InPlace",
+    "group": 12
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_glovel_d",
     "x": 900.0,
     "y": 300.0,
-    "label": "BC_Cut_Test_D1_to_D7__P01",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_BC_Cut_Test_D1_to_D7__P01"
+    "label": "BC_Cut_Test_D1_to_D7__P01_In",
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_BC_Cut_Test_D1_to_D7__P01_InPlace",
+    "group": 12
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_faulkmarshall_11413",
     "x": 1200.0,
     "y": 300.0,
     "label": "2man_Catch_Def_In_Over_Shove",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_Catch_Def_In_Over_ShoveTackle__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_Catch_Def_In_Over_ShoveTackle__P01_InPlace",
+    "group": 13
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_fullarms_d",
     "x": 1200.0,
     "y": 300.0,
     "label": "2man_Catch_Def_In_Over_Shove",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_Catch_Def_In_Over_ShoveTackle__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_Catch_Def_In_Over_ShoveTackle__P01_InPlace",
+    "group": 13
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_legs_d",
     "x": 1200.0,
     "y": 300.0,
     "label": "2man_Catch_Def_In_Over_Shove",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_Catch_Def_In_Over_ShoveTackle__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_Catch_Def_In_Over_ShoveTackle__P01_InPlace",
+    "group": 13
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_jersey_d",
     "x": 1200.0,
     "y": 300.0,
     "label": "2man_Catch_Def_In_Over_Shove",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_Catch_Def_In_Over_ShoveTackle__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_Catch_Def_In_Over_ShoveTackle__P01_InPlace",
+    "group": 13
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_pants_d",
     "x": 1200.0,
     "y": 300.0,
     "label": "2man_Catch_Def_In_Over_Shove",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_Catch_Def_In_Over_ShoveTackle__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_Catch_Def_In_Over_ShoveTackle__P01_InPlace",
+    "group": 13
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_socks_mid_d",
     "x": 1200.0,
     "y": 300.0,
     "label": "2man_Catch_Def_In_Over_Shove",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_Catch_Def_In_Over_ShoveTackle__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_Catch_Def_In_Over_ShoveTackle__P01_InPlace",
+    "group": 13
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_sleeve_tight_d",
     "x": 1200.0,
     "y": 300.0,
     "label": "2man_Catch_Def_In_Over_Shove",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_Catch_Def_In_Over_ShoveTackle__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_Catch_Def_In_Over_ShoveTackle__P01_InPlace",
+    "group": 13
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_shell_xenith",
     "x": 1200.0,
     "y": 300.0,
     "label": "2man_Catch_Def_In_Over_Shove",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_Catch_Def_In_Over_ShoveTackle__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_Catch_Def_In_Over_ShoveTackle__P01_InPlace",
+    "group": 13
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_facemask_xenithprism",
     "x": 1200.0,
     "y": 300.0,
     "label": "2man_Catch_Def_In_Over_Shove",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_Catch_Def_In_Over_ShoveTackle__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_Catch_Def_In_Over_ShoveTackle__P01_InPlace",
+    "group": 13
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubr_d",
     "x": 1200.0,
     "y": 300.0,
     "label": "2man_Catch_Def_In_Over_Shove",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_Catch_Def_In_Over_ShoveTackle__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_Catch_Def_In_Over_ShoveTackle__P01_InPlace",
+    "group": 13
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubl_d",
     "x": 1200.0,
     "y": 300.0,
     "label": "2man_Catch_Def_In_Over_Shove",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_Catch_Def_In_Over_ShoveTackle__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_Catch_Def_In_Over_ShoveTackle__P01_InPlace",
+    "group": 13
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_glover_d",
     "x": 1200.0,
     "y": 300.0,
     "label": "2man_Catch_Def_In_Over_Shove",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_Catch_Def_In_Over_ShoveTackle__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_Catch_Def_In_Over_ShoveTackle__P01_InPlace",
+    "group": 13
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_glovel_d",
     "x": 1200.0,
     "y": 300.0,
     "label": "2man_Catch_Def_In_Over_Shove",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_Catch_Def_In_Over_ShoveTackle__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_Catch_Def_In_Over_ShoveTackle__P01_InPlace",
+    "group": 13
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_faulkmarshall_11413",
     "x": 1500.0,
     "y": 300.0,
     "label": "2man_Catch_Def_In_Over_Shove",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_Catch_Def_In_Over_ShoveTackle__P02"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_Catch_Def_In_Over_ShoveTackle__P02_InPlace",
+    "group": 14
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_fullarms_d",
     "x": 1500.0,
     "y": 300.0,
     "label": "2man_Catch_Def_In_Over_Shove",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_Catch_Def_In_Over_ShoveTackle__P02"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_Catch_Def_In_Over_ShoveTackle__P02_InPlace",
+    "group": 14
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_legs_d",
     "x": 1500.0,
     "y": 300.0,
     "label": "2man_Catch_Def_In_Over_Shove",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_Catch_Def_In_Over_ShoveTackle__P02"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_Catch_Def_In_Over_ShoveTackle__P02_InPlace",
+    "group": 14
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_jersey_d",
     "x": 1500.0,
     "y": 300.0,
     "label": "2man_Catch_Def_In_Over_Shove",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_Catch_Def_In_Over_ShoveTackle__P02"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_Catch_Def_In_Over_ShoveTackle__P02_InPlace",
+    "group": 14
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_pants_d",
     "x": 1500.0,
     "y": 300.0,
     "label": "2man_Catch_Def_In_Over_Shove",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_Catch_Def_In_Over_ShoveTackle__P02"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_Catch_Def_In_Over_ShoveTackle__P02_InPlace",
+    "group": 14
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_socks_mid_d",
     "x": 1500.0,
     "y": 300.0,
     "label": "2man_Catch_Def_In_Over_Shove",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_Catch_Def_In_Over_ShoveTackle__P02"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_Catch_Def_In_Over_ShoveTackle__P02_InPlace",
+    "group": 14
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_sleeve_tight_d",
     "x": 1500.0,
     "y": 300.0,
     "label": "2man_Catch_Def_In_Over_Shove",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_Catch_Def_In_Over_ShoveTackle__P02"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_Catch_Def_In_Over_ShoveTackle__P02_InPlace",
+    "group": 14
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_shell_xenith",
     "x": 1500.0,
     "y": 300.0,
     "label": "2man_Catch_Def_In_Over_Shove",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_Catch_Def_In_Over_ShoveTackle__P02"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_Catch_Def_In_Over_ShoveTackle__P02_InPlace",
+    "group": 14
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_facemask_xenithprism",
     "x": 1500.0,
     "y": 300.0,
     "label": "2man_Catch_Def_In_Over_Shove",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_Catch_Def_In_Over_ShoveTackle__P02"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_Catch_Def_In_Over_ShoveTackle__P02_InPlace",
+    "group": 14
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubr_d",
     "x": 1500.0,
     "y": 300.0,
     "label": "2man_Catch_Def_In_Over_Shove",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_Catch_Def_In_Over_ShoveTackle__P02"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_Catch_Def_In_Over_ShoveTackle__P02_InPlace",
+    "group": 14
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubl_d",
     "x": 1500.0,
     "y": 300.0,
     "label": "2man_Catch_Def_In_Over_Shove",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_Catch_Def_In_Over_ShoveTackle__P02"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_Catch_Def_In_Over_ShoveTackle__P02_InPlace",
+    "group": 14
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_glover_d",
     "x": 1500.0,
     "y": 300.0,
     "label": "2man_Catch_Def_In_Over_Shove",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_Catch_Def_In_Over_ShoveTackle__P02"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_Catch_Def_In_Over_ShoveTackle__P02_InPlace",
+    "group": 14
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_glovel_d",
     "x": 1500.0,
     "y": 300.0,
     "label": "2man_Catch_Def_In_Over_Shove",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_Catch_Def_In_Over_ShoveTackle__P02"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_Catch_Def_In_Over_ShoveTackle__P02_InPlace",
+    "group": 14
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_faulkmarshall_11413",
     "x": 1800.0,
     "y": 300.0,
     "label": "2man_Catch_Def_In_Under_Swat",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_Catch_Def_In_Under_SwatTackle_v6__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_Catch_Def_In_Under_SwatTackle_v6__P01_InPlace",
+    "group": 15
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_fullarms_d",
     "x": 1800.0,
     "y": 300.0,
     "label": "2man_Catch_Def_In_Under_Swat",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_Catch_Def_In_Under_SwatTackle_v6__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_Catch_Def_In_Under_SwatTackle_v6__P01_InPlace",
+    "group": 15
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_legs_d",
     "x": 1800.0,
     "y": 300.0,
     "label": "2man_Catch_Def_In_Under_Swat",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_Catch_Def_In_Under_SwatTackle_v6__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_Catch_Def_In_Under_SwatTackle_v6__P01_InPlace",
+    "group": 15
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_jersey_d",
     "x": 1800.0,
     "y": 300.0,
     "label": "2man_Catch_Def_In_Under_Swat",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_Catch_Def_In_Under_SwatTackle_v6__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_Catch_Def_In_Under_SwatTackle_v6__P01_InPlace",
+    "group": 15
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_pants_d",
     "x": 1800.0,
     "y": 300.0,
     "label": "2man_Catch_Def_In_Under_Swat",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_Catch_Def_In_Under_SwatTackle_v6__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_Catch_Def_In_Under_SwatTackle_v6__P01_InPlace",
+    "group": 15
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_socks_mid_d",
     "x": 1800.0,
     "y": 300.0,
     "label": "2man_Catch_Def_In_Under_Swat",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_Catch_Def_In_Under_SwatTackle_v6__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_Catch_Def_In_Under_SwatTackle_v6__P01_InPlace",
+    "group": 15
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_sleeve_tight_d",
     "x": 1800.0,
     "y": 300.0,
     "label": "2man_Catch_Def_In_Under_Swat",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_Catch_Def_In_Under_SwatTackle_v6__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_Catch_Def_In_Under_SwatTackle_v6__P01_InPlace",
+    "group": 15
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_shell_xenith",
     "x": 1800.0,
     "y": 300.0,
     "label": "2man_Catch_Def_In_Under_Swat",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_Catch_Def_In_Under_SwatTackle_v6__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_Catch_Def_In_Under_SwatTackle_v6__P01_InPlace",
+    "group": 15
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_facemask_xenithprism",
     "x": 1800.0,
     "y": 300.0,
     "label": "2man_Catch_Def_In_Under_Swat",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_Catch_Def_In_Under_SwatTackle_v6__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_Catch_Def_In_Under_SwatTackle_v6__P01_InPlace",
+    "group": 15
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubr_d",
     "x": 1800.0,
     "y": 300.0,
     "label": "2man_Catch_Def_In_Under_Swat",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_Catch_Def_In_Under_SwatTackle_v6__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_Catch_Def_In_Under_SwatTackle_v6__P01_InPlace",
+    "group": 15
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubl_d",
     "x": 1800.0,
     "y": 300.0,
     "label": "2man_Catch_Def_In_Under_Swat",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_Catch_Def_In_Under_SwatTackle_v6__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_Catch_Def_In_Under_SwatTackle_v6__P01_InPlace",
+    "group": 15
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_glover_d",
     "x": 1800.0,
     "y": 300.0,
     "label": "2man_Catch_Def_In_Under_Swat",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_Catch_Def_In_Under_SwatTackle_v6__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_Catch_Def_In_Under_SwatTackle_v6__P01_InPlace",
+    "group": 15
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_glovel_d",
     "x": 1800.0,
     "y": 300.0,
     "label": "2man_Catch_Def_In_Under_Swat",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_Catch_Def_In_Under_SwatTackle_v6__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_Catch_Def_In_Under_SwatTackle_v6__P01_InPlace",
+    "group": 15
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_faulkmarshall_11413",
     "x": 2100.0,
     "y": 300.0,
     "label": "2man_Catch_Jump_Def_In_Under",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_Catch_Jump_Def_In_Under_JumpCatchTackle_v5__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_Catch_Jump_Def_In_Under_JumpCatchTackle_v5__P01_InPlace",
+    "group": 16
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_fullarms_d",
     "x": 2100.0,
     "y": 300.0,
     "label": "2man_Catch_Jump_Def_In_Under",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_Catch_Jump_Def_In_Under_JumpCatchTackle_v5__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_Catch_Jump_Def_In_Under_JumpCatchTackle_v5__P01_InPlace",
+    "group": 16
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_legs_d",
     "x": 2100.0,
     "y": 300.0,
     "label": "2man_Catch_Jump_Def_In_Under",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_Catch_Jump_Def_In_Under_JumpCatchTackle_v5__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_Catch_Jump_Def_In_Under_JumpCatchTackle_v5__P01_InPlace",
+    "group": 16
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_jersey_d",
     "x": 2100.0,
     "y": 300.0,
     "label": "2man_Catch_Jump_Def_In_Under",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_Catch_Jump_Def_In_Under_JumpCatchTackle_v5__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_Catch_Jump_Def_In_Under_JumpCatchTackle_v5__P01_InPlace",
+    "group": 16
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_pants_d",
     "x": 2100.0,
     "y": 300.0,
     "label": "2man_Catch_Jump_Def_In_Under",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_Catch_Jump_Def_In_Under_JumpCatchTackle_v5__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_Catch_Jump_Def_In_Under_JumpCatchTackle_v5__P01_InPlace",
+    "group": 16
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_socks_mid_d",
     "x": 2100.0,
     "y": 300.0,
     "label": "2man_Catch_Jump_Def_In_Under",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_Catch_Jump_Def_In_Under_JumpCatchTackle_v5__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_Catch_Jump_Def_In_Under_JumpCatchTackle_v5__P01_InPlace",
+    "group": 16
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_sleeve_tight_d",
     "x": 2100.0,
     "y": 300.0,
     "label": "2man_Catch_Jump_Def_In_Under",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_Catch_Jump_Def_In_Under_JumpCatchTackle_v5__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_Catch_Jump_Def_In_Under_JumpCatchTackle_v5__P01_InPlace",
+    "group": 16
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_shell_xenith",
     "x": 2100.0,
     "y": 300.0,
     "label": "2man_Catch_Jump_Def_In_Under",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_Catch_Jump_Def_In_Under_JumpCatchTackle_v5__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_Catch_Jump_Def_In_Under_JumpCatchTackle_v5__P01_InPlace",
+    "group": 16
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_facemask_xenithprism",
     "x": 2100.0,
     "y": 300.0,
     "label": "2man_Catch_Jump_Def_In_Under",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_Catch_Jump_Def_In_Under_JumpCatchTackle_v5__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_Catch_Jump_Def_In_Under_JumpCatchTackle_v5__P01_InPlace",
+    "group": 16
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubr_d",
     "x": 2100.0,
     "y": 300.0,
     "label": "2man_Catch_Jump_Def_In_Under",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_Catch_Jump_Def_In_Under_JumpCatchTackle_v5__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_Catch_Jump_Def_In_Under_JumpCatchTackle_v5__P01_InPlace",
+    "group": 16
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubl_d",
     "x": 2100.0,
     "y": 300.0,
     "label": "2man_Catch_Jump_Def_In_Under",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_Catch_Jump_Def_In_Under_JumpCatchTackle_v5__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_Catch_Jump_Def_In_Under_JumpCatchTackle_v5__P01_InPlace",
+    "group": 16
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_glover_d",
     "x": 2100.0,
     "y": 300.0,
     "label": "2man_Catch_Jump_Def_In_Under",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_Catch_Jump_Def_In_Under_JumpCatchTackle_v5__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_Catch_Jump_Def_In_Under_JumpCatchTackle_v5__P01_InPlace",
+    "group": 16
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_glovel_d",
     "x": 2100.0,
     "y": 300.0,
     "label": "2man_Catch_Jump_Def_In_Under",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_Catch_Jump_Def_In_Under_JumpCatchTackle_v5__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_Catch_Jump_Def_In_Under_JumpCatchTackle_v5__P01_InPlace",
+    "group": 16
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_faulkmarshall_11413",
     "x": 2400.0,
     "y": 300.0,
     "label": "MADNMAY04_0022_2__QB_deepPas",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MADNMAY04_0022_2__QB_deepPass_D1_standardRelease__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MADNMAY04_0022_2__QB_deepPass_D1_standardRelease__P01_InPlace",
+    "group": 17
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_fullarms_d",
     "x": 2400.0,
     "y": 300.0,
     "label": "MADNMAY04_0022_2__QB_deepPas",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MADNMAY04_0022_2__QB_deepPass_D1_standardRelease__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MADNMAY04_0022_2__QB_deepPass_D1_standardRelease__P01_InPlace",
+    "group": 17
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_legs_d",
     "x": 2400.0,
     "y": 300.0,
     "label": "MADNMAY04_0022_2__QB_deepPas",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MADNMAY04_0022_2__QB_deepPass_D1_standardRelease__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MADNMAY04_0022_2__QB_deepPass_D1_standardRelease__P01_InPlace",
+    "group": 17
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_jersey_d",
     "x": 2400.0,
     "y": 300.0,
     "label": "MADNMAY04_0022_2__QB_deepPas",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MADNMAY04_0022_2__QB_deepPass_D1_standardRelease__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MADNMAY04_0022_2__QB_deepPass_D1_standardRelease__P01_InPlace",
+    "group": 17
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_pants_d",
     "x": 2400.0,
     "y": 300.0,
     "label": "MADNMAY04_0022_2__QB_deepPas",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MADNMAY04_0022_2__QB_deepPass_D1_standardRelease__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MADNMAY04_0022_2__QB_deepPass_D1_standardRelease__P01_InPlace",
+    "group": 17
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_socks_mid_d",
     "x": 2400.0,
     "y": 300.0,
     "label": "MADNMAY04_0022_2__QB_deepPas",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MADNMAY04_0022_2__QB_deepPass_D1_standardRelease__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MADNMAY04_0022_2__QB_deepPass_D1_standardRelease__P01_InPlace",
+    "group": 17
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_sleeve_tight_d",
     "x": 2400.0,
     "y": 300.0,
     "label": "MADNMAY04_0022_2__QB_deepPas",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MADNMAY04_0022_2__QB_deepPass_D1_standardRelease__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MADNMAY04_0022_2__QB_deepPass_D1_standardRelease__P01_InPlace",
+    "group": 17
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_shell_xenith",
     "x": 2400.0,
     "y": 300.0,
     "label": "MADNMAY04_0022_2__QB_deepPas",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MADNMAY04_0022_2__QB_deepPass_D1_standardRelease__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MADNMAY04_0022_2__QB_deepPass_D1_standardRelease__P01_InPlace",
+    "group": 17
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_facemask_xenithprism",
     "x": 2400.0,
     "y": 300.0,
     "label": "MADNMAY04_0022_2__QB_deepPas",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MADNMAY04_0022_2__QB_deepPass_D1_standardRelease__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MADNMAY04_0022_2__QB_deepPass_D1_standardRelease__P01_InPlace",
+    "group": 17
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubr_d",
     "x": 2400.0,
     "y": 300.0,
     "label": "MADNMAY04_0022_2__QB_deepPas",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MADNMAY04_0022_2__QB_deepPass_D1_standardRelease__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MADNMAY04_0022_2__QB_deepPass_D1_standardRelease__P01_InPlace",
+    "group": 17
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubl_d",
     "x": 2400.0,
     "y": 300.0,
     "label": "MADNMAY04_0022_2__QB_deepPas",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MADNMAY04_0022_2__QB_deepPass_D1_standardRelease__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MADNMAY04_0022_2__QB_deepPass_D1_standardRelease__P01_InPlace",
+    "group": 17
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_glover_d",
     "x": 2400.0,
     "y": 300.0,
     "label": "MADNMAY04_0022_2__QB_deepPas",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MADNMAY04_0022_2__QB_deepPass_D1_standardRelease__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MADNMAY04_0022_2__QB_deepPass_D1_standardRelease__P01_InPlace",
+    "group": 17
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_glovel_d",
     "x": 2400.0,
     "y": 300.0,
     "label": "MADNMAY04_0022_2__QB_deepPas",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MADNMAY04_0022_2__QB_deepPass_D1_standardRelease__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MADNMAY04_0022_2__QB_deepPass_D1_standardRelease__P01_InPlace",
+    "group": 17
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_faulkmarshall_11413",
     "x": 0.0,
     "y": 600.0,
     "label": "MADNMAY04_0041_2_QB_backFoot",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MADNMAY04_0041_2_QB_backFootShortPass_D1_standard__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MADNMAY04_0041_2_QB_backFootShortPass_D1_standard__P01_InPlace",
+    "group": 18
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_fullarms_d",
     "x": 0.0,
     "y": 600.0,
     "label": "MADNMAY04_0041_2_QB_backFoot",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MADNMAY04_0041_2_QB_backFootShortPass_D1_standard__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MADNMAY04_0041_2_QB_backFootShortPass_D1_standard__P01_InPlace",
+    "group": 18
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_legs_d",
     "x": 0.0,
     "y": 600.0,
     "label": "MADNMAY04_0041_2_QB_backFoot",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MADNMAY04_0041_2_QB_backFootShortPass_D1_standard__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MADNMAY04_0041_2_QB_backFootShortPass_D1_standard__P01_InPlace",
+    "group": 18
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_jersey_d",
     "x": 0.0,
     "y": 600.0,
     "label": "MADNMAY04_0041_2_QB_backFoot",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MADNMAY04_0041_2_QB_backFootShortPass_D1_standard__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MADNMAY04_0041_2_QB_backFootShortPass_D1_standard__P01_InPlace",
+    "group": 18
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_pants_d",
     "x": 0.0,
     "y": 600.0,
     "label": "MADNMAY04_0041_2_QB_backFoot",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MADNMAY04_0041_2_QB_backFootShortPass_D1_standard__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MADNMAY04_0041_2_QB_backFootShortPass_D1_standard__P01_InPlace",
+    "group": 18
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_socks_mid_d",
     "x": 0.0,
     "y": 600.0,
     "label": "MADNMAY04_0041_2_QB_backFoot",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MADNMAY04_0041_2_QB_backFootShortPass_D1_standard__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MADNMAY04_0041_2_QB_backFootShortPass_D1_standard__P01_InPlace",
+    "group": 18
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_sleeve_tight_d",
     "x": 0.0,
     "y": 600.0,
     "label": "MADNMAY04_0041_2_QB_backFoot",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MADNMAY04_0041_2_QB_backFootShortPass_D1_standard__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MADNMAY04_0041_2_QB_backFootShortPass_D1_standard__P01_InPlace",
+    "group": 18
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_shell_xenith",
     "x": 0.0,
     "y": 600.0,
     "label": "MADNMAY04_0041_2_QB_backFoot",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MADNMAY04_0041_2_QB_backFootShortPass_D1_standard__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MADNMAY04_0041_2_QB_backFootShortPass_D1_standard__P01_InPlace",
+    "group": 18
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_facemask_xenithprism",
     "x": 0.0,
     "y": 600.0,
     "label": "MADNMAY04_0041_2_QB_backFoot",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MADNMAY04_0041_2_QB_backFootShortPass_D1_standard__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MADNMAY04_0041_2_QB_backFootShortPass_D1_standard__P01_InPlace",
+    "group": 18
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubr_d",
     "x": 0.0,
     "y": 600.0,
     "label": "MADNMAY04_0041_2_QB_backFoot",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MADNMAY04_0041_2_QB_backFootShortPass_D1_standard__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MADNMAY04_0041_2_QB_backFootShortPass_D1_standard__P01_InPlace",
+    "group": 18
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubl_d",
     "x": 0.0,
     "y": 600.0,
     "label": "MADNMAY04_0041_2_QB_backFoot",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MADNMAY04_0041_2_QB_backFootShortPass_D1_standard__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MADNMAY04_0041_2_QB_backFootShortPass_D1_standard__P01_InPlace",
+    "group": 18
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_glover_d",
     "x": 0.0,
     "y": 600.0,
     "label": "MADNMAY04_0041_2_QB_backFoot",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MADNMAY04_0041_2_QB_backFootShortPass_D1_standard__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MADNMAY04_0041_2_QB_backFootShortPass_D1_standard__P01_InPlace",
+    "group": 18
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_glovel_d",
     "x": 0.0,
     "y": 600.0,
     "label": "MADNMAY04_0041_2_QB_backFoot",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MADNMAY04_0041_2_QB_backFootShortPass_D1_standard__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MADNMAY04_0041_2_QB_backFootShortPass_D1_standard__P01_InPlace",
+    "group": 18
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_faulkmarshall_11413",
     "x": 300.0,
     "y": 600.0,
     "label": "MADNMAY04_0093_QB_rollout_R_",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MADNMAY04_0093_QB_rollout_R_shortPass_D7_standard__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MADNMAY04_0093_QB_rollout_R_shortPass_D7_standard__P01_InPlace",
+    "group": 19
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_fullarms_d",
     "x": 300.0,
     "y": 600.0,
     "label": "MADNMAY04_0093_QB_rollout_R_",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MADNMAY04_0093_QB_rollout_R_shortPass_D7_standard__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MADNMAY04_0093_QB_rollout_R_shortPass_D7_standard__P01_InPlace",
+    "group": 19
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_legs_d",
     "x": 300.0,
     "y": 600.0,
     "label": "MADNMAY04_0093_QB_rollout_R_",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MADNMAY04_0093_QB_rollout_R_shortPass_D7_standard__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MADNMAY04_0093_QB_rollout_R_shortPass_D7_standard__P01_InPlace",
+    "group": 19
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_jersey_d",
     "x": 300.0,
     "y": 600.0,
     "label": "MADNMAY04_0093_QB_rollout_R_",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MADNMAY04_0093_QB_rollout_R_shortPass_D7_standard__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MADNMAY04_0093_QB_rollout_R_shortPass_D7_standard__P01_InPlace",
+    "group": 19
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_pants_d",
     "x": 300.0,
     "y": 600.0,
     "label": "MADNMAY04_0093_QB_rollout_R_",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MADNMAY04_0093_QB_rollout_R_shortPass_D7_standard__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MADNMAY04_0093_QB_rollout_R_shortPass_D7_standard__P01_InPlace",
+    "group": 19
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_socks_mid_d",
     "x": 300.0,
     "y": 600.0,
     "label": "MADNMAY04_0093_QB_rollout_R_",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MADNMAY04_0093_QB_rollout_R_shortPass_D7_standard__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MADNMAY04_0093_QB_rollout_R_shortPass_D7_standard__P01_InPlace",
+    "group": 19
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_sleeve_tight_d",
     "x": 300.0,
     "y": 600.0,
     "label": "MADNMAY04_0093_QB_rollout_R_",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MADNMAY04_0093_QB_rollout_R_shortPass_D7_standard__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MADNMAY04_0093_QB_rollout_R_shortPass_D7_standard__P01_InPlace",
+    "group": 19
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_shell_xenith",
     "x": 300.0,
     "y": 600.0,
     "label": "MADNMAY04_0093_QB_rollout_R_",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MADNMAY04_0093_QB_rollout_R_shortPass_D7_standard__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MADNMAY04_0093_QB_rollout_R_shortPass_D7_standard__P01_InPlace",
+    "group": 19
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_facemask_xenithprism",
     "x": 300.0,
     "y": 600.0,
     "label": "MADNMAY04_0093_QB_rollout_R_",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MADNMAY04_0093_QB_rollout_R_shortPass_D7_standard__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MADNMAY04_0093_QB_rollout_R_shortPass_D7_standard__P01_InPlace",
+    "group": 19
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubr_d",
     "x": 300.0,
     "y": 600.0,
     "label": "MADNMAY04_0093_QB_rollout_R_",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MADNMAY04_0093_QB_rollout_R_shortPass_D7_standard__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MADNMAY04_0093_QB_rollout_R_shortPass_D7_standard__P01_InPlace",
+    "group": 19
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubl_d",
     "x": 300.0,
     "y": 600.0,
     "label": "MADNMAY04_0093_QB_rollout_R_",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MADNMAY04_0093_QB_rollout_R_shortPass_D7_standard__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MADNMAY04_0093_QB_rollout_R_shortPass_D7_standard__P01_InPlace",
+    "group": 19
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_glover_d",
     "x": 300.0,
     "y": 600.0,
     "label": "MADNMAY04_0093_QB_rollout_R_",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MADNMAY04_0093_QB_rollout_R_shortPass_D7_standard__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MADNMAY04_0093_QB_rollout_R_shortPass_D7_standard__P01_InPlace",
+    "group": 19
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_glovel_d",
     "x": 300.0,
     "y": 600.0,
     "label": "MADNMAY04_0093_QB_rollout_R_",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_MADNMAY04_0093_QB_rollout_R_shortPass_D7_standard__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_MADNMAY04_0093_QB_rollout_R_shortPass_D7_standard__P01_InPlace",
+    "group": 19
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_faulkmarshall_11413",
     "x": 600.0,
     "y": 600.0,
     "label": "Catch_Stand_0_Waist_RunFwd_1",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_Catch_Stand_0_Waist_RunFwd_16f_V1__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_Catch_Stand_0_Waist_RunFwd_16f_V1__P01_InPlace",
+    "group": 20
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_fullarms_d",
     "x": 600.0,
     "y": 600.0,
     "label": "Catch_Stand_0_Waist_RunFwd_1",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_Catch_Stand_0_Waist_RunFwd_16f_V1__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_Catch_Stand_0_Waist_RunFwd_16f_V1__P01_InPlace",
+    "group": 20
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_legs_d",
     "x": 600.0,
     "y": 600.0,
     "label": "Catch_Stand_0_Waist_RunFwd_1",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_Catch_Stand_0_Waist_RunFwd_16f_V1__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_Catch_Stand_0_Waist_RunFwd_16f_V1__P01_InPlace",
+    "group": 20
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_jersey_d",
     "x": 600.0,
     "y": 600.0,
     "label": "Catch_Stand_0_Waist_RunFwd_1",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_Catch_Stand_0_Waist_RunFwd_16f_V1__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_Catch_Stand_0_Waist_RunFwd_16f_V1__P01_InPlace",
+    "group": 20
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_pants_d",
     "x": 600.0,
     "y": 600.0,
     "label": "Catch_Stand_0_Waist_RunFwd_1",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_Catch_Stand_0_Waist_RunFwd_16f_V1__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_Catch_Stand_0_Waist_RunFwd_16f_V1__P01_InPlace",
+    "group": 20
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_socks_mid_d",
     "x": 600.0,
     "y": 600.0,
     "label": "Catch_Stand_0_Waist_RunFwd_1",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_Catch_Stand_0_Waist_RunFwd_16f_V1__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_Catch_Stand_0_Waist_RunFwd_16f_V1__P01_InPlace",
+    "group": 20
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_sleeve_tight_d",
     "x": 600.0,
     "y": 600.0,
     "label": "Catch_Stand_0_Waist_RunFwd_1",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_Catch_Stand_0_Waist_RunFwd_16f_V1__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_Catch_Stand_0_Waist_RunFwd_16f_V1__P01_InPlace",
+    "group": 20
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_shell_xenith",
     "x": 600.0,
     "y": 600.0,
     "label": "Catch_Stand_0_Waist_RunFwd_1",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_Catch_Stand_0_Waist_RunFwd_16f_V1__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_Catch_Stand_0_Waist_RunFwd_16f_V1__P01_InPlace",
+    "group": 20
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_facemask_xenithprism",
     "x": 600.0,
     "y": 600.0,
     "label": "Catch_Stand_0_Waist_RunFwd_1",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_Catch_Stand_0_Waist_RunFwd_16f_V1__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_Catch_Stand_0_Waist_RunFwd_16f_V1__P01_InPlace",
+    "group": 20
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubr_d",
     "x": 600.0,
     "y": 600.0,
     "label": "Catch_Stand_0_Waist_RunFwd_1",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_Catch_Stand_0_Waist_RunFwd_16f_V1__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_Catch_Stand_0_Waist_RunFwd_16f_V1__P01_InPlace",
+    "group": 20
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubl_d",
     "x": 600.0,
     "y": 600.0,
     "label": "Catch_Stand_0_Waist_RunFwd_1",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_Catch_Stand_0_Waist_RunFwd_16f_V1__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_Catch_Stand_0_Waist_RunFwd_16f_V1__P01_InPlace",
+    "group": 20
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_glover_d",
     "x": 600.0,
     "y": 600.0,
     "label": "Catch_Stand_0_Waist_RunFwd_1",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_Catch_Stand_0_Waist_RunFwd_16f_V1__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_Catch_Stand_0_Waist_RunFwd_16f_V1__P01_InPlace",
+    "group": 20
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_glovel_d",
     "x": 600.0,
     "y": 600.0,
     "label": "Catch_Stand_0_Waist_RunFwd_1",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_Catch_Stand_0_Waist_RunFwd_16f_V1__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_Catch_Stand_0_Waist_RunFwd_16f_V1__P01_InPlace",
+    "group": 20
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_faulkmarshall_11413",
     "x": 900.0,
     "y": 600.0,
     "label": "2man_BS_Catch_Under_GoodTimi",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_BS_Catch_Under_GoodTiming_v1__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_BS_Catch_Under_GoodTiming_v1__P01_InPlace",
+    "group": 21
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_fullarms_d",
     "x": 900.0,
     "y": 600.0,
     "label": "2man_BS_Catch_Under_GoodTimi",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_BS_Catch_Under_GoodTiming_v1__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_BS_Catch_Under_GoodTiming_v1__P01_InPlace",
+    "group": 21
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_legs_d",
     "x": 900.0,
     "y": 600.0,
     "label": "2man_BS_Catch_Under_GoodTimi",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_BS_Catch_Under_GoodTiming_v1__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_BS_Catch_Under_GoodTiming_v1__P01_InPlace",
+    "group": 21
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_jersey_d",
     "x": 900.0,
     "y": 600.0,
     "label": "2man_BS_Catch_Under_GoodTimi",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_BS_Catch_Under_GoodTiming_v1__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_BS_Catch_Under_GoodTiming_v1__P01_InPlace",
+    "group": 21
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_pants_d",
     "x": 900.0,
     "y": 600.0,
     "label": "2man_BS_Catch_Under_GoodTimi",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_BS_Catch_Under_GoodTiming_v1__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_BS_Catch_Under_GoodTiming_v1__P01_InPlace",
+    "group": 21
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_socks_mid_d",
     "x": 900.0,
     "y": 600.0,
     "label": "2man_BS_Catch_Under_GoodTimi",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_BS_Catch_Under_GoodTiming_v1__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_BS_Catch_Under_GoodTiming_v1__P01_InPlace",
+    "group": 21
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_sleeve_tight_d",
     "x": 900.0,
     "y": 600.0,
     "label": "2man_BS_Catch_Under_GoodTimi",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_BS_Catch_Under_GoodTiming_v1__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_BS_Catch_Under_GoodTiming_v1__P01_InPlace",
+    "group": 21
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_shell_xenith",
     "x": 900.0,
     "y": 600.0,
     "label": "2man_BS_Catch_Under_GoodTimi",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_BS_Catch_Under_GoodTiming_v1__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_BS_Catch_Under_GoodTiming_v1__P01_InPlace",
+    "group": 21
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_facemask_xenithprism",
     "x": 900.0,
     "y": 600.0,
     "label": "2man_BS_Catch_Under_GoodTimi",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_BS_Catch_Under_GoodTiming_v1__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_BS_Catch_Under_GoodTiming_v1__P01_InPlace",
+    "group": 21
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubr_d",
     "x": 900.0,
     "y": 600.0,
     "label": "2man_BS_Catch_Under_GoodTimi",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_BS_Catch_Under_GoodTiming_v1__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_BS_Catch_Under_GoodTiming_v1__P01_InPlace",
+    "group": 21
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubl_d",
     "x": 900.0,
     "y": 600.0,
     "label": "2man_BS_Catch_Under_GoodTimi",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_BS_Catch_Under_GoodTiming_v1__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_BS_Catch_Under_GoodTiming_v1__P01_InPlace",
+    "group": 21
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_glover_d",
     "x": 900.0,
     "y": 600.0,
     "label": "2man_BS_Catch_Under_GoodTimi",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_BS_Catch_Under_GoodTiming_v1__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_BS_Catch_Under_GoodTiming_v1__P01_InPlace",
+    "group": 21
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_glovel_d",
     "x": 900.0,
     "y": 600.0,
     "label": "2man_BS_Catch_Under_GoodTimi",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2man_BS_Catch_Under_GoodTiming_v1__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2man_BS_Catch_Under_GoodTiming_v1__P01_InPlace",
+    "group": 21
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_faulkmarshall_11413",
     "x": 1200.0,
     "y": 600.0,
     "label": "EffortCatch_AboveHead_Overth",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_EffortCatch_AboveHead_Overthrow__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_EffortCatch_AboveHead_Overthrow__P01_InPlace",
+    "group": 22
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_fullarms_d",
     "x": 1200.0,
     "y": 600.0,
     "label": "EffortCatch_AboveHead_Overth",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_EffortCatch_AboveHead_Overthrow__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_EffortCatch_AboveHead_Overthrow__P01_InPlace",
+    "group": 22
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_legs_d",
     "x": 1200.0,
     "y": 600.0,
     "label": "EffortCatch_AboveHead_Overth",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_EffortCatch_AboveHead_Overthrow__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_EffortCatch_AboveHead_Overthrow__P01_InPlace",
+    "group": 22
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_jersey_d",
     "x": 1200.0,
     "y": 600.0,
     "label": "EffortCatch_AboveHead_Overth",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_EffortCatch_AboveHead_Overthrow__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_EffortCatch_AboveHead_Overthrow__P01_InPlace",
+    "group": 22
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_pants_d",
     "x": 1200.0,
     "y": 600.0,
     "label": "EffortCatch_AboveHead_Overth",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_EffortCatch_AboveHead_Overthrow__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_EffortCatch_AboveHead_Overthrow__P01_InPlace",
+    "group": 22
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_socks_mid_d",
     "x": 1200.0,
     "y": 600.0,
     "label": "EffortCatch_AboveHead_Overth",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_EffortCatch_AboveHead_Overthrow__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_EffortCatch_AboveHead_Overthrow__P01_InPlace",
+    "group": 22
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_sleeve_tight_d",
     "x": 1200.0,
     "y": 600.0,
     "label": "EffortCatch_AboveHead_Overth",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_EffortCatch_AboveHead_Overthrow__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_EffortCatch_AboveHead_Overthrow__P01_InPlace",
+    "group": 22
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_shell_xenith",
     "x": 1200.0,
     "y": 600.0,
     "label": "EffortCatch_AboveHead_Overth",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_EffortCatch_AboveHead_Overthrow__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_EffortCatch_AboveHead_Overthrow__P01_InPlace",
+    "group": 22
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_facemask_xenithprism",
     "x": 1200.0,
     "y": 600.0,
     "label": "EffortCatch_AboveHead_Overth",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_EffortCatch_AboveHead_Overthrow__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_EffortCatch_AboveHead_Overthrow__P01_InPlace",
+    "group": 22
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubr_d",
     "x": 1200.0,
     "y": 600.0,
     "label": "EffortCatch_AboveHead_Overth",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_EffortCatch_AboveHead_Overthrow__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_EffortCatch_AboveHead_Overthrow__P01_InPlace",
+    "group": 22
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubl_d",
     "x": 1200.0,
     "y": 600.0,
     "label": "EffortCatch_AboveHead_Overth",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_EffortCatch_AboveHead_Overthrow__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_EffortCatch_AboveHead_Overthrow__P01_InPlace",
+    "group": 22
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_glover_d",
     "x": 1200.0,
     "y": 600.0,
     "label": "EffortCatch_AboveHead_Overth",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_EffortCatch_AboveHead_Overthrow__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_EffortCatch_AboveHead_Overthrow__P01_InPlace",
+    "group": 22
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_glovel_d",
     "x": 1200.0,
     "y": 600.0,
     "label": "EffortCatch_AboveHead_Overth",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_EffortCatch_AboveHead_Overthrow__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_EffortCatch_AboveHead_Overthrow__P01_InPlace",
+    "group": 22
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_faulkmarshall_11413",
     "x": 1500.0,
     "y": 600.0,
     "label": "2014_PC_Generic_SpikeBall__P",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2014_PC_Generic_SpikeBall__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2014_PC_Generic_SpikeBall__P01_InPlace",
+    "group": 23
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_fullarms_d",
     "x": 1500.0,
     "y": 600.0,
     "label": "2014_PC_Generic_SpikeBall__P",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2014_PC_Generic_SpikeBall__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2014_PC_Generic_SpikeBall__P01_InPlace",
+    "group": 23
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_legs_d",
     "x": 1500.0,
     "y": 600.0,
     "label": "2014_PC_Generic_SpikeBall__P",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2014_PC_Generic_SpikeBall__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2014_PC_Generic_SpikeBall__P01_InPlace",
+    "group": 23
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_jersey_d",
     "x": 1500.0,
     "y": 600.0,
     "label": "2014_PC_Generic_SpikeBall__P",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2014_PC_Generic_SpikeBall__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2014_PC_Generic_SpikeBall__P01_InPlace",
+    "group": 23
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_pants_d",
     "x": 1500.0,
     "y": 600.0,
     "label": "2014_PC_Generic_SpikeBall__P",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2014_PC_Generic_SpikeBall__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2014_PC_Generic_SpikeBall__P01_InPlace",
+    "group": 23
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_socks_mid_d",
     "x": 1500.0,
     "y": 600.0,
     "label": "2014_PC_Generic_SpikeBall__P",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2014_PC_Generic_SpikeBall__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2014_PC_Generic_SpikeBall__P01_InPlace",
+    "group": 23
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_sleeve_tight_d",
     "x": 1500.0,
     "y": 600.0,
     "label": "2014_PC_Generic_SpikeBall__P",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2014_PC_Generic_SpikeBall__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2014_PC_Generic_SpikeBall__P01_InPlace",
+    "group": 23
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_shell_xenith",
     "x": 1500.0,
     "y": 600.0,
     "label": "2014_PC_Generic_SpikeBall__P",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2014_PC_Generic_SpikeBall__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2014_PC_Generic_SpikeBall__P01_InPlace",
+    "group": 23
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_facemask_xenithprism",
     "x": 1500.0,
     "y": 600.0,
     "label": "2014_PC_Generic_SpikeBall__P",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2014_PC_Generic_SpikeBall__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2014_PC_Generic_SpikeBall__P01_InPlace",
+    "group": 23
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubr_d",
     "x": 1500.0,
     "y": 600.0,
     "label": "2014_PC_Generic_SpikeBall__P",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2014_PC_Generic_SpikeBall__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2014_PC_Generic_SpikeBall__P01_InPlace",
+    "group": 23
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubl_d",
     "x": 1500.0,
     "y": 600.0,
     "label": "2014_PC_Generic_SpikeBall__P",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2014_PC_Generic_SpikeBall__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2014_PC_Generic_SpikeBall__P01_InPlace",
+    "group": 23
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_glover_d",
     "x": 1500.0,
     "y": 600.0,
     "label": "2014_PC_Generic_SpikeBall__P",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2014_PC_Generic_SpikeBall__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2014_PC_Generic_SpikeBall__P01_InPlace",
+    "group": 23
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_glovel_d",
     "x": 1500.0,
     "y": 600.0,
     "label": "2014_PC_Generic_SpikeBall__P",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2014_PC_Generic_SpikeBall__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2014_PC_Generic_SpikeBall__P01_InPlace",
+    "group": 23
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_faulkmarshall_11413",
     "x": 1800.0,
     "y": 600.0,
     "label": "2012_NCAA_Celebration_MidTen",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2012_NCAA_Celebration_MidTensity_V7__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2012_NCAA_Celebration_MidTensity_V7__P01_InPlace",
+    "group": 24
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_fullarms_d",
     "x": 1800.0,
     "y": 600.0,
     "label": "2012_NCAA_Celebration_MidTen",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2012_NCAA_Celebration_MidTensity_V7__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2012_NCAA_Celebration_MidTensity_V7__P01_InPlace",
+    "group": 24
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_legs_d",
     "x": 1800.0,
     "y": 600.0,
     "label": "2012_NCAA_Celebration_MidTen",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2012_NCAA_Celebration_MidTensity_V7__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2012_NCAA_Celebration_MidTensity_V7__P01_InPlace",
+    "group": 24
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_jersey_d",
     "x": 1800.0,
     "y": 600.0,
     "label": "2012_NCAA_Celebration_MidTen",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2012_NCAA_Celebration_MidTensity_V7__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2012_NCAA_Celebration_MidTensity_V7__P01_InPlace",
+    "group": 24
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_pants_d",
     "x": 1800.0,
     "y": 600.0,
     "label": "2012_NCAA_Celebration_MidTen",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2012_NCAA_Celebration_MidTensity_V7__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2012_NCAA_Celebration_MidTensity_V7__P01_InPlace",
+    "group": 24
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_socks_mid_d",
     "x": 1800.0,
     "y": 600.0,
     "label": "2012_NCAA_Celebration_MidTen",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2012_NCAA_Celebration_MidTensity_V7__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2012_NCAA_Celebration_MidTensity_V7__P01_InPlace",
+    "group": 24
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_sleeve_tight_d",
     "x": 1800.0,
     "y": 600.0,
     "label": "2012_NCAA_Celebration_MidTen",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2012_NCAA_Celebration_MidTensity_V7__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2012_NCAA_Celebration_MidTensity_V7__P01_InPlace",
+    "group": 24
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_shell_xenith",
     "x": 1800.0,
     "y": 600.0,
     "label": "2012_NCAA_Celebration_MidTen",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2012_NCAA_Celebration_MidTensity_V7__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2012_NCAA_Celebration_MidTensity_V7__P01_InPlace",
+    "group": 24
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_facemask_xenithprism",
     "x": 1800.0,
     "y": 600.0,
     "label": "2012_NCAA_Celebration_MidTen",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2012_NCAA_Celebration_MidTensity_V7__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2012_NCAA_Celebration_MidTensity_V7__P01_InPlace",
+    "group": 24
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubr_d",
     "x": 1800.0,
     "y": 600.0,
     "label": "2012_NCAA_Celebration_MidTen",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2012_NCAA_Celebration_MidTensity_V7__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2012_NCAA_Celebration_MidTensity_V7__P01_InPlace",
+    "group": 24
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubl_d",
     "x": 1800.0,
     "y": 600.0,
     "label": "2012_NCAA_Celebration_MidTen",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2012_NCAA_Celebration_MidTensity_V7__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2012_NCAA_Celebration_MidTensity_V7__P01_InPlace",
+    "group": 24
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_glover_d",
     "x": 1800.0,
     "y": 600.0,
     "label": "2012_NCAA_Celebration_MidTen",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2012_NCAA_Celebration_MidTensity_V7__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2012_NCAA_Celebration_MidTensity_V7__P01_InPlace",
+    "group": 24
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_glovel_d",
     "x": 1800.0,
     "y": 600.0,
     "label": "2012_NCAA_Celebration_MidTen",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2012_NCAA_Celebration_MidTensity_V7__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2012_NCAA_Celebration_MidTensity_V7__P01_InPlace",
+    "group": 24
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_faulkmarshall_11413",
     "x": 2100.0,
     "y": 600.0,
     "label": "2014_PI_Celebration_Pointtoh",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2014_PI_Celebration_Pointtohelmet_Var1__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2014_PI_Celebration_Pointtohelmet_Var1__P01_InPlace",
+    "group": 25
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_fullarms_d",
     "x": 2100.0,
     "y": 600.0,
     "label": "2014_PI_Celebration_Pointtoh",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2014_PI_Celebration_Pointtohelmet_Var1__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2014_PI_Celebration_Pointtohelmet_Var1__P01_InPlace",
+    "group": 25
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_legs_d",
     "x": 2100.0,
     "y": 600.0,
     "label": "2014_PI_Celebration_Pointtoh",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2014_PI_Celebration_Pointtohelmet_Var1__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2014_PI_Celebration_Pointtohelmet_Var1__P01_InPlace",
+    "group": 25
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_jersey_d",
     "x": 2100.0,
     "y": 600.0,
     "label": "2014_PI_Celebration_Pointtoh",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2014_PI_Celebration_Pointtohelmet_Var1__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2014_PI_Celebration_Pointtohelmet_Var1__P01_InPlace",
+    "group": 25
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_pants_d",
     "x": 2100.0,
     "y": 600.0,
     "label": "2014_PI_Celebration_Pointtoh",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2014_PI_Celebration_Pointtohelmet_Var1__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2014_PI_Celebration_Pointtohelmet_Var1__P01_InPlace",
+    "group": 25
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_socks_mid_d",
     "x": 2100.0,
     "y": 600.0,
     "label": "2014_PI_Celebration_Pointtoh",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2014_PI_Celebration_Pointtohelmet_Var1__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2014_PI_Celebration_Pointtohelmet_Var1__P01_InPlace",
+    "group": 25
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_sleeve_tight_d",
     "x": 2100.0,
     "y": 600.0,
     "label": "2014_PI_Celebration_Pointtoh",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2014_PI_Celebration_Pointtohelmet_Var1__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2014_PI_Celebration_Pointtohelmet_Var1__P01_InPlace",
+    "group": 25
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_shell_xenith",
     "x": 2100.0,
     "y": 600.0,
     "label": "2014_PI_Celebration_Pointtoh",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2014_PI_Celebration_Pointtohelmet_Var1__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2014_PI_Celebration_Pointtohelmet_Var1__P01_InPlace",
+    "group": 25
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_facemask_xenithprism",
     "x": 2100.0,
     "y": 600.0,
     "label": "2014_PI_Celebration_Pointtoh",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2014_PI_Celebration_Pointtohelmet_Var1__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2014_PI_Celebration_Pointtohelmet_Var1__P01_InPlace",
+    "group": 25
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubr_d",
     "x": 2100.0,
     "y": 600.0,
     "label": "2014_PI_Celebration_Pointtoh",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2014_PI_Celebration_Pointtohelmet_Var1__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2014_PI_Celebration_Pointtohelmet_Var1__P01_InPlace",
+    "group": 25
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubl_d",
     "x": 2100.0,
     "y": 600.0,
     "label": "2014_PI_Celebration_Pointtoh",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2014_PI_Celebration_Pointtohelmet_Var1__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2014_PI_Celebration_Pointtohelmet_Var1__P01_InPlace",
+    "group": 25
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_glover_d",
     "x": 2100.0,
     "y": 600.0,
     "label": "2014_PI_Celebration_Pointtoh",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2014_PI_Celebration_Pointtohelmet_Var1__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2014_PI_Celebration_Pointtohelmet_Var1__P01_InPlace",
+    "group": 25
    },
    {
     "mesh": "/Game/MaddenRef/Players/Stage2/SK_glovel_d",
     "x": 2100.0,
     "y": 600.0,
     "label": "2014_PI_Celebration_Pointtoh",
-    "anim": "/Game/MaddenRef/Animations/Prototype/A_2014_PI_Celebration_Pointtohelmet_Var1__P01"
+    "anim": "/Game/MaddenRef/Animations/PreviewInPlace/AnimPrototype/A_2014_PI_Celebration_Pointtohelmet_Var1__P01_InPlace",
+    "group": 25
    }
-  ]
+  ],
+  "staging": {}
  }
 }

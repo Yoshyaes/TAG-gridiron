@@ -262,9 +262,16 @@ def build_preview(spec):
     eas = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
     if les is None or eas is None:
         return {"preview": "skipped, editor subsystems unavailable in this commandlet"}
+    # Reuse an existing level in place. Deleting it and calling new_level on the same path fails silently
+    # in one commandlet session (the deleted package stays in memory), which left old levels unchanged.
     if EAL.does_asset_exist(path):
-        EAL.delete_asset(path)
-    les.new_level(path)
+        if not les.load_level(path):
+            raise RuntimeError("could not load " + path)
+        old = [a for a in eas.get_all_level_actors() if not isinstance(a, unreal.WorldSettings)]
+        if old:
+            eas.destroy_actors(old)
+    elif not les.new_level(path):
+        raise RuntimeError("could not create " + path)
     placed = []
     for i, m in enumerate(spec["meshes"]):
         if isinstance(m, dict):
@@ -289,11 +296,16 @@ def build_preview(spec):
                     comp.set_animation(anim)
                     comp.set_editor_property("animation_data", unreal.SingleAnimationPlayData(anim_to_play=anim, saved_looping=True, saved_playing=True))
         actor.set_actor_label((label + "_" if label else "") + mpath.rsplit("/", 1)[1])
-        group = m.get("group", label or i) if isinstance(m, dict) else i
+        # parts at the same spot without a group or label form one subject (one dressed player)
+        group = m.get("group", label or (x, y)) if isinstance(m, dict) else (x, y)
         placed.append((mesh, x, y, group))
     staged = stage_level(placed, spec.get("staging", {}))
-    les.save_current_level()
-    return {"preview": path, "staging": staged}
+    world = unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem).get_editor_world()
+    if world.get_outermost().get_name() != path:
+        raise RuntimeError("current level is %s, expected %s" % (world.get_outermost().get_name(), path))
+    if not les.save_current_level():
+        raise RuntimeError("save failed for " + path)
+    return {"preview": path, "staging": staged, "actors": len(eas.get_all_level_actors())}
 
 
 def run():

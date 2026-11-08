@@ -16,6 +16,7 @@ How it works. Madden's ANT bank is FIFA 17's format with little endian GD stream
 Held out (5, reasons in `failures.csv`). The four additive layer clips, which are deltas and not standalone motions, and one celebration with a single bad key (a 5 m Hips pop for one frame in the source data).
 
 ## Where to look in Unreal
+Every `L_MaddenRef` level is now lit, has a grid floor, uses the `GameModeBase` override and has a camera where one player fills about a third of the view (press Play, or pilot `PreviewCamera`). Animated players play in place from preview only copies (`Animations/PreviewInPlace`). The real clips still carry their root motion.
 - `Maps/L_MaddenRef_AnimCheckpoint` has the dressed player in idle, run and tackle.
 - `Maps/L_MaddenRef_AnimPrototype` has the 26 core clips on a grid.
 - `Animations/Full/C000` to `C082` hold every clip, named `A_<controller name>`.

@@ -1,0 +1,29 @@
+[
+ {
+  "name": "HB_Blocking_Idle_Loop__P01",
+  "file": "HB_Blocking_Idle_Loop__P01",
+  "clip_key": "f7f8174082a094de",
+  "layer_key": "5bde1c8566700e9b",
+  "fps": 60.0,
+  "frames": 80,
+  "additive": false
+ },
+ {
+  "name": "MG_Loco_Run_Average__P01",
+  "file": "MG_Loco_Run_Average__P01",
+  "clip_key": "3baf401e5a1208cb",
+  "layer_key": "bf003d491ef6a3e6",
+  "fps": 30.0,
+  "frames": 53,
+  "additive": false
+ },
+ {
+  "name": "2man_Catch_Def_In_Over_ShoveTackle__P01",
+  "file": "2man_Catch_Def_In_Over_ShoveTackle__P01",
+  "clip_key": "5e9d6a52c48f75cb",
+  "layer_key": "af6919152a08f93d",
+  "fps": 60.0,
+  "frames": 147,
+  "additive": false
+ }
+]
