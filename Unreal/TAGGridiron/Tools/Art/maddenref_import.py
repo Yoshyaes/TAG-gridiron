@@ -109,6 +109,10 @@ def import_with_task(job):
             if not EAL.save_asset(p, only_if_is_dirty=False):
                 raise RuntimeError("save failed for %s (file locked, is the Unreal Editor open?)" % p)
             out.append(p)
+    # The name matched copy under Saved/MaddenRefImport is only needed during the import. Left behind, every
+    # import duplicated its FBX from D onto C (24 GB after the full animation batch).
+    if kind in ("mesh", "anim") and out and os.path.exists(tmp):
+        os.remove(tmp)
     return out
 
 
