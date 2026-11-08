@@ -5,7 +5,8 @@
   "clip_key": "c0664853fd9f858d",
   "layer_key": "c87ef20e3ac3d9d1",
   "fps": 30.0,
-  "frames": 370
+  "frames": 370,
+  "additive": false
  },
  {
   "name": "15_FLD_PLYR_Injury_Back_Arm_V1__P01",
@@ -13,7 +14,8 @@
   "clip_key": "29e28e609c183ae2",
   "layer_key": "3134e3a4b82f91c4",
   "fps": 60.0,
-  "frames": 601
+  "frames": 601,
+  "additive": false
  },
  {
   "name": "15_FLD_PLYR_Injury_Back_Arm_V2__P01",
@@ -21,7 +23,8 @@
   "clip_key": "3ed8f4f9faeffcf3",
   "layer_key": "1bb69ad91d58b434",
   "fps": 60.0,
-  "frames": 601
+  "frames": 601,
+  "additive": false
  },
  {
   "name": "15_FLD_PLYR_Injury_Back_Arm_V3__P01",
@@ -29,7 +32,8 @@
   "clip_key": "c963e958b7c58707",
   "layer_key": "9624ec7a2c0375cb",
   "fps": 60.0,
-  "frames": 601
+  "frames": 601,
+  "additive": false
  },
  {
   "name": "15_FLD_PLYR_Injury_Back_Back_V1__P01",
@@ -37,7 +41,8 @@
   "clip_key": "37a8bc4016a7893b",
   "layer_key": "cf7061462407f5b5",
   "fps": 60.0,
-  "frames": 601
+  "frames": 601,
+  "additive": false
  },
  {
   "name": "15_FLD_PLYR_Injury_Back_Back_V2__P01",
@@ -45,7 +50,8 @@
   "clip_key": "2223fa738bbfd595",
   "layer_key": "d7e297c8b293119b",
   "fps": 60.0,
-  "frames": 601
+  "frames": 601,
+  "additive": false
  },
  {
   "name": "15_FLD_PLYR_Injury_Back_Foot_V1__P01",
@@ -53,7 +59,8 @@
   "clip_key": "108fdffc5eae4b86",
   "layer_key": "74821c7ca499a8e5",
   "fps": 60.0,
-  "frames": 601
+  "frames": 601,
+  "additive": false
  },
  {
   "name": "15_FLD_PLYR_Injury_Back_Foot_V2__P01",
@@ -61,7 +68,8 @@
   "clip_key": "74b94dfc6096f111",
   "layer_key": "5135e7d0cd605d1f",
   "fps": 60.0,
-  "frames": 601
+  "frames": 601,
+  "additive": false
  },
  {
   "name": "15_FLD_PLYR_Injury_Back_Foot_V3__P01",
@@ -69,7 +77,8 @@
   "clip_key": "462af35bf898abd6",
   "layer_key": "ff0a7d6cf7f0bd3d",
   "fps": 60.0,
-  "frames": 601
+  "frames": 601,
+  "additive": false
  },
  {
   "name": "15_FLD_PLYR_Injury_Back_Hand_V1__P01",
@@ -77,7 +86,8 @@
   "clip_key": "dbcf9401c3c16a00",
   "layer_key": "6bf78b7861f938e0",
   "fps": 60.0,
-  "frames": 601
+  "frames": 601,
+  "additive": false
  },
  {
   "name": "15_FLD_PLYR_Injury_Back_Hand_V2__P01",
@@ -85,7 +95,8 @@
   "clip_key": "8d5995f4d43286b4",
   "layer_key": "6f4176b4b2c675e8",
   "fps": 60.0,
-  "frames": 601
+  "frames": 601,
+  "additive": false
  },
  {
   "name": "15_FLD_PLYR_Injury_Back_Hand_V3__P01",
@@ -93,7 +104,8 @@
   "clip_key": "6cee87e9223f9138",
   "layer_key": "cb450b719e6a40b7",
   "fps": 60.0,
-  "frames": 601
+  "frames": 601,
+  "additive": false
  },
  {
   "name": "15_FLD_PLYR_Injury_Back_Knee_V1__P01",
@@ -101,7 +113,8 @@
   "clip_key": "52ff1b8329f13f98",
   "layer_key": "0805aed7f7c180c9",
   "fps": 60.0,
-  "frames": 601
+  "frames": 601,
+  "additive": false
  },
  {
   "name": "15_FLD_PLYR_Injury_Back_Knee_V2__P01",
@@ -109,7 +122,8 @@
   "clip_key": "3bee581eb478a3fa",
   "layer_key": "799f4c1114e5e646",
   "fps": 60.0,
-  "frames": 601
+  "frames": 601,
+  "additive": false
  },
  {
   "name": "15_FLD_PLYR_Injury_Back_Knee_V3__P01",
@@ -117,7 +131,8 @@
   "clip_key": "16f353681d428592",
   "layer_key": "a07044816cef3a84",
   "fps": 60.0,
-  "frames": 601
+  "frames": 601,
+  "additive": false
  },
  {
   "name": "15_FLD_PLYR_Injury_Back_Leg_V1__P01",
@@ -125,7 +140,8 @@
   "clip_key": "17af92bf13b26ea7",
   "layer_key": "a451dafae4116f9d",
   "fps": 60.0,
-  "frames": 601
+  "frames": 601,
+  "additive": false
  },
  {
   "name": "15_FLD_PLYR_Injury_Back_Leg_V2__P01",
@@ -133,7 +149,8 @@
   "clip_key": "948fa2b3487155c8",
   "layer_key": "1cfd5df19d658f70",
   "fps": 60.0,
-  "frames": 601
+  "frames": 601,
+  "additive": false
  },
  {
   "name": "15_FLD_PLYR_Injury_Back_Shoulder_V1__P01",
@@ -141,7 +158,8 @@
   "clip_key": "c5b392682549b6c5",
   "layer_key": "6cf52637f38d79c4",
   "fps": 60.0,
-  "frames": 601
+  "frames": 601,
+  "additive": false
  },
  {
   "name": "15_FLD_PLYR_Injury_Back_Shoulder_V2__P01",
@@ -149,7 +167,8 @@
   "clip_key": "a0dc615937f64f98",
   "layer_key": "85df697bfde57e50",
   "fps": 60.0,
-  "frames": 601
+  "frames": 601,
+  "additive": false
  },
  {
   "name": "15_FLD_PLYR_Injury_Back_Shoulder_V3__P01",
@@ -157,7 +176,8 @@
   "clip_key": "aa073c5e1001a4f7",
   "layer_key": "d4f356ce69fe4e4b",
   "fps": 60.0,
-  "frames": 601
+  "frames": 601,
+  "additive": false
  },
  {
   "name": "15_FLD_PLYR_Injury_Fours_Arm_V1__P01",
@@ -165,7 +185,8 @@
   "clip_key": "e11d37edf6151196",
   "layer_key": "9ebf5f233f360817",
   "fps": 60.0,
-  "frames": 601
+  "frames": 601,
+  "additive": false
  },
  {
   "name": "15_FLD_PLYR_Injury_Fours_Back_V1__P01",
@@ -173,7 +194,8 @@
   "clip_key": "da8454fc91a819d5",
   "layer_key": "549153a3c413e609",
   "fps": 60.0,
-  "frames": 601
+  "frames": 601,
+  "additive": false
  },
  {
   "name": "15_FLD_PLYR_Injury_Fours_Foot_V1__P01",
@@ -181,7 +203,8 @@
   "clip_key": "55f5b3a2a6ab2fc1",
   "layer_key": "9e15be5cc7d1c669",
   "fps": 60.0,
-  "frames": 601
+  "frames": 601,
+  "additive": false
  },
  {
   "name": "15_FLD_PLYR_Injury_Fours_Hand_V1__P01",
@@ -189,7 +212,8 @@
   "clip_key": "cbe309b9e91a52a3",
   "layer_key": "96164feb5e93fabd",
   "fps": 60.0,
-  "frames": 601
+  "frames": 601,
+  "additive": false
  },
  {
   "name": "15_FLD_PLYR_Injury_Fours_Knee_V1__P01",
@@ -197,7 +221,8 @@
   "clip_key": "4204d86c704a5b9a",
   "layer_key": "8f183e1f6ce4a45f",
   "fps": 60.0,
-  "frames": 601
+  "frames": 601,
+  "additive": false
  },
  {
   "name": "15_FLD_PLYR_Injury_Fours_Leg_V1__P01",
@@ -205,7 +230,8 @@
   "clip_key": "1f4f51b366aa5868",
   "layer_key": "b272f6a6f71c4f4e",
   "fps": 60.0,
-  "frames": 601
+  "frames": 601,
+  "additive": false
  },
  {
   "name": "15_FLD_PLYR_Injury_Fours_Shoulder_V1__P01",
@@ -213,7 +239,8 @@
   "clip_key": "65c428421095e7c2",
   "layer_key": "227a004df7b87d8c",
   "fps": 60.0,
-  "frames": 601
+  "frames": 601,
+  "additive": false
  },
  {
   "name": "15_FLD_PLYR_Injury_Front_Arm_V1__P01",
@@ -221,7 +248,8 @@
   "clip_key": "c0babc1ddef8a5f5",
   "layer_key": "6437fb078aa5969a",
   "fps": 60.0,
-  "frames": 601
+  "frames": 601,
+  "additive": false
  },
  {
   "name": "15_FLD_PLYR_Injury_Front_Arm_V2__P01",
@@ -229,7 +257,8 @@
   "clip_key": "5088e7cd8a5f1194",
   "layer_key": "3e50571a29fba8c0",
   "fps": 60.0,
-  "frames": 601
+  "frames": 601,
+  "additive": false
  },
  {
   "name": "15_FLD_PLYR_Injury_Front_Back_V1__P01",
@@ -237,7 +266,8 @@
   "clip_key": "453d63ea31f149f0",
   "layer_key": "9ff1d5845339443b",
   "fps": 60.0,
-  "frames": 601
+  "frames": 601,
+  "additive": false
  },
  {
   "name": "15_FLD_PLYR_Injury_Front_Back_V2__P01",
@@ -245,7 +275,8 @@
   "clip_key": "668d279f78c48029",
   "layer_key": "965c30f6b0762a29",
   "fps": 60.0,
-  "frames": 601
+  "frames": 601,
+  "additive": false
  },
  {
   "name": "15_FLD_PLYR_Injury_Front_Foot_V1__P01",
@@ -253,7 +284,8 @@
   "clip_key": "236e6d8cdfcf6b73",
   "layer_key": "8a8d0e38a49fb8d8",
   "fps": 60.0,
-  "frames": 601
+  "frames": 601,
+  "additive": false
  },
  {
   "name": "15_FLD_PLYR_Injury_Front_Foot_V2__P01",
@@ -261,7 +293,8 @@
   "clip_key": "d9d516e30d9855db",
   "layer_key": "f7df36d196f85e12",
   "fps": 60.0,
-  "frames": 601
+  "frames": 601,
+  "additive": false
  },
  {
   "name": "15_FLD_PLYR_Injury_Front_Hand_V1__P01",
@@ -269,7 +302,8 @@
   "clip_key": "2fc55aec943d64e8",
   "layer_key": "866c73a29dd4c442",
   "fps": 60.0,
-  "frames": 601
+  "frames": 601,
+  "additive": false
  },
  {
   "name": "15_FLD_PLYR_Injury_Front_Hand_V2__P01",
@@ -277,7 +311,8 @@
   "clip_key": "8e8b864aeea5c387",
   "layer_key": "daf70eddeaca008d",
   "fps": 60.0,
-  "frames": 601
+  "frames": 601,
+  "additive": false
  },
  {
   "name": "15_FLD_PLYR_Injury_Front_Hand_V3__P01",
@@ -285,7 +320,8 @@
   "clip_key": "8b588cc6d218fd51",
   "layer_key": "0e7f4d20a933dbfd",
   "fps": 60.0,
-  "frames": 601
+  "frames": 601,
+  "additive": false
  },
  {
   "name": "15_FLD_PLYR_Injury_Front_Knee_V1__P01",
@@ -293,7 +329,8 @@
   "clip_key": "e4304747566d4a40",
   "layer_key": "e0f62847ca5c6c98",
   "fps": 60.0,
-  "frames": 601
+  "frames": 601,
+  "additive": false
  },
  {
   "name": "15_FLD_PLYR_Injury_Front_Knee_V2__P01",
@@ -301,7 +338,8 @@
   "clip_key": "ec01b73edb40bfd9",
   "layer_key": "cd95b9f1e461f936",
   "fps": 60.0,
-  "frames": 601
+  "frames": 601,
+  "additive": false
  },
  {
   "name": "15_FLD_PLYR_Injury_Front_Knee_V3__P01",
@@ -309,7 +347,8 @@
   "clip_key": "94c74e82b442eeaa",
   "layer_key": "787e4e9b20af2ec4",
   "fps": 60.0,
-  "frames": 601
+  "frames": 601,
+  "additive": false
  },
  {
   "name": "15_FLD_PLYR_Injury_Front_Leg_V1__P01",
@@ -317,7 +356,8 @@
   "clip_key": "50ec27fe820ef11c",
   "layer_key": "a5d6d765f9478a40",
   "fps": 60.0,
-  "frames": 601
+  "frames": 601,
+  "additive": false
  },
  {
   "name": "15_FLD_PLYR_Injury_Front_Leg_V2__P01",
@@ -325,7 +365,8 @@
   "clip_key": "bc6f319f72b192d9",
   "layer_key": "a36aacddbed28fed",
   "fps": 60.0,
-  "frames": 601
+  "frames": 601,
+  "additive": false
  },
  {
   "name": "15_FLD_PLYR_Injury_Front_Shoulder_V1__P01",
@@ -333,7 +374,8 @@
   "clip_key": "66bf19b550d6a92f",
   "layer_key": "2fb34adac4d44de4",
   "fps": 60.0,
-  "frames": 601
+  "frames": 601,
+  "additive": false
  },
  {
   "name": "15_FLD_PLYR_Injury_Front_Shoulder_V2__P01",
@@ -341,7 +383,8 @@
   "clip_key": "589301ee418a7035",
   "layer_key": "5d3cf2c5c16742f7",
   "fps": 60.0,
-  "frames": 601
+  "frames": 601,
+  "additive": false
  },
  {
   "name": "2010_MultiPlayerCelebration_Var6__P01",
@@ -349,7 +392,8 @@
   "clip_key": "ea75f446b38cb447",
   "layer_key": "609bd2bfb5fd094a",
   "fps": 30.0,
-  "frames": 83
+  "frames": 83,
+  "additive": false
  },
  {
   "name": "2010_MultiPlayerCelebration_Var6__P02",
@@ -357,7 +401,8 @@
   "clip_key": "4742420180b380a7",
   "layer_key": "77bb154d78b3d499",
   "fps": 30.0,
-  "frames": 91
+  "frames": 91,
+  "additive": false
  },
  {
   "name": "2010_PostGame_Coaches_Players_shakeHands_var2__P02",
@@ -365,7 +410,8 @@
   "clip_key": "a8972e71f7ba937e",
   "layer_key": "0abd298b21401754",
   "fps": 30.0,
-  "frames": 201
+  "frames": 201,
+  "additive": false
  },
  {
   "name": "2010_PostGame_Coaches_Players_shakeHands_var2__P07",
@@ -373,7 +419,8 @@
   "clip_key": "5d8830ca33a66429",
   "layer_key": "5a9c9a349d4fe29d",
   "fps": 30.0,
-  "frames": 201
+  "frames": 201,
+  "additive": false
  },
  {
   "name": "2010_PostGame_SB_CoachCheering__P07",
@@ -381,7 +428,8 @@
   "clip_key": "2052ace26233c00d",
   "layer_key": "03f7bb894151de42",
   "fps": 30.0,
-  "frames": 151
+  "frames": 151,
+  "additive": false
  },
  {
   "name": "2010_PostGame_SB_CoachCheering__P08",
@@ -389,7 +437,8 @@
   "clip_key": "b197148fd4086310",
   "layer_key": "b495b059d5152e4f",
   "fps": 30.0,
-  "frames": 151
+  "frames": 151,
+  "additive": false
  },
  {
   "name": "2010_PostPlay_Chall_Negative_Var1__C01",
@@ -397,7 +446,8 @@
   "clip_key": "9ee0e220ba57ec2a",
   "layer_key": "a8de64c634e4a322",
   "fps": 30.0,
-  "frames": 55
+  "frames": 55,
+  "additive": false
  },
  {
   "name": "2010_PostPlay_CoachPissedAtPlayer_Var2X__P01",
@@ -405,7 +455,8 @@
   "clip_key": "f8ecca05d7a31aa6",
   "layer_key": "5cea6e1a38cb0b61",
   "fps": 30.0,
-  "frames": 201
+  "frames": 201,
+  "additive": false
  },
  {
   "name": "2010_PostPlay_KickerTeamCelebration_V2__P01",
@@ -413,7 +464,8 @@
   "clip_key": "7dc3a86db9e40318",
   "layer_key": "178fa25f44ed00a7",
   "fps": 30.0,
-  "frames": 201
+  "frames": 201,
+  "additive": false
  },
  {
   "name": "2010_PostPlay_KickerTeamCelebration_V2__P02",
@@ -421,7 +473,8 @@
   "clip_key": "c61d6f3778bb7703",
   "layer_key": "50bd22676c51edb3",
   "fps": 30.0,
-  "frames": 201
+  "frames": 201,
+  "additive": false
  },
  {
   "name": "2010_PostPlay_SidelineCatch__C01",
@@ -429,7 +482,8 @@
   "clip_key": "8a57d8b12798f551",
   "layer_key": "9d340e4109183950",
   "fps": 30.0,
-  "frames": 54
+  "frames": 54,
+  "additive": false
  },
  {
   "name": "2010_PostPlay_SidelineCatch__P04",
@@ -437,7 +491,8 @@
   "clip_key": "4f51a9a14ad68fb2",
   "layer_key": "fef7b22399ea18af",
   "fps": 30.0,
-  "frames": 88
+  "frames": 88,
+  "additive": false
  },
  {
   "name": "2010_PostPlay_SidelineCatch__P05",
@@ -445,7 +500,8 @@
   "clip_key": "19b76a475c9dc6fa",
   "layer_key": "4e0ac188b41fe01b",
   "fps": 30.0,
-  "frames": 200
+  "frames": 200,
+  "additive": false
  },
  {
   "name": "2010_PostPlay_TeammateCeleb_Var3__P01",
@@ -453,7 +509,8 @@
   "clip_key": "b575d0a30fb38bb0",
   "layer_key": "8ab237a842b8ab49",
   "fps": 30.0,
-  "frames": 229
+  "frames": 229,
+  "additive": false
  },
  {
   "name": "2010_PostPlay_TeammateCeleb_Var3__P02",
@@ -461,7 +518,8 @@
   "clip_key": "08eb1c6e3c11cf4b",
   "layer_key": "491322f383214c35",
   "fps": 30.0,
-  "frames": 229
+  "frames": 229,
+  "additive": false
  },
  {
   "name": "2010_Sideline_Congratulations_Var4__P01",
@@ -469,7 +527,8 @@
   "clip_key": "44ec6a487144eb04",
   "layer_key": "3ee12da635717954",
   "fps": 30.0,
-  "frames": 102
+  "frames": 102,
+  "additive": false
  },
  {
   "name": "2010_Sideline_Congratulations_Var4__P02",
@@ -477,7 +536,8 @@
   "clip_key": "feac67d92961b327",
   "layer_key": "ad33e1be243fa9d5",
   "fps": 30.0,
-  "frames": 122
+  "frames": 122,
+  "additive": false
  },
  {
   "name": "2010_Sideline_Congratulations_Var4__P03",
@@ -485,7 +545,8 @@
   "clip_key": "58c1435acd5595f1",
   "layer_key": "db1f5183684ee7b3",
   "fps": 30.0,
-  "frames": 83
+  "frames": 83,
+  "additive": false
  },
  {
   "name": "2010_Sideline_PlayersFreezing__P01",
@@ -493,7 +554,8 @@
   "clip_key": "835b254f241ee689",
   "layer_key": "906959dba2aa3f36",
   "fps": 30.0,
-  "frames": 136
+  "frames": 136,
+  "additive": false
  },
  {
   "name": "2011_NCAA_Def_BC_JawingAtEachOther__P02",
@@ -501,7 +563,8 @@
   "clip_key": "331cba7cbd6f2d4f",
   "layer_key": "a468d118c12ae3e1",
   "fps": 30.0,
-  "frames": 285
+  "frames": 285,
+  "additive": false
  },
  {
   "name": "2011_Star_Celebration__P09",
@@ -509,7 +572,8 @@
   "clip_key": "1efcee4c1c469a8e",
   "layer_key": "41b2b69743ccff25",
   "fps": 30.0,
-  "frames": 139
+  "frames": 139,
+  "additive": false
  },
  {
   "name": "2011_Superbowl_MultiPlayerCelebration__P01",
@@ -517,7 +581,8 @@
   "clip_key": "05b1765f3733b2ee",
   "layer_key": "78b3b84f3061933b",
   "fps": 30.0,
-  "frames": 151
+  "frames": 151,
+  "additive": false
  },
  {
   "name": "2011_Superbowl_MultiPlayerCelebration__P02",
@@ -525,7 +590,8 @@
   "clip_key": "bc13f8057778d4aa",
   "layer_key": "d1ae926396b955b8",
   "fps": 30.0,
-  "frames": 151
+  "frames": 151,
+  "additive": false
  },
  {
   "name": "2012_CoinToss_WalkBack__P05",
@@ -533,7 +599,8 @@
   "clip_key": "4d15038a9ef2214e",
   "layer_key": "fe2e5892527f31c1",
   "fps": 30.0,
-  "frames": 300
+  "frames": 300,
+  "additive": false
  },
  {
   "name": "2012_CoinToss_WalkBack__P07",
@@ -541,6 +608,7 @@
   "clip_key": "ec66d4ee60c7e077",
   "layer_key": "d9af0ebec58532e5",
   "fps": 30.0,
-  "frames": 300
+  "frames": 300,
+  "additive": false
  }
 ]
