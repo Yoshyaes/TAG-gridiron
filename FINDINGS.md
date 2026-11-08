@@ -273,3 +273,17 @@ Tooling is in `tools\madden\antbank\`. It is Python and reads the AssetBank RES 
 - `Saved\MaddenRefImport` holds 24.4 GB of temporary FBX copies (12,710 files). The importer copied every FBX there for name matching and never removed it. Every file is a duplicate of a manifest verified FBX on D. The importer now deletes its copy after a successful save (tested on one clip).
 - `Saved\Autosaves\Game\TAG` (5.7 GB) is the editor's own autosave of TAG content, not pipeline output.
 - The plan options and their effect on the prototype clips and preview levels are in MORNING-REPORT.md under C drive plan.
+
+## Reference only project and C drive cleanup (2026-11-08, option A)
+- **Project.** `D:\MaddenRef\MaddenRef_ReferenceOnly\MaddenRef_ReferenceOnly.uproject`, UE 5.8, content only, outside the repo and outside any git work tree. Its `.gitignore` ignores everything, `REFERENCE_ONLY.txt` explains it, and `DefaultGame.ini` keeps `/Game/MaddenRef` out of cooking.
+- **Cache on D.** The engine's default derived data stores live under the user folder on C. The project's `DefaultEngine.ini` replaces the cache graph with a filesystem store at `DerivedDataCache\Local` inside the project. Its first headless run changed C by 0.6 MB.
+- **Copy.** `Animations\Full`, `Skeleton` and `_Pipelines` copied with robocopy (junctions excluded) at the same package paths, so nothing was reimported. `tools\madden\ref_project.py verifycopy` matched all 12,186 files by size and SHA256 (22,096,278,588 bytes).
+- **Gates before deleting.**
+  1. Twenty random full batch clips (seed 1108) sampled in the reference project and compared with the Python decode. Raw error at most 0.02 cm, compressed at most 0.48 cm, motion identical (`logs\ref_sample_compare.json`).
+  2. Audit pass in the reference project (12,186 packages, reference mode) and in TAGGridiron (13,579 packages).
+  3. `maddenref_full_refs.py` found no package among 16,234 in TAGGridiron that depends on `Full`, and no file under Source, Config, Tools or Plugins naming it.
+- **Removal.** `ref_project.py removefull` refuses to run unless all those reports pass and the editor is closed. It removed only files whose reference copy was verified, one by one, never through a link, logged in `logs\removed_full.csv` (12,182 files, 22,095,137,729 bytes). The empty folders went with a non recursive rmdir.
+- **Temp copies.** `ref_project.py cleanimport` removed a file from `Saved\MaddenRefImport` only when its hash matched a manifest entry whose file exists on D with the same recomputed hash. 12,706 files removed (26,218,489,616 bytes), logged in `logs\removed_maddenrefimport.csv`. Three were kept with no matching manifest file (`logs\kept_maddenrefimport.csv`, 3 MB, held out clips from 7 Nov). The editor autosaves were not touched.
+- **C drive.** 40.57 GB free before (43,561,885,696 bytes), 85.60 GB after (91,910,836,224 bytes), 45.03 GB gained. The reference project takes 20.6 GB on D, which has 405 GB free.
+- **Tooling.** `madden.py --project ref` runs any Unreal step against the reference project with its own import state `logs\ue_state_ref.json` (the 12,182 full batch entries moved there). Animation kits whose `ue_dir` is under `Animations/Full` switch to it on their own, and `anim_reimport.py` targets it.
+- **After.** Audit pass in TAGGridiron (1,397 MaddenRef packages) and the reference project (12,186), install guard unchanged, manifest verify 27,651 files. The 26 prototype clips, checkpoint clips, in place copies, retargeted clips and preview levels are unchanged.

@@ -27,6 +27,8 @@ Team uniforms are shared sets in `kits\uniforms\<name>.json`. A kit names one wi
 
 Retargeting onto the Athlete's UEFN mannequin runs headless with `maddenref_retarget.py`. Env `MADDENREF_RETARGET` names a clip list such as `jobs\retarget_prototype.json`, and `MADDENREF_DRY=1` saves nothing.
 
+The full animation batch lives in the REFERENCE ONLY project `D:\MaddenRef\MaddenRef_ReferenceOnly` (outside the repo, git ignored, cache on D). Add `--project ref` to any `madden.py` command to run its Unreal steps there. Animation kits under `Animations/Full` and `anim_reimport.py` use it on their own. `ref_project.py` holds the copy check and the logged, gated cleanups that moved the batch off C.
+
 ## Files
 | Path | Role |
 | --- | --- |
@@ -44,6 +46,9 @@ Retargeting onto the Athlete's UEFN mannequin runs headless with `maddenref_reta
 | `Unreal\TAGGridiron\Tools\Art\maddenref_audit.py` | Guardrail audit |
 | `Unreal\TAGGridiron\Tools\Art\maddenref_retarget.py` | IK Rig, retargeter and batch retarget onto the UEFN mannequin, with a limb direction check |
 | `kits\uniforms\*.json` | Team uniform sets used by kits |
+| `ref_project.py` | Reference project copy check, gated removal of the full batch from TAGGridiron, temp copy cleanup |
+| `Unreal\TAGGridiron\Tools\Art\maddenref_sample.py` | Samples sequences for `antbank\compare_ue.py` |
+| `Unreal\TAGGridiron\Tools\Art\maddenref_full_refs.py` | Confirms nothing references `Animations/Full` |
 
 ## Conventions
 - **Scale** is fixed at export. FBX is written in meters (UnitScaleFactor 100). No import offset scale anywhere.
