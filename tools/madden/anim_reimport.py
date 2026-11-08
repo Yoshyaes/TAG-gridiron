@@ -22,7 +22,7 @@ REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
 LOGS = os.path.join(REPO, "logs")
 CONTENT = os.path.join(REPO, "Unreal", "TAGGridiron", "Content")
 EXTRACTED = os.path.join(REPO, "extracted")
-BATCH = 220
+BATCH = 230
 
 
 def pending():

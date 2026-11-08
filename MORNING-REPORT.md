@@ -15,6 +15,9 @@ How it works. Madden's ANT bank is FIFA 17's format with little endian GD stream
 
 Held out (5, reasons in `failures.csv`). The four additive layer clips, which are deltas and not standalone motions, and one celebration with a single bad key (a 5 m Hips pop for one frame in the source data).
 
+## Twitch fix (2026-11-08)
+The preview twitch was in the clips, not the actors. Every animation FBX wrote key times as floats, so Unreal held one pose after the first instant. Fixed in the writer, all 12,214 FBX files repaired and all sequences re-imported. Unreal now matches the decode within 0.01 cm (raw) and about 1 cm (compressed) on 20 sampled clips.
+
 ## Where to look in Unreal
 Every `L_MaddenRef` level is now lit, has a grid floor, uses the `GameModeBase` override and has a camera where one player fills about a third of the view (press Play, or pilot `PreviewCamera`). Animated players play in place from preview only copies (`Animations/PreviewInPlace`). The real clips still carry their root motion.
 - `Maps/L_MaddenRef_AnimCheckpoint` has the dressed player in idle, run and tackle.
