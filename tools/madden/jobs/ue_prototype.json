@@ -347,6 +347,20 @@
  },
  {
   "kind": "texture",
+  "file": "{REPO}/extracted/prototype/textures/socks_under_rsm.png",
+  "dest": "/Game/MaddenRef/Players/Prototype/Textures",
+  "name": "T_socks_under_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/prototype/textures_ue/socks_under_normal_ue.png",
+  "dest": "/Game/MaddenRef/Players/Prototype/Textures",
+  "name": "T_socks_under_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
   "file": "{REPO}/extracted/prototype/textures/nin_helmet_2018_golalt_sticker_col.png",
   "dest": "/Game/MaddenRef/Players/Prototype/Textures",
   "name": "T_nin_helmet_2018_golalt_sticker_col"

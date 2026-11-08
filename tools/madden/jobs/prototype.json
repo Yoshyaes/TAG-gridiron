@@ -1517,6 +1517,36 @@
   }
  },
  {
+  "id": "t_socks_under_rsm",
+  "op": "texture",
+  "asset": "content/characters/player/parts/legsApparel/socks_Under/socks_Under_RSM",
+  "out": "{REPO}/extracted/prototype/textures/socks_under_rsm",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "kit extra"
+   ]
+  }
+ },
+ {
+  "id": "t_socks_under_normal",
+  "op": "texture",
+  "asset": "content/characters/player/parts/legsApparel/socks_Under/socks_Under_normal",
+  "out": "{REPO}/extracted/prototype/textures/socks_under_normal",
+  "formats": [
+   "dds",
+   "png"
+  ],
+  "meta": {
+   "used_by": [
+    "kit extra"
+   ]
+  }
+ },
+ {
   "id": "t_nin_helmet_2018_golalt_sticker_col",
   "op": "texture",
   "asset": "content/characters/player/parts/uniforms/49ers/2018/NIN_HELMET_2018_GOLALT_Sticker_COL",

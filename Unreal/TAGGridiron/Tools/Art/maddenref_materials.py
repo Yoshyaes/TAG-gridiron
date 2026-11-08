@@ -15,6 +15,8 @@
 #   UseRSM switch. When on, RSM texture R -> Roughness, G -> Specular, B -> Metallic.
 #   RSMIsSkin switch. Skin maps are R_S_SSR_T (B is subsurface), so Metallic falls back to the scalar.
 #   When UseRSM is off, the Roughness, Specular and Metallic scalars are used.
+#   Tint vector (default white) multiplies Base Color. Pieces with only a colour in their Madden preset (facemasks)
+#   use it over the white default texture. Masters built before Tint existed are upgraded in place.
 import json
 import math
 import os
@@ -60,10 +62,37 @@ def _switch(m, name, x, y):
 WORLD_MASTER = ROOT + "/Materials/M_MaddenRef_World"
 
 
+def ensure_tint(m):
+    """Adds the Tint vector parameter between the BaseColor texture and Base Color, once. Default white keeps
+    every existing instance as it was."""
+    if "Tint" in [str(n) for n in MEL.get_vector_parameter_names(m)]:
+        return m
+    base = MEL.get_material_property_input_node(m, unreal.MaterialProperty.MP_BASE_COLOR)
+    if base is None:
+        raise RuntimeError("master has no Base Color input " + m.get_path_name())
+    tint = _expr(m, unreal.MaterialExpressionVectorParameter, -800, -550)
+    tint.set_editor_property("parameter_name", "Tint")
+    tint.set_editor_property("default_value", unreal.LinearColor(1.0, 1.0, 1.0, 1.0))
+    mask = _expr(m, unreal.MaterialExpressionComponentMask, -550, -550)
+    for c in ("r", "g", "b"):
+        mask.set_editor_property(c, True)
+    mask.set_editor_property("a", False)
+    mul = _expr(m, unreal.MaterialExpressionMultiply, -300, -400)
+    MEL.connect_material_expressions(tint, "", mask, "")
+    MEL.connect_material_expressions(base, "RGB", mul, "A")
+    MEL.connect_material_expressions(mask, "", mul, "B")
+    MEL.connect_material_property(mul, "", unreal.MaterialProperty.MP_BASE_COLOR)
+    MEL.recompile_material(m)
+    if not EAL.save_loaded_asset(m, only_if_is_dirty=False):
+        raise RuntimeError("save failed for %s (file locked, is the Unreal Editor open?)" % m.get_path_name())
+    return m
+
+
 def build_master(path=MASTER, tiling=False):
     """M_MaddenRef_Ref for characters. M_MaddenRef_World adds a Tiling scalar on the UVs (world presets tile)."""
     if EAL.does_asset_exist(path):
-        return unreal.load_asset(path)
+        m = unreal.load_asset(path)
+        return ensure_tint(m) if path == MASTER else m
     pkg, name = path.rsplit("/", 1)
     m = tools.create_asset(name, pkg, unreal.Material, unreal.MaterialFactoryNew())
     base = _tex(m, "BaseColor", WHITE, -800, -300, unreal.MaterialSamplerType.SAMPLERTYPE_COLOR)
@@ -99,7 +128,7 @@ def build_master(path=MASTER, tiling=False):
     MEL.connect_material_property(sw_m, "", unreal.MaterialProperty.MP_METALLIC)
     MEL.recompile_material(m)
     EAL.save_loaded_asset(m, only_if_is_dirty=False)
-    return m
+    return ensure_tint(m) if path == MASTER else m
 
 
 def make_mi(path, master):
@@ -125,8 +154,11 @@ def apply_binding(b, master):
         MEL.set_material_instance_scalar_parameter_value(mi, k, float(v))
     for k, v in b.get("switches", {}).items():
         MEL.set_material_instance_static_switch_parameter_value(mi, k, bool(v))
+    for k, v in b.get("vectors", {}).items():
+        MEL.set_material_instance_vector_parameter_value(mi, k, unreal.LinearColor(*[float(x) for x in (list(v) + [1.0] * 4)[:4]]))
     MEL.update_material_instance(mi)
-    EAL.save_loaded_asset(mi, only_if_is_dirty=False)
+    if not EAL.save_loaded_asset(mi, only_if_is_dirty=False):
+        raise RuntimeError("save failed for %s (file locked, is the Unreal Editor open?)" % b["mi"])
     mesh = unreal.load_asset(b["mesh"])
     if mesh is None:
         raise RuntimeError("missing mesh " + b["mesh"])
@@ -140,7 +172,8 @@ def apply_binding(b, master):
         mesh.set_editor_property("materials", mats)
     else:
         mesh.set_editor_property("static_materials", mats)
-    EAL.save_loaded_asset(mesh, only_if_is_dirty=False)
+    if not EAL.save_loaded_asset(mesh, only_if_is_dirty=False):
+        raise RuntimeError("save failed for %s (file locked, is the Unreal Editor open?)" % b["mesh"])
     return {"mi": b["mi"], "mesh": b["mesh"], "slots": list(slots)}
 
 

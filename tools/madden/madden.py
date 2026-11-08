@@ -16,6 +16,7 @@ Commands
   verify                    manifest counts and hashes against the disk, exit 6 on mismatch
   kit <spec.json>           run one kit end to end (plan, export, texfix, material JSON, UE import,
                             materials, verify, guard, audit). Exit 3 on install change, 4 on disk floor
+  kit <spec.json> --prep    the same up to the bindings, no Unreal steps, then verify and guard
 """
 import csv
 import hashlib
@@ -399,8 +400,10 @@ def cmd_animkit(spec_path, spec):
     return 0
 
 
-def cmd_kit(spec_path):
-    """Runs one kit end to end with gates. Exit 3 means the install guard saw a change (stop everything)."""
+def cmd_kit(spec_path, prep=False):
+    """Runs one kit end to end with gates. Exit 3 means the install guard saw a change (stop everything).
+    prep stops before the Unreal steps (export, texfix, material descriptions and bindings only), then verifies
+    and runs the guard. Useful while the editor is open."""
     spec = json.load(open(spec_path, encoding="utf-8"))
     if spec.get("kind") == "anim":
         return cmd_animkit(spec_path, spec)
@@ -437,6 +440,11 @@ def cmd_kit(spec_path):
         step("texfix", subprocess.run(PY313 + [os.path.join(TOOLS, "texfix.py"), tex_dir], timeout=STEP_TIMEOUT).returncode)
     step("matdesc", subprocess.run(kit + ["matdesc", spec_path], timeout=STEP_TIMEOUT).returncode)
     step("mat", subprocess.run(kit + ["mat", spec_path], timeout=STEP_TIMEOUT).returncode)
+    if prep:
+        step("verify", cmd_verify())
+        g = step("guard", cmd_guard())
+        save()
+        return 3 if g else 0
     step("ue", cmd_ue(os.path.join(TOOLS, "jobs", "ue_" + name + ".json"), name))
     step("materials", cmd_materials(os.path.join(TOOLS, "jobs", "mat_" + name + ".json"), name))
     step("verify", cmd_verify())
@@ -504,7 +512,7 @@ def main(argv):
     if c == "audit":
         return cmd_audit(argv[2])
     if c == "kit":
-        return cmd_kit(argv[2])
+        return cmd_kit(argv[2], prep="--prep" in argv)
     if c == "verify":
         return cmd_verify(argv[argv.index("--stage") + 1] if "--stage" in argv else None)
     print(__doc__)

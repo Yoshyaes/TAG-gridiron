@@ -19,8 +19,12 @@ Spec fields
   mesh_patterns                     regexes, first match each (or all matches when pattern_mode is "all")
   sample                            {"pattern": regex, "count": n, "seed": s} random sample from the inventory
   limit                             cap on the number of meshes after all selectors
-  extra_textures                    {"dir": prefix, "regex": regex} team or kit textures to include
-  overrides                         [[regex, {"BaseColor": leaf, "Normal": leaf, "RSM": leaf}], ...]
+  extra_textures                    {"dir": prefix, "regex": regex} or a list of them, team or kit textures to include
+  overrides                         [[regex, {"BaseColor": leaf, "Normal": leaf, "RSM": leaf,
+                                              "vectors": {...}, "scalars": {...}, "switches": {...}}], ...]
+                                    first match wins, every key optional
+  uniform                           name of a team set in kits/uniforms/<name>.json. Its "textures" join
+                                    extra_textures and its "rules" are tried after the kit's own overrides
   preview                           {"mode": "grid", "spacing": 80} or {"mode": "bodytypes", ...}
 """
 import csv
@@ -78,6 +82,12 @@ def load_spec(path):
     s.setdefault("mesh_type", "SkinnedMeshAsset")
     s.setdefault("single_lod", True)
     s["OUT"] = "{REPO}/extracted/" + s["out"] + "/"
+    et = s.get("extra_textures") or []
+    s["extra_textures"] = [et] if isinstance(et, dict) else list(et)
+    if s.get("uniform"):
+        u = json.load(open(os.path.join(HERE, "kits", "uniforms", s["uniform"] + ".json"), encoding="utf-8"))
+        s["extra_textures"] += u["textures"]
+        s["overrides"] = list(s.get("overrides", [])) + u["rules"]
     s["OUTDIR"] = os.path.join(REPO, "extracted", s["out"]) + os.sep
     return s
 
@@ -291,12 +301,15 @@ def cmd_jobs(spec):
             for name, t in slot["textures"].items():
                 if name in PARAM_MAP and t and t.lower() in inv and inv[t.lower()][1] == "TextureAsset" and not DEFAULT_TEX.search(t.lower()):
                     textures.setdefault(inv[t.lower()][0], set()).add(leaf(m))
-    if spec.get("extra_textures"):
-        et = spec["extra_textures"]
+    for et in spec["extra_textures"]:
         rx = re.compile(et["regex"], re.I)
+        hits = 0
         for k, v in inv.items():
             if k.startswith(et["dir"].lower()) and v[1] == "TextureAsset" and rx.search(k):
                 textures.setdefault(v[0], set()).add("kit extra")
+                hits += 1
+        if not hits:
+            print("missing extra textures", et)
     projected = 0
     for m in meshes:
         j = {"id": "m_" + leaf(m), "op": "mesh", "asset": m, "out": spec["OUT"] + "meshes/" + leaf(m) + ".fbx",
@@ -348,9 +361,13 @@ def bindings_for(spec, mesh, meta):
     name = base_name(mesh)
     for rx, o in spec.get("overrides", []):
         if re.search(rx, mesh.lower()):
-            tex = {k: ue_dir + "/Textures/T_" + v for k, v in o.items()}
-            return [{"mesh": ue_dir + "/" + prefix(spec) + name, "slot": "all", "mi": ue_dir + "/Materials/MI_" + name,
-                     "textures": tex, "switches": {"UseRSM": "RSM" in tex, "RSMIsSkin": False}}]
+            tex = {k: ue_dir + "/Textures/T_" + v for k, v in o.items() if k not in ("vectors", "scalars", "switches")}
+            b = {"mesh": ue_dir + "/" + prefix(spec) + name, "slot": "all", "mi": ue_dir + "/Materials/MI_" + name,
+                 "textures": tex, "switches": dict({"UseRSM": "RSM" in tex, "RSMIsSkin": False}, **o.get("switches", {}))}
+            for k in ("vectors", "scalars"):
+                if o.get(k):
+                    b[k] = o[k]
+            return [b]
     slots = meta.get("materials") or []
     p = info_path(spec, mesh)
     sections = json.load(open(p))["lods"][0]["sections"] if os.path.exists(p) else []

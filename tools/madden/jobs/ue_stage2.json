@@ -8,13 +8,6 @@
  },
  {
   "kind": "mesh",
-  "file": "{REPO}/extracted/stage2/meshes/faulkmarshall_11413_mesh.fbx",
-  "dest": "/Game/MaddenRef/Players/Stage2",
-  "name": "SK_faulkmarshall_11413",
-  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
- },
- {
-  "kind": "mesh",
   "file": "{REPO}/extracted/stage2/meshes/fullarms_d_mesh.fbx",
   "dest": "/Game/MaddenRef/Players/Stage2",
   "name": "SK_fullarms_d",
@@ -57,20 +50,6 @@
  },
  {
   "kind": "mesh",
-  "file": "{REPO}/extracted/stage2/meshes/helmet_shell_xenith_mesh.fbx",
-  "dest": "/Game/MaddenRef/Players/Stage2",
-  "name": "SK_helmet_shell_xenith",
-  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
- },
- {
-  "kind": "mesh",
-  "file": "{REPO}/extracted/stage2/meshes/helmet_facemask_xenithprism_mesh.fbx",
-  "dest": "/Game/MaddenRef/Players/Stage2",
-  "name": "SK_helmet_facemask_xenithprism",
-  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
- },
- {
-  "kind": "mesh",
   "file": "{REPO}/extracted/stage2/meshes/shoe_low_nikealphamenaceelite99clubr_d_mesh.fbx",
   "dest": "/Game/MaddenRef/Players/Stage2",
   "name": "SK_shoe_low_nikealphamenaceelite99clubr_d",
@@ -98,11 +77,58 @@
   "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
  },
  {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage2/meshes/faulkmarshall_11413_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Stage2",
+  "name": "SK_faulkmarshall_11413",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage2/meshes/helmet_shell_xenith_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Stage2",
+  "name": "SK_helmet_shell_xenith",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage2/meshes/helmet_facemask_xenithprism_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Stage2",
+  "name": "SK_helmet_facemask_xenithprism",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
   "kind": "texture",
-  "file": "{REPO}/extracted/stage2/textures/arm_normal.png",
+  "file": "{REPO}/extracted/stage2/textures/ls_common_legs_rsm.png",
   "dest": "/Game/MaddenRef/Players/Stage2/Textures",
-  "name": "T_arm_normal",
+  "name": "T_ls_common_legs_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage2/textures_ue/ls_common_legs_normal_ue.png",
+  "dest": "/Game/MaddenRef/Players/Stage2/Textures",
+  "name": "T_ls_common_legs_normal",
   "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage2/textures/genericpadless_legs_st1.png",
+  "dest": "/Game/MaddenRef/Players/Stage2/Textures",
+  "name": "T_genericpadless_legs_st1"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage2/textures/genericpadless_legs_st7.png",
+  "dest": "/Game/MaddenRef/Players/Stage2/Textures",
+  "name": "T_genericpadless_legs_st7"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage2/textures/arm_rsm_skintone2.png",
+  "dest": "/Game/MaddenRef/Players/Stage2/Textures",
+  "name": "T_arm_rsm_skintone2",
+  "srgb": false
  },
  {
   "kind": "texture",
@@ -113,34 +139,90 @@
  },
  {
   "kind": "texture",
+  "file": "{REPO}/extracted/stage2/textures_ue/arm_normal_ue.png",
+  "dest": "/Game/MaddenRef/Players/Stage2/Textures",
+  "name": "T_arm_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage2/textures/arm_skintone1.png",
+  "dest": "/Game/MaddenRef/Players/Stage2/Textures",
+  "name": "T_arm_skintone1"
+ },
+ {
+  "kind": "texture",
   "file": "{REPO}/extracted/stage2/textures/arm_skintone7.png",
   "dest": "/Game/MaddenRef/Players/Stage2/Textures",
   "name": "T_arm_skintone7"
  },
  {
   "kind": "texture",
-  "file": "{REPO}/extracted/stage2/textures/faulkmarshall_11413_color.png",
+  "file": "{REPO}/extracted/stage2/textures/commonrsm.png",
   "dest": "/Game/MaddenRef/Players/Stage2/Textures",
-  "name": "T_faulkmarshall_11413_color"
+  "name": "T_commonrsm",
+  "srgb": false
  },
  {
   "kind": "texture",
-  "file": "{REPO}/extracted/stage2/textures/faulkmarshall_11413_normal.png",
+  "file": "{REPO}/extracted/stage2/textures_ue/venthole_norm_ue.png",
   "dest": "/Game/MaddenRef/Players/Stage2/Textures",
-  "name": "T_faulkmarshall_11413_normal",
+  "name": "T_venthole_norm",
   "normal": true
  },
  {
   "kind": "texture",
-  "file": "{REPO}/extracted/stage2/textures/genericpadless_legs_st7.png",
+  "file": "{REPO}/extracted/stage2/textures_ue/shoe_low_nikealphamenaceelite99club_norm_ue.png",
   "dest": "/Game/MaddenRef/Players/Stage2/Textures",
-  "name": "T_genericpadless_legs_st7"
+  "name": "T_shoe_low_nikealphamenaceelite99club_norm",
+  "normal": true
  },
  {
   "kind": "texture",
-  "file": "{REPO}/extracted/stage2/textures/nin_helmet_2018_golalt_helmet_col.png",
+  "file": "{REPO}/extracted/stage2/textures/shoe_low_nikealphamenaceelite99club_rsm.png",
   "dest": "/Game/MaddenRef/Players/Stage2/Textures",
-  "name": "T_nin_helmet_2018_golalt_helmet_col"
+  "name": "T_shoe_low_nikealphamenaceelite99club_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage2/textures/shoe_low_nikealphamenaceelite99club_black_col.png",
+  "dest": "/Game/MaddenRef/Players/Stage2/Textures",
+  "name": "T_shoe_low_nikealphamenaceelite99club_black_col"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage2/textures/socks_outer_col.png",
+  "dest": "/Game/MaddenRef/Players/Stage2/Textures",
+  "name": "T_socks_outer_col"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage2/textures_ue/socks_outer_norm_ue.png",
+  "dest": "/Game/MaddenRef/Players/Stage2/Textures",
+  "name": "T_socks_outer_norm",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage2/textures/socks_outer_rsm.png",
+  "dest": "/Game/MaddenRef/Players/Stage2/Textures",
+  "name": "T_socks_outer_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage2/textures/socks_under_rsm.png",
+  "dest": "/Game/MaddenRef/Players/Stage2/Textures",
+  "name": "T_socks_under_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage2/textures_ue/socks_under_normal_ue.png",
+  "dest": "/Game/MaddenRef/Players/Stage2/Textures",
+  "name": "T_socks_under_normal",
+  "normal": true
  },
  {
   "kind": "texture",
@@ -150,13 +232,19 @@
  },
  {
   "kind": "texture",
+  "file": "{REPO}/extracted/stage2/textures/nin_helmet_2018_golalt_helmet_col.png",
+  "dest": "/Game/MaddenRef/Players/Stage2/Textures",
+  "name": "T_nin_helmet_2018_golalt_helmet_col"
+ },
+ {
+  "kind": "texture",
   "file": "{REPO}/extracted/stage2/textures/nin_jersey_2018_whialt_jersey_col.png",
   "dest": "/Game/MaddenRef/Players/Stage2/Textures",
   "name": "T_nin_jersey_2018_whialt_jersey_col"
  },
  {
   "kind": "texture",
-  "file": "{REPO}/extracted/stage2/textures/nin_jersey_2018_whialt_jersey_norm.png",
+  "file": "{REPO}/extracted/stage2/textures_ue/nin_jersey_2018_whialt_jersey_norm_ue.png",
   "dest": "/Game/MaddenRef/Players/Stage2/Textures",
   "name": "T_nin_jersey_2018_whialt_jersey_norm",
   "normal": true
@@ -176,7 +264,7 @@
  },
  {
   "kind": "texture",
-  "file": "{REPO}/extracted/stage2/textures/nin_pants_2018_whialt_pants_norm.png",
+  "file": "{REPO}/extracted/stage2/textures_ue/nin_pants_2018_whialt_pants_norm_ue.png",
   "dest": "/Game/MaddenRef/Players/Stage2/Textures",
   "name": "T_nin_pants_2018_whialt_pants_norm",
   "normal": true
@@ -196,22 +284,15 @@
  },
  {
   "kind": "texture",
-  "file": "{REPO}/extracted/stage2/textures/shoe_low_nikealphamenaceelite99club_black_col.png",
+  "file": "{REPO}/extracted/stage2/textures/faulkmarshall_11413_color.png",
   "dest": "/Game/MaddenRef/Players/Stage2/Textures",
-  "name": "T_shoe_low_nikealphamenaceelite99club_black_col"
+  "name": "T_faulkmarshall_11413_color"
  },
  {
   "kind": "texture",
-  "file": "{REPO}/extracted/stage2/textures/shoe_low_nikealphamenaceelite99club_norm.png",
+  "file": "{REPO}/extracted/stage2/textures_ue/faulkmarshall_11413_normal_ue.png",
   "dest": "/Game/MaddenRef/Players/Stage2/Textures",
-  "name": "T_shoe_low_nikealphamenaceelite99club_norm",
+  "name": "T_faulkmarshall_11413_normal",
   "normal": true
- },
- {
-  "kind": "texture",
-  "file": "{REPO}/extracted/stage2/textures/shoe_low_nikealphamenaceelite99club_rsm.png",
-  "dest": "/Game/MaddenRef/Players/Stage2/Textures",
-  "name": "T_shoe_low_nikealphamenaceelite99club_rsm",
-  "srgb": false
  }
 ]
