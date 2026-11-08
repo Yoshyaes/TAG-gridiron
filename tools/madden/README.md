@@ -21,7 +21,11 @@ python -I tools\madden\madden.py inventory
 ```
 python -I tools\madden\madden.py kit tools\madden\kits\prototype.json
 ```
-A kit run is plan, export, normal map conversion, material JSON, Unreal import, material instances and preview level, manifest verify, install guard, MaddenRef audit. Every step skips finished work. Exit code 3 means the install guard saw a change, so stop everything. Exit code 4 means the kit was skipped because it would break the 50 GB free space floor on D.
+A kit run is plan, export, normal map conversion, material JSON, Unreal import, material instances and preview level, manifest verify, install guard, MaddenRef audit. Every step skips finished work. Exit code 3 means the install guard saw a change, so stop everything. Exit code 4 means the kit was skipped because it would break the 50 GB free space floor on D. Add `--prep` to stop before the Unreal steps (useful while the editor is open). It still verifies and runs the guard.
+
+Team uniforms are shared sets in `kits\uniforms\<name>.json`. A kit names one with `"uniform"`. Each rule follows the `AppearanceShaderPreset` Madden applies to that template piece and may carry textures, vectors (for example `Tint`), scalars and switches.
+
+Retargeting onto the Athlete's UEFN mannequin runs headless with `maddenref_retarget.py`. Env `MADDENREF_RETARGET` names a clip list such as `jobs\retarget_prototype.json`, and `MADDENREF_DRY=1` saves nothing.
 
 ## Files
 | Path | Role |
@@ -38,6 +42,8 @@ A kit run is plan, export, normal map conversion, material JSON, Unreal import, 
 | `Unreal\TAGGridiron\Tools\Art\maddenref_import.py` | Headless Interchange import |
 | `Unreal\TAGGridiron\Tools\Art\maddenref_materials.py` | Master material, instances, preview level |
 | `Unreal\TAGGridiron\Tools\Art\maddenref_audit.py` | Guardrail audit |
+| `Unreal\TAGGridiron\Tools\Art\maddenref_retarget.py` | IK Rig, retargeter and batch retarget onto the UEFN mannequin, with a limb direction check |
+| `kits\uniforms\*.json` | Team uniform sets used by kits |
 
 ## Conventions
 - **Scale** is fixed at export. FBX is written in meters (UnitScaleFactor 100). No import offset scale anywhere.
@@ -49,5 +55,7 @@ A kit run is plan, export, normal map conversion, material JSON, Unreal import, 
   - `/Game/MaddenRef/Coaches/<Kit>` and `/Game/MaddenRef/Stadiums/<Kit>` for later kits
   - `/Game/MaddenRef/Materials` master materials
   - `/Game/MaddenRef/Maps` preview levels
+  - `/Game/MaddenRef/Animations/<Kit>` clips, with preview only in place copies in `PreviewInPlace`
+  - `/Game/MaddenRef/Retargeted` clips retargeted onto the UEFN mannequin (`A_<clip>_UEFN`) and their rigs in `Rigs`, editor preview only
   - `/Game/MaddenRef/_Pipelines` Interchange pipeline assets
 - **Guardrails.** `extracted\` and `Content\MaddenRef\` are gitignored, `/Game/MaddenRef` is in `DirectoriesToNeverCook`, and `maddenref_audit.py` fails if anything outside MaddenRef references it or if any of it is tracked by git.

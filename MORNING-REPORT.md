@@ -1,40 +1,40 @@
 # Morning report. Madden 19 reference pipeline
 
-Branch `madden-extraction`, local only, nothing pushed. Install guard clean at every gate.
+Branch `madden-extraction`, local only, nothing pushed. Install guard clean and audit passing at every step. Details in FINDINGS.md.
 
-## Animation decoder port. Done
-| Checkpoint | Result |
-| --- | --- |
-| A Bank header and clip index | PASS. 25,349 clips in `extracted\animation\animation_inventory.csv` |
-| B Decode idle, run, tackle | PASS. Run root speed 7.06 m/s, bone lengths constant, knees bend forward, idle loop closes to 0.8 deg. Frame 0 against the T pose bind judged by structure (see FINDINGS) |
-| C FBX and UE import of the three clips | PASS. 0 errors, 0 warnings, 268 tracks, no missing bones |
-| D Prototype batch | PASS. 26 core clips (stance, run, cut, tackle, throw, catch, celebrate) |
-| E Full clip list | PASS. 12,182 of 12,187 player clips in Unreal, 0 UE errors, 6 h 15 min |
-
-How it works. Madden's ANT bank is FIFA 17's format with little endian GD streams, yard units, and the player rig in a second (launch) bank. The decoder is our own Python in `tools\madden\antbank\`, reading the banks the Frosty host exports. No executable reverse engineering.
-
-Held out (5, reasons in `failures.csv`). The four additive layer clips, which are deltas and not standalone motions, and one celebration with a single bad key (a 5 m Hips pop for one frame in the source data).
-
-## Twitch fix (2026-11-08)
-The preview twitch was in the clips, not the actors. Every animation FBX wrote key times as floats, so Unreal held one pose after the first instant. Fixed in the writer, all 12,214 FBX files repaired and all sequences re-imported. Unreal now matches the decode within 0.01 cm (raw) and about 1 cm (compressed) on 20 sampled clips.
+## Done so far
+- **Animation decoder port.** Checkpoints A to E passed. 12,182 of 12,187 player clips are in Unreal. The twitch (key times written as floats) is fixed and every clip is re-imported.
+- **Team textures (2026-11-08).** Every dressed preview level now wears the 49ers 2018 set. Jersey, sleeves, pants and socks follow Madden's own presets, and the facemask gets its preset colour. Stage 2 normals were unconverted (bump inverted in the animation previews) and now use the converted maps.
+- **Retargeting (2026-11-08).** The Athlete animates on the UEFN mannequin. The 26 prototype clips are retargeted onto it in `/Game/MaddenRef/Retargeted`, for editor preview only. Limbs match the source within 0.2 degrees.
 
 ## Where to look in Unreal
-Every `L_MaddenRef` level is now lit, has a grid floor, uses the `GameModeBase` override and has a camera where one player fills about a third of the view (press Play, or pilot `PreviewCamera`). Animated players play in place from preview only copies (`Animations/PreviewInPlace`). The real clips still carry their root motion.
-- `Maps/L_MaddenRef_AnimCheckpoint` has the dressed player in idle, run and tackle.
-- `Maps/L_MaddenRef_AnimPrototype` has the 26 core clips on a grid.
-- `Animations/Full/C000` to `C082` hold every clip, named `A_<controller name>`.
+- `Maps/L_MaddenRef_AnimCheckpoint` and `L_MaddenRef_AnimPrototype` show dressed players in motion (press Play).
+- `Maps/L_MaddenRef_Stage2Player` and `L_MaddenRef_Prototype` show the dressed body types standing.
+- `Retargeted/A_<clip>_UEFN` opens on the UEFN mannequin in the animation editor.
 
-## On disk
-- D. `extracted\` 27.6 GB (sparse animation FBX 25 GB), 426 GB free.
-- C. Unreal animations 20 GB, 70 GB free.
-- Manifest 27,521 files, all hashes match.
+## Check by eye
+1. Bump direction and roughness on jersey and pants. Roughness reads RSM red (jersey mean 0.31, pants 0.39). Whether red is roughness or smoothness is still unproven.
+2. The socks. Madden's 49ers WHI preset gives a charcoal sock texture. It may need a shader tint we do not reproduce.
+3. The retargeted clips on the UEFN mannequin.
+4. Gloves are still untextured because the team set has no glove preset.
+
+## C drive plan (needs your approval, nothing deleted)
+C has 43.2 GB free. Two items hold 45 GB.
+- `Animations/Full` is 20.6 GB. Nothing outside it references it.
+- `Saved/MaddenRefImport` is 24.4 GB of leftover temporary FBX copies, all duplicates of files on D. The importer no longer leaves them.
+
+| Option | What happens | C freed | Cost |
+| --- | --- | --- | --- |
+| A. Reference project on D (recommended) | New UE 5.8 project `D:\MaddenRef\MaddenRefProject` with its cache on D. `Full`, the skeleton and the pipelines are copied with the same package paths, so no reimport. Twenty random clips are re-checked against the decode there before anything is deleted. Full batch tooling then targets that project | about 45 GB | About an hour of copy and checks. Two projects to open |
+| B. FBX on D, regenerate on demand | `Full` is deleted from the main project. A new pull command imports chosen clips from the verified FBX on D at about one clip per second | about 45 GB | Full library no longer browsable in Unreal |
+
+Both options also delete `Saved/MaddenRefImport`. Neither touches the 26 prototype clips, the three checkpoint clips, the 29 in place preview copies, the retargeted clips or any preview level. Those are separate assets, and the probe found no reference from them into `Full`.
 
 ## Open items
 1. **Provenance.** Fred will answer separately. `codex.cfg` and `OrangeEmu64.dll` stay out of the tooling and git.
-2. **Frame 0 criterion.** The bind pose is a T pose, so Checkpoint B judged frame 0 by structure, not equality.
-3. **C drive.** C is 97 percent full (70 GB free) after 20 GB of animations.
-4. **Not done.** Retargeting to the UEFN mannequin or MetaHumans, root motion setup, additive clips, non player rigs.
+2. **Not done.** Jersey numbers and names, gloves, retargeting beyond the prototype clips, root motion setup, additive clips, non player rigs.
+3. `Unreal/TAGGridiron/Config/DefaultEditor.ini` is untracked and left out of commits.
 
 ## What I need from you
-1. Watch `L_MaddenRef_AnimCheckpoint` and `L_MaddenRef_AnimPrototype` in the editor. They have only been checked by numbers so far.
-2. Say whether you want retargeting onto the UEFN mannequin or your MetaHumans next.
+1. Look at the four dressed levels and the retargeted clips (checks above).
+2. Choose option A or B for the C drive, and approve deleting `Saved/MaddenRefImport`.
