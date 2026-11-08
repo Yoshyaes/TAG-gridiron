@@ -149,7 +149,9 @@ def write_fbx(path, hero, frames, fps, take="Take 001", keyed=None):
     w("\tAnimationLayer: %d, \"AnimLayer::BaseLayer\", \"\" {\n\t}" % layer_id)
     conns.append("\tC: \"OO\",%d,%d" % (layer_id, stack_id))
     cid = 4000000
-    ktimes = arr(times)
+    # KeyTime is an int64 tick array. Written through %.7g it became "1.539539e+9", which FBX readers parse
+    # as 1, so every key collapsed onto the first ticks and Unreal held the last pose (the twitch bug).
+    ktimes = ",".join(str(int(t)) for t in times)
     for i in keyed:
         for prop, short, data in (("Lcl Translation", "T", trans[i]), ("Lcl Rotation", "R", rot[i])):
             cn = cid

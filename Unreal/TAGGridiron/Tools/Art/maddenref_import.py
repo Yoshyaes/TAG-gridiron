@@ -105,7 +105,9 @@ def import_with_task(job):
         leaf = p.rsplit("/", 1)[1]
         anim_hit = kind == "anim" and leaf.startswith(job["name"]) and isinstance(unreal.load_asset(p), unreal.AnimSequence)
         if leaf == job["name"] or leaf == job["name"] + "_Skeleton" or anim_hit:
-            EAL.save_asset(p, only_if_is_dirty=False)
+            # A failed save (file locked by an open editor) must not count as an import.
+            if not EAL.save_asset(p, only_if_is_dirty=False):
+                raise RuntimeError("save failed for %s (file locked, is the Unreal Editor open?)" % p)
             out.append(p)
     return out
 
