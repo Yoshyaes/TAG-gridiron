@@ -17,6 +17,8 @@ Commands
   kit <spec.json>           run one kit end to end (plan, export, texfix, material JSON, UE import,
                             materials, verify, guard, audit). Exit 3 on install change, 4 on disk floor
   kit <spec.json> --prep    the same up to the bindings, no Unreal steps, then verify and guard
+  --project ref             (any command) run Unreal against the REFERENCE ONLY project on D, which holds
+                            /Game/MaddenRef/Animations/Full, with its own import state logs/ue_state_ref.json
 """
 import csv
 import hashlib
@@ -34,6 +36,9 @@ LOGS = os.path.join(REPO, "logs")
 HOST = os.path.join(TOOLS, "FrostyHost", "bin", "FrostyHost.exe")
 UE_CMD = r"C:\Program Files\Epic Games\UE_5.8\Engine\Binaries\Win64\UnrealEditor-Cmd.exe"
 UPROJECT = os.path.join(REPO, "Unreal", "TAGGridiron", "TAGGridiron.uproject")
+# REFERENCE ONLY project on D (outside the repo) that holds /Game/MaddenRef/Animations/Full. Chosen with --project ref.
+REF_UPROJECT = r"D:\MaddenRef\MaddenRef_ReferenceOnly\MaddenRef_ReferenceOnly.uproject"
+FULL_DIR = "/Game/MaddenRef/Animations/Full"
 ART = os.path.join(REPO, "Unreal", "TAGGridiron", "Tools", "Art")
 MANIFEST = os.path.join(EXTRACTED, "manifest.json")
 FAILURES = os.path.join(EXTRACTED, "failures.csv")
@@ -254,6 +259,17 @@ UE_STATE = os.path.join(LOGS, "ue_state.json")
 CONTENT = os.path.join(REPO, "Unreal", "TAGGridiron", "Content")
 
 
+def set_project(name):
+    """Points Unreal runs, the import state and uasset checks at TAGGridiron (main) or the reference project."""
+    global UPROJECT, UE_STATE, CONTENT
+    if name == "ref":
+        UPROJECT = REF_UPROJECT
+        UE_STATE = os.path.join(LOGS, "ue_state_ref.json")
+        CONTENT = os.path.join(os.path.dirname(REF_UPROJECT), "Content")
+    elif name != "main":
+        raise SystemExit("unknown project " + name)
+
+
 def uasset_path(game_path):
     return os.path.join(CONTENT, *game_path[len("/Game/"):].split("/")) + ".uasset"
 
@@ -334,7 +350,7 @@ def cmd_audit(stage):
     out = os.path.join(LOGS, "audit_%s.json" % stage)
     if os.path.exists(out):
         os.remove(out)
-    run_ue("maddenref_audit.py", {"MADDENREF_AUDIT": out}, "audit_%s.log" % stage)
+    run_ue("maddenref_audit.py", {"MADDENREF_AUDIT": out, "MADDENREF_REPO": REPO}, "audit_%s.log" % stage)
     if not os.path.exists(out):
         log("audit %s produced no report" % stage)
         return 5
@@ -347,8 +363,12 @@ PY313 = ["py", "-3.13", "-I"]
 
 
 def cmd_animkit(spec_path, spec):
-    """Animation kit: plan, disk floor, decode and FBX with plausibility gate, UE import, preview, verify, guard, audit."""
+    """Animation kit: plan, disk floor, decode and FBX with plausibility gate, UE import, preview, verify, guard, audit.
+    The full batch (/Game/MaddenRef/Animations/Full) lives only in the REFERENCE ONLY project on D, so those kits
+    always run their Unreal steps there."""
     name = spec["name"]
+    if spec.get("ue_dir", "").startswith(FULL_DIR):
+        set_project("ref")
     ak = PY313 + [os.path.join(TOOLS, "antbank", "animkit.py")]
     result = {"kit": name, "kind": "anim", "steps": []}
 
@@ -490,6 +510,10 @@ def cmd_verify(stage=None):
 def main(argv):
     os.makedirs(LOGS, exist_ok=True)
     sys.path.insert(0, TOOLS)
+    if "--project" in argv:
+        i = argv.index("--project")
+        set_project(argv[i + 1])
+        argv = argv[:i] + argv[i + 2:]
     c = argv[1] if len(argv) > 1 else ""
     if c == "init":
         return cmd_init()

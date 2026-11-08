@@ -20,13 +20,14 @@ import time
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, "..", ".."))
 LOGS = os.path.join(REPO, "logs")
-CONTENT = os.path.join(REPO, "Unreal", "TAGGridiron", "Content")
+# The full batch lives only in the REFERENCE ONLY project on D (madden.py --project ref).
+CONTENT = r"D:\MaddenRef\MaddenRef_ReferenceOnly\Content"
 EXTRACTED = os.path.join(REPO, "extracted")
 BATCH = 230
 
 
 def pending():
-    state = json.load(open(os.path.join(LOGS, "ue_state.json")))
+    state = json.load(open(os.path.join(LOGS, "ue_state_ref.json")))
     manifest = json.load(open(os.path.join(EXTRACTED, "manifest.json"), encoding="utf-8"))["files"]
     out = []
     for p in sorted(glob.glob(os.path.join(LOGS, "ue_anim_full_*_gated.json"))):
@@ -55,7 +56,7 @@ def main(argv):
                 os.remove(p)
         path = os.path.join(LOGS, "reimport_batch.json")
         json.dump(batch, open(path, "w"), indent=1)
-        subprocess.run([sys.executable, "-I", os.path.join(HERE, "madden.py"), "ue", path, "reimport"], timeout=570)
+        subprocess.run([sys.executable, "-I", os.path.join(HERE, "madden.py"), "ue", path, "reimport", "--project", "ref"], timeout=570)
         n += len(batch)
     rc = subprocess.run([sys.executable, "-I", os.path.join(HERE, "madden.py"), "guard"], timeout=300).returncode
     left = len(pending())
