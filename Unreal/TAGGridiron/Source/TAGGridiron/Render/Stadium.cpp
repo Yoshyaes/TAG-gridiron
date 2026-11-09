@@ -188,23 +188,68 @@ void AStadium::BuildBowl(const tag::Team& Home, const tag::Team& Away, bool bNig
 	const FVector2D Wall(-1, 0), Up(0, 1), Down(0, -1);
 
 	FBowlBuf Crowd, Concrete, Steps, Tunnel, Padding, Glass, Ribbon, Roof, Edge;
-	// seats: crowd texture is 16 rows of fans (~1450 cm of slope) by ~55 seats (~3000 cm) per tile
-	Sweep(Crowd, Path, {Lower(0), Lower(1)}, Up, 3000, 1450);
-	Sweep(Crowd, Path, {Upper(0), Upper(1)}, Up, 3000, 1450);
+	// seats: crowd texture is 16 rows of fans (~1450 cm of slope) by ~55 seats (~3000 cm) per tile. The decks are real
+	// seating steps, one row of fans per riser + tread, so the stands get depth and a shadow line along every row; the
+	// front rows (where the 3D fans sit) stay on the plain slope. A landing two thirds up the lower bowl is the cross
+	// aisle, and the wall behind it carries the tunnel mouths (vomitories).
+	const double RowLen = 1450.0 / 16.0;
+	const FVector2D StepFace(-1, 1); // risers face the field, treads face up
+	auto StepRun = [&](FVector2D C, int32 Rows, double PitchDeg, const FVector2D& Shift = FVector2D::ZeroVector)
+	{
+		const double R = FMath::DegreesToRadians(PitchDeg), Tread = RowLen * FMath::Cos(R), Rise = RowLen * FMath::Sin(R);
+		TArray<FVector2D> P{C + Shift};
+		for (int32 i = 0; i < Rows; ++i)
+		{
+			C.Y += Rise;
+			P.Add(C + Shift);
+			C.X += Tread;
+			P.Add(C + Shift);
+		}
+		return P;
+	};
+	const double StepV = 16.0 * RowLen * (FMath::Cos(FMath::DegreesToRadians(33.0)) + FMath::Sin(FMath::DegreesToRadians(33.0)));
+	const double StepVU = 16.0 * RowLen * (FMath::Cos(FMath::DegreesToRadians(38.0)) + FMath::Sin(FMath::DegreesToRadians(38.0)));
+	const double T0 = 0.1, TLand = 0.58, LandDepth = 300;
+	const int32 Rows1 = FMath::RoundToInt((TLand - T0) * 3600 / RowLen);
+	const TArray<FVector2D> Lower1 = StepRun(Lower(T0), Rows1, 33);
+	const FVector2D LandA = Lower1.Last(), LandB = LandA + FVector2D(LandDepth, 0);
+	const FVector2D WallTop(LandB.X, LandA.Y + LandDepth * FMath::Tan(FMath::DegreesToRadians(33.0)));
+	const int32 Rows2 = FMath::FloorToInt((FVector2D::Distance(WallTop, Lower(1)) - 1.0) / RowLen);
+	const TArray<FVector2D> Lower2 = StepRun(WallTop, Rows2, 33);
+	const int32 RowsU = FMath::FloorToInt(2800.0 / RowLen);
+	const TArray<FVector2D> UpperS = StepRun(Upper(0), RowsU, 38);
+	FBowlBuf Flat;
+	Sweep(Flat, Path, {Lower(0), Lower(T0)}, Up, 3000, 1450);
+	Sweep(Crowd, Path, Lower1, StepFace, 3000, StepV);
+	Sweep(Crowd, Path, Lower2, StepFace, 3000, StepV);
+	Sweep(Crowd, Path, UpperS, StepFace, 3000, StepVU);
+	Crowd.T.Reserve(Crowd.T.Num() + Flat.T.Num());
+	for (int32 t : Flat.T) Crowd.T.Add(t + Crowd.V.Num());
+	Crowd.V.Append(Flat.V);
+	Crowd.N.Append(Flat.N);
+	Crowd.UV.Append(Flat.UV);
 	for (FVector2D& UV : Crowd.UV) UV = FVector2D(UV.Y, UV.X); // T_Crowd is stored turned: rows along U, seats along V
+	// the landing (cross aisle) and the wall behind it
+	Sweep(Steps, Path, {LandA + FVector2D(0, 1), LandB + FVector2D(0, 1)}, Up, 100, 100);
+	Sweep(Concrete, Path, {LandB, WallTop}, Wall, 100, 100);
 	// field-level wall (padded, team colour) and its cap
 	Sweep(Padding, Path, {{-60, 0}, {-60, 220}}, Wall, 100, 100);
 	Sweep(Concrete, Path, {{-60, 220}, {80, 220}}, Up, 100, 100);
-	// cross aisle two thirds up the lower bowl, with tunnel mouths (vomitories) below it between every other pair of aisles
-	Sweep(Steps, Path, {Lower(0.60, 2), Lower(0.645, 2)}, Up, 100, 100);
-	// stair aisles every ~17 m around both decks (offset on the upper deck)
+	// stair aisles every ~17 m around both decks (offset on the upper deck), stepped with the seats; tunnel mouths in the
+	// landing wall between every other pair of aisles
 	const double Step = 1700;
+	const FVector2D AisleLift(-3, 3);
+	const TArray<FVector2D> AisleL1 = StepRun(Lower(T0), Rows1, 33, AisleLift), AisleL2 = StepRun(WallTop, Rows2, 33, AisleLift);
+	const TArray<FVector2D> AisleU = StepRun(Upper(0), RowsU, 38, AisleLift);
 	for (double L = Step * 0.5; L < Around; L += Step)
 	{
-		Sweep(Steps, PathPatch(Path, L, 60), {Lower(0.0, 3), Lower(1.0, 3)}, Up, 100, 100);
-		Sweep(Steps, PathPatch(Path, L + Step * 0.5, 60), {Upper(0.0, 3), Upper(1.0, 3)}, Up, 100, 100);
+		const TArray<FBowlSample> At = PathPatch(Path, L, 60);
+		Sweep(Steps, At, {Lower(0.0, 3), Lower(T0, 3)}, Up, 100, 100);
+		Sweep(Steps, At, AisleL1, StepFace, 100, 100);
+		Sweep(Steps, At, AisleL2, StepFace, 100, 100);
+		Sweep(Steps, PathPatch(Path, L + Step * 0.5, 60), AisleU, StepFace, 100, 100);
 		if (FMath::RoundToInt(L / Step) % 2 == 0)
-			Sweep(Tunnel, PathPatch(Path, L + Step * 0.5, 190), {Lower(0.48, 3), Lower(0.60, 3)}, Up, 100, 100);
+			Sweep(Tunnel, PathPatch(Path, L + Step * 0.5, 160), {LandB + FVector2D(-2, 1), FVector2D(LandB.X - 2, FMath::Min(WallTop.Y, LandA.Y + 230))}, Wall, 100, 100);
 	}
 	// club level between the decks: concrete lip, suite glass, LED ribbon board, lip, and the upper deck's front cap
 	const double F = 2990;

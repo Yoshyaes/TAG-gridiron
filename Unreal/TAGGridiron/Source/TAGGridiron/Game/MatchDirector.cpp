@@ -477,7 +477,8 @@ void AMatchDirector::TickGapTest(float Dt)
 
 static bool GHudShot = false;  // automation: one screenshot with the UI
 static bool GAutoBoard = false;
-static bool GAutoChains = false; // automation: the establishing shot turns to the end-zone video board
+static bool GAutoChains = false;
+static bool GAutoCoach = false; // automation: the establishing shot turns to the end-zone video board
 
 void AMatchDirector::TickAutomation(float Dt)
 {
@@ -527,9 +528,15 @@ void AMatchDirector::TickAutomation(float Dt)
 		GAutoChains = true; // then the chain crew and the down box on the far sideline
 		AutoT = 54.0f;
 	}
-	if (GAutoChains && AutoT >= 54.6f && AutoT < 55.f)
+	if (GAutoChains && !GAutoCoach && AutoT >= 54.6f && AutoT < 55.f)
 	{
 		FScreenshotRequest::RequestScreenshot(TEXT("tag_auto_chains.png"), false, false);
+		GAutoCoach = true; // then the home head coach in the coaching box
+		AutoT = 54.0f;
+	}
+	if (GAutoCoach && AutoT >= 54.6f && AutoT < 55.f)
+	{
+		FScreenshotRequest::RequestScreenshot(TEXT("tag_auto_coach.png"), false, false);
 		AutoT = 55.f;
 	}
 	// close-up of one athlete (verifies character, uniform and equipment fit)
@@ -538,6 +545,7 @@ void AMatchDirector::TickAutomation(float Dt)
 		bAutoEstablish = false;
 		GAutoBoard = false;
 		GAutoChains = false;
+		GAutoCoach = false;
 		for (auto& KV : Athletes)
 		{
 			if (!KV.Value->IsHidden())
@@ -1785,7 +1793,13 @@ void AMatchDirector::UpdateCamera(float Dt, const FVector& InFocus)
 		P += FVector(FMath::FRandRange(-Shake, Shake), FMath::FRandRange(-Shake, Shake), FMath::FRandRange(-Shake, Shake));
 		Shake *= FMath::Exp(-Dt * 6.f);
 	}
-	if (bAutoEstablish && GAutoChains && Stadium)
+	if (bAutoEstablish && GAutoCoach)
+	{
+		const FVector C(46 * Y, (tag::FIELD_W / 2 + 1.7) * Y, 0);
+		P = C + FVector(-5 * Y, -11 * Y, 2.2 * Y);
+		CamLook = C + FVector(0, 0, 1.1 * Y);
+	}
+	else if (bAutoEstablish && GAutoChains && Stadium)
 	{
 		const FVector B = Stadium->DownBoxLocation();
 		P = B + FVector(-4 * Y, -14 * Y, 3.5 * Y);
