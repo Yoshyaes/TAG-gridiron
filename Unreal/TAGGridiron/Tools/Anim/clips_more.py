@@ -816,5 +816,38 @@ def tackled_hit(rig):
 
 
 MORE.update({"Tackled_Hit": tackled_hit, "Injured_Down": injured_down})
+
+
+# ======================================================================================= mirrored variety
+class _MirrorRig:
+    """Wraps a rig so every key a clip writes is mirrored left/right (clips.mirror): the other side's version of the
+    same move (wrap from the other side, toss to the left, the other shoulder), not a copy of it."""
+    def __init__(self, rig):
+        self._rig = rig
+
+    def key(self, f, k):
+        self._rig.key(f, C.mirror(k))
+
+    def __getattr__(self, name):
+        return getattr(self._rig, name)
+
+
+def _mirrored(fn):
+    return lambda rig: fn(_MirrorRig(rig))
+
+
+_TO_MIRROR = {
+    "Tackle_Wrap": C.tackle_wrap, "Tackle_High": C.tackle_high, "Tackle_Low": C.tackle_low, "Tackle_Dive": C.tackle_dive,
+    "Tackle_Shoulder": tackle_shoulder, "Tackle_Arm": tackle_arm, "Tackle_Assist": tackle_assist,
+    "Tackled_Hit": tackled_hit, "Catch_High": catch_high, "Catch_Chest": catch_chest, "Catch_Low": catch_low,
+    "Catch_OverShoulder": catch_over_shoulder, "Catch_Dive": catch_dive,
+    "GetUp_FaceDown": C.getup_face_down, "GetUp_FaceUp": C.getup_face_up, "GetUp_Roll": getup_roll,
+    "GetUp_Slow": getup_slow, "Injured_Down": injured_down, "Truck": truck, "Hurdle": hurdle,
+    "QB_Pitch": qb_pitch, "QB_Handoff": C.qb_handoff,
+    "Celebrate_Loop": C.celebrate, "Celebrate_Flex_Loop": celebrate_flex, "Celebrate_PointUp_Loop": celebrate_point_up,
+    "Celebrate_Leap_Loop": celebrate_leap, "Celebrate_FirstDown_Loop": celebrate_first_down,
+    "Celebrate_Shimmy_Loop": celebrate_shimmy,
+}
+MORE.update({name + "_M": _mirrored(fn) for name, fn in _TO_MIRROR.items()})
 MORE.update({"StanceUnderCenter_Loop": stance_under_center, "QB_UnderCenterSnap": qb_under_center_snap,
              "QB_Pitch": qb_pitch, "Catch_Dive": catch_dive, "GetUp_Slow": getup_slow})

@@ -141,6 +141,18 @@ void FAthleteAssets::Load()
 			if (UAnimationAsset* C = Keyed(N)) Celebrations.Add(C);
 		Celebrate = LoadAsset<UAnimationAsset>(*(G + TEXT("Animations/Idle/M_Neutral_Stand_Idle_Break_v02.M_Neutral_Stand_Idle_Break_v02")), false);
 		if (UAnimationAsset* C = Keyed(TEXT("A_TAG_Celebrate_Loop"))) { Celebrate = C; bCelebrateKeyed = true; Celebrations.Insert(C, 0); } // after the GASP default
+		// the other side's version of every asymmetric keyed clip (A_TAG_<name>_M)
+		for (const TCHAR* N : {TEXT("Tackle_Wrap"), TEXT("Tackle_High"), TEXT("Tackle_Low"), TEXT("Tackle_Dive"), TEXT("Tackle_Shoulder"),
+			TEXT("Tackle_Arm"), TEXT("Tackle_Assist"), TEXT("Tackled_Hit"), TEXT("Catch_High"), TEXT("Catch_Chest"), TEXT("Catch_Low"),
+			TEXT("Catch_OverShoulder"), TEXT("Catch_Dive"), TEXT("GetUp_FaceDown"), TEXT("GetUp_FaceUp"), TEXT("GetUp_Roll"), TEXT("GetUp_Slow"),
+			TEXT("Injured_Down"), TEXT("Truck"), TEXT("Hurdle"), TEXT("QB_Pitch"), TEXT("QB_Handoff"), TEXT("Celebrate_Loop"),
+			TEXT("Celebrate_Flex_Loop"), TEXT("Celebrate_PointUp_Loop"), TEXT("Celebrate_Leap_Loop"), TEXT("Celebrate_FirstDown_Loop"),
+			TEXT("Celebrate_Shimmy_Loop")})
+		{
+			UAnimationAsset* Orig = Keyed(*FString::Printf(TEXT("A_TAG_%s"), N));
+			UAnimationAsset* Mir = Keyed(*FString::Printf(TEXT("A_TAG_%s_M"), N));
+			if (Orig && Mir) MirrorOf.Add(Orig, Mir);
+		}
 		Idle = LoadAsset<UAnimationAsset>(*(G + TEXT("Animations/Idle/M_Neutral_Stand_Idle_Loop.M_Neutral_Stand_Idle_Loop")), false);
 		Jump = LoadAsset<UAnimationAsset>(*(G + TEXT("Animations/Jump/M_Neutral_Jump_F_Land_Roll_Lfoot.M_Neutral_Jump_F_Land_Roll_Lfoot")), false);
 		UniformMat = LoadAsset<UMaterialInterface>(*(G + TEXT("Materials/MI_UEFN_Mannequin_CMC.MI_UEFN_Mannequin_CMC")), false);
@@ -668,7 +680,8 @@ void AAthlete::PlayOneShot(UAnimationAsset* Clip)
 {
 	if (!Clip || bRagdoll) return;
 	OneShot = Clip;
-	OneShotLeft = Clip->GetPlayLength();
+	OneShotRate = 1.f + StyleJitter * 0.07f; // each player's own timing, within 7 %
+	OneShotLeft = Clip->GetPlayLength() / OneShotRate;
 	UE_LOG(LogTemp, Verbose, TEXT("TAG one-shot %s #%d"), *Clip->GetName(), Player ? Player->number : -1);
 	CurrentClip = CurrentClip == Clip ? nullptr : CurrentClip; // restart if the same clip is already playing
 }
@@ -932,7 +945,7 @@ void AAthlete::PlayCatch(float BallZCm, float SpeedCm, const FVector& BallVelW, 
 	}
 	else
 		C = BallZCm > 160.f ? A.CatchHigh.Get() : BallZCm < 80.f ? A.CatchLow.Get() : A.CatchChest.Get();
-	if (C) PlayOneShot(C);
+	if (C) PlayOneShot(A.Side(C, Player && (Player->id % 2) == 1));
 }
 
 void AAthlete::BeginTackleOn(AAthlete* Carrier)
@@ -946,7 +959,7 @@ void AAthlete::BeginTackleOn(AAthlete* Carrier)
 
 void AAthlete::PlayDiveAttempt()
 {
-	if (const FAthleteAssets& A = FAthleteAssets::Get(); A.CatchDive) PlayOneShot(A.CatchDive);
+	if (const FAthleteAssets& A = FAthleteAssets::Get(); A.CatchDive) PlayOneShot(A.Side(A.CatchDive, Player && (Player->id % 2) == 1));
 }
 
 float AAthlete::GetUpElapsed() const
@@ -969,6 +982,8 @@ void AAthlete::StartGetUp(const FVector& SimLoc)
 	// the keyed get-ups lie along the actor axis: face down with the head forward, face up with the head behind
 	const float NewYaw = (bFaceDown ? H : -H).Rotation().Yaw;
 	UAnimationAsset* Clip = bFaceDown ? A.GetUpDown.Get() : A.GetUpUp.Get();
+	static int32 GUpSide = 0;
+	const bool bUpMirror = (GUpSide++ % 2) == 1; // come up over either shoulder
 	static int32 GGetUpSeq = 0; // every other face-up landing rolls to the side and up instead
 	if (!bFaceDown && A.GetUpRoll && (GGetUpSeq++ % 2)) Clip = A.GetUpRoll.Get();
 	static int32 GSlowSeq = 0;  // now and then a player is shaken up and slow to get up (hand on the ribs)
@@ -982,6 +997,7 @@ void AAthlete::StartGetUp(const FVector& SimLoc)
 		{
 			Clip = A.InjuredDown.Get();
 			bInjuredChain = true;
+			bInjuredMirror = bUpMirror;
 			bForceInjury = false;
 			InjuredLeft = A.InjuredDown->GetPlayLength();
 			UE_LOG(LogTemp, Verbose, TEXT("TAG injury: #%d stays down"), Player ? Player->number : -1);
@@ -1028,6 +1044,7 @@ void AAthlete::StartGetUp(const FVector& SimLoc)
 	}
 	CurrentClip = nullptr; // restart cleanly; the snapshot (not the last pose) is the blend source
 	PlayClip(Clip, false);
+	Clip = A.Side(Clip, bUpMirror);
 	GetUpLeft = Clip->GetPlayLength() + (bInjuredChain && A.GetUpSlow ? A.GetUpSlow->GetPlayLength() : 0.f);
 	bGettingUp = true;
 	bStoodUp = true;
@@ -1098,7 +1115,7 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 			if (InjuredLeft <= 0.f && A.GetUpSlow)
 			{
 				bInjuredChain = false;
-				PlayClip(A.GetUpSlow, false); // the injury beat ends in the slow get-up's first pose
+				PlayClip(A.Side(A.GetUpSlow, bInjuredMirror), false); // the injury beat ends in the slow get-up's first pose
 			}
 		}
 		SetActorLocation(Location + VisOffset);
@@ -1153,9 +1170,11 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 			VisOffset = FVector(PrevActorLoc.X - Location.X, PrevActorLoc.Y - Location.Y, 0.f);
 			SetActorLocation(Location + VisOffset);
 			PileVel = (Location - PrevActorLoc).GetSafeNormal2D() * 320.f + FVector(VelWorld.X, VelWorld.Y, 0.f) * 0.4f - FVector(0, 0, 50);
-			TackledLeft = A.TackledHit->GetPlayLength();
+			static int32 GHitSeq = 0;
+			UAnimationAsset* Hit = A.Side(A.TackledHit, (GHitSeq++ % 2) == 1);
+			TackledLeft = Hit->GetPlayLength();
 			UE_LOG(LogTemp, Verbose, TEXT("TAG tackled #%d held %.0f cm behind the sim spot"), Player ? Player->number : -1, Jump);
-			PlayClip(A.TackledHit, false);
+			PlayClip(Hit, false);
 			return;
 		}
 		StartRagdoll(VelWorld);
@@ -1173,8 +1192,9 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 			// plays never show the same one (a per-player hash over three variants collides too often)
 			static int32 GTackleSeq = 0;
 			++TackleCount;
-			UAnimationAsset* T = Pool[GTackleSeq++ % 6];
-			PlayClip(T ? T : A.TackleKeyed.Get(), false);
+			const int32 Seq = GTackleSeq++;
+			UAnimationAsset* T = A.Side(Pool[Seq % 6], (Seq / 6 + (Player ? Player->id : 0)) % 2 == 1); // wrap from either side
+			PlayClip(T ? T : A.TackleKeyed.Get(), false, OneShotRate);
 		}
 		// paired: ease into wrap distance of the carrier (his body, not the sim spot) and square up to him
 		if (AAthlete* C = TackleOn.Get(); C && AlignT >= 0.f && AlignT < 0.6f)
@@ -1226,9 +1246,9 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 			if (Player)
 			{
 				const tag::Ratings& R = Player->r;
-				if (A.Hurdle && R.agility > 85 && Seq % 7 == 3) Move = A.Hurdle;
+				if (A.Hurdle && R.agility > 85 && Seq % 7 == 3) Move = A.Side(A.Hurdle, Side > 0.f);
 				else if (R.breakTackle > R.elusiveness + 5)
-					Move = (Seq % 2) ? A.Truck.Get() : (Side > 0.f ? A.StiffArmR.Get() : A.StiffArmL.Get());
+					Move = (Seq % 2) ? A.Side(A.Truck, Side > 0.f) : (Side > 0.f ? A.StiffArmR.Get() : A.StiffArmL.Get());
 				else if (Seq % 3 == 1)
 					Move = Side > 0.f ? A.SpinR.Get() : A.SpinL.Get();
 				if (!Move) Move = Side > 0.f ? A.JukeR.Get() : A.JukeL.Get();
@@ -1278,12 +1298,12 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 	if (OneShotLeft > 0.f && OneShot && !bPreSnap)
 	{
 		OneShotLeft -= DeltaTime;
-		PlayClip(OneShot, false);
+		PlayClip(OneShot, false, OneShotRate);
 		if (OneShotLeft <= 0.f)
 		{
 			// the layout dive ends ~1 m ahead of where it started: hand that travel to the actor so the next pose
 			// starts where the body is (VisOffset then eases back onto the sim position)
-			if (OneShot == A.CatchDive) VisOffset += GetActorForwardVector() * FAthleteAssets::CatchDiveTravel;
+			if (OneShot == A.CatchDive || OneShot == A.Side(A.CatchDive, true)) VisOffset += GetActorForwardVector() * FAthleteAssets::CatchDiveTravel;
 			OneShot = nullptr;
 			CurrentAnim.Reset(); // one-shot done: let whatever state follows (re)start next frame (crossfaded)
 		}
@@ -1309,7 +1329,7 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 	if (Anim == TEXT("celebrate"))
 	{
 		// each player has his own celebration (keyed loops), phase offset so nobody moves in unison
-		UAnimationAsset* C = A.Celebrations.Num() && Player ? A.Celebrations[Player->id % A.Celebrations.Num()] : A.Celebrate.Get();
+		UAnimationAsset* C = A.Celebrations.Num() && Player ? A.Side(A.Celebrations[Player->id % A.Celebrations.Num()], (Player->id / 7) % 2 == 1) : A.Celebrate.Get();
 		if (bChanged) PlayClip(C, true, A.bCelebrateKeyed || A.Celebrations.Num() ? 1.f : 1.2f, Player ? FMath::Frac(Player->id * 0.29f) : 0.f);
 		return;
 	}

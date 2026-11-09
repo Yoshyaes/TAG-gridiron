@@ -174,6 +174,8 @@ private:
 	TWeakObjectPtr<AAthlete> TackleOn;
 	TWeakObjectPtr<AAthlete> BlockPartner;
 	bool bInjuredChain = false;   // getting up: the injury beat plays first, then the slow get-up
+	bool bInjuredMirror = false;  // ...on the same side
+	float OneShotRate = 1.f;      // per-player timing (style), so two players never move in lockstep
 	float InjuredLeft = 0.f;
 	FVector BlockAlign = FVector::ZeroVector;
 	float AlignT = -1.f;   // rotates tackle variants so the same player never repeats one back to back
@@ -270,6 +272,14 @@ struct FAthleteAssets
 	TObjectPtr<UAnimationAsset> StanceUnderCenter, UnderCenterSnap, Pitch, CatchDive, GetUpSlow;
 	TObjectPtr<UAnimationAsset> TackledHit; // the carrier's side of a tackle
 	TObjectPtr<UAnimationAsset> InjuredDown; // hurt on the play, chained into the slow get-up
+	/** Mirrored (other side) version of a keyed clip, built by Tools/Anim (<name>_M); the clip itself if none. */
+	TMap<UAnimationAsset*, UAnimationAsset*> MirrorOf;
+	UAnimationAsset* Side(UAnimationAsset* Clip, bool bMirror) const
+	{
+		if (!Clip || !bMirror) return Clip;
+		UAnimationAsset* const* M = MirrorOf.Find(Clip);
+		return M ? *M : Clip;
+	}
 	static constexpr float CatchDiveTravel = 115.f; // cm the dive carries the body forward (Tools/Anim CATCH_DIVE_TRAVEL)
 	TArray<UAnimationAsset*> Celebrations;                                            // keyed celebration loops
 	// where foot contact falls in each kick clip (s), so the director can line it up with the ball leaving

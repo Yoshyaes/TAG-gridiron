@@ -1125,7 +1125,12 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 			AAthlete* Q = AthOf(Ev.a);
 			// a toss on stretch runs (the back is out wide), a handoff otherwise
 			const bool bPitch = Ev.b && tag::dist(Ev.a->pos, Ev.b->pos) > 2.5 && FAthleteAssets::Get().Pitch;
-			if (Q) Q->PlayOneShot(bPitch ? FAthleteAssets::Get().Pitch.Get() : FAthleteAssets::Get().Handoff.Get());
+			// toss / hand to the side the back is on (the keyed clips go to the QB's right; mirrored to his left)
+			bool bLeft = false;
+			if (Q && Ev.b)
+				if (AAthlete* Rb = AthOf(Ev.b)) bLeft = FVector::DotProduct(Rb->GetActorLocation() - Q->GetActorLocation(), Q->GetActorRightVector()) < 0.f;
+			const FAthleteAssets& AA = FAthleteAssets::Get();
+			if (Q) Q->PlayOneShot(AA.Side(bPitch ? AA.Pitch.Get() : AA.Handoff.Get(), bLeft));
 		}
 		else if (Ev.type == "divecatch" && Ev.a)
 		{
