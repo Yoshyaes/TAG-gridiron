@@ -619,9 +619,29 @@ void AMatchDirector::ApplyPlay()
 	Timer = 0.f;
 }
 
+void AMatchDirector::StartCutIn(const tag::Ent* Who, float Seconds)
+{
+	static const bool bForce = FParse::Param(FCommandLine::Get(), TEXT("TagCutIns")); // review cut-ins under automation
+	if (!Who || ((bAuto || bLineup) && !bForce)) return; // automation drives its own shots
+	UE_LOG(LogTemp, Display, TEXT("TAG cut-in: #%d %s for %.1f s"), Who->p->number, ANSI_TO_TCHAR(tag::posName(Who->p->pos)), Seconds);
+	CutInTarget = AthleteFor(Who->p, Who->side == tag::Side::Off ? Game->poss : tag::other(Game->poss));
+	CutInLeft = Seconds;
+	Timer = FMath::Max(Timer, Seconds); // hold the post-play beat long enough for the shot
+}
+
 void AMatchDirector::OnPlayDead()
 {
 	const tag::PlayResult& R = *Sim->result;
+	// the broadcast cut-in: who made the play (the ball carrier on a score, takeaway or big gain; the sacker)
+	{
+		const tag::Ent* Star = Sim->ball.holder;
+		if (R.kind == tag::PlayKind::Sack && !R.tacklers.empty())
+			for (const tag::Ent* E : Sim->ents)
+				if (E->p == R.tacklers.front()) Star = E;
+		static const int32 BigGain = FParse::Param(FCommandLine::Get(), TEXT("TagCutIns")) ? 5 : 20; // review: more samples
+		if (R.td || R.interception || R.fumbleLost || R.kind == tag::PlayKind::Sack || R.yards >= BigGain)
+			StartCutIn(Star, R.td ? 3.5f : 2.8f);
+	}
 	if (R.td)
 	{
 		Stadium->Hype = 1.f;
@@ -1146,10 +1166,52 @@ void AMatchDirector::UpdateCamera(float Dt, const FVector& Focus)
 		CamPos = T; // cut, don't swoop, when the camera changes
 		CamLook = Look;
 	}
-	const double K = 1.0 - FMath::Exp(-Dt * 3.2);
-	CamPos = FMath::Lerp(CamPos, T, K);
-	CamLook = FMath::Lerp(CamLook, Look, FMath::Min(1.0, K * 1.3));
+	// lead the ball the way an operator does: frame where the play is going, not where it was
+	if (Sim && CamMode != ECamMode::Player)
+	{
+		const tag::Ball& B = Sim->ball;
+		const FVector BV = Dir > 0 ? FVector(B.vel.x, -B.vel.y, 0) * Y : FVector(-B.vel.x, B.vel.y, 0) * Y;
+		Look += (BV * 0.35f).GetClampedToMaxSize(6.f * Y);
+	}
+	// critically damped moves (no overshoot, no linear-lerp drag): ~0.35 s to settle the dolly, ~0.25 s the pan
+	auto Spring = [Dt](FVector& X, FVector& V, const FVector& Goal, float Halflife)
+	{
+		const float W = 1.3863f / FMath::Max(Halflife, 0.01f); // ln(4) / halflife
+		const FVector J0 = X - Goal, J1 = V + J0 * W;
+		const float E = FMath::Exp(-W * Dt);
+		X = Goal + (J0 + J1 * Dt) * E;
+		V = (V - J1 * W * Dt) * E;
+	};
+	Spring(CamPos, CamVel, T, 0.35f);
+	Spring(CamLook, LookVel, Look, 0.22f);
 	FVector P = CamPos;
+	CamTime += Dt;
+	// lens: zoom to the action (players within 18 yd of the focus) so a pile fills the frame and a breakaway does
+	// not shrink to a speck; wider when the ball is in the air
+	float WantFocal = CamMode == ECamMode::Sideline ? 45.f : CamMode == ECamMode::Player ? 24.f : 30.f;
+	if (CamMode == ECamMode::Sideline || CamMode == ECamMode::Broadcast)
+	{
+		float Spread = 6.f * Y;
+		for (const auto& KV : Athletes)
+		{
+			const AAthlete* O = KV.Value;
+			if (!O || O->IsHidden()) continue;
+			const float Dd = FVector::Dist2D(O->GetActorLocation(), Look);
+			if (Dd < 18.f * Y) Spread = FMath::Max(Spread, Dd);
+		}
+		if (Sim && Sim->ball.mode == tag::BallMode::Air) Spread = FMath::Max(Spread, 16.f * Y);
+		WantFocal = FMath::Clamp(WantFocal * (11.f * Y) / Spread, WantFocal * 0.75f, WantFocal * 1.9f);
+	}
+	{
+		const float W = 1.3863f / 0.6f, J0 = CamFocal - WantFocal, J1 = CamFocalVel + J0 * W, E = FMath::Exp(-W * Dt);
+		CamFocal = WantFocal + (J0 + J1 * Dt) * E;
+		CamFocalVel = (CamFocalVel - J1 * W * Dt) * E;
+	}
+	// handheld drift for the field-level cameras (low frequency, a few cm; the booth and skycam stay rock steady)
+	FVector Hand = FVector::ZeroVector;
+	if (CamMode == ECamMode::Sideline || CamMode == ECamMode::Player)
+		Hand = FVector(FMath::PerlinNoise1D(CamTime * 0.31f), FMath::PerlinNoise1D(CamTime * 0.27f + 17.f), FMath::PerlinNoise1D(CamTime * 0.23f + 41.f)) * 6.f;
+	P += Hand;
 	if (Shake > 0.1f)
 	{
 		P += FVector(FMath::FRandRange(-Shake, Shake), FMath::FRandRange(-Shake, Shake), FMath::FRandRange(-Shake, Shake));
@@ -1159,6 +1221,20 @@ void AMatchDirector::UpdateCamera(float Dt, const FVector& Focus)
 	{
 		P = FVector(50 * Y, -30 * Y, 22 * Y);
 		CamLook = FVector(50 * Y, 70 * Y, 14 * Y);
+	}
+	else if (!CloseupTarget && CutInTarget && CutInLeft > 0.f)
+	{
+		CutInLeft -= Dt;
+		const FVector Tgt = CutInTarget->GetActorLocation() + FVector(0, 0, 120);
+		const FVector F = CutInTarget->GetActorForwardVector(), R = CutInTarget->GetActorRightVector();
+		// long lens from in front and a little low: compresses the background, the crowd fills the frame behind him
+		P = Tgt + F * 900.f + R * 260.f - FVector(0, 0, 40) + FVector(FMath::PerlinNoise1D(CamTime * 0.4f), FMath::PerlinNoise1D(CamTime * 0.35f + 9.f), 0) * 8.f;
+		CamLook = Tgt;
+		static int32 GCutShots = 0;
+		static const bool bShots = FParse::Param(FCommandLine::Get(), TEXT("TagCutIns"));
+		if (bShots && CutInLeft < 1.6f && CutInLeft + Dt >= 1.6f && GCutShots < 6)
+			FScreenshotRequest::RequestScreenshot(FString::Printf(TEXT("tag_cutin_%d.png"), GCutShots++), false, false);
+		if (CutInLeft <= 0.f) { CutInTarget = nullptr; CamPos = P; CamVel = FVector::ZeroVector; }
 	}
 	else if (CloseupTarget)
 	{
@@ -1208,7 +1284,7 @@ void AMatchDirector::UpdateCamera(float Dt, const FVector& Focus)
 	if (UCineCameraComponent* C = Camera->GetCineCameraComponent())
 	{
 		C->FocusSettings.ManualFocusDistance = (CamLook - P).Size();
-		C->CurrentFocalLength = CamMode == ECamMode::Sideline ? 45.f : CamMode == ECamMode::Player ? 24.f : 30.f;
+		C->CurrentFocalLength = CutInTarget && CutInLeft > 0.f && !CloseupTarget ? 85.f : CloseupTarget ? 30.f : CamFocal;
 	}
 }
 

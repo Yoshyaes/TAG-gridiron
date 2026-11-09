@@ -102,6 +102,17 @@ private:
 	FVector CamLook = FVector(4572, 0, 0);
 	FVector IdleFocus = FVector(4572, 0, 0);
 	float Shake = 0.f;
+	// broadcast camera operator (UpdateCamera): critically damped moves, lens zoom to the action, handheld drift
+	FVector CamVel = FVector::ZeroVector;
+	FVector LookVel = FVector::ZeroVector;
+	float CamFocal = 30.f;
+	float CamFocalVel = 0.f;
+	float CamTime = 0.f;
+	/** Post-play cut-in: a telephoto close shot of the player who made the play (TD, takeaway, sack, big gain). */
+	UPROPERTY()
+	TObjectPtr<AActor> CutInTarget;
+	float CutInLeft = 0.f;
+	void StartCutIn(const tag::Ent* Who, float Seconds);
 	float Timer = 0.f;
 	float Acc = 0.f;
 	int Dir = 1;
