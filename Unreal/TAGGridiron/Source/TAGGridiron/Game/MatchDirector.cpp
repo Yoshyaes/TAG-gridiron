@@ -475,6 +475,7 @@ void AMatchDirector::TickGapTest(float Dt)
 	}
 }
 
+static bool GHudShot = false;  // automation: one screenshot with the UI
 static bool GAutoBoard = false; // automation: the establishing shot turns to the end-zone video board
 
 void AMatchDirector::TickAutomation(float Dt)
@@ -485,18 +486,25 @@ void AMatchDirector::TickAutomation(float Dt)
 #endif
 	if (FAssetCompilingManager::Get().GetNumRemainingAssets() > 0) return; // and textures/meshes
 	AutoT += Dt;
+	if (GHudShot && !FScreenshotRequest::IsScreenshotRequested())
+	{
+		GHudShot = false;
+		FScreenshotRequest::RequestScreenshot(TEXT("tag_auto_hud.png"), true, false);
+	}
 	static const float Times[] = {3.f, 9.f, 14.f, 20.f, 27.f, 34.f, 42.f, 50.f};
 	if (AutoShot < static_cast<int32>(UE_ARRAY_COUNT(Times)) && AutoT >= Times[AutoShot])
 	{
 		if (AutoShot == 4) CamMode = ECamMode::Sideline;
 		if (AutoShot == 6) CamMode = ECamMode::Skycam;
 		FScreenshotRequest::RequestScreenshot(FString::Printf(TEXT("tag_auto_%02d.png"), AutoShot), false, false);
+		if (AutoShot == 3) GHudShot = true; // next frame: the same view with the HUD (score bug, hints)
 		int32 NLog = 0;
 		for (auto& KV : Athletes)
 		{
 			if (!KV.Value->IsHidden() && NLog++ < 3) UE_LOG(LogTemp, Display, TEXT("TAG athlete %d: %s"), KV.Key, *KV.Value->DebugAnimState());
 		}
-		UE_LOG(LogTemp, Display, TEXT("TAG auto screenshot %d state=%d"), AutoShot, static_cast<int32>(State));
+		UE_LOG(LogTemp, Display, TEXT("TAG auto screenshot %d state=%d cam %s look %s focus %s dir %d ballOn %.1f"), AutoShot, static_cast<int32>(State),
+			*Camera->GetActorLocation().ToCompactString(), *CamLook.ToCompactString(), *FocusPoint().ToCompactString(), Dir, Game ? Game->ballOn : -1.0);
 		++AutoShot;
 	}
 	// final shot: establishing view of the far stands (verifies crowd/stadium rendering)
@@ -1641,9 +1649,12 @@ FVector AMatchDirector::FocusPoint() const
 	return ToWorld(X, Y, Dir);
 }
 
-void AMatchDirector::UpdateCamera(float Dt, const FVector& Focus)
+void AMatchDirector::UpdateCamera(float Dt, const FVector& InFocus)
 {
 	const double Y = YD;
+	// a dead ball keeps flying (an overthrow out of the back of the end zone, a kick into the stands): the operators
+	// stay on the field, so the framing never follows it more than a few yards past the end lines and sidelines
+	const FVector Focus(FMath::Clamp(InFocus.X, -8.0 * Y, 108.0 * Y), FMath::Clamp(InFocus.Y, -(tag::FIELD_W / 2 + 3) * Y, (tag::FIELD_W / 2 + 3) * Y), InFocus.Z);
 	FVector T, Look;
 	const double D = static_cast<double>(Dir);
 	switch (CamMode)

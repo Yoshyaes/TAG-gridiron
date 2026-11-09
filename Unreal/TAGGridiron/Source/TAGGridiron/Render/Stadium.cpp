@@ -613,9 +613,9 @@ void AStadium::Build(const tag::Team& Home, const tag::Team& Away, const tag::We
 	PP->Settings.bOverride_AutoExposureBias = true;
 	PP->Settings.AutoExposureBias = bNight ? 0.f : 0.4f;
 	PP->Settings.bOverride_MotionBlurAmount = true;
-	PP->Settings.MotionBlurAmount = 0.2f;
+	PP->Settings.MotionBlurAmount = 0.15f;  // broadcast shutter: a hint of blur on fast pans, never a smear
 	PP->Settings.bOverride_MotionBlurMax = true;
-	PP->Settings.MotionBlurMax = 2.f;
+	PP->Settings.MotionBlurMax = 0.6f;
 	PP->Settings.bOverride_ColorSaturation = true;
 	PP->Settings.ColorSaturation = FVector4(1.08f, 1.08f, 1.08f, 1.f);
 	PP->Settings.bOverride_ColorContrast = true;
