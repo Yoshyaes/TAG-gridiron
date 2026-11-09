@@ -948,6 +948,21 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 	// ball
 	const tag::Ball& B = Sim->ball;
 	auto AthOf = [&](const tag::Ent* X) { return AthleteFor(X->p, X->side == tag::Side::Off ? OffK : tag::other(OffK)); };
+	// paired tackles: a defender whose tackle just started squares up to the carrier he is hitting (the man down or
+	// still holding the ball within 3 yd)
+	for (tag::Ent* E : Sim->ents)
+	{
+		if (E->anim != tag::Anim::Tackle || E->animT > 0.06) continue;
+		const tag::Ent* Best = nullptr;
+		double BestD = 3.0;
+		for (const tag::Ent* C : Sim->ents)
+			if (C->side != E->side && (C->anim == tag::Anim::Down || C->hasBall) && tag::dist(C->pos, E->pos) < BestD)
+			{
+				Best = C;
+				BestD = tag::dist(C->pos, E->pos);
+			}
+		if (Best) AthOf(E)->BeginTackleOn(AthOf(Best));
+	}
 	// keyed one-shots on sim events (new events only; a new play restarts the list)
 	if (Sim.get() != EventSim || Sim->events.size() < SeenEvents) { EventSim = Sim.get(); SeenEvents = 0; }
 	for (; SeenEvents < Sim->events.size(); ++SeenEvents)

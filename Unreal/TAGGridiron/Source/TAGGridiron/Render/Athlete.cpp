@@ -132,6 +132,7 @@ void FAthleteAssets::Load()
 		Pitch = Keyed(TEXT("A_TAG_QB_Pitch"));
 		CatchDive = Keyed(TEXT("A_TAG_Catch_Dive"));
 		GetUpSlow = Keyed(TEXT("A_TAG_GetUp_Slow"));
+		TackledHit = Keyed(TEXT("A_TAG_Tackled_Hit"));
 		IdleHandsHips = Keyed(TEXT("A_TAG_Idle_HandsHips_Loop"));
 		IdleHandsKnees = Keyed(TEXT("A_TAG_Idle_HandsKnees_Loop"));
 		for (const TCHAR* N : {TEXT("A_TAG_Celebrate_Flex_Loop"), TEXT("A_TAG_Celebrate_PointUp_Loop"), TEXT("A_TAG_Celebrate_Leap_Loop"),
@@ -933,6 +934,15 @@ void AAthlete::PlayCatch(float BallZCm, float SpeedCm, const FVector& BallVelW, 
 	if (C) PlayOneShot(C);
 }
 
+void AAthlete::BeginTackleOn(AAthlete* Carrier)
+{
+	if (!Carrier || Carrier == this) return;
+	TackleOn = Carrier;
+	AlignT = 0.f;
+	UE_LOG(LogTemp, Verbose, TEXT("TAG paired tackle #%d on #%d at %.0f cm"), Player ? Player->number : -1, Carrier->Player ? Carrier->Player->number : -1,
+		FVector::Dist2D(GetActorLocation(), Carrier->GetActorLocation()));
+}
+
 void AAthlete::PlayDiveAttempt()
 {
 	if (const FAthleteAssets& A = FAthleteAssets::Get(); A.CatchDive) PlayOneShot(A.CatchDive);
@@ -1015,6 +1025,9 @@ void AAthlete::ResetPose()
 	VisOffset = FVector::ZeroVector;
 	bGettingUp = false;
 	bStoodUp = false;
+	TackledLeft = 0.f;
+	TackleOn = nullptr;
+	AlignT = -1.f;
 	DownTime = 0.f;
 	// new play: the players are teleported to the formation, so the motion history starts over
 	TrajPos.Reset();
@@ -1038,12 +1051,26 @@ void AAthlete::ResetPose()
 void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld, float VMaxYds, const FString& Anim, float AnimT, float DeltaTime, bool bLineman)
 {
 	FAthleteAssets& A = FAthleteAssets::Get();
+	const FVector PrevActorLoc = GetActorLocation();
 	if (bRagdoll)
 	{
 		// physics owns the body; after a beat the player gets up with a keyed get-up out of the ragdoll pose
 		DownTime += DeltaTime;
 		if (DownTime > 0.6f && A.GetUpDown && A.GetUpUp) StartGetUp(Location); // ragdoll settled: get up before the next play resets him
 		if (bRagdoll) return;
+	}
+	if (TackledLeft > 0.f)
+	{
+		// held by the tackler and driven forward with the pile onto the sim's spot, then the fall is physics
+		TackledLeft -= DeltaTime;
+		VisOffset *= FMath::Exp(-9.f * DeltaTime);
+		SetActorLocation(Location + VisOffset);
+		if (TackledLeft <= 0.f)
+		{
+			VisOffset = FVector::ZeroVector;
+			StartRagdoll(PileVel);
+		}
+		return;
 	}
 	if (bGettingUp)
 	{
@@ -1092,6 +1119,19 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 			if (A.Idle) PlayClip(A.Idle, true);
 			return;
 		}
+		// tackled ball carrier: the sim resolves the tackle in one tick and moves him forward by the yards after
+		// contact. Keep the body where the hit landed, play the hit, carry it with the pile, then let it fall.
+		const float Jump = FVector::Dist2D(PrevActorLoc, Location);
+		if (bChanged && A.TackledHit && Jump < 800.f && PrevActorLoc != FVector::ZeroVector)
+		{
+			VisOffset = FVector(PrevActorLoc.X - Location.X, PrevActorLoc.Y - Location.Y, 0.f);
+			SetActorLocation(Location + VisOffset);
+			PileVel = (Location - PrevActorLoc).GetSafeNormal2D() * 320.f + FVector(VelWorld.X, VelWorld.Y, 0.f) * 0.4f - FVector(0, 0, 50);
+			TackledLeft = A.TackledHit->GetPlayLength();
+			UE_LOG(LogTemp, Verbose, TEXT("TAG tackled #%d held %.0f cm behind the sim spot"), Player ? Player->number : -1, Jump);
+			PlayClip(A.TackledHit, false);
+			return;
+		}
 		StartRagdoll(VelWorld);
 		return;
 	}
@@ -1109,6 +1149,24 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 			++TackleCount;
 			UAnimationAsset* T = Pool[GTackleSeq++ % 6];
 			PlayClip(T ? T : A.TackleKeyed.Get(), false);
+		}
+		// paired: ease into wrap distance of the carrier (his body, not the sim spot) and square up to him
+		if (AAthlete* C = TackleOn.Get(); C && AlignT >= 0.f && AlignT < 0.6f)
+		{
+			AlignT += DeltaTime;
+			const FVector Me = Location + VisOffset, Him = C->GetActorLocation();
+			FVector To = Him - Me;
+			To.Z = 0.f;
+			const float D = To.Size();
+			if (D > 1.f)
+			{
+				const FVector Want = (Him - To / D * 62.f) - Location; // wrap distance, chest to chest
+				const FVector Off = FVector(Want.X, Want.Y, 0.f).GetClampedToMaxSize(160.f);
+				VisOffset = FMath::Lerp(VisOffset, Off, 1.f - FMath::Exp(-14.f * DeltaTime));
+				SetActorLocation(Location + VisOffset);
+				SmoothedYaw += FMath::FindDeltaAngleDegrees(SmoothedYaw, To.Rotation().Yaw) * FMath::Clamp(DeltaTime * 14.f, 0.f, 1.f);
+				SetActorRotation(FRotator(0, SmoothedYaw, 0));
+			}
 		}
 		return;
 	}

@@ -78,6 +78,8 @@ public:
 	void PlayCatch(float BallZCm, float SpeedCm, const FVector& BallVelW, const FVector& SidelineDirW);
 	/** Layout dive at an incompletion just out of reach (gets back up at the end). */
 	void PlayDiveAttempt();
+	/** Paired tackle: this defender's tackle is on Carrier; ease into wrap distance and face him. */
+	void BeginTackleOn(AAthlete* Carrier);
 
 	const tag::Player* Player = nullptr;
 
@@ -160,7 +162,13 @@ private:
 	void UpdateFace(float DeltaTime);
 	float BlinkClock = 0.f, NextBlink = 3.f, BlinkPhase = 10.f;
 	bool bDoubleBlink = false;
-	float Exertion = 0.f, FaceEffort = 0.f, FaceFocus = 0.f, FaceShout = 0.f;   // rotates tackle variants so the same player never repeats one back to back
+	float Exertion = 0.f, FaceEffort = 0.f, FaceFocus = 0.f, FaceShout = 0.f;
+	// paired tackles: the carrier is held where the hit lands and carried with the pile before the ragdoll fall;
+	// the tackler eases into wrap distance of him
+	float TackledLeft = 0.f;
+	FVector PileVel = FVector::ZeroVector;
+	TWeakObjectPtr<AAthlete> TackleOn;
+	float AlignT = -1.f;   // rotates tackle variants so the same player never repeats one back to back
 	bool bEngaged = false;   // hands on an opponent (football layer reach), picks the engaged block loop
 	void StartRagdoll(const FVector& VelWorld);
 	void SetupMetaHuman(int32 Arch, const FUniform& U);
@@ -252,6 +260,7 @@ struct FAthleteAssets
 	TObjectPtr<UAnimationAsset> GetUpRoll, IdleHandsHips, IdleHandsKnees;
 	// batch 3: the last uncovered situations
 	TObjectPtr<UAnimationAsset> StanceUnderCenter, UnderCenterSnap, Pitch, CatchDive, GetUpSlow;
+	TObjectPtr<UAnimationAsset> TackledHit; // the carrier's side of a tackle
 	static constexpr float CatchDiveTravel = 115.f; // cm the dive carries the body forward (Tools/Anim CATCH_DIVE_TRAVEL)
 	TArray<UAnimationAsset*> Celebrations;                                            // keyed celebration loops
 	// where foot contact falls in each kick clip (s), so the director can line it up with the ball leaving

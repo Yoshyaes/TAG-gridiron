@@ -774,5 +774,29 @@ def getup_slow(rig):
     return _key_all(rig, keys)
 
 
+def tackled_hit(rig):
+    """The ball carrier's side of a tackle, 11 frames: running with the ball locked in, the hit jolts the torso and
+    snaps the head, the hips drop and the knees buckle as he is driven forward and starts to go down (the ragdoll takes
+    the fall from here). In place."""
+    keys = [
+        (0, _base(pelvis=(0, 0, 0.90), pelvis_rot=(16, 0, 0), spine=(6, 0, 0), look=(0, -6, 1.4),
+                  hand_l=(0.24, -0.12, 1.02), **_tuck(0.0), foot_l=(0.12, -0.22, ANKLE), foot_r=(-0.12, 0.22, 0.14),
+                  foot_pitch_r=40)),
+        (4, _base(pelvis=(0.04, -0.06, 0.86), pelvis_rot=(4, 8, 6), spine=(-12, 12, 10), look=(1.5, -3, 2.0),
+                  hand_l=(0.36, -0.04, 1.16), elbow_l=(1, 0.2, -0.6), **_tuck(-0.06),
+                  foot_l=(0.12, -0.22, ANKLE), foot_r=(-0.14, 0.06, 0.12), foot_pitch_l=20, foot_pitch_r=30)),
+        (8, _base(pelvis=(0.06, -0.20, 0.76), pelvis_rot=(22, 10, 8), spine=(10, 8, 6), look=(0.5, -2, 0.6),
+                  hand_l=(0.34, -0.40, 0.96), elbow_l=(1, 0.3, -0.3), **_tuck(-0.20),
+                  foot_l=(0.12, -0.22, ANKLE), foot_r=(-0.12, -0.10, ANKLE), foot_pitch_l=35, foot_pitch_r=30,
+                  knee_l=(0.2, -1, 0.3), knee_r=(-0.2, -1, 0.3))),
+        (11, _base(pelvis=(0.06, -0.34, 0.66), pelvis_rot=(40, 10, 8), spine=(16, 6, 4), look=(0.2, -1.5, 0.2),
+                   hand_l=(0.30, -0.66, 0.74), elbow_l=(1, 0.3, 0), **_tuck(-0.34),
+                   foot_l=(0.12, -0.24, ANKLE), foot_r=(-0.12, -0.16, ANKLE), foot_pitch_l=50, foot_pitch_r=45,
+                   knee_l=(0.2, -1, 0.5), knee_r=(-0.2, -1, 0.5))),
+    ]
+    return _key_all(rig, C._in_place(keys))
+
+
+MORE.update({"Tackled_Hit": tackled_hit})
 MORE.update({"StanceUnderCenter_Loop": stance_under_center, "QB_UnderCenterSnap": qb_under_center_snap,
              "QB_Pitch": qb_pitch, "Catch_Dive": catch_dive, "GetUp_Slow": getup_slow})
