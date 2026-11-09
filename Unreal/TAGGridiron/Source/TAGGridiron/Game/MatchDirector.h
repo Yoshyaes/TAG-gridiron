@@ -93,6 +93,15 @@ private:
 	UPROPERTY()
 	TMap<int32, TObjectPtr<AAthlete>> Athletes;
 
+	/** Bench players standing in each team's area (deep backups, so they never meet themselves on the field). */
+	UPROPERTY()
+	TArray<TObjectPtr<AAthlete>> Sideline;
+	TArray<bool> SidelineIsHome;
+	void SpawnSidelines(const tag::Team& Home, const tag::Team& Away);
+	void TickSidelines(float Dt);
+	int32 SidelineScore[2] = {0, 0};
+	float SidelineCheerLeft[2] = {0.f, 0.f};
+
 	TSharedPtr<SGridironOverlay> Overlay;
 	std::map<tag::Ent*, FVector2D> Prev;
 	std::map<tag::Ent*, FString> Labels;

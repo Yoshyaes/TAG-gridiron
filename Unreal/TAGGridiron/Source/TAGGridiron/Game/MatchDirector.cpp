@@ -577,6 +577,94 @@ void AMatchDirector::BuildWorld(const tag::Team& Home, const tag::Team& Away, co
 	Athletes.Empty();
 	Stadium = GetWorld()->SpawnActor<AStadium>(AStadium::StaticClass(), FTransform::Identity);
 	Stadium->Build(Home, Away, W, bNight);
+	SpawnSidelines(Home, Away);
+}
+
+static FUniform UniformFor(const tag::Team& T, bool bHome)
+{
+	FUniform U;
+	if (bHome)
+	{
+		U.Jersey = Hex(T.colors.primary);
+		U.Pants = Hex(T.colors.secondary);
+		U.Helmet = Hex(T.colors.primary);
+		U.Trim = Hex(T.colors.secondary);
+		U.Number = Hex(T.colors.accent);
+	}
+	else
+	{
+		U.Jersey = FLinearColor(0.92f, 0.92f, 0.92f);
+		U.Pants = FLinearColor(0.85f, 0.85f, 0.85f);
+		U.Helmet = Hex(T.colors.primary);
+		U.Trim = Hex(T.colors.primary);
+		U.Number = Hex(T.colors.primary);
+	}
+	return U;
+}
+
+void AMatchDirector::SpawnSidelines(const tag::Team& Home, const tag::Team& Away)
+{
+	for (AAthlete* A : Sideline)
+		if (A) A->Destroy();
+	Sideline.Empty();
+	SidelineIsHome.Empty();
+	SidelineScore[0] = SidelineScore[1] = 0;
+	SidelineCheerLeft[0] = SidelineCheerLeft[1] = 0.f;
+	static int32 PerTeam = 14;
+	FParse::Value(FCommandLine::Get(), TEXT("TagSideline="), PerTeam); // 0 turns the benches off
+	if (PerTeam <= 0 || bLineup) return;
+	// the team areas: home on the far sideline (the broadcast side looks at it), visitors on the near one, each between
+	// the 32s, standing in two loose rows just outside the 6 ft border in front of the bench
+	for (int32 Team = 0; Team < 2; ++Team)
+	{
+		const bool bHome = Team == 0;
+		const tag::Team& T = bHome ? Home : Away;
+		std::vector<tag::Player*> Bench;
+		for (int32 Depth = 2; Depth < 6 && static_cast<int32>(Bench.size()) < PerTeam; ++Depth)
+			for (int32 Pi = 0; Pi <= static_cast<int32>(tag::Pos::P) && static_cast<int32>(Bench.size()) < PerTeam; ++Pi)
+			{
+				const std::vector<tag::Player*> D = tag::depth(T, static_cast<tag::Pos>(Pi));
+				if (Depth < static_cast<int32>(D.size())) Bench.push_back(D[Depth]);
+			}
+		const double SideSign = bHome ? 1.0 : -1.0;
+		FRandomStream Rand(T.id * 31 + 7);
+		const FUniform U = UniformFor(T, bHome);
+		for (int32 i = 0; i < static_cast<int32>(Bench.size()); ++i)
+		{
+			const int32 Row = i % 3 == 2 ? 1 : 0;
+			const double X = (33.0 + 34.0 * (i + Rand.FRandRange(-0.3f, 0.3f)) / FMath::Max(1, static_cast<int32>(Bench.size()) - 1)) * YD;
+			const double Y = SideSign * (tag::FIELD_W / 2 + 2.4 + Row * 1.3 + Rand.FRandRange(-0.25f, 0.25f)) * YD;
+			float Yaw = SideSign > 0 ? -90.f : 90.f;            // facing the field
+			Yaw += Rand.FRandRange(-28.f, 28.f) + (i % 5 == 4 ? (Rand.FRand() < 0.5f ? 70.f : -70.f) : 0.f); // some talk to a teammate
+			AAthlete* A = GetWorld()->SpawnActor<AAthlete>(AAthlete::StaticClass(), FTransform::Identity);
+			A->Setup(Bench[i], U);
+			A->StandOnSideline(FVector(X, Y, 0), Yaw, i + T.id * 5);
+			Sideline.Add(A);
+			SidelineIsHome.Add(bHome);
+		}
+	}
+}
+
+void AMatchDirector::TickSidelines(float Dt)
+{
+	if (!Game || Sideline.Num() == 0) return;
+	// a score sets the scoring team's bench off for a few seconds (longer for a touchdown)
+	const int32 Now[2] = {Game->score.home, Game->score.away};
+	for (int32 k = 0; k < 2; ++k)
+	{
+		if (Now[k] > SidelineScore[k])
+		{
+			SidelineCheerLeft[k] = Now[k] - SidelineScore[k] >= 6 ? 7.f : 4.f;
+			for (int32 i = 0; i < Sideline.Num(); ++i)
+				if (Sideline[i] && SidelineIsHome[i] == (k == 0)) Sideline[i]->SidelineCheer(true);
+		}
+		else if (Now[k] < SidelineScore[k])
+			SidelineCheerLeft[k] = 0.f; // new game
+		SidelineScore[k] = Now[k];
+		if (SidelineCheerLeft[k] > 0.f && (SidelineCheerLeft[k] -= Dt) <= 0.f)
+			for (int32 i = 0; i < Sideline.Num(); ++i)
+				if (Sideline[i] && SidelineIsHome[i] == (k == 0)) Sideline[i]->SidelineCheer(false);
+	}
 }
 
 void AMatchDirector::ShowMainMenu()
@@ -1659,6 +1747,7 @@ void AMatchDirector::Tick(float Dt)
 {
 	Super::Tick(Dt);
 	TickAutomation(Dt);
+	TickSidelines(Dt);
 	APlayerController* PC = GetWorld()->GetFirstPlayerController();
 	const bool bEsc = PC && (PC->WasInputKeyJustPressed(EKeys::Escape) || PC->WasInputKeyJustPressed(EKeys::Gamepad_Special_Right));
 	if (State == EMatchState::Menu)

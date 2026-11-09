@@ -56,6 +56,11 @@ public:
 	 */
 	void Drive(const FVector& Location, float Yaw, const FVector& VelWorld, float VMaxYds, const FString& Anim, float AnimT, float DeltaTime, bool bLineman);
 
+	/** Bench player in the team area: stands at Loc facing Yaw, idling (Variant picks the idle, side and timing). */
+	void StandOnSideline(const FVector& Loc, float Yaw, int32 Variant);
+	/** Bench reaction to a score: celebrate, or settle back into the idle. */
+	void SidelineCheer(bool bCheer);
+
 	/** Restore an animated (non-ragdoll) pose, e.g. before the next snap. */
 	void ResetPose();
 
@@ -148,6 +153,7 @@ private:
 	bool DriveMotionMatching(const FVector& VelWorld, float SimYaw, float DeltaTime, bool bCrouch = false);
 	void RecordTrajectory();
 	bool bInMatch = false;
+	int32 SidelineVariant = 0;
 	int32 MMGait = 1;                         // 0 walk, 1 run, 2 sprint
 	TArray<FVector> TrajPos;                  // recorded source body transforms (world), newest last
 	TArray<FQuat> TrajRot;

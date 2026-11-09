@@ -1155,6 +1155,37 @@ void AAthlete::StartGetUp(const FVector& SimLoc)
 	UE_LOG(LogTemp, Verbose, TEXT("TAG one-shot %s #%d"), *Clip->GetName(), Player ? Player->number : -1);
 }
 
+void AAthlete::StandOnSideline(const FVector& Loc, float Yaw, int32 Variant)
+{
+	SidelineVariant = Variant;
+	SetActorLocationAndRotation(Loc, FRotator(0, Yaw, 0));
+	// bench players are small in frame and helmeted: the face follows the head (leader pose) instead of running the
+	// facial rig, and the visible body updates at a reduced rate when it is small on screen
+	if (MHFace && MHBody)
+	{
+		MHFace->SetAnimInstanceClass(nullptr);
+		MHFace->SetLeaderPoseComponent(MHBody);
+	}
+	if (MHBody) MHBody->bEnableUpdateRateOptimizations = true;
+	SidelineCheer(false);
+}
+
+void AAthlete::SidelineCheer(bool bCheer)
+{
+	const FAthleteAssets& A = FAthleteAssets::Get();
+	const int32 V = SidelineVariant;
+	const bool bMirror = (V / 3) % 2 == 1;
+	UAnimationAsset* Clip = nullptr;
+	if (bCheer && A.Celebrations.Num())
+		Clip = A.Side(A.Celebrations[V % A.Celebrations.Num()], bMirror);
+	else
+		Clip = (V % 3 == 1 && A.IdleHandsHips) ? A.Side(A.IdleHandsHips, bMirror) : A.Idle.Get(); // standing idles, a few hands on hips
+	if (!Clip) return;
+	// each bench player on his own beat: random phase, a little tempo spread (the cheer starts staggered too)
+	const float Phase = FMath::Frac(V * 0.618f) * Clip->GetPlayLength();
+	PlayClip(Clip, true, 0.9f + 0.2f * FMath::Frac(V * 0.377f), bCheer ? FMath::Frac(V * 0.29f) * 0.6f : Phase);
+}
+
 void AAthlete::ResetPose()
 {
 	VisOffset = FVector::ZeroVector;

@@ -373,6 +373,15 @@ void AStadium::Build(const tag::Team& Home, const tag::Team& Away, const tag::We
 		EZ(100, Home, -90);
 		// apron around the field (darker, unpainted turf)
 		PlaneAt(FVector(50 * YD, 0, -0.5), 170, 100, TurfMID(0.f, FLinearColor(0.7f, 0.75f, 0.7f) * SnowTint, 0.f, FLinearColor::Black, FLinearColor(85, 50, 0, 0), 0.f));
+		// the 6 ft white border painted around the field (outside the sidelines and end lines), and the team areas'
+		// yellow coaching-box line 6 ft further out between the 32s
+		UMaterialInstanceDynamic* Border = TurfMID(0.f, SnowTint, 0.97f, FLinearColor(0.75f, 0.75f, 0.73f), FLinearColor(40, 1, 0, 0), 0.f);
+		for (double S : {-1.0, 1.0})
+		{
+			PlaneAt(FVector(50 * YD, S * (FW / 2 + 1) * YD, 0.4), 124, 2, Border);
+			PlaneAt(FVector((50 + S * 61) * YD, 0, 0.4), 2, FW, Border);
+			PlaneAt(FVector(50 * YD, S * (FW / 2 + 2.05) * YD, 0.4), 36, 0.1, TurfMID(0.f, SnowTint, 0.95f, FLinearColor(0.45f, 0.38f, 0.02f), FLinearColor(10, 1, 0, 0), 0.f));
+		}
 	}
 	// ---------------- turf: 5-yard mowing stripes (cube is 100 cm)
 	const FLinearColor G1 = bSnowy ? FLinearColor(0.11f, 0.2f, 0.1f) : FLinearColor(0.035f, 0.13f, 0.03f);
@@ -493,8 +502,15 @@ void AStadium::Build(const tag::Team& Home, const tag::Team& Away, const tag::We
 	}
 	if (!A.CrowdMat) BuildCrowd(Home);
 	// sideline benches & personnel area tint
-	for (double Y : {-(FW / 2 + 4.5), FW / 2 + 4.5})
-		AddMesh(Cube, FVector(50 * YD, Y * YD, 30), FVector(30 * YD / 100, 0.6, 0.5), FLinearColor(0.05f, 0.05f, 0.06f), 0.6f);
+	// team benches (home on the far sideline, visitors near): seat, backrest and a team-colour skirt
+	for (double S : {-1.0, 1.0})
+	{
+		const FLinearColor TeamC = Hex((S > 0 ? Home : Away).colors.primary);
+		const double Y = S * (FW / 2 + 4.6) * YD;
+		AddMesh(Cube, FVector(50 * YD, Y, 45), FVector(30 * YD / 100, 0.55, 0.08), FLinearColor(0.06f, 0.06f, 0.07f), 0.5f);
+		AddMesh(Cube, FVector(50 * YD, Y + S * 25, 70), FVector(30 * YD / 100, 0.06, 0.5), TeamC * 0.5f, 0.5f);
+		AddMesh(Cube, FVector(50 * YD, Y - S * 22, 22), FVector(30 * YD / 100, 0.04, 0.44), TeamC * 0.35f, 0.6f);
+	}
 
 	// ---------------- sky, sun / floodlights, atmosphere
 	UDirectionalLightComponent* Sun = NewObject<UDirectionalLightComponent>(this);
