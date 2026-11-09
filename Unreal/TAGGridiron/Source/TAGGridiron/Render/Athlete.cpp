@@ -1027,6 +1027,8 @@ void AAthlete::ResetPose()
 	bStoodUp = false;
 	TackledLeft = 0.f;
 	TackleOn = nullptr;
+	BlockPartner = nullptr;
+	BlockAlign = FVector::ZeroVector;
 	AlignT = -1.f;
 	DownTime = 0.f;
 	// new play: the players are teleported to the formation, so the motion history starts over
@@ -1283,6 +1285,25 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 	SmoothedSpeed = FMath::FInterpTo(SmoothedSpeed, SpeedCm, DeltaTime, 10.f);
 	// near-stationary blockers: keyed engaged loop (hands on the chest plate) or the pass set before contact;
 	// moving blockers keep the crouch blend space
+	// paired block: locked-up linemen close to hand fighting distance (each takes half the correction, so the pair
+	// meets in the middle) and square their pads to each other; eases back off when they disengage
+	{
+		FVector Want = FVector::ZeroVector;
+		if (AAthlete* O = BlockPartner.Get(); O && Anim == TEXT("block"))
+		{
+			FVector To = O->GetActorLocation() - Location;
+			To.Z = 0.f;
+			const float D = To.Size();
+			if (D > 1.f && D < 260.f)
+			{
+				Want = (To / D * (D - 70.f) * 0.5f).GetClampedToMaxSize(80.f);
+				SmoothedYaw += FMath::FindDeltaAngleDegrees(SmoothedYaw, To.Rotation().Yaw) * FMath::Clamp(DeltaTime * 6.f, 0.f, 1.f);
+				SetActorRotation(FRotator(0, SmoothedYaw, 0));
+			}
+		}
+		BlockAlign = FMath::Lerp(BlockAlign, Want, 1.f - FMath::Exp(-8.f * DeltaTime));
+		if (!BlockAlign.IsNearlyZero(0.5f)) SetActorLocation(Location + VisOffset + BlockAlign);
+	}
 	if (Anim == TEXT("block") && SpeedCm < 150.f && A.BlockEngaged && A.BlockPassSet)
 	{
 		PlayClip(bEngaged ? A.BlockEngaged.Get() : A.BlockPassSet.Get(), true, 1.f, Player ? FMath::Frac(Player->id * 0.41f) : 0.f);

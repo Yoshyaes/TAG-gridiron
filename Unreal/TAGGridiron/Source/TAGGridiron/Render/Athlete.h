@@ -80,6 +80,8 @@ public:
 	void PlayDiveAttempt();
 	/** Paired tackle: this defender's tackle is on Carrier; ease into wrap distance and face him. */
 	void BeginTackleOn(AAthlete* Carrier);
+	/** Paired block: the man this lineman is locked up with this frame (null when not engaged). */
+	void SetBlockPartner(AAthlete* Partner) { BlockPartner = Partner; }
 
 	const tag::Player* Player = nullptr;
 
@@ -168,6 +170,8 @@ private:
 	float TackledLeft = 0.f;
 	FVector PileVel = FVector::ZeroVector;
 	TWeakObjectPtr<AAthlete> TackleOn;
+	TWeakObjectPtr<AAthlete> BlockPartner;
+	FVector BlockAlign = FVector::ZeroVector;
 	float AlignT = -1.f;   // rotates tackle variants so the same player never repeats one back to back
 	bool bEngaged = false;   // hands on an opponent (football layer reach), picks the engaged block loop
 	void StartRagdoll(const FVector& VelWorld);

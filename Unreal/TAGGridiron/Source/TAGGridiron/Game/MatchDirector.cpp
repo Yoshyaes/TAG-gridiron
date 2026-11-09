@@ -948,6 +948,25 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 	// ball
 	const tag::Ball& B = Sim->ball;
 	auto AthOf = [&](const tag::Ent* X) { return AthleteFor(X->p, X->side == tag::Side::Off ? OffK : tag::other(OffK)); };
+	// paired blocks: who each lineman is locked up with (the sim's engagement), for alignment
+	{
+		double SumD = 0.0;
+		int32 NPairs = 0;
+		for (tag::Ent* E : Sim->ents)
+		{
+			AAthlete* Me = AthOf(E);
+			AAthlete* Him = E->engaged && E->anim == tag::Anim::Block ? AthOf(E->engaged) : nullptr;
+			Me->SetBlockPartner(Him);
+			if (Him) { SumD += FVector::Dist2D(Me->GetActorLocation(), Him->GetActorLocation()); ++NPairs; }
+		}
+		static double LastBlockLog = 0.0;
+		const double NowT = GetWorld()->GetTimeSeconds();
+		if (NPairs && NowT - LastBlockLog > 3.0)
+		{
+			LastBlockLog = NowT;
+			UE_LOG(LogTemp, Verbose, TEXT("TAG blocks: %d engaged, mean chest to chest %.0f cm"), NPairs, SumD / NPairs);
+		}
+	}
 	// paired tackles: a defender whose tackle just started squares up to the carrier he is hitting (the man down or
 	// still holding the ball within 3 yd)
 	for (tag::Ent* E : Sim->ents)
