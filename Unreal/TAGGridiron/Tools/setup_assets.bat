@@ -7,8 +7,12 @@ set "SRC=%UE%\Templates\TemplateResources\High\Characters\Content\Mannequins"
 robocopy "%SRC%" "%PROJDIR%\Content\Characters\Mannequins" /E /NFL /NDL /NJH /NJS >nul
 rem 2) procedural textures (turf, field markings, crowd)
 python "%~dp0Art\gen_textures.py" "%PROJDIR%\RawArt" || (echo Python with Pillow+NumPy is required & exit /b 1)
+rem 2b) TAG uniform texture pack (digit atlas, jersey mesh knit, twill); imported by ue_build_mh_uniform.py
+python "%~dp0Art\gen_uniform_textures.py" "%PROJDIR%\RawArt" || (echo Python with Pillow+NumPy is required & exit /b 1)
 rem 3) import textures + build materials inside Unreal (headless)
 "%UE%\Engine\Binaries\Win64\UnrealEditor-Cmd.exe" "%PROJDIR%\TAGGridiron.uproject" -run=pythonscript "-script=%~dp0Art\ue_build_materials.py" -unattended -nosplash
+rem 3b) TAG football gear: procedural helmet and facemasks
+"%UE%\Engine\Binaries\Win64\UnrealEditor-Cmd.exe" "%PROJDIR%\TAGGridiron.uproject" -run=pythonscript "-script=%~dp0Art\gear_build.py" -unattended -nosplash -nullrhi
 rem 4) optional: Epic's free Game Animation Sample (download to <repo>\Assets\GASP) -> motion-captured athletes
 set "GASP=%~dp0..\..\..\Assets\GASP\Content"
 if exist "%GASP%\Characters\UEFN_Mannequin" (
@@ -20,6 +24,8 @@ if exist "%GASP%\Characters\UEFN_Mannequin" (
   robocopy "%GASP%\MetaHumans\Common\Female\Medium\NormalWeight\Body" "%PROJDIR%\Content\MetaHumans\Common\Female\Medium\NormalWeight\Body" /E /NFL /NDL /NJH /NJS >nul
   rem needs the C++ module built first (UTagEditorLib rebuilds the blend spaces' runtime data)
   "%UE%\Engine\Binaries\Win64\UnrealEditor-Cmd.exe" "%PROJDIR%\TAGGridiron.uproject" -run=pythonscript "-script=%~dp0Art\ue_build_anims.py" -unattended -nosplash
+  rem football copies of the motion matching loop databases (sprint without acceleration transitions + curve loops, run + arcs)
+  "%UE%\Engine\Binaries\Win64\UnrealEditor-Cmd.exe" "%PROJDIR%\TAGGridiron.uproject" -run=pythonscript "-script=%~dp0Art\mm_build_dbs.py" -unattended -nosplash -nullrhi
 ) else (
   echo Game Animation Sample not found at %GASP% - using template mannequin animations.
 )

@@ -1,0 +1,360 @@
+{
+ "source": "MaddenRef clip metadata, aggregates only",
+ "clips": 12182,
+ "timing": {
+  "other": {
+   "clips": 3236,
+   "median_s": 2.742,
+   "p10_s": 0.933,
+   "p90_s": 7.117
+  },
+  "tackle": {
+   "clips": 1878,
+   "median_s": 3.167,
+   "p10_s": 1.7,
+   "p90_s": 6.61
+  },
+  "celebration": {
+   "clips": 883,
+   "median_s": 8.167,
+   "p10_s": 3.233,
+   "p90_s": 15.033
+  },
+  "catch_other": {
+   "clips": 662,
+   "median_s": 2.517,
+   "p10_s": 0.933,
+   "p90_s": 6.545
+  },
+  "block_run": {
+   "clips": 566,
+   "median_s": 2.667,
+   "p10_s": 1.35,
+   "p90_s": 4.333
+  },
+  "catch_high": {
+   "clips": 541,
+   "median_s": 3.033,
+   "p10_s": 1.367,
+   "p90_s": 6.767
+  },
+  "stance_other": {
+   "clips": 527,
+   "median_s": 3.3,
+   "p10_s": 1.267,
+   "p90_s": 7.013
+  },
+  "tackle_multi": {
+   "clips": 393,
+   "median_s": 4.167,
+   "p10_s": 2.3,
+   "p90_s": 7.2
+  },
+  "get_up": {
+   "clips": 388,
+   "median_s": 5.692,
+   "p10_s": 2.59,
+   "p90_s": 9.33
+  },
+  "block_pass": {
+   "clips": 321,
+   "median_s": 3.2,
+   "p10_s": 1.0,
+   "p90_s": 9.317
+  },
+  "loco_jog": {
+   "clips": 277,
+   "median_s": 1.85,
+   "p10_s": 0.643,
+   "p90_s": 4.513
+  },
+  "loco_run": {
+   "clips": 271,
+   "median_s": 1.533,
+   "p10_s": 0.533,
+   "p90_s": 5.2
+  },
+  "handoff_pitch": {
+   "clips": 224,
+   "median_s": 1.917,
+   "p10_s": 0.9,
+   "p90_s": 3.778
+  },
+  "qb_dropback": {
+   "clips": 208,
+   "median_s": 2.567,
+   "p10_s": 1.633,
+   "p90_s": 3.238
+  },
+  "fall": {
+   "clips": 143,
+   "median_s": 5.0,
+   "p10_s": 1.967,
+   "p90_s": 8.447
+  },
+  "loco_walk": {
+   "clips": 141,
+   "median_s": 1.733,
+   "p10_s": 0.533,
+   "p90_s": 6.667
+  },
+  "stance_3pt": {
+   "clips": 137,
+   "median_s": 2.6,
+   "p10_s": 1.13,
+   "p90_s": 5.277
+  },
+  "stance_2pt": {
+   "clips": 134,
+   "median_s": 2.608,
+   "p10_s": 1.077,
+   "p90_s": 3.945
+  },
+  "loco_sprint": {
+   "clips": 129,
+   "median_s": 1.1,
+   "p10_s": 0.467,
+   "p90_s": 2.033
+  },
+  "stance_qb": {
+   "clips": 109,
+   "median_s": 2.467,
+   "p10_s": 1.0,
+   "p90_s": 4.167
+  },
+  "kicking": {
+   "clips": 108,
+   "median_s": 3.317,
+   "p10_s": 1.157,
+   "p90_s": 5.677
+  },
+  "bc_cut": {
+   "clips": 90,
+   "median_s": 2.333,
+   "p10_s": 1.297,
+   "p90_s": 3.373
+  },
+  "bc_juke": {
+   "clips": 87,
+   "median_s": 2.0,
+   "p10_s": 1.443,
+   "p90_s": 2.557
+  },
+  "snap": {
+   "clips": 83,
+   "median_s": 1.367,
+   "p10_s": 0.667,
+   "p90_s": 4.757
+  },
+  "bc_truck_hurdle": {
+   "clips": 75,
+   "median_s": 2.0,
+   "p10_s": 1.667,
+   "p90_s": 4.8
+  },
+  "catch_low": {
+   "clips": 70,
+   "median_s": 1.95,
+   "p10_s": 0.997,
+   "p90_s": 6.483
+  },
+  "idle": {
+   "clips": 64,
+   "median_s": 5.717,
+   "p10_s": 1.267,
+   "p90_s": 11.753
+  },
+  "qb_throw": {
+   "clips": 63,
+   "median_s": 2.133,
+   "p10_s": 1.507,
+   "p90_s": 4.393
+  },
+  "catch_sideline": {
+   "clips": 61,
+   "median_s": 2.4,
+   "p10_s": 1.633,
+   "p90_s": 3.433
+  },
+  "bc_spin": {
+   "clips": 59,
+   "median_s": 2.267,
+   "p10_s": 1.44,
+   "p90_s": 4.073
+  },
+  "injury": {
+   "clips": 57,
+   "median_s": 10.0,
+   "p10_s": 1.78,
+   "p90_s": 10.0
+  },
+  "loco_shuffle": {
+   "clips": 46,
+   "median_s": 1.45,
+   "p10_s": 1.233,
+   "p90_s": 1.95
+  },
+  "loco_backpedal": {
+   "clips": 37,
+   "median_s": 2.4,
+   "p10_s": 1.353,
+   "p90_s": 3.243
+  },
+  "catch_dive": {
+   "clips": 35,
+   "median_s": 2.233,
+   "p10_s": 1.873,
+   "p90_s": 3.567
+  },
+  "bc_stiff_arm": {
+   "clips": 34,
+   "median_s": 8.2,
+   "p10_s": 0.573,
+   "p90_s": 8.2
+  },
+  "tackle_dive": {
+   "clips": 26,
+   "median_s": 2.083,
+   "p10_s": 1.583,
+   "p90_s": 3.133
+  },
+  "catch_over_shoulder": {
+   "clips": 12,
+   "median_s": 6.083,
+   "p10_s": 1.053,
+   "p90_s": 11.915
+  },
+  "rush_move": {
+   "clips": 7,
+   "median_s": 1.4,
+   "p10_s": 1.187,
+   "p90_s": 3.617
+  }
+ },
+ "interactions": {
+  "groups": 8708,
+  "multi_participant_groups": 2785,
+  "max_participants": 9,
+  "participants_histogram": {
+   "1": 5923,
+   "2": 2250,
+   "3": 469,
+   "4": 40,
+   "5": 4,
+   "6": 6,
+   "7": 3,
+   "8": 2,
+   "9": 11
+  }
+ },
+ "gait_stance": {
+  "jog_loop": {
+   "clips_measured": 6,
+   "hips_speed_mps": {
+    "median": 2.502,
+    "p10": 1.928,
+    "p90": 2.734
+   },
+   "steps_per_s": {
+    "median": 3.324,
+    "p10": 2.804,
+    "p90": 4.688
+   },
+   "head_height_m": {
+    "median": 1.586,
+    "p10": 1.558,
+    "p90": 1.601
+   },
+   "hips_height_m": {
+    "median": 0.983,
+    "p10": 0.962,
+    "p90": 0.992
+   }
+  },
+  "run_loop": {
+   "clips_measured": 12,
+   "hips_speed_mps": {
+    "median": 4.768,
+    "p10": 0.383,
+    "p90": 7.91
+   },
+   "steps_per_s": {
+    "median": 4.461,
+    "p10": 3.75,
+    "p90": 6.863
+   },
+   "head_height_m": {
+    "median": 1.529,
+    "p10": 1.321,
+    "p90": 1.59
+   },
+   "hips_height_m": {
+    "median": 0.973,
+    "p10": 0.89,
+    "p90": 0.983
+   }
+  },
+  "sprint_loop": {
+   "clips_measured": 12,
+   "hips_speed_mps": {
+    "median": 5.997,
+    "p10": 5.764,
+    "p90": 8.058
+   },
+   "steps_per_s": {
+    "median": 5.405,
+    "p10": 4.564,
+    "p90": 6.248
+   },
+   "head_height_m": {
+    "median": 1.438,
+    "p10": 1.318,
+    "p90": 1.535
+   },
+   "hips_height_m": {
+    "median": 0.936,
+    "p10": 0.901,
+    "p90": 0.992
+   }
+  },
+  "stance_3pt": {
+   "clips_measured": 12,
+   "head_height_m": {
+    "median": 0.765,
+    "p10": 0.712,
+    "p90": 1.174
+   },
+   "hips_height_m": {
+    "median": 0.765,
+    "p10": 0.7,
+    "p90": 0.809
+   }
+  },
+  "stance_2pt": {
+   "clips_measured": 12,
+   "head_height_m": {
+    "median": 1.114,
+    "p10": 1.076,
+    "p90": 1.364
+   },
+   "hips_height_m": {
+    "median": 0.796,
+    "p10": 0.727,
+    "p90": 0.856
+   }
+  },
+  "stance_qb_shotgun": {
+   "clips_measured": 12,
+   "head_height_m": {
+    "median": 1.419,
+    "p10": 1.366,
+    "p90": 1.48
+   },
+   "hips_height_m": {
+    "median": 0.933,
+    "p10": 0.884,
+    "p90": 0.96
+   }
+  }
+ }
+}

@@ -28,6 +28,10 @@ struct FTagProcInput
 	// per-player style ("signature") - stable per player, see AAthlete::Setup
 	float ArmSlot = 0.f;       // -1 sidearm .. +1 over the top
 	float StyleJitter = 0.f;   // -1..1 small timing / height variation
+	// transition crossfade: bump ClipSerial whenever the source clip changes; the displayed pose eases from the last
+	// shown pose into the new one over BlendTime (single node playback cannot blend on its own)
+	int32 ClipSerial = 0;
+	float BlendTime = 0.2f;
 };
 
 USTRUCT()
@@ -51,6 +55,16 @@ struct FTagRetargetProxy : public FAnimInstanceProxy
 
 private:
 	void ApplyFootballLayer(FPoseContext& Output) const;
+	void ApplyCrossfade(FPoseContext& Output);
+
+	TArray<FTransform> LastPose;   // last displayed local pose (compact order)
+	TArray<FTransform> FromPose;   // frozen pose a transition blends out of
+	int32 SeenSerial = 0;
+	float BlendElapsed = 1e3f;
+	float CurBlendTime = 0.f;      // > 0 overrides In.BlendTime for the current blend (pose snapshots)
+	TArray<FTransform> PendingMesh; // snapshot in mesh bone order, converted to compact order in Evaluate
+	bool bPendingSnap = false;
+	int32 SeenSnap = 0;
 };
 
 UCLASS(Transient, NotBlueprintable)
@@ -64,6 +78,12 @@ public:
 
 	/** Football layer inputs; copied to the worker-thread proxy each update. */
 	FTagProcInput Proc;
+
+	/** Blend the displayed body out of an explicit pose (local transforms, mesh bone order), e.g. the ragdoll pose
+	 *  a get-up starts from. Bump SnapshotSerial after filling SnapshotMesh. */
+	TArray<FTransform> SnapshotMesh;
+	int32 SnapshotSerial = 0;
+	float SnapshotBlend = 0.35f;
 
 protected:
 	virtual FAnimInstanceProxy* CreateAnimInstanceProxy() override;

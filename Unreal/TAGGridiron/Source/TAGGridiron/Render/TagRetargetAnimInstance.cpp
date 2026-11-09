@@ -33,13 +33,67 @@ void FTagRetargetProxy::PreUpdate(UAnimInstance* InAnimInstance, float DeltaSeco
 	{
 		In = I->Proc; // game thread -> worker copy
 	}
+	BlendElapsed += DeltaSeconds;
+	if (In.ClipSerial != SeenSerial)
+	{
+		SeenSerial = In.ClipSerial;
+		FromPose = LastPose; // previous Evaluate finished before this PreUpdate
+		BlendElapsed = 0.f;
+		CurBlendTime = 0.f;
+	}
+	// an explicit pose snapshot (ragdoll -> get-up) wins over the last displayed pose
+	if (const UTagRetargetAnimInstance* I = Cast<UTagRetargetAnimInstance>(InAnimInstance))
+	{
+		if (I->SnapshotSerial != SeenSnap)
+		{
+			SeenSnap = I->SnapshotSerial;
+			PendingMesh = I->SnapshotMesh;
+			bPendingSnap = PendingMesh.Num() > 0;
+			BlendElapsed = 0.f;
+			CurBlendTime = I->SnapshotBlend;
+		}
+	}
 }
 
 bool FTagRetargetProxy::Evaluate(FPoseContext& Output)
 {
-	Node->Evaluate_AnyThread(Output); // mocap retargeted onto this body
+	Node->Evaluate_AnyThread(Output); // mocap / keyed clip retargeted onto this body
 	ApplyFootballLayer(Output);
+	ApplyCrossfade(Output);
 	return true;
+}
+
+void FTagRetargetProxy::ApplyCrossfade(FPoseContext& Output)
+{
+	const int32 N = Output.Pose.GetNumBones();
+	if (bPendingSnap)
+	{
+		// mesh order -> this frame's compact order
+		const FBoneContainer& BC = Output.Pose.GetBoneContainer();
+		FromPose.SetNum(N);
+		for (FCompactPoseBoneIndex I(0); I < N; ++I)
+		{
+			const int32 M = BC.MakeMeshPoseIndex(I).GetInt();
+			FromPose[I.GetInt()] = PendingMesh.IsValidIndex(M) ? PendingMesh[M] : Output.Pose[I];
+		}
+		bPendingSnap = false;
+	}
+	const float BlendTime = CurBlendTime > 0.f ? CurBlendTime : In.BlendTime;
+	if (FromPose.Num() == N && BlendElapsed < BlendTime && BlendTime > 0.f)
+	{
+		float A = FMath::Clamp(BlendElapsed / BlendTime, 0.f, 1.f);
+		A = A * A * (3.f - 2.f * A); // ease in / out
+		for (FCompactPoseBoneIndex I(0); I < N; ++I)
+		{
+			FTransform& T = Output.Pose[I];
+			const FTransform& F = FromPose[I.GetInt()];
+			T.SetRotation(FQuat::Slerp(F.GetRotation(), T.GetRotation(), A).GetNormalized());
+			T.SetTranslation(FMath::Lerp(F.GetTranslation(), T.GetTranslation(), A));
+			T.SetScale3D(FMath::Lerp(F.GetScale3D(), T.GetScale3D(), A));
+		}
+	}
+	LastPose.SetNum(N, EAllowShrinking::No);
+	for (FCompactPoseBoneIndex I(0); I < N; ++I) LastPose[I.GetInt()] = Output.Pose[I];
 }
 
 // ------------------------------------------------------------------ football layer helpers

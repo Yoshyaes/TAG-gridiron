@@ -2,6 +2,7 @@
 
 #include "Render/Athlete.h"
 #include "Render/Coords.h"
+#include "Render/TagFanSpawner.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/InstancedStaticMeshComponent.h"
 #include "Components/TextRenderComponent.h"
@@ -13,6 +14,14 @@
 #include "Components/SpotLightComponent.h"
 #include "Components/PostProcessComponent.h"
 #include "Engine/StaticMesh.h"
+#include "Engine/SkeletalMesh.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Animation/AnimSingleNodeInstance.h"
+#include "Animation/AnimationAsset.h"
+#include "AssetRegistry/AssetRegistryModule.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
+#include "EngineUtils.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Sim/Types.h"
 #include "Sim/PlaySim.h"
@@ -240,6 +249,42 @@ void AStadium::Build(const tag::Team& Home, const tag::Team& Away, const tag::We
 	const double SideY = (FW / 2 + 9) * YD;
 	Stand(FVector(50 * YD, SideY, 0), 90, 140 * YD);
 	Stand(FVector(50 * YD, -SideY, 0), -90, 140 * YD);
+	// 3D fans in the front sideline rows (Mass, dressed by the MetaHuman Crowd Sample). ~485 fans cost about 45 percent
+	// of frame rate (175 -> 96 fps in a full game at 1600x900); -TagNoHeroCrowd turns them off on slower machines.
+	if (!FParse::Param(FCommandLine::Get(), TEXT("TagNoHeroCrowd")))
+	{
+		// seats on the lowest sideline rows; fans are Mass entities dressed by the crowd sample's appearance pipeline
+		TArray<FTransform> Seats;
+		for (const float Yaw : {90.f, -90.f})
+		{
+			const FVector C(50 * YD, Yaw > 0 ? SideY : -SideY, 0);
+			const FVector Fwd = FRotator(0, Yaw, 0).Vector();
+			const FVector Side = FRotator(0, Yaw + 90, 0).Vector();
+			const float P = FMath::DegreesToRadians(33.f);
+			const FVector SlopeF = Fwd * FMath::Cos(P) + FVector::UpVector * FMath::Sin(P);
+			const FVector SlopeU = -Fwd * FMath::Sin(P) + FVector::UpVector * FMath::Cos(P);
+			const FVector DeckC = C + Fwd * 1600 + FVector(0, 0, 1050);
+			const float FaceYaw = (-Fwd).Rotation().Yaw;
+			FRandomStream Rand(static_cast<int32>(Yaw) + 11);
+			for (int32 Row = 0; Row < 3; ++Row)
+				for (double T = -34.0 * YD; T <= 34.0 * YD; T += 72.0)
+				{
+					if (Rand.FRand() < 0.1f) continue;
+					const FVector Feet = DeckC + SlopeF * (120.0 + Row * 92.0 - 1800.0) + SlopeU * 25.0 + Side * (T + Rand.FRandRange(-10, 10));
+					Seats.Add(FTransform(FRotator(0, FaceYaw + Rand.FRandRange(-14, 14), 0), GetActorTransform().TransformPosition(Feet)));
+				}
+		}
+		FActorSpawnParameters SP;
+		SP.Owner = this;
+		if (ATagFanSpawner* FanSpawner = GetWorld()->SpawnActor<ATagFanSpawner>(ATagFanSpawner::StaticClass(), FTransform::Identity, SP))
+		{
+			const bool bOk = FanSpawner->Setup(Seats);
+			if (bOk) FanSpawner->SpawnFans();
+			FanSpawnerActor = FanSpawner;
+			UE_LOG(LogTemp, Display, TEXT("TAG: Mass fan spawner %d seats, config %s, spawn count %d"), Seats.Num(),
+				bOk ? TEXT("ok") : TEXT("MISSING"), FanSpawner->SeatCount());
+		}
+	}
 	Stand(FVector(-24 * YD, 0, 0), 180, 76 * YD);
 	Stand(FVector(124 * YD, 0, 0), 0, 76 * YD);
 	if (!A.CrowdMat) BuildCrowd(Home);
@@ -336,6 +381,166 @@ void AStadium::Build(const tag::Team& Home, const tag::Team& Away, const tag::We
 	if (W.precip != tag::Precip::None) BuildRain(W);
 }
 
+void AStadium::BuildHeroCrowd(const FVector& C, float Yaw)
+{
+	if (FanMeshes.Num() == 0)
+	{
+		// merged crowd meshes from Epic's MetaHuman Crowd Sample (one skeletal mesh per fan, no grooms) and our
+		// spectator clips retargeted onto their skeleton (Tools/Art/crowd_retarget.py)
+		FanIdle = LoadObject<UAnimationAsset>(nullptr, TEXT("/Game/TAG/Crowd/Anims/A_Crowd_Idle.A_Crowd_Idle"), nullptr, LOAD_NoWarn | LOAD_Quiet);
+		FanCheer = LoadObject<UAnimationAsset>(nullptr, TEXT("/Game/TAG/Crowd/Anims/A_Crowd_Cheer.A_Crowd_Cheer"), nullptr, LOAD_NoWarn | LOAD_Quiet);
+		if (!FanIdle || !FanCheer) return;
+		// merged crowd meshes (hard paths: the asset registry is not populated for this plugin in -game)
+		static const TCHAR* Names[] = {
+			TEXT("AverageFemale_Head01/MHC_AverageFemale_Head01_CombinedSkelMesh"), TEXT("AverageFemale_Head02/MHC_AverageFemale_Head02_CombinedSkelMesh"),
+			TEXT("AverageMale_Head01/MHC_AverageMale_Head01_CombinedSkelMesh"), TEXT("AverageMale_Head02/MHC_AverageMale_Head02_CombinedSkelMesh"),
+			TEXT("HeavysetFemale_Head01/MHC_HeavysetFemale_Head01_FullBody"), TEXT("HeavysetFemale_Head02/MHC_HeavysetFemale_Head02_FullBody"),
+			TEXT("HeavysetMale_Head01/MHC_HeavysetMale_Head01_FullBody"), TEXT("ShortFemale_Head01/MHC_ShortFemale_Head01_FullBody"),
+			TEXT("ShortMale_Head01/MHC_ShortMale_Head01_FullBody"), TEXT("TallFemale_Head01/MHC_TallFemale_head01_FullBody"),
+			TEXT("TallMale_Head01/MHC_TallMale_Head01_FullBody")};
+		int32 Tried = 0;
+		FString OtherSkel;
+		for (const TCHAR* N : Names)
+		{
+			const FString Leaf = FPaths::GetCleanFilename(N);
+			const FString Path = FString::Printf(TEXT("/MetaHumanCrowdContent/Characters/Assembled/%s.%s"), N, *Leaf);
+			USkeletalMesh* M = LoadObject<USkeletalMesh>(nullptr, *Path, nullptr, LOAD_NoWarn | LOAD_Quiet);
+			++Tried;
+			if (!M) continue;
+			if (M->GetSkeleton() == FanIdle->GetSkeleton()) FanMeshes.Add(M); // anims must share the skeleton
+			else if (M->GetSkeleton()) OtherSkel = M->GetSkeleton()->GetPathName();
+		}
+		UE_LOG(LogTemp, Display, TEXT("TAG: hero crowd meshes %d of %d (anim skeleton %s, other %s)"), FanMeshes.Num(), Tried,
+			FanIdle->GetSkeleton() ? *FanIdle->GetSkeleton()->GetPathName() : TEXT("-"), *OtherSkel);
+		if (FanMeshes.Num() == 0) return;
+	}
+	// lower deck surface (matches Stand(): box 3600 x Len x 50 cm, centre Fwd*1600 + Z 1050, pitched 33 deg)
+	const FRotator R(0, Yaw, 0);
+	const FVector Fwd = R.Vector();
+	const FVector Side = FRotator(0, Yaw + 90, 0).Vector();
+	const float P = FMath::DegreesToRadians(33.f);
+	const FVector SlopeF = Fwd * FMath::Cos(P) + FVector::UpVector * FMath::Sin(P);
+	const FVector SlopeU = -Fwd * FMath::Sin(P) + FVector::UpVector * FMath::Cos(P);
+	const FVector DeckC = C + Fwd * 1600 + FVector(0, 0, 1050);
+	const float FaceYaw = (-Fwd).Rotation().Yaw;
+	FRandomStream Rand(static_cast<int32>(Yaw) + 11);
+	constexpr int32 Rows = 3;
+	constexpr double SeatW = 72.0;
+	const double Half = 34.0 * YD; // between the 16s
+	for (int32 Row = 0; Row < Rows; ++Row)
+	{
+		const double S = 120.0 + Row * 92.0;
+		for (double T = -Half; T <= Half; T += SeatW)
+		{
+			if (Rand.FRand() < 0.1f) continue; // a few empty seats
+			const FVector Feet = DeckC + SlopeF * (S - 1800.0) + SlopeU * 25.0 + Side * (T + Rand.FRandRange(-10, 10));
+			USkeletalMeshComponent* F = NewObject<USkeletalMeshComponent>(this);
+			F->SetSkeletalMesh(FanMeshes[Rand.RandRange(0, FanMeshes.Num() - 1)]);
+			F->SetupAttachment(RootComponent);
+			F->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			F->SetCastShadow(false);
+			F->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::OnlyTickPoseWhenRendered;
+			F->bEnableUpdateRateOptimizations = true;
+			F->RegisterComponent();
+			// MetaHumans face +Y in component space: yaw -90 turns them to the field; a little head turn variety
+			F->SetWorldLocationAndRotation(Feet, FRotator(0, FaceYaw - 90.f + Rand.FRandRange(-14, 14), 0));
+			F->PlayAnimation(FanIdle, true);
+			if (UAnimSingleNodeInstance* I = F->GetSingleNodeInstance())
+			{
+				I->SetPosition(Rand.FRandRange(0.f, FanIdle->GetPlayLength()), false);
+				I->SetPlayRate(Rand.FRandRange(0.85f, 1.15f));
+			}
+			Fans.Add(F);
+			FanDelay.Add(Rand.FRandRange(0.f, 0.9f));
+			FanCheering.Add(0);
+		}
+	}
+}
+
+void AStadium::UpdateMassFans(float Dt)
+{
+	// big plays: the dressed close-up crowd actors (Mass high-res representation) cheer with our keyed loop;
+	// far LODs keep the sample's baked idle. Back to the sample's crowd anim blueprint when the hype fades.
+	if (!MassCheer)
+	{
+		MassCheer = LoadObject<UAnimationAsset>(nullptr, TEXT("/Game/TAG/Crowd/Anims/A_CrowdActor_Cheer.A_CrowdActor_Cheer"), nullptr, LOAD_NoWarn | LOAD_Quiet);
+		if (!MassCheer) return;
+	}
+	const bool bWant = bMassCheer ? Hype > 0.15f : Hype > 0.5f;
+	MassScanT -= Dt;
+	if (bWant == bMassCheer && (!bWant || MassScanT > 0.f)) return;
+	MassScanT = 0.5f; // pick up crowd actors the Mass LOD spawns while the crowd is cheering
+	bMassCheer = bWant;
+	if (!bWant)
+	{
+		for (auto& KV : MassFanAnimClass)
+		{
+			if (USkeletalMeshComponent* C = KV.Key.Get())
+			{
+				C->SetAnimationMode(EAnimationMode::AnimationBlueprint);
+				if (UClass* Cls = KV.Value.Get()) C->SetAnimInstanceClass(Cls);
+			}
+		}
+		MassFanAnimClass.Reset();
+		return;
+	}
+	int32 N = 0;
+	for (TActorIterator<AActor> It(GetWorld()); It; ++It)
+	{
+		if (!It->GetClass()->GetName().Contains(TEXT("MassHighRes"))) continue;
+		TInlineComponentArray<USkeletalMeshComponent*> Comps(*It);
+		for (USkeletalMeshComponent* C : Comps)
+		{
+			if (!C->GetSkeletalMeshAsset() || C->GetSkeletalMeshAsset()->GetSkeleton() != MassCheer->GetSkeleton()) continue;
+			if (MassFanAnimClass.Contains(C)) continue;
+			MassFanAnimClass.Add(C, C->GetAnimClass());
+			C->PlayAnimation(MassCheer, true);
+			if (UAnimSingleNodeInstance* I = C->GetSingleNodeInstance())
+			{
+				const uint32 H = GetTypeHash(C->GetUniqueID());
+				I->SetPosition((H % 997) / 997.f * MassCheer->GetPlayLength(), false);
+				I->SetPlayRate(0.88f + (H % 31) / 31.f * 0.25f);
+			}
+			++N;
+		}
+	}
+	if (N) UE_LOG(LogTemp, Verbose, TEXT("TAG crowd cheer +%d (total %d)"), N, MassFanAnimClass.Num());
+	static bool bListed = false;
+	if (!bListed)
+	{
+		bListed = true;
+		TMap<FString, int32> Classes;
+		for (TActorIterator<AActor> It(GetWorld()); It; ++It) Classes.FindOrAdd(It->GetClass()->GetName())++;
+		for (auto& KV : Classes) if (KV.Value > 3 || KV.Key.Contains(TEXT("Mass")) || KV.Key.Contains(TEXT("Crowd")))
+			UE_LOG(LogTemp, Display, TEXT("TAG crowd scan class %s x%d"), *KV.Key, KV.Value);
+	}
+}
+
+void AStadium::UpdateHeroCrowd(float Dt)
+{
+	UpdateMassFans(Dt);
+	if (FanSpawnerActor) FanSpawnerActor->Animate(Time, Hype);
+	if (Fans.Num() == 0) return;
+	// cheer while the crowd is hyped (big plays, scores), settle back to idle as Hype decays
+	const bool bWantCheer = Hype > 0.5f;
+	HypeHeld = (bWantCheer == (Hype > 0.15f)) ? HypeHeld + Dt : 0.f;
+	for (int32 i = 0; i < Fans.Num(); ++i)
+	{
+		const bool bCheer = FanCheering[i] != 0;
+		const bool bTarget = bCheer ? Hype > 0.15f : bWantCheer;
+		if (bTarget == bCheer || HypeHeld < FanDelay[i]) continue;
+		FanCheering[i] = bTarget ? 1 : 0;
+		USkeletalMeshComponent* F = Fans[i];
+		UAnimationAsset* Clip = bTarget ? FanCheer.Get() : FanIdle.Get();
+		F->PlayAnimation(Clip, true);
+		if (UAnimSingleNodeInstance* I = F->GetSingleNodeInstance())
+		{
+			I->SetPosition(FMath::Frac(i * 0.137f) * Clip->GetPlayLength(), false);
+			I->SetPlayRate(0.9f + FMath::Frac(i * 0.29f) * 0.25f);
+		}
+	}
+}
+
 void AStadium::BuildCrowd(const tag::Team& Home)
 {
 	FAthleteAssets& A = FAthleteAssets::Get();
@@ -406,6 +611,7 @@ void AStadium::Tick(float Dt)
 	Super::Tick(Dt);
 	Time += Dt;
 	Hype = FMath::Max(0.f, Hype - Dt * 0.25f);
+	UpdateHeroCrowd(Dt);
 	// crowd: idle sway, jumping on big plays (update a rotating slice each frame to stay cheap)
 	if (CrowdBase.Num() > 0)
 	{

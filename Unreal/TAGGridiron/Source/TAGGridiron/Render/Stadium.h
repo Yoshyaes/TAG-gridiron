@@ -32,6 +32,31 @@ private:
 	void AddText(const FString& S, const FVector& Loc, const FRotator& Rot, float Size, const FColor& Color);
 	void BuildCrowd(const tag::Team& Home);
 	void BuildRain(const tag::Weather& W);
+	/** 3D spectators (MetaHuman Crowd Sample merged meshes) in the lowest rows of the sideline stands, idling and
+	 *  cheering with Hype. Superseded by the Mass fan spawner (TagFanSpawner); kept as a fallback. */
+	void BuildHeroCrowd(const FVector& StandC, float Yaw);
+	void UpdateHeroCrowd(float Dt);
+
+	UPROPERTY()
+	TArray<TObjectPtr<class USkeletalMeshComponent>> Fans;
+	TArray<float> FanDelay;          // per-fan reaction delay (s) so the stands ripple instead of switching at once
+	TArray<uint8> FanCheering;
+	float HypeHeld = 0.f;            // time Hype has been above / below the switch thresholds
+	UPROPERTY()
+	TObjectPtr<class UAnimationAsset> FanIdle;
+	UPROPERTY()
+	TObjectPtr<class UAnimationAsset> FanCheer;
+	UPROPERTY()
+	TArray<TObjectPtr<class USkeletalMesh>> FanMeshes;
+	/** Mass crowd (TagFanSpawner): cheer on Hype by swapping the close-up crowd actors' body to the keyed cheer. */
+	void UpdateMassFans(float Dt);
+	UPROPERTY()
+	TObjectPtr<class UAnimationAsset> MassCheer;
+	TMap<TWeakObjectPtr<class USkeletalMeshComponent>, TWeakObjectPtr<UClass>> MassFanAnimClass; // fans currently cheering
+	bool bMassCheer = false;
+	UPROPERTY()
+	TObjectPtr<class ATagFanSpawner> FanSpawnerActor;
+	float MassScanT = 0.f;
 
 	UPROPERTY()
 	TArray<TObjectPtr<UInstancedStaticMeshComponent>> CrowdSections;

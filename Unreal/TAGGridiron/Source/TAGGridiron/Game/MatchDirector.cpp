@@ -57,10 +57,23 @@ void AMatchDirector::BeginPlay()
 	}
 	Ball = GetWorld()->SpawnActor<AStaticMeshActor>(AStaticMeshActor::StaticClass(), FTransform::Identity);
 	Ball->SetMobility(EComponentMobility::Movable);
-	Ball->GetStaticMeshComponent()->SetStaticMesh(FAthleteAssets::Get().Sphere);
-	Ball->GetStaticMeshComponent()->SetMaterial(0, TagColorMat(this, FLinearColor(0.2f, 0.07f, 0.02f), 0.55f));
-	Ball->GetStaticMeshComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	Ball->SetActorScale3D(FVector(0.28f, 0.17f, 0.17f));
+	const FAthleteAssets& GA = FAthleteAssets::Get();
+	UStaticMeshComponent* BC = Ball->GetStaticMeshComponent();
+	BC->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	if (GA.FootballMesh)
+	{
+		// TAG football (Tools/Art/gear_build.py): pointed tips and white laces, authored at real size
+		BC->SetStaticMesh(GA.FootballMesh);
+		BC->SetMaterial(0, TagColorMat(this, FLinearColor(0.16f, 0.055f, 0.018f), 0.5f));
+		BC->SetMaterial(1, TagColorMat(this, FLinearColor(0.9f, 0.9f, 0.88f), 0.6f));
+		Ball->SetActorScale3D(FVector::OneVector);
+	}
+	else
+	{
+		BC->SetStaticMesh(GA.Sphere);
+		BC->SetMaterial(0, TagColorMat(this, FLinearColor(0.2f, 0.07f, 0.02f), 0.55f));
+		Ball->SetActorScale3D(FVector(0.28f, 0.17f, 0.17f));
+	}
 
 	if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
 	{
@@ -85,6 +98,193 @@ void AMatchDirector::BeginPlay()
 		FParse::Value(FCommandLine::Get(), TEXT("TagWeather="), Wx);
 		const bool bDay = FParse::Param(FCommandLine::Get(), TEXT("TagDay"));
 		StartMatch(3, 7, false, true, Wx, !bDay, 900);
+	}
+	else if (FParse::Param(FCommandLine::Get(), TEXT("TagMoveTest")))
+	{
+		bLineup = true;
+		bMoveTest = true;
+		StartMatch(3, 7, false, true, 0, false, 900);
+	}
+	else if (FParse::Param(FCommandLine::Get(), TEXT("TagLineup")))
+	{
+		// look-dev lineup: six athletes (home and away, every body type) in a row, shot front then back, then exit
+		bLineup = true;
+		StartMatch(3, 7, false, true, 0, false, 900);
+	}
+}
+
+void AMatchDirector::TickLineup(float Dt)
+{
+	LineupT += Dt;
+	if (Lineup.Num() == 0)
+	{
+		const tag::Pos Pick[] = {tag::Pos::OT, tag::Pos::DE, tag::Pos::LB, tag::Pos::RB, tag::Pos::WR, tag::Pos::QB};
+		const tag::Pos MovePick[] = {tag::Pos::WR, tag::Pos::RB, tag::Pos::CB, tag::Pos::OT};
+		const tag::TeamKey Side[] = {tag::TeamKey::Home, tag::TeamKey::Away, tag::TeamKey::Home, tag::TeamKey::Away, tag::TeamKey::Home, tag::TeamKey::Away};
+		for (int32 i = 0; i < (bMoveTest ? 4 : 6); ++i)
+		{
+			const std::vector<tag::Player*> D = tag::depth(Game->teamOf(Side[i]), bMoveTest ? MovePick[i] : Pick[i]);
+			if (!D.empty()) Lineup.Add(AthleteFor(D[0], Side[i]));
+		}
+		for (auto& KV : Athletes) KV.Value->SetActorHiddenInGame(!Lineup.Contains(KV.Value));
+		if (Ball) Ball->SetActorHiddenInGame(true);
+	}
+	if (bMoveTest)
+	{
+		TickMoveTest(Dt);
+		return;
+	}
+	// 0-9 s pre-snap stances facing the camera, 9-13 s from behind, 13-15 s celebrating, 15-17 s contact / evasion:
+	// linemen tackle, skill players juke (alternating sides, with real lateral velocity), the QB kneels
+	const bool bBack = LineupT > 9.f && LineupT <= 13.f;
+	const bool bCelebrate = LineupT > 13.f && LineupT <= 15.f;
+	const bool bAction = LineupT > 15.f;
+	const FVector Center = TagCoords::ToWorld(50, tag::FIELD_W * 0.5, 1);
+	for (int32 i = 0; i < Lineup.Num(); ++i)
+	{
+		const FVector L = Center + FVector(0, (i - (Lineup.Num() - 1) * 0.5) * 115.0, 0);
+		FAthleteFootball F;
+		F.bPreSnap = !bCelebrate && !bAction;
+		Lineup[i]->SetFootball(F, Dt);
+		const TCHAR* LineState = bCelebrate ? TEXT("celebrate") : TEXT("idle");
+		FVector Vel = FVector::ZeroVector;
+		if (bAction)
+		{
+			LineState = i < 2 ? TEXT("tackle") : i == Lineup.Num() - 1 ? TEXT("kneel") : TEXT("juke");
+			// facing -X (yaw 180): the actor's right is +Y; alternate cut sides across the skill players
+			if (i >= 2 && i < Lineup.Num() - 1) Vel = FVector(-300.f, (i % 2) ? 250.f : -250.f, 0.f);
+		}
+		Lineup[i]->Drive(L, bBack ? 0.f : 180.f, Vel, 9.f, LineState, LineupT, Dt, false);
+	}
+	if (LineupT > 16.8f)
+	{
+		// last beat: look at the near sideline's front rows (3D hero crowd) from the field, crowd hyped (cheering)
+		if (Stadium) Stadium->Hype = 1.f;
+		const FVector Stand(50 * TagCoords::YD, (tag::FIELD_W / 2 + 9) * TagCoords::YD, 0);
+		Camera->SetActorLocation(Stand + FVector(0, -900, 300));
+		Camera->SetActorRotation(((Stand + FVector(0, 250, 250)) - Camera->GetActorLocation()).Rotation());
+	}
+	else
+	{
+		Camera->SetActorLocation(Center + FVector(-1050, 0, 150));
+		Camera->SetActorRotation(((Center + FVector(0, 0, 100)) - Camera->GetActorLocation()).Rotation());
+	}
+	if (UCineCameraComponent* C = Camera->GetCineCameraComponent())
+	{
+		C->CurrentFocalLength = 30.f;
+		C->FocusSettings.ManualFocusDistance = 1050.f;
+	}
+	auto Shot = [&](float At, const TCHAR* Name, int32 Idx)
+	{
+		if (LineupShot == Idx && LineupT >= At)
+		{
+			FScreenshotRequest::RequestScreenshot(Name, false, false);
+			++LineupShot;
+		}
+	};
+	Shot(7.f, TEXT("tag_lineup_front.png"), 0);
+	Shot(12.f, TEXT("tag_lineup_back.png"), 1);
+	{
+		static float NextLog = 0.f;
+		if (LineupT >= NextLog && Lineup.Num() > 3)
+		{
+			NextLog = LineupT + 0.5f;
+			for (int32 i : {0, 1, 3})
+				UE_LOG(LogTemp, Display, TEXT("TAG lineup t=%.2f #%d head=%s %s"), LineupT, i, *Lineup[i]->BoneWorld(TEXT("head")).ToString(), *Lineup[i]->DebugAnimState());
+		}
+	}
+	Shot(14.1f, TEXT("tag_lineup_celebrate_a.png"), 2);
+	Shot(14.5f, TEXT("tag_lineup_celebrate_b.png"), 3);
+	Shot(15.25f, TEXT("tag_lineup_action_a.png"), 4);
+	Shot(15.45f, TEXT("tag_lineup_action_b.png"), 5);
+	Shot(16.4f, TEXT("tag_lineup_action_c.png"), 6);
+	Shot(17.6f, TEXT("tag_lineup_crowd.png"), 7);
+	Shot(17.8f, TEXT("tag_lineup_crowd_b.png"), 8);
+	PerfT += Dt; ++PerfFrames;
+	if (LineupT > 18.f)
+	{
+		UE_LOG(LogTemp, Display, TEXT("TAG perf avg %.1f fps over %d frames"), PerfFrames / FMath::Max(PerfT, 0.001f), PerfFrames);
+		FPlatformMisc::RequestExit(false);
+	}
+}
+
+void AMatchDirector::TickMoveTest(float Dt)
+{
+	// hold the clock until motion matching has its search indexes (uncooked runs build them in the background)
+	FAthleteAssets& AA = FAthleteAssets::Get();
+	if (AA.bMotionMatch && !AA.MotionMatchReady())
+	{
+		LineupT = 0.f;
+		return;
+	}
+	const float Seg = 9.f;
+	const int32 R = FMath::Clamp(static_cast<int32>(LineupT / Seg), 0, Lineup.Num() - 1);
+	const float T = LineupT - R * Seg;
+	const FVector Start = TagCoords::ToWorld(30, tag::FIELD_W * 0.5, 1);
+	if (R != MoveRunner)
+	{
+		MoveRunner = R;
+		MovePos = Start;
+		MoveVel = FVector::ZeroVector;
+		for (int32 i = 0; i < Lineup.Num(); ++i) Lineup[i]->SetActorHiddenInGame(i != R);
+		Lineup[R]->ResetPose();
+	}
+	// target velocity and facing for this runner's route (yaw 0 = +X, downfield)
+	FVector Target = FVector::ZeroVector;
+	float Yaw = 0.f;
+	if (R == 0)
+	{
+		// receiver: standing start, sprint 9 m/s, plant and cut 90 deg right at 4.5 s, stop at 7 s
+		if (T > 1.f && T <= 4.5f) Target = FVector(900, 0, 0);
+		else if (T > 4.5f && T <= 7.f) Target = FVector(0, -850, 0);
+	}
+	else if (R == 1)
+	{
+		// back: 7 m/s, then a 120 deg sweeping curve, stop at 7 s
+		const float CurveYaw = T <= 3.f ? 0.f : FMath::Min(T - 3.f, 4.f) * 30.f;
+		if (T > 1.f && T <= 7.f) Target = 750.f * FRotator(0, CurveYaw, 0).Vector();
+	}
+	else if (R == 3)
+	{
+		// tackle: pass set kick-slide (back and out at 1.9 m/s, facing downfield), anchor, drive block forward, settle
+		if (T > 1.f && T <= 3.f) Target = FVector(-110, 150, 0);
+		else if (T > 4.5f && T <= 6.5f) Target = FVector(220, 0, 0);
+	}
+	else
+	{
+		// defensive back: backpedal at 3.8 m/s facing downfield, plant and break forward at 4 s, stop at 7.5 s
+		if (T > 1.f && T <= 4.f) Target = FVector(-380, 0, 0);
+		else if (T > 4.f && T <= 7.5f) Target = FVector(850, 0, 0);
+	}
+	const float MaxDv = (Target.Size() > MoveVel.Size() ? 900.f : 1500.f) * Dt;
+	MoveVel += (Target - MoveVel).GetClampedToMaxSize(MaxDv);
+	MovePos += MoveVel * Dt;
+	if (R < 2 && MoveVel.Size() > 50.f) Yaw = MoveVel.Rotation().Yaw;
+	else if (R < 2) Yaw = Lineup[R]->GetActorRotation().Yaw;
+	FAthleteFootball F;
+	Lineup[R]->SetFootball(F, Dt);
+	Lineup[R]->Drive(MovePos, Yaw, MoveVel, 10.f, MoveVel.Size() > 30.f ? TEXT("run") : TEXT("idle"), T, Dt, R == 3);
+
+	// tracking side camera (from the -Y sideline side), 8 m off, at chest height
+	Camera->SetActorLocation(MovePos + FVector(-250, -800, 170));
+	Camera->SetActorRotation(((MovePos + FVector(0, 0, 95)) - Camera->GetActorLocation()).Rotation());
+	if (UCineCameraComponent* C = Camera->GetCineCameraComponent())
+	{
+		C->CurrentFocalLength = 28.f;
+		C->FocusSettings.ManualFocusDistance = 840.f;
+	}
+	const float ShotT = 0.8f + (MoveShot % 27) * 0.3f;
+	if (MoveShot / 27 == R && T >= ShotT)
+	{
+		FScreenshotRequest::RequestScreenshot(FString::Printf(TEXT("tag_move_r%d_%02d.png"), R, MoveShot % 27), false, false);
+		UE_LOG(LogTemp, Display, TEXT("TAG move r%d t=%.2f v=%.0f %s"), R, T, MoveVel.Size(), *Lineup[R]->DebugAnimState());
+		++MoveShot;
+	}
+	PerfT += Dt; ++PerfFrames;
+	if (LineupT > Seg * Lineup.Num())
+	{
+		UE_LOG(LogTemp, Display, TEXT("TAG perf avg %.1f fps over %d frames"), PerfFrames / FMath::Max(PerfT, 0.001f), PerfFrames);
+		FPlatformMisc::RequestExit(false);
 	}
 }
 
@@ -157,7 +357,12 @@ void AMatchDirector::TickAutomation(float Dt)
 			++AutoShot;
 		}
 	}
-	if (AutoT > 63.5f) FPlatformMisc::RequestExit(false);
+	PerfT += Dt; ++PerfFrames;
+	if (AutoT > 63.5f)
+	{
+		UE_LOG(LogTemp, Display, TEXT("TAG perf avg %.1f fps over %d frames"), PerfFrames / FMath::Max(PerfT, 0.001f), PerfFrames);
+		FPlatformMisc::RequestExit(false);
+	}
 }
 
 void AMatchDirector::EndPlay(const EEndPlayReason::Type Reason)
@@ -702,6 +907,17 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 	// ball
 	const tag::Ball& B = Sim->ball;
 	auto AthOf = [&](const tag::Ent* X) { return AthleteFor(X->p, X->side == tag::Side::Off ? OffK : tag::other(OffK)); };
+	// keyed one-shots on sim events (new events only; a new play restarts the list)
+	if (Sim.get() != EventSim || Sim->events.size() < SeenEvents) { EventSim = Sim.get(); SeenEvents = 0; }
+	for (; SeenEvents < Sim->events.size(); ++SeenEvents)
+	{
+		const tag::PlayEvent& Ev = Sim->events[SeenEvents];
+		if (Ev.type == "handoff" && Ev.a)
+		{
+			AAthlete* Q = AthOf(Ev.a);
+			if (Q) Q->PlayOneShot(FAthleteAssets::Get().Handoff);
+		}
+	}
 	const FVector BallW = ToWorld(B.pos.x, B.pos.y, Dir, B.pos.z);
 	const FVector BallVelW = Dir > 0 ? FVector(B.vel.x, -B.vel.y, B.vel.z) * YD : FVector(-B.vel.x, B.vel.y, B.vel.z) * YD;
 
@@ -716,6 +932,7 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 		F.bSecure = F.bHasBall && bQB && E->speed() < 5.5 && E->anim != tag::Anim::Run;
 		if (E->anim == tag::Anim::Throw) F.ThrowT = FMath::Clamp(static_cast<float>(E->animT) / 0.45f, 0.f, 1.f);
 		F.bStance = Sim->t < 0.05 && (E->isOL || E->isDL);
+		F.bPreSnap = Sim->t < 0.05 && State == EMatchState::Presnap;
 		const FVector Me = A->GetActorLocation();
 		// catch: the intended receiver (and anyone right on the ball) gets hands to where the ball will be
 		if (B.mode == tag::BallMode::Air)
@@ -784,6 +1001,20 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 				EventShotName = TEXT("tag_auto_throw.png");
 				CloseupTarget = AthOf(E);
 				EventShotFrames = 3;
+			}
+		}
+		if (!bShotGetUp && EventShotFrames == 0)
+		{
+			for (auto& KV : Athletes)
+			{
+				if (KV.Value && KV.Value->GetUpElapsed() > 0.4f)
+				{
+					bShotGetUp = true;
+					EventShotName = TEXT("tag_auto_getup.png");
+					CloseupTarget = KV.Value;
+					EventShotFrames = 3;
+					break;
+				}
 			}
 		}
 		if (!bShotCatch && B.mode == tag::BallMode::Air && B.target &&
@@ -920,6 +1151,28 @@ void AMatchDirector::UpdateCamera(float Dt, const FVector& Focus)
 			P = Tgt + F * 230.f + R * 90.f + FVector(0, 0, 10);
 			CamLook = Tgt - FVector(0, 0, 25);
 		}
+		// broadcast operators reframe around bodies: orbit the camera about the target until no other visible
+		// athlete sits on the camera or the camera-to-target line (catches are usually contested)
+		auto Blocked = [&](const FVector& C)
+		{
+			for (const auto& KV : Athletes)
+			{
+				const AAthlete* O = KV.Value;
+				if (!O || O == CloseupTarget || O->IsHidden()) continue;
+				const FVector Q = O->GetActorLocation() + FVector(0, 0, 100);
+				if (FMath::PointDistToSegment(Q, C, Tgt) < 70.f) return true;
+			}
+			return false;
+		};
+		if (Blocked(P))
+		{
+			const FVector Off = P - Tgt;
+			for (float Deg : {35.f, -35.f, 70.f, -70.f, 110.f, -110.f, 150.f, -150.f})
+			{
+				const FVector Cand = Tgt + Off.RotateAngleAxis(Deg, FVector::UpVector) + FVector(0, 0, 40);
+				if (!Blocked(Cand)) { P = Cand; break; }
+			}
+		}
 	}
 	Camera->SetActorLocation(P);
 	Camera->SetActorRotation((CamLook - P).Rotation());
@@ -994,6 +1247,14 @@ void AMatchDirector::Tick(float Dt)
 		return;
 	}
 	if (!Game) return;
+	if (bLineup)
+	{
+#if WITH_EDITOR
+		if (GShaderCompilingManager && GShaderCompilingManager->GetNumRemainingJobs() > 0) return; // wait for shaders
+#endif
+		TickLineup(Dt);
+		return;
+	}
 	if (bEsc && State != EMatchState::Final) TogglePause();
 	if (PC && PC->WasInputKeyJustPressed(EKeys::C)) CamMode = static_cast<ECamMode>((static_cast<uint8>(CamMode) + 1) % 4);
 	if (bWatch && PC)

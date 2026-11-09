@@ -24,6 +24,7 @@ struct FAthleteFootball
 	float ReachSpread = 8.f;
 	float Lean = 0.f;          // drive lean 0..1
 	bool bStance = false;
+	bool bPreSnap = false;     // before the snap: hand keyed stance loops
 	bool bLook = false;
 	FVector LookWorld = FVector::ZeroVector;
 };
@@ -67,6 +68,10 @@ public:
 	/** World position of a bone on the visible body (falls back to the actor). */
 	FVector BoneWorld(FName Bone) const;
 	void SetLabel(const FString& Text);
+	/** Play a keyed clip once over the current state, then hand back (crossfaded). Contact states override it. */
+	void PlayOneShot(UAnimationAsset* Clip);
+	/** Seconds into the current keyed get-up (-1 when not getting up). */
+	float GetUpElapsed() const;
 
 	const tag::Player* Player = nullptr;
 
@@ -112,7 +117,38 @@ public:
 	USkeletalMeshComponent* Visible() const { return MHBody ? MHBody.Get() : Body.Get(); }
 
 private:
-	void PlayClip(UAnimationAsset* Clip, bool bLoop, float Rate = 1.f);
+	void PlayClip(UAnimationAsset* Clip, bool bLoop, float Rate = 1.f, float StartPos = 0.f);
+	/** Start a clip or blend space on the hidden source body (leaves motion matching), crossfading the visible body. */
+	void StartBodyAsset(UAnimationAsset* Asset, bool bLoop);
+	// motion matched locomotion (Game Animation Sample PoseSearch databases), see UTagMotionMatchInstance
+	class UTagMotionMatchInstance* MatchInstance() const;
+	/** Search the motion databases for this frame's move; false when motion matching is unavailable. */
+	bool DriveMotionMatching(const FVector& VelWorld, float SimYaw, float DeltaTime, bool bCrouch = false);
+	void RecordTrajectory();
+	bool bInMatch = false;
+	int32 MMGait = 1;                         // 0 walk, 1 run, 2 sprint
+	TArray<FVector> TrajPos;                  // recorded source body transforms (world), newest last
+	TArray<FQuat> TrajRot;
+	TArray<double> TrajTime;
+	FVector PrevVel = FVector::ZeroVector;     // measured (smoothed) body velocity
+	FVector PrevPos = FVector::ZeroVector;
+	FVector SmoothedAccel = FVector::ZeroVector;
+	bool bHavePrevVel = false;
+	float MovingTime = 0.f;                   // seconds since this player started moving (motion matching start state)
+	bool bPreSnap = false;
+	bool bWasPreSnap = false;
+	UPROPERTY()
+	TObjectPtr<UAnimationAsset> OneShot;   // keyed one-shot in progress (get-off, snap catch, handoff)
+	float OneShotLeft = 0.f;
+	// get-up after a ragdoll: snapshot the lying pose, play the matching keyed get-up where the body lies
+	void StartGetUp(const FVector& SimLoc);
+	float DownTime = 0.f;
+	float GetUpLeft = 0.f;
+	bool bGettingUp = false;
+	bool bStoodUp = false;
+	FVector VisOffset = FVector::ZeroVector;
+	int32 TackleCount = 0;   // rotates tackle variants so the same player never repeats one back to back
+	bool bEngaged = false;   // hands on an opponent (football layer reach), picks the engaged block loop
 	void StartRagdoll(const FVector& VelWorld);
 	void SetupMetaHuman(int32 Arch, const FUniform& U);
 	FVector VisRelScale = FVector::OneVector;
@@ -130,6 +166,7 @@ private:
 	float SmoothedSpeed = 0.f;
 	bool bYawInit = false;
 	bool bRagdoll = false;
+	bool bMaterialNumbers = false;
 	FVector BodyRelLoc = FVector::ZeroVector;
 	FRotator BodyRelRot = FRotator(0, -90, 0);
 };
@@ -153,7 +190,8 @@ struct FAthleteAssets
 	bool bLoaded = false;
 	bool bMocap = false; // Game Animation Sample (UEFN mannequin) assets available
 	bool bMetaHumans = false; // TAG MetaHuman bodies available (retargeted from the mocap)
-	FMHArchetype MH[3]; // 0 lineman, 1 skill, 2 big
+	static constexpr int32 MHCount = 5;
+	FMHArchetype MH[MHCount]; // 0 OL, 1 skill, 2 big, 3 defensive line, 4 lean (QB/K/P); 3 and 4 optional
 	TObjectPtr<class UMaterialInterface> MHUniformMat;
 	static int32 ArchetypeFor(int32 PosIndex);
 	TObjectPtr<class USkeletalMesh> Mesh;
@@ -168,11 +206,55 @@ struct FAthleteAssets
 	TObjectPtr<UAnimationAsset> Jump;
 	TObjectPtr<UAnimationAsset> Dash;
 	TObjectPtr<UAnimationAsset> Celebrate;
+	/** TAG hand keyed clips (Tools/Anim, Blender; imported by Tools/Art/import_tag_anims.py). Null = old behaviour. */
+	TObjectPtr<UAnimationAsset> Stance3pt;      // OL / DL pre-snap loop
+	TObjectPtr<UAnimationAsset> Stance2pt;      // WR, TE, RB, LB, DB pre-snap loop
+	TObjectPtr<UAnimationAsset> StanceShotgun;  // QB pre-snap loop
+	TObjectPtr<UAnimationAsset> ThrowKeyed;     // QB pass; played from its stride frame so release meets the sim's
+	static constexpr float ThrowKeyedStart = 14.f / 30.f;
+	bool bCelebrateKeyed = false;
+	TObjectPtr<UAnimationAsset> GetOff;         // OL / DL explode out of the three point stance at the snap
+	TObjectPtr<UAnimationAsset> TackleKeyed;    // form tackle: sink, explode, wrap, drive (then ragdoll on "down")
+	TObjectPtr<UAnimationAsset> TackleHigh;     // chest-level wrap
+	TObjectPtr<UAnimationAsset> TackleLow;      // shoot the thighs
+	TObjectPtr<UAnimationAsset> TackleDive;     // full extension (sim "dive")
+	TObjectPtr<UAnimationAsset> JukeL;          // ball carrier cut to his left / right
+	TObjectPtr<UAnimationAsset> JukeR;
+	TObjectPtr<UAnimationAsset> Kneel;          // QB victory formation
+	TObjectPtr<UAnimationAsset> BlockEngaged;   // hands inside, choppy feet (engaged OL / DL)
+	TObjectPtr<UAnimationAsset> BlockPassSet;   // pass protection set before contact
+	TObjectPtr<UAnimationAsset> SnapCatch;      // shotgun QB takes the snap
+	TObjectPtr<UAnimationAsset> Handoff;        // QB hands off right and carries out the fake
+	TObjectPtr<UAnimationAsset> GetUpDown;      // get up from lying face down
+	TObjectPtr<UAnimationAsset> GetUpUp;        // get up from lying on the back
+	TObjectPtr<UAnimationAsset> ShedSwim;       // pass rush moves when a defender beats his blocker
+	TObjectPtr<UAnimationAsset> ShedRip;
 	TObjectPtr<UAnimationAsset> Idle;
+	// motion matching over the Game Animation Sample's Dense PoseSearch databases (rooted, never collected)
+	bool bMotionMatch = false;
+	// per gait (walk / run / sprint), split by state the way the sample's chooser does: the start and pivot databases are
+	// only offered while starting / pivoting (offered all the time, their clips won over the loops on straight runs)
+	TArray<class UPoseSearchDatabase*> MMMove[3];   // loops
+	TArray<class UPoseSearchDatabase*> MMStart[3];  // starts + loops
+	TArray<class UPoseSearchDatabase*> MMPivot[3];  // pivots + spins + loops
+	TArray<class UPoseSearchDatabase*> MMStop[3];
+	// crouched line footwork (pass sets, pulls, drive blocks), same state split: [0] loops, [1] starts, [2] pivots, [3] stops + idles
+	TArray<class UPoseSearchDatabase*> MMCrouch[4];   // that gait's stops + standing idles + turns in place
+	TArray<class UPoseSearchDatabase*> MMAll;
+	void LoadMotionMatching();
+	/** True once every database's search index is built (game thread; checked at most once a frame). */
+	bool MotionMatchReady();
+	bool bMMReady = false;
+	uint64 MMCheckedFrame = 0;
 	TObjectPtr<class UMaterialInterface> UniformMat;
 	float LocoMaxSpeed = 700.f;
 	float CrouchMaxSpeed = 225.f;
 	TObjectPtr<class UStaticMesh> Sphere;
+	/** TAG gear meshes (Tools/Art/gear_build.py). Null falls back to the primitive helmet and bar facemask. */
+	TObjectPtr<class UStaticMesh> HelmetMesh;
+	TObjectPtr<class UStaticMesh> FacemaskMesh[3]; // Open (skill), Std (RB/LB/TE/FB), Cage (linemen)
+	TObjectPtr<class UStaticMesh> PadsMesh;
+	TObjectPtr<class UStaticMesh> FootballMesh;   // 28 x 17 cm along X, slot 0 leather, slot 1 laces
 	TObjectPtr<class UStaticMesh> Cube;
 	TObjectPtr<class UStaticMesh> Cylinder;
 	TObjectPtr<class UStaticMesh> Torus;

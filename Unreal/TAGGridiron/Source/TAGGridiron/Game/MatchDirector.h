@@ -45,6 +45,8 @@ public:
 	tag::League League;
 	std::unique_ptr<tag::Game> Game;
 	std::unique_ptr<tag::PlaySim> Sim;
+	const tag::PlaySim* EventSim = nullptr;  // sim whose events were last scanned for keyed one-shots
+	size_t SeenEvents = 0;
 	EMatchState State = EMatchState::Menu;
 	bool bWatch = false;
 	float Speed = 1.f;
@@ -117,9 +119,27 @@ private:
 	int32 CloseupView = 0;
 	bool bShotThrow = false;
 	bool bShotCatch = false;
+	bool bShotGetUp = false;
 	int32 EventShotFrames = 0;
 	FString EventShotName;
 	void TickAutomation(float Dt);
+	/** -TagLineup: look-dev lineup of six athletes, front and back shots. */
+	void TickLineup(float Dt);
+	bool bLineup = false;
+	/** -TagMoveTest: locomotion test course (sprint + 90 deg cut + stop, curve + stop, backpedal + break), one runner at a
+	 *  time with a tracking side camera and a screenshot every 0.3 s (motion matching look-dev; -TagNoMM shows the blend spaces for A/B). */
+	void TickMoveTest(float Dt);
+	bool bMoveTest = false;
+	FVector MovePos = FVector::ZeroVector;
+	FVector MoveVel = FVector::ZeroVector;
+	int32 MoveRunner = -1;
+	int32 MoveShot = 0;
+	float PerfT = 0.f;      // automation frame-time sampling
+	int32 PerfFrames = 0;
+	float LineupT = 0.f;
+	int32 LineupShot = 0;
+	UPROPERTY()
+	TArray<TObjectPtr<class AAthlete>> Lineup;
 
 	struct FKick
 	{

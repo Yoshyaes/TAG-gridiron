@@ -35,3 +35,6 @@ codex.cfg
 OrangeEmu64.dll
 tools/madden/FrostyHost/bin/
 __pycache__/
+
+# Epic MetaHuman Crowd Sample: junction to the engine install (Fab content, never committed)
+Unreal/TAGGridiron/Plugins/MetaHumanCrowdContent/

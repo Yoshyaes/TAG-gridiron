@@ -20,6 +20,9 @@ BODIES = [
     ("TAG_Lineman", {"height": 196, "chest": 132, "waist": 118, "hip": 124, "neck": 51, "thigh": 76, "calf": 48, "across shoulder": 50}),
     ("TAG_Skill", {"height": 185, "chest": 104, "waist": 81, "hip": 98, "neck": 40, "thigh": 61, "calf": 40, "across shoulder": 47}),
     ("TAG_Big", {"height": 191, "chest": 118, "waist": 92, "hip": 108, "neck": 45, "thigh": 68, "calf": 43, "across shoulder": 49}),
+    # five body types (LOOK-AND-FEEL-PLAN 2.5): defensive line ~6'4" 290 lb, lean QB/K/P ~6'2" 220 lb
+    ("TAG_DLine", {"height": 193, "chest": 126, "waist": 106, "hip": 118, "neck": 48, "thigh": 73, "calf": 46, "across shoulder": 50}),
+    ("TAG_Lean", {"height": 189, "chest": 102, "waist": 84, "hip": 98, "neck": 40, "thigh": 60, "calf": 39, "across shoulder": 46}),
 ]
 PER_CHARACTER_TIMEOUT = 20 * 60
 # `py ".../mh_create.py" retex` : bodies are already shaped + rigged; only re-fetch textures and re-assemble.
@@ -212,6 +215,10 @@ def tick(dt):
         log("ERROR", traceback.format_exc())
         finish_character(BODIES[S["idx"]][0], "error")
 
+
+# Default: build only bodies that are not assembled yet.  `py ".../mh_create.py" all` rebuilds every body.
+if not RETEX and not any(a.lower() == "all" for a in sys.argv[1:]):
+    BODIES[:] = [b for b in BODIES if not unreal.EditorAssetLibrary.does_directory_exist("/Game/TAG/MetaHumans/Unpacked/" + b[0])]
 
 # replace any previous run of this script in the same editor session
 _prev = getattr(unreal, "_tag_mh_handle", None)
