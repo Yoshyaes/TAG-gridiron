@@ -354,9 +354,15 @@ void AStadium::Build(const tag::Team& Home, const tag::Team& Away, const tag::We
 	};
 	if (bPro)
 	{
-		const FLinearColor SnowTint = bSnowy ? FLinearColor(0.85f, 0.9f, 0.9f) : FLinearColor(0.62f, 0.66f, 0.56f);
+		// broadcast turf: a deep, natural green (the grass texture alone renders neon under the sun), and 5-yard mowing
+		// stripes strong enough to read from the high camera (StripeAmount above 1 pushes the material's stripe contrast)
+		static FLinearColor TurfTint(1.05f, 0.30f, 1.3f);
+		static float StripeAmt = 2.4f;
+		FParse::Value(FCommandLine::Get(), TEXT("TagTurfG="), TurfTint.G);
+		FParse::Value(FCommandLine::Get(), TEXT("TagStripes="), StripeAmt);
+		const FLinearColor SnowTint = bSnowy ? FLinearColor(0.85f, 0.9f, 0.9f) : TurfTint;
 		// one surface for the whole 120-yard field: grass + mowing stripes + painted markings
-		PlaneAt(FVector(50 * YD, 0, 0.5), 120, FW, TurfMID(1.f, SnowTint, 0.f, FLinearColor::Black, FLinearColor(60, 27, 0, 0), 1.f));
+		PlaneAt(FVector(50 * YD, 0, 0.5), 120, FW, TurfMID(1.f, SnowTint, 0.f, FLinearColor::Black, FLinearColor(60, 27, 0, 0), StripeAmt));
 		// team-painted end zones, inset so the boundary paint stays visible
 		auto EZ = [&](double X0, const tag::Team& T, float Yaw)
 		{
@@ -426,7 +432,7 @@ void AStadium::Build(const tag::Team& Home, const tag::Team& Away, const tag::We
 		AddText(S, FVector(yd * YD, -(FW / 2 - 11) * YD, 2), FRotator(90, 0, 0), 180.f, FColor(225, 225, 220));
 	}
 	// midfield emblem
-	AddMesh(A.Cylinder, FVector(50 * YD, 0, 0.6), FVector(9, 9, 0.004), Hex(Home.colors.primary) * 0.7f, 0.6f, FRotator::ZeroRotator, false);
+	AddMesh(A.Cylinder, FVector(50 * YD, 0, 0.6), FVector(9, 9, 0.004), Hex(Home.colors.primary) * 0.45f, 0.85f, FRotator::ZeroRotator, false);
 	AddText(FString(Home.abbr.c_str()), FVector(50 * YD, 0, 3), FRotator(90, 0, 0), 300.f, FColor::White);
 	// ---------------- line overlays
 	LosLine = AddMesh(Cube, FVector(0, 0, 2), FVector(0.2, (FW - 0.6) * YD / 100, 0.005), FLinearColor(0.1f, 0.35f, 1.f), 0.3f, FRotator::ZeroRotator, false);
