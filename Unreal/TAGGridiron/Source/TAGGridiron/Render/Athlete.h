@@ -82,6 +82,8 @@ public:
 	void BeginTackleOn(AAthlete* Carrier);
 	/** Paired block: the man this lineman is locked up with this frame (null when not engaged). */
 	void SetBlockPartner(AAthlete* Partner) { BlockPartner = Partner; }
+	/** Look-dev (-TagGapTest): this player's next get-up is the injury beat. */
+	bool bForceInjury = false;
 
 	const tag::Player* Player = nullptr;
 
@@ -171,6 +173,8 @@ private:
 	FVector PileVel = FVector::ZeroVector;
 	TWeakObjectPtr<AAthlete> TackleOn;
 	TWeakObjectPtr<AAthlete> BlockPartner;
+	bool bInjuredChain = false;   // getting up: the injury beat plays first, then the slow get-up
+	float InjuredLeft = 0.f;
 	FVector BlockAlign = FVector::ZeroVector;
 	float AlignT = -1.f;   // rotates tackle variants so the same player never repeats one back to back
 	bool bEngaged = false;   // hands on an opponent (football layer reach), picks the engaged block loop
@@ -265,6 +269,7 @@ struct FAthleteAssets
 	// batch 3: the last uncovered situations
 	TObjectPtr<UAnimationAsset> StanceUnderCenter, UnderCenterSnap, Pitch, CatchDive, GetUpSlow;
 	TObjectPtr<UAnimationAsset> TackledHit; // the carrier's side of a tackle
+	TObjectPtr<UAnimationAsset> InjuredDown; // hurt on the play, chained into the slow get-up
 	static constexpr float CatchDiveTravel = 115.f; // cm the dive carries the body forward (Tools/Anim CATCH_DIVE_TRAVEL)
 	TArray<UAnimationAsset*> Celebrations;                                            // keyed celebration loops
 	// where foot contact falls in each kick clip (s), so the director can line it up with the ball leaving

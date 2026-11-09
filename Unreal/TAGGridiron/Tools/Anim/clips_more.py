@@ -747,14 +747,32 @@ def catch_dive(rig):
     return _key_all(rig, keys)
 
 
+def _prone_start():
+    """Face down, hands by the shoulders: where the slow get-up starts (and the injury beat ends)."""
+    return _base(pelvis=(0, 0, 0.20), pelvis_rot=(90, 0, 0), spine=(0, 0, 0), look=(0, -2, 0.1),
+                 hand_l=(0.22, -0.36, 0.11), hand_r=(-0.22, -0.36, 0.11), elbow_l=(1, 0.3, 0), elbow_r=(-1, 0.3, 0),
+                 foot_l=(0.14, 0.82, 0.12), foot_r=(-0.14, 0.82, 0.12), foot_pitch_l=85, foot_pitch_r=85,
+                 knee_l=(0.2, 0, -1), knee_r=(-0.2, 0, -1))
+
+
+def injured_down(rig):
+    """Hurt on the play (3 s): face down, the right knee drawn up, the right hand reaching back to clutch the back of
+    the knee, head lifting and dropping, rocking with the pain, then settling flat to get up slowly."""
+    s = _prone_start()
+    hurt = dict(s, pelvis=(0.02, 0.02, 0.22), pelvis_rot=(86, 0, -8), spine=(-10, -14, -6), look=(0, -2, 0.6),
+                hand_r=(-0.18, -0.02, 0.32), elbow_r=(-1, 0.4, 0.4), foot_r=(-0.16, 0.42, 0.40), foot_pitch_r=40,
+                knee_r=(-0.2, -0.3, -1))
+    rock = dict(hurt, pelvis=(0.05, 0.03, 0.24), pelvis_rot=(84, 0, -14), spine=(-16, -16, -10), look=(0.3, -2, 0.8),
+                foot_r=(-0.18, 0.36, 0.46))
+    keys = [(0, s), (12, hurt), (30, rock), (45, hurt), (62, rock), (76, hurt), (90, s)]
+    return _key_all(rig, keys)
+
+
 def getup_slow(rig):
     """Slow to get up (shaken up on the play): from face down onto one knee, a hand pressed to the right ribs, head
     hanging for a beat, then a careful rise with the hand still on the side."""
     keys = [
-        (0, _base(pelvis=(0, 0, 0.20), pelvis_rot=(90, 0, 0), spine=(0, 0, 0), look=(0, -2, 0.1),
-                  hand_l=(0.22, -0.36, 0.11), hand_r=(-0.22, -0.36, 0.11), elbow_l=(1, 0.3, 0), elbow_r=(-1, 0.3, 0),
-                  foot_l=(0.14, 0.82, 0.12), foot_r=(-0.14, 0.82, 0.12), foot_pitch_l=85, foot_pitch_r=85,
-                  knee_l=(0.2, 0, -1), knee_r=(-0.2, 0, -1))),
+        (0, _prone_start()),
         (18, _base(pelvis=(0, 0.20, 0.44), pelvis_rot=(64, 0, 0), spine=(26, 0, 0), look=(0, -1.5, 0.2),
                    hand_l=(0.22, -0.16, 0.11), hand_r=(-0.22, -0.16, 0.11), foot_l=(0.16, 0.55, 0.12),
                    foot_r=(-0.16, 0.55, 0.12), foot_pitch_l=80, foot_pitch_r=80)),
@@ -797,6 +815,6 @@ def tackled_hit(rig):
     return _key_all(rig, C._in_place(keys))
 
 
-MORE.update({"Tackled_Hit": tackled_hit})
+MORE.update({"Tackled_Hit": tackled_hit, "Injured_Down": injured_down})
 MORE.update({"StanceUnderCenter_Loop": stance_under_center, "QB_UnderCenterSnap": qb_under_center_snap,
              "QB_Pitch": qb_pitch, "Catch_Dive": catch_dive, "GetUp_Slow": getup_slow})

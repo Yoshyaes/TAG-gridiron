@@ -1960,12 +1960,23 @@ void PlaySim::resolveAir() {
         }
         catcher = e;
         catchX = e->pos.x;
-        ev("catch", e);
+        // a ball well off target, or a low one dying at the turf, with a defender right there, is caught laid out and
+        // touched down: the play ends at the spot (outside the end zone; there the normal scoring rules apply)
+        bool defenderClose = false;
+        for (Ent* o : ents)
+          if (o->side != e->side && o->free() && dist(o->pos, e->pos) < 2.0) defenderClose = true;
+        const bool diving = (d > 1.05 || (descendingLow && b.pos.z < 0.30)) && defenderClose && e->pos.x < 99.0;
+        ev(diving ? "divecatch" : "catch", e);
         e->anim = Anim::Catch;
         e->animT = 0;
         // momentum loss when catching
         e->vel = scale(e->vel, contested ? 0.3 : 0.45);
         setCarrier(e);
+        if (diving) {
+          e->vel = V2{0, 0};
+          e->state = EntState::Down;
+          endPlay("tackle");
+        }
         return;
       }
       ev(contested ? "contested_inc" : "drop", e);

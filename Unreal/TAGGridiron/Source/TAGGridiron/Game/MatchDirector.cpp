@@ -105,6 +105,12 @@ void AMatchDirector::BeginPlay()
 		bMoveTest = true;
 		StartMatch(3, 7, false, true, 0, false, 900);
 	}
+	else if (FParse::Param(FCommandLine::Get(), TEXT("TagGapTest")))
+	{
+		bLineup = true;
+		bGapTest = true;
+		StartMatch(3, 7, false, true, 0, false, 900);
+	}
 	else if (FParse::Param(FCommandLine::Get(), TEXT("TagLineup")))
 	{
 		// look-dev lineup: six athletes (home and away, every body type) in a row, shot front then back, then exit
@@ -120,11 +126,14 @@ void AMatchDirector::TickLineup(float Dt)
 	{
 		const tag::Pos Pick[] = {tag::Pos::OT, tag::Pos::DE, tag::Pos::LB, tag::Pos::RB, tag::Pos::WR, tag::Pos::QB};
 		const tag::Pos MovePick[] = {tag::Pos::WR, tag::Pos::RB, tag::Pos::CB, tag::Pos::OT};
+		const tag::Pos GapPick[] = {tag::Pos::QB, tag::Pos::RB, tag::Pos::WR, tag::Pos::LB, tag::Pos::CB};
+		const tag::TeamKey GapSide[] = {tag::TeamKey::Home, tag::TeamKey::Home, tag::TeamKey::Home, tag::TeamKey::Away, tag::TeamKey::Away};
 		const tag::TeamKey Side[] = {tag::TeamKey::Home, tag::TeamKey::Away, tag::TeamKey::Home, tag::TeamKey::Away, tag::TeamKey::Home, tag::TeamKey::Away};
-		for (int32 i = 0; i < (bMoveTest ? 4 : 6); ++i)
+		for (int32 i = 0; i < (bGapTest ? 5 : bMoveTest ? 4 : 6); ++i)
 		{
-			const std::vector<tag::Player*> D = tag::depth(Game->teamOf(Side[i]), bMoveTest ? MovePick[i] : Pick[i]);
-			if (!D.empty()) Lineup.Add(AthleteFor(D[0], Side[i]));
+			const tag::TeamKey Sd = bGapTest ? GapSide[i] : Side[i];
+			const std::vector<tag::Player*> D = tag::depth(Game->teamOf(Sd), bGapTest ? GapPick[i] : bMoveTest ? MovePick[i] : Pick[i]);
+			if (!D.empty()) Lineup.Add(AthleteFor(D[0], Sd));
 		}
 		for (auto& KV : Athletes) KV.Value->SetActorHiddenInGame(!Lineup.Contains(KV.Value));
 		if (Ball) Ball->SetActorHiddenInGame(true);
@@ -132,6 +141,11 @@ void AMatchDirector::TickLineup(float Dt)
 	if (bMoveTest)
 	{
 		TickMoveTest(Dt);
+		return;
+	}
+	if (bGapTest)
+	{
+		TickGapTest(Dt);
 		return;
 	}
 	// 0-9 s pre-snap stances facing the camera, 9-13 s from behind, 13-15 s celebrating, 15-17 s contact / evasion:
@@ -291,6 +305,125 @@ void AMatchDirector::TickMoveTest(float Dt)
 	}
 	PerfT += Dt; ++PerfFrames;
 	if (LineupT > Seg * Lineup.Num())
+	{
+		UE_LOG(LogTemp, Display, TEXT("TAG perf avg %.1f fps over %d frames"), PerfFrames / FMath::Max(PerfT, 0.001f), PerfFrames);
+		FPlatformMisc::RequestExit(false);
+	}
+}
+
+void AMatchDirector::TickGapTest(float Dt)
+{
+	if (Lineup.Num() < 5) return;
+	const float T = LineupT;
+	AAthlete* QB = Lineup[0];
+	AAthlete* RB = Lineup[1];
+	AAthlete* WR = Lineup[2];
+	AAthlete* LB = Lineup[3];
+	AAthlete* CB = Lineup[4];
+	const FVector O = TagCoords::ToWorld(40, tag::FIELD_W * 0.5, 1); // the spot, offense going +X (yaw 0)
+	auto Show = [&](std::initializer_list<AAthlete*> Who)
+	{
+		for (AAthlete* A : Lineup) A->SetActorHiddenInGame(true);
+		for (AAthlete* A : Who) A->SetActorHiddenInGame(false);
+	};
+	auto Foot = [&](AAthlete* A, bool bPre, bool bUnder)
+	{
+		FAthleteFootball F;
+		F.bPreSnap = bPre;
+		F.bUnderCenter = bUnder;
+		A->SetFootball(F, Dt);
+	};
+	auto Cam = [&](const FVector& At, const FVector& Look, float Focal)
+	{
+		Camera->SetActorLocation(At);
+		Camera->SetActorRotation((Look - At).Rotation());
+		if (UCineCameraComponent* C = Camera->GetCineCameraComponent())
+		{
+			C->CurrentFocalLength = Focal;
+			C->FocusSettings.ManualFocusDistance = (Look - At).Size();
+		}
+	};
+	static bool bSnap = false, bPitch = false, bDive = false, bTackle = false;
+	if (T < 6.f)
+	{
+		// 1) under center, the snap, the toss to the back sweeping right (-Y)
+		Show({QB, RB});
+		const bool bPre = T < 1.5f;
+		Foot(QB, bPre, true);
+		Foot(RB, bPre, false);
+		QB->Drive(O, 0.f, FVector::ZeroVector, 9.f, TEXT("idle"), T, Dt, false);
+		if (!bPre && !bPitch && T > 2.2f) { QB->PlayOneShot(FAthleteAssets::Get().Pitch); bPitch = true; }
+		const float Rt = FMath::Max(0.f, T - 1.6f);
+		const FVector RbV = Rt > 0.f ? FVector(Rt > 1.6f ? 450.f : 120.f, -650.f, 0.f) : FVector::ZeroVector;
+		const FVector RbP = O + FVector(-450.f, -60.f, 0.f) + FVector(Rt > 1.6f ? 120.f * 1.6f + 450.f * (Rt - 1.6f) : 120.f * Rt, -650.f * Rt, 0.f);
+		RB->Drive(RbP, RbV.IsNearlyZero() ? 0.f : RbV.Rotation().Yaw, RbV, 9.f, RbV.IsNearlyZero() ? TEXT("idle") : TEXT("run"), T, Dt, false);
+		(void)bSnap;
+		Cam(O + FVector(-700.f, 420.f, 230.f), O + FVector(-120.f, -120.f, 100.f), 30.f);
+	}
+	else if (T < 11.f)
+	{
+		// 2) the layout catch: a receiver at full speed, the ball just out of reach
+		Show({WR});
+		Foot(WR, false, false);
+		const float Wt = T - 6.f;
+		const float StopT = 2.4f;
+		const float Run = FMath::Min(Wt, StopT);
+		const FVector P = O + FVector(-1200.f + 800.f * Run, 900.f, 0.f);
+		if (!bDive && Wt >= StopT) { WR->PlayDiveAttempt(); bDive = true; }
+		const FVector V = Wt < StopT ? FVector(800.f, 0.f, 0.f) : FVector::ZeroVector;
+		WR->Drive(P, 0.f, V, 9.f, Wt < StopT ? TEXT("run") : TEXT("catch"), Wt, Dt, false);
+		Cam(P + FVector(250.f, -650.f, 140.f), P + FVector(150.f, 0.f, 70.f), 30.f);
+	}
+	else
+	{
+		// 3) gang tackle: the linebacker squares up and wraps, the corner comes in second, they go down in a pile,
+		//    the back is hurt and stays down, then gets up slowly
+		Show({RB, LB, CB});
+		Foot(RB, false, false);
+		Foot(LB, false, false);
+		Foot(CB, false, false);
+		const float Kt = T - 11.f;
+		const float HitT = 1.8f;
+		static FVector RbAt = FVector::ZeroVector;
+		if (Kt < HitT)
+		{
+			RB->bForceInjury = true;
+			RbAt = O + FVector(-900.f + 700.f * Kt, -300.f, 0.f);
+			RB->Drive(RbAt, 0.f, FVector(700.f, 0.f, 0.f), 9.f, TEXT("run"), Kt, Dt, false);
+			const FVector LbAt = O + FVector(900.f - 300.f * Kt, -360.f, 0.f);
+			LB->Drive(LbAt, 180.f, FVector(-300.f, 0.f, 0.f), 9.f, TEXT("run"), Kt, Dt, false);
+			// the corner closes from the sideline to arrive just behind the linebacker, a beat later
+			const FVector CbTgt = O + FVector(-900.f + 700.f * HitT + 160.f, -300.f + 110.f, 0.f);
+			const FVector CbAt = CbTgt + FVector(0.f, 420.f * (HitT + 0.25f - Kt), 0.f);
+			CB->Drive(CbAt, -90.f, FVector(0.f, -420.f, 0.f), 9.f, TEXT("run"), Kt, Dt, false);
+		}
+		else
+		{
+			// the sim resolves the tackle in one tick and moves the carrier forward by the yards after contact
+			const FVector Spot = RbAt + FVector(140.f, 0.f, 0.f);
+			RB->Drive(Spot, 0.f, FVector::ZeroVector, 9.f, TEXT("down"), Kt - HitT, Dt, false);
+			if (!bTackle) { LB->BeginTackleOn(RB); bTackle = true; }
+			LB->Drive(O + FVector(900.f - 300.f * HitT, -360.f, 0.f), 180.f, FVector::ZeroVector, 9.f, TEXT("tackle"), Kt - HitT, Dt, false);
+			const float Ct = Kt - HitT - 0.25f;
+			const FVector CbTgt = O + FVector(-900.f + 700.f * HitT + 160.f, -300.f + 110.f, 0.f);
+			const FVector CbAt = CbTgt + FVector(0.f, 420.f * FMath::Max(0.f, HitT + 0.25f - Kt), 0.f);
+			if (Ct < 0.f) CB->Drive(CbAt, -90.f, FVector(0.f, -420.f, 0.f), 9.f, TEXT("run"), Kt, Dt, false);
+			else
+			{
+				if (Ct < Dt * 1.5f) CB->BeginTackleOn(RB);
+				CB->Drive(CbAt, -90.f, FVector::ZeroVector, 9.f, TEXT("tackle"), Ct, Dt, false);
+			}
+		}
+		Cam(RbAt + FVector(100.f, -900.f, 170.f), RbAt + FVector(160.f, 0.f, 60.f), 32.f);
+	}
+	const float ShotT = 0.33f * GapShot;
+	if (T >= ShotT && GapShot < 66)
+	{
+		FScreenshotRequest::RequestScreenshot(FString::Printf(TEXT("tag_gap_%02d.png"), GapShot), false, false);
+		++GapShot;
+	}
+	PerfT += Dt; ++PerfFrames;
+	if (T > 22.f)
 	{
 		UE_LOG(LogTemp, Display, TEXT("TAG perf avg %.1f fps over %d frames"), PerfFrames / FMath::Max(PerfT, 0.001f), PerfFrames);
 		FPlatformMisc::RequestExit(false);
@@ -993,6 +1126,11 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 			// a toss on stretch runs (the back is out wide), a handoff otherwise
 			const bool bPitch = Ev.b && tag::dist(Ev.a->pos, Ev.b->pos) > 2.5 && FAthleteAssets::Get().Pitch;
 			if (Q) Q->PlayOneShot(bPitch ? FAthleteAssets::Get().Pitch.Get() : FAthleteAssets::Get().Handoff.Get());
+		}
+		else if (Ev.type == "divecatch" && Ev.a)
+		{
+			// laid out for it: the sim ends the play at the spot, the receiver dives, secures it and gets up
+			if (AAthlete* R = AthOf(Ev.a)) R->PlayDiveAttempt();
 		}
 		else if (Ev.type == "incomplete" && Ev.a)
 		{

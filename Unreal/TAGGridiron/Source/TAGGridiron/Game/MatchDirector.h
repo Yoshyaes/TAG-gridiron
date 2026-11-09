@@ -140,6 +140,11 @@ private:
 	/** -TagMoveTest: locomotion test course (sprint + 90 deg cut + stop, curve + stop, backpedal + break), one runner at a
 	 *  time with a tracking side camera and a screenshot every 0.3 s (motion matching look-dev; -TagNoMM shows the blend spaces for A/B). */
 	void TickMoveTest(float Dt);
+	/** -TagGapTest: the situations that only come up now and then, played on demand and shot every 0.33 s: under
+	 *  center snap + pitch, a layout catch, a paired gang tackle with the pile and an injured carrier. */
+	void TickGapTest(float Dt);
+	bool bGapTest = false;
+	int32 GapShot = 0;
 	bool bMoveTest = false;
 	FVector MovePos = FVector::ZeroVector;
 	FVector MoveVel = FVector::ZeroVector;

@@ -133,6 +133,7 @@ void FAthleteAssets::Load()
 		CatchDive = Keyed(TEXT("A_TAG_Catch_Dive"));
 		GetUpSlow = Keyed(TEXT("A_TAG_GetUp_Slow"));
 		TackledHit = Keyed(TEXT("A_TAG_Tackled_Hit"));
+		InjuredDown = Keyed(TEXT("A_TAG_Injured_Down"));
 		IdleHandsHips = Keyed(TEXT("A_TAG_Idle_HandsHips_Loop"));
 		IdleHandsKnees = Keyed(TEXT("A_TAG_Idle_HandsKnees_Loop"));
 		for (const TCHAR* N : {TEXT("A_TAG_Celebrate_Flex_Loop"), TEXT("A_TAG_Celebrate_PointUp_Loop"), TEXT("A_TAG_Celebrate_Leap_Loop"),
@@ -971,7 +972,21 @@ void AAthlete::StartGetUp(const FVector& SimLoc)
 	static int32 GGetUpSeq = 0; // every other face-up landing rolls to the side and up instead
 	if (!bFaceDown && A.GetUpRoll && (GGetUpSeq++ % 2)) Clip = A.GetUpRoll.Get();
 	static int32 GSlowSeq = 0;  // now and then a player is shaken up and slow to get up (hand on the ribs)
-	if (bFaceDown && A.GetUpSlow && (GSlowSeq++ % 5) == 4) Clip = A.GetUpSlow.Get();
+	bInjuredChain = false;
+	if (bFaceDown && A.GetUpSlow && ((GSlowSeq++ % 5) == 4 || bForceInjury))
+	{
+		Clip = A.GetUpSlow.Get();
+		// every other one of those (and on request) he is hurt: stays down clutching the leg before getting up
+		static int32 GHurtSeq = 0;
+		if (A.InjuredDown && ((GHurtSeq++ % 2) == 1 || bForceInjury))
+		{
+			Clip = A.InjuredDown.Get();
+			bInjuredChain = true;
+			bForceInjury = false;
+			InjuredLeft = A.InjuredDown->GetPlayLength();
+			UE_LOG(LogTemp, Verbose, TEXT("TAG injury: #%d stays down"), Player ? Player->number : -1);
+		}
+	}
 	if (!Clip) return;
 
 	const int32 NB = V->GetNumBones();
@@ -1013,7 +1028,7 @@ void AAthlete::StartGetUp(const FVector& SimLoc)
 	}
 	CurrentClip = nullptr; // restart cleanly; the snapshot (not the last pose) is the blend source
 	PlayClip(Clip, false);
-	GetUpLeft = Clip->GetPlayLength();
+	GetUpLeft = Clip->GetPlayLength() + (bInjuredChain && A.GetUpSlow ? A.GetUpSlow->GetPlayLength() : 0.f);
 	bGettingUp = true;
 	bStoodUp = true;
 	CurrentAnim.Reset();
@@ -1077,6 +1092,15 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 	if (bGettingUp)
 	{
 		GetUpLeft -= DeltaTime;
+		if (bInjuredChain)
+		{
+			InjuredLeft -= DeltaTime;
+			if (InjuredLeft <= 0.f && A.GetUpSlow)
+			{
+				bInjuredChain = false;
+				PlayClip(A.GetUpSlow, false); // the injury beat ends in the slow get-up's first pose
+			}
+		}
 		SetActorLocation(Location + VisOffset);
 		if (GetUpLeft > 0.f) return;
 		bGettingUp = false;
@@ -1163,7 +1187,7 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 			if (D > 1.f)
 			{
 				const FVector Want = (Him - To / D * 62.f) - Location; // wrap distance, chest to chest
-				const FVector Off = FVector(Want.X, Want.Y, 0.f).GetClampedToMaxSize(160.f);
+				const FVector Off = FVector(Want.X, Want.Y, 0.f).GetClampedToMaxSize(250.f); // the pairing window is 3 yd
 				VisOffset = FMath::Lerp(VisOffset, Off, 1.f - FMath::Exp(-14.f * DeltaTime));
 				SetActorLocation(Location + VisOffset);
 				SmoothedYaw += FMath::FindDeltaAngleDegrees(SmoothedYaw, To.Rotation().Yaw) * FMath::Clamp(DeltaTime * 14.f, 0.f, 1.f);
