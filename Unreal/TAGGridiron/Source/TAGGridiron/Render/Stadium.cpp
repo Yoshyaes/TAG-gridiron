@@ -309,7 +309,7 @@ void AStadium::Build(const tag::Team& Home, const tag::Team& Away, const tag::We
 	USkyLightComponent* Sky = NewObject<USkyLightComponent>(this);
 	Sky->SetupAttachment(RootComponent);
 	Sky->bRealTimeCapture = true;
-	Sky->SetIntensity(bNight ? 0.15f : 1.0f);
+	Sky->SetIntensity(bNight ? 0.04f : 1.0f); // night: the sky above the bowl goes near black
 	Sky->RegisterComponent();
 
 	if (!bNight)
@@ -333,32 +333,56 @@ void AStadium::Build(const tag::Team& Home, const tag::Team& Away, const tag::We
 		{
 			AddMesh(A.Cylinder, FVector(X, Y, 3500), FVector(1.2, 1.2, 70), FLinearColor(0.2f, 0.2f, 0.22f), 0.7f);
 			AddMesh(Cube, FVector(X, Y, 7100), FVector(12, 2, 6), FLinearColor(1, 1, 0.95f) * (bNight ? 30.f : 1.f), 0.2f, FRotator(0, FMath::RadiansToDegrees(FMath::Atan2(-Y, 50 * YD - X)), 0), false);
-			if (bNight)
-			{
-				USpotLightComponent* L = NewObject<USpotLightComponent>(this);
-				L->SetupAttachment(RootComponent);
-				L->SetRelativeLocation(FVector(X, Y, 7000));
-				L->SetRelativeRotation((FVector(50 * YD, 0, 0) - FVector(X, Y, 7000)).Rotation());
-				L->SetIntensityUnits(ELightUnits::Candelas);
-				L->SetIntensity(140000.f);
-				L->SetAttenuationRadius(40000.f);
-				L->SetOuterConeAngle(38.f);
-				L->SetInnerConeAngle(20.f);
-				L->SetLightColor(FLinearColor(1.f, 0.96f, 0.9f));
-				L->RegisterComponent();
-			}
 		}
+	// night: LED light banks along both stand roofs and over the end zones, the way a modern stadium is lit. Many
+	// sources from both sides give every player the broadcast look: a fan of crisp shadows around the feet, specular
+	// glints on the helmets from several directions, and no dark side to anyone. Six banks cast shadows (cost).
+	if (bNight)
+	{
+		auto Bank = [&](const FVector& At, const FVector& Aim, bool bShadow, float Candela)
+		{
+			AddMesh(Cube, At, FVector(9, 1.2f, 3.5f), FLinearColor(1.f, 1.f, 0.97f) * 40.f, 0.2f, (Aim - At).Rotation(), false);
+			USpotLightComponent* L = NewObject<USpotLightComponent>(this);
+			L->SetupAttachment(RootComponent);
+			L->SetRelativeLocation(At);
+			L->SetRelativeRotation((Aim - At).Rotation());
+			L->SetIntensityUnits(ELightUnits::Candelas);
+			L->SetIntensity(Candela);
+			L->SetAttenuationRadius(32000.f);
+			L->SetOuterConeAngle(46.f);
+			L->SetInnerConeAngle(24.f);
+			L->bUseTemperature = true;
+			L->Temperature = 5700.f;                 // LED sports lighting
+			L->SourceRadius = 80.f;                  // a bank of lamps, not a point: slightly soft shadow edges
+			L->SetCastShadows(bShadow);
+			L->SetVolumetricScatteringIntensity(0.12f); // faint beams in the night air (more washes the bowl out in rain)
+			L->RegisterComponent();
+		};
+		for (int32 Side : {-1, 1})
+			for (int32 i = 0; i < 5; ++i)
+			{
+				const double X = (10 + 20 * i) * YD;
+				const FVector At(X, Side * (FW / 2 + 24) * YD, 4600);
+				const FVector Aim(X + (50 * YD - X) * 0.25, -Side * 8 * YD, 0);
+				Bank(At, Aim, i % 2 == 1 || i == 2, 60000.f);
+			}
+		Bank(FVector(-16 * YD, 0, 4200), FVector(22 * YD, 0, 0), false, 50000.f);
+		Bank(FVector(116 * YD, 0, 4200), FVector(78 * YD, 0, 0), false, 50000.f);
+	}
 
 	UPostProcessComponent* PP = NewObject<UPostProcessComponent>(this);
 	PP->SetupAttachment(RootComponent);
 	PP->bUnbound = true;
 	// keep exposure in a narrow, broadcast-like range so the turf doesn't wash out
+	// a broadcast camera holds its exposure: at night pin it (the lit bowl stays bright, the sky stays black, no
+	// pumping when the shot swings across the stands); by day a narrow range follows sun and cloud
+	static float NightEV = FParse::Value(FCommandLine::Get(), TEXT("TagNightEV="), NightEV) ? NightEV : 4.5f;
 	PP->Settings.bOverride_AutoExposureMinBrightness = true;
-	PP->Settings.AutoExposureMinBrightness = bNight ? 0.8f : 0.6f;
+	PP->Settings.AutoExposureMinBrightness = bNight ? NightEV : 0.6f;
 	PP->Settings.bOverride_AutoExposureMaxBrightness = true;
-	PP->Settings.AutoExposureMaxBrightness = bNight ? 2.2f : 2.0f;
+	PP->Settings.AutoExposureMaxBrightness = bNight ? NightEV : 2.0f;
 	PP->Settings.bOverride_AutoExposureBias = true;
-	PP->Settings.AutoExposureBias = bNight ? -0.4f : 0.4f;
+	PP->Settings.AutoExposureBias = bNight ? 0.f : 0.4f;
 	PP->Settings.bOverride_MotionBlurAmount = true;
 	PP->Settings.MotionBlurAmount = 0.2f;
 	PP->Settings.bOverride_MotionBlurMax = true;

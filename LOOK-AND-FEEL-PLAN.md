@@ -178,6 +178,8 @@ Reasons, briefly:
   - Verified in a full game: rush moves, catches and get-ups fire; 112 fps, 0 errors.
   - **Coverage against MaddenRef's 37 situation categories** (aggregate counts only): 33 now have TAG motion (keyed, GASP motion matching or ragdoll). Gaps: injury, diving catch, pitch, under-center snap. Multi-player paired interactions (2,785 groups in MaddenRef) are single-player approximations here.
   - **Count:** 57 keyed clips plus the GASP locomotion set used by motion matching, against 12,182 MaddenRef clips. The count can't reach parity by hand keying. The target is coverage parity: every situation has motion.
+- **Cameras (2026-11-09).** `AMatchDirector::UpdateCamera` is now a broadcast operator: critically damped dolly and pan (no linear-lerp drag), the frame leads the ball by its velocity, the lens zooms to the spread of players around the ball (wider when the ball is in the air), handheld drift on the field-level cameras. Post-play cut-ins (`StartCutIn`): a telephoto (85 mm) close shot of the player who made the play after a touchdown, takeaway, sack or 20+ yard gain, with the post-play beat held long enough to see it. `-TagCutIns` reviews them under automation.
+- **Night lighting (2026-11-09).** Twelve 5700 K LED light banks on the stand roofs and over the end zones replace four corner spots. Six cast shadows (a fan of crisp shadows per player); helmets catch several specular glints; the sky goes near black; exposure is pinned (`-TagNightEV=`, default 4.5) so the camera never pumps. 102 fps.
 - **Next.**
   - Motion matching: stride warping for the rare speeds above the 1.3× cap; football-specific motion beyond what the GASP capture covers stays keyed (Tools/Anim).
 
