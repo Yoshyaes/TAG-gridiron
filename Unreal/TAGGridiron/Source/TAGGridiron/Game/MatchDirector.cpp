@@ -374,6 +374,51 @@ void AMatchDirector::TickGapTest(float Dt)
 		WR->Drive(P, 0.f, V, 9.f, Wt < StopT ? TEXT("run") : TEXT("catch"), Wt, Dt, false);
 		Cam(P + FVector(250.f, -650.f, 140.f), P + FVector(150.f, 0.f, 70.f), 30.f);
 	}
+	else if (T >= 22.f && T < 38.f)
+	{
+		// 4) the throwing family, one every 2 s: quick, deep, fade, sidearm, touch (feet set), then on the run both ways
+		Show({QB});
+		Foot(QB, false, false);
+		const float Tt = T - 22.f;
+		const int32 Kinds[] = {FAthleteAssets::ThrowQuickK, FAthleteAssets::ThrowDeepK, FAthleteAssets::ThrowFadeK,
+			FAthleteAssets::ThrowSidearmK, FAthleteAssets::ThrowTouchK, FAthleteAssets::ThrowRunRK, FAthleteAssets::ThrowRunLK};
+		const int32 Idx = FMath::Clamp(static_cast<int32>(Tt / 2.f), 0, 6);
+		static int32 LastThrow = -1;
+		const bool bRun = Kinds[Idx] == FAthleteAssets::ThrowRunRK || Kinds[Idx] == FAthleteAssets::ThrowRunLK;
+		const FVector V = bRun ? FVector(400.f, 0.f, 0.f) : FVector::ZeroVector;
+		QB->Drive(O + FVector(-600.f, 0.f, 0.f), 0.f, V, 9.f, TEXT("throw"), Tt, Dt, false);
+		if (Idx != LastThrow)
+		{
+			LastThrow = Idx;
+			QB->PlayThrow(Kinds[Idx]);
+			UE_LOG(LogTemp, Display, TEXT("TAG gap test: throw kind %d"), Kinds[Idx]);
+		}
+		const FVector At = O + FVector(-600.f, 0.f, 0.f);
+		Cam(At + FVector(250.f, -520.f, 160.f), At + FVector(0.f, 0.f, 120.f), 30.f);
+	}
+	else if (T >= 38.f)
+	{
+		// 5) the catching family, one every 2.2 s, each in its situation: in stride, back shoulder, one hand, scoop at
+		//    speed; the high point jump ball and the comeback from a stand
+		Show({WR});
+		Foot(WR, false, false);
+		const float Ct = T - 38.f;
+		const FAthleteAssets& AA = FAthleteAssets::Get();
+		UAnimationAsset* Catches[] = {AA.CatchInStride.Get(), AA.CatchBackShoulder.Get(), AA.CatchOneHand.Get(), AA.CatchScoop.Get(),
+			AA.CatchHighPoint.Get(), AA.CatchComeback.Get()};
+		const int32 Idx = FMath::Clamp(static_cast<int32>(Ct / 2.2f), 0, 5);
+		static int32 LastCatch = -1;
+		const bool bRun = Idx < 4;
+		const FVector V = bRun ? FVector(650.f, 0.f, 0.f) : FVector::ZeroVector;
+		const FVector At = O + FVector(-800.f, 700.f, 0.f);
+		WR->Drive(At, 0.f, V, 9.f, bRun ? TEXT("run") : TEXT("catch"), Ct, Dt, false);
+		if (Idx != LastCatch && Catches[Idx])
+		{
+			LastCatch = Idx;
+			WR->PlayOneShot(Catches[Idx]);
+		}
+		Cam(At + FVector(260.f, -560.f, 150.f), At + FVector(0.f, 0.f, 110.f), 30.f);
+	}
 	else
 	{
 		// 3) gang tackle: the linebacker squares up and wraps, the corner comes in second, they go down in a pile,
@@ -417,13 +462,13 @@ void AMatchDirector::TickGapTest(float Dt)
 		Cam(RbAt + FVector(100.f, -900.f, 170.f), RbAt + FVector(160.f, 0.f, 60.f), 32.f);
 	}
 	const float ShotT = 0.33f * GapShot;
-	if (T >= ShotT && GapShot < 66)
+	if (T >= ShotT && GapShot < 160)
 	{
 		FScreenshotRequest::RequestScreenshot(FString::Printf(TEXT("tag_gap_%02d.png"), GapShot), false, false);
 		++GapShot;
 	}
 	PerfT += Dt; ++PerfFrames;
-	if (T > 22.f)
+	if (T > 51.5f)
 	{
 		UE_LOG(LogTemp, Display, TEXT("TAG perf avg %.1f fps over %d frames"), PerfFrames / FMath::Max(PerfT, 0.001f), PerfFrames);
 		FPlatformMisc::RequestExit(false);
