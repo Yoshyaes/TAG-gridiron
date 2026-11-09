@@ -134,6 +134,28 @@ void FAthleteAssets::Load()
 		GetUpSlow = Keyed(TEXT("A_TAG_GetUp_Slow"));
 		TackledHit = Keyed(TEXT("A_TAG_Tackled_Hit"));
 		InjuredDown = Keyed(TEXT("A_TAG_Injured_Down"));
+		{
+			// the throwing family; each starts 7 frames before its release (the set throw starts at its stride frame)
+			const TCHAR* TN[ThrowCount] = {TEXT("A_TAG_QB_Throw"), TEXT("A_TAG_QB_Throw_Quick"), TEXT("A_TAG_QB_Throw_Deep"),
+				TEXT("A_TAG_QB_Throw_Fade"), TEXT("A_TAG_QB_Throw_Sidearm"), TEXT("A_TAG_QB_Throw_Touch"), TEXT("A_TAG_QB_Throw_RunR"),
+				TEXT("A_TAG_QB_Throw_RunL")};
+			const int32 Release[ThrowCount] = {21, 16, 24, 21, 21, 22, 16, 16}; // Tools/Anim/clips_more2.py THROW_RELEASE (tempo-scaled)
+			for (int32 i = 0; i < ThrowCount; ++i)
+			{
+				Throws[i] = Keyed(TN[i]);
+				ThrowStart[i] = FMath::Max(0, Release[i] - 7) / 30.f;
+			}
+		}
+		CatchInStride = Keyed(TEXT("A_TAG_Catch_InStride"));
+		CatchHighPoint = Keyed(TEXT("A_TAG_Catch_HighPoint"));
+		CatchOneHand = Keyed(TEXT("A_TAG_Catch_OneHand"));
+		CatchBackShoulder = Keyed(TEXT("A_TAG_Catch_BackShoulder"));
+		CatchComeback = Keyed(TEXT("A_TAG_Catch_Comeback"));
+		CatchScoop = Keyed(TEXT("A_TAG_Catch_Scoop"));
+		TackledFromBehind = Keyed(TEXT("A_TAG_Tackled_FromBehind"));
+		TackledFromSide = Keyed(TEXT("A_TAG_Tackled_FromSide"));
+		TackleMiss = Keyed(TEXT("A_TAG_Tackle_Miss"));
+		BrokenStumble = Keyed(TEXT("A_TAG_Broken_Stumble"));
 		IdleHandsHips = Keyed(TEXT("A_TAG_Idle_HandsHips_Loop"));
 		IdleHandsKnees = Keyed(TEXT("A_TAG_Idle_HandsKnees_Loop"));
 		for (const TCHAR* N : {TEXT("A_TAG_Celebrate_Flex_Loop"), TEXT("A_TAG_Celebrate_PointUp_Loop"), TEXT("A_TAG_Celebrate_Leap_Loop"),
@@ -147,7 +169,8 @@ void FAthleteAssets::Load()
 			TEXT("Catch_OverShoulder"), TEXT("Catch_Dive"), TEXT("GetUp_FaceDown"), TEXT("GetUp_FaceUp"), TEXT("GetUp_Roll"), TEXT("GetUp_Slow"),
 			TEXT("Injured_Down"), TEXT("Truck"), TEXT("Hurdle"), TEXT("QB_Pitch"), TEXT("QB_Handoff"), TEXT("Celebrate_Loop"),
 			TEXT("Celebrate_Flex_Loop"), TEXT("Celebrate_PointUp_Loop"), TEXT("Celebrate_Leap_Loop"), TEXT("Celebrate_FirstDown_Loop"),
-			TEXT("Celebrate_Shimmy_Loop")})
+			TEXT("Celebrate_Shimmy_Loop"), TEXT("Catch_OneHand"), TEXT("Catch_BackShoulder"), TEXT("Catch_Comeback"),
+			TEXT("Tackled_FromSide"), TEXT("Tackle_Miss"), TEXT("Broken_Stumble")})
 		{
 			UAnimationAsset* Orig = Keyed(*FString::Printf(TEXT("A_TAG_%s"), N));
 			UAnimationAsset* Mir = Keyed(*FString::Printf(TEXT("A_TAG_%s_M"), N));
@@ -930,22 +953,101 @@ void AAthlete::StartRagdoll(const FVector& VelWorld)
 	V->SetAllPhysicsLinearVelocity(VelWorld * 0.85f + FVector(0, 0, -50));
 }
 
-void AAthlete::PlayCatch(float BallZCm, float SpeedCm, const FVector& BallVelW, const FVector& SidelineDirW)
+void AAthlete::PlayCatch(float BallZCm, float SpeedCm, const FVector& BallVelW, const FVector& SidelineDirW,
+	const FVector& BallPosW, bool bContested)
 {
 	const FAthleteAssets& A = FAthleteAssets::Get();
+	const FVector Fwd = GetActorForwardVector(), Right = GetActorRightVector();
+	const FVector Rel = BallPosW.IsNearlyZero() ? FVector::ZeroVector : BallPosW - GetActorLocation();
+	const float Lateral = FVector::DotProduct(FVector(Rel.X, Rel.Y, 0.f), Right);   // + = ball to his right
+	const float Along = FVector::DotProduct(BallVelW.GetSafeNormal2D(), Fwd);         // + = ball travelling his way
+	const bool bHanded = Player && (Player->id % 2) == 1;
+	static int32 GCatchSeq = 0;
+	const int32 Seq = GCatchSeq++;
 	UAnimationAsset* C = nullptr;
+	bool bMirror = bHanded;
 	if (!SidelineDirW.IsNearlyZero() && A.CatchSidelineL && A.CatchSidelineR)
-		C = FVector::DotProduct(SidelineDirW, GetActorRightVector()) > 0.f ? A.CatchSidelineR.Get() : A.CatchSidelineL.Get(); // reach toward the boundary, drag the toes
+	{
+		C = FVector::DotProduct(SidelineDirW, Right) > 0.f ? A.CatchSidelineR.Get() : A.CatchSidelineL.Get(); // reach to the boundary, drag the toes
+		bMirror = false;
+	}
+	else if (bContested && BallZCm > 170.f && A.CatchHighPoint)
+		C = A.CatchHighPoint; // jump ball: high point it over the defender
 	else if (SpeedCm > 350.f)
 	{
-		// at speed only the deep ball over the shoulder gets a full body catch (its legs keep the stride); other
-		// running catches stay on the procedural hands layer over the run
-		if (A.CatchOverShoulder && FVector::DotProduct(BallVelW.GetSafeNormal2D(), GetActorForwardVector()) > 0.5f)
-			C = A.CatchOverShoulder;
+		if (Along > 0.5f && A.CatchOverShoulder && A.CatchBackShoulder)
+		{
+			// thrown over the top from behind: over the shoulder in stride, or back to the outside shoulder
+			const bool bBack = FMath::Abs(Lateral) > 45.f || Along < 0.8f;
+			C = bBack ? A.CatchBackShoulder.Get() : A.CatchOverShoulder.Get();
+			if (bBack) bMirror = Lateral > 0.f; // the keyed one turns back over the left shoulder
+		}
+		else if (BallZCm < 70.f && A.CatchScoop) C = A.CatchScoop;
+		else if (FMath::Abs(Lateral) > 55.f && A.CatchOneHand)
+		{
+			C = A.CatchOneHand; // thrown wide: stab it with the near hand
+			bMirror = Lateral > 0.f;
+		}
+		else C = A.CatchInStride; // the everyday one: hands out in front, in stride
 	}
+	else if (Along < -0.5f && A.CatchComeback && Seq % 3 == 0)
+		C = A.CatchComeback; // working back to the quarterback
 	else
 		C = BallZCm > 160.f ? A.CatchHigh.Get() : BallZCm < 80.f ? A.CatchLow.Get() : A.CatchChest.Get();
-	if (C) PlayOneShot(A.Side(C, Player && (Player->id % 2) == 1));
+	if (C) PlayOneShot(A.Side(C, bMirror));
+}
+
+void AAthlete::PlayThrow(int32 Kind)
+{
+	const FAthleteAssets& A = FAthleteAssets::Get();
+	if (Kind < 0 || Kind >= FAthleteAssets::ThrowCount || !A.Throws[Kind]) return;
+	CurrentClip = nullptr; // restart cleanly in the chosen throw
+	PlayClip(A.Throws[Kind], false, 1.f, A.ThrowStart[Kind]);
+}
+
+void AAthlete::ApplyHit(const FVector& TacklerVelW, float TacklerKg, const FVector& TacklerLoc)
+{
+	const FAthleteAssets& A = FAthleteAssets::Get();
+	if (bHitApplied || TackledLeft <= 0.f) return;
+	bHitApplied = true;
+	// where the hit comes from: the tackler's motion, or his position if he was nearly still
+	FVector HitDir = FVector(TacklerVelW.X, TacklerVelW.Y, 0.f);
+	if (HitDir.Size() < 150.f) HitDir = GetActorLocation() - TacklerLoc;
+	HitDir.Z = 0.f;
+	HitDir = HitDir.GetSafeNormal();
+	const float Front = FVector::DotProduct(HitDir, GetActorForwardVector());  // + = pushed the way he faces (from behind)
+	const float Side = FVector::DotProduct(HitDir, GetActorRightVector());     // + = pushed to his right
+	UAnimationAsset* R = A.TackledHit;                                         // head on
+	if (Front > 0.5f && A.TackledFromBehind) R = A.TackledFromBehind;
+	else if (FMath::Abs(Front) <= 0.5f && A.TackledFromSide) R = A.Side(A.TackledFromSide, Side > 0.f); // knocked to the side the hit drives him
+	if (R && R != CurrentClip)
+	{
+		PlayClip(R, false);
+		TackledLeft = R->GetPlayLength();
+	}
+	// the pile moves with both players' momentum (kg * cm/s), the fall carries it
+	const float CarrierKg = Player ? static_cast<float>(Player->weightLb) * 0.4536f : 100.f;
+	const FVector P = LastVelW * CarrierKg + FVector(TacklerVelW.X, TacklerVelW.Y, 0.f) * TacklerKg;
+	const FVector V = P / FMath::Max(1.f, CarrierKg + TacklerKg);
+	PileVel = V.GetClampedToMaxSize(650.f) + HitDir * 120.f - FVector(0, 0, 60);
+	UE_LOG(LogTemp, Verbose, TEXT("TAG hit on #%d: %s (front %.2f side %.2f), pile %.0f cm/s"), Player ? Player->number : -1,
+		R ? *R->GetName() : TEXT("-"), Front, Side, PileVel.Size2D());
+}
+
+void AAthlete::PlayMissedTackle(bool bCarrierLeft)
+{
+	const FAthleteAssets& A = FAthleteAssets::Get();
+	if (!A.TackleMiss || bRagdoll) return;
+	bMissing = true;
+	PlayOneShot(A.Side(A.TackleMiss, !bCarrierLeft));
+	UE_LOG(LogTemp, Verbose, TEXT("TAG missed tackle #%d"), Player ? Player->number : -1);
+}
+
+void AAthlete::PlayBrokenTackle(bool bHitFromRight)
+{
+	const FAthleteAssets& A = FAthleteAssets::Get();
+	if (!A.BrokenStumble || bRagdoll) return;
+	PlayOneShot(A.Side(A.BrokenStumble, !bHitFromRight)); // the keyed one is hit on his right, stumbles left
 }
 
 void AAthlete::BeginTackleOn(AAthlete* Carrier)
@@ -1058,6 +1160,8 @@ void AAthlete::ResetPose()
 	bGettingUp = false;
 	bStoodUp = false;
 	TackledLeft = 0.f;
+	bHitApplied = false;
+	bMissing = false;
 	TackleOn = nullptr;
 	BlockPartner = nullptr;
 	BlockAlign = FVector::ZeroVector;
@@ -1086,6 +1190,7 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 {
 	FAthleteAssets& A = FAthleteAssets::Get();
 	const FVector PrevActorLoc = GetActorLocation();
+	if (Anim != TEXT("down") && FVector(VelWorld.X, VelWorld.Y, 0.f).SizeSquared() > 100.f) LastVelW = FVector(VelWorld.X, VelWorld.Y, 0.f);
 	if (bRagdoll)
 	{
 		// physics owns the body; after a beat the player gets up with a keyed get-up out of the ragdoll pose
@@ -1173,6 +1278,7 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 			static int32 GHitSeq = 0;
 			UAnimationAsset* Hit = A.Side(A.TackledHit, (GHitSeq++ % 2) == 1);
 			TackledLeft = Hit->GetPlayLength();
+			bHitApplied = false;
 			UE_LOG(LogTemp, Verbose, TEXT("TAG tackled #%d held %.0f cm behind the sim spot"), Player ? Player->number : -1, Jump);
 			PlayClip(Hit, false);
 			return;
@@ -1181,7 +1287,7 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 		return;
 	}
 	// hand keyed contact and evasion clips (in place; the sim moves the actor)
-	if (Anim == TEXT("tackle") && A.TackleKeyed)
+	if (Anim == TEXT("tackle") && A.TackleKeyed && !bMissing)
 	{
 		if (bChanged)
 		{
@@ -1304,6 +1410,7 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 			// the layout dive ends ~1 m ahead of where it started: hand that travel to the actor so the next pose
 			// starts where the body is (VisOffset then eases back onto the sim position)
 			if (OneShot == A.CatchDive || OneShot == A.Side(A.CatchDive, true)) VisOffset += GetActorForwardVector() * FAthleteAssets::CatchDiveTravel;
+			bMissing = false;
 			OneShot = nullptr;
 			CurrentAnim.Reset(); // one-shot done: let whatever state follows (re)start next frame (crossfaded)
 		}

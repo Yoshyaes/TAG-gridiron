@@ -12,7 +12,10 @@ import clips  # noqa: E402
 import clips_more  # noqa: E402
 import tag_anim  # noqa: E402
 
+import clips_more2  # noqa: E402
+
 clips.CLIPS.update(clips_more.MORE)
+clips.CLIPS.update(clips_more2.MORE2)
 
 argv = sys.argv[sys.argv.index("--") + 1:]
 rig_fbx, name, out_dir = argv[0], argv[1], argv[2]
@@ -23,10 +26,14 @@ f0, f1 = clips.CLIPS[name](rig)
 rig.commit()
 import bpy  # noqa: E402
 ik_miss = {}
+ik_frame = {}
 for f in range(f0, f1 + 1, max(1, (f1 - f0) // 6)):
     bpy.context.scene.frame_set(f)
     for key, (mid, end, c, tgt, pole, cr) in rig.chains.items():
-        ik_miss[key] = max(ik_miss.get(key, 0.0), round((rig.head(end) - tgt.matrix_world.translation).length, 4))
+        m = round((rig.head(end) - tgt.matrix_world.translation).length, 4)
+        if m > ik_miss.get(key, -1.0):
+            ik_miss[key] = m
+            ik_frame[key] = f
 rig.bake(f0, f1)
 rows = rig.measure(f0, f1)
 
@@ -44,7 +51,7 @@ for side in ("l", "r"):
                              if a[2] < 0.105 and b[2] < 0.105), default=0.0), 4)
 report = {"clip": name, "frames": [f0, f1], "seconds": round((f1 - f0) / 30.0, 3), "pole_angles": rig.pole_angles,
           "pelvis_z": stat("pelvis", 2), "head_z": stat("head", 2), "hand_r_z": stat("hand_r", 2), "shoulder_r": [round(v, 3) for v in rows[0]["upperarm_r"]], "hand_r": [round(v, 3) for v in rows[0]["hand_r"]],
-          "max_planted_foot_step_m": slide, "ik_miss_m": ik_miss, "track_align": rig.track_align}
+          "max_planted_foot_step_m": slide, "ik_miss_m": ik_miss, "ik_miss_frame": ik_frame, "track_align": rig.track_align}
 os.makedirs(out_dir, exist_ok=True)
 fbx = os.path.join(out_dir, "A_TAG_%s.fbx" % name)
 rig.export(fbx, f0, f1)

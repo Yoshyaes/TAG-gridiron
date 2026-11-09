@@ -1113,7 +1113,16 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 				Best = C;
 				BestD = tag::dist(C->pos, E->pos);
 			}
-		if (Best) AthOf(E)->BeginTackleOn(AthOf(Best));
+		if (Best)
+		{
+			AAthlete* Tk = AthOf(E);
+			Tk->BeginTackleOn(AthOf(Best));
+			if (Best->anim == tag::Anim::Down)
+			{
+				const FVector TvW = Dir > 0 ? FVector(E->vel.x, -E->vel.y, 0) * YD : FVector(-E->vel.x, E->vel.y, 0) * YD;
+				AthOf(Best)->ApplyHit(TvW, static_cast<float>(E->p->weightLb) * 0.4536f, Tk->GetActorLocation());
+			}
+		}
 	}
 	// keyed one-shots on sim events (new events only; a new play restarts the list)
 	if (Sim.get() != EventSim || Sim->events.size() < SeenEvents) { EventSim = Sim.get(); SeenEvents = 0; }
@@ -1131,6 +1140,42 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 				if (AAthlete* Rb = AthOf(Ev.b)) bLeft = FVector::DotProduct(Rb->GetActorLocation() - Q->GetActorLocation(), Q->GetActorRightVector()) < 0.f;
 			const FAthleteAssets& AA = FAthleteAssets::Get();
 			if (Q) Q->PlayOneShot(AA.Side(bPitch ? AA.Pitch.Get() : AA.Handoff.Get(), bLeft));
+		}
+		else if (Ev.type == "throw" && Ev.a && Ev.b)
+		{
+			// the throw that fits the pass: on the run, under pressure, lofted, deep, quick, or a set-feet throw
+			if (AAthlete* Q = AthOf(Ev.a))
+			{
+				const double D = tag::dist(Ev.a->pos, Ev.b->pos);
+				const double Sp = tag::len(Ev.a->vel);
+				double Rush = 99.0;
+				for (const tag::Ent* O : Sim->ents)
+					if (O->side != Ev.a->side) Rush = FMath::Min(Rush, tag::dist(O->pos, Ev.a->pos));
+				int32 K = FAthleteAssets::ThrowSet;
+				static int32 GPressSeq = 0;
+				if (Sp > 2.5)
+				{
+					const FVector VW = Dir > 0 ? FVector(Ev.a->vel.x, -Ev.a->vel.y, 0) : FVector(-Ev.a->vel.x, Ev.a->vel.y, 0);
+					K = FVector::DotProduct(VW, Q->GetActorRightVector()) > 0.f ? FAthleteAssets::ThrowRunRK : FAthleteAssets::ThrowRunLK;
+				}
+				else if (Rush < 1.6) K = (GPressSeq++ % 2) ? FAthleteAssets::ThrowSidearmK : FAthleteAssets::ThrowFadeK;
+				else if (Sim->ball.lob) K = FAthleteAssets::ThrowTouchK;
+				else if (D > 28.0) K = FAthleteAssets::ThrowDeepK;
+				else if (D < 10.0) K = FAthleteAssets::ThrowQuickK;
+				Q->PlayThrow(K);
+				UE_LOG(LogTemp, Verbose, TEXT("TAG throw kind %d (%.0f yd, qb %.1f yd/s, rush %.1f yd%s)"), K, D, Sp, Rush, Sim->ball.lob ? TEXT(", lob") : TEXT(""));
+			}
+		}
+		else if ((Ev.type == "broken") && Ev.a && Ev.b)
+		{
+			// broken tackle: the defender whiffs, the carrier bounces off and keeps going
+			AAthlete* Cr = AthOf(Ev.a);
+			AAthlete* Df = AthOf(Ev.b);
+			if (Cr && Df)
+			{
+				Cr->PlayBrokenTackle(FVector::DotProduct(Df->GetActorLocation() - Cr->GetActorLocation(), Cr->GetActorRightVector()) > 0.f);
+				Df->PlayMissedTackle(FVector::DotProduct(Cr->GetActorLocation() - Df->GetActorLocation(), Df->GetActorRightVector()) < 0.f);
+			}
 		}
 		else if (Ev.type == "divecatch" && Ev.a)
 		{
@@ -1159,7 +1204,13 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 					const FVector In = ToWorld(Ev.a->pos.x, Yd, Dir, 0), Out = ToWorld(Ev.a->pos.x, Yd < 1.5 ? Yd - 1.0 : Yd + 1.0, Dir, 0);
 					Side = (Out - In).GetSafeNormal();
 				}
-				R->PlayCatch(static_cast<float>(Bc.pos.z * YD), static_cast<float>(tag::len(Ev.a->vel) * YD), BallVelC, Side);
+				bool bContested = false;
+				for (const tag::Ent* O : Sim->ents)
+					if (O->side != Ev.a->side && tag::dist(O->pos, Ev.a->pos) < 1.3) bContested = true;
+				// the sim takes momentum off the catcher as he catches it (x0.45, x0.3 contested): his speed into the catch
+				const double SpeedIn = tag::len(Ev.a->vel) / (bContested ? 0.3 : 0.45);
+				R->PlayCatch(static_cast<float>(Bc.pos.z * YD), static_cast<float>(SpeedIn * YD), BallVelC, Side,
+					ToWorld(Bc.pos.x, Bc.pos.y, Dir, Bc.pos.z), bContested);
 			}
 		}
 	}

@@ -75,7 +75,17 @@ public:
 	float GetUpElapsed() const;
 	/** The sim says this player just caught the ball: pick the catch for the ball height, his speed, where the ball
 	 *  came from and whether he is at the sideline (SidelineDirW: unit vector toward the nearest sideline, or zero). */
-	void PlayCatch(float BallZCm, float SpeedCm, const FVector& BallVelW, const FVector& SidelineDirW);
+	void PlayCatch(float BallZCm, float SpeedCm, const FVector& BallVelW, const FVector& SidelineDirW,
+		const FVector& BallPosW = FVector::ZeroVector, bool bContested = false);
+	/** The sim just released a pass: play the throw that fits it (FAthleteAssets::EThrow). */
+	void PlayThrow(int32 Kind);
+	/** Paired tackle: the first tackler's hit decides the carrier's reaction (head on / from behind / from the side)
+	 *  and the pile's momentum (both players' masses and velocities). */
+	void ApplyHit(const FVector& TacklerVelW, float TacklerKg, const FVector& TacklerLoc);
+	/** Broken tackle: the defender whiffs (bCarrierLeft: the carrier slipped by on his left). */
+	void PlayMissedTackle(bool bCarrierLeft);
+	/** Broken tackle: the carrier bounces off contact (bHitFromRight: the defender came from his right). */
+	void PlayBrokenTackle(bool bHitFromRight);
 	/** Layout dive at an incompletion just out of reach (gets back up at the end). */
 	void PlayDiveAttempt();
 	/** Paired tackle: this defender's tackle is on Carrier; ease into wrap distance and face him. */
@@ -176,6 +186,9 @@ private:
 	bool bInjuredChain = false;   // getting up: the injury beat plays first, then the slow get-up
 	bool bInjuredMirror = false;  // ...on the same side
 	float OneShotRate = 1.f;      // per-player timing (style), so two players never move in lockstep
+	bool bHitApplied = false;     // the carrier's reaction already matched to the first tackler
+	bool bMissing = false;        // whiffing a tackle (one-shot), the tackle clips stand aside
+	FVector LastVelW = FVector::ZeroVector; // last moving velocity (the carrier's momentum into a tackle)
 	float InjuredLeft = 0.f;
 	FVector BlockAlign = FVector::ZeroVector;
 	float AlignT = -1.f;   // rotates tackle variants so the same player never repeats one back to back
@@ -272,6 +285,12 @@ struct FAthleteAssets
 	TObjectPtr<UAnimationAsset> StanceUnderCenter, UnderCenterSnap, Pitch, CatchDive, GetUpSlow;
 	TObjectPtr<UAnimationAsset> TackledHit; // the carrier's side of a tackle
 	TObjectPtr<UAnimationAsset> InjuredDown; // hurt on the play, chained into the slow get-up
+	// batch 4: the throwing family (index = EThrow), more catches, collision reactions
+	enum EThrow : int32 { ThrowSet = 0, ThrowQuickK, ThrowDeepK, ThrowFadeK, ThrowSidearmK, ThrowTouchK, ThrowRunRK, ThrowRunLK, ThrowCount };
+	UAnimationAsset* Throws[ThrowCount] = {};
+	float ThrowStart[ThrowCount] = {};   // where each clip starts so its release lands just after the sim's
+	TObjectPtr<UAnimationAsset> CatchInStride, CatchHighPoint, CatchOneHand, CatchBackShoulder, CatchComeback, CatchScoop;
+	TObjectPtr<UAnimationAsset> TackledFromBehind, TackledFromSide, TackleMiss, BrokenStumble;
 	/** Mirrored (other side) version of a keyed clip, built by Tools/Anim (<name>_M); the clip itself if none. */
 	TMap<UAnimationAsset*, UAnimationAsset*> MirrorOf;
 	UAnimationAsset* Side(UAnimationAsset* Clip, bool bMirror) const
