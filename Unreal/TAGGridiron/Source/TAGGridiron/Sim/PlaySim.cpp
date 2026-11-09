@@ -1632,10 +1632,14 @@ void PlaySim::thinkCarrier(Ent* e) {
 // ------------------------------------------------------------------ physics
 void PlaySim::move(Ent* e, double dt) {
   if (e->engaged) return;  // engaged pairs are moved by updateEngagements
-  if (e->state == EntState::Down) {
+  if (e->state == EntState::Down || (e->pancaked && e->stun > 0)) {
     e->vel = scale(e->vel, 0.85);
     e->pos = add(e->pos, scale(e->vel, dt));
     return;
+  }
+  if (e->pancaked) {  // back on his feet
+    e->pancaked = false;
+    e->anim = Anim::Idle;
   }
   const V2 vd = e->want;
   const double s = e->speed();
@@ -1694,8 +1698,39 @@ void PlaySim::disengage(Ent* b) {
   Ent* d = b->engaged;
   if (!d) return;
   b->engaged = nullptr;
+  b->linePush = 0;
   removeValue(d->engagedBy, b);
   if (d->engaged == b) d->engaged = d->engagedBy.empty() ? nullptr : d->engagedBy[0];
+  if (d->engagedBy.empty()) d->linePush = 0;
+}
+
+// a per-player key that is the same in every build of the league (Player::id comes from a process-wide counter, so
+// two leagues in one process number their players differently): jersey number and side
+static unsigned stableKey(const Ent* d) {
+  return static_cast<unsigned>((d->p ? d->p->number : 0) * 2 + (d->side == Side::Def ? 1 : 0)) + 1u;
+}
+
+double PlaySim::pancakeRoll(const Ent* d) const {
+  // a uniform draw that does not touch the play's rng stream (so adding pancakes changes nothing but the pancakes)
+  unsigned h = stableKey(d) * 2654435761u ^ static_cast<unsigned>(t * 60.0 + 0.5) * 2246822519u;
+  h ^= h >> 15;
+  h *= 2246822519u;
+  h ^= h >> 13;
+  return (h & 0xFFFFFF) / static_cast<double>(0x1000000);
+}
+
+const char* PlaySim::shedMove(const Ent* d, const Ent* b, bool passPro, double push) const {
+  const Ratings& r = d->r();
+  const unsigned h = stableKey(d) * 2654435761u + static_cast<unsigned>(t * 10.0) * 40503u;
+  const bool power = r.strength > r.agility + 4;
+  if (!passPro) return power ? (h % 2 ? "longarm" : "club") : (h % 3 == 0 ? "club" : "rip");  // stack and shed
+  if (push > 0.35) return h % 2 ? "longarm" : "bull";  // he was already walking the blocker back: finish the power rush
+  // edge or inside: is the rusher wider of the quarterback's lane than his blocker?
+  const double qy = qb ? qb->pos.y : by;
+  const bool edge = std::fabs(d->pos.y - qy) > std::fabs(b->pos.y - qy) + 0.25;
+  if (edge) return (r.accel + r.agility > 170 || h % 3 == 0) ? "diprip" : "club";
+  if (r.agility > 80 && h % 4 == 0) return "spin";
+  return power ? (h % 2 ? "longarm" : "bull") : (h % 2 ? "swim" : "rip");
 }
 
 void PlaySim::updateEngagements(double dt) {
@@ -1727,6 +1762,8 @@ void PlaySim::updateEngagements(double dt) {
     const double diff = dSkill - avgB - edge + massAdv - (nb - 1) * 14;
     // movement of the pile
     const double push = clamp(diff / 25, -1, 1);
+    d->linePush = push;
+    for (Ent* b : blockers) b->linePush = push;
     const V2 pileV = push > 0 ? scale(toGoal, push * (passPro ? 1.3 : 1.6))
                               : scale(norm(V2{-toGoal.x, -toGoal.y * 0.3}), -push * (passPro ? 0.35 : 1.6));
     // defender also slides laterally toward the goal when not winning
@@ -1751,8 +1788,28 @@ void PlaySim::updateEngagements(double dt) {
     const bool holderNear = holder && holder->side != d->side && dist(holder->pos, d->pos) < 1.6;
     const double decay = (std::max)(0.0, blockers[0]->engT - (passPro ? 2.6 : 1.6)) * 0.5;
     const double lambda = (base * std::exp(diff / 17) + decay) * (holderNear ? 3.2 : 1);
+    // pancake: a run block won decisively puts the defender on his back (rare; the drive has to be dominant)
+    if (!passPro && push < -0.6 && blockers[0]->engT > 0.5 &&
+        pancakeRoll(d) < 1 - std::exp(-0.35 * (-push - 0.6) / 0.4 * dt)) {
+      if (ball.mode != BallMode::Snap) ev("pancake", d, blockers[0]);
+      for (Ent* b : blockers) {
+        disengage(b);
+        b->stun = 0.25;
+      }
+      d->engaged = nullptr;
+      d->engagedBy.clear();
+      d->linePush = 0;
+      d->pancaked = true;
+      d->stun = 2.4;
+      d->anim = Anim::Down;
+      d->animT = 0;
+      d->vel = scale(norm(V2{-toGoal.x, -toGoal.y}), 1.2);
+      continue;
+    }
     if (rng.chance(1 - std::exp(-lambda * dt))) {
-      // shed! the beaten blocker is left behind and can't re-engage this rusher
+      // shed! the beaten blocker is left behind and can't re-engage this rusher. The move that won it (for the
+      // presentation): picked from the rusher's build and leverage, not from the rng, so the sim is unchanged
+      if (ball.mode != BallMode::Snap) ev("shed", d, blockers[0], shedMove(d, blockers[0], passPro, push)); // events start at the snap
       for (Ent* b : blockers) {
         disengage(b);
         b->stun = (passPro ? 0.6 : 0.35) + rng.range(0, 0.3);
@@ -1772,10 +1829,10 @@ void PlaySim::collide() {
   const std::vector<Ent*>& es = ents;
   for (size_t i = 0; i < es.size(); i++) {
     Ent* a = es[i];
-    if (a->state == EntState::Down) continue;
+    if (a->state == EntState::Down || (a->pancaked && a->stun > 0)) continue;  // on the ground: no longer in the way
     for (size_t j = i + 1; j < es.size(); j++) {
       Ent* b = es[j];
-      if (b->state == EntState::Down) continue;
+      if (b->state == EntState::Down || (b->pancaked && b->stun > 0)) continue;
       if (a->engaged == b || b->engaged == a) continue;
       const double dx = b->pos.x - a->pos.x;
       const double dy = b->pos.y - a->pos.y;

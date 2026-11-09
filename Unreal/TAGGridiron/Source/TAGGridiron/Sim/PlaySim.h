@@ -81,6 +81,11 @@ class Ent {
   double engageEdge = 0;
   double engT = 0;
   double stun = 0;
+  /** Engaged block: who is winning the rep, from the defender's side (-1 blocker driving him, +1 defender driving
+   *  the blocker). Same value on the defender and his blockers; 0 when not engaged. Presentation only. */
+  double linePush = 0;
+  /** Pancaked: down on his back for the rest of the stun (run blocking). */
+  bool pancaked = false;
   double tackleCd = 0;
   std::vector<V2> route;
   size_t routeIdx = 0;
@@ -371,6 +376,10 @@ class PlaySim {
   void move(Ent* e, double dt);
   void engage(Ent* blocker, Ent* d);
   void disengage(Ent* b);
+  /** The pass rush / block shedding move that beat this blocker (presentation: "swim", "rip", "club", "spin",
+   *  "bull", "longarm", "diprip"). Deterministic: does not draw from the rng. */
+  const char* shedMove(const Ent* d, const Ent* b, bool passPro, double push) const;
+  double pancakeRoll(const Ent* d) const;
   void updateEngagements(double dt);
   void collide();
   void updateBall(double dt);

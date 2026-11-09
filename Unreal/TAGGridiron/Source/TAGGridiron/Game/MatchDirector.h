@@ -171,6 +171,9 @@ private:
 	 *  center snap + pitch, a layout catch, a paired gang tackle with the pile and an injured carrier. */
 	void TickGapTest(float Dt);
 	bool bGapTest = false;
+	/** -TagLineTest: one tackle against one end, every trench interaction in turn, filmed side on. */
+	bool bLineTest = false;
+	void TickLineTest(float Dt);
 	int32 GapShot = 0;
 	bool bMoveTest = false;
 	FVector MovePos = FVector::ZeroVector;

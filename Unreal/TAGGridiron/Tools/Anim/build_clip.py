@@ -13,9 +13,11 @@ import clips_more  # noqa: E402
 import tag_anim  # noqa: E402
 
 import clips_more2  # noqa: E402
+import clips_more3  # noqa: E402
 
 clips.CLIPS.update(clips_more.MORE)
 clips.CLIPS.update(clips_more2.MORE2)
+clips.CLIPS.update(clips_more3.LINE)
 
 argv = sys.argv[sys.argv.index("--") + 1:]
 rig_fbx, name, out_dir = argv[0], argv[1], argv[2]

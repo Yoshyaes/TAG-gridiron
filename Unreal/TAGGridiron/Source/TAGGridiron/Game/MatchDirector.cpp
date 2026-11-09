@@ -105,6 +105,12 @@ void AMatchDirector::BeginPlay()
 		bMoveTest = true;
 		StartMatch(3, 7, false, true, 0, false, 900);
 	}
+	else if (FParse::Param(FCommandLine::Get(), TEXT("TagLineTest")))
+	{
+		bLineup = true;
+		bLineTest = true;
+		StartMatch(3, 7, false, true, 0, false, 900);
+	}
 	else if (FParse::Param(FCommandLine::Get(), TEXT("TagGapTest")))
 	{
 		bLineup = true;
@@ -146,6 +152,11 @@ void AMatchDirector::TickLineup(float Dt)
 	if (bGapTest)
 	{
 		TickGapTest(Dt);
+		return;
+	}
+	if (bLineTest)
+	{
+		TickLineTest(Dt);
 		return;
 	}
 	// 0-9 s pre-snap stances facing the camera, 9-13 s from behind, 13-15 s celebrating, 15-17 s contact / evasion:
@@ -309,6 +320,139 @@ void AMatchDirector::TickMoveTest(float Dt)
 		UE_LOG(LogTemp, Display, TEXT("TAG perf avg %.1f fps over %d frames"), PerfFrames / FMath::Max(PerfT, 0.001f), PerfFrames);
 		FPlatformMisc::RequestExit(false);
 	}
+}
+
+void AMatchDirector::TickLineTest(float Dt)
+{
+	// a right tackle (home, +X) against the end over him (away, -X), filmed side on. Each 4 s rep: stance, get-off and
+	// the punch at contact, the hand fight, then the rep's outcome:
+	//   0 bull rush: the end walks him into the pocket (bull drive / anchor), finishes with the long arm
+	//   1 run block won: drive / driven back, pancake (the end goes down, the tackle finishes over him)
+	//   2 speed rush off the edge: dip and rip, the tackle beaten on the outside
+	//   3 swim inside   4 spin   5 club   6 rip
+	if (Lineup.Num() < 2) return;
+	const float T = LineupT;
+	AAthlete* OL = Lineup[0];
+	AAthlete* DL = Lineup[1];
+	for (int32 i = 0; i < Lineup.Num(); ++i) Lineup[i]->SetActorHiddenInGame(i > 1);
+	const int32 Rep = static_cast<int32>(T / 4.f);
+	const float R = T - Rep * 4.f;
+	static const TCHAR* Moves[] = {TEXT("longarm"), TEXT(""), TEXT("diprip"), TEXT("swim"), TEXT("spin"), TEXT("club"), TEXT("rip")};
+	if (Rep > 6)
+	{
+		FPlatformMisc::RequestExit(false);
+		return;
+	}
+	static int32 LastRep = -1;
+	static bool bResolved = false;
+	if (Rep != LastRep)
+	{
+		LastRep = Rep;
+		bResolved = false;
+		OL->ResetPose();
+		DL->ResetPose();
+	}
+	const FVector O = TagCoords::ToWorld(40, tag::FIELD_W * 0.5, 1);
+	const bool bRun = Rep == 1;
+	const float Wide = Rep == 2 ? 70.f : 0.f; // the speed rusher lines up wide of the tackle
+	const float Snap = 0.8f, Contact = 1.15f, Resolve = 2.6f;
+	// pile travel: toward the quarterback (-X) on the bull rush, off the ball (+X) on the run block
+	const float PileV = Rep == 0 ? -110.f : bRun ? 150.f : 0.f;
+	const float Fought = FMath::Clamp(R - (Contact + 0.6f), 0.f, Resolve - Contact - 0.6f);
+	const FVector Pile = O + FVector(PileV * Fought, 0.f, 0.f);
+	FVector OLp = Pile + FVector(-55.f, 0.f, 0.f), DLp = Pile + FVector(55.f, Wide, 0.f);
+	FVector OLv = FVector(PileV, 0, 0), DLv = OLv;
+	FString OLa = TEXT("block"), DLa = TEXT("block");
+	bool bEngaged = R >= Contact && R < Resolve;
+	if (R < Snap)
+	{
+		OLp = O + FVector(-125.f, 0, 0);
+		DLp = O + FVector(125.f, Wide, 0);
+		OLv = DLv = FVector::ZeroVector;
+		OLa = DLa = TEXT("idle");
+	}
+	else if (R < Contact)
+	{
+		const float S = (R - Snap) / (Contact - Snap);
+		OLp = FMath::Lerp(O + FVector(-125.f, 0, 0), O + FVector(-55.f, 0, 0), S);  // pass set / fire out
+		DLp = FMath::Lerp(O + FVector(125.f, Wide, 0), O + FVector(55.f, Wide, 0), S);
+		OLv = FVector(bRun ? 80.f : -60.f, 0, 0);
+		DLv = FVector(-80.f, 0, 0);
+	}
+	else if (R >= Resolve)
+	{
+		const float After = R - Resolve;
+		if (!bResolved)
+		{
+			bResolved = true;
+			if (bRun)
+			{
+				OL->PlayPancakeFinish();
+				DL->SetPancaked(FVector(1, 0, 0));
+				UE_LOG(LogTemp, Display, TEXT("TAG line test rep %d: pancake"), Rep);
+			}
+			else
+			{
+				DL->PlayRushMove(Moves[Rep], OL);
+				OL->PlayBeaten(DL);
+				UE_LOG(LogTemp, Display, TEXT("TAG line test rep %d: %s"), Rep, Moves[Rep]);
+			}
+		}
+		const FVector End = Pile;
+		OLp = End + FVector(-55.f, 0.f, 0.f);
+		OLv = FVector::ZeroVector;
+		OLa = TEXT("idle");
+		if (bRun)
+		{
+			DLp = End + FVector(60.f + 40.f * FMath::Min(After, 0.5f), 0.f, 0.f);
+			DLv = FVector(120.f, 0, 0);
+			DLa = TEXT("down");
+		}
+		else
+		{
+			DLp = End + FVector(48.f - 380.f * After, Wide + (Rep == 3 || Rep == 6 ? -90.f : 90.f) * FMath::Min(After, 0.6f), 0.f);
+			DLv = FVector(-380.f, 0, 0);
+			DLa = TEXT("run");
+		}
+	}
+	// hand fight while engaged; the rep's winner after the punch has settled
+	const float Push = !bEngaged || R < Contact + 0.6f ? 0.f : (Rep == 0 ? 0.85f : bRun ? -0.85f : 0.f);
+	OL->SetBlockPartner(bEngaged ? DL : nullptr);
+	DL->SetBlockPartner(bEngaged ? OL : nullptr);
+	OL->SetLinePush(Push, false, !bRun);
+	DL->SetLinePush(Push, true, !bRun);
+	auto Feed = [&](AAthlete* Me, AAthlete* Him)
+	{
+		FAthleteFootball F;
+		F.bPreSnap = R < Snap;
+		if (bEngaged)
+		{
+			const FVector Chest = Him->BoneWorld(TEXT("spine_04"));
+			F.bReach = true;
+			F.ReachWorld = Chest + (Me->GetActorLocation() - Chest).GetSafeNormal2D() * 16.f;
+			F.ReachSpread = 13.f;
+			F.Lean = 0.9f;
+			F.bLook = true;
+			F.LookWorld = Him->BoneWorld(TEXT("head"));
+		}
+		Me->SetFootball(F, Dt);
+	};
+	Feed(OL, DL);
+	Feed(DL, OL);
+	OL->Drive(OLp, 0.f, OLv, 7.f, OLa, R, Dt, true);
+	DL->Drive(DLp, 180.f, DLv, 7.f, DLa, R, Dt, true);
+	// side on from the offense's right, low, a 35 mm lens on the pair
+	const FVector At = O + FVector(0.f, -560.f, 150.f), Look = O + FVector(0.f, 0.f, 95.f);
+	Camera->SetActorLocation(At);
+	Camera->SetActorRotation((Look - At).Rotation());
+	if (UCineCameraComponent* C = Camera->GetCineCameraComponent())
+	{
+		C->CurrentFocalLength = 35.f;
+		C->FocusSettings.ManualFocusDistance = (Look - At).Size();
+	}
+	static int32 Shot = 0;
+	if (T >= 0.2f * Shot && Shot < 150)
+		FScreenshotRequest::RequestScreenshot(FString::Printf(TEXT("tag_linetest_%03d.png"), Shot++), false, false);
 }
 
 void AMatchDirector::TickGapTest(float Dt)
@@ -580,7 +724,8 @@ void AMatchDirector::TickAutomation(float Dt)
 		}
 	}
 	PerfT += Dt; ++PerfFrames;
-	if (AutoT > 63.5f)
+	static const bool bLineCamAuto = FParse::Param(FCommandLine::Get(), TEXT("TagLineCam"));
+	if (AutoT > (bLineCamAuto ? 240.f : 63.5f))
 	{
 		UE_LOG(LogTemp, Display, TEXT("TAG perf avg %.1f fps over %d frames"), PerfFrames / FMath::Max(PerfT, 0.001f), PerfFrames);
 		FPlatformMisc::RequestExit(false);
@@ -1413,6 +1558,10 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 			AAthlete* Me = AthOf(E);
 			AAthlete* Him = E->engaged && E->anim == tag::Anim::Block ? AthOf(E->engaged) : nullptr;
 			Me->SetBlockPartner(Him);
+			// who is winning the rep (the engaged loops follow it); pass or run blocking from the blocker's state
+			const tag::Ent* Blk = E->side == tag::Side::Off ? E : E->engaged;
+			Me->SetLinePush(Him ? static_cast<float>(E->linePush) : 0.f, E->side == tag::Side::Def,
+				!Blk || Blk->state != tag::EntState::RunBlock);
 			if (Him) { SumD += FVector::Dist2D(Me->GetActorLocation(), Him->GetActorLocation()); ++NPairs; }
 		}
 		static double LastBlockLog = 0.0;
@@ -1488,6 +1637,29 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 				Q->PlayThrow(K);
 				UE_LOG(LogTemp, Verbose, TEXT("TAG throw kind %d (%.0f yd, qb %.1f yd/s, rush %.1f yd%s)"), K, D, Sp, Rush, Sim->ball.lob ? TEXT(", lob") : TEXT(""));
 			}
+		}
+		else if (Ev.type == "shed" && Ev.a && Ev.b)
+		{
+			// the rusher beat his blocker: his move (picked by the sim from his build and leverage) to the side he
+			// went, and the beaten blocker's lunge after him
+			AAthlete* Ru = AthOf(Ev.a);
+			AAthlete* Bl = AthOf(Ev.b);
+			if (Ru && Bl)
+			{
+				Ru->PlayRushMove(UTF8_TO_TCHAR(Ev.note.c_str()), Bl);
+				Bl->PlayBeaten(Ru);
+			}
+		}
+		else if (Ev.type == "pancake" && Ev.a && Ev.b)
+		{
+			// a run block won decisively: the defender goes down on his back (the sim's down state: hit, fall, get up)
+			// and the blocker finishes over him
+			if (AAthlete* Bl = AthOf(Ev.b))
+			{
+				Bl->PlayPancakeFinish();
+				if (AAthlete* Df = AthOf(Ev.a)) Df->SetPancaked(Df->GetActorLocation() - Bl->GetActorLocation());
+			}
+			UE_LOG(LogTemp, Display, TEXT("TAG pancake: #%d puts #%d down"), Ev.b->p ? Ev.b->p->number : -1, Ev.a->p ? Ev.a->p->number : -1);
 		}
 		else if ((Ev.type == "broken") && Ev.a && Ev.b)
 		{
@@ -1872,12 +2044,35 @@ void AMatchDirector::UpdateCamera(float Dt, const FVector& InFocus)
 			}
 		}
 	}
+	// -TagLineCam (look-dev, with -TagAutoWatch): the trenches in profile. A low camera on the sideline at the line of
+	// scrimmage, framing the interior line, for the first 4 s of every scrimmage play; a frame every 0.25 s.
+	static const bool bLineCam = FParse::Param(FCommandLine::Get(), TEXT("TagLineCam"));
+	bool bLineShot = false;
+	if (bLineCam && Sim && (State == EMatchState::Live || State == EMatchState::Presnap) && Sim->t < 4.0)
+	{
+		const FVector Los = ToWorld(Sim->los, Sim->by, Dir);
+		P = FVector(Los.X, Los.Y - 15.5 * Y, 1.7 * Y);
+		CamLook = FVector(Los.X - Dir * 1.0 * Y, Los.Y, 0.8 * Y);
+		bLineShot = State == EMatchState::Live;
+	}
 	Camera->SetActorLocation(P);
 	Camera->SetActorRotation((CamLook - P).Rotation());
 	if (UCineCameraComponent* C = Camera->GetCineCameraComponent())
 	{
 		C->FocusSettings.ManualFocusDistance = (CamLook - P).Size();
-		C->CurrentFocalLength = CutInTarget && CutInLeft > 0.f && !CloseupTarget ? 85.f : CloseupTarget ? 30.f : CamFocal;
+		C->CurrentFocalLength = bLineShot || (bLineCam && State == EMatchState::Presnap) ? 50.f
+			: CutInTarget && CutInLeft > 0.f && !CloseupTarget ? 85.f : CloseupTarget ? 30.f : CamFocal;
+	}
+	static int32 GLineShots = 0;
+	static double GNextLineShot = 0.0;
+	if (bLineShot && GLineShots < 400)
+	{
+		if (Sim->t < GNextLineShot - 1.0) GNextLineShot = 0.0; // new play
+		if (Sim->t >= GNextLineShot)
+		{
+			FScreenshotRequest::RequestScreenshot(FString::Printf(TEXT("tag_line_%03d.png"), GLineShots++), false, false);
+			GNextLineShot = Sim->t + 0.25;
+		}
 	}
 }
 

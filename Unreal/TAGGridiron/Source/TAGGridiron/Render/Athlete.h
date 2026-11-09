@@ -106,6 +106,18 @@ public:
 	void BeginTackleOn(AAthlete* Carrier);
 	/** Paired block: the man this lineman is locked up with this frame (null when not engaged). */
 	void SetBlockPartner(AAthlete* Partner) { BlockPartner = Partner; }
+	/** Engaged rep state from the sim: Push -1 (blocker driving the defender) .. +1 (defender driving the blocker). */
+	void SetLinePush(float Push, bool bDefender, bool bPassPro) { LinePush = Push; bLineDefender = bDefender; bLinePassPro = bPassPro; }
+	/** The rusher beat his blocker with Move ("swim", "rip", "club", "spin", "bull", "longarm", "diprip"): play it to
+	 *  the side he beats him on. */
+	void PlayRushMove(const FString& Move, const AAthlete* Blocker);
+	/** The blocker was beaten by Rusher: open the hips, lunge and reach to the side he went, turn and chase. */
+	void PlayBeaten(const AAthlete* Rusher);
+	/** Pancake: the blocker drives through and finishes over the man he put down. */
+	void PlayPancakeFinish();
+	/** Pancaked: the next fall goes over backward along PushDirW (away from the blocker), about a metre, instead of
+	 *  travelling with a tackle pile. */
+	void SetPancaked(const FVector& PushDirW) { PancakeDir = PushDirW.GetSafeNormal2D(); bPancakePending = true; }
 	/** Look-dev (-TagGapTest): this player's next get-up is the injury beat. */
 	bool bForceInjury = false;
 
@@ -202,6 +214,16 @@ private:
 	FVector PileVel = FVector::ZeroVector;
 	TWeakObjectPtr<AAthlete> TackleOn;
 	TWeakObjectPtr<AAthlete> BlockPartner;
+	TWeakObjectPtr<AAthlete> PunchedPartner; // the man this lineman struck at first contact (one punch per engagement)
+	float LinePush = 0.f, SmoothedPush = 0.f;
+	bool bLineDefender = false, bLinePassPro = true;
+	int32 LineLoop = 0; // engaged loop in use: +1 defender winning, -1 blocker winning, 0 hand fight
+	FVector PancakeDir = FVector::ZeroVector;
+	bool bPancakePending = false;
+	bool bFaceOnLeader = false; // bench / staff: the face always follows the head by leader pose
+	/** Ragdoll: the face follows the physics-driven head by leader pose (its pose copy runs before physics and would
+	 *  leave it hanging where the head was); back to the face rig when he is up. */
+	void FaceFollowBody(bool bFollow);
 	bool bInjuredChain = false;   // getting up: the injury beat plays first, then the slow get-up
 	bool bInjuredMirror = false;  // ...on the same side
 	float OneShotRate = 1.f;      // per-player timing (style), so two players never move in lockstep
@@ -296,6 +318,10 @@ struct FAthleteAssets
 	TObjectPtr<UAnimationAsset> CatchHigh, CatchChest, CatchLow, CatchOverShoulder, CatchSidelineL, CatchSidelineR;
 	TObjectPtr<UAnimationAsset> SpinL, SpinR, StiffArmL, StiffArmR, Truck, Hurdle;   // ball carrier moves
 	TObjectPtr<UAnimationAsset> RushBull, RushSpinL, RushSpinR, RushClub;             // pass rush moves
+	// the fight in the trenches (Tools/Anim/clips_more3.py): engaged loops by who is winning the rep, the strike at
+	// contact, the power and edge moves, the beaten blocker, the pancake finish
+	TObjectPtr<UAnimationAsset> BullDriveLoop, AnchorLoop, DriveLoop, DrivenBackLoop, BlockPunch, LongArm, DipRip,
+		Beaten, BlockFinish;
 	TObjectPtr<UAnimationAsset> TackleShoulder, TackleArm, TackleAssist;
 	TObjectPtr<UAnimationAsset> Stance4pt, StanceRB, StanceDB, StanceLB, StanceK;
 	TObjectPtr<UAnimationAsset> KickKickoff, KickFieldGoal, KickPunt;

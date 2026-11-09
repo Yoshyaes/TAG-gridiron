@@ -116,6 +116,15 @@ void FAthleteAssets::Load()
 		RushSpinL = Keyed(TEXT("A_TAG_Rush_Spin_L"));
 		RushSpinR = Keyed(TEXT("A_TAG_Rush_Spin_R"));
 		RushClub = Keyed(TEXT("A_TAG_Rush_Club"));
+		BullDriveLoop = Keyed(TEXT("A_TAG_Rush_BullDrive_Loop"));
+		AnchorLoop = Keyed(TEXT("A_TAG_Block_Anchor_Loop"));
+		DriveLoop = Keyed(TEXT("A_TAG_Block_Drive_Loop"));
+		DrivenBackLoop = Keyed(TEXT("A_TAG_Block_DrivenBack_Loop"));
+		BlockPunch = Keyed(TEXT("A_TAG_Block_Punch"));
+		LongArm = Keyed(TEXT("A_TAG_Rush_LongArm"));
+		DipRip = Keyed(TEXT("A_TAG_Rush_DipRip"));
+		Beaten = Keyed(TEXT("A_TAG_Block_Beaten"));
+		BlockFinish = Keyed(TEXT("A_TAG_Block_Finish"));
 		TackleShoulder = Keyed(TEXT("A_TAG_Tackle_Shoulder"));
 		TackleArm = Keyed(TEXT("A_TAG_Tackle_Arm"));
 		TackleAssist = Keyed(TEXT("A_TAG_Tackle_Assist"));
@@ -171,7 +180,8 @@ void FAthleteAssets::Load()
 			TEXT("Injured_Down"), TEXT("Truck"), TEXT("Hurdle"), TEXT("QB_Pitch"), TEXT("QB_Handoff"), TEXT("Celebrate_Loop"),
 			TEXT("Celebrate_Flex_Loop"), TEXT("Celebrate_PointUp_Loop"), TEXT("Celebrate_Leap_Loop"), TEXT("Celebrate_FirstDown_Loop"),
 			TEXT("Celebrate_Shimmy_Loop"), TEXT("Catch_OneHand"), TEXT("Catch_BackShoulder"), TEXT("Catch_Comeback"),
-			TEXT("Tackled_FromSide"), TEXT("Tackle_Miss"), TEXT("Broken_Stumble")})
+			TEXT("Tackled_FromSide"), TEXT("Tackle_Miss"), TEXT("Broken_Stumble"), TEXT("Rush_LongArm"), TEXT("Rush_DipRip"),
+			TEXT("Block_Beaten"), TEXT("Shed_Swim"), TEXT("Shed_Rip"), TEXT("Rush_Club")})
 		{
 			UAnimationAsset* Orig = Keyed(*FString::Printf(TEXT("A_TAG_%s"), N));
 			UAnimationAsset* Mir = Keyed(*FString::Printf(TEXT("A_TAG_%s_M"), N));
@@ -945,6 +955,7 @@ void AAthlete::StartRagdoll(const FVector& VelWorld)
 	if (bRagdoll || !V->GetPhysicsAsset()) return;
 	bRagdoll = true;
 	DownTime = 0.f;
+	FaceFollowBody(true);
 	V->SetCollisionProfileName(TEXT("Ragdoll"));
 	V->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	V->SetAllBodiesSimulatePhysics(true);
@@ -1115,6 +1126,7 @@ void AAthlete::StartGetUp(const FVector& SimLoc)
 	ClearReplayHold(); // (or the pose a replay left him in)
 
 	bRagdoll = false;
+	FaceFollowBody(false);
 	V->SetSimulatePhysics(false);
 	V->SetAllBodiesSimulatePhysics(false);
 	V->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -1166,9 +1178,49 @@ void AAthlete::StandOnSideline(const FVector& Loc, float Yaw, int32 Variant)
 	{
 		MHFace->SetAnimInstanceClass(nullptr);
 		MHFace->SetLeaderPoseComponent(MHBody);
+		bFaceOnLeader = true;
 	}
 	if (MHBody) MHBody->bEnableUpdateRateOptimizations = true;
 	SidelineCheer(false);
+}
+
+void AAthlete::PlayRushMove(const FString& Move, const AAthlete* Blocker)
+{
+	const FAthleteAssets& A = FAthleteAssets::Get();
+	// the side he beats his man on: with the blocker on his right he goes past on the left, the side the swim, long
+	// arm, club and dip-rip are keyed to (the rip is keyed to the right)
+	const bool bBlockerRight = !Blocker || FVector::DotProduct(Blocker->GetActorLocation() - GetActorLocation(), GetActorRightVector()) > 0.f;
+	UAnimationAsset* C = nullptr;
+	if (Move == TEXT("swim")) C = A.Side(A.ShedSwim, !bBlockerRight);
+	else if (Move == TEXT("rip")) C = A.Side(A.ShedRip, bBlockerRight);
+	else if (Move == TEXT("club")) C = A.Side(A.RushClub, !bBlockerRight);
+	else if (Move == TEXT("longarm")) C = A.Side(A.LongArm, !bBlockerRight);
+	else if (Move == TEXT("diprip")) C = A.Side(A.DipRip, !bBlockerRight);
+	else if (Move == TEXT("spin")) C = bBlockerRight ? A.RushSpinR.Get() : A.RushSpinL.Get();
+	else if (Move == TEXT("bull")) C = A.RushBull;
+	if (!C) C = A.Side(A.ShedSwim, !bBlockerRight);
+	UE_LOG(LogTemp, Display, TEXT("TAG rush move #%d: %s (%s)"), Player ? Player->number : -1, *Move, C ? *C->GetName() : TEXT("-"));
+	if (C) PlayOneShot(C);
+}
+
+void AAthlete::PlayBeaten(const AAthlete* Rusher)
+{
+	const FAthleteAssets& A = FAthleteAssets::Get();
+	if (!A.Beaten || !Rusher) return;
+	// keyed with the rusher getting by on his left
+	const bool bRusherLeft = FVector::DotProduct(Rusher->GetActorLocation() - GetActorLocation(), GetActorRightVector()) < 0.f;
+	PlayOneShot(A.Side(A.Beaten, !bRusherLeft));
+}
+
+void AAthlete::PlayPancakeFinish()
+{
+	if (const FAthleteAssets& A = FAthleteAssets::Get(); A.BlockFinish) PlayOneShot(A.BlockFinish);
+}
+
+void AAthlete::FaceFollowBody(bool bFollow)
+{
+	if (!MHFace || !MHBody || bFaceOnLeader) return;
+	MHFace->SetLeaderPoseComponent(bFollow ? MHBody.Get() : nullptr);
 }
 
 void AAthlete::SetCivilian()
@@ -1269,6 +1321,9 @@ void AAthlete::ResetPose()
 	bMissing = false;
 	TackleOn = nullptr;
 	BlockPartner = nullptr;
+	PunchedPartner = nullptr;
+	LineLoop = 0;
+	SmoothedPush = 0.f;
 	BlockAlign = FVector::ZeroVector;
 	AlignT = -1.f;
 	DownTime = 0.f;
@@ -1280,6 +1335,7 @@ void AAthlete::ResetPose()
 	SmoothedAccel = FVector::ZeroVector;
 	if (!bRagdoll) return;
 	bRagdoll = false;
+	FaceFollowBody(false);
 	USkeletalMeshComponent* V = Visible();
 	V->SetSimulatePhysics(false);
 	V->SetAllBodiesSimulatePhysics(false);
@@ -1350,20 +1406,8 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 
 	const float SpeedCm = FVector(VelWorld.X, VelWorld.Y, 0).Size();
 	const bool bChanged = Anim != CurrentAnim;
-	// a defender who comes off a block straight into a run beat his blocker: show the rush move (swim / rip)
-	const bool bShed = bChanged && CurrentAnim == TEXT("block") && (Anim == TEXT("run") || Anim == TEXT("idle")) &&
-		Player && (Player->pos == tag::Pos::DE || Player->pos == tag::Pos::DT || Player->pos == tag::Pos::LB) &&
-		A.ShedSwim && A.ShedRip;
 	StillTime = SpeedCm < 20.f ? StillTime + DeltaTime : 0.f;
 	CurrentAnim = Anim;
-	if (bShed)
-	{
-		static int32 GShedSeq = 0; // rotate game wide so consecutive sheds differ
-		UAnimationAsset* Pool[] = {A.ShedSwim.Get(), A.ShedRip.Get(), A.RushBull.Get(), A.RushClub.Get(), A.RushSpinL.Get(), A.RushSpinR.Get()};
-		UAnimationAsset* M = nullptr;
-		for (int32 Tries = 0; Tries < 6 && !M; ++Tries) M = Pool[GShedSeq++ % 6];
-		PlayOneShot(M ? M : A.ShedSwim.Get());
-	}
 
 	if (A.bMocap && Anim == TEXT("down"))
 	{
@@ -1380,6 +1424,11 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 			VisOffset = FVector(PrevActorLoc.X - Location.X, PrevActorLoc.Y - Location.Y, 0.f);
 			SetActorLocation(Location + VisOffset);
 			PileVel = (Location - PrevActorLoc).GetSafeNormal2D() * 320.f + FVector(VelWorld.X, VelWorld.Y, 0.f) * 0.4f - FVector(0, 0, 50);
+			if (bPancakePending) // knocked over backward by the blocker's drive, not carried by a pile
+			{
+				PileVel = PancakeDir * 170.f - FVector(0, 0, 40);
+				bPancakePending = false;
+			}
 			static int32 GHitSeq = 0;
 			UAnimationAsset* Hit = A.Side(A.TackledHit, (GHitSeq++ % 2) == 1);
 			TackledLeft = Hit->GetPlayLength();
@@ -1510,6 +1559,7 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 	{
 		OneShotLeft -= DeltaTime;
 		PlayClip(OneShot, false, OneShotRate);
+		if (!BlockAlign.IsNearlyZero(0.5f)) SetActorLocation(Location + VisOffset + BlockAlign);
 		if (OneShotLeft <= 0.f)
 		{
 			// the layout dive ends ~1 m ahead of where it started: hand that travel to the actor so the next pose
@@ -1563,17 +1613,54 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 			const float D = To.Size();
 			if (D > 1.f && D < 260.f)
 			{
-				Want = (To / D * (D - 70.f) * 0.5f).GetClampedToMaxSize(80.f);
+				Want = (To / D * (D - 110.f) * 0.5f).GetClampedToMaxSize(80.f); // hip to hip: both lean in, arms on the chest plate
 				SmoothedYaw += FMath::FindDeltaAngleDegrees(SmoothedYaw, To.Rotation().Yaw) * FMath::Clamp(DeltaTime * 6.f, 0.f, 1.f);
 				SetActorRotation(FRotator(0, SmoothedYaw, 0));
 			}
 		}
 		BlockAlign = FMath::Lerp(BlockAlign, Want, 1.f - FMath::Exp(-8.f * DeltaTime));
 		if (!BlockAlign.IsNearlyZero(0.5f)) SetActorLocation(Location + VisOffset + BlockAlign);
+		// the strike: both men's hands shoot to the chest plate the moment they meet (once per engagement)
+		if (AAthlete* O = BlockPartner.Get(); O && Anim == TEXT("block") && O != PunchedPartner.Get() && A.BlockPunch)
+		{
+			PunchedPartner = O;
+			LineLoop = 0;
+			SmoothedPush = 0.f;
+			PlayOneShot(A.BlockPunch);
+			return;
+		}
 	}
-	if (Anim == TEXT("block") && SpeedCm < 150.f && A.BlockEngaged && A.BlockPassSet)
+	if (Anim == TEXT("block") && SpeedCm < 220.f && A.BlockEngaged && A.BlockPassSet)
 	{
-		PlayClip(bEngaged ? A.BlockEngaged.Get() : A.BlockPassSet.Get(), true, 1.f, Player ? FMath::Frac(Player->id * 0.41f) : 0.f);
+		UAnimationAsset* Loop = bEngaged || BlockPartner.IsValid() ? A.BlockEngaged.Get() : A.BlockPassSet.Get();
+		float Rate = 1.f;
+		if (BlockPartner.IsValid())
+		{
+			// who is winning the rep picks the loop (with hysteresis, so a balanced rep doesn't flicker): the rusher
+			// walking his man into the pocket, the blocker anchoring / driving, or the hand fight in between
+			SmoothedPush = FMath::FInterpTo(SmoothedPush, LinePush, DeltaTime, 3.f);
+			if (LineLoop == 0) LineLoop = SmoothedPush > 0.32f ? 1 : SmoothedPush < -0.32f ? -1 : 0;
+			else if ((LineLoop == 1 && SmoothedPush < 0.22f) || (LineLoop == -1 && SmoothedPush > -0.22f)) LineLoop = 0;
+			UAnimationAsset* Want = nullptr;
+			float Authored = 100.f; // the loop's own ground speed (cm/s): the play rate follows the pile
+			if (LineLoop == 1)
+			{
+				if (bLineDefender) { Want = A.BullDriveLoop; Authored = 120.f; }
+				else if (bLinePassPro) { Want = A.AnchorLoop; Authored = 90.f; }
+				else { Want = A.DrivenBackLoop; Authored = 140.f; }
+			}
+			else if (LineLoop == -1)
+			{
+				if (bLineDefender) { Want = A.DrivenBackLoop; Authored = 140.f; }
+				else if (!bLinePassPro) { Want = A.DriveLoop; Authored = 160.f; }
+			}
+			if (Want)
+			{
+				Loop = Want;
+				Rate = FMath::Clamp(SpeedCm / Authored, 0.6f, 1.4f);
+			}
+		}
+		PlayClip(Loop, true, Rate, Player ? FMath::Frac(Player->id * 0.41f) : 0.f);
 		return;
 	}
 	const bool bCrouched = A.bMocap && A.Crouch && (Anim == TEXT("block") || (bLineman && SpeedCm < 260.f));
