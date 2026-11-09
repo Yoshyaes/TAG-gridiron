@@ -506,6 +506,7 @@ void AStadium::Build(const tag::Team& Home, const tag::Team& Away, const tag::We
 		}
 	}
 	if (!A.CrowdMat) BuildCrowd(Home);
+	BuildOfficials();
 	// sideline benches & personnel area tint
 	// team benches (home on the far sideline, visitors near): seat, backrest and a team-colour skirt
 	for (double S : {-1.0, 1.0})
@@ -639,39 +640,42 @@ void AStadium::Build(const tag::Team& Home, const tag::Team& Away, const tag::We
 	if (W.precip != tag::Precip::None) BuildRain(W);
 }
 
+bool AStadium::LoadFanMeshes()
+{
+	if (FanMeshes.Num() > 0) return true;
+	// merged crowd meshes from Epic's MetaHuman Crowd Sample (one skeletal mesh per fan, no grooms) and our
+	// spectator clips retargeted onto their skeleton (Tools/Art/crowd_retarget.py)
+	FanIdle = LoadObject<UAnimationAsset>(nullptr, TEXT("/Game/TAG/Crowd/Anims/A_Crowd_Idle.A_Crowd_Idle"), nullptr, LOAD_NoWarn | LOAD_Quiet);
+	FanCheer = LoadObject<UAnimationAsset>(nullptr, TEXT("/Game/TAG/Crowd/Anims/A_Crowd_Cheer.A_Crowd_Cheer"), nullptr, LOAD_NoWarn | LOAD_Quiet);
+	if (!FanIdle || !FanCheer) return false;
+	// merged crowd meshes (hard paths: the asset registry is not populated for this plugin in -game)
+	static const TCHAR* Names[] = {
+		TEXT("AverageFemale_Head01/MHC_AverageFemale_Head01_CombinedSkelMesh"), TEXT("AverageFemale_Head02/MHC_AverageFemale_Head02_CombinedSkelMesh"),
+		TEXT("AverageMale_Head01/MHC_AverageMale_Head01_CombinedSkelMesh"), TEXT("AverageMale_Head02/MHC_AverageMale_Head02_CombinedSkelMesh"),
+		TEXT("HeavysetFemale_Head01/MHC_HeavysetFemale_Head01_FullBody"), TEXT("HeavysetFemale_Head02/MHC_HeavysetFemale_Head02_FullBody"),
+		TEXT("HeavysetMale_Head01/MHC_HeavysetMale_Head01_FullBody"), TEXT("ShortFemale_Head01/MHC_ShortFemale_Head01_FullBody"),
+		TEXT("ShortMale_Head01/MHC_ShortMale_Head01_FullBody"), TEXT("TallFemale_Head01/MHC_TallFemale_head01_FullBody"),
+		TEXT("TallMale_Head01/MHC_TallMale_Head01_FullBody")};
+	int32 Tried = 0;
+	FString OtherSkel;
+	for (const TCHAR* N : Names)
+	{
+		const FString Leaf = FPaths::GetCleanFilename(N);
+		const FString Path = FString::Printf(TEXT("/MetaHumanCrowdContent/Characters/Assembled/%s.%s"), N, *Leaf);
+		USkeletalMesh* M = LoadObject<USkeletalMesh>(nullptr, *Path, nullptr, LOAD_NoWarn | LOAD_Quiet);
+		++Tried;
+		if (!M) continue;
+		if (M->GetSkeleton() == FanIdle->GetSkeleton()) FanMeshes.Add(M); // anims must share the skeleton
+		else if (M->GetSkeleton()) OtherSkel = M->GetSkeleton()->GetPathName();
+	}
+	UE_LOG(LogTemp, Display, TEXT("TAG: hero crowd meshes %d of %d (anim skeleton %s, other %s)"), FanMeshes.Num(), Tried,
+		FanIdle->GetSkeleton() ? *FanIdle->GetSkeleton()->GetPathName() : TEXT("-"), *OtherSkel);
+	return FanMeshes.Num() > 0;
+}
+
 void AStadium::BuildHeroCrowd(const FVector& C, float Yaw)
 {
-	if (FanMeshes.Num() == 0)
-	{
-		// merged crowd meshes from Epic's MetaHuman Crowd Sample (one skeletal mesh per fan, no grooms) and our
-		// spectator clips retargeted onto their skeleton (Tools/Art/crowd_retarget.py)
-		FanIdle = LoadObject<UAnimationAsset>(nullptr, TEXT("/Game/TAG/Crowd/Anims/A_Crowd_Idle.A_Crowd_Idle"), nullptr, LOAD_NoWarn | LOAD_Quiet);
-		FanCheer = LoadObject<UAnimationAsset>(nullptr, TEXT("/Game/TAG/Crowd/Anims/A_Crowd_Cheer.A_Crowd_Cheer"), nullptr, LOAD_NoWarn | LOAD_Quiet);
-		if (!FanIdle || !FanCheer) return;
-		// merged crowd meshes (hard paths: the asset registry is not populated for this plugin in -game)
-		static const TCHAR* Names[] = {
-			TEXT("AverageFemale_Head01/MHC_AverageFemale_Head01_CombinedSkelMesh"), TEXT("AverageFemale_Head02/MHC_AverageFemale_Head02_CombinedSkelMesh"),
-			TEXT("AverageMale_Head01/MHC_AverageMale_Head01_CombinedSkelMesh"), TEXT("AverageMale_Head02/MHC_AverageMale_Head02_CombinedSkelMesh"),
-			TEXT("HeavysetFemale_Head01/MHC_HeavysetFemale_Head01_FullBody"), TEXT("HeavysetFemale_Head02/MHC_HeavysetFemale_Head02_FullBody"),
-			TEXT("HeavysetMale_Head01/MHC_HeavysetMale_Head01_FullBody"), TEXT("ShortFemale_Head01/MHC_ShortFemale_Head01_FullBody"),
-			TEXT("ShortMale_Head01/MHC_ShortMale_Head01_FullBody"), TEXT("TallFemale_Head01/MHC_TallFemale_head01_FullBody"),
-			TEXT("TallMale_Head01/MHC_TallMale_Head01_FullBody")};
-		int32 Tried = 0;
-		FString OtherSkel;
-		for (const TCHAR* N : Names)
-		{
-			const FString Leaf = FPaths::GetCleanFilename(N);
-			const FString Path = FString::Printf(TEXT("/MetaHumanCrowdContent/Characters/Assembled/%s.%s"), N, *Leaf);
-			USkeletalMesh* M = LoadObject<USkeletalMesh>(nullptr, *Path, nullptr, LOAD_NoWarn | LOAD_Quiet);
-			++Tried;
-			if (!M) continue;
-			if (M->GetSkeleton() == FanIdle->GetSkeleton()) FanMeshes.Add(M); // anims must share the skeleton
-			else if (M->GetSkeleton()) OtherSkel = M->GetSkeleton()->GetPathName();
-		}
-		UE_LOG(LogTemp, Display, TEXT("TAG: hero crowd meshes %d of %d (anim skeleton %s, other %s)"), FanMeshes.Num(), Tried,
-			FanIdle->GetSkeleton() ? *FanIdle->GetSkeleton()->GetPathName() : TEXT("-"), *OtherSkel);
-		if (FanMeshes.Num() == 0) return;
-	}
+	if (!LoadFanMeshes()) return;
 	// lower deck surface (matches Stand(): box 3600 x Len x 50 cm, centre Fwd*1600 + Z 1050, pitched 33 deg)
 	const FRotator R(0, Yaw, 0);
 	const FVector Fwd = R.Vector();
@@ -850,8 +854,107 @@ void AStadium::BuildRain(const tag::Weather& W)
 	(void)W;
 }
 
+void AStadium::BuildOfficials()
+{
+	FAthleteAssets& A = FAthleteAssets::Get();
+	const double CrewY = (FW / 2 + 1.3) * YD; // just outside the far sideline, facing the broadcast cameras
+	auto Rig = [&](const TCHAR* Name)
+	{
+		USceneComponent* R = NewObject<USceneComponent>(this, Name);
+		R->SetupAttachment(RootComponent);
+		R->RegisterComponent();
+		R->SetRelativeLocation(FVector(50 * YD, CrewY, 0));
+		return R;
+	};
+	auto Part = [&](USceneComponent* Parent, UStaticMesh* Mesh, const FVector& Rel, const FVector& Scale, const FLinearColor& C, float Rough)
+	{
+		UStaticMeshComponent* M = AddMesh(Mesh, FVector::ZeroVector, Scale, C, Rough, FRotator::ZeroRotator, true);
+		M->AttachToComponent(Parent, FAttachmentTransformRules::KeepRelativeTransform);
+		M->SetRelativeLocation(Rel);
+		return M;
+	};
+	const FLinearColor Black(0.02f, 0.02f, 0.02f), Orange(1.f, 0.32f, 0.02f);
+	// each rod: an 8 ft pole with an orange marker on top, held upright at the crew member's side (field side)
+	for (int32 k = 0; k < 2; ++k)
+	{
+		USceneComponent* R = Rig(k ? TEXT("ChainFront") : TEXT("ChainRear"));
+		(k ? ChainFront : ChainRear) = R;
+		Part(R, A.Cylinder, FVector(0, -30, 122), FVector(0.04, 0.04, 2.44), Black, 0.5f);
+		Part(R, A.Cylinder, FVector(0, -30, 236), FVector(0.16, 0.16, 0.3), Orange, 0.6f);
+	}
+	{
+		USceneComponent* R = Rig(TEXT("DownBox"));
+		DownBox = R;
+		Part(R, A.Cylinder, FVector(0, -30, 115), FVector(0.045, 0.045, 2.3), Black, 0.5f);
+		Part(R, A.Cube, FVector(0, -30, 258), FVector(0.42, 0.42, 0.42), Orange, 0.5f);
+		for (int32 Face = 0; Face < 2; ++Face)
+		{
+			UTextRenderComponent* T = NewObject<UTextRenderComponent>(this);
+			T->SetupAttachment(R);
+			T->SetWorldSize(36.f);
+			T->SetTextRenderColor(FColor(15, 15, 15));
+			T->SetHorizontalAlignment(EHTA_Center);
+			T->SetVerticalAlignment(EVRTA_TextCenter);
+			T->SetCastShadow(false);
+			T->RegisterComponent();
+			T->SetRelativeLocationAndRotation(FVector(0, -30 + (Face ? -22.f : 22.f), 258), FRotator(0, Face ? -90.f : 90.f, 0));
+			DownText.Add(T);
+		}
+	}
+	// the chain lies on the ground between the rods
+	ChainLink = AddMesh(A.Cube, FVector(50 * YD, CrewY - 30, 1.5), FVector(10 * YD / 100, 0.012, 0.012), FLinearColor(0.35f, 0.35f, 0.37f), 0.3f, FRotator::ZeroRotator, false);
+	SetDown(1);
+}
+
+FVector AStadium::DownBoxLocation() const
+{
+	return DownBox ? DownBox->GetComponentLocation() : FVector::ZeroVector;
+}
+
+void AStadium::SetDown(int32 Down)
+{
+	for (UTextRenderComponent* T : DownText)
+		if (T) T->SetText(Down >= 1 && Down <= 4 ? FText::AsNumber(Down) : FText::GetEmpty());
+}
+
+// show / hide a chain post: the stadium's own parts, and the crew member standing at it as a whole actor (propagating
+// visibility into his components would turn his hidden gear and markers back on)
+static void ShowPost(AActor* Self, USceneComponent* Post, bool bShow)
+{
+	if (!Post) return;
+	Post->SetVisibility(bShow, false);
+	for (USceneComponent* C : Post->GetAttachChildren())
+	{
+		if (!C) continue;
+		if (C->GetOwner() == Self) C->SetVisibility(bShow, true);
+		else if (AActor* O = C->GetOwner()) O->SetActorHiddenInGame(!bShow);
+	}
+}
+
 void AStadium::SetLines(double LosX, double FirstDownX)
 {
+	// the chain crew: down box at the line of scrimmage, the rods at the start of the series and the line to gain
+	if (DownBox)
+	{
+		ShowPost(this, DownBox, LosX >= 0);
+		if (LosX >= 0) DownBox->SetRelativeLocation(FVector(LosX, DownBox->GetRelativeLocation().Y, 0));
+	}
+	if (ChainRear && ChainFront && ChainLink)
+	{
+		const bool bChains = FirstDownX >= 0 && LosX >= 0;
+		ShowPost(this, ChainRear, bChains);
+		ShowPost(this, ChainFront, bChains);
+		ChainLink->SetVisibility(bChains);
+		if (bChains)
+		{
+			const double Dir = FirstDownX >= LosX ? 1.0 : -1.0;
+			const double RearX = FirstDownX - Dir * 10 * YD;
+			const double Y = ChainRear->GetRelativeLocation().Y;
+			ChainRear->SetRelativeLocation(FVector(RearX, Y, 0));
+			ChainFront->SetRelativeLocation(FVector(FirstDownX, Y, 0));
+			ChainLink->SetRelativeLocation(FVector((RearX + FirstDownX) * 0.5, Y - 30, 1.5));
+		}
+	}
 	if (LosLine)
 	{
 		LosLine->SetVisibility(LosX >= 0);

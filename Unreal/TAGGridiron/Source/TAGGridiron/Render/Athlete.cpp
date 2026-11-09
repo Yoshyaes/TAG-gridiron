@@ -1171,6 +1171,20 @@ void AAthlete::StandOnSideline(const FVector& Loc, float Yaw, int32 Variant)
 	SidelineCheer(false);
 }
 
+void AAthlete::SetCivilian()
+{
+	for (UStaticMeshComponent* C : {Helmet.Get(), Facemask.Get(), Pads.Get()})
+		if (C) C->SetVisibility(false);
+	for (UStaticMeshComponent* C : Gear)
+	{
+		if (!C) continue;
+		const FString S = C->GetAttachSocketName().ToString();
+		if (!S.Contains(TEXT("foot")) && !S.Contains(TEXT("ball"))) C->SetVisibility(false); // keep the shoes
+	}
+	for (UTextRenderComponent* T : {BackNumber.Get(), FrontNumber.Get()})
+		if (T) T->SetVisibility(false);
+}
+
 void AAthlete::SidelineCheer(bool bCheer)
 {
 	const FAthleteAssets& A = FAthleteAssets::Get();

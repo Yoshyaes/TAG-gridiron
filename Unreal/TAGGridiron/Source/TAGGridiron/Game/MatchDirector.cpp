@@ -476,7 +476,8 @@ void AMatchDirector::TickGapTest(float Dt)
 }
 
 static bool GHudShot = false;  // automation: one screenshot with the UI
-static bool GAutoBoard = false; // automation: the establishing shot turns to the end-zone video board
+static bool GAutoBoard = false;
+static bool GAutoChains = false; // automation: the establishing shot turns to the end-zone video board
 
 void AMatchDirector::TickAutomation(float Dt)
 {
@@ -520,9 +521,15 @@ void AMatchDirector::TickAutomation(float Dt)
 	// then the end-zone video board above the stands (verifies the bowl's end and the live score)
 	if (AutoShot == static_cast<int32>(UE_ARRAY_COUNT(Times)) + 1 && AutoT > 53.9f && AutoT < 55.f && !GAutoBoard)
 		GAutoBoard = true;
-	if (GAutoBoard && AutoT >= 54.6f && AutoT < 55.f)
+	if (GAutoBoard && !GAutoChains && AutoT >= 54.6f && AutoT < 55.f)
 	{
 		FScreenshotRequest::RequestScreenshot(TEXT("tag_auto_board.png"), false, false);
+		GAutoChains = true; // then the chain crew and the down box on the far sideline
+		AutoT = 54.0f;
+	}
+	if (GAutoChains && AutoT >= 54.6f && AutoT < 55.f)
+	{
+		FScreenshotRequest::RequestScreenshot(TEXT("tag_auto_chains.png"), false, false);
 		AutoT = 55.f;
 	}
 	// close-up of one athlete (verifies character, uniform and equipment fit)
@@ -530,6 +537,7 @@ void AMatchDirector::TickAutomation(float Dt)
 	{
 		bAutoEstablish = false;
 		GAutoBoard = false;
+		GAutoChains = false;
 		for (auto& KV : Athletes)
 		{
 			if (!KV.Value->IsHidden())
@@ -615,12 +623,47 @@ void AMatchDirector::SpawnSidelines(const tag::Team& Home, const tag::Team& Away
 	for (AAthlete* A : Sideline)
 		if (A) A->Destroy();
 	Sideline.Empty();
+	for (AAthlete* A : Officials)
+		if (A) A->Destroy();
+	Officials.Empty();
 	SidelineIsHome.Empty();
 	SidelineScore[0] = SidelineScore[1] = 0;
 	SidelineCheerLeft[0] = SidelineCheerLeft[1] = 0.f;
 	static int32 PerTeam = 14;
 	FParse::Value(FCommandLine::Get(), TEXT("TagSideline="), PerTeam); // 0 turns the benches off
 	if (PerTeam <= 0 || bLineup) return;
+	// chain crew (orange shirts, black trousers) on the rods and the down box, and a head coach in each team's colours
+	{
+		OfficialPeople.clear();
+		auto Staff = [&](int32 Id, double HeightIn, double WeightLb, const FLinearColor& Top, const FLinearColor& Bottom)
+		{
+			auto P = std::make_unique<tag::Player>();
+			P->id = 900000 + Id;
+			P->pos = tag::Pos::WR;
+			P->heightIn = HeightIn;
+			P->weightLb = WeightLb;
+			P->number = 0;
+			FUniform U{Top, Bottom, Top, Top, Top}; // number painted in the shirt colour: none shows
+			AAthlete* A = GetWorld()->SpawnActor<AAthlete>(AAthlete::StaticClass(), FTransform::Identity);
+			A->Setup(P.get(), U);
+			A->SetCivilian();
+			OfficialPeople.push_back(std::move(P));
+			Officials.Add(A);
+			return A;
+		};
+		const FLinearColor Orange(0.9f, 0.28f, 0.02f), Black(0.03f, 0.03f, 0.035f), Khaki(0.55f, 0.47f, 0.33f);
+		for (int32 k = 0; k < 3; ++k)
+			if (USceneComponent* Post = Stadium ? Stadium->CrewPost(k) : nullptr)
+			{
+				AAthlete* A = Staff(k, 70 + k * 2, 185 + k * 15, Orange, Black);
+				A->StandOnSideline(Post->GetComponentTransform().TransformPosition(FVector(-40, 14, 0)), -90.f, 3 * k);
+				A->AttachToComponent(Post, FAttachmentTransformRules::KeepWorldTransform);
+			}
+		AAthlete* HC = Staff(5, 72, 210, Hex(Home.colors.primary) * 0.8f, Khaki);
+		HC->StandOnSideline(FVector(46 * YD, (tag::FIELD_W / 2 + 1.7) * YD, 0), -90.f, 1);
+		AAthlete* AC = Staff(6, 70, 200, Hex(Away.colors.primary) * 0.8f, Khaki);
+		AC->StandOnSideline(FVector(54 * YD, -(tag::FIELD_W / 2 + 1.7) * YD, 0), 90.f, 4);
+	}
 	// the team areas: home on the far sideline (the broadcast side looks at it), visitors on the near one, each between
 	// the 32s, standing in two loose rows just outside the 6 ft border in front of the bench
 	for (int32 Team = 0; Team < 2; ++Team)
@@ -817,6 +860,7 @@ void AMatchDirector::CallPlays(bool bTwo)
 	IdleFocus = ToWorld(bTwo ? 98 : G.ballOn, G.ballY, Dir);
 	Stadium->SetLines(ToWorld(bTwo ? 98 : G.ballOn, 0, Dir).X, bTwo ? -1 : ToWorld(FMath::Min(100.0, G.ballOn + G.toGo), 0, Dir).X);
 	{
+		Stadium->SetDown(bTwo || G.phase != tag::GamePhase::Scrimmage ? 0 : G.down);
 		static const TCHAR* QName[] = {TEXT("1ST"), TEXT("2ND"), TEXT("3RD"), TEXT("4TH")};
 		const int32 Secs = FMath::Max(0, FMath::CeilToInt(G.clock));
 		Stadium->SetScoreboard(FString::Printf(TEXT("%s %d   %s %d"), UTF8_TO_TCHAR(G.away->abbr.c_str()), G.score.away,
@@ -1741,7 +1785,13 @@ void AMatchDirector::UpdateCamera(float Dt, const FVector& InFocus)
 		P += FVector(FMath::FRandRange(-Shake, Shake), FMath::FRandRange(-Shake, Shake), FMath::FRandRange(-Shake, Shake));
 		Shake *= FMath::Exp(-Dt * 6.f);
 	}
-	if (bAutoEstablish && GAutoBoard)
+	if (bAutoEstablish && GAutoChains && Stadium)
+	{
+		const FVector B = Stadium->DownBoxLocation();
+		P = B + FVector(-4 * Y, -14 * Y, 3.5 * Y);
+		CamLook = B + FVector(4 * Y, 0, 1.2 * Y);
+	}
+	else if (bAutoEstablish && GAutoBoard)
 	{
 		P = FVector(40 * Y, -12 * Y, 12 * Y);
 		CamLook = FVector(-76 * Y, 0, 72 * Y);

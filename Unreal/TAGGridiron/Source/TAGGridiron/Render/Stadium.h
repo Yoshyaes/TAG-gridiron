@@ -26,6 +26,14 @@ public:
 	/** Crowd excitement 0..1 (makes the crowd bounce). */
 	float Hype = 0.f;
 
+	/** The down on the chain crew's down box (0 hides the number: kicks, tries). */
+	void SetDown(int32 Down);
+
+	/** The chain crew's posts (0 rear rod, 1 front rod, 2 down box): the crew stand attached to them. */
+	USceneComponent* CrewPost(int32 i) const { return i == 0 ? ChainRear.Get() : i == 1 ? ChainFront.Get() : DownBox.Get(); }
+	/** Where the down box stands (automation framing). */
+	FVector DownBoxLocation() const;
+
 	/** The end-zone video boards' score lines. */
 	void SetScoreboard(const FString& Top, const FString& Bottom);
 
@@ -33,6 +41,19 @@ private:
 	/** The seating bowl: one swept surface around a rounded-rectangle path (tiers, aisles, suites, ribbon boards,
 	 *  roof canopy), so the stands wrap the corners instead of meeting as separate slabs. */
 	void BuildBowl(const tag::Team& Home, const tag::Team& Away, bool bNight);
+	/** Chain crew equipment: rods 10 yd apart and the down box on the far sideline (the crew are AMatchDirector's). */
+	void BuildOfficials();
+	bool LoadFanMeshes();
+	UPROPERTY()
+	TObjectPtr<USceneComponent> ChainRear;
+	UPROPERTY()
+	TObjectPtr<USceneComponent> ChainFront;
+	UPROPERTY()
+	TObjectPtr<USceneComponent> DownBox;
+	UPROPERTY()
+	TObjectPtr<UStaticMeshComponent> ChainLink;
+	UPROPERTY()
+	TArray<TObjectPtr<class UTextRenderComponent>> DownText;
 	UPROPERTY()
 	TArray<TObjectPtr<class UTextRenderComponent>> ScoreText;
 	UStaticMeshComponent* AddMesh(UStaticMesh* Mesh, const FVector& Loc, const FVector& Scale, const FLinearColor& Color, float Rough = 0.8f, const FRotator& Rot = FRotator::ZeroRotator, bool bShadow = true);

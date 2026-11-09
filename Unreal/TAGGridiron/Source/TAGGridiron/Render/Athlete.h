@@ -58,6 +58,8 @@ public:
 
 	/** Bench player in the team area: stands at Loc facing Yaw, idling (Variant picks the idle, side and timing). */
 	void StandOnSideline(const FVector& Loc, float Yaw, int32 Variant);
+	/** Sideline staff (chain crew, coaches): no helmet, facemask, pads or numbers; just the clothes and shoes. */
+	void SetCivilian();
 	/** Bench reaction to a score: celebrate, or settle back into the idle. */
 	void SidelineCheer(bool bCheer);
 

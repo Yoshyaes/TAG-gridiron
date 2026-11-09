@@ -111,6 +111,10 @@ private:
 	UPROPERTY()
 	TArray<TObjectPtr<AAthlete>> Sideline;
 	TArray<bool> SidelineIsHome;
+	/** Chain crew (holding the rods and the down box) and the head coaches. */
+	UPROPERTY()
+	TArray<TObjectPtr<AAthlete>> Officials;
+	std::vector<std::unique_ptr<tag::Player>> OfficialPeople;
 	void SpawnSidelines(const tag::Team& Home, const tag::Team& Away);
 	void TickSidelines(float Dt);
 	int32 SidelineScore[2] = {0, 0};
