@@ -72,6 +72,9 @@ public:
 	void PlayOneShot(UAnimationAsset* Clip);
 	/** Seconds into the current keyed get-up (-1 when not getting up). */
 	float GetUpElapsed() const;
+	/** The sim says this player just caught the ball: pick the catch for the ball height, his speed, where the ball
+	 *  came from and whether he is at the sideline (SidelineDirW: unit vector toward the nearest sideline, or zero). */
+	void PlayCatch(float BallZCm, float SpeedCm, const FVector& BallVelW, const FVector& SidelineDirW);
 
 	const tag::Player* Player = nullptr;
 
@@ -147,7 +150,8 @@ private:
 	bool bGettingUp = false;
 	bool bStoodUp = false;
 	FVector VisOffset = FVector::ZeroVector;
-	int32 TackleCount = 0;   // rotates tackle variants so the same player never repeats one back to back
+	int32 TackleCount = 0;
+	float StillTime = 0.f;   // seconds standing still (post-play idles)   // rotates tackle variants so the same player never repeats one back to back
 	bool bEngaged = false;   // hands on an opponent (football layer reach), picks the engaged block loop
 	void StartRagdoll(const FVector& VelWorld);
 	void SetupMetaHuman(int32 Arch, const FUniform& U);
@@ -229,6 +233,17 @@ struct FAthleteAssets
 	TObjectPtr<UAnimationAsset> GetUpUp;        // get up from lying on the back
 	TObjectPtr<UAnimationAsset> ShedSwim;       // pass rush moves when a defender beats his blocker
 	TObjectPtr<UAnimationAsset> ShedRip;
+	// batch 2 (Tools/Anim/clips_more.py): coverage of the remaining football situations
+	TObjectPtr<UAnimationAsset> CatchHigh, CatchChest, CatchLow, CatchOverShoulder, CatchSidelineL, CatchSidelineR;
+	TObjectPtr<UAnimationAsset> SpinL, SpinR, StiffArmL, StiffArmR, Truck, Hurdle;   // ball carrier moves
+	TObjectPtr<UAnimationAsset> RushBull, RushSpinL, RushSpinR, RushClub;             // pass rush moves
+	TObjectPtr<UAnimationAsset> TackleShoulder, TackleArm, TackleAssist;
+	TObjectPtr<UAnimationAsset> Stance4pt, StanceRB, StanceDB, StanceLB, StanceK;
+	TObjectPtr<UAnimationAsset> KickKickoff, KickFieldGoal, KickPunt;
+	TObjectPtr<UAnimationAsset> GetUpRoll, IdleHandsHips, IdleHandsKnees;
+	TArray<UAnimationAsset*> Celebrations;                                            // keyed celebration loops
+	// where foot contact falls in each kick clip (s), so the director can line it up with the ball leaving
+	static constexpr float KickoffContact = 26.f / 30.f, FieldGoalContact = 20.f / 30.f, PuntContact = 19.f / 30.f;
 	TObjectPtr<UAnimationAsset> Idle;
 	// motion matching over the Game Animation Sample's Dense PoseSearch databases (rooted, never collected)
 	bool bMotionMatch = false;

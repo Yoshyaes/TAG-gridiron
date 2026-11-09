@@ -169,6 +169,15 @@ Reasons, briefly:
   - **Next to try:**
     - Re-run `-TagMoveTest` against `-TagMoveTest -TagNoMM` after each change.
   - Packaged builds: nodes driven from C++ read folded properties only with editor data. Shipping motion matching needs an AnimBP host for the nodes.
+- **Coverage batch 2 (2026-11-09): 35 more hand-keyed clips, 57 total** (`Tools/Anim/clips_more.py`, built by `Tools/Anim/build_all.sh`, all round-trip 0 mm).
+  - Catches: high (diamond), chest, low (pinkies, hip hinge), over the shoulder (in stride), sideline toe tap L/R. Triggered on the sim's catch event by ball height, receiver speed, ball direction and sideline distance.
+  - Ball carrier: spin L/R, stiff arm L/R, truck, hurdle. The sim's juke picks the move from the runner's ratings: elusive backs juke and spin, power backs truck and stiff arm, agile ones occasionally hurdle.
+  - Pass rush: bull, club, spin L/R join swim and rip (six-move rotation).
+  - Tackles: shoulder hit, arm tackle, gang-tackle assist join wrap, high and low (six).
+  - Stances by position: DT four point, RB, DB, LB, K/P. Kicks: kickoff, field goal, punt, timed so foot contact meets the ball. Celebrations: six, one per player. Get-up: roll-out joins face down / face up. Post-play idles: hands on hips, hands on knees when winded.
+  - Verified in a full game: rush moves, catches and get-ups fire; 112 fps, 0 errors.
+  - **Coverage against MaddenRef's 37 situation categories** (aggregate counts only): 33 now have TAG motion (keyed, GASP motion matching or ragdoll). Gaps: injury, diving catch, pitch, under-center snap. Multi-player paired interactions (2,785 groups in MaddenRef) are single-player approximations here.
+  - **Count:** 57 keyed clips plus the GASP locomotion set used by motion matching, against 12,182 MaddenRef clips. The count can't reach parity by hand keying. The target is coverage parity: every situation has motion.
 - **Next.**
   - Motion matching: stride warping for the rare speeds above the 1.3× cap; football-specific motion beyond what the GASP capture covers stays keyed (Tools/Anim).
 

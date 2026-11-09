@@ -9,7 +9,10 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import clips  # noqa: E402
+import clips_more  # noqa: E402
 import tag_anim  # noqa: E402
+
+clips.CLIPS.update(clips_more.MORE)
 
 argv = sys.argv[sys.argv.index("--") + 1:]
 rig_fbx, name, out_dir = argv[0], argv[1], argv[2]

@@ -771,7 +771,11 @@ void AMatchDirector::UpdateKick(float Dt)
 		A->SetActorHiddenInGame(false);
 		const float Yw = FaceToYaw(FaceX > 0 ? 0 : PI, K.Dir);
 		const FVector VelW = FRotator(0, Yw, 0).Vector() * Sp * YD;
-		A->Drive(ToWorld(X, Y, K.Dir), Yw, VelW, 9.f, Anim, K.T, Dt, false);
+		// kick clips: AnimT is where to start in the clip so its foot contact lands on the ball leaving (Lead)
+		float AnimT = K.T;
+		if (FCString::Strcmp(Anim, TEXT("kickoff")) == 0) AnimT = FAthleteAssets::KickoffContact - Lead;
+		else if (FCString::Strcmp(Anim, TEXT("punt")) == 0 || FCString::Strcmp(Anim, TEXT("fgkick")) == 0) AnimT = 0.f;
+		A->Drive(ToWorld(X, Y, K.Dir), Yw, VelW, 9.f, Anim, AnimT, Dt, false);
 		A->SetSelected(false);
 		A->SetLabel(TEXT(""));
 	};
@@ -781,7 +785,9 @@ void AMatchDirector::UpdateKick(float Dt)
 		{
 			const double Y = i == 0 ? W / 2 : 4 + (static_cast<double>(i) - 1) / 9.0 * (W - 8);
 			const double X = K.FromX - (i == 0 ? 7 : 1) + FMath::Max(0.f, K.T - 0.2f) * (i == 0 ? 4 : 8.5);
-			Pose(K.Kick[i], FMath::Min(X, BallX + 2), Y, 1, K.T > 0.2f ? TEXT("run") : TEXT("idle"), K.T > 0.2f ? 8.5f : 0.f);
+			const TCHAR* An = K.T > 0.2f ? TEXT("run") : TEXT("idle");
+			if (i == 0 && K.T < Lead + 0.5f) An = TEXT("kickoff");
+			Pose(K.Kick[i], FMath::Min(X, BallX + 2), Y, 1, An, K.T > 0.2f ? 8.5f : 0.f);
 		}
 		for (size_t i = 0; i < K.Recv.size(); ++i)
 		{
@@ -797,7 +803,9 @@ void AMatchDirector::UpdateKick(float Dt)
 		{
 			const double Y = i == 0 ? W / 2 : i <= 6 ? W / 2 + (static_cast<double>(i) - 3.5) * 1.4 : i == 7 ? 4 : i == 8 ? W - 4 : W / 2 + (static_cast<double>(i) - 9.5) * 6;
 			const double X = (i == 0 ? K.FromX : Los - 0.6) + FMath::Max(0.f, K.T - 1.1f) * (i == 0 ? 1 : 8);
-			Pose(K.Kick[i], X, Y, 1, K.T > 1.1f ? TEXT("run") : TEXT("idle"), K.T > 1.1f ? 8.f : 0.f);
+			const TCHAR* An = K.T > 1.1f ? TEXT("run") : TEXT("idle");
+			if (i == 0 && K.T > Lead - FAthleteAssets::PuntContact && K.T < Lead + 0.5f) An = TEXT("punt"); // the punter
+			Pose(K.Kick[i], X, Y, 1, An, K.T > 1.1f ? 8.f : 0.f);
 		}
 		for (size_t i = 0; i < K.Recv.size(); ++i)
 		{
@@ -814,7 +822,11 @@ void AMatchDirector::UpdateKick(float Dt)
 			double X = Los - 0.6, Y = W / 2 + (static_cast<double>(i) - 5) * 1.3;
 			const TCHAR* Anim = TEXT("block");
 			float Sp = 0;
-			if (i == 0) { X = K.FromX - 1.5 + FMath::Min(1.f, K.T / 0.9f) * 1.5; Y = W / 2 + 0.5; Anim = K.T > 0.9f ? TEXT("idle") : TEXT("run"); Sp = K.T < 0.9f ? 4.f : 0.f; }
+			if (i == 0)
+			{
+				X = K.FromX - 1.5 + FMath::Min(1.f, K.T / 0.9f) * 1.5; Y = W / 2 + 0.5; Anim = K.T > 0.9f ? TEXT("idle") : TEXT("run"); Sp = K.T < 0.9f ? 4.f : 0.f;
+				if (K.T > Lead - FAthleteAssets::FieldGoalContact && K.T < Lead + 0.6f) Anim = TEXT("fgkick");
+			}
 			if (i == 8) { X = K.FromX; Y = W / 2 - 0.4; Anim = TEXT("idle"); }
 			Pose(K.Kick[i], X, Y, 1, Anim, Sp);
 		}
@@ -916,6 +928,23 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 		{
 			AAthlete* Q = AthOf(Ev.a);
 			if (Q) Q->PlayOneShot(FAthleteAssets::Get().Handoff);
+		}
+		else if (Ev.type == "catch" && Ev.a)
+		{
+			// catch type from the ball's height, the receiver's speed, the ball's direction and the sideline
+			if (AAthlete* R = AthOf(Ev.a))
+			{
+				const tag::Ball& Bc = Sim->ball;
+				const FVector BallVelC = Dir > 0 ? FVector(Bc.vel.x, -Bc.vel.y, Bc.vel.z) * YD : FVector(-Bc.vel.x, Bc.vel.y, Bc.vel.z) * YD;
+				const double Yd = Ev.a->pos.y;
+				FVector Side = FVector::ZeroVector;
+				if (Yd < 1.5 || Yd > tag::FIELD_W - 1.5)
+				{
+					const FVector In = ToWorld(Ev.a->pos.x, Yd, Dir, 0), Out = ToWorld(Ev.a->pos.x, Yd < 1.5 ? Yd - 1.0 : Yd + 1.0, Dir, 0);
+					Side = (Out - In).GetSafeNormal();
+				}
+				R->PlayCatch(static_cast<float>(Bc.pos.z * YD), static_cast<float>(tag::len(Ev.a->vel) * YD), BallVelC, Side);
+			}
 		}
 	}
 	const FVector BallW = ToWorld(B.pos.x, B.pos.y, Dir, B.pos.z);

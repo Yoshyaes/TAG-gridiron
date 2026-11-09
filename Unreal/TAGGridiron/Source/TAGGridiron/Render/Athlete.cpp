@@ -98,8 +98,41 @@ void FAthleteAssets::Load()
 		GetUpUp = Keyed(TEXT("A_TAG_GetUp_FaceUp"));
 		ShedSwim = Keyed(TEXT("A_TAG_Shed_Swim"));
 		ShedRip = Keyed(TEXT("A_TAG_Shed_Rip"));
+		CatchHigh = Keyed(TEXT("A_TAG_Catch_High"));
+		CatchChest = Keyed(TEXT("A_TAG_Catch_Chest"));
+		CatchLow = Keyed(TEXT("A_TAG_Catch_Low"));
+		CatchOverShoulder = Keyed(TEXT("A_TAG_Catch_OverShoulder"));
+		CatchSidelineL = Keyed(TEXT("A_TAG_Catch_Sideline_L"));
+		CatchSidelineR = Keyed(TEXT("A_TAG_Catch_Sideline_R"));
+		SpinL = Keyed(TEXT("A_TAG_Spin_L"));
+		SpinR = Keyed(TEXT("A_TAG_Spin_R"));
+		StiffArmL = Keyed(TEXT("A_TAG_StiffArm_L"));
+		StiffArmR = Keyed(TEXT("A_TAG_StiffArm_R"));
+		Truck = Keyed(TEXT("A_TAG_Truck"));
+		Hurdle = Keyed(TEXT("A_TAG_Hurdle"));
+		RushBull = Keyed(TEXT("A_TAG_Rush_Bull"));
+		RushSpinL = Keyed(TEXT("A_TAG_Rush_Spin_L"));
+		RushSpinR = Keyed(TEXT("A_TAG_Rush_Spin_R"));
+		RushClub = Keyed(TEXT("A_TAG_Rush_Club"));
+		TackleShoulder = Keyed(TEXT("A_TAG_Tackle_Shoulder"));
+		TackleArm = Keyed(TEXT("A_TAG_Tackle_Arm"));
+		TackleAssist = Keyed(TEXT("A_TAG_Tackle_Assist"));
+		Stance4pt = Keyed(TEXT("A_TAG_Stance4pt_Loop"));
+		StanceRB = Keyed(TEXT("A_TAG_StanceRB_Loop"));
+		StanceDB = Keyed(TEXT("A_TAG_StanceDB_Loop"));
+		StanceLB = Keyed(TEXT("A_TAG_StanceLB_Loop"));
+		StanceK = Keyed(TEXT("A_TAG_StanceK_Loop"));
+		KickKickoff = Keyed(TEXT("A_TAG_Kick_Kickoff"));
+		KickFieldGoal = Keyed(TEXT("A_TAG_Kick_FieldGoal"));
+		KickPunt = Keyed(TEXT("A_TAG_Kick_Punt"));
+		GetUpRoll = Keyed(TEXT("A_TAG_GetUp_Roll"));
+		IdleHandsHips = Keyed(TEXT("A_TAG_Idle_HandsHips_Loop"));
+		IdleHandsKnees = Keyed(TEXT("A_TAG_Idle_HandsKnees_Loop"));
+		for (const TCHAR* N : {TEXT("A_TAG_Celebrate_Flex_Loop"), TEXT("A_TAG_Celebrate_PointUp_Loop"), TEXT("A_TAG_Celebrate_Leap_Loop"),
+			TEXT("A_TAG_Celebrate_Shimmy_Loop"), TEXT("A_TAG_Celebrate_FirstDown_Loop")})
+			if (UAnimationAsset* C = Keyed(N)) Celebrations.Add(C);
 		Celebrate = LoadAsset<UAnimationAsset>(*(G + TEXT("Animations/Idle/M_Neutral_Stand_Idle_Break_v02.M_Neutral_Stand_Idle_Break_v02")), false);
-		if (UAnimationAsset* C = Keyed(TEXT("A_TAG_Celebrate_Loop"))) { Celebrate = C; bCelebrateKeyed = true; } // after the GASP default
+		if (UAnimationAsset* C = Keyed(TEXT("A_TAG_Celebrate_Loop"))) { Celebrate = C; bCelebrateKeyed = true; Celebrations.Insert(C, 0); } // after the GASP default
 		Idle = LoadAsset<UAnimationAsset>(*(G + TEXT("Animations/Idle/M_Neutral_Stand_Idle_Loop.M_Neutral_Stand_Idle_Loop")), false);
 		Jump = LoadAsset<UAnimationAsset>(*(G + TEXT("Animations/Jump/M_Neutral_Jump_F_Land_Roll_Lfoot.M_Neutral_Jump_F_Land_Roll_Lfoot")), false);
 		UniformMat = LoadAsset<UMaterialInterface>(*(G + TEXT("Materials/MI_UEFN_Mannequin_CMC.MI_UEFN_Mannequin_CMC")), false);
@@ -867,6 +900,24 @@ void AAthlete::StartRagdoll(const FVector& VelWorld)
 	V->SetAllPhysicsLinearVelocity(VelWorld * 0.85f + FVector(0, 0, -50));
 }
 
+void AAthlete::PlayCatch(float BallZCm, float SpeedCm, const FVector& BallVelW, const FVector& SidelineDirW)
+{
+	const FAthleteAssets& A = FAthleteAssets::Get();
+	UAnimationAsset* C = nullptr;
+	if (!SidelineDirW.IsNearlyZero() && A.CatchSidelineL && A.CatchSidelineR)
+		C = FVector::DotProduct(SidelineDirW, GetActorRightVector()) > 0.f ? A.CatchSidelineR.Get() : A.CatchSidelineL.Get(); // reach toward the boundary, drag the toes
+	else if (SpeedCm > 350.f)
+	{
+		// at speed only the deep ball over the shoulder gets a full body catch (its legs keep the stride); other
+		// running catches stay on the procedural hands layer over the run
+		if (A.CatchOverShoulder && FVector::DotProduct(BallVelW.GetSafeNormal2D(), GetActorForwardVector()) > 0.5f)
+			C = A.CatchOverShoulder;
+	}
+	else
+		C = BallZCm > 160.f ? A.CatchHigh.Get() : BallZCm < 80.f ? A.CatchLow.Get() : A.CatchChest.Get();
+	if (C) PlayOneShot(C);
+}
+
 float AAthlete::GetUpElapsed() const
 {
 	return bGettingUp && CurrentClip ? CurrentClip->GetPlayLength() - GetUpLeft : -1.f;
@@ -887,6 +938,8 @@ void AAthlete::StartGetUp(const FVector& SimLoc)
 	// the keyed get-ups lie along the actor axis: face down with the head forward, face up with the head behind
 	const float NewYaw = (bFaceDown ? H : -H).Rotation().Yaw;
 	UAnimationAsset* Clip = bFaceDown ? A.GetUpDown.Get() : A.GetUpUp.Get();
+	static int32 GGetUpSeq = 0; // every other face-up landing rolls to the side and up instead
+	if (!bFaceDown && A.GetUpRoll && (GGetUpSeq++ % 2)) Clip = A.GetUpRoll.Get();
 	if (!Clip) return;
 
 	const int32 NB = V->GetNumBones();
@@ -999,11 +1052,15 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 	const bool bShed = bChanged && CurrentAnim == TEXT("block") && (Anim == TEXT("run") || Anim == TEXT("idle")) &&
 		Player && (Player->pos == tag::Pos::DE || Player->pos == tag::Pos::DT || Player->pos == tag::Pos::LB) &&
 		A.ShedSwim && A.ShedRip;
+	StillTime = SpeedCm < 20.f ? StillTime + DeltaTime : 0.f;
 	CurrentAnim = Anim;
 	if (bShed)
 	{
-		static int32 GShedSeq = 0; // alternate game wide so consecutive sheds differ
-		PlayOneShot((GShedSeq++ % 2) ? A.ShedRip.Get() : A.ShedSwim.Get());
+		static int32 GShedSeq = 0; // rotate game wide so consecutive sheds differ
+		UAnimationAsset* Pool[] = {A.ShedSwim.Get(), A.ShedRip.Get(), A.RushBull.Get(), A.RushClub.Get(), A.RushSpinL.Get(), A.RushSpinR.Get()};
+		UAnimationAsset* M = nullptr;
+		for (int32 Tries = 0; Tries < 6 && !M; ++Tries) M = Pool[GShedSeq++ % 6];
+		PlayOneShot(M ? M : A.ShedSwim.Get());
 	}
 
 	if (A.bMocap && Anim == TEXT("down"))
@@ -1022,12 +1079,13 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 		if (bChanged)
 		{
 			// variety: rotate wrap / high / low, starting from a per-player offset so a gang tackle mixes heights
-			UAnimationAsset* Pool[3] = {A.TackleKeyed.Get(), A.TackleHigh.Get(), A.TackleLow.Get()};
+			UAnimationAsset* Pool[6] = {A.TackleKeyed.Get(), A.TackleHigh.Get(), A.TackleLow.Get(), A.TackleShoulder.Get(),
+				A.TackleArm.Get(), A.TackleAssist.Get()};
 			// game-wide rotation: every tackle takes the next variant, so simultaneous gang tacklers and consecutive
 			// plays never show the same one (a per-player hash over three variants collides too often)
 			static int32 GTackleSeq = 0;
 			++TackleCount;
-			UAnimationAsset* T = Pool[GTackleSeq++ % 3];
+			UAnimationAsset* T = Pool[GTackleSeq++ % 6];
 			PlayClip(T ? T : A.TackleKeyed.Get(), false);
 		}
 		return;
@@ -1041,8 +1099,36 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 	{
 		// cut direction from the carrier's lateral velocity relative to his facing
 		const float Side = FVector::DotProduct(FVector(VelWorld.X, VelWorld.Y, 0), GetActorRightVector());
-		if (bChanged) PlayClip(Side > 0.f ? A.JukeR.Get() : A.JukeL.Get(), false);
+		if (bChanged)
+		{
+			// the move fits the runner: elusive backs juke and spin, power backs lower the shoulder or stiff arm,
+			// the most agile occasionally hurdle; a game-wide counter keeps consecutive moves from repeating
+			static int32 GMoveSeq = 0;
+			const int32 Seq = GMoveSeq++;
+			UAnimationAsset* Move = Side > 0.f ? A.JukeR.Get() : A.JukeL.Get();
+			if (Player)
+			{
+				const tag::Ratings& R = Player->r;
+				if (A.Hurdle && R.agility > 85 && Seq % 7 == 3) Move = A.Hurdle;
+				else if (R.breakTackle > R.elusiveness + 5)
+					Move = (Seq % 2) ? A.Truck.Get() : (Side > 0.f ? A.StiffArmR.Get() : A.StiffArmL.Get());
+				else if (Seq % 3 == 1)
+					Move = Side > 0.f ? A.SpinR.Get() : A.SpinL.Get();
+				if (!Move) Move = Side > 0.f ? A.JukeR.Get() : A.JukeL.Get();
+			}
+			PlayClip(Move, false);
+		}
 		return;
+	}
+	// kicks (the director starts them so foot contact meets the ball leaving; AnimT = start position in the clip)
+	if (Anim == TEXT("kickoff") || Anim == TEXT("punt") || Anim == TEXT("fgkick"))
+	{
+		UAnimationAsset* K = Anim == TEXT("kickoff") ? A.KickKickoff.Get() : Anim == TEXT("punt") ? A.KickPunt.Get() : A.KickFieldGoal.Get();
+		if (K)
+		{
+			if (bChanged) PlayClip(K, false, 1.f, FMath::Max(0.f, AnimT));
+			return;
+		}
 	}
 	if (Anim == TEXT("kneel") && A.Kneel)
 	{
@@ -1087,7 +1173,12 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 	{
 		const tag::Pos P = Player->pos;
 		UAnimationAsset* S = bLine ? A.Stance3pt.Get() : P == tag::Pos::QB ? A.StanceShotgun.Get() : A.Stance2pt.Get();
-		if (S && P != tag::Pos::K && P != tag::Pos::P)
+		if (P == tag::Pos::DT && A.Stance4pt && Player->id % 2) S = A.Stance4pt; // some tackles fire out of a four point
+		else if ((P == tag::Pos::RB || P == tag::Pos::FB) && A.StanceRB) S = A.StanceRB;
+		else if ((P == tag::Pos::CB || P == tag::Pos::S) && A.StanceDB) S = A.StanceDB;
+		else if (P == tag::Pos::LB && A.StanceLB) S = A.StanceLB;
+		else if ((P == tag::Pos::K || P == tag::Pos::P) && A.StanceK) S = A.StanceK;
+		if (S)
 		{
 			// per player phase offset so a whole line does not breathe in unison
 			PlayClip(S, true, 1.f, FMath::Frac(Player->id * 0.37f) * 2.5f);
@@ -1096,7 +1187,9 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 	}
 	if (Anim == TEXT("celebrate"))
 	{
-		if (bChanged) PlayClip(A.Celebrate, true, A.bCelebrateKeyed ? 1.f : 1.2f, Player ? FMath::Frac(Player->id * 0.29f) : 0.f);
+		// each player has his own celebration (keyed loops), phase offset so nobody moves in unison
+		UAnimationAsset* C = A.Celebrations.Num() && Player ? A.Celebrations[Player->id % A.Celebrations.Num()] : A.Celebrate.Get();
+		if (bChanged) PlayClip(C, true, A.bCelebrateKeyed || A.Celebrations.Num() ? 1.f : 1.2f, Player ? FMath::Frac(Player->id * 0.29f) : 0.f);
 		return;
 	}
 	// locomotion: direction of travel relative to facing, speed-matched so feet don't slide
@@ -1112,6 +1205,12 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 		return;
 	}
 	const bool bCrouched = A.bMocap && A.Crouch && (Anim == TEXT("block") || (bLineman && SpeedCm < 260.f));
+	// after the whistle, standing around: hands on the hips (winded players bend over, hands on the knees)
+	if (!bPreSnap && StillTime > 2.5f && Anim == TEXT("idle") && A.IdleHandsHips && A.IdleHandsKnees && Player)
+	{
+		PlayClip(Player->r.stamina < 70 ? A.IdleHandsKnees.Get() : A.IdleHandsHips.Get(), true, 1.f, FMath::Frac(Player->id * 0.53f) * 2.f);
+		return;
+	}
 	// open field locomotion and standing: motion matching (crouched line footwork keeps its blend space)
 	if (DriveMotionMatching(VelWorld, Yaw, DeltaTime, bCrouched)) return;
 	// standing still: play the idle clip itself (the blend space's zero-speed row leaves the rig in its bind pose)
