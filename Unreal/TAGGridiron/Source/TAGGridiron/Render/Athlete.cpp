@@ -1112,6 +1112,7 @@ void AAthlete::StartGetUp(const FVector& SimLoc)
 	TArray<FTransform> W;
 	W.SetNum(NB);
 	for (int32 i = 0; i < NB; ++i) W[i] = V->GetBoneTransform(i); // ragdoll pose, world space
+	ClearReplayHold(); // (or the pose a replay left him in)
 
 	bRagdoll = false;
 	V->SetSimulatePhysics(false);
@@ -1186,8 +1187,66 @@ void AAthlete::SidelineCheer(bool bCheer)
 	PlayClip(Clip, true, 0.9f + 0.2f * FMath::Frac(V * 0.377f), bCheer ? FMath::Frac(V * 0.29f) * 0.6f : Phase);
 }
 
+bool AAthlete::CaptureReplayPose(FTransform& OutWorld, TArray<FTransform>& OutLocal) const
+{
+	if (!MHBody) return false;
+	OutWorld = MHBody->GetComponentTransform();
+	OutLocal = MHBody->GetBoneSpaceTransforms();
+	return OutLocal.Num() > 0;
+}
+
+void AAthlete::ShowReplayPose(const FTransform& World, const TArray<FTransform>& Local)
+{
+	if (!MHBody) return;
+	UTagRetargetAnimInstance* R = Cast<UTagRetargetAnimInstance>(MHBody->GetAnimInstance());
+	if (!R) return;
+	if (!bReplaying)
+	{
+		bReplaying = true;
+		bReplayHold = false;
+		ReplayRel = MHBody->GetRelativeTransform();
+		if (MHBody->IsSimulatingPhysics())
+		{
+			MHBody->SetSimulatePhysics(false); // a downed player's ragdoll is replaced by the recording
+			MHBody->SetAllBodiesSimulatePhysics(false);
+		}
+	}
+	MHBody->SetWorldTransform(World);
+	R->ReplayMesh = Local;
+	R->bReplay = true;
+}
+
+void AAthlete::EndReplay()
+{
+	if (!bReplaying || !MHBody) return;
+	bReplaying = false;
+	UTagRetargetAnimInstance* R = Cast<UTagRetargetAnimInstance>(MHBody->GetAnimInstance());
+	if (bRagdoll)
+	{
+		bReplayHold = true; // stays down in the replay's last pose; the get-up blends out of it
+		return;
+	}
+	MHBody->SetRelativeTransform(ReplayRel);
+	if (R)
+	{
+		R->bReplay = false;
+		R->SnapshotMesh = R->ReplayMesh;
+		R->SnapshotBlend = 0.3f;
+		++R->SnapshotSerial;
+	}
+}
+
+void AAthlete::ClearReplayHold()
+{
+	if (!bReplayHold || !MHBody) return;
+	bReplayHold = false;
+	if (UTagRetargetAnimInstance* R = Cast<UTagRetargetAnimInstance>(MHBody->GetAnimInstance())) R->bReplay = false;
+}
+
 void AAthlete::ResetPose()
 {
+	ClearReplayHold();
+	bReplaying = false;
 	VisOffset = FVector::ZeroVector;
 	bGettingUp = false;
 	bStoodUp = false;

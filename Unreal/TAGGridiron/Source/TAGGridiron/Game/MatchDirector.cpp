@@ -934,6 +934,8 @@ void AMatchDirector::OnPlayDead()
 		static const int32 BigGain = FParse::Param(FCommandLine::Get(), TEXT("TagCutIns")) ? 5 : 20; // review: more samples
 		if (R.td || R.interception || R.fumbleLost || R.kind == tag::PlayKind::Sack || R.yards >= BigGain)
 			StartCutIn(Star, R.td ? 3.5f : 2.8f);
+		static const bool bReplayAll = FParse::Param(FCommandLine::Get(), TEXT("TagReplayAll")); // review: replay every play
+		bReplayWorthy = bReplayAll || R.td || R.interception || R.fumbleLost || R.kind == tag::PlayKind::Sack || R.yards >= 20;
 	}
 	if (R.td)
 	{
@@ -950,6 +952,116 @@ void AMatchDirector::OnPlayDead()
 	else if (R.fumbleLost) Overlay->Banner(TEXT("FUMBLE"), TEXT("Defense recovers"), Bad);
 	else if (R.kind == tag::PlayKind::Sack) { Overlay->Banner(TEXT("SACK"), TEXT(""), Flag); Shake = 12.f; }
 	else if (R.safety) Overlay->Banner(TEXT("SAFETY"), TEXT(""), Bad);
+}
+
+void AMatchDirector::RecordReplayFrame(float Dt)
+{
+	static const bool bOff = FParse::Param(FCommandLine::Get(), TEXT("TagNoReplay"));
+	if (bOff || bLineup) return;
+	ReplayClock += Dt;
+	if (ReplayBuf.Num() && ReplayClock - ReplayBuf.Last().T < 1.f / 30.f) return;
+	if (ReplayBuf.Num() >= 30 * 40) return; // 40 s cap
+	FReplayFrame& F = ReplayBuf.AddDefaulted_GetRef();
+	F.T = ReplayClock;
+	if (Ball)
+	{
+		F.Ball = Ball->GetActorTransform();
+		F.bBall = !Ball->IsHidden();
+	}
+	TArray<FTransform> Local;
+	for (const auto& KV : Athletes)
+	{
+		const AAthlete* A = KV.Value;
+		FTransform W;
+		if (!A || A->IsHidden() || !A->CaptureReplayPose(W, Local)) continue;
+		FReplayAth& R = F.Ath.AddDefaulted_GetRef();
+		R.Id = KV.Key;
+		R.World = W;
+		R.Rot.SetNumUninitialized(Local.Num());
+		R.Pos.SetNumUninitialized(Local.Num());
+		for (int32 i = 0; i < Local.Num(); ++i)
+		{
+			R.Rot[i] = FQuat4f(Local[i].GetRotation());
+			R.Pos[i] = FVector3f(Local[i].GetTranslation());
+		}
+	}
+}
+
+bool AMatchDirector::StartReplay()
+{
+	if (!bReplayWorthy || ReplayBuf.Num() < 20) return false;
+	bReplayWorthy = false;
+	// the last 5 s of the play at a little over half speed (a long run is picked up as it breaks free)
+	ReplayEnd = ReplayBuf.Last().T;
+	ReplayT = FMath::Max(0.f, ReplayEnd - 5.f);
+	ReplayIdx = 0;
+	ReplayFocus = FVector::ZeroVector;
+	State = EMatchState::Replay;
+	Overlay->SetHint(bWatch ? TEXT("REPLAY") : TEXT("REPLAY      SPACE skip"));
+	UE_LOG(LogTemp, Display, TEXT("TAG replay: %d frames, %.1f s of play from %.1f s"), ReplayBuf.Num(), ReplayEnd - ReplayT, ReplayT);
+	return true;
+}
+
+void AMatchDirector::TickReplay(float Dt, bool bSkip)
+{
+	ReplayT += Dt * 0.55f;
+	while (ReplayIdx + 1 < ReplayBuf.Num() && ReplayBuf[ReplayIdx + 1].T <= ReplayT) ++ReplayIdx;
+	const FReplayFrame& A = ReplayBuf[ReplayIdx];
+	const FReplayFrame& B = ReplayBuf[FMath::Min(ReplayIdx + 1, ReplayBuf.Num() - 1)];
+	const float Al = B.T > A.T ? FMath::Clamp((ReplayT - A.T) / (B.T - A.T), 0.f, 1.f) : 0.f;
+	for (const FReplayAth& RA : A.Ath)
+	{
+		AAthlete* Ath = Athletes.FindRef(RA.Id);
+		if (!Ath) continue;
+		const FReplayAth* RB = B.Ath.FindByPredicate([&](const FReplayAth& X) { return X.Id == RA.Id; });
+		if (!RB || RB->Rot.Num() != RA.Rot.Num()) RB = &RA;
+		ReplayScratch.SetNum(RA.Rot.Num());
+		for (int32 i = 0; i < RA.Rot.Num(); ++i)
+			ReplayScratch[i] = FTransform(FQuat::Slerp(FQuat(RA.Rot[i]), FQuat(RB->Rot[i]), Al).GetNormalized(),
+				FMath::Lerp(FVector(RA.Pos[i]), FVector(RB->Pos[i]), Al));
+		FTransform W;
+		W.Blend(RA.World, RB->World, Al);
+		Ath->ShowReplayPose(W, ReplayScratch);
+	}
+	FTransform BallT;
+	BallT.Blend(A.Ball, B.Ball, Al);
+	if (Ball)
+	{
+		Ball->SetActorTransform(BallT);
+		Ball->SetActorHiddenInGame(!A.bBall);
+	}
+	// reverse angle from field level on the far side, a longer lens, easing after the ball
+	const FVector BallAt = BallT.GetLocation();
+	ReplayFocus = ReplayFocus.IsZero() ? BallAt : FMath::Lerp(ReplayFocus, BallAt, 1.f - FMath::Exp(-Dt / 0.55f * 4.f));
+	const FVector P = ReplayFocus + FVector(-350.f, 1650.f, 230.f);
+	const FVector Look = FVector(ReplayFocus.X, ReplayFocus.Y, 95.f);
+	Camera->SetActorLocation(P);
+	Camera->SetActorRotation((Look - P).Rotation());
+	if (UCineCameraComponent* C = Camera->GetCineCameraComponent())
+	{
+		C->FocusSettings.ManualFocusDistance = (Look - P).Size();
+		C->CurrentFocalLength = 50.f;
+	}
+	static int32 GReplayShots = 0;
+	if (bAuto && GReplayShots < 12 && ReplayCount == 0)
+	{
+		static float NextShot = 0.f;
+		if (ReplayT >= NextShot || NextShot > ReplayEnd)
+		{
+			FScreenshotRequest::RequestScreenshot(FString::Printf(TEXT("tag_replay_%02d.png"), GReplayShots++), false, false);
+			NextShot = ReplayT + 0.45f;
+		}
+	}
+	if (ReplayT >= ReplayEnd || bSkip)
+	{
+		for (auto& KV : Athletes)
+			if (KV.Value) KV.Value->EndReplay();
+		++ReplayCount;
+		Overlay->SetHint(TEXT(""));
+		State = EMatchState::Post;
+		Overlay->SetClockOffset(0);
+		ApplyPlay();
+	}
 }
 
 void AMatchDirector::ShowFinal()
@@ -1793,6 +1905,10 @@ void AMatchDirector::Tick(float Dt)
 			State = EMatchState::Live;
 			Acc = 0;
 			Overlay->SetHint(TEXT(""));
+			ReplayBuf.Reset();
+			ReplayClock = 0.f;
+			ReplayPostRec = 0.f;
+			bReplayWorthy = false;
 		}
 		SyncPlay(Dt, 1.f);
 		UpdateCamera(Dt, FocusPoint());
@@ -1811,6 +1927,7 @@ void AMatchDirector::Tick(float Dt)
 		}
 		SyncPlay(Dt, FMath::Min(1.f, Acc / STEP));
 		UpdateCamera(Dt, FocusPoint());
+		RecordReplayFrame(SDt);
 		Overlay->SetClockOffset(Sim->t);
 		if (!Sim->isLive())
 		{
@@ -1825,11 +1942,16 @@ void AMatchDirector::Tick(float Dt)
 		for (tag::Ent* E : Sim->ents) E->animT += Dt;
 		SyncPlay(Dt, 1.f);
 		UpdateCamera(Dt, FocusPoint());
+		if ((ReplayPostRec += SDt) < 1.3f) RecordReplayFrame(SDt); // the whistle and the moment after it
 		if (Timer <= 0 || (!bWatch && Timer < 1.2f && bSpace))
 		{
+			if (StartReplay()) break;
 			Overlay->SetClockOffset(0);
 			ApplyPlay();
 		}
+		break;
+	case EMatchState::Replay:
+		TickReplay(SDt, bSpace);
 		break;
 	case EMatchState::Kick:
 		UpdateKick(SDt);

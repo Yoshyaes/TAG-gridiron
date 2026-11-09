@@ -19,7 +19,7 @@ class SGridironOverlay;
 class AStaticMeshActor;
 
 UENUM()
-enum class EMatchState : uint8 { Menu, Call, Presnap, Live, Post, Kick, Wait, Final, Paused };
+enum class EMatchState : uint8 { Menu, Call, Presnap, Live, Post, Kick, Wait, Final, Paused, Replay };
 
 UENUM()
 enum class ECamMode : uint8 { Broadcast, Sideline, Skycam, Player };
@@ -92,6 +92,20 @@ private:
 
 	UPROPERTY()
 	TMap<int32, TObjectPtr<AAthlete>> Athletes;
+
+	/** Instant replay: every visible player's shown pose and the ball, sampled at 30 Hz from the snap to just after
+	 *  the whistle, played back in slow motion from a field-level reverse angle after a big play. */
+	struct FReplayAth { int32 Id = 0; FTransform World; TArray<FQuat4f> Rot; TArray<FVector3f> Pos; };
+	struct FReplayFrame { float T = 0.f; FTransform Ball; bool bBall = false; TArray<FReplayAth> Ath; };
+	TArray<FReplayFrame> ReplayBuf;
+	float ReplayClock = 0.f, ReplayPostRec = 0.f, ReplayT = 0.f, ReplayEnd = 0.f;
+	int32 ReplayIdx = 0, ReplayCount = 0;
+	bool bReplayWorthy = false;
+	FVector ReplayFocus = FVector::ZeroVector;
+	TArray<FTransform> ReplayScratch;
+	void RecordReplayFrame(float Dt);
+	bool StartReplay();
+	void TickReplay(float Dt, bool bSkip);
 
 	/** Bench players standing in each team's area (deep backups, so they never meet themselves on the field). */
 	UPROPERTY()

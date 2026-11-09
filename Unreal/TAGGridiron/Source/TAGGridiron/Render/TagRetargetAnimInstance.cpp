@@ -32,6 +32,8 @@ void FTagRetargetProxy::PreUpdate(UAnimInstance* InAnimInstance, float DeltaSeco
 	if (const UTagRetargetAnimInstance* I = Cast<UTagRetargetAnimInstance>(InAnimInstance))
 	{
 		In = I->Proc; // game thread -> worker copy
+		bReplay = I->bReplay && I->ReplayMesh.Num() > 0;
+		if (bReplay) ReplayMesh = I->ReplayMesh;
 	}
 	BlendElapsed += DeltaSeconds;
 	if (In.ClipSerial != SeenSerial)
@@ -57,6 +59,22 @@ void FTagRetargetProxy::PreUpdate(UAnimInstance* InAnimInstance, float DeltaSeco
 
 bool FTagRetargetProxy::Evaluate(FPoseContext& Output)
 {
+	if (bReplay)
+	{
+		// instant replay: the recorded pose as it was shown, nothing layered on top
+		Output.ResetToRefPose();
+		const FBoneContainer& BC = Output.Pose.GetBoneContainer();
+		const int32 N = Output.Pose.GetNumBones();
+		LastPose.SetNum(N, EAllowShrinking::No);
+		for (FCompactPoseBoneIndex I(0); I < N; ++I)
+		{
+			const int32 M = BC.MakeMeshPoseIndex(I).GetInt();
+			if (ReplayMesh.IsValidIndex(M)) Output.Pose[I] = ReplayMesh[M];
+			LastPose[I.GetInt()] = Output.Pose[I];
+		}
+		BlendElapsed = 1e3f;
+		return true;
+	}
 	Node->Evaluate_AnyThread(Output); // mocap / keyed clip retargeted onto this body
 	ApplyFootballLayer(Output);
 	ApplyCrossfade(Output);

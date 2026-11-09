@@ -64,6 +64,8 @@ private:
 	float CurBlendTime = 0.f;      // > 0 overrides In.BlendTime for the current blend (pose snapshots)
 	TArray<FTransform> PendingMesh; // snapshot in mesh bone order, converted to compact order in Evaluate
 	bool bPendingSnap = false;
+	TArray<FTransform> ReplayMesh;  // instant replay: shown as is (mesh bone order)
+	bool bReplay = false;
 	int32 SeenSnap = 0;
 };
 
@@ -84,6 +86,11 @@ public:
 	TArray<FTransform> SnapshotMesh;
 	int32 SnapshotSerial = 0;
 	float SnapshotBlend = 0.35f;
+
+	/** Instant replay: while bReplay, the body shows ReplayMesh (local transforms, mesh bone order) instead of the
+	 *  retargeted animation and football layer. */
+	TArray<FTransform> ReplayMesh;
+	bool bReplay = false;
 
 protected:
 	virtual FAnimInstanceProxy* CreateAnimInstanceProxy() override;

@@ -61,6 +61,13 @@ public:
 	/** Bench reaction to a score: celebrate, or settle back into the idle. */
 	void SidelineCheer(bool bCheer);
 
+	/** Instant replay: the visible body's world transform and local pose (mesh bone order) as shown this frame. */
+	bool CaptureReplayPose(FTransform& OutWorld, TArray<FTransform>& OutLocal) const;
+	/** Show a recorded pose. EndReplay hands back to the live animation (blending out of the last replay pose); a
+	 *  player who was down holds the replay's last pose until he gets up. */
+	void ShowReplayPose(const FTransform& World, const TArray<FTransform>& Local);
+	void EndReplay();
+
 	/** Restore an animated (non-ragdoll) pose, e.g. before the next snap. */
 	void ResetPose();
 
@@ -154,6 +161,10 @@ private:
 	void RecordTrajectory();
 	bool bInMatch = false;
 	int32 SidelineVariant = 0;
+	bool bReplaying = false;
+	bool bReplayHold = false;     // down at the end of a replay: keeps its last pose until the get-up
+	FTransform ReplayRel;
+	void ClearReplayHold();
 	int32 MMGait = 1;                         // 0 walk, 1 run, 2 sprint
 	TArray<FVector> TrajPos;                  // recorded source body transforms (world), newest last
 	TArray<FQuat> TrajRot;
