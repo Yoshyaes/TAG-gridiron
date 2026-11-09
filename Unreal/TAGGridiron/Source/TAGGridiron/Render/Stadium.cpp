@@ -13,6 +13,7 @@
 #include "Components/VolumetricCloudComponent.h"
 #include "Components/SpotLightComponent.h"
 #include "Components/PostProcessComponent.h"
+#include "ProceduralMeshComponent.h"
 #include "Engine/StaticMesh.h"
 #include "Engine/SkeletalMesh.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -29,6 +30,103 @@
 using namespace TagCoords;
 
 static constexpr double FW = tag::FIELD_W;
+// the bowl's front edge: sideline stands 9 yd off the sideline, end stands 14 yd behind the end lines
+static const double BowlSideY = (FW / 2 + 9) * YD;
+static const double BowlHalfX = 74 * YD;      // midfield to the end stands
+static const double BowlCornerR = 14 * YD;    // corner radius where the sideline and end stands meet
+static const double BowlRoofEdgeD = 3900;     // roof canopy's front edge, out from the bowl's front edge (cm)
+static const double BowlRoofEdgeZ = 5600;
+
+namespace
+{
+	// rounded-rectangle path along the bowl's front edge. Each sample carries its outward normal angle Phi; a point at
+	// offset d outward is P + N(Phi) * d, and its distance around the bowl at that offset is L + d * Phi, so the seat
+	// spacing holds through the corners.
+	struct FBowlSample { FVector2D P; double Phi = 0; double L = 0; };
+	struct FBowlBuf { TArray<FVector> V; TArray<int32> T; TArray<FVector> N; TArray<FVector2D> UV; };
+
+	TArray<FBowlSample> BowlPath(double X0, double X1, double HalfY, double Rc, int32 NCorner)
+	{
+		const FVector2D C[4] = {{X1 - Rc, HalfY - Rc}, {X0 + Rc, HalfY - Rc}, {X0 + Rc, -HalfY + Rc}, {X1 - Rc, -HalfY + Rc}};
+		TArray<FBowlSample> S;
+		for (int32 q = 0; q < 4; ++q)
+			for (int32 k = 0; k <= NCorner; ++k)
+			{
+				const double Phi = (q + double(k) / NCorner) * UE_HALF_PI;
+				S.Add({C[q] + Rc * FVector2D(FMath::Cos(Phi), FMath::Sin(Phi)), Phi, 0.0});
+			}
+		S.Add({S[0].P, 2 * UE_PI, 0.0}); // closes the loop along the end stand
+		for (int32 i = 1; i < S.Num(); ++i) S[i].L = S[i - 1].L + FVector2D::Distance(S[i].P, S[i - 1].P);
+		return S;
+	}
+
+	FBowlSample PathAt(const TArray<FBowlSample>& S, double L)
+	{
+		for (int32 i = 1; i < S.Num(); ++i)
+			if (S[i].L >= L)
+			{
+				const double A = (L - S[i - 1].L) / FMath::Max(S[i].L - S[i - 1].L, 1e-6);
+				return {FMath::Lerp(S[i - 1].P, S[i].P, A), FMath::Lerp(S[i - 1].Phi, S[i].Phi, A), L};
+			}
+		return S.Last();
+	}
+
+	/** A short stretch of path centred on L, HalfW either side (aisles, tunnels, boards). */
+	TArray<FBowlSample> PathPatch(const TArray<FBowlSample>& S, double L, double HalfW)
+	{
+		const FBowlSample C = PathAt(S, L);
+		const FVector2D T(-FMath::Sin(C.Phi), FMath::Cos(C.Phi));
+		return {{C.P - T * HalfW, C.Phi, L - HalfW}, {C.P + T * HalfW, C.Phi, L + HalfW}};
+	}
+
+	// Sweeps a cross-section (d outward from the path, z up; one flat face per profile segment) along the path. Hint
+	// (d, z) points to the front side; both sides are emitted so nothing vanishes from behind. UVs: U is distance
+	// around the bowl / USc, V is distance along the profile / VSc.
+	void Sweep(FBowlBuf& B, const TArray<FBowlSample>& Path, const TArray<FVector2D>& Prof, const FVector2D& Hint, double USc, double VSc)
+	{
+		double V0 = 0;
+		for (int32 k = 0; k + 1 < Prof.Num(); ++k)
+		{
+			const FVector2D Pa = Prof[k], Pb = Prof[k + 1];
+			const double Seg = FVector2D::Distance(Pa, Pb);
+			for (int32 Back = 0; Back < 2; ++Back)
+			{
+				const int32 Base = B.V.Num();
+				for (const FBowlSample& S : Path)
+				{
+					const FVector N3(FMath::Cos(S.Phi), FMath::Sin(S.Phi), 0), T3(-N3.Y, N3.X, 0);
+					FVector Nrm = FVector::CrossProduct(T3, N3 * (Pb.X - Pa.X) + FVector::UpVector * (Pb.Y - Pa.Y)).GetSafeNormal();
+					if (FVector::DotProduct(Nrm, N3 * Hint.X + FVector::UpVector * Hint.Y) < 0) Nrm = -Nrm;
+					if (Back) Nrm = -Nrm;
+					for (int32 j = 0; j < 2; ++j)
+					{
+						const FVector2D E = j ? Pb : Pa;
+						B.V.Add(FVector(S.P.X + N3.X * E.X, S.P.Y + N3.Y * E.X, E.Y));
+						B.N.Add(Nrm);
+						B.UV.Add(FVector2D((S.L + E.X * S.Phi) / USc, (V0 + (j ? Seg : 0.0)) / VSc));
+					}
+				}
+				for (int32 i = 0; i + 1 < Path.Num(); ++i)
+				{
+					const int32 A0 = Base + 2 * i, B0 = A0 + 1, A1 = A0 + 2, B1 = A0 + 3;
+					// UE front faces: (v1 - v0) x (v2 - v0) points away from the face normal (left-handed, clockwise)
+					const bool bFlip = FVector::DotProduct(FVector::CrossProduct(B.V[A1] - B.V[A0], B.V[B1] - B.V[A0]), B.N[A0]) > 0;
+					B.T.Append(bFlip ? TArray<int32>{A0, B1, A1, A0, B0, B1} : TArray<int32>{A0, A1, B1, A0, B1, B0});
+				}
+			}
+			V0 += Seg;
+		}
+	}
+
+	/** Point on a pitched deck's top surface: deck box centred at (Dc, Zc), Depth along the slope, 50 cm thick;
+	 *  T 0..1 from the front row to the back row, Lift off the surface. */
+	FVector2D DeckPt(double Dc, double Zc, double Depth, double PitchDeg, double T, double Lift = 0)
+	{
+		const double P = FMath::DegreesToRadians(PitchDeg);
+		const FVector2D Along(FMath::Cos(P), FMath::Sin(P)), Up(-FMath::Sin(P), FMath::Cos(P));
+		return FVector2D(Dc, Zc) + Along * (Depth * (T - 0.5)) + Up * (25 + Lift);
+	}
+}
 
 AStadium::AStadium()
 {
@@ -75,6 +173,139 @@ void AStadium::AddText(const FString& S, const FVector& Loc, const FRotator& Rot
 	T->SetRelativeLocation(Loc);
 	T->SetRelativeRotation(Rot);
 	T->RegisterComponent();
+}
+
+void AStadium::BuildBowl(const tag::Team& Home, const tag::Team& Away, bool bNight)
+{
+	FAthleteAssets& A = FAthleteAssets::Get();
+	const TArray<FBowlSample> Path = BowlPath(50 * YD - BowlHalfX, 50 * YD + BowlHalfX, BowlSideY, BowlCornerR, 16);
+	const double Around = Path.Last().L;
+
+	// the two seating decks: the same boxes the stands were (lower 36 m deep at 33 deg, upper 28 m at 38 deg), so the
+	// Mass fans in the front sideline rows still sit on the seats
+	auto Lower = [](double T, double Lift = 0) { return DeckPt(1600, 1050, 3600, 33, T, Lift); };
+	auto Upper = [](double T, double Lift = 0) { return DeckPt(4200, 3300, 2800, 38, T, Lift); };
+	const FVector2D Wall(-1, 0), Up(0, 1), Down(0, -1);
+
+	FBowlBuf Crowd, Concrete, Steps, Tunnel, Padding, Glass, Ribbon, Roof, Edge;
+	// seats: crowd texture is 16 rows of fans (~1450 cm of slope) by ~55 seats (~3000 cm) per tile
+	Sweep(Crowd, Path, {Lower(0), Lower(1)}, Up, 3000, 1450);
+	Sweep(Crowd, Path, {Upper(0), Upper(1)}, Up, 3000, 1450);
+	for (FVector2D& UV : Crowd.UV) UV = FVector2D(UV.Y, UV.X); // T_Crowd is stored turned: rows along U, seats along V
+	// field-level wall (padded, team colour) and its cap
+	Sweep(Padding, Path, {{-60, 0}, {-60, 220}}, Wall, 100, 100);
+	Sweep(Concrete, Path, {{-60, 220}, {80, 220}}, Up, 100, 100);
+	// cross aisle two thirds up the lower bowl, with tunnel mouths (vomitories) below it between every other pair of aisles
+	Sweep(Steps, Path, {Lower(0.60, 2), Lower(0.645, 2)}, Up, 100, 100);
+	// stair aisles every ~17 m around both decks (offset on the upper deck)
+	const double Step = 1700;
+	for (double L = Step * 0.5; L < Around; L += Step)
+	{
+		Sweep(Steps, PathPatch(Path, L, 60), {Lower(0.0, 3), Lower(1.0, 3)}, Up, 100, 100);
+		Sweep(Steps, PathPatch(Path, L + Step * 0.5, 60), {Upper(0.0, 3), Upper(1.0, 3)}, Up, 100, 100);
+		if (FMath::RoundToInt(L / Step) % 2 == 0)
+			Sweep(Tunnel, PathPatch(Path, L + Step * 0.5, 190), {Lower(0.48, 3), Lower(0.60, 3)}, Up, 100, 100);
+	}
+	// club level between the decks: concrete lip, suite glass, LED ribbon board, lip, and the upper deck's front cap
+	const double F = 2990;
+	Sweep(Concrete, Path, {{F, 1975}, {F, 2010}}, Wall, 100, 100);
+	Sweep(Glass, Path, {{F, 2010}, {F, 2230}}, Wall, 100, 100);
+	Sweep(Concrete, Path, {{F, 2230}, {F, 2260}}, Wall, 100, 100);
+	Sweep(Ribbon, Path, {{F, 2260}, {F, 2440}}, Wall, 100, 180);
+	Sweep(Concrete, Path, {{F, 2440}, {F, 2480}}, Wall, 100, 100);
+	Sweep(Concrete, Path, {{F, 2480}, {Upper(0).X + 10, 2480}}, Up, 100, 100);
+	// back of the upper deck: press / suite level glass under the roof
+	const double Bk = Upper(1).X + 10;
+	Sweep(Concrete, Path, {{Bk, Upper(1).Y - 15}, {Bk, 4250}}, Wall, 100, 100);
+	Sweep(Glass, Path, {{Bk, 4250}, {Bk, 4650}}, Wall, 100, 100);
+	Sweep(Concrete, Path, {{Bk, 4650}, {Bk, 5900}}, Wall, 100, 100);
+	// roof canopy: team-colour front edge and the steel underside, rising gently outward
+	Sweep(Edge, Path, {{BowlRoofEdgeD, BowlRoofEdgeZ - 180}, {BowlRoofEdgeD, BowlRoofEdgeZ}}, Wall, 100, 100);
+	Sweep(Roof, Path, {{BowlRoofEdgeD, BowlRoofEdgeZ - 180}, {BowlRoofEdgeD + 3100, BowlRoofEdgeZ + 270}}, Down, 400, 400);
+
+	UProceduralMeshComponent* M = NewObject<UProceduralMeshComponent>(this);
+	M->SetupAttachment(RootComponent);
+	M->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	M->SetCastShadow(true);
+	M->RegisterComponent();
+	int32 Sec = 0;
+	auto Add = [&](const FBowlBuf& B, UMaterialInterface* Mat)
+	{
+		if (B.V.Num() == 0) return;
+		M->CreateMeshSection(Sec, B.V, B.T, B.N, B.UV, TArray<FColor>(), TArray<FProcMeshTangent>(), false);
+		M->SetMaterial(Sec++, Mat);
+	};
+	auto LED = [&](const FLinearColor& C, const FLinearColor& C2, float Intensity, float Count, float Speed, float Diffuse, float Rough) -> UMaterialInterface*
+	{
+		if (!A.LEDMat) return TagColorMat(this, C * 0.5f, Rough);
+		UMaterialInstanceDynamic* D = UMaterialInstanceDynamic::Create(A.LEDMat, this);
+		D->SetVectorParameterValue(TEXT("Color"), C);
+		D->SetVectorParameterValue(TEXT("ColorB"), C2);
+		D->SetScalarParameterValue(TEXT("Intensity"), Intensity);
+		D->SetScalarParameterValue(TEXT("Count"), Count);
+		D->SetScalarParameterValue(TEXT("Speed"), Speed);
+		D->SetScalarParameterValue(TEXT("Diffuse"), Diffuse);
+		D->SetScalarParameterValue(TEXT("Roughness"), Rough);
+		return D;
+	};
+	UMaterialInterface* CrowdM = TagColorMat(this, FLinearColor(0.12f, 0.12f, 0.13f), 0.9f);
+	if (A.CrowdMat)
+	{
+		UMaterialInstanceDynamic* D = UMaterialInstanceDynamic::Create(A.CrowdMat, this);
+		D->SetVectorParameterValue(TEXT("TeamColor"), Hex(Home.colors.primary));
+		D->SetVectorParameterValue(TEXT("Tiling"), FLinearColor(1, 1, 0, 0)); // the sweep's UVs are already in tiles
+		D->SetScalarParameterValue(TEXT("Glow"), bNight ? 0.25f : 0.08f);
+		CrowdM = D;
+	}
+	const FLinearColor HomeC = Hex(Home.colors.primary), HomeC2 = Hex(Home.colors.secondary), AwayC = Hex(Away.colors.primary);
+	Add(Crowd, CrowdM);
+	Add(Concrete, TagColorMat(this, FLinearColor(0.16f, 0.16f, 0.17f), 0.9f));
+	Add(Steps, TagColorMat(this, FLinearColor(0.32f, 0.32f, 0.33f), 0.85f));
+	Add(Tunnel, TagColorMat(this, FLinearColor(0.008f, 0.008f, 0.01f), 0.9f));
+	Add(Padding, TagColorMat(this, HomeC * 0.6f, 0.5f));
+	// suites: dark reflective glass, warm interiors that read at night
+	Add(Glass, LED(FLinearColor(1.f, 0.82f, 0.6f), FLinearColor(1.f, 0.82f, 0.6f), bNight ? 0.35f : 0.03f, 0, 0, 0.02f, 0.08f));
+	// ribbon board: 12.5 m panels alternating the home colours, scrolling slowly around the bowl
+	Add(Ribbon, LED(HomeC, HomeC2, bNight ? 3.f : 5.f, 0.08f, 0.12f, 0.1f, 0.3f));
+	Add(Roof, TagColorMat(this, FLinearColor(0.34f, 0.35f, 0.37f), 0.6f));
+	Add(Edge, TagColorMat(this, HomeC * 0.5f, 0.4f));
+
+	// video boards on the end-zone roofs, facing the field, with the score
+	for (int32 End : {-1, 1})
+	{
+		const double D = BowlRoofEdgeD + 900, X = 50 * YD + End * (BowlHalfX + D);
+		const double Z = BowlRoofEdgeZ + 270.0 * 900 / 3100 + 1050; // board centre: sits on the canopy
+		const FRotator R(0, End < 0 ? 0.f : 180.f, 0);
+		const FVector In = -End * FVector::XAxisVector;
+		AddMesh(A.Cube, FVector(X, 0, Z), FVector(2.4, 50, 19), FLinearColor(0.03f, 0.03f, 0.035f), 0.5f, R);
+		for (double LegY : {-1600.0, 1600.0}) // legs down to the canopy
+			AddMesh(A.Cube, FVector(X, LegY, Z - 1100), FVector(1.2, 1.2, 4), FLinearColor(0.2f, 0.2f, 0.22f), 0.6f, R);
+		UStaticMeshComponent* Screen = AddMesh(A.Cube, FVector(X, 0, Z) + In * 125, FVector(0.05, 47, 16.4), FLinearColor::Black, 0.5f, R, false);
+		Screen->SetMaterial(0, LED(FLinearColor(0.02f, 0.04f, 0.12f), FLinearColor(0.02f, 0.04f, 0.12f), bNight ? 1.5f : 1.1f, 0, 0, 0.02f, 0.2f));
+		UStaticMeshComponent* Band = AddMesh(A.Cube, FVector(X, 0, Z + 640) + In * 128, FVector(0.05, 47, 2.2), FLinearColor::Black, 0.5f, R, false);
+		Band->SetMaterial(0, LED(HomeC, AwayC, bNight ? 3.f : 6.f, 0.5f / 47, 0, 0.05f, 0.3f));
+		for (int32 Line = 0; Line < 2; ++Line)
+		{
+			UTextRenderComponent* T = NewObject<UTextRenderComponent>(this);
+			T->SetupAttachment(RootComponent);
+			T->SetWorldSize(Line ? 480.f : 620.f);
+			T->SetTextRenderColor(Line ? FColor(255, 214, 90) : FColor::White);
+			T->SetHorizontalAlignment(EHTA_Center);
+			T->SetVerticalAlignment(EVRTA_TextCenter);
+			T->SetRelativeLocation(FVector(X, 0, Z + (Line ? -480 : 120)) + In * 140);
+			T->SetRelativeRotation(R);
+			T->SetCastShadow(false);
+			T->RegisterComponent();
+			ScoreText.Add(T);
+		}
+	}
+	SetScoreboard(FString::Printf(TEXT("%s 0   %s 0"), UTF8_TO_TCHAR(Away.abbr.c_str()), UTF8_TO_TCHAR(Home.abbr.c_str())), TEXT("1ST  15:00"));
+}
+
+void AStadium::SetScoreboard(const FString& Top, const FString& Bottom)
+{
+	for (int32 i = 0; i < ScoreText.Num(); ++i)
+		if (ScoreText[i]) ScoreText[i]->SetText(FText::FromString(i % 2 ? Bottom : Top));
 }
 
 void AStadium::Build(const tag::Team& Home, const tag::Team& Away, const tag::Weather& W, bool bNight)
@@ -215,40 +446,9 @@ void AStadium::Build(const tag::Team& Home, const tag::Team& Away, const tag::We
 	for (double X : {0.0, 100.0, -10.0, 110.0})
 		for (double Y : {-FW / 2, FW / 2})
 			AddMesh(Cube, FVector(X * YD, Y * YD, 23), FVector(0.1, 0.1, 0.46), FLinearColor(1.f, 0.3f, 0.f), 0.5f);
-	// ---------------- stands: lower bowl + upper deck on all four sides
-	const FLinearColor Concrete(0.12f, 0.12f, 0.13f);
-	const FLinearColor WallC = Hex(Home.colors.primary) * 0.6f;
-	auto Deck = [&](const FVector& P, const FVector& Scale, const FRotator& R)
-	{
-		UStaticMeshComponent* D = AddMesh(Cube, P, Scale, Concrete, 0.9f, R);
-		if (A.CrowdMat)
-		{
-			UMaterialInstanceDynamic* M = UMaterialInstanceDynamic::Create(A.CrowdMat, this);
-			M->SetVectorParameterValue(TEXT("TeamColor"), Hex(Home.colors.primary));
-			// crowd texture is 16 rows of fans ~ 2048px wide (~70 seats): tile to real seat spacing
-			M->SetVectorParameterValue(TEXT("Tiling"), FLinearColor(Scale.X * 100 / 1450.f, Scale.Y * 100 / 4500.f, 0, 0));
-			M->SetScalarParameterValue(TEXT("Glow"), bNight ? 0.25f : 0.08f);
-			D->SetMaterial(0, M);
-		}
-		return D;
-	};
-	auto Stand = [&](const FVector& C, float Yaw, double Len)
-	{
-		const FRotator R(0, Yaw, 0);
-		const FVector Fwd = R.Vector();
-		AddMesh(Cube, C + Fwd * 0, FVector(1.2, Len / 100, 2.2), WallC, 0.5f, R);
-		// seating bowls rise AWAY from the field (positive pitch about the stand's forward axis)
-		Deck(C + Fwd * 1600 + FVector(0, 0, 1050), FVector(36, Len / 100, 0.5), FRotator(33, Yaw, 0));
-		Deck(C + Fwd * 4200 + FVector(0, 0, 3300), FVector(28, Len / 100, 0.5), FRotator(38, Yaw, 0));
-		// club-level fascia + suites between the decks (no sky gaps), and a back wall
-		AddMesh(Cube, C + Fwd * 3050 + FVector(0, 0, 2100), FVector(1.0, Len / 100, 6.0), WallC * 0.7f, 0.4f, R);
-		AddMesh(Cube, C + Fwd * 3060 + FVector(0, 0, 2050), FVector(1.05, Len / 100 * 0.98, 1.6), FLinearColor(0.02f, 0.03f, 0.05f), 0.1f, R, false);
-		AddMesh(Cube, C + Fwd * 5300 + FVector(0, 0, 3000), FVector(1.0, Len / 100, 60), FLinearColor(0.08f, 0.08f, 0.09f), 0.9f, R);
-		AddMesh(Cube, C + Fwd * 5400 + FVector(0, 0, 5600), FVector(24, Len / 100, 0.6), FLinearColor(0.2f, 0.21f, 0.24f), 0.7f, FRotator(8, Yaw, 0));
-	};
-	const double SideY = (FW / 2 + 9) * YD;
-	Stand(FVector(50 * YD, SideY, 0), 90, 140 * YD);
-	Stand(FVector(50 * YD, -SideY, 0), -90, 140 * YD);
+	// ---------------- stands: one bowl (lower bowl, suites, upper deck, roof) wrapping all four sides
+	const double SideY = BowlSideY;
+	BuildBowl(Home, Away, bNight);
 	// 3D fans in the front sideline rows (Mass, dressed by the MetaHuman Crowd Sample). ~485 fans cost about 45 percent
 	// of frame rate (175 -> 96 fps in a full game at 1600x900); -TagNoHeroCrowd turns them off on slower machines.
 	if (!FParse::Param(FCommandLine::Get(), TEXT("TagNoHeroCrowd")))
@@ -285,8 +485,6 @@ void AStadium::Build(const tag::Team& Home, const tag::Team& Away, const tag::We
 				bOk ? TEXT("ok") : TEXT("MISSING"), FanSpawner->SeatCount());
 		}
 	}
-	Stand(FVector(-24 * YD, 0, 0), 180, 76 * YD);
-	Stand(FVector(124 * YD, 0, 0), 0, 76 * YD);
 	if (!A.CrowdMat) BuildCrowd(Home);
 	// sideline benches & personnel area tint
 	for (double Y : {-(FW / 2 + 4.5), FW / 2 + 4.5})
@@ -325,23 +523,27 @@ void AStadium::Build(const tag::Team& Home, const tag::Team& Away, const tag::We
 	Fog->SetVolumetricFog(true);
 	Fog->RegisterComponent();
 
-	// stadium floodlights (always on at night; supplementary by day)
-	const double LX[2] = {-12 * YD, 112 * YD};
-	const double LY[2] = {-(FW / 2 + 30) * YD, (FW / 2 + 30) * YD};
-	for (double X : LX)
-		for (double Y : LY)
-		{
-			AddMesh(A.Cylinder, FVector(X, Y, 3500), FVector(1.2, 1.2, 70), FLinearColor(0.2f, 0.2f, 0.22f), 0.7f);
-			AddMesh(Cube, FVector(X, Y, 7100), FVector(12, 2, 6), FLinearColor(1, 1, 0.95f) * (bNight ? 30.f : 1.f), 0.2f, FRotator(0, FMath::RadiansToDegrees(FMath::Atan2(-Y, 50 * YD - X)), 0), false);
-		}
-	// night: LED light banks along both stand roofs and over the end zones, the way a modern stadium is lit. Many
-	// sources from both sides give every player the broadcast look: a fan of crisp shadows around the feet, specular
-	// glints on the helmets from several directions, and no dark side to anyone. Six banks cast shadows (cost).
-	if (bNight)
+	// LED light banks hung from the roof's front edge along both sidelines and over the end zones, the way a modern
+	// stadium is lit (housings by day; lit at night). Many sources from both sides give every player the broadcast
+	// look: a fan of crisp shadows around the feet, specular glints on the helmets from several directions, and no dark
+	// side to anyone. Six banks cast shadows (cost). Each bank's intensity is set by its throw to the field, so moving
+	// the banks out to the roof edge kept the field's illuminance where it was tuned.
 	{
-		auto Bank = [&](const FVector& At, const FVector& Aim, bool bShadow, float Candela)
+		UMaterialInstanceDynamic* LampMat = nullptr;
+		if (A.LEDMat)
 		{
-			AddMesh(Cube, At, FVector(9, 1.2f, 3.5f), FLinearColor(1.f, 1.f, 0.97f) * 40.f, 0.2f, (Aim - At).Rotation(), false);
+			LampMat = UMaterialInstanceDynamic::Create(A.LEDMat, this);
+			LampMat->SetVectorParameterValue(TEXT("Color"), FLinearColor(1.f, 0.97f, 0.92f));
+			LampMat->SetVectorParameterValue(TEXT("ColorB"), FLinearColor(1.f, 0.97f, 0.92f));
+			LampMat->SetScalarParameterValue(TEXT("Intensity"), bNight ? 60.f : 0.4f);
+			LampMat->SetScalarParameterValue(TEXT("Diffuse"), 0.6f);
+		}
+		auto Bank = [&](const FVector& At, const FVector& Aim, const FVector& WasAt, bool bShadow, float Candela)
+		{
+			UStaticMeshComponent* H = AddMesh(Cube, At, FVector(9, 1.2f, 3.5f), FLinearColor(0.75f, 0.75f, 0.72f), 0.3f, (Aim - At).Rotation(), false);
+			if (LampMat) H->SetMaterial(0, LampMat);
+			if (!bNight) return;
+			Candela *= FMath::Square(FVector::Dist(At, Aim) / FVector::Dist(WasAt, Aim));
 			USpotLightComponent* L = NewObject<USpotLightComponent>(this);
 			L->SetupAttachment(RootComponent);
 			L->SetRelativeLocation(At);
@@ -358,16 +560,21 @@ void AStadium::Build(const tag::Team& Home, const tag::Team& Away, const tag::We
 			L->SetVolumetricScatteringIntensity(0.12f); // faint beams in the night air (more washes the bowl out in rain)
 			L->RegisterComponent();
 		};
+		const double EdgeD = BowlRoofEdgeD + 150, EdgeZ = BowlRoofEdgeZ - 260; // just under the canopy's front edge
 		for (int32 Side : {-1, 1})
 			for (int32 i = 0; i < 5; ++i)
 			{
 				const double X = (10 + 20 * i) * YD;
-				const FVector At(X, Side * (FW / 2 + 24) * YD, 4600);
+				const FVector At(X, Side * (BowlSideY + EdgeD), EdgeZ);
 				const FVector Aim(X + (50 * YD - X) * 0.25, -Side * 8 * YD, 0);
-				Bank(At, Aim, i % 2 == 1 || i == 2, 60000.f);
+				Bank(At, Aim, FVector(X, Side * (FW / 2 + 24) * YD, 4600), i % 2 == 1 || i == 2, 60000.f);
 			}
-		Bank(FVector(-16 * YD, 0, 4200), FVector(22 * YD, 0, 0), false, 50000.f);
-		Bank(FVector(116 * YD, 0, 4200), FVector(78 * YD, 0, 0), false, 50000.f);
+		for (int32 End : {-1, 1})
+		{
+			const FVector At(50 * YD + End * (BowlHalfX + EdgeD), 0, EdgeZ);
+			const FVector Aim((50 + End * 28) * YD, 0, 0);
+			Bank(At, Aim, FVector((50 + End * 66) * YD, 0, 4200), false, 50000.f);
+		}
 	}
 
 	UPostProcessComponent* PP = NewObject<UPostProcessComponent>(this);

@@ -335,6 +335,7 @@ struct FAthleteAssets
 	TObjectPtr<class UStaticMesh> Plane;
 	TObjectPtr<class UMaterialInterface> TurfMat;
 	TObjectPtr<class UMaterialInterface> CrowdMat;
+	TObjectPtr<class UMaterialInterface> LEDMat; // emissive panels: ribbon boards, video boards (Tools/Art/ue_build_stadium_mats.py)
 	TObjectPtr<class UMaterialInterface> ShapeMat;
 	void Load();
 };

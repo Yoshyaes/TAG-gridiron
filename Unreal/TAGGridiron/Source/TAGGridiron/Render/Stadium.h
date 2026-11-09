@@ -26,7 +26,15 @@ public:
 	/** Crowd excitement 0..1 (makes the crowd bounce). */
 	float Hype = 0.f;
 
+	/** The end-zone video boards' score lines. */
+	void SetScoreboard(const FString& Top, const FString& Bottom);
+
 private:
+	/** The seating bowl: one swept surface around a rounded-rectangle path (tiers, aisles, suites, ribbon boards,
+	 *  roof canopy), so the stands wrap the corners instead of meeting as separate slabs. */
+	void BuildBowl(const tag::Team& Home, const tag::Team& Away, bool bNight);
+	UPROPERTY()
+	TArray<TObjectPtr<class UTextRenderComponent>> ScoreText;
 	UStaticMeshComponent* AddMesh(UStaticMesh* Mesh, const FVector& Loc, const FVector& Scale, const FLinearColor& Color, float Rough = 0.8f, const FRotator& Rot = FRotator::ZeroRotator, bool bShadow = true);
 	UInstancedStaticMeshComponent* AddISM(UStaticMesh* Mesh, const FLinearColor& Color, float Rough = 0.8f, bool bShadow = true);
 	void AddText(const FString& S, const FVector& Loc, const FRotator& Rot, float Size, const FColor& Color);

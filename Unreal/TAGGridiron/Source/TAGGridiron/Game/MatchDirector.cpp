@@ -475,6 +475,8 @@ void AMatchDirector::TickGapTest(float Dt)
 	}
 }
 
+static bool GAutoBoard = false; // automation: the establishing shot turns to the end-zone video board
+
 void AMatchDirector::TickAutomation(float Dt)
 {
 	if (!bAuto) return;
@@ -507,10 +509,19 @@ void AMatchDirector::TickAutomation(float Dt)
 		FScreenshotRequest::RequestScreenshot(TEXT("tag_auto_stands.png"), false, false);
 		++AutoShot;
 	}
+	// then the end-zone video board above the stands (verifies the bowl's end and the live score)
+	if (AutoShot == static_cast<int32>(UE_ARRAY_COUNT(Times)) + 1 && AutoT > 53.9f && AutoT < 55.f && !GAutoBoard)
+		GAutoBoard = true;
+	if (GAutoBoard && AutoT >= 54.6f && AutoT < 55.f)
+	{
+		FScreenshotRequest::RequestScreenshot(TEXT("tag_auto_board.png"), false, false);
+		AutoT = 55.f;
+	}
 	// close-up of one athlete (verifies character, uniform and equipment fit)
 	if (AutoShot == static_cast<int32>(UE_ARRAY_COUNT(Times)) + 1 && AutoT > 55.f)
 	{
 		bAutoEstablish = false;
+		GAutoBoard = false;
 		for (auto& KV : Athletes)
 		{
 			if (!KV.Value->IsHidden())
@@ -709,6 +720,13 @@ void AMatchDirector::CallPlays(bool bTwo)
 	Dir = G.worldDir();
 	IdleFocus = ToWorld(bTwo ? 98 : G.ballOn, G.ballY, Dir);
 	Stadium->SetLines(ToWorld(bTwo ? 98 : G.ballOn, 0, Dir).X, bTwo ? -1 : ToWorld(FMath::Min(100.0, G.ballOn + G.toGo), 0, Dir).X);
+	{
+		static const TCHAR* QName[] = {TEXT("1ST"), TEXT("2ND"), TEXT("3RD"), TEXT("4TH")};
+		const int32 Secs = FMath::Max(0, FMath::CeilToInt(G.clock));
+		Stadium->SetScoreboard(FString::Printf(TEXT("%s %d   %s %d"), UTF8_TO_TCHAR(G.away->abbr.c_str()), G.score.away,
+			UTF8_TO_TCHAR(G.home->abbr.c_str()), G.score.home),
+			FString::Printf(TEXT("%s  %d:%02d"), G.q >= 1 && G.q <= 4 ? QName[G.q - 1] : TEXT("OT"), Secs / 60, Secs % 60));
+	}
 	auto Finish = [this](const tag::OffPlay* Op, const tag::DefCall* Dc) { StartPresnap(Op, Dc); };
 	if (UserOff())
 	{
@@ -1512,7 +1530,12 @@ void AMatchDirector::UpdateCamera(float Dt, const FVector& Focus)
 		P += FVector(FMath::FRandRange(-Shake, Shake), FMath::FRandRange(-Shake, Shake), FMath::FRandRange(-Shake, Shake));
 		Shake *= FMath::Exp(-Dt * 6.f);
 	}
-	if (bAutoEstablish)
+	if (bAutoEstablish && GAutoBoard)
+	{
+		P = FVector(40 * Y, -12 * Y, 12 * Y);
+		CamLook = FVector(-76 * Y, 0, 72 * Y);
+	}
+	else if (bAutoEstablish)
 	{
 		P = FVector(50 * Y, -30 * Y, 22 * Y);
 		CamLook = FVector(50 * Y, 70 * Y, 14 * Y);

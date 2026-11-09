@@ -63,6 +63,7 @@ void FAthleteAssets::Load()
 	ShapeMat = LoadAsset<UMaterialInterface>(TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial"));
 	TurfMat = LoadAsset<UMaterialInterface>(TEXT("/Game/TAG/Materials/M_TagTurf.M_TagTurf"), false);
 	CrowdMat = LoadAsset<UMaterialInterface>(TEXT("/Game/TAG/Materials/M_TagCrowd.M_TagCrowd"), false);
+	LEDMat = LoadAsset<UMaterialInterface>(TEXT("/Game/TAG/Materials/M_TagLED.M_TagLED"), false);
 
 	// Preferred: Epic's Game Animation Sample motion capture on the UEFN mannequin.
 	const FString G = TEXT("/Game/Characters/UEFN_Mannequin/");
