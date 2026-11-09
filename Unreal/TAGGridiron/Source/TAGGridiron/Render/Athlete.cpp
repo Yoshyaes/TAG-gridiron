@@ -1170,6 +1170,17 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 				SetActorRotation(FRotator(0, SmoothedYaw, 0));
 			}
 		}
+		// pileup: once the wrap clip has played out on a carrier who went down, the tackler goes down with him (a
+		// ragdoll driven onto the carrier; ragdolls collide, so gang tacklers land on and around him) instead of
+		// freezing upright in the clip's last pose until the next play
+		if (AAthlete* C = TackleOn.Get(); C && CurrentClip && AnimT >= CurrentClip->GetPlayLength() - 0.03f &&
+			(C->bRagdoll || C->TackledLeft > 0.f))
+		{
+			FVector To = C->GetActorLocation() - GetActorLocation();
+			To.Z = 0.f;
+			StartRagdoll(To.GetSafeNormal() * 260.f + FVector(VelWorld.X, VelWorld.Y, 0.f) * 0.3f - FVector(0, 0, 80));
+			UE_LOG(LogTemp, Verbose, TEXT("TAG pileup: #%d falls onto #%d"), Player ? Player->number : -1, C->Player ? C->Player->number : -1);
+		}
 		return;
 	}
 	if (Anim == TEXT("dive") && A.TackleDive)
