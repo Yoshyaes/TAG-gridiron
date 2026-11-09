@@ -8,6 +8,8 @@
 class UBlendSpace;
 class UPoseSearchDatabase;
 class UAnimationAsset;
+class UMetaHumanCollection;
+class UMetaHumanInstance;
 
 UCLASS()
 class TAGGRIDIRON_API UTagEditorLib : public UBlueprintFunctionLibrary
@@ -34,4 +36,18 @@ public:
 	/** Append an animation (sequence or blend space) to a database with default sampling; false if already present. */
 	UFUNCTION(BlueprintCallable, Category = "TAG")
 	static bool DatabaseAddAnim(UPoseSearchDatabase* Database, UAnimationAsset* Anim);
+
+	/** MetaHuman Crowd: point a collection's crowd editor pipeline at an animation config (the clips baked for
+	 *  distant instanced crowd members). Tools/Art/crowd_rebuild.py */
+	UFUNCTION(BlueprintCallable, Category = "TAG")
+	static bool CrowdSetAnimationConfig(UMetaHumanCollection* Collection, UObject* AnimationConfig);
+
+	/** Build a MetaHuman collection and wait for it (headless commandlets pump the engine until it completes or
+	 *  TimeoutSeconds passes). Returns true on success. */
+	UFUNCTION(BlueprintCallable, Category = "TAG")
+	static bool CrowdBuildCollection(UMetaHumanCollection* Collection, float TimeoutSeconds = 7200.f);
+
+	/** Point a MetaHuman instance at another collection (e.g. a TAG rebuild of the crowd sample's). */
+	UFUNCTION(BlueprintCallable, Category = "TAG")
+	static bool CrowdSetInstanceCollection(UMetaHumanInstance* Instance, UMetaHumanCollection* Collection);
 };

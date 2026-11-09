@@ -125,7 +125,13 @@ Reasons, briefly:
     - Instead, `ATagFanSpawner::Animate` makes fans jump and bounce on their seats with Hype (per-fan rhythm, up to ~26 cm on a touchdown) through each entity's transform fragment, then settles them back.
     - Verified: two hyped frames 0.2 s apart differ across the crowd. About 93 fps, 0 errors.
     - Our keyed cheer is also retargeted to the crowd actor skeleton (`A_CrowdActor_Cheer`). `UpdateMassFans` swaps it onto any close-up high-res crowd actors.
-  - Full arm-waving cheers at stadium distance would mean adding the cheer to the crowd's baked animation set (the sample's `AnimConfig`) and re-baking its instances.
+  - **Distant fans cheer (2026-11-09, rebuilt).** `Tools/Art/crowd_rebuild.py`:
+    - Builds `AnimConfig_TAG`: the sample's idle and walk plus our keyed cheer as baked sequence 2.
+    - Builds `CrowdCollection_TAG` through Epic's crowd pipeline (`UTagEditorLib::CrowdBuildCollection`, a headless build that pumps the engine and collects garbage; ~8 min).
+    - Re-points 255 instance copies at it and switches `DA_TAG_FanConfig` to them. Epic's plugin content is untouched.
+    - Runtime: `UTagFanCheerProcessor` runs after the plugin's idle/walk processor. It moves a hype-scaled share of distant fans to the cheer, each on its own threshold.
+    - Verified: lineup crowd shot shows rows of fans with arms up; full game 114 fps, 0 errors.
+    - Memory: the build needs ~40 GB of commit. Run it with the asset-compile cap in `setup_assets.bat`.
 - **Motion matching (2026-11-09, approved; built and on by default, `-TagNoMM` for the blend spaces).**
   - All GASP PoseSearch data was already in the project: Dense databases, schemas, normalization sets. Only GASP's `/Game/Blueprints` (its AnimBP and chooser enums) is missing, and we don't need it. Database choice by gait and state happens in C++ and mirrors GASP's chooser.
   - `Render/TagMotionMatchInstance`:

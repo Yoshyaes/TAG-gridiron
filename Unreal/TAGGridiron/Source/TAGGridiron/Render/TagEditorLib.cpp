@@ -2,6 +2,14 @@
 
 #include "Animation/BlendSpace.h"
 #include "PoseSearch/PoseSearchDatabase.h"
+#include "MetaHumanCollection.h"
+#include "MetaHumanInstance.h"
+#include "MetaHumanCharacterEditorPipeline.h"
+#include "MetaHumanCollectionEditorPipeline.h"
+#include "Containers/Ticker.h"
+#include "Async/TaskGraphInterfaces.h"
+#include "AssetCompilingManager.h"
+#include "HAL/PlatformProcess.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(TagEditorLib)
 
@@ -59,4 +67,68 @@ bool UTagEditorLib::DatabaseAddAnim(UPoseSearchDatabase* Database, UAnimationAss
 #else
 	return false;
 #endif
+}
+
+bool UTagEditorLib::CrowdSetAnimationConfig(UMetaHumanCollection* Collection, UObject* AnimationConfig)
+{
+#if WITH_EDITOR
+	if (!Collection || !AnimationConfig) return false;
+	UMetaHumanCollectionEditorPipeline* EP = const_cast<UMetaHumanCollectionEditorPipeline*>(Collection->GetEditorPipeline());
+	if (!EP) return false;
+	FObjectPropertyBase* P = FindFProperty<FObjectPropertyBase>(EP->GetClass(), TEXT("AnimationConfig"));
+	if (!P || !AnimationConfig->IsA(P->PropertyClass)) return false;
+	EP->Modify();
+	P->SetObjectPropertyValue_InContainer(EP, AnimationConfig);
+	Collection->MarkPackageDirty();
+	return true;
+#else
+	return false;
+#endif
+}
+
+bool UTagEditorLib::CrowdBuildCollection(UMetaHumanCollection* Collection, float TimeoutSeconds)
+{
+#if WITH_EDITOR
+	if (!Collection) return false;
+	bool bDone = false, bOk = false;
+	Collection->Build(FInstancedStruct(), UMetaHumanCollection::FOnBuildComplete::CreateLambda([&bDone, &bOk](EMetaHumanBuildStatus Status)
+	{
+		bOk = Status == EMetaHumanBuildStatus::Succeeded;
+		bDone = true;
+	}));
+	const double T0 = FPlatformTime::Seconds();
+	double Last = T0, LastGC = T0;
+	while (!bDone && FPlatformTime::Seconds() - T0 < TimeoutSeconds)
+	{
+		// the editor collects garbage between frames; a commandlet pump has to do it itself or every per-head bake's
+		// temporary meshes and sequences pile up (the first headless builds ran out of commit memory)
+		if (FPlatformTime::Seconds() - LastGC > 15.0)
+		{
+			LastGC = FPlatformTime::Seconds();
+			CollectGarbage(GARBAGE_COLLECTION_KEEPFLAGS);
+		}
+		FTaskGraphInterface::Get().ProcessThreadUntilIdle(ENamedThreads::GameThread);
+		FTSTicker::GetCoreTicker().Tick(0.01f);
+		FAssetCompilingManager::Get().ProcessAsyncTasks(true);
+		FPlatformProcess::Sleep(0.01f);
+		if (FPlatformTime::Seconds() - Last > 30.0)
+		{
+			Last = FPlatformTime::Seconds();
+			UE_LOG(LogTemp, Display, TEXT("TAG crowd build: %.0f s"), Last - T0);
+		}
+	}
+	UE_LOG(LogTemp, Display, TEXT("TAG crowd build %s after %.0f s"), !bDone ? TEXT("timed out") : bOk ? TEXT("succeeded") : TEXT("failed"), FPlatformTime::Seconds() - T0);
+	if (bOk) Collection->MarkPackageDirty();
+	return bOk;
+#else
+	return false;
+#endif
+}
+
+bool UTagEditorLib::CrowdSetInstanceCollection(UMetaHumanInstance* Instance, UMetaHumanCollection* Collection)
+{
+	if (!Instance || !Collection) return false;
+	Instance->SetMetaHumanCollection(Collection);
+	Instance->MarkPackageDirty();
+	return true;
 }

@@ -35,4 +35,12 @@ if exist "%PROJDIR%\Content\TAG\MetaHumans\Unpacked\TAG_Skill" (
   "%UE%\Engine\Binaries\Win64\UnrealEditor-Cmd.exe" "%PROJDIR%\TAGGridiron.uproject" -run=pythonscript "-script=%~dp0Art\mh_retarget.py" -unattended -nosplash
   "%UE%\Engine\Binaries\Win64\UnrealEditor-Cmd.exe" "%PROJDIR%\TAGGridiron.uproject" -run=pythonscript "-script=%~dp0Art\ue_build_mh_uniform.py" -unattended -nosplash
 )
+rem 6) optional: MetaHuman Crowd Sample spectators (Fab; Plugins\MetaHumanCrowdContent junction to the engine install).
+rem    Fan config without the walking traits, our cheer retargeted to the crowd skeleton, then a TAG rebuild of the
+rem    crowd collection with the cheer baked as sequence 2 for distant instanced fans (~10 min; needs ~40 GB commit).
+if exist "%PROJDIR%\Plugins\MetaHumanCrowdContent" (
+  "%UE%\Engine\Binaries\Win64\UnrealEditor-Cmd.exe" "%PROJDIR%\TAGGridiron.uproject" -run=pythonscript "-script=%~dp0Art\crowd_fan_config.py" -unattended -nosplash -nullrhi
+  "%UE%\Engine\Binaries\Win64\UnrealEditor-Cmd.exe" "%PROJDIR%\TAGGridiron.uproject" -run=pythonscript "-script=%~dp0Art\crowd_retarget.py" -unattended -nosplash
+  "%UE%\Engine\Binaries\Win64\UnrealEditor-Cmd.exe" "%PROJDIR%\TAGGridiron.uproject" -run=pythonscript "-script=%~dp0Art\crowd_rebuild.py" -unattended -nosplash "-ini:Engine:[ConsoleVariables]:Editor.AsyncAssetCompilationMaxMemoryUsage=8,Editor.AsyncAssetCompilationMemoryPerCore=2"
+)
 echo Asset setup complete.
