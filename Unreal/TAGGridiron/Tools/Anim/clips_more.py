@@ -646,3 +646,133 @@ MORE = {
     "Celebrate_Shimmy_Loop": celebrate_shimmy,
     "GetUp_Roll": getup_roll, "Idle_HandsHips_Loop": idle_hands_hips, "Idle_HandsKnees_Loop": idle_hands_knees,
 }
+
+
+# ================================================================================ coverage gaps (batch 3)
+UNDER_CENTER = {"pelvis": (0.0, 0.04, 0.78), "pelvis_rot": (40, 0, 0), "spine": (20, 0, 0),
+                "hand_l": (0.03, -0.36, 0.76), "elbow_l": (1, 0.3, -0.2), "hand_r": (-0.03, -0.38, 0.78),
+                "elbow_r": (-1, 0.3, -0.2), "foot_l": (0.17, -0.04, ANKLE), "foot_r": (-0.17, 0.0, ANKLE),
+                "foot_pitch_l": 10, "foot_pitch_r": 10, "foot_yaw_l": 6, "foot_yaw_r": -6,
+                "knee_l": (0.25, -1, 0), "knee_r": (-0.25, -1, 0), "look": (0.0, -12.0, 1.4)}
+
+
+def stance_under_center(rig):
+    """QB under center: knees flexed, hands seated under the center (top hand pressure, bottom hand open), feet
+    parallel, eyes reading the defense."""
+    return _stance_loop(rig, UNDER_CENTER, amp_z=0.006, amp_pitch=1.0, shift=0.008)
+
+
+def qb_under_center_snap(rig):
+    """Under center snap, 14 frames: the ball slaps into the hands, comes straight to the belly, the QB pushes off the
+    left foot and the right foot takes the first drop step back. In place."""
+    def k(**kw):
+        d = dict(UNDER_CENTER)
+        d.update(kw)
+        return d
+    keys = [
+        (0, k()),
+        (3, k(hand_l=(0.03, -0.32, 0.80), hand_r=(-0.03, -0.33, 0.82), pelvis=(0.0, 0.05, 0.80))),
+        (7, k(hand_l=(0.04, -0.10, 1.02), hand_r=(-0.06, -0.10, 1.06), elbow_l=(1, 0.4, -0.8), elbow_r=(-1, 0.4, -0.8),
+              pelvis=(0.0, 0.12, 0.86), pelvis_rot=(18, -10, 0), spine=(8, -5, 0),
+              foot_r=(-0.18, 0.30, 0.13), foot_pitch_r=20, foot_yaw_r=-25)),
+        (14, k(hand_l=(0.02, 0.22, 1.12), hand_r=(-0.08, 0.24, 1.16), elbow_l=(1, 0.4, -0.8), elbow_r=(-1, 0.4, -0.8),
+               pelvis=(0.0, 0.40, 0.88), pelvis_rot=(12, -25, 0), spine=(6, -10, 0), look=(0.0, -8.0, 1.6),
+               foot_l=(0.16, 0.10, 0.12), foot_pitch_l=30, foot_r=(-0.20, 0.60, ANKLE), foot_yaw_r=-40)),
+    ]
+    return _key_all(rig, C._in_place(keys))
+
+
+def qb_pitch(rig):
+    """Toss to the right: reverse out, ball low in both hands, underhand two-hand pitch leading the back toward the
+    sideline, follow through with the hands at the target, then carry out the fake."""
+    look = (-4.0, 1.0, 0.9)
+    keys = [
+        (0, _base(pelvis=(0, 0.0, 0.88), pelvis_rot=(16, 0, 0), spine=(8, 0, 0), look=(0, -6, 1.4),
+                  hand_l=(0.04, -0.22, 1.10), hand_r=(-0.06, -0.20, 1.12), elbow_l=(1, 0.4, -0.8), elbow_r=(-1, 0.4, -0.8),
+                  foot_l=(0.18, -0.04, ANKLE), foot_r=(-0.18, 0.04, ANKLE))),
+        (5, _base(pelvis=(-0.06, 0.08, 0.84), pelvis_rot=(20, -55, 0), spine=(12, -20, 0), look=look,
+                  hand_l=(-0.04, -0.10, 0.84), hand_r=(-0.16, -0.04, 0.82), elbow_l=(1, 0.4, 0), elbow_r=(-1, 0.4, 0),
+                  foot_l=(0.14, -0.04, ANKLE), foot_r=(-0.26, 0.24, ANKLE), foot_yaw_r=-60, foot_pitch_l=12)),
+        (9, _base(pelvis=(-0.12, 0.12, 0.84), pelvis_rot=(16, -70, 0), spine=(8, -25, 0), look=look,
+                  hand_l=(-0.32, 0.02, 0.92), hand_r=(-0.38, 0.10, 0.94), elbow_l=(1, 0, 0.2), elbow_r=(-1, 0, 0.2),
+                  foot_l=(0.10, 0.0, ANKLE), foot_r=(-0.30, 0.26, ANKLE), foot_yaw_l=-30, foot_yaw_r=-70)),
+        (13, _base(pelvis=(-0.14, 0.14, 0.86), pelvis_rot=(12, -72, 0), spine=(4, -26, 0), look=look,
+                   hand_l=(-0.40, 0.14, 1.08), hand_r=(-0.44, 0.22, 1.10), elbow_l=(1, 0, 0), elbow_r=(-1, 0, 0),
+                   foot_l=(0.10, 0.0, 0.12), foot_r=(-0.30, 0.26, ANKLE), foot_pitch_l=25, foot_yaw_r=-70)),
+        (20, _base(pelvis=(-0.08, 0.10, 0.90), pelvis_rot=(12, -30, 0), spine=(4, -10, 0), look=(-1.0, -5.0, 1.4),
+                   hand_l=(0.10, -0.10, 1.06), hand_r=(-0.12, -0.08, 1.06), elbow_l=(1, 0.3, -0.6), elbow_r=(-1, 0.3, -0.6),
+                   foot_l=(0.16, -0.10, ANKLE), foot_r=(-0.26, 0.20, ANKLE))),
+    ]
+    return _key_all(rig, C._in_place(keys))
+
+
+CATCH_DIVE_TRAVEL = 1.15  # m the body ends up ahead of where the dive started (handed to the actor afterwards)
+
+
+def catch_dive(rig):
+    """Layout dive for a ball just out of reach: last push step, full extension with the arms reaching out ahead, chest
+    and forearms land, the body slides, then he pushes up to a knee and stands. Not in place: the travel is handed to
+    the actor when the clip ends (FAthleteAssets::CatchDiveTravel)."""
+    T = CATCH_DIVE_TRAVEL
+    keys = [
+        (0, _base(pelvis=(0, 0.0, 0.88), pelvis_rot=(20, 0, 0), spine=(8, 0, 0), look=(0, -4, 0.8),
+                  hand_l=(0.24, -0.20, 1.02), hand_r=(-0.24, 0.0, 1.0),
+                  foot_l=(0.13, -0.20, ANKLE), foot_r=(-0.13, 0.24, ANKLE), foot_pitch_r=30)),
+        (5, _base(pelvis=(0, -0.25, 0.82), pelvis_rot=(46, 0, 0), spine=(10, 0, 0), look=(0, -3, 0.5),
+                  hand_l=(0.20, -0.70, 0.95), hand_r=(-0.20, -0.70, 0.95), elbow_l=(1, 0, -0.3), elbow_r=(-1, 0, -0.3),
+                  foot_l=(0.13, -0.25, ANKLE), foot_r=(-0.13, 0.15, 0.12), foot_pitch_l=30, foot_pitch_r=55)),
+        (11, _base(pelvis=(0, -0.65, 0.66), pelvis_rot=(78, 0, 0), spine=(6, 0, 0), clav_l=(6, 20), clav_r=(6, 20),
+                   look=(0, -2.5, 0.3), hand_l=(0.12, -1.10, 0.66), hand_r=(-0.12, -1.10, 0.66),
+                   elbow_l=(1, 0, -0.3), elbow_r=(-1, 0, -0.3), foot_l=(0.13, -0.10, 0.30), foot_r=(-0.13, 0.10, 0.42),
+                   foot_pitch_l=50, foot_pitch_r=60, knee_l=(0.2, -0.2, -1), knee_r=(-0.2, -0.2, -1))),
+        (17, _base(pelvis=(0, -T + 0.15, 0.30), pelvis_rot=(88, 0, 0), spine=(4, 0, 0), clav_l=(6, 20), clav_r=(6, 20),
+                   look=(0, -T - 2.0, 0.2), hand_l=(0.10, -T - 0.45, 0.22), hand_r=(-0.10, -T - 0.45, 0.22),
+                   elbow_l=(1, 0, -0.2), elbow_r=(-1, 0, -0.2), foot_l=(0.14, -T + 0.95, 0.16),
+                   foot_r=(-0.14, -T + 0.95, 0.20), foot_pitch_l=80, foot_pitch_r=80,
+                   knee_l=(0.2, 0, -1), knee_r=(-0.2, 0, -1))),
+        (23, _base(pelvis=(0, -T, 0.24), pelvis_rot=(90, 0, 0), spine=(2, 0, 0), look=(0, -T - 2.0, 0.2),
+                   hand_l=(0.18, -T - 0.36, 0.12), hand_r=(-0.18, -T - 0.36, 0.12), elbow_l=(1, 0.3, 0), elbow_r=(-1, 0.3, 0),
+                   foot_l=(0.14, -T + 0.90, 0.12), foot_r=(-0.14, -T + 0.90, 0.12), foot_pitch_l=85, foot_pitch_r=85,
+                   knee_l=(0.2, 0, -1), knee_r=(-0.2, 0, -1))),
+        (34, _base(pelvis=(0, -T + 0.20, 0.46), pelvis_rot=(60, 0, 0), spine=(24, 0, 0), look=(0, -T - 2.0, 0.4),
+                   hand_l=(0.22, -T - 0.12, 0.11), hand_r=(-0.22, -T - 0.12, 0.11), foot_l=(0.18, -T + 0.40, 0.12),
+                   foot_r=(-0.16, -T + 0.60, 0.12), foot_pitch_l=80, foot_pitch_r=80)),
+        (44, _base(pelvis=(0, -T + 0.15, 0.62), pelvis_rot=(44, 0, 0), spine=(18, 0, 0), look=(0, -T - 3.0, 0.9),
+                   hand_l=(0.22, -T - 0.06, 0.62), hand_r=(-0.22, -T - 0.10, 0.46), foot_l=(0.18, -T - 0.10, ANKLE),
+                   foot_r=(-0.16, -T + 0.50, 0.12), foot_pitch_r=80)),
+        (56, _base(pelvis=(0, -T, 0.93), pelvis_rot=(8, 0, 0), spine=(2, 0, 0), look=(0, -T - 6.0, 1.5),
+                   hand_l=(0.22, -T - 0.04, 0.95), hand_r=(-0.22, -T - 0.04, 0.95), foot_l=(0.15, -T - 0.06, ANKLE),
+                   foot_r=(-0.15, -T + 0.06, ANKLE))),
+    ]
+    return _key_all(rig, keys)
+
+
+def getup_slow(rig):
+    """Slow to get up (shaken up on the play): from face down onto one knee, a hand pressed to the right ribs, head
+    hanging for a beat, then a careful rise with the hand still on the side."""
+    keys = [
+        (0, _base(pelvis=(0, 0, 0.20), pelvis_rot=(90, 0, 0), spine=(0, 0, 0), look=(0, -2, 0.1),
+                  hand_l=(0.22, -0.36, 0.11), hand_r=(-0.22, -0.36, 0.11), elbow_l=(1, 0.3, 0), elbow_r=(-1, 0.3, 0),
+                  foot_l=(0.14, 0.82, 0.12), foot_r=(-0.14, 0.82, 0.12), foot_pitch_l=85, foot_pitch_r=85,
+                  knee_l=(0.2, 0, -1), knee_r=(-0.2, 0, -1))),
+        (18, _base(pelvis=(0, 0.20, 0.44), pelvis_rot=(64, 0, 0), spine=(26, 0, 0), look=(0, -1.5, 0.2),
+                   hand_l=(0.22, -0.16, 0.11), hand_r=(-0.22, -0.16, 0.11), foot_l=(0.16, 0.55, 0.12),
+                   foot_r=(-0.16, 0.55, 0.12), foot_pitch_l=80, foot_pitch_r=80)),
+        (32, _base(pelvis=(0, 0.20, 0.52), pelvis_rot=(36, 0, 6), spine=(30, 0, 8), look=(0, -1.0, 0.0),
+                   hand_l=(0.22, -0.26, 0.58), hand_r=(-0.20, -0.04, 0.88), elbow_r=(-1, 0.5, 0.2),
+                   foot_l=(0.18, -0.20, ANKLE), foot_r=(-0.16, 0.50, 0.12), foot_pitch_r=80)),
+        (52, _base(pelvis=(0, 0.20, 0.54), pelvis_rot=(34, 0, 8), spine=(32, 0, 10), look=(0, -0.8, -0.2),
+                   hand_l=(0.22, -0.24, 0.60), hand_r=(-0.20, -0.04, 0.88), elbow_r=(-1, 0.5, 0.2),
+                   foot_l=(0.18, -0.20, ANKLE), foot_r=(-0.16, 0.50, 0.12), foot_pitch_r=80)),
+        (70, _base(pelvis=(0, 0.08, 0.84), pelvis_rot=(18, 0, 4), spine=(10, 0, 6), look=(0, -4, 1.2),
+                   hand_l=(0.24, -0.06, 0.92), hand_r=(-0.20, -0.02, 0.90), elbow_r=(-1, 0.5, 0.2),
+                   foot_l=(0.16, -0.10, ANKLE), foot_r=(-0.16, 0.14, ANKLE))),
+        (84, _base(pelvis=(0, 0.04, 0.93), pelvis_rot=(6, 0, 0), spine=(2, 0, 0), look=(0, -6, 1.6),
+                   hand_l=(0.22, -0.04, 0.95), hand_r=(-0.20, -0.02, 0.92), foot_l=(0.15, -0.06, ANKLE),
+                   foot_r=(-0.15, 0.06, ANKLE))),
+    ]
+    return _key_all(rig, keys)
+
+
+MORE.update({"StanceUnderCenter_Loop": stance_under_center, "QB_UnderCenterSnap": qb_under_center_snap,
+             "QB_Pitch": qb_pitch, "Catch_Dive": catch_dive, "GetUp_Slow": getup_slow})

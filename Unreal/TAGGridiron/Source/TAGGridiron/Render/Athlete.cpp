@@ -127,6 +127,11 @@ void FAthleteAssets::Load()
 		KickFieldGoal = Keyed(TEXT("A_TAG_Kick_FieldGoal"));
 		KickPunt = Keyed(TEXT("A_TAG_Kick_Punt"));
 		GetUpRoll = Keyed(TEXT("A_TAG_GetUp_Roll"));
+		StanceUnderCenter = Keyed(TEXT("A_TAG_StanceUnderCenter_Loop"));
+		UnderCenterSnap = Keyed(TEXT("A_TAG_QB_UnderCenterSnap"));
+		Pitch = Keyed(TEXT("A_TAG_QB_Pitch"));
+		CatchDive = Keyed(TEXT("A_TAG_Catch_Dive"));
+		GetUpSlow = Keyed(TEXT("A_TAG_GetUp_Slow"));
 		IdleHandsHips = Keyed(TEXT("A_TAG_Idle_HandsHips_Loop"));
 		IdleHandsKnees = Keyed(TEXT("A_TAG_Idle_HandsKnees_Loop"));
 		for (const TCHAR* N : {TEXT("A_TAG_Celebrate_Flex_Loop"), TEXT("A_TAG_Celebrate_PointUp_Loop"), TEXT("A_TAG_Celebrate_Leap_Loop"),
@@ -928,6 +933,11 @@ void AAthlete::PlayCatch(float BallZCm, float SpeedCm, const FVector& BallVelW, 
 	if (C) PlayOneShot(C);
 }
 
+void AAthlete::PlayDiveAttempt()
+{
+	if (const FAthleteAssets& A = FAthleteAssets::Get(); A.CatchDive) PlayOneShot(A.CatchDive);
+}
+
 float AAthlete::GetUpElapsed() const
 {
 	return bGettingUp && CurrentClip ? CurrentClip->GetPlayLength() - GetUpLeft : -1.f;
@@ -950,6 +960,8 @@ void AAthlete::StartGetUp(const FVector& SimLoc)
 	UAnimationAsset* Clip = bFaceDown ? A.GetUpDown.Get() : A.GetUpUp.Get();
 	static int32 GGetUpSeq = 0; // every other face-up landing rolls to the side and up instead
 	if (!bFaceDown && A.GetUpRoll && (GGetUpSeq++ % 2)) Clip = A.GetUpRoll.Get();
+	static int32 GSlowSeq = 0;  // now and then a player is shaken up and slow to get up (hand on the ribs)
+	if (bFaceDown && A.GetUpSlow && (GSlowSeq++ % 5) == 4) Clip = A.GetUpSlow.Get();
 	if (!Clip) return;
 
 	const int32 NB = V->GetNumBones();
@@ -1164,6 +1176,7 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 	if (bWasPreSnap && !bPreSnap)
 	{
 		if (bLine && A.GetOff) PlayOneShot(A.GetOff);
+		else if (Player && Player->pos == tag::Pos::QB && bUnderCenter && A.UnderCenterSnap) PlayOneShot(A.UnderCenterSnap);
 		else if (Player && Player->pos == tag::Pos::QB && A.SnapCatch) PlayOneShot(A.SnapCatch);
 	}
 	bWasPreSnap = bPreSnap;
@@ -1173,6 +1186,9 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 		PlayClip(OneShot, false);
 		if (OneShotLeft <= 0.f)
 		{
+			// the layout dive ends ~1 m ahead of where it started: hand that travel to the actor so the next pose
+			// starts where the body is (VisOffset then eases back onto the sim position)
+			if (OneShot == A.CatchDive) VisOffset += GetActorForwardVector() * FAthleteAssets::CatchDiveTravel;
 			OneShot = nullptr;
 			CurrentAnim.Reset(); // one-shot done: let whatever state follows (re)start next frame (crossfaded)
 		}
@@ -1182,7 +1198,7 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 	if (bPreSnap && SpeedCm < 40.f && Player)
 	{
 		const tag::Pos P = Player->pos;
-		UAnimationAsset* S = bLine ? A.Stance3pt.Get() : P == tag::Pos::QB ? A.StanceShotgun.Get() : A.Stance2pt.Get();
+		UAnimationAsset* S = bLine ? A.Stance3pt.Get() : P == tag::Pos::QB ? (bUnderCenter && A.StanceUnderCenter ? A.StanceUnderCenter.Get() : A.StanceShotgun.Get()) : A.Stance2pt.Get();
 		if (P == tag::Pos::DT && A.Stance4pt && Player->id % 2) S = A.Stance4pt; // some tackles fire out of a four point
 		else if ((P == tag::Pos::RB || P == tag::Pos::FB) && A.StanceRB) S = A.StanceRB;
 		else if ((P == tag::Pos::CB || P == tag::Pos::S) && A.StanceDB) S = A.StanceDB;
@@ -1296,6 +1312,7 @@ void AAthlete::SetFootball(const FAthleteFootball& InF, float Dt)
 {
 	UpdateFace(Dt);
 	bPreSnap = InF.bPreSnap;
+	if (InF.bPreSnap) bUnderCenter = InF.bUnderCenter; // keep the alignment through the snap
 	bEngaged = InF.bReach;
 	if (!MHBody) return;
 	UTagRetargetAnimInstance* I = Cast<UTagRetargetAnimInstance>(MHBody->GetAnimInstance());

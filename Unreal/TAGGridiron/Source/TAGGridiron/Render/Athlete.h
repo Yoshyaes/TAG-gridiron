@@ -25,6 +25,7 @@ struct FAthleteFootball
 	float Lean = 0.f;          // drive lean 0..1
 	bool bStance = false;
 	bool bPreSnap = false;     // before the snap: hand keyed stance loops
+	bool bUnderCenter = false; // QB lined up under center (not shotgun / pistol)
 	bool bLook = false;
 	FVector LookWorld = FVector::ZeroVector;
 };
@@ -75,6 +76,8 @@ public:
 	/** The sim says this player just caught the ball: pick the catch for the ball height, his speed, where the ball
 	 *  came from and whether he is at the sideline (SidelineDirW: unit vector toward the nearest sideline, or zero). */
 	void PlayCatch(float BallZCm, float SpeedCm, const FVector& BallVelW, const FVector& SidelineDirW);
+	/** Layout dive at an incompletion just out of reach (gets back up at the end). */
+	void PlayDiveAttempt();
 
 	const tag::Player* Player = nullptr;
 
@@ -140,6 +143,7 @@ private:
 	float MovingTime = 0.f;                   // seconds since this player started moving (motion matching start state)
 	bool bPreSnap = false;
 	bool bWasPreSnap = false;
+	bool bUnderCenter = false;
 	UPROPERTY()
 	TObjectPtr<UAnimationAsset> OneShot;   // keyed one-shot in progress (get-off, snap catch, handoff)
 	float OneShotLeft = 0.f;
@@ -246,6 +250,9 @@ struct FAthleteAssets
 	TObjectPtr<UAnimationAsset> Stance4pt, StanceRB, StanceDB, StanceLB, StanceK;
 	TObjectPtr<UAnimationAsset> KickKickoff, KickFieldGoal, KickPunt;
 	TObjectPtr<UAnimationAsset> GetUpRoll, IdleHandsHips, IdleHandsKnees;
+	// batch 3: the last uncovered situations
+	TObjectPtr<UAnimationAsset> StanceUnderCenter, UnderCenterSnap, Pitch, CatchDive, GetUpSlow;
+	static constexpr float CatchDiveTravel = 115.f; // cm the dive carries the body forward (Tools/Anim CATCH_DIVE_TRAVEL)
 	TArray<UAnimationAsset*> Celebrations;                                            // keyed celebration loops
 	// where foot contact falls in each kick clip (s), so the director can line it up with the ball leaving
 	static constexpr float KickoffContact = 26.f / 30.f, FieldGoalContact = 20.f / 30.f, PuntContact = 19.f / 30.f;

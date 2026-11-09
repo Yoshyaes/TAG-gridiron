@@ -956,7 +956,17 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 		if (Ev.type == "handoff" && Ev.a)
 		{
 			AAthlete* Q = AthOf(Ev.a);
-			if (Q) Q->PlayOneShot(FAthleteAssets::Get().Handoff);
+			// a toss on stretch runs (the back is out wide), a handoff otherwise
+			const bool bPitch = Ev.b && tag::dist(Ev.a->pos, Ev.b->pos) > 2.5 && FAthleteAssets::Get().Pitch;
+			if (Q) Q->PlayOneShot(bPitch ? FAthleteAssets::Get().Pitch.Get() : FAthleteAssets::Get().Handoff.Get());
+		}
+		else if (Ev.type == "incomplete" && Ev.a)
+		{
+			// a ball just out of reach of a receiver still running at it: he lays out for it
+			const tag::Ball& Bi = Sim->ball;
+			const double Gap = tag::dist(tag::V2{Bi.pos.x, Bi.pos.y}, Ev.a->pos);
+			if (Gap > 1.0 && Gap < 3.5 && tag::len(Ev.a->vel) > 3.0)
+				if (AAthlete* R = AthOf(Ev.a)) R->PlayDiveAttempt();
 		}
 		else if (Ev.type == "catch" && Ev.a)
 		{
@@ -991,6 +1001,9 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 		if (E->anim == tag::Anim::Throw) F.ThrowT = FMath::Clamp(static_cast<float>(E->animT) / 0.45f, 0.f, 1.f);
 		F.bStance = Sim->t < 0.05 && (E->isOL || E->isDL);
 		F.bPreSnap = Sim->t < 0.05 && State == EMatchState::Presnap;
+		if (bQB && F.bPreSnap)
+			for (const tag::Ent* C : Sim->ents)
+				if (C->role == "C") F.bUnderCenter = tag::dist(C->pos, E->pos) < 1.7; // hands under the center
 		const FVector Me = A->GetActorLocation();
 		// catch: the intended receiver (and anyone right on the ball) gets hands to where the ball will be
 		if (B.mode == tag::BallMode::Air)
