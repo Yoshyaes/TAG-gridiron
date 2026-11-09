@@ -299,7 +299,7 @@ void AStadium::BuildBowl(const tag::Team& Home, const tag::Team& Away, bool bNig
 		UMaterialInstanceDynamic* D = UMaterialInstanceDynamic::Create(A.CrowdMat, this);
 		D->SetVectorParameterValue(TEXT("TeamColor"), Hex(Home.colors.primary));
 		D->SetVectorParameterValue(TEXT("Tiling"), FLinearColor(1, 1, 0, 0)); // the sweep's UVs are already in tiles
-		D->SetScalarParameterValue(TEXT("Glow"), bNight ? 0.25f : 0.08f);
+		D->SetScalarParameterValue(TEXT("Glow"), bNight ? 0.07f : 0.08f); // at night the floodlit field outshines the stands
 		CrowdM = D;
 	}
 	const FLinearColor HomeC = Hex(Home.colors.primary), HomeC2 = Hex(Home.colors.secondary), AwayC = Hex(Away.colors.primary);
