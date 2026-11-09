@@ -362,15 +362,20 @@ void AStadium::Build(const tag::Team& Home, const tag::Team& Away, const tag::We
 		FParse::Value(FCommandLine::Get(), TEXT("TagStripes="), StripeAmt);
 		const FLinearColor SnowTint = bSnowy ? FLinearColor(0.85f, 0.9f, 0.9f) : TurfTint;
 		// one surface for the whole 120-yard field: grass + mowing stripes + painted markings
-		PlaneAt(FVector(50 * YD, 0, 0.5), 120, FW, TurfMID(1.f, SnowTint, 0.f, FLinearColor::Black, FLinearColor(60, 27, 0, 0), StripeAmt));
+		UMaterialInstanceDynamic* FieldM = TurfMID(1.f, SnowTint, 0.f, FLinearColor::Black, FLinearColor(60, 27, 0, 0), StripeAmt);
+		// season wear between the hashes (T_TurfWear); -TagWear=0 for a fresh field
+		static float WearAmt = 0.7f;
+		FParse::Value(FCommandLine::Get(), TEXT("TagWear="), WearAmt);
+		FieldM->SetScalarParameterValue(TEXT("WearAmount"), bSnowy ? WearAmt * 0.4f : WearAmt);
+		PlaneAt(FVector(50 * YD, 0, 0.5), 120, FW, FieldM);
 		// team-painted end zones, inset so the boundary paint stays visible
 		auto EZ = [&](double X0, const tag::Team& T, float Yaw)
 		{
 			PlaneAt(FVector((X0 + 5) * YD, 0, 1.0), 9.6, FW - 0.8, TurfMID(0.f, SnowTint, 0.92f, Hex(T.colors.primary), FLinearColor(5, 27, 0, 0), 0.f));
 			AddText(FString(T.name.c_str()).ToUpper(), FVector((X0 + 5) * YD, 0, 3), FRotator(90, Yaw, 0), 520.f, FColor(240, 240, 240));
 		};
-		EZ(-10, Away, 90);
-		EZ(100, Home, -90);
+		EZ(-10, Away, 0); // lettering runs across the width, tops toward the end line
+		EZ(100, Home, 180);
 		// apron around the field (darker, unpainted turf)
 		PlaneAt(FVector(50 * YD, 0, -0.5), 170, 100, TurfMID(0.f, FLinearColor(0.7f, 0.75f, 0.7f) * SnowTint, 0.f, FLinearColor::Black, FLinearColor(85, 50, 0, 0), 0.f));
 		// the 6 ft white border painted around the field (outside the sidelines and end lines), and the team areas'
@@ -402,8 +407,8 @@ void AStadium::Build(const tag::Team& Home, const tag::Team& Away, const tag::We
 	};
 	if (!bPro)
 	{
-		EndZone(-10, Away, 90);
-		EndZone(100, Home, -90);
+		EndZone(-10, Away, 0);
+		EndZone(100, Home, 180);
 	}
 	// ---------------- markings (white paint, slightly emissive-looking via low roughness off)
 	const FLinearColor Paint(0.85f, 0.85f, 0.82f);

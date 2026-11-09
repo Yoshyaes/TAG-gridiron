@@ -167,7 +167,42 @@ def crowd(w=2048, h=1024):
     img.save(os.path.join(OUT, "T_Crowd.png"))
 
 
+def turf_wear(px_per_yd=16):
+    """Wear mask over the full 120 x 53.33 yd field, same layout as T_FieldLines (x = length, y = width).
+    Natural grass in season: a beaten strip between the hashes where the lines set up (heaviest between the 20s),
+    scuffed patches at the snap spots, the goal-line stands inside the 5s and the kickoff spots, broken up by noise."""
+    W, H = int(120 * px_per_yd), int(160 / 3 * px_per_yd)
+    xs = (np.arange(W) + 0.5) / px_per_yd - 10.0          # field yards, 0 = goal line
+    ys = (np.arange(H) + 0.5) / px_per_yd                  # yards from one sideline
+    X, Y = np.meshgrid(xs, ys)
+    mid = 80.0 / 3                                          # center of the field's width
+    smooth = lambda a, b, v: np.clip((v - a) / (b - a), 0, 1) ** 2 * (3 - 2 * np.clip((v - a) / (b - a), 0, 1))
+    along = smooth(-2, 12, X) * smooth(-2, 12, 100 - X)
+    heavy = smooth(12, 30, X) * smooth(12, 30, 100 - X)
+    band = np.exp(-((Y - mid) / 4.2) ** 2)
+    m = band * (0.45 * along + 0.35 * heavy)
+    r = np.random.default_rng(77)
+    for _ in range(46):                                     # snap spots: the line of scrimmage moves up and down the field
+        cx, cy = r.uniform(4, 96), mid + r.normal(0, 1.3)
+        m += 0.55 * np.exp(-(((X - cx) / r.uniform(1.6, 3.2)) ** 2 + ((Y - cy) / r.uniform(1.8, 3.0)) ** 2))
+    for gx in (2.5, 97.5):                                  # goal-line stands
+        m += 0.6 * np.exp(-(((X - gx) / 3.0) ** 2 + ((Y - mid) / 5.0) ** 2))
+    for kx in (35.0, 65.0):                                 # kickoff tees
+        m += 0.5 * np.exp(-(((X - kx) / 0.9) ** 2 + ((Y - mid) / 0.9) ** 2))
+    # break it into turf and bare patches
+    n = tileable_noise(1024, 18, octaves=4, seed=5)
+    n = np.array(Image.fromarray((n * 255).astype(np.uint8)).resize((W, H), Image.BILINEAR), np.float32) / 255.0
+    n2 = tileable_noise(1024, 40, octaves=3, seed=9)
+    n2 = np.array(Image.fromarray((n2 * 255).astype(np.uint8)).resize((W, H), Image.BILINEAR), np.float32) / 255.0
+    w = np.clip(m * (0.15 + 1.2 * n ** 1.5) - 0.12 + (n2 - 0.5) * 0.45 * np.clip(m * 2, 0, 1), 0, 0.85) ** 1.3
+    Image.fromarray((w * 255).astype(np.uint8), "L").filter(ImageFilter.GaussianBlur(0.8)).save(os.path.join(OUT, "T_TurfWear.png"))
+
+
 if __name__ == "__main__":
+    if len(sys.argv) > 2 and sys.argv[2] == "wear":
+        turf_wear()
+        sys.exit(0)
+    turf_wear()
     grass()
     print("grass done")
     field_lines()

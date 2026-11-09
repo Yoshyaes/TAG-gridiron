@@ -77,7 +77,7 @@ def op(mat, cls, a, b, x, y, oa="", ob=""):
     return e
 
 
-def build_turf(grass_d, grass_n, var, lines):
+def build_turf(grass_d, grass_n, var, lines, wear):
     m = new_material("M_TagTurf")
     uv = expr(m, unreal.MaterialExpressionTextureCoordinate, -1400, 0)
     tiling = vector(m, "GrassTiling", (60.0, 27.0, 0, 0), -1400, 150)
@@ -126,8 +126,17 @@ def build_turf(grass_d, grass_n, var, lines):
     lum = op(m, unreal.MaterialExpressionMultiply, gd, scalar(m, "PaintGrassMix", 2.6, -650, 80), -450, 100, "G")
     paint_tex = op(m, unreal.MaterialExpressionMultiply, paint, lum, -300, 50)
     paint_amt = scalar(m, "PaintAmount", 0.0, -300, 150)
+    # season wear (T_TurfWear over the whole field, same UVs as the lines): grass thins to dirt between the hashes
+    wt = texparam(m, "Wear", wear, -650, 1000, gray=True)
+    MEL.connect_material_expressions(uv, "", wt, "UVs")
+    wamt = op(m, unreal.MaterialExpressionMultiply, wt, scalar(m, "WearAmount", 0.0, -650, 1150), -450, 1000)
+    dirt = op(m, unreal.MaterialExpressionMultiply, vector(m, "DirtColor", (0.16, 0.11, 0.065, 1), -650, 1250), lum, -450, 1200)
+    worn = expr(m, unreal.MaterialExpressionLinearInterpolate, -150, 1000)
+    MEL.connect_material_expressions(c3, "", worn, "A")
+    MEL.connect_material_expressions(dirt, "", worn, "B")
+    MEL.connect_material_expressions(wamt, "", worn, "Alpha")
     painted = expr(m, unreal.MaterialExpressionLinearInterpolate, 0, -100)
-    MEL.connect_material_expressions(c3, "", painted, "A")
+    MEL.connect_material_expressions(worn, "", painted, "A")
     MEL.connect_material_expressions(paint_tex, "", painted, "B")
     MEL.connect_material_expressions(paint_amt, "", painted, "Alpha")
     # yard-line paint overlay
@@ -192,7 +201,8 @@ def main():
     var = import_tex("T_TurfVariation", gray=True)
     lines = import_tex("T_FieldLines", gray=True)
     crowd = import_tex("T_Crowd")
-    build_turf(gd, gn, var, lines)
+    wear = import_tex("T_TurfWear", gray=True)
+    build_turf(gd, gn, var, lines, wear)
     build_crowd(crowd)
     unreal.log("TAG materials built OK")
 
