@@ -151,7 +151,12 @@ private:
 	bool bStoodUp = false;
 	FVector VisOffset = FVector::ZeroVector;
 	int32 TackleCount = 0;
-	float StillTime = 0.f;   // seconds standing still (post-play idles)   // rotates tackle variants so the same player never repeats one back to back
+	float StillTime = 0.f;   // seconds standing still (post-play idles)
+	// face (UTagFaceAnimInstance): blinks, effort, breathing, focus, celebration
+	void UpdateFace(float DeltaTime);
+	float BlinkClock = 0.f, NextBlink = 3.f, BlinkPhase = 10.f;
+	bool bDoubleBlink = false;
+	float Exertion = 0.f, FaceEffort = 0.f, FaceFocus = 0.f, FaceShout = 0.f;   // rotates tackle variants so the same player never repeats one back to back
 	bool bEngaged = false;   // hands on an opponent (football layer reach), picks the engaged block loop
 	void StartRagdoll(const FVector& VelWorld);
 	void SetupMetaHuman(int32 Arch, const FUniform& U);

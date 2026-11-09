@@ -164,6 +164,14 @@ void AMatchDirector::TickLineup(float Dt)
 		Camera->SetActorLocation(Stand + FVector(0, -900, 300));
 		Camera->SetActorRotation(((Stand + FVector(0, 250, 250)) - Camera->GetActorLocation()).Rotation());
 	}
+	else if (Lineup.Num() > 3 && ((LineupT > 6.4f && LineupT < 7.6f) || (LineupT > 14.3f && LineupT < 14.9f)))
+	{
+		// face closeups (expressions): pre-snap focus, then the celebration
+		const FVector Head = Lineup[3]->BoneWorld(TEXT("head")) + FVector(0, 0, 6);
+		const FVector Fw = Lineup[3]->GetActorForwardVector();
+		Camera->SetActorLocation(Head + Fw * 95.f + FVector(0, 0, 4));
+		Camera->SetActorRotation((Head - Camera->GetActorLocation()).Rotation());
+	}
 	else
 	{
 		Camera->SetActorLocation(Center + FVector(-1050, 0, 150));
@@ -182,8 +190,9 @@ void AMatchDirector::TickLineup(float Dt)
 			++LineupShot;
 		}
 	};
-	Shot(7.f, TEXT("tag_lineup_front.png"), 0);
-	Shot(12.f, TEXT("tag_lineup_back.png"), 1);
+	Shot(7.f, TEXT("tag_lineup_face_focus.png"), 0);
+	Shot(7.7f, TEXT("tag_lineup_front.png"), 1);
+	Shot(12.f, TEXT("tag_lineup_back.png"), 2);
 	{
 		static float NextLog = 0.f;
 		if (LineupT >= NextLog && Lineup.Num() > 3)
@@ -193,13 +202,13 @@ void AMatchDirector::TickLineup(float Dt)
 				UE_LOG(LogTemp, Display, TEXT("TAG lineup t=%.2f #%d head=%s %s"), LineupT, i, *Lineup[i]->BoneWorld(TEXT("head")).ToString(), *Lineup[i]->DebugAnimState());
 		}
 	}
-	Shot(14.1f, TEXT("tag_lineup_celebrate_a.png"), 2);
-	Shot(14.5f, TEXT("tag_lineup_celebrate_b.png"), 3);
-	Shot(15.25f, TEXT("tag_lineup_action_a.png"), 4);
-	Shot(15.45f, TEXT("tag_lineup_action_b.png"), 5);
-	Shot(16.4f, TEXT("tag_lineup_action_c.png"), 6);
-	Shot(17.6f, TEXT("tag_lineup_crowd.png"), 7);
-	Shot(17.8f, TEXT("tag_lineup_crowd_b.png"), 8);
+	Shot(14.1f, TEXT("tag_lineup_celebrate_a.png"), 3);
+	Shot(14.5f, TEXT("tag_lineup_face_celebrate.png"), 4);
+	Shot(15.25f, TEXT("tag_lineup_action_a.png"), 5);
+	Shot(15.45f, TEXT("tag_lineup_action_b.png"), 6);
+	Shot(16.4f, TEXT("tag_lineup_action_c.png"), 7);
+	Shot(17.6f, TEXT("tag_lineup_crowd.png"), 8);
+	Shot(17.8f, TEXT("tag_lineup_crowd_b.png"), 9);
 	PerfT += Dt; ++PerfFrames;
 	if (LineupT > 18.f)
 	{

@@ -16,6 +16,7 @@
 #include "Retargeter/IKRetargeter.h"
 #include "Render/TagRetargetAnimInstance.h"
 #include "Render/TagMotionMatchInstance.h"
+#include "Render/TagFaceAnimInstance.h"
 #include "PoseSearch/PoseSearchDatabase.h"
 #if WITH_EDITOR
 #include "PoseSearch/PoseSearchDerivedData.h"
@@ -598,7 +599,16 @@ void AAthlete::SetupMetaHuman(int32 Arch, const FUniform& U)
 
 	MHFace->SetSkeletalMesh(M.Face);
 	MHFace->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	MHFace->SetLeaderPoseComponent(MHBody);
+	// the face runs its own rig: copies the body's head and neck, drives the expression controls; Epic's RigLogic
+	// post-process turns them into the facial joints (leader-pose following left every face frozen in neutral)
+	MHFace->SetAnimInstanceClass(UTagFaceAnimInstance::StaticClass());
+	if (UTagFaceAnimInstance* FI = Cast<UTagFaceAnimInstance>(MHFace->GetAnimInstance())) FI->Configure(MHBody);
+	MHFace->AddTickPrerequisiteComponent(MHBody);
+	MHFace->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::OnlyTickPoseWhenRendered;
+	{
+		const uint32 H = Player ? static_cast<uint32>(Player->id) * 2246822519u : 1u;
+		NextBlink = 1.5f + static_cast<float>(H % 1000u) / 300.f; // players don't blink in unison
+	}
 
 	// uniform painted by body region; boundaries measured from this body's skeleton
 	if (A.MHUniformMat)
@@ -1243,8 +1253,48 @@ FVector AAthlete::BoneWorld(FName Bone) const
 	return V && V->GetBoneIndex(Bone) != INDEX_NONE ? V->GetSocketLocation(Bone) : GetActorLocation() + FVector(0, 0, 120);
 }
 
+void AAthlete::UpdateFace(float Dt)
+{
+	if (!MHFace) return;
+	UTagFaceAnimInstance* FI = Cast<UTagFaceAnimInstance>(MHFace->GetAnimInstance());
+	if (!FI) return;
+	const float Now = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.f;
+	// blinks: every 2-6 s, ~0.16 s each, sometimes a double blink
+	BlinkClock += Dt;
+	if (BlinkClock > NextBlink)
+	{
+		BlinkClock = 0.f;
+		NextBlink = FMath::FRandRange(2.f, 6.f);
+		BlinkPhase = 0.f;
+		bDoubleBlink = FMath::FRand() < 0.15f;
+	}
+	BlinkPhase += Dt;
+	auto Tri = [](float T) { return T >= 0.f && T <= 0.16f ? 1.f - FMath::Abs(T - 0.08f) / 0.08f : 0.f; };
+	float Blink = Tri(BlinkPhase) + (bDoubleBlink ? Tri(BlinkPhase - 0.26f) : 0.f);
+	// effort: sprinting builds it, contact maxes it (tackles, blocks, sheds, getting up)
+	const float Sp = SmoothedSpeed; // cm/s
+	Exertion = FMath::Clamp(Exertion + (Sp > 500.f ? Dt * 0.12f : -Dt * 0.04f), 0.f, 1.f);
+	const bool bContact = CurrentAnim == TEXT("tackle") || CurrentAnim == TEXT("block") || CurrentAnim == TEXT("dive") ||
+		(OneShot != nullptr && OneShotLeft > 0.f);
+	const float EffortGoal = FMath::Clamp(FMath::Clamp((Sp - 450.f) / 500.f, 0.f, 1.f) * 0.6f + (bContact ? 1.f : 0.f) +
+		(bGettingUp ? 0.7f : 0.f) + (bRagdoll ? 0.8f : 0.f), 0.f, 1.f);
+	FaceEffort = FMath::FInterpTo(FaceEffort, EffortGoal, Dt, 8.f);
+	FaceFocus = FMath::FInterpTo(FaceFocus, bPreSnap ? 1.f : 0.f, Dt, 3.f);
+	const bool bCeleb = CurrentAnim == TEXT("celebrate");
+	FaceShout = FMath::FInterpTo(FaceShout, bCeleb ? 1.f : 0.f, Dt, 5.f);
+	FTagFaceInput& F = FI->Face;
+	F.Blink = FMath::Clamp(Blink * (1.f - FaceEffort * 0.3f) + FaceEffort * 0.15f, 0.f, 1.f); // grimacing eyes narrow
+	F.Effort = FaceEffort;
+	// breathing: faster and deeper after running (mouth breathing)
+	F.Breath = (0.5f + 0.5f * FMath::Sin(Now * 2.f * PI * (0.25f + Exertion * 0.45f))) * (0.15f + Exertion);
+	F.Focus = FaceFocus;
+	F.Shout = FaceShout * (0.65f + 0.35f * FMath::Sin(Now * 5.f + (Player ? Player->id : 0)));
+	F.Smile = FaceShout;
+}
+
 void AAthlete::SetFootball(const FAthleteFootball& InF, float Dt)
 {
+	UpdateFace(Dt);
 	bPreSnap = InF.bPreSnap;
 	bEngaged = InF.bReach;
 	if (!MHBody) return;
