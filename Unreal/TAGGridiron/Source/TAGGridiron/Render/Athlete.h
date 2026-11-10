@@ -135,6 +135,9 @@ public:
 	/** Planted-foot slide over every athlete since the last reset (cm): in the animation as retargeted, and as shown
 	 *  after the foot lock (UTagRetargetAnimInstance). */
 	static void SlideStats(double& OutRaw, double& OutShown, bool bReset);
+	/** Gait over every athlete running faster than 8 m/s since the last reset: seconds, metres, foot touchdowns
+	 *  (cadence = steps / seconds, step length = metres / steps; sprint biomechanics put 10 m/s at ~4.7 steps/s, 2.1 m). */
+	static void GaitStats(double& OutSeconds, double& OutMetres, int32& OutSteps, bool bReset);
 
 	const tag::Player* Player = nullptr;
 

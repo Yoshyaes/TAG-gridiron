@@ -65,6 +65,7 @@ struct FTagRetargetProxy : public FAnimInstanceProxy
 	FTagProcInput In;
 	/** Planted-foot travel this evaluation (cm): in the animation as retargeted, and as shown after the foot lock. */
 	float SlideRawFrame = 0.f, SlideShownFrame = 0.f;
+	int32 TouchdownsFrame = 0;
 
 private:
 	void ApplyFootballLayer(FPoseContext& Output) const;
@@ -124,6 +125,7 @@ public:
 
 	/** Foot slide accumulated since the game thread last cleared it (cm): the animation's and the shown body's. */
 	float SlideRaw = 0.f, SlideShown = 0.f;
+	int32 Touchdowns = 0; // feet that came down on the turf since the game thread last cleared it (gait cadence)
 
 protected:
 	virtual FAnimInstanceProxy* CreateAnimInstanceProxy() override;

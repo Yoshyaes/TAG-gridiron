@@ -12,6 +12,9 @@ Published reference points the ranges are drawn from:
     99-speed player runs 11 yd/s (22.5 mph), which is what stride warping covers above the capture's 9.1 m/s.
   - A five step drop ends about 7 yd behind the line (Human Kinetics, Football Skills & Drills); our under-center
     drop clip covers 6 m in 1.5 s and the sim sets the quarterback up 6 deep.
+  - Sprint gait: 10.0 m/s at 4.70 steps/s is a 2.13 m step (Freelap / University of Oregon); elite maxima 5.06-5.28
+    steps/s at 10.6-10.8 m/s (Journal of Human Kinetics). Measured in game (AAthlete::GaitStats, -TagMoveTest): the
+    receiver at 9.4 m/s runs 4.82 steps/s with a 1.95 m step, within 4 % of the proportional reference.
 Two kinds of check:
   1. Real-world numbers (the references above, broadcast footage, coaching manuals), hard limits per clip family:
      release-to-follow-through of a pass 0.35-0.6 s; shotgun three step 0.6-0.9 s; under-center five step 1.3-1.9 s;

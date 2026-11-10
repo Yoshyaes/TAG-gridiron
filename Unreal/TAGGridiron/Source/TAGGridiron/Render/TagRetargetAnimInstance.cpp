@@ -96,6 +96,7 @@ void FTagRetargetProxy::PostUpdate(UAnimInstance* InAnimInstance) const
 	{
 		I->SlideRaw += SlideRawFrame;
 		I->SlideShown += SlideShownFrame;
+		I->Touchdowns += TouchdownsFrame;
 	}
 }
 
@@ -450,6 +451,7 @@ void FTagRetargetProxy::ApplyFeet(FPoseContext& Output)
 	// the clip lifts it or it has drifted too far (then the pin eases off). Keyed clips play in place while the sim
 	// moves the actor, and clips sped up past their capture speed slide too; both read as skating without this.
 	SlideRawFrame = SlideShownFrame = 0.f;
+	TouchdownsFrame = 0;
 	bool bAnyPin = In.bFootLock;
 	for (const FFootLock& L : Feet) bAnyPin = bAnyPin || L.bLocked || L.ReleaseAlpha > 0.f;
 	if (!bAnyPin) return; // nothing pinned and nothing to pin (a bench player, a body on the ground)
@@ -475,6 +477,7 @@ void FTagRetargetProxy::ApplyFeet(FPoseContext& Output)
 		const FVector FootCS = Pos(P, Ba[i]);
 		const FVector FootW = CT.TransformPosition(FootCS);
 		const bool bLow = FootCS.Z < Low;
+		if (bLow && !L.bWasLow) ++TouchdownsFrame;
 		if (bLow && L.bHadRaw) SlideRawFrame += FVector::Dist2D(FootW, L.PrevRawW);
 		L.PrevRawW = FootW;
 		L.bHadRaw = bLow;

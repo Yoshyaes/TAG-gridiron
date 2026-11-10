@@ -1425,6 +1425,16 @@ void AAthlete::ResetPose()
 }
 
 static double GSlideRaw = 0.0, GSlideShown = 0.0;
+static double GFastSec = 0.0, GFastM = 0.0;
+static int32 GFastSteps = 0;
+
+void AAthlete::GaitStats(double& OutSeconds, double& OutMetres, int32& OutSteps, bool bReset)
+{
+	OutSeconds = GFastSec;
+	OutMetres = GFastM;
+	OutSteps = GFastSteps;
+	if (bReset) { GFastSec = GFastM = 0.0; GFastSteps = 0; }
+}
 
 void AAthlete::SlideStats(double& OutRaw, double& OutShown, bool bReset)
 {
@@ -1466,6 +1476,13 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 		GSlideRaw += RI->SlideRaw; // foot slide over all athletes (SlideStats)
 		GSlideShown += RI->SlideShown;
 		RI->SlideRaw = RI->SlideShown = 0.f;
+		if (FVector(VelWorld.X, VelWorld.Y, 0.f).Size() > 800.f) // sprinting: cadence and step length (GaitStats)
+		{
+			GFastSec += DeltaTime;
+			GFastM += FVector(VelWorld.X, VelWorld.Y, 0.f).Size() * DeltaTime / 100.0;
+			GFastSteps += RI->Touchdowns;
+		}
+		RI->Touchdowns = 0;
 		// body physics are off while the body is down: falls, get-ups and ragdolls own the pose (set again below)
 		RI->Proc.bFootLock = false;
 		RI->Proc.LeanCS = FVector::ZeroVector;

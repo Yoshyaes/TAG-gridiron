@@ -306,9 +306,12 @@ void AMatchDirector::TickMoveTest(float Dt)
 	const FVector Start = TagCoords::ToWorld(30, tag::FIELD_W * 0.5, 1);
 	if (R != MoveRunner)
 	{
-		double Raw, Shown;
+		double Raw, Shown, Sec, Metres;
+		int32 Steps;
 		AAthlete::SlideStats(Raw, Shown, true);
+		AAthlete::GaitStats(Sec, Metres, Steps, true);
 		if (MoveRunner >= 0) UE_LOG(LogTemp, Display, TEXT("TAG slide r%d: animation %.0f cm, shown %.0f cm (planted-foot travel over the route)"), MoveRunner, Raw, Shown);
+		if (MoveRunner >= 0 && Sec > 0.5) UE_LOG(LogTemp, Display, TEXT("TAG gait r%d: %.2f steps/s, %.2f m per step at %.1f m/s over %.1f s (sprint reference ~4.7 steps/s, 2.1 m at 10 m/s)"), MoveRunner, Steps / Sec, Steps > 0 ? Metres / Steps : 0.0, Metres / Sec, Sec);
 		MoveRunner = R;
 		MovePos = Start;
 		MoveVel = FVector::ZeroVector;
@@ -370,9 +373,12 @@ void AMatchDirector::TickMoveTest(float Dt)
 	PerfT += Dt; ++PerfFrames;
 	if (LineupT > Seg * Lineup.Num())
 	{
-		double Raw, Shown;
+		double Raw, Shown, Sec, Metres;
+		int32 Steps;
 		AAthlete::SlideStats(Raw, Shown, true);
+		AAthlete::GaitStats(Sec, Metres, Steps, true);
 		UE_LOG(LogTemp, Display, TEXT("TAG slide r%d: animation %.0f cm, shown %.0f cm (planted-foot travel over the route)"), MoveRunner, Raw, Shown);
+		if (Sec > 0.5) UE_LOG(LogTemp, Display, TEXT("TAG gait r%d: %.2f steps/s, %.2f m per step at %.1f m/s over %.1f s (sprint reference ~4.7 steps/s, 2.1 m at 10 m/s)"), MoveRunner, Steps / Sec, Steps > 0 ? Metres / Steps : 0.0, Metres / Sec, Sec);
 		UE_LOG(LogTemp, Display, TEXT("TAG perf avg %.1f fps over %d frames"), PerfFrames / FMath::Max(PerfT, 0.001f), PerfFrames);
 		FPlatformMisc::RequestExit(false);
 	}
