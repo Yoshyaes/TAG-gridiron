@@ -395,8 +395,8 @@ def stance_4pt(rig):
     """Defensive tackle four point stance (goal line / run downs): both hands down, hips slightly higher than the
     shoulders, weight forward on the hands to fire out low."""
     b = dict(C.STANCE_3PT)
-    b.update({"pelvis": (0.0, 0.14, 0.60), "pelvis_rot": (86, 0, 0), "spine": (32, 0, 0), "clav_l": (-16, 22),
-              "hand_l": (0.20, -0.42, 0.11), "elbow_l": (0.4, 0.3, 0.2), "foot_l": (0.25, 0.08, ANKLE),
+    b.update({"pelvis": (0.0, 0.16, 0.72), "pelvis_rot": (92, 0, 0), "spine": (48, 0, 0), "clav_l": (-14, 24),
+              "hand_l": (0.20, -0.40, 0.11), "elbow_l": (0.4, 0.3, 0.2), "foot_l": (0.25, 0.10, ANKLE),
               "foot_r": (-0.25, 0.10, ANKLE), "foot_pitch_l": 22})
     return _stance_loop(rig, b, amp_z=0.004, amp_pitch=0.8, shift=0.005)
 

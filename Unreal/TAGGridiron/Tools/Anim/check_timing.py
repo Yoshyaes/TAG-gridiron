@@ -80,9 +80,33 @@ REAL = [
 SPEEDS = {"QB_Drop_Shotgun": (1.8, 20, (2.5, 3.2)), "QB_Drop_UnderCenter": (6.0, 45, (3.6, 4.5))}
 
 
+# stance heights: hips (pelvis) in metres against the look targets' p10-p90 by stance (12 clips each) and coaching
+# (a three point stance has the hips level with or just above the shoulders, never a sprinter's set below them)
+STANCES = {"Stance3pt_Loop": "stance_3pt", "Stance4pt_Loop": "stance_3pt", "Stance2pt_Loop": "stance_2pt",
+           "StanceRB_Loop": "stance_2pt", "StanceLB_Loop": "stance_2pt", "StanceDB_Loop": "stance_2pt",
+           "QB_Shotgun_Loop": "stance_qb_shotgun"}
+
+
+def stances(gait, rows):
+    fails = 0
+    for name, cat in STANCES.items():
+        path = os.path.join(CLIPS, "A_TAG_%s.json" % name)
+        if not os.path.exists(path) or cat not in gait:
+            continue
+        r = json.load(open(path))
+        hips = r["pelvis_z"]["start"]
+        lo, hi = gait[cat]["hips_height_m"]["p10"], gait[cat]["hips_height_m"]["p90"]
+        ok = lo - 0.02 <= hips <= hi + 0.02
+        rows.append((name + " hips", hips, "ok" if ok else "FAIL", "%.2f-%.2f m" % (lo, hi), "stance height (%s)" % cat))
+        fails += 0 if ok else 1
+    return fails
+
+
 def main():
-    targets = json.load(open(TARGETS))["timing"] if os.path.exists(TARGETS) else {}
+    data = json.load(open(TARGETS)) if os.path.exists(TARGETS) else {}
+    targets = data.get("timing", {})
     fails, rows = 0, []
+    fails += stances(data.get("gait_stance", {}), rows)
     for path in sorted(glob.glob(os.path.join(CLIPS, "A_TAG_*.json"))):
         r = json.load(open(path))
         name = r["clip"]
@@ -110,7 +134,7 @@ def main():
         fails += 0 if ok else 1
     w = max(len(r[0]) for r in rows)
     for name, sec, verdict, lim, note in rows:
-        print("%-*s %5.2f s  %-4s  %-18s %s" % (w, name, sec, verdict, lim, note))
+        print("%-*s %5.2f %s  %-4s  %-18s %s" % (w, name, sec, "m" if name.endswith("hips") else "s", verdict, lim, note))
     print("\n%d clips, %d outside their real-world range" % (len(rows), fails))
     sys.exit(1 if fails else 0)
 

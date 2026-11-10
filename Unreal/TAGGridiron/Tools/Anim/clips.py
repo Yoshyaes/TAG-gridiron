@@ -32,13 +32,15 @@ def stance_3pt(rig):
 
 
 STANCE_3PT = {
-        # this rig's arm is ~0.49 m shoulder to wrist, so the shoulders sit ~0.6 m for the down hand to reach the turf
-        "pelvis": (0.0, 0.12, 0.57), "pelvis_rot": (82, 0, 0), "spine": (30, 0, 0),
-        "clav_r": (-16, 22), "clav_l": (0, 4),
-        "hand_r": (-0.20, -0.42, 0.11), "elbow_r": (-0.4, 0.3, 0.2),
-        "hand_l": (0.27, -0.20, 0.40), "elbow_l": (0.8, 0.2, 0.0),
-        "foot_l": (0.25, -0.04, 0.094), "foot_r": (-0.25, 0.12, 0.094),
-        "foot_pitch_l": 18, "foot_pitch_r": 22, "foot_yaw_l": 6, "foot_yaw_r": -6,
+        # hips at 0.75 m, level with the shoulders (a flat back; the look targets' 12-clip band is 0.70-0.81 and line
+        # coaches want the hips no lower than the shoulders). The down arm hangs straight from a shoulder ~0.62 m up
+        # and ~0.45 m ahead of the hips, so the hand meets the turf a stride ahead of the feet.
+        "pelvis": (0.0, 0.14, 0.71), "pelvis_rot": (88, 0, 0), "spine": (46, 0, 0),
+        "clav_r": (-14, 24), "clav_l": (0, 4),
+        "hand_r": (-0.20, -0.40, 0.11), "elbow_r": (-0.4, 0.3, 0.2),
+        "hand_l": (0.27, -0.22, 0.42), "elbow_l": (0.8, 0.2, 0.0),
+        "foot_l": (0.25, -0.02, 0.094), "foot_r": (-0.25, 0.16, 0.094),
+        "foot_pitch_l": 16, "foot_pitch_r": 22, "foot_yaw_l": 6, "foot_yaw_r": -6,
         "knee_l": (0.25, -1, 0), "knee_r": (-0.25, -1, 0),
         "look": (0.0, -6.0, 1.0),
 }
@@ -68,9 +70,9 @@ def stance_shotgun(rig):
 
 
 SHOTGUN = {
-        "pelvis": (0.0, 0.05, 0.84), "pelvis_rot": (22, 0, 0), "spine": (8, 0, 0),
-        "hand_l": (0.07, -0.30, 0.96), "elbow_l": (1, 0.3, -0.6),
-        "hand_r": (-0.07, -0.30, 0.96), "elbow_r": (-1, 0.3, -0.6),
+        "pelvis": (0.0, 0.05, 0.90), "pelvis_rot": (18, 0, 0), "spine": (8, 0, 0),
+        "hand_l": (0.07, -0.30, 1.00), "elbow_l": (1, 0.3, -0.6),
+        "hand_r": (-0.07, -0.30, 1.00), "elbow_r": (-1, 0.3, -0.6),
         "foot_l": (0.21, -0.02, 0.094), "foot_r": (-0.21, 0.02, 0.094),
         "foot_pitch_l": 6, "foot_pitch_r": 6, "foot_yaw_l": 8, "foot_yaw_r": -8,
         "knee_l": (0.25, -1, 0), "knee_r": (-0.25, -1, 0),
@@ -87,11 +89,11 @@ def qb_snap_catch(rig):
         return d
     keys = [
         (0, k()),
-        (3, k(hand_l=(0.06, -0.36, 1.00), hand_r=(-0.06, -0.36, 1.00), pelvis=(0.0, 0.05, 0.85))),
+        (3, k(hand_l=(0.06, -0.36, 1.00), hand_r=(-0.06, -0.36, 1.00), pelvis=(0.0, 0.05, 0.91))),
         (6, k(hand_l=(0.05, -0.24, 1.10), hand_r=(-0.07, -0.24, 1.14), elbow_l=(1, 0.4, -0.8), elbow_r=(-1, 0.4, -0.8),
-              pelvis=(0.0, 0.06, 0.86), pelvis_rot=(16, 0, 0))),
+              pelvis=(0.0, 0.06, 0.90), pelvis_rot=(14, 0, 0))),
         (12, k(hand_l=(0.04, -0.20, 1.18), hand_r=(-0.08, -0.18, 1.22), elbow_l=(1, 0.4, -0.8), elbow_r=(-1, 0.4, -0.8),
-               pelvis=(0.0, 0.10, 0.86), pelvis_rot=(12, -6, 0), foot_r=(-0.20, 0.20, 0.11), foot_pitch_r=20,
+               pelvis=(0.0, 0.10, 0.89), pelvis_rot=(12, -6, 0), foot_r=(-0.20, 0.20, 0.11), foot_pitch_r=20,
                foot_yaw_r=-15)),
     ]
     for f, kk in _in_place(keys):
@@ -252,15 +254,15 @@ def lineman_getoff(rig):
         return d
     keys = [
         (0, k()),
-        (3, k(pelvis=(0.0, 0.07, 0.60), pelvis_rot=(70, 0, 0), spine=(20, 0, 0), hand_r=(-0.20, -0.46, 0.24),
+        (3, k(pelvis=(0.0, 0.08, 0.72), pelvis_rot=(74, 0, 0), spine=(30, 0, 0), hand_r=(-0.20, -0.44, 0.26),
               foot_pitch_l=20, foot_pitch_r=26)),
-        (6, k(pelvis=(0.0, -0.02, 0.66), pelvis_rot=(56, 0, 0), spine=(16, 0, 0), clav_r=(0, 10), clav_l=(0, 10),
+        (6, k(pelvis=(0.0, -0.02, 0.74), pelvis_rot=(54, 0, 0), spine=(16, 0, 0), clav_r=(0, 10), clav_l=(0, 10),
               hand_r=(-0.16, -0.40, 0.82), hand_l=(0.16, -0.40, 0.82), elbow_r=(-1, 0.3, -0.6), elbow_l=(1, 0.3, -0.6),
               foot_l=(0.24, -0.16, 0.15), foot_pitch_l=0, foot_pitch_r=30)),
-        (10, k(pelvis=(0.0, -0.14, 0.71), pelvis_rot=(46, 0, 0), spine=(14, 0, 0), clav_r=(0, 16), clav_l=(0, 16),
+        (10, k(pelvis=(0.0, -0.14, 0.76), pelvis_rot=(46, 0, 0), spine=(14, 0, 0), clav_r=(0, 16), clav_l=(0, 16),
                hand_r=(-0.13, -0.60, 0.98), hand_l=(0.13, -0.60, 0.98), elbow_r=(-1, 0.2, -1), elbow_l=(1, 0.2, -1),
                foot_l=(0.24, -0.20, 0.094), foot_pitch_l=0, foot_r=(-0.24, -0.06, 0.16), foot_pitch_r=10)),
-        (16, k(pelvis=(0.0, -0.28, 0.75), pelvis_rot=(40, 0, 0), spine=(12, 0, 0), clav_r=(0, 18), clav_l=(0, 18),
+        (16, k(pelvis=(0.0, -0.28, 0.78), pelvis_rot=(40, 0, 0), spine=(12, 0, 0), clav_r=(0, 18), clav_l=(0, 18),
                hand_r=(-0.13, -0.72, 1.04), hand_l=(0.13, -0.72, 1.04), elbow_r=(-1, 0.2, -1), elbow_l=(1, 0.2, -1),
                foot_l=(0.24, -0.20, 0.094), foot_pitch_l=12, foot_r=(-0.24, -0.42, 0.094), foot_pitch_r=0)),
     ]
