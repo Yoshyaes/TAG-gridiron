@@ -80,9 +80,7 @@ void FAthleteAssets::Load()
 		const FString K = TEXT("/Game/TAG/Anim/Authored/");
 		auto Keyed = [&](const TCHAR* N) { return LoadAsset<UAnimationAsset>(*FString::Printf(TEXT("%s%s.%s"), *K, N, N), false); };
 		Shove = Keyed(TEXT("A_TAG_Block_Punch"));
-		if (!Shove) Shove = LoadAsset<UAnimationAsset>(*(G + TEXT("Animations/Interactions/Shoves/M_relaxed_ragdoll_shove_stand_F_A.M_relaxed_ragdoll_shove_stand_F_A")), false);
 		Throw = Keyed(TEXT("A_TAG_QB_Throw"));
-		if (!Throw) Throw = LoadAsset<UAnimationAsset>(*(G + TEXT("Animations/Idle/M_Neutral_Stand_Turn_045_R.M_Neutral_Stand_Turn_045_R")), false);
 		Stance3pt = Keyed(TEXT("A_TAG_Stance3pt_Loop"));
 		Stance2pt = Keyed(TEXT("A_TAG_Stance2pt_Loop"));
 		StanceShotgun = Keyed(TEXT("A_TAG_QB_Shotgun_Loop"));
@@ -195,7 +193,6 @@ void FAthleteAssets::Load()
 			TEXT("A_TAG_Celebrate_Shimmy_Loop"), TEXT("A_TAG_Celebrate_FirstDown_Loop")})
 			if (UAnimationAsset* C = Keyed(N)) Celebrations.Add(C);
 		if (UAnimationAsset* C = Keyed(TEXT("A_TAG_Celebrate_Loop"))) { Celebrate = C; bCelebrateKeyed = true; Celebrations.Insert(C, 0); }
-		else Celebrate = LoadAsset<UAnimationAsset>(*(G + TEXT("Animations/Idle/M_Neutral_Stand_Idle_Break_v02.M_Neutral_Stand_Idle_Break_v02")), false);
 		// the other side's version of every asymmetric keyed clip (A_TAG_<name>_M)
 		for (const TCHAR* N : {TEXT("Tackle_Wrap"), TEXT("Tackle_High"), TEXT("Tackle_Low"), TEXT("Tackle_Dive"), TEXT("Tackle_Shoulder"),
 			TEXT("Tackle_Arm"), TEXT("Tackle_Assist"), TEXT("Tackled_Hit"), TEXT("Catch_High"), TEXT("Catch_Chest"), TEXT("Catch_Low"),
@@ -213,9 +210,7 @@ void FAthleteAssets::Load()
 		// the plain standing idle and the fall's lunge: the pack's neutral post-play stand and its tackle whiff (a dive
 		// to the ground), the sample's clips only when those are missing
 		Idle = Keyed(TEXT("A_TAG_Idle_Stand_Loop"));
-		if (!Idle) Idle = LoadAsset<UAnimationAsset>(*(G + TEXT("Animations/Idle/M_Neutral_Stand_Idle_Loop.M_Neutral_Stand_Idle_Loop")), false);
 		Jump = Keyed(TEXT("A_TAG_Tackle_Miss"));
-		if (!Jump) Jump = LoadAsset<UAnimationAsset>(*(G + TEXT("Animations/Jump/M_Neutral_Jump_F_Land_Roll_Lfoot.M_Neutral_Jump_F_Land_Roll_Lfoot")), false);
 		UniformMat = LoadAsset<UMaterialInterface>(*(G + TEXT("Materials/MI_UEFN_Mannequin_CMC.MI_UEFN_Mannequin_CMC")), false);
 		// safety net for blend spaces authored headlessly (see UTagEditorLib::ResampleBlendSpace)
 		UTagEditorLib::ResampleBlendSpace(Locomotion);
@@ -266,30 +261,22 @@ void FAthleteAssets::Load()
 		return;
 	}
 	// Fallback: template mannequin
+	// no UEFN mannequin (and so no pack clips): the simple mannequin stands in, unanimated; every animation the game
+	// plays comes from the mocap pack retargets
 	const FString A = TEXT("/Game/Characters/Mannequins/");
 	Mesh = LoadAsset<USkeletalMesh>(*(A + TEXT("Meshes/SKM_Manny_Simple.SKM_Manny_Simple")));
-	Locomotion = LoadAsset<UBlendSpace>(*(A + TEXT("Anims/Unarmed/BS_Idle_Walk_Run.BS_Idle_Walk_Run")));
-	FallFront = LoadAsset<UAnimationAsset>(*(A + TEXT("Anims/Death/MM_Death_Front_01.MM_Death_Front_01")));
-	FallFront2 = LoadAsset<UAnimationAsset>(*(A + TEXT("Anims/Death/MM_Death_Front_02.MM_Death_Front_02")));
-	Shove = LoadAsset<UAnimationAsset>(*(A + TEXT("Anims/Unarmed/Attack/MM_Attack_02.MM_Attack_02")));
-	Throw = LoadAsset<UAnimationAsset>(*(A + TEXT("Anims/Unarmed/Attack/MM_Attack_03.MM_Attack_03")));
-	Jump = LoadAsset<UAnimationAsset>(*(A + TEXT("Anims/Unarmed/Jump/MM_Jump.MM_Jump")));
-	Celebrate = Jump;
-	if (Locomotion) LocoMaxSpeed = FMath::Max(1.f, Locomotion->GetBlendParameter(0).Max);
+	UE_LOG(LogTemp, Warning, TEXT("TAG: UEFN mannequin or TAG blend spaces missing; players will not animate"));
 }
 
 void FAthleteAssets::LoadMotionMatching()
 {
 	// Epic's Game Animation Sample motion matching data (free, UEFN mannequin), Dense variant: every database is
 	// searched against the same normalization set, so costs compare across databases
-	const FString D = TEXT("/Game/Characters/UEFN_Mannequin/Animations/MotionMatchingData/Databases/Dense/PSD_Dense_");
 	// every set prefers its TAG copy (Tools/Art/mm_build_dbs.py: the sample's clips plus the pack's starts, stops,
 	// pivots and idles with root motion, mocap_map.LOCO_DB), else the sample's
-	auto Db = [&D](const FString& N)
-	{
-		if (UPoseSearchDatabase* T = LoadAsset<UPoseSearchDatabase>(*FString::Printf(TEXT("/Game/TAG/Anim/MM/PSD_TAG_%s.PSD_TAG_%s"), *N, *N), false)) return T;
-		return LoadAsset<UPoseSearchDatabase>(*FString::Printf(TEXT("%s%s.PSD_Dense_%s"), *D, *N, *N), false);
-	};
+	// the TAG databases only (the pack's clips, Tools/Art/mm_build_dbs.py); without them motion matching is off and the
+	// blend spaces (also the pack's) drive the body
+	auto Db = [](const FString& N) { return LoadAsset<UPoseSearchDatabase>(*FString::Printf(TEXT("/Game/TAG/Anim/MM/PSD_TAG_%s.PSD_TAG_%s"), *N, *N), false); };
 	UPoseSearchDatabase* Idles = Db(TEXT("Stand_Idles"));
 	UPoseSearchDatabase* Turn = Db(TEXT("Stand_TurnInPlace"));
 	static const TCHAR* Gait[3] = {TEXT("Walk"), TEXT("Run"), TEXT("Sprint")};
@@ -305,7 +292,6 @@ void FAthleteAssets::LoadMotionMatching()
 		// transitions + curve loops, run + arcs), else the sample's
 		// the TAG copies carry the football locomotion from the mocap pack (Tools/Art/mm_build_dbs.py)
 		UPoseSearchDatabase* Loops = LoadAsset<UPoseSearchDatabase>(*FString::Printf(TEXT("/Game/TAG/Anim/MM/PSD_TAG_%s_Loops.PSD_TAG_%s_Loops"), Gait[g], Gait[g]), false);
-		if (!Loops) Loops = Db(FString::Printf(TEXT("Stand_%s_Loops"), Gait[g]));
 		if (UPoseSearchDatabase* X = Loops) { MMMove[g].Add(X); MMStart[g].Add(X); MMPivot[g].Add(X); }
 		if (UPoseSearchDatabase* X = Db(FString::Printf(TEXT("Stand_%s_Starts"), Gait[g]))) MMStart[g].Add(X);
 		for (const TCHAR* K : {TEXT("Pivots"), TEXT("SpinTransition")})
@@ -327,7 +313,6 @@ void FAthleteAssets::LoadMotionMatching()
 	{
 		for (TArray<UPoseSearchDatabase*>& C : MMCrouch) C.Reset();
 		UPoseSearchDatabase* CLoops = LoadAsset<UPoseSearchDatabase>(TEXT("/Game/TAG/Anim/MM/PSD_TAG_Crouch_Loops.PSD_TAG_Crouch_Loops"), false);
-		if (!CLoops) CLoops = Db(TEXT("Crouch_Walk_Loops"));
 		UPoseSearchDatabase* CIdles = Db(TEXT("Crouch_Idles"));
 		if (CLoops && CIdles)
 		{
@@ -337,7 +322,7 @@ void FAthleteAssets::LoadMotionMatching()
 			// crouch starts: with the TAG databases the pack's own (PSD_TAG_Crouch_Starts: a lineman's first steps out of
 			// his crouch, forward, sideways and back); the sample's generic walk starts only without them (they kept
 			// playing for their full 2 s against the lineman's kick slide, -TagMMTrace)
-			if (UPoseSearchDatabase* X = bMMPack ? LoadAsset<UPoseSearchDatabase>(TEXT("/Game/TAG/Anim/MM/PSD_TAG_Crouch_Starts.PSD_TAG_Crouch_Starts"), false) : Db(TEXT("Crouch_Walk_Starts")))
+			if (UPoseSearchDatabase* X = LoadAsset<UPoseSearchDatabase>(TEXT("/Game/TAG/Anim/MM/PSD_TAG_Crouch_Starts.PSD_TAG_Crouch_Starts"), false))
 				MMCrouch[1].Add(X);
 			if (UPoseSearchDatabase* X = Db(TEXT("Crouch_Walk_Pivots"))) MMCrouch[2].Add(X);
 			if (UPoseSearchDatabase* X = Db(TEXT("Crouch_Walk_Stops"))) MMCrouch[3].Add(X);
