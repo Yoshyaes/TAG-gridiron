@@ -15,6 +15,11 @@
 #include "Misc/PackageName.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Math/RandomStream.h"
+#include "Dom/JsonObject.h"
+#include "Serialization/JsonReader.h"
+#include "Serialization/JsonSerializer.h"
+#include "Misc/FileHelper.h"
+#include "Misc/Paths.h"
 #include "Retargeter/IKRetargeter.h"
 #include "Render/TagRetargetAnimInstance.h"
 #include "Render/TagMotionMatchInstance.h"
@@ -201,6 +206,61 @@ void FAthleteAssets::Load()
 			PackLibraryCount = PackCelebrations.Num() + PackPostPlayIdles.Num() + PackGetUpsFaceDown.Num() + PackGetUpsFaceUp.Num() + PackInjuries.Num();
 			for (const auto& KV : PackStances) PackLibraryCount += KV.Value.Num();
 			for (UAnimationAsset* C : PackCelebrations) Celebrations.Add(C);
+			// the timed families (PackTimed): started at the capture's own moment less a lead
+			LoadPackIndex();
+			if (PackIndex.Num())
+			{
+				const std::initializer_list<const TCHAR*> ThrowNone = {TEXT("Fake"), TEXT("Pump"), TEXT("Drop_"), TEXT("Handoff"), TEXT("Pitch"), TEXT("Scramble"), TEXT("Sack"), TEXT("Fumble"), TEXT("Kneel"), TEXT("Spike"), TEXT("Celeb"), TEXT("Idle"), TEXT("Walk"), TEXT("Jog"), TEXT("2man"), TEXT("Snap"), TEXT("Option"), TEXT("Toss"), TEXT("Lateral"), TEXT("UBRig")};
+				PackThrowsSet = PackTimed(TEXT("Quarterback"), {TEXT("Pass_Set"), TEXT("Throw"), TEXT("Pass_")}, {}, ThrowNone, 24, Seed + 50, TEXT("release"), 7, 0.6f, 8.f);
+				PackThrowsQuick = PackTimed(TEXT("Quarterback"), {TEXT("Quick"), TEXT("Short"), TEXT("Bullet_D2"), TEXT("Slant")}, {TEXT("Pass"), TEXT("Throw")}, ThrowNone, 12, Seed + 51, TEXT("release"), 7, 0.6f, 8.f);
+				PackThrowsDeep = PackTimed(TEXT("Quarterback"), {TEXT("Deep"), TEXT("D8"), TEXT("Bomb"), TEXT("Long")}, {TEXT("Pass"), TEXT("Throw")}, ThrowNone, 12, Seed + 52, TEXT("release"), 7, 0.6f, 8.f);
+				PackThrowsRollR = PackTimed(TEXT("Quarterback"), {TEXT("Rollout"), TEXT("Roll_"), TEXT("Run_")}, {TEXT("Right"), TEXT("_Rt"), TEXT("HeadRight"), TEXT("_R_")}, ThrowNone, 8, Seed + 53, TEXT("release"), 7, 0.6f, 8.f);
+				PackThrowsRollL = PackTimed(TEXT("Quarterback"), {TEXT("Rollout"), TEXT("Roll_"), TEXT("Run_")}, {TEXT("Left"), TEXT("_Lt"), TEXT("HeadLeft"), TEXT("_L_")}, ThrowNone, 8, Seed + 54, TEXT("release"), 7, 0.6f, 8.f);
+				const std::initializer_list<const TCHAR*> KickNone = {TEXT("Fake"), TEXT("Block"), TEXT("Holder"), TEXT("Hold"), TEXT("Snap"), TEXT("Return"), TEXT("Catch"), TEXT("Onside"), TEXT("Celeb"), TEXT("Miss"), TEXT("Hurr"), TEXT("Lineup"), TEXT("LINEUP"), TEXT("Idle"), TEXT("Walk"), TEXT("Jog"), TEXT("Long_Snap")};
+				PackKickoffs = PackTimed(TEXT("Kicking"), {TEXT("kick_off"), TEXT("Kickoff"), TEXT("KICKOFF"), TEXT("KO_")}, {}, KickNone, 8, Seed + 60, TEXT("contact"), 0, 0.8f, 10.f);
+				PackFieldGoals = PackTimed(TEXT("Kicking"), {TEXT("FG"), TEXT("Field_Goal"), TEXT("FieldGoal"), TEXT("PAT")}, {}, KickNone, 8, Seed + 61, TEXT("contact"), 0, 0.8f, 10.f);
+				PackPunts = PackTimed(TEXT("Kicking"), {TEXT("Punt")}, {}, KickNone, 8, Seed + 62, TEXT("contact"), 0, 0.8f, 10.f);
+				const std::initializer_list<const TCHAR*> DropNone = {TEXT("Pump"), TEXT("Fake"), TEXT("PA_"), TEXT("Boot"), TEXT("Roll"), TEXT("Bubble"), TEXT("Spike"), TEXT("Pocket"), TEXT("Throw"), TEXT("Pass")};
+				PackDropsSG = PackTimed(TEXT(""), {TEXT("QB_Drop_SG")}, {}, DropNone, 8, Seed + 63, nullptr, 0, 1.0f);
+				PackDropsUC = PackTimed(TEXT(""), {TEXT("QB_Drop_UC")}, {}, DropNone, 8, Seed + 64, nullptr, 0, 1.0f);
+				const std::initializer_list<const TCHAR*> CatchNone = {TEXT("2man"), TEXT("Drop"), TEXT("Def_"), TEXT("INT"), TEXT("Int_"), TEXT("Swat"), TEXT("Knock"), TEXT("Tip"), TEXT("Bobble"), TEXT("Miss"), TEXT("Fumble"), TEXT("Kick"), TEXT("Punt"), TEXT("Pump"), TEXT("Handoff"), TEXT("Pitch"), TEXT("Almost"), TEXT("Out_of_Bounds"), TEXT("Celeb"), TEXT("Jump_Ball"), TEXT("Juggl")};
+				PackCatchStride = PackTimed(TEXT("Catching"), {TEXT("Catch_Run"), TEXT("InStride"), TEXT("In_Stride")}, {}, CatchNone, 16, Seed + 70, TEXT("release"), 4, 0.7f);
+				PackCatchHigh = PackTimed(TEXT("Catching"), {TEXT("Jump"), TEXT("AboveHead"), TEXT("HighPoint"), TEXT("High_Point")}, {TEXT("Catch")}, CatchNone, 12, Seed + 71, TEXT("release"), 4, 0.7f);
+				PackCatchLow = PackTimed(TEXT("Catching"), {TEXT("Low"), TEXT("Shoestring"), TEXT("Scoop"), TEXT("Shoe")}, {TEXT("Catch")}, CatchNone, 8, Seed + 72, TEXT("release"), 4, 0.7f);
+				PackCatchOverShoulder = PackTimed(TEXT("Catching"), {TEXT("OverShoulder"), TEXT("Over_Shoulder"), TEXT("OvrShldr"), TEXT("BackShoulder"), TEXT("Back_Shoulder")}, {}, CatchNone, 12, Seed + 73, TEXT("release"), 4, 0.7f);
+				PackCatchSideline = PackTimed(TEXT("Catching"), {TEXT("Sideline")}, {TEXT("Catch")}, CatchNone, 8, Seed + 74, TEXT("release"), 4, 0.7f);
+				PackCatchStand = PackTimed(TEXT("Catching"), {TEXT("Catch_Stand"), TEXT("Stand_"), TEXT("Strafe"), TEXT("Chest")}, {TEXT("Catch")}, CatchNone, 12, Seed + 75, TEXT("release"), 4, 0.7f);
+				PackCatchComeback = PackTimed(TEXT("Catching"), {TEXT("Bkpd"), TEXT("Comeback"), TEXT("Curl")}, {TEXT("Catch")}, CatchNone, 8, Seed + 76, TEXT("release"), 4, 0.7f);
+				PackCatchDive = PackTimed(TEXT("Catching"), {TEXT("Dive"), TEXT("Layout")}, {TEXT("Catch")}, CatchNone, 8, Seed + 77, TEXT("release"), 6, 0.9f);
+				const std::initializer_list<const TCHAR*> TackleNone = {TEXT("Dive"), TEXT("Strip"), TEXT("Whiff"), TEXT("Miss"), TEXT("Sack"), TEXT("Pile"), TEXT("Gang"), TEXT("Sideline"), TEXT("Spin"), TEXT("Brkn"), TEXT("Broken"), TEXT("Hurdle"), TEXT("Truck"), TEXT("StiffArm"), TEXT("Celeb"), TEXT("Fumble")};
+				PackTackledFront = PackTimed(TEXT("Tackles"), {TEXT("_D1"), TEXT("_D2"), TEXT("_D8")}, {TEXT("__P01")}, TackleNone, 12, Seed + 80, TEXT("hit"), 2, 0.8f);
+				PackTackledBehind = PackTimed(TEXT("Tackles"), {TEXT("_D5"), TEXT("_D4"), TEXT("_D6")}, {TEXT("__P01")}, TackleNone, 12, Seed + 81, TEXT("hit"), 2, 0.8f);
+				PackTackledSide = PackTimed(TEXT("Tackles"), {TEXT("_D3"), TEXT("_D7")}, {TEXT("__P01")}, TackleNone, 12, Seed + 82, TEXT("hit"), 2, 0.8f);
+				PackTacklers = PackTimed(TEXT("Tackles"), {TEXT("Tackle")}, {TEXT("__P02")}, TackleNone, 16, Seed + 83, TEXT("release"), 6, 0.8f, 3.f);
+				PackWhiffs = PackTimed(TEXT(""), {TEXT("Whiff"), TEXT("Miss_Tackle"), TEXT("MissTackle"), TEXT("Missed")}, {}, {TEXT("Strip"), TEXT("2man"), TEXT("Catch"), TEXT("Kick"), TEXT("Celeb")}, 8, Seed + 84, TEXT("hit"), 10, 0.8f);
+				PackStumbles = PackTimed(TEXT("BrokenTackles"), {TEXT("Stumble"), TEXT("Brkn"), TEXT("Broken")}, {TEXT("__P01")}, {TEXT("Strip"), TEXT("Fumble"), TEXT("Spin"), TEXT("Hurdle")}, 12, Seed + 85, TEXT("onset"), 3, 0.8f);
+				const std::initializer_list<const TCHAR*> JukeNone = {TEXT("Spin"), TEXT("Hurdle"), TEXT("Truck"), TEXT("StiffArm"), TEXT("Stiff_Arm"), TEXT("Hesi"), TEXT("2man"), TEXT("Strip"), TEXT("Fumble"), TEXT("Celeb"), TEXT("Catch"), TEXT("Tackle")};
+				PackJukesL = PackTimed(TEXT("BallCarrier"), {TEXT("Juke"), TEXT("Cut"), TEXT("SkillMoves")}, {TEXT("Left"), TEXT("_L_"), TEXT("Lt_"), TEXT("_L0"), TEXT("D7"), TEXT("D8")}, JukeNone, 12, Seed + 90, TEXT("onset"), 5, 0.6f);
+				PackJukesR = PackTimed(TEXT("BallCarrier"), {TEXT("Juke"), TEXT("Cut"), TEXT("SkillMoves")}, {TEXT("Right"), TEXT("_R_"), TEXT("Rt_"), TEXT("_R0"), TEXT("D3"), TEXT("D2")}, JukeNone, 12, Seed + 91, TEXT("onset"), 5, 0.6f);
+				PackSpinsL = PackTimed(TEXT("BallCarrier"), {TEXT("Spin")}, {TEXT("Left"), TEXT("_L_"), TEXT("Lt_")}, {TEXT("2man"), TEXT("Strip")}, 8, Seed + 92, TEXT("onset"), 5, 0.6f);
+				PackSpinsR = PackTimed(TEXT("BallCarrier"), {TEXT("Spin")}, {TEXT("Right"), TEXT("_R_"), TEXT("Rt_")}, {TEXT("2man"), TEXT("Strip")}, 8, Seed + 93, TEXT("onset"), 5, 0.6f);
+				PackTrucks = PackTimed(TEXT(""), {TEXT("Truck"), TEXT("LowerShoulder"), TEXT("Lower_Shoulder"), TEXT("Bruiser_Shoulder")}, {}, {TEXT("2man"), TEXT("Strip"), TEXT("Catch")}, 8, Seed + 94, TEXT("onset"), 5, 0.6f);
+				PackHurdles = PackTimed(TEXT(""), {TEXT("Hurdle")}, {}, {TEXT("2man"), TEXT("Strip")}, 8, Seed + 95, TEXT("onset"), 5, 0.6f);
+				PackStiffArmsL = PackTimed(TEXT(""), {TEXT("StiffArm"), TEXT("Stiff_Arm"), TEXT("Stiffarm")}, {}, {TEXT("2man"), TEXT("Strip")}, 8, Seed + 96, TEXT("release"), 6, 0.6f);
+				PackStiffArmsR = PackTimed(TEXT(""), {TEXT("StiffArm"), TEXT("Stiff_Arm"), TEXT("Stiffarm")}, {}, {TEXT("2man"), TEXT("Strip")}, 8, Seed + 97, TEXT("release"), 6, 0.6f);
+				const std::initializer_list<const TCHAR*> BlockNone = {TEXT("2man"), TEXT("Celeb"), TEXT("Idle"), TEXT("Stance"), TEXT("Double"), TEXT("3Man"), TEXT("Jammed"), TEXT("FakeFG"), TEXT("Option")};
+				PackRushWinsL = PackTimed(TEXT("Blocking"), {TEXT("Win")}, {TEXT("Left"), TEXT("_L_")}, BlockNone, 10, Seed + 100, nullptr, 0, 0.8f);
+				PackRushWinsR = PackTimed(TEXT("Blocking"), {TEXT("Win")}, {TEXT("Right"), TEXT("_R_")}, BlockNone, 10, Seed + 101, nullptr, 0, 0.8f);
+				PackBeatenL = PackTimed(TEXT("Blocking"), {TEXT("Loss")}, {TEXT("Left"), TEXT("_L_")}, BlockNone, 10, Seed + 102, nullptr, 0, 0.8f);
+				PackBeatenR = PackTimed(TEXT("Blocking"), {TEXT("Loss")}, {TEXT("Right"), TEXT("_R_")}, BlockNone, 10, Seed + 103, nullptr, 0, 0.8f);
+				PackPancakes = PackTimed(TEXT("Blocking"), {TEXT("Pancake"), TEXT("Impact"), TEXT("Stand_Loss_Big")}, {}, BlockNone, 8, Seed + 104, TEXT("hit"), 4, 0.8f);
+				PackGetOffs = PackTimed(TEXT(""), {TEXT("InitialMove"), TEXT("InitMove"), TEXT("Get_Off"), TEXT("GetOff"), TEXT("RunBlock_D1")}, {TEXT("OL"), TEXT("DL"), TEXT("Dline"), TEXT("Block")}, {TEXT("KickSlide"), TEXT("lateral"), TEXT("2man"), TEXT("Idle"), TEXT("Celeb"), TEXT("Stance")}, 10, Seed + 105, nullptr, 0, 0.8f);
+			}
+			UE_LOG(LogTemp, Display, TEXT("TAG: pack library timed families: %d captures (throws %d/%d/%d/%d/%d, kicks %d/%d/%d, drops %d/%d, catches %d/%d/%d/%d/%d/%d/%d/%d, tackled %d/%d/%d, tacklers %d, whiffs %d, stumbles %d, jukes %d/%d, spins %d/%d, trucks %d, hurdles %d, stiff arms %d/%d, rush wins %d/%d, beaten %d/%d, pancakes %d, get-offs %d; index %d)"),
+				PackTimedCount, PackThrowsSet.Num(), PackThrowsQuick.Num(), PackThrowsDeep.Num(), PackThrowsRollR.Num(), PackThrowsRollL.Num(), PackKickoffs.Num(), PackFieldGoals.Num(), PackPunts.Num(),
+				PackDropsSG.Num(), PackDropsUC.Num(), PackCatchStride.Num(), PackCatchHigh.Num(), PackCatchLow.Num(), PackCatchOverShoulder.Num(), PackCatchSideline.Num(), PackCatchStand.Num(), PackCatchComeback.Num(), PackCatchDive.Num(),
+				PackTackledFront.Num(), PackTackledBehind.Num(), PackTackledSide.Num(), PackTacklers.Num(), PackWhiffs.Num(), PackStumbles.Num(), PackJukesL.Num(), PackJukesR.Num(), PackSpinsL.Num(), PackSpinsR.Num(),
+				PackTrucks.Num(), PackHurdles.Num(), PackStiffArmsL.Num(), PackStiffArmsR.Num(), PackRushWinsL.Num(), PackRushWinsR.Num(), PackBeatenL.Num(), PackBeatenR.Num(), PackPancakes.Num(), PackGetOffs.Num(), PackIndex.Num());
 			UE_LOG(LogTemp, Display, TEXT("TAG: pack library in play: %d celebrations, %d post-play idles, %d / %d get-ups, %d injuries, %d breakdowns, %d stances (seed %d)"),
 				PackCelebrations.Num(), PackPostPlayIdles.Num(), PackGetUpsFaceDown.Num(), PackGetUpsFaceUp.Num(), PackInjuries.Num(), Breakdowns.Num(), PackLibraryCount - PackCelebrations.Num() - PackPostPlayIdles.Num() - PackGetUpsFaceDown.Num() - PackGetUpsFaceUp.Num() - PackInjuries.Num(), Seed);
 		}
@@ -367,6 +427,72 @@ TArray<UAnimationAsset*> FAthleteAssets::PackFamily(const TCHAR* Category, std::
 		S->AddToRoot(); // held by a plain struct, like every other asset here: never collected
 		Out.Add(S);
 	}
+	return Out;
+}
+
+void FAthleteAssets::LoadPackIndex()
+{
+	FString Text;
+	const FString File = FPaths::ProjectContentDir() / TEXT("TAG/Anim/Pack/pack_index.json");
+	if (!FFileHelper::LoadFileToString(Text, *File)) return;
+	TSharedPtr<FJsonObject> Root;
+	if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Text), Root) || !Root.IsValid()) return;
+	for (const auto& KV : Root->Values)
+		if (KV.Value.IsValid() && KV.Value->Type == EJson::Object)
+		{
+			const TSharedPtr<FJsonObject> Obj = KV.Value->AsObject();
+			PackIndex.Add(FString(KV.Key), Obj);
+		}
+}
+
+TArray<FAthleteAssets::FPackClip> FAthleteAssets::PackTimed(const TCHAR* Category, std::initializer_list<const TCHAR*> Any, std::initializer_list<const TCHAR*> Any2,
+	std::initializer_list<const TCHAR*> None, int32 Max, int32 Seed, const TCHAR* Field, int32 LeadFrames, float MinAfter, float MinEventSpeed)
+{
+	TArray<FPackClip> Out;
+	IAssetRegistry& AR = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry").Get();
+	const FString Path = FString::Printf(TEXT("/Game/TAG/Anim/Pack/%s"), Category);
+	AR.ScanPathsSynchronous({Path}, true);
+	TArray<FAssetData> Assets;
+	AR.GetAssetsByPath(FName(*Path), Assets, FCString::Strcmp(Category, TEXT("")) == 0);
+	TArray<FAssetData> Hits;
+	for (const FAssetData& D : Assets)
+	{
+		const FString N = D.AssetName.ToString();
+		auto AnyOf = [&N](std::initializer_list<const TCHAR*> L) { if (L.size() == 0) return true; for (const TCHAR* T : L) if (N.Contains(T)) return true; return false; };
+		bool bOk = AnyOf(Any) && AnyOf(Any2);
+		for (const TCHAR* T : None) if (N.Contains(T)) { bOk = false; break; }
+		if (bOk) Hits.Add(D);
+	}
+	Hits.Sort([](const FAssetData& L, const FAssetData& R) { return L.AssetName.LexicalLess(R.AssetName); });
+	FRandomStream Rand(Seed);
+	for (int32 i = Hits.Num() - 1; i > 0; --i) Hits.Swap(i, Rand.RandRange(0, i));
+	for (const FAssetData& D : Hits)
+	{
+		if (Out.Num() >= Max) break;
+		const FString N = D.AssetName.ToString();
+		const TSharedPtr<FJsonObject>* E = PackIndex.Find(N);
+		if (!E || !E->IsValid()) continue;
+		FPackClip C;
+		C.Name = N;
+		C.Len = static_cast<float>((*E)->GetNumberField(TEXT("len")));
+		if (Field && *Field)
+		{
+			double Frame = 0.0;
+			if (!(*E)->TryGetNumberField(Field, Frame)) continue;
+			double Ms = 0.0;
+			if (MinEventSpeed > 0.f && (!(*E)->TryGetNumberField(*(FString(Field) + TEXT("_ms")), Ms) || Ms < MinEventSpeed)) continue;
+			C.Start = FMath::Max(0.f, (static_cast<float>(Frame) - LeadFrames) / 30.f);
+		}
+		if (C.Len - C.Start < MinAfter) continue;
+		double Speed = 0.0;
+		if ((*E)->TryGetNumberField(TEXT("speed"), Speed)) C.Speed = static_cast<float>(Speed);
+		UAnimSequence* S = Cast<UAnimSequence>(D.GetAsset());
+		if (!S) continue;
+		S->AddToRoot();
+		C.Anim = S;
+		Out.Add(C);
+	}
+	PackTimedCount += Out.Num();
 	return Out;
 }
 
@@ -856,10 +982,16 @@ void AAthlete::SetupMetaHuman(int32 Arch, const FUniform& U)
 
 void AAthlete::PlayOneShot(UAnimationAsset* Clip)
 {
+	PlayOneShotFrom(Clip, 0.f);
+}
+
+void AAthlete::PlayOneShotFrom(UAnimationAsset* Clip, float Start)
+{
 	if (!Clip || bRagdoll) return;
 	OneShot = Clip;
+	OneShotStart = Start;
 	OneShotRate = 1.f + StyleJitter * 0.07f; // each player's own timing, within 7 %
-	OneShotLeft = Clip->GetPlayLength() / OneShotRate;
+	OneShotLeft = FMath::Max(0.05f, Clip->GetPlayLength() - Start) / OneShotRate;
 	UE_LOG(LogTemp, Verbose, TEXT("TAG one-shot %s #%d"), *Clip->GetName(), Player ? Player->number : -1);
 	CurrentClip = CurrentClip == Clip ? nullptr : CurrentClip; // restart if the same clip is already playing
 }
@@ -1152,6 +1284,18 @@ void AAthlete::PlayCatch(float BallZCm, float SpeedCm, const FVector& BallVelW, 
 		C = A.CatchComeback; // working back to the quarterback
 	else
 		C = BallZCm > 160.f ? A.CatchHigh.Get() : BallZCm < 80.f ? A.CatchLow.Get() : A.CatchChest.Get();
+	// every other catch a library capture of the same kind, from 4 frames before the hands reach
+	if (Seq % 2)
+	{
+		const TArray<FAthleteAssets::FPackClip>* Lib =
+			(C == A.CatchSidelineL || C == A.CatchSidelineR) ? &A.PackCatchSideline :
+			(C == A.CatchHighPoint || C == A.CatchHigh) ? &A.PackCatchHigh :
+			(C == A.CatchOverShoulder || C == A.CatchBackShoulder) ? &A.PackCatchOverShoulder :
+			(C == A.CatchScoop || C == A.CatchLow) ? &A.PackCatchLow :
+			(C == A.CatchComeback) ? &A.PackCatchComeback :
+			(C == A.CatchChest) ? &A.PackCatchStand : &A.PackCatchStride;
+		if (const FAthleteAssets::FPackClip* P = FAthleteAssets::Pick(*Lib, Seq / 2)) { PlayOneShotFrom(P->Anim, P->Start); return; }
+	}
 	if (C) PlayOneShot(A.Side(C, bMirror));
 }
 
@@ -1160,6 +1304,16 @@ void AAthlete::PlayThrow(int32 Kind)
 	const FAthleteAssets& A = FAthleteAssets::Get();
 	if (Kind < 0 || Kind >= FAthleteAssets::ThrowCount || !A.Throws[Kind]) return;
 	CurrentClip = nullptr; // restart cleanly in the chosen throw
+	// every other throw a library capture of the kind, from 7 frames before its release
+	static int32 GThrowSeq = 0;
+	const int32 Seq = GThrowSeq++;
+	const TArray<FAthleteAssets::FPackClip>* Lib = Kind == 1 ? &A.PackThrowsQuick : Kind == 2 ? &A.PackThrowsDeep : Kind == 6 ? &A.PackThrowsRollR : Kind == 7 ? &A.PackThrowsRollL : &A.PackThrowsSet;
+	if (!Lib->Num()) Lib = &A.PackThrowsSet;
+	if (const FAthleteAssets::FPackClip* P = (Seq % 2) ? FAthleteAssets::Pick(*Lib, Seq / 2) : nullptr)
+	{
+		PlayClip(P->Anim, false, 1.f, P->Start);
+		return;
+	}
 	PlayClip(A.Throws[Kind], false, 1.f, A.ThrowStart[Kind]);
 }
 
@@ -1178,10 +1332,16 @@ void AAthlete::ApplyHit(const FVector& TacklerVelW, float TacklerKg, const FVect
 	UAnimationAsset* R = A.TackledHit;                                         // head on
 	if (Front > 0.5f && A.TackledFromBehind) R = A.TackledFromBehind;
 	else if (FMath::Abs(Front) <= 0.5f && A.TackledFromSide) R = A.Side(A.TackledFromSide, Side > 0.f); // knocked to the side the hit drives him
+	// every other hit the carrier's reaction is a library capture hit from that side, from 2 frames before he goes down
+	static int32 GHitSeq = 0;
+	float Start = 0.f;
+	if (GHitSeq++ % 2)
+		if (const FAthleteAssets::FPackClip* P = FAthleteAssets::Pick(Front > 0.5f ? A.PackTackledBehind : FMath::Abs(Front) <= 0.5f ? A.PackTackledSide : A.PackTackledFront, GHitSeq / 2))
+		{ R = P->Anim; Start = P->Start; }
 	if (R && R != CurrentClip)
 	{
-		PlayClip(R, false);
-		TackledLeft = R->GetPlayLength();
+		PlayClip(R, false, 1.f, Start);
+		TackledLeft = R->GetPlayLength() - Start;
 	}
 	// the pile moves with both players' momentum (kg * cm/s), the fall carries it
 	const float CarrierKg = Player ? static_cast<float>(Player->weightLb) * 0.4536f : 100.f;
@@ -1197,6 +1357,8 @@ void AAthlete::PlayMissedTackle(bool bCarrierLeft)
 	const FAthleteAssets& A = FAthleteAssets::Get();
 	if (!A.TackleMiss || bRagdoll) return;
 	bMissing = true;
+	static int32 GWhiffSeq = 0;
+	if (const FAthleteAssets::FPackClip* P = (GWhiffSeq++ % 2) ? FAthleteAssets::Pick(A.PackWhiffs, GWhiffSeq / 2) : nullptr) { PlayOneShotFrom(P->Anim, P->Start); return; }
 	PlayOneShot(A.Side(A.TackleMiss, !bCarrierLeft));
 	UE_LOG(LogTemp, Verbose, TEXT("TAG missed tackle #%d"), Player ? Player->number : -1);
 }
@@ -1205,6 +1367,8 @@ void AAthlete::PlayBrokenTackle(bool bHitFromRight)
 {
 	const FAthleteAssets& A = FAthleteAssets::Get();
 	if (!A.BrokenStumble || bRagdoll) return;
+	static int32 GStumbleSeq = 0;
+	if (const FAthleteAssets::FPackClip* P = (GStumbleSeq++ % 2) ? FAthleteAssets::Pick(A.PackStumbles, GStumbleSeq / 2) : nullptr) { PlayOneShotFrom(P->Anim, P->Start); return; }
 	PlayOneShot(A.Side(A.BrokenStumble, !bHitFromRight)); // the keyed one is hit on his right, stumbles left
 }
 
@@ -1219,7 +1383,10 @@ void AAthlete::BeginTackleOn(AAthlete* Carrier)
 
 void AAthlete::PlayDiveAttempt()
 {
-	if (const FAthleteAssets& A = FAthleteAssets::Get(); A.CatchDive) PlayOneShot(A.Side(A.CatchDive, Player && (Player->id % 2) == 1));
+	const FAthleteAssets& A = FAthleteAssets::Get();
+	static int32 GDiveSeq = 0;
+	if (const FAthleteAssets::FPackClip* P = (GDiveSeq++ % 2) ? FAthleteAssets::Pick(A.PackCatchDive, GDiveSeq / 2) : nullptr) { PlayOneShotFrom(P->Anim, P->Start); return; }
+	if (A.CatchDive) PlayOneShot(A.Side(A.CatchDive, Player && (Player->id % 2) == 1));
 }
 
 float AAthlete::GetUpElapsed() const
@@ -1352,6 +1519,9 @@ void AAthlete::PlayRushMove(const FString& Move, const AAthlete* Blocker)
 	else if (Move == TEXT("spin")) C = bBlockerRight ? A.RushSpinR.Get() : A.RushSpinL.Get();
 	else if (Move == TEXT("bull")) C = A.RushBull;
 	if (!C) C = A.Side(A.ShedSwim, !bBlockerRight);
+	// every other rush a library win past the blocker on the open side
+	static int32 GRushSeq = 0;
+	if (const FAthleteAssets::FPackClip* P = (GRushSeq++ % 2) ? FAthleteAssets::Pick(bBlockerRight ? A.PackRushWinsL : A.PackRushWinsR, GRushSeq / 2) : nullptr) C = P->Anim;
 	UE_LOG(LogTemp, Display, TEXT("TAG rush move #%d: %s (%s)"), Player ? Player->number : -1, *Move, C ? *C->GetName() : TEXT("-"));
 	if (C) PlayOneShot(C);
 }
@@ -1362,12 +1532,17 @@ void AAthlete::PlayBeaten(const AAthlete* Rusher)
 	if (!A.Beaten || !Rusher) return;
 	// keyed with the rusher getting by on his left
 	const bool bRusherLeft = FVector::DotProduct(Rusher->GetActorLocation() - GetActorLocation(), GetActorRightVector()) < 0.f;
+	static int32 GBeatenSeq = 0;
+	if (const FAthleteAssets::FPackClip* P = (GBeatenSeq++ % 2) ? FAthleteAssets::Pick(bRusherLeft ? A.PackBeatenL : A.PackBeatenR, GBeatenSeq / 2) : nullptr) { PlayOneShot(P->Anim); return; }
 	PlayOneShot(A.Side(A.Beaten, !bRusherLeft));
 }
 
 void AAthlete::PlayPancakeFinish()
 {
-	if (const FAthleteAssets& A = FAthleteAssets::Get(); A.BlockFinish) PlayOneShot(A.BlockFinish);
+	const FAthleteAssets& A = FAthleteAssets::Get();
+	static int32 GPancakeSeq = 0;
+	if (const FAthleteAssets::FPackClip* P = (GPancakeSeq++ % 2) ? FAthleteAssets::Pick(A.PackPancakes, GPancakeSeq / 2) : nullptr) { PlayOneShotFrom(P->Anim, P->Start); return; }
+	if (A.BlockFinish) PlayOneShot(A.BlockFinish);
 }
 
 void AAthlete::FaceFollowBody(bool bFollow)
@@ -1782,7 +1957,10 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 			++TackleCount;
 			const int32 Seq = GTackleSeq++;
 			UAnimationAsset* T = A.Side(Pool[Seq % 6], (Seq / 6 + (Player ? Player->id : 0)) % 2 == 1); // wrap from either side
-			PlayClip(T ? T : A.TackleKeyed.Get(), false, OneShotRate);
+			float Start = 0.f;
+			if (Seq % 2) // every other tackle a library tackler, from 6 frames before his arms close
+				if (const FAthleteAssets::FPackClip* P = FAthleteAssets::Pick(A.PackTacklers, Seq / 2)) { T = P->Anim; Start = P->Start; }
+			PlayClip(T ? T : A.TackleKeyed.Get(), false, OneShotRate, Start);
 		}
 		// paired: ease into wrap distance of the carrier (his body, not the sim spot) and square up to him
 		if (AAthlete* C = TackleOn.Get(); C && AlignT >= 0.f && AlignT < 0.6f)
@@ -1832,6 +2010,17 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 				else if (Seq % 3 == 1)
 					Move = Side > 0.f ? A.SpinR.Get() : A.SpinL.Get();
 				if (!Move) Move = Side > 0.f ? A.JukeR.Get() : A.JukeL.Get();
+				// every other move a library capture of the same move to the same side, from 5 frames before its first step
+				if (Seq % 2)
+				{
+					const bool bR = Side > 0.f;
+					const TArray<FAthleteAssets::FPackClip>* Lib =
+						(Move == A.Hurdle || Move == A.Side(A.Hurdle, true)) ? &A.PackHurdles :
+						(Move == A.Truck || Move == A.Side(A.Truck, true)) ? &A.PackTrucks :
+						(Move == A.StiffArmR || Move == A.StiffArmL) ? (bR ? &A.PackStiffArmsR : &A.PackStiffArmsL) :
+						(Move == A.SpinR || Move == A.SpinL) ? (bR ? &A.PackSpinsR : &A.PackSpinsL) : (bR ? &A.PackJukesR : &A.PackJukesL);
+					if (const FAthleteAssets::FPackClip* P = FAthleteAssets::Pick(*Lib, Seq / 2)) { PlayClip(P->Anim, false, 1.f, P->Start); return; }
+				}
 			}
 			PlayClip(Move, false);
 		}
@@ -1841,9 +2030,15 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 	if (Anim == TEXT("kickoff") || Anim == TEXT("punt") || Anim == TEXT("fgkick"))
 	{
 		UAnimationAsset* K = Anim == TEXT("kickoff") ? A.KickKickoff.Get() : Anim == TEXT("punt") ? A.KickPunt.Get() : A.KickFieldGoal.Get();
+		// the kicker's own library capture (every other kicker), its contact moved onto the placed clip's contact
+		const TArray<FAthleteAssets::FPackClip>& Lib = Anim == TEXT("kickoff") ? A.PackKickoffs : Anim == TEXT("punt") ? A.PackPunts : A.PackFieldGoals;
+		const float Contact = Anim == TEXT("kickoff") ? FAthleteAssets::KickoffContact : Anim == TEXT("punt") ? FAthleteAssets::PuntContact : FAthleteAssets::FieldGoalContact;
+		float Shift = 0.f;
+		if (Player && (Player->id % 2) == 1)
+			if (const FAthleteAssets::FPackClip* P = FAthleteAssets::Pick(Lib, Player->id / 2)) { K = P->Anim; Shift = P->Start - Contact; }
 		if (K)
 		{
-			if (bChanged) PlayClip(K, false, 1.f, FMath::Max(0.f, AnimT));
+			if (bChanged) PlayClip(K, false, 1.f, FMath::Max(0.f, AnimT + Shift));
 			return;
 		}
 	}
@@ -1870,7 +2065,12 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 	// the snap: linemen explode out of the stance (get-off), the shotgun QB catches the snap; both are one-shots
 	if (bWasPreSnap && !bPreSnap)
 	{
-		if (bLine && A.GetOff) PlayOneShot(A.GetOff);
+		if (bLine && A.GetOff)
+		{
+			static int32 GGetOffSeq = 0;
+			if (const FAthleteAssets::FPackClip* P = (GGetOffSeq++ % 2) ? FAthleteAssets::Pick(A.PackGetOffs, GGetOffSeq / 2) : nullptr) PlayOneShot(P->Anim);
+			else PlayOneShot(A.GetOff);
+		}
 		else if (Player && Player->pos == tag::Pos::QB && bUnderCenter && A.UnderCenterSnap) PlayOneShot(A.UnderCenterSnap);
 		else if (Player && Player->pos == tag::Pos::QB && A.SnapCatch) PlayOneShot(A.SnapCatch);
 	}
@@ -1878,7 +2078,7 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 	if (OneShotLeft > 0.f && OneShot && !bPreSnap)
 	{
 		OneShotLeft -= DeltaTime;
-		PlayClip(OneShot, false, OneShotRate);
+		PlayClip(OneShot, false, OneShotRate, OneShotStart);
 		if (!BlockAlign.IsNearlyZero(0.5f)) SetActorLocation(Location + VisOffset + BlockAlign);
 		if (OneShotLeft <= 0.f)
 		{
@@ -1928,7 +2128,13 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 		if (bDropping && (DropLeft > 0.f || !bDropped))
 		{
 			UAnimationAsset* D = bUnderCenter ? A.QBDropUnder.Get() : A.QBDropShotgun.Get();
-			const float Rate = FMath::Clamp(SpeedCm / (bUnderCenter ? FAthleteAssets::DropUnderSpeed : FAthleteAssets::DropShotgunSpeed), 0.7f, 1.5f);
+			float DropSpeed = bUnderCenter ? FAthleteAssets::DropUnderSpeed : FAthleteAssets::DropShotgunSpeed;
+			if ((Player->id % 2) == 1) // the quarterback's own library drop, at its own captured speed
+				if (const FAthleteAssets::FPackClip* P = FAthleteAssets::Pick(bUnderCenter ? A.PackDropsUC : A.PackDropsSG, Player->id / 2))
+				{
+					D = P->Anim; // at the placed drop's pace: a whole capture's mean speed holds its setup and read far too slow
+				}
+			const float Rate = FMath::Clamp(SpeedCm / DropSpeed, 0.7f, 1.5f);
 			if (!bDropped)
 			{
 				DropLeft = D->GetPlayLength() / Rate;

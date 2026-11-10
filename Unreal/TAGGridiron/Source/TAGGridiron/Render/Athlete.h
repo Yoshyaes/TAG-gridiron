@@ -9,6 +9,7 @@ class USkeletalMeshComponent;
 class UStaticMeshComponent;
 class UTextRenderComponent;
 class UAnimationAsset;
+class FJsonObject;
 class UMaterialInstanceDynamic;
 
 namespace tag { struct Player; }
@@ -91,6 +92,7 @@ public:
 	void SetLabel(const FString& Text);
 	/** Play a keyed clip once over the current state, then hand back (crossfaded). Contact states override it. */
 	void PlayOneShot(UAnimationAsset* Clip);
+	void PlayOneShotFrom(UAnimationAsset* Clip, float Start); // from Start seconds into the clip (a library capture's moment less its lead)
 	/** Seconds into the current keyed get-up (-1 when not getting up). */
 	float GetUpElapsed() const;
 	/** The sim says this player just caught the ball: pick the catch for the ball height, his speed, where the ball
@@ -218,6 +220,7 @@ private:
 	UPROPERTY()
 	TObjectPtr<UAnimationAsset> OneShot;   // keyed one-shot in progress (get-off, snap catch, handoff)
 	float OneShotLeft = 0.f;
+	float OneShotStart = 0.f;     // seconds into the one-shot's clip it starts at (a library capture's moment less its lead)
 	// get-up after a ragdoll: snapshot the lying pose, play the matching keyed get-up where the body lies
 	void StartGetUp(const FVector& SimLoc);
 	// keyed fall to the ground (paired tackle, pancake, solo knockdown): the actor is anchored and the clip carries the
@@ -385,6 +388,24 @@ struct FAthleteAssets
 	TArray<UAnimationAsset*> PackFamily(const TCHAR* Category, std::initializer_list<const TCHAR*> Any, std::initializer_list<const TCHAR*> Any2,
 		std::initializer_list<const TCHAR*> None, int32 Max, int32 Seed, bool bLoop);
 	static bool LoopsCleanly(const UAnimSequence* Seq);
+	/** The timed families: a whole capture started at its moment (pack_index.json, Tools/Art/pack_index.py: the
+	 *  right hand's peak = a throw's release or a catch's reach, the right foot's peak = a kick's contact, the pelvis
+	 *  going down = the hit, the root's first sideways step = a juke's onset) less a lead, the way the placed clips
+	 *  were cut by hand. Every family keeps its placed clip and takes a library capture every other time. */
+	struct FPackClip { TObjectPtr<UAnimationAsset> Anim; float Start = 0.f; float Len = 0.f; float Speed = 0.f; FString Name; };
+	TArray<FPackClip> PackThrowsSet, PackThrowsQuick, PackThrowsDeep, PackThrowsRollR, PackThrowsRollL;
+	TArray<FPackClip> PackKickoffs, PackFieldGoals, PackPunts, PackDropsSG, PackDropsUC;
+	TArray<FPackClip> PackCatchStride, PackCatchHigh, PackCatchLow, PackCatchOverShoulder, PackCatchSideline, PackCatchStand, PackCatchComeback, PackCatchDive;
+	TArray<FPackClip> PackTackledFront, PackTackledBehind, PackTackledSide, PackTacklers, PackWhiffs, PackStumbles;
+	TArray<FPackClip> PackJukesL, PackJukesR, PackSpinsL, PackSpinsR, PackTrucks, PackHurdles, PackStiffArmsL, PackStiffArmsR;
+	TArray<FPackClip> PackRushWinsL, PackRushWinsR, PackBeatenL, PackBeatenR, PackPancakes, PackGetOffs;
+	TMap<FString, TSharedPtr<FJsonObject>> PackIndex;
+	int32 PackTimedCount = 0;
+	void LoadPackIndex();
+	TArray<FPackClip> PackTimed(const TCHAR* Category, std::initializer_list<const TCHAR*> Any, std::initializer_list<const TCHAR*> Any2,
+		std::initializer_list<const TCHAR*> None, int32 Max, int32 Seed, const TCHAR* Field, int32 LeadFrames, float MinAfter, float MinEventSpeed = 0.f);
+	static const FPackClip* Pick(const TArray<FPackClip>& L, int32 Seq) { return L.Num() ? &L[FMath::Abs(Seq) % L.Num()] : nullptr; }
+	static bool NameHas(const FString& N, std::initializer_list<const TCHAR*> L) { for (const TCHAR* T : L) if (N.Contains(T)) return true; return false; }
 	static constexpr float DropShotgunSpeed = 253.f, DropUnderSpeed = 368.f; // cm/s the drops were captured at (mocap_constants.py)
 	// batch 4: the throwing family (index = EThrow), more catches, collision reactions
 	enum EThrow : int32 { ThrowSet = 0, ThrowQuickK, ThrowDeepK, ThrowFadeK, ThrowSidearmK, ThrowTouchK, ThrowRunRK, ThrowRunLK, ThrowCount };
