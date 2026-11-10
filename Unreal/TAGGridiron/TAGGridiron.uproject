@@ -37,6 +37,14 @@
 			"Enabled": true
 		},
 		{
+			"Name": "GameInput",
+			"Enabled": true
+		},
+		{
+			"Name": "GameInputWindows",
+			"Enabled": true
+		},
+		{
 			"Name": "PythonScriptPlugin",
 			"Enabled": true
 		},

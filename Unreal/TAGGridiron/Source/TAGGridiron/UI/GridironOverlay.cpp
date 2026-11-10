@@ -98,18 +98,96 @@ void SGridironOverlay::Tick(const FGeometry& G, const double Now, const float Dt
 	SCompoundWidget::Tick(G, Now, Dt);
 	BannerT += Dt;
 	ToastT += Dt;
+	// a menu just opened (laid out by now): give its button focus so the gamepad can drive it
+	if (PendingFocus >= 0 && bModal && ModalBox.IsValid() && FSlateApplication::IsInitialized())
+	{
+		TArray<TSharedRef<SWidget>> All;
+		Focusables(ModalBox.ToSharedRef(), All);
+		if (All.Num() > 0)
+			FSlateApplication::Get().SetAllUserFocus(All[FMath::Clamp(PendingFocus, 0, All.Num() - 1)], EFocusCause::Navigation);
+		PendingFocus = -1;
+	}
+	// keep the menu focused if a click on the game view took it away (a pad can't click back in)
+	if (bModal && ModalBox.IsValid() && FSlateApplication::IsInitialized() && FocusedIndex() < 0)
+	{
+		TArray<TSharedRef<SWidget>> All;
+		Focusables(ModalBox.ToSharedRef(), All);
+		if (All.Num() > 0) FSlateApplication::Get().SetAllUserFocus(All[0], EFocusCause::Navigation);
+	}
 }
 
-void SGridironOverlay::ShowModal(TSharedRef<SWidget> W)
+void SGridironOverlay::Focusables(const TSharedRef<SWidget>& W, TArray<TSharedRef<SWidget>>& Out)
 {
+	if (W->GetVisibility().IsVisible() || W->GetVisibility() == EVisibility::SelfHitTestInvisible)
+	{
+		if (W->SupportsKeyboardFocus()) Out.Add(W);
+		FChildren* C = W->GetChildren();
+		for (int32 i = 0; C && i < C->Num(); ++i) Focusables(C->GetChildAt(i), Out);
+	}
+}
+
+int32 SGridironOverlay::FocusedIndex() const
+{
+	if (!ModalBox.IsValid() || !FSlateApplication::IsInitialized()) return -1;
+	const TSharedPtr<SWidget> F = FSlateApplication::Get().GetUserFocusedWidget(0);
+	if (!F.IsValid()) return -1;
+	TArray<TSharedRef<SWidget>> All;
+	Focusables(ModalBox.ToSharedRef(), All);
+	return All.IndexOfByPredicate([&](const TSharedRef<SWidget>& X) { return X == F.ToSharedRef(); });
+}
+
+void SGridironOverlay::ShowModal(TSharedRef<SWidget> W, bool bKeepFocus)
+{
+	const int32 Was = bKeepFocus ? FocusedIndex() : -1;
 	ModalBox->SetContent(W);
 	bModal = true;
+	PendingFocus = FMath::Max(0, Was); // focused next tick, once laid out
 }
 
 void SGridironOverlay::ClearModal()
 {
 	ModalBox->SetContent(SNullWidget::NullWidget);
 	bModal = false;
+	PendingFocus = -1;
+	if (FSlateApplication::IsInitialized()) FSlateApplication::Get().SetAllUserFocusToGameViewport();
+}
+
+int32 SGridironOverlay::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect,
+	FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
+{
+	int32 Layer = SCompoundWidget::OnPaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
+	// the focused menu button (gamepad / keyboard navigation) gets a gold frame
+	if (bModal && FSlateApplication::IsInitialized())
+	{
+		const TSharedPtr<SWidget> F = FSlateApplication::Get().GetUserFocusedWidget(0);
+		if (F.IsValid() && F != ModalBox)
+		{
+			FWidgetPath Path;
+			if (FSlateApplication::Get().GeneratePathToWidgetUnchecked(F.ToSharedRef(), Path) && Path.IsValid())
+			{
+				// the focused widget's rectangle in this overlay's own space (its path geometry is window absolute)
+				// (a generated path is in desktop space: take the window's position out to get paint space)
+				const FGeometry& G = Path.Widgets.Last().Geometry;
+				const FVector2D Win = Path.Widgets[0].Geometry.GetAbsolutePosition();
+				const FVector2D TL = AllottedGeometry.AbsoluteToLocal(G.GetAbsolutePosition() - Win);
+				const FVector2D BR = AllottedGeometry.AbsoluteToLocal(G.GetAbsolutePosition() + G.GetAbsoluteSize() - Win);
+				const FVector2D Size = BR - TL;
+				const float Tk = 3.f;
+				const FSlateBrush* B = FCoreStyle::Get().GetBrush("WhiteBrush");
+				auto Edge = [&](const FVector2D& At, const FVector2D& Sz)
+				{
+					FSlateDrawElement::MakeBox(OutDrawElements, Layer + 1,
+						AllottedGeometry.ToPaintGeometry(FVector2f(Sz), FSlateLayoutTransform(FVector2f(TL + At))), B, ESlateDrawEffect::None, Accent);
+				};
+				Edge(FVector2D(-Tk, -Tk), FVector2D(Size.X + 2 * Tk, Tk));
+				Edge(FVector2D(-Tk, Size.Y), FVector2D(Size.X + 2 * Tk, Tk));
+				Edge(FVector2D(-Tk, 0), FVector2D(Tk, Size.Y));
+				Edge(FVector2D(Size.X, 0), FVector2D(Tk, Size.Y));
+				++Layer;
+			}
+		}
+	}
+	return Layer;
 }
 
 void SGridironOverlay::Banner(const FString& Text, const FString& Sub, const FLinearColor& Color)
@@ -309,7 +387,7 @@ void SGridironOverlay::ShowTeamSelect(bool bUserPlays)
 		+ SHorizontalBox::Slot().AutoWidth().Padding(6)[ MakeButton(TEXT("Back"), TEXT(""), [this] { ShowMainMenu(); }, 160) ]
 		+ SHorizontalBox::Slot().AutoWidth().Padding(6)[ MakeButton(TEXT("Kick Off"), TEXT(""), [this, bUserPlays] { Director->StartMatch(SelHome, SelAway, bUserPlays, bSelUserHome, SelWeather, bSelNight, Quarters[SelQuarter]); }, 200) ]
 	];
-	ShowModal(Centered(Root, 0.7f));
+	ShowModal(Centered(Root, 0.7f), true);
 }
 
 void SGridironOverlay::ShowPlayCall(bool bOffense, bool bFourthDown, bool bTwoPoint, std::function<void(FCallChoice)> Done)
@@ -414,7 +492,7 @@ void SGridironOverlay::ShowPlayCall(bool bOffense, bool bFourthDown, bool bTwoPo
 		+ SVerticalBox::Slot().AutoHeight()[ Cards ]
 	];
 	bHud = true;
-	ShowModal(Body);
+	ShowModal(Body, bModal); // a formation tab changed (the call screen is already up): keep the focus there
 }
 
 void SGridironOverlay::ShowPatChoice(std::function<void(bool)> Done)

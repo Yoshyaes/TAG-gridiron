@@ -121,6 +121,7 @@ private:
 	float SidelineCheerLeft[2] = {0.f, 0.f};
 
 	TSharedPtr<SGridironOverlay> Overlay;
+	bool bPlayStationPad = false; // a DualSense was found through RawInput (hints name its buttons)
 	std::map<tag::Ent*, FVector2D> Prev;
 	std::map<tag::Ent*, FString> Labels;
 	ECamMode CamMode = ECamMode::Broadcast;

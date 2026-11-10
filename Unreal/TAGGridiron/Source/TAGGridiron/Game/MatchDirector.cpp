@@ -6,6 +6,12 @@
 #include "UI/GridironOverlay.h"
 #include "CineCameraActor.h"
 #include "CineCameraComponent.h"
+#include "GenericPlatform/GenericPlatformInputDeviceMapper.h"
+#if PLATFORM_WINDOWS
+#include "Windows/AllowWindowsPlatformTypes.h"
+#include <windows.h>
+#include "Windows/HideWindowsPlatformTypes.h"
+#endif
 #include "Engine/StaticMeshActor.h"
 #include "Engine/GameViewportClient.h"
 #include "Engine/Engine.h"
@@ -43,6 +49,30 @@ AMatchDirector::AMatchDirector()
 void AMatchDirector::BeginPlay()
 {
 	Super::BeginPlay();
+	// controllers: GameInput (GameInputWindows plugin) reads PS5 DualSense pads as standard gamepads, XInput pads too;
+	// all of them drive the one player (Config/Windows/WindowsInput.ini). Note whether a Sony pad is plugged in so the
+	// hints can name its buttons.
+#if PLATFORM_WINDOWS
+	{
+		UINT N = 0;
+		GetRawInputDeviceList(nullptr, &N, sizeof(RAWINPUTDEVICELIST));
+		TArray<RAWINPUTDEVICELIST> L;
+		L.SetNumZeroed(N);
+		if (N && GetRawInputDeviceList(L.GetData(), &N, sizeof(RAWINPUTDEVICELIST)) != (UINT)-1)
+			for (const RAWINPUTDEVICELIST& D : L)
+			{
+				if (D.dwType != RIM_TYPEHID) continue;
+				UINT Len = 0;
+				GetRawInputDeviceInfoW(D.hDevice, RIDI_DEVICENAME, nullptr, &Len);
+				TArray<WCHAR> Name;
+				Name.SetNumZeroed(Len + 1);
+				GetRawInputDeviceInfoW(D.hDevice, RIDI_DEVICENAME, Name.GetData(), &Len);
+				if (FString(Name.GetData()).ToUpper().Contains(TEXT("VID_054C"))) bPlayStationPad = true;
+			}
+	}
+#endif
+	UE_LOG(LogTemp, Display, TEXT("TAG controllers: PlayStation pad %s, device mapping policy %d"), bPlayStationPad ? TEXT("found") : TEXT("not found"),
+		static_cast<int32>(IPlatformInputDeviceMapper::Get().GetCurrentDeviceMappingPolicy()));
 	League = tag::createLeague(2027);
 	FAthleteAssets::Get().Load();
 
@@ -91,6 +121,7 @@ void AMatchDirector::BeginPlay()
 	W.tempF = 60;
 	BuildWorld(*League[0], *League[1], W, true);
 	ShowMainMenu();
+	if (Overlay) Overlay->Toast(bPlayStationPad ? TEXT("PS5 controller connected") : TEXT("No PlayStation controller found (Xbox pads and keyboard work)"));
 	if (FParse::Param(FCommandLine::Get(), TEXT("TagAutoWatch")))
 	{
 		bAuto = true;
@@ -1243,9 +1274,14 @@ void AMatchDirector::StartPresnap(const tag::OffPlay* Op, const tag::DefCall* Dc
 	if (US && *US == tag::Side::Off) AssignLabels();
 	State = EMatchState::Presnap;
 	Timer = bWatch ? 1.1f / Speed : (US && *US == tag::Side::Off) ? 999.f : 1.6f;
-	Overlay->SetHint(US && *US == tag::Side::Off ? TEXT("SPACE snap   1-5 throw (SHIFT = touch)   WASD move   C camera")
-		: US ? TEXT("Defending   TAB switch player   WASD move   SPACE dive tackle")
-		: TEXT("1/2/4 game speed   C camera   ESC pause"));
+	if (bPlayStationPad)
+		Overlay->SetHint(US && *US == tag::Side::Off ? TEXT("CROSS snap    CROSS CIRCLE SQUARE TRIANGLE R1 throw to 1-5 (hold L2 = touch)    L-STICK move    R2 juke    CREATE camera    OPTIONS pause")
+			: US ? TEXT("Defending    L1 switch player    L-STICK move    R2 dive tackle    CREATE camera    OPTIONS pause")
+			: TEXT("CREATE camera    OPTIONS pause"));
+	else
+		Overlay->SetHint(US && *US == tag::Side::Off ? TEXT("SPACE snap   1-5 throw (SHIFT = touch)   WASD move   C camera")
+			: US ? TEXT("Defending   TAB switch player   WASD move   SPACE dive tackle")
+			: TEXT("1/2/4 game speed   C camera   ESC pause"));
 	SyncPlay(0.f, 1.f);
 }
 
@@ -2323,6 +2359,18 @@ void AMatchDirector::Tick(float Dt)
 {
 	Super::Tick(Dt);
 	TickAutomation(Dt);
+	{
+		// -TagMenuShot: screenshot the main menu with its UI (gamepad focus frame), then quit
+		static const bool bMenuShot = FParse::Param(FCommandLine::Get(), TEXT("TagMenuShot"));
+		static float MenuT = 0.f;
+		if (bMenuShot && (MenuT += Dt) > 6.f && MenuT - Dt <= 6.f) FScreenshotRequest::RequestScreenshot(TEXT("tag_menu.png"), true, false);
+		if (bMenuShot)
+			if (APlayerController* MPC = GetWorld()->GetFirstPlayerController())
+				for (const FKey& K : {EKeys::Gamepad_FaceButton_Bottom, EKeys::Gamepad_FaceButton_Right, EKeys::Enter, EKeys::SpaceBar,
+					EKeys::Gamepad_Special_Right, EKeys::Gamepad_LeftShoulder, EKeys::Gamepad_RightTrigger})
+					if (MPC->IsInputKeyDown(K)) UE_LOG(LogTemp, Display, TEXT("TAG menu input held: %s at %.2f s"), *K.ToString(), MenuT);
+		if (bMenuShot && MenuT > 8.f) FPlatformMisc::RequestExit(false);
+	}
 	TickSidelines(Dt);
 	APlayerController* PC = GetWorld()->GetFirstPlayerController();
 	const bool bEsc = PC && (PC->WasInputKeyJustPressed(EKeys::Escape) || PC->WasInputKeyJustPressed(EKeys::Gamepad_Special_Right));
@@ -2344,7 +2392,7 @@ void AMatchDirector::Tick(float Dt)
 		return;
 	}
 	if (bEsc && State != EMatchState::Final) TogglePause();
-	if (PC && PC->WasInputKeyJustPressed(EKeys::C)) CamMode = static_cast<ECamMode>((static_cast<uint8>(CamMode) + 1) % 4);
+	if (PC && (PC->WasInputKeyJustPressed(EKeys::C) || PC->WasInputKeyJustPressed(EKeys::Gamepad_Special_Left))) CamMode = static_cast<ECamMode>((static_cast<uint8>(CamMode) + 1) % 4);
 	if (bWatch && PC)
 	{
 		if (PC->WasInputKeyJustPressed(EKeys::One)) Speed = 1.f;

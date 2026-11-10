@@ -25,7 +25,8 @@ public:
 
 	void Construct(const FArguments& InArgs);
 
-	void ShowModal(TSharedRef<SWidget> W);
+	/** bKeepFocus: the same screen rebuilt (a selection changed): keep the focus on the same button. */
+	void ShowModal(TSharedRef<SWidget> W, bool bKeepFocus = false);
 	void ClearModal();
 	bool HasModal() const { return bModal; }
 	void Banner(const FString& Text, const FString& Sub, const FLinearColor& Color);
@@ -44,6 +45,8 @@ public:
 	void ShowBoxScore(const FString& Title, const FString& Button, std::function<void()> Done);
 
 	virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
+	virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect,
+		FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
 
 private:
 	TSharedRef<SWidget> MakeButton(const FString& Label, const FString& Sub, std::function<void()> OnClick, float Width = 420.f);
@@ -74,4 +77,8 @@ private:
 	bool bSelNight = true;
 	int SelQuarter = 1;
 	FString CallTab;
+	// gamepad navigation: focus the menu's button (by its order in the menu) once the menu is laid out
+	int32 PendingFocus = -1;
+	static void Focusables(const TSharedRef<SWidget>& W, TArray<TSharedRef<SWidget>>& Out);
+	int32 FocusedIndex() const;
 };
