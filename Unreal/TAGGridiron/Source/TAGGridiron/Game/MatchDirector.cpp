@@ -320,8 +320,9 @@ void AMatchDirector::TickMoveTest(float Dt)
 	float Yaw = 0.f;
 	if (R == 0)
 	{
-		// receiver: standing start, sprint 9 m/s, plant and cut 90 deg right at 4.5 s, stop at 7 s
-		if (T > 1.f && T <= 4.5f) Target = FVector(900, 0, 0);
+		// receiver: standing start, sprint 10 m/s (past the 9.1 the sped-up capture covers: stride warping), plant and
+		// cut 90 deg right at 4.5 s, stop at 7 s
+		if (T > 1.f && T <= 4.5f) Target = FVector(1000, 0, 0);
 		else if (T > 4.5f && T <= 7.f) Target = FVector(0, -850, 0);
 	}
 	else if (R == 1)
@@ -464,17 +465,106 @@ void AMatchDirector::TickPostJog(float Dt)
 		if (E->animT < 1.0) continue; // the beat after the whistle: look around, then go
 		auto It = PostPos.find(E);
 		if (It == PostPos.end()) It = PostPos.emplace(E, A->GetActorLocation()).first;
+		// the huddle: the offense in a ring 7 yd behind the ball (1.3 m radius, the quarterback at the open side
+		// nearest the line, facing his men), the defense in a looser ring 5 yd in front; everyone faces the middle
 		const bool bOff = E->side == tag::Side::Off;
-		const double Ly = FMath::Clamp(E->pos.y, 8.0, tag::FIELD_W - 8.0);
-		const double Ty = Ly + (tag::FIELD_W * 0.5 - Ly) * 0.5; // halfway in toward the middle
-		const FVector Target = ToWorld(BallX + (bOff ? -7.0 : 5.0), Ty, Dir);
+		const std::vector<tag::Ent*>& Side = bOff ? Sim->off : Sim->def;
+		const int32 N = static_cast<int32>(Side.size());
+		const int32 K = static_cast<int32>(std::find(Side.begin(), Side.end(), E) - Side.begin());
+		const double Hy = FMath::Clamp(B.pos.y, 10.0, tag::FIELD_W - 10.0);
+		const FVector C = ToWorld(BallX + (bOff ? -7.5 : 5.5), Hy, Dir);
+		const FVector Down = ToWorld(1, 0, Dir) - ToWorld(0, 0, Dir); // downfield, unit
+		const FVector Left = FVector::CrossProduct(FVector::UpVector, Down);
+		FVector Target;
+		if (bOff && E->p->pos == tag::Pos::QB) Target = C + Down * 150.f;
+		else
+		{
+			const int32 M = bOff ? FMath::Max(N - 1, 1) : FMath::Max(N, 1);
+			int32 J = K;
+			if (bOff) for (int32 i = 0; i < K; ++i) if (Side[i]->p->pos == tag::Pos::QB) --J; // slots skip the QB
+			const double Ang = bOff ? PI * 0.5 + PI * (J + 0.5) / M : 2 * PI * (J + 0.5) / M; // offense: the far half
+			const float R = bOff ? 130.f : 190.f;
+			Target = C + (Down * FMath::Cos(Ang) + Left * FMath::Sin(Ang)) * R;
+		}
+		PostYaw[E] = (C - Target).Rotation().Yaw;
 		FVector To = Target - It->second;
 		To.Z = 0.f;
 		const float D = To.Size();
-		if (D < 40.f) continue;
+		if (D < 30.f) continue;
 		const float Sp = FMath::Min(420.f, 120.f + D * 1.2f); // slows into the spot
 		It->second += To / D * FMath::Min(D, Sp * Dt);
 	}
+}
+
+void AMatchDirector::TickUmpire(float Dt)
+{
+	if (!Umpire || !Game) return;
+	const bool bDead = Sim && !Sim->isLive() && Sim->result && !Sim->isReturn();
+	const int32 NewDir = Game->worldDir();
+	const FVector Spot = ToWorld(Game->ballOn, Game->ballY, NewDir); // the next play's spot (after ApplyPlay)
+	FVector Target = UmpPos;
+	float Jog = 380.f;
+	if (Sim && Sim->isReturn()) Target = ToWorld(FMath::Clamp(Game->ballOn, 5.0, 95.0), -2.5, Dir); // off the field for the kick
+	else if (State == EMatchState::Live) Jog = 0.f;                                               // holds his position through the play
+	else if (bDead && State == EMatchState::Post)
+	{
+		// at the whistle, to the dead ball
+		const FVector BallW = ToWorld(Sim->ball.pos.x, Sim->ball.pos.y, Dir);
+		Target = BallW;
+		if (!bUmpHasBall && !bUmpSpotted && FVector::Dist2D(UmpPos, BallW) < 75.f) bUmpHasBall = true;
+	}
+	else if (bDead && (State == EMatchState::Wait || State == EMatchState::Call))
+	{
+		const FVector BallW = ToWorld(Sim->ball.pos.x, Sim->ball.pos.y, Dir);
+		if (!bUmpHasBall && !bUmpSpotted)
+		{
+			Target = BallW;
+			if (FVector::Dist2D(UmpPos, BallW) < 75.f) bUmpHasBall = true;
+		}
+		else if (bUmpHasBall)
+		{
+			// carry it to the new spot and set it down
+			Target = Spot;
+			if (FVector::Dist2D(UmpPos, Spot) < 60.f) { bUmpHasBall = false; bUmpSpotted = true; }
+		}
+		else
+		{
+			// spotted: back to his position, 9 yd behind the new line, off the quarterback's line
+			const FVector Down = (ToWorld(1, 0, NewDir) - ToWorld(0, 0, NewDir)).GetSafeNormal();
+			Target = Spot - Down * 9.f * YD + FVector::CrossProduct(FVector::UpVector, Down) * 3.5f * YD;
+		}
+	}
+	else if (Sim)
+	{
+		// before the snap: 9 yd behind the ball in the offensive backfield, off the quarterback's line
+		const FVector Down = ToWorld(1, 0, Dir) - ToWorld(0, 0, Dir);
+		Target = ToWorld(Sim->los, Sim->by, Dir) - Down.GetSafeNormal() * 9.f * YD + FVector::CrossProduct(FVector::UpVector, Down.GetSafeNormal()) * 3.5f * YD;
+	}
+	FVector To = Target - UmpPos;
+	To.Z = 0.f;
+	const float D = To.Size();
+	FVector Vel = FVector::ZeroVector;
+	if (Jog > 0.f && D > 25.f)
+	{
+		const float Sp = FMath::Min(Jog, 110.f + D * 1.3f);
+		Vel = To / D * Sp;
+		UmpPos += Vel * FMath::Min(Dt, D / Sp);
+	}
+	// facing: the way he goes, or the ball when he stands
+	float Yaw = Umpire->GetActorRotation().Yaw;
+	if (!Vel.IsNearlyZero()) Yaw = Vel.Rotation().Yaw;
+	else if (Sim)
+	{
+		const FVector BallW = Sim->isLive() || State == EMatchState::Presnap ? ToWorld(Sim->ball.pos.x, Sim->ball.pos.y, Dir) : Spot;
+		FVector F = BallW - UmpPos;
+		F.Z = 0.f;
+		if (F.Size() > 30.f) Yaw = F.Rotation().Yaw;
+	}
+	FAthleteFootball F;
+	F.bLook = true;
+	F.LookWorld = Sim ? (bUmpHasBall ? UmpPos + Vel.GetSafeNormal() * 800.f + FVector(0, 0, 150) : ToWorld(Sim->ball.pos.x, Sim->ball.pos.y, Dir) + FVector(0, 0, 20)) : UmpPos + FVector(100, 0, 150);
+	Umpire->SetFootball(F, Dt);
+	Umpire->Drive(UmpPos, Yaw, Vel, 7.f, Vel.IsNearlyZero() ? TEXT("idle") : TEXT("run"), 0.f, Dt, false);
 }
 
 void AMatchDirector::StartPileOn(AAthlete* As, AAthlete* Cr)
@@ -1093,6 +1183,10 @@ void AMatchDirector::SpawnSidelines(const tag::Team& Home, const tag::Team& Away
 		HC->StandOnSideline(FVector(46 * YD, (tag::FIELD_W / 2 + 1.7) * YD, 0), -90.f, 1);
 		AAthlete* AC = Staff(6, 70, 200, Hex(Away.colors.primary) * 0.8f, Khaki);
 		AC->StandOnSideline(FVector(54 * YD, -(tag::FIELD_W / 2 + 1.7) * YD, 0), 90.f, 4);
+		// the umpire (white cap, striped shirt reads as white at distance) works from the offensive backfield
+		Umpire = Staff(7, 71, 195, FLinearColor(0.85f, 0.85f, 0.85f), Black);
+		UmpPos = FVector(50 * YD, 8 * YD, 0);
+		Umpire->StandOnSideline(UmpPos, -90.f, 2);
 	}
 	// the team areas: home on the far sideline (the broadcast side looks at it), visitors on the near one, each between
 	// the 32s, standing in two loose rows just outside the 6 ft border in front of the bench
@@ -1352,6 +1446,9 @@ void AMatchDirector::StartPresnap(const tag::OffPlay* Op, const tag::DefCall* Dc
 			From[E->p] = PJ != PostPos.end() ? PJ->second : ToWorld(E->pos.x, E->pos.y, Dir);
 		}
 	PostPos.clear();
+	PostYaw.clear();
+	bUmpHasBall = false;
+	bUmpSpotted = false;
 	Sim = bTwoPoint ? G.twoPointSim(*Op, *Dc, US) : G.makePlay(*Op, *Dc, US);
 	Dir = G.worldDir();
 	double Far = 0.0;
@@ -1914,7 +2011,12 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 			const FVector Step = PJ->second - A->GetActorLocation();
 			VelW = Dt > 1e-4f ? FVector(Step.X, Step.Y, 0.f) / Dt : FVector::ZeroVector;
 			if (VelW.Size() > 60.f) { AnimName = TEXT("run"); Yaw = VelW.Rotation().Yaw; }
-			else { AnimName = TEXT("idle"); VelW = FVector::ZeroVector; }
+			else
+			{
+				AnimName = TEXT("idle");
+				VelW = FVector::ZeroVector;
+				if (auto PY = PostYaw.find(E); PY != PostYaw.end()) Yaw = PY->second;
+			}
 			Loc = PJ->second;
 		}
 		if (Sim->isReturn() && E == Sim->kickerEnt && Sim->t < Sim->cfg.kick->kickT + 0.6)
@@ -2253,6 +2355,19 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 			Ball->SetActorLocation(A->GetActorLocation() + Fwd * 16 + Right * 20 + FVector(0, 0, bDown ? 30 : 108));
 			Ball->SetActorRotation(A->GetActorRotation());
 		}
+	}
+	else if (bUmpHasBall && Umpire)
+	{
+		FVector HoldLoc;
+		FRotator HoldRot;
+		if (Umpire->GetBallHold(HoldLoc, HoldRot)) { Ball->SetActorLocation(HoldLoc); Ball->SetActorRotation(HoldRot); }
+	}
+	else if (bUmpSpotted && Game)
+	{
+		// spotted for the next play: on the turf at the new line, laces up, nose downfield
+		const int32 NewDir = Game->worldDir();
+		Ball->SetActorLocation(ToWorld(Game->ballOn, Game->ballY, NewDir) + FVector(0, 0, 9));
+		Ball->SetActorRotation(FRotator(0, NewDir > 0 ? 0 : 180, 0));
 	}
 	else
 	{
@@ -2683,6 +2798,7 @@ void AMatchDirector::Tick(float Dt)
 		if (Sim) SyncPlay(Dt, 1.f);
 		break;
 	}
+	if (State != EMatchState::Menu && State != EMatchState::Final && !bLineup) TickUmpire(Dt);
 	UpdateIcons();
 	if (PlayArt && State != EMatchState::Presnap) PlayArt->SetShown(false);
 }

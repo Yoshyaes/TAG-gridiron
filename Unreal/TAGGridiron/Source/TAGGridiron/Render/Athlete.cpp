@@ -153,7 +153,7 @@ void FAthleteAssets::Load()
 			const TCHAR* TN[ThrowCount] = {TEXT("A_TAG_QB_Throw"), TEXT("A_TAG_QB_Throw_Quick"), TEXT("A_TAG_QB_Throw_Deep"),
 				TEXT("A_TAG_QB_Throw_Fade"), TEXT("A_TAG_QB_Throw_Sidearm"), TEXT("A_TAG_QB_Throw_Touch"), TEXT("A_TAG_QB_Throw_RunR"),
 				TEXT("A_TAG_QB_Throw_RunL")};
-			const int32 Release[ThrowCount] = {21, 16, 24, 21, 21, 22, 16, 16}; // Tools/Anim/clips_more2.py THROW_RELEASE (tempo-scaled)
+			const int32 Release[ThrowCount] = {23, 17, 26, 23, 23, 24, 16, 16}; // Tools/Anim/clips_more2.py THROW_RELEASE (tempo-scaled)
 			for (int32 i = 0; i < ThrowCount; ++i)
 			{
 				Throws[i] = Keyed(TN[i]);
@@ -884,6 +884,14 @@ bool AAthlete::DriveMotionMatching(const FVector& VelWorld, float SimYaw, float 
 		// once start / pivot databases were offered by state
 		static float RateCap = FParse::Value(FCommandLine::Get(), TEXT("TagMMRateCap="), RateCap) ? RateCap : 1.3f;
 		M->MatchPlayRate = FMath::Min(1.f / M->TrajectorySpeedMultiplier, RateCap);
+		// faster still (a 10 m/s ball carrier against the 9.1 m/s the sped-up sprint covers): stretch the stride
+		if (MHBody && bMoving && !bCrouch)
+			if (UTagRetargetAnimInstance* RI = Cast<UTagRetargetAnimInstance>(MHBody->GetAnimInstance()))
+			{
+				const float Covered = AnimMax * RateCap;
+				RI->Proc.StrideScale = GaitSpeed > Covered ? FMath::Min(GaitSpeed / Covered, 1.25f) : 1.f;
+				RI->Proc.StrideDirCS = MHBody->GetComponentTransform().InverseTransformVectorNoScale(V.GetSafeNormal2D());
+			}
 	}
 
 	if (!bInMatch)
@@ -1461,6 +1469,7 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 		// body physics are off while the body is down: falls, get-ups and ragdolls own the pose (set again below)
 		RI->Proc.bFootLock = false;
 		RI->Proc.LeanCS = FVector::ZeroVector;
+		RI->Proc.StrideScale = 1.f; // motion matching sets it when the man outruns the capture
 	}
 	if (bPreSnap) { bDropped = false; DropLeft = 0.f; } // a new play: the quarterback has his drop again
 	if (Anim != TEXT("down") && FVector(VelWorld.X, VelWorld.Y, 0.f).SizeSquared() > 100.f) LastVelW = FVector(VelWorld.X, VelWorld.Y, 0.f);

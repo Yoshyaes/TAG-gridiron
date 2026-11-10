@@ -2,8 +2,18 @@
 
     python Tools/Anim/check_timing.py            (reads RawArt/Anim/Clips/*.json and docs/look_targets.json)
 
+Published reference points the ranges are drawn from:
+  - NFL time to throw (snap to release, sacks excluded) averaged 2.81 s in 2024 (PFF, Next Gen Stats data); the sim's
+    own pass timing is calibrated to it. Our throw clips carry only the throwing motion itself.
+  - A quarterback's release (start of the throwing motion to the ball leaving) runs 0.35-0.47 s, ~0.40 typical
+    (video analytics of NFL quarterbacks; USC Sport Science clocked Sam Darnold at 0.39 s); the front foot lands about
+    0.21 s before release (motion analysis of Senior Bowl quarterbacks). Our set throw: plant at frame 18, release 23.
+  - Ball-carrier top speeds: season leaders 22.4 mph (Next Gen Stats 2024 and 2025), the record 23.24 mph; the sim's
+    99-speed player runs 11 yd/s (22.5 mph), which is what stride warping covers above the capture's 9.1 m/s.
+  - A five step drop ends about 7 yd behind the line (Human Kinetics, Football Skills & Drills); our under-center
+    drop clip covers 6 m in 1.5 s and the sim sets the quarterback up 6 deep.
 Two kinds of check:
-  1. Real-world numbers (broadcast footage, combine data, coaching manuals), hard limits per clip family:
+  1. Real-world numbers (the references above, broadcast footage, coaching manuals), hard limits per clip family:
      release-to-follow-through of a pass 0.35-0.6 s; shotgun three step 0.6-0.9 s; under-center five step 1.3-1.9 s;
      a tackle from contact to the ground 0.6-1.4 s; a get-up 1.5-4 s; a catch's hands-to-tuck 0.5-1.2 s;
      jukes and spins 0.5-1.1 s; a kick's approach-to-contact 0.6-1.2 s; stance / pocket / idle loops >= 0.8 s.

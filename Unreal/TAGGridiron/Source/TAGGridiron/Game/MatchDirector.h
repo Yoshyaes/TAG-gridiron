@@ -121,7 +121,15 @@ private:
 	 *  the next play is called; the pre-snap walk then takes them on to the formation from there. Director-side
 	 *  positions (world, cm), the dead sim's own are left alone. */
 	std::map<tag::Ent*, FVector> PostPos;
+	std::map<tag::Ent*, float> PostYaw;  // where each man faces once he has arrived (the huddle looks in)
 	void TickPostJog(float Dt);
+	/** The umpire: stands in the offensive backfield before the snap, jogs to the dead ball at the whistle, carries it
+	 *  to the new spot and sets it down, then goes back to his position. */
+	UPROPERTY()
+	TObjectPtr<AAthlete> Umpire;
+	FVector UmpPos = FVector::ZeroVector;
+	bool bUmpHasBall = false, bUmpSpotted = false;
+	void TickUmpire(float Dt);
 	/** A live kick return (the sim fields the kick and runs it back; the user returns it or covers it). */
 	bool bLiveReturn = false;
 	void StartLiveReturn(const std::vector<tag::Player*>& KickTeam, const std::vector<tag::Player*>& RecvTeam);

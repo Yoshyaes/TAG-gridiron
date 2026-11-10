@@ -328,7 +328,7 @@ struct FAthleteAssets
 	TObjectPtr<UAnimationAsset> Stance2pt;      // WR, TE, RB, LB, DB pre-snap loop
 	TObjectPtr<UAnimationAsset> StanceShotgun;  // QB pre-snap loop
 	TObjectPtr<UAnimationAsset> ThrowKeyed;     // QB pass; played from its stride frame so release meets the sim's
-	static constexpr float ThrowKeyedStart = 14.f / 30.f;
+	static constexpr float ThrowKeyedStart = 16.f / 30.f; // release at frame 23, 0.2 s after the plant (frame 18)
 	bool bCelebrateKeyed = false;
 	TObjectPtr<UAnimationAsset> GetOff;         // OL / DL explode out of the three point stance at the snap
 	TObjectPtr<UAnimationAsset> TackleKeyed;    // form tackle: sink, explode, wrap, drive (then ragdoll on "down")

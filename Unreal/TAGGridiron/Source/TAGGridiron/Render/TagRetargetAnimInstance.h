@@ -38,6 +38,10 @@ struct FTagProcInput
 	// the actor, and the capture's top speed is below a sprinter's: both slide the feet otherwise)
 	FVector LeanCS = FVector::ZeroVector;
 	bool bFootLock = false;
+	// stride warping: above the speed the capture covers (7 m/s sprint x the 1.3 play-rate cap) the stride is
+	// stretched along the direction of travel instead of letting the feet skate (NFL ball carriers reach 10 m/s)
+	float StrideScale = 1.f;
+	FVector StrideDirCS = FVector(0, 1, 0);
 };
 
 USTRUCT()
@@ -64,6 +68,7 @@ struct FTagRetargetProxy : public FAnimInstanceProxy
 
 private:
 	void ApplyFootballLayer(FPoseContext& Output) const;
+	void ApplyStride(FPoseContext& Output) const;
 	void ApplyLean(FPoseContext& Output) const;
 	void ApplyFeet(FPoseContext& Output);
 	void ApplyCrossfade(FPoseContext& Output);

@@ -78,6 +78,7 @@ bool FTagRetargetProxy::Evaluate(FPoseContext& Output)
 	}
 	Node->Evaluate_AnyThread(Output); // mocap / keyed clip retargeted onto this body
 	ApplyFootballLayer(Output);
+	ApplyStride(Output);
 	ApplyLean(Output);
 	ApplyCrossfade(Output);
 	ApplyFeet(Output); // on the shown pose, after the blend (a blended foot would slide through every transition)
@@ -387,6 +388,33 @@ void FTagRetargetProxy::ApplyFootballLayer(FPoseContext& Output) const
 
 	FCSPose<FCompactPose>::ConvertComponentPosesToLocalPoses(MoveTemp(P), Output.Pose);
 	(void)kTau;
+}
+
+void FTagRetargetProxy::ApplyStride(FPoseContext& Output) const
+{
+	// a longer stride for a faster man: each foot's offset from the pelvis along the direction of travel is scaled,
+	// the hips sit a touch lower, the legs follow through IK (the clip's cadence stays; the ground covered per step
+	// grows with the speed, as a sprinter's does)
+	const float S = In.StrideScale;
+	if (S < 1.005f) return;
+	const FBoneContainer& BC = Output.Pose.GetBoneContainer();
+	const FBones B = Resolve(BC);
+	if (!B.bLegs) return;
+	FCSPose<FCompactPose> P;
+	P.InitPose(Output.Pose);
+	const FVector Dir = FVector(In.StrideDirCS.X, In.StrideDirCS.Y, 0.f).GetSafeNormal();
+	if (Dir.IsNearlyZero()) return;
+	FTransform Pel = P.GetComponentSpaceTransform(B.Pelvis);
+	const FVector PelPos = Pel.GetLocation();
+	const FVector FL = Pos(P, B.FtL), FR = Pos(P, B.FtR);
+	Pel.SetLocation(PelPos - FVector(0, 0, (S - 1.f) * 22.f));
+	const FBoneTransform BT[] = {FBoneTransform(B.Pelvis, Pel)};
+	P.LocalBlendCSBoneTransforms(BT, 1.f);
+	const FVector NL = FL + Dir * FVector::DotProduct(FL - PelPos, Dir) * (S - 1.f);
+	const FVector NR = FR + Dir * FVector::DotProduct(FR - PelPos, Dir) * (S - 1.f);
+	LegIK(P, B.ThL, B.CaL, B.FtL, NL, 1.f);
+	LegIK(P, B.ThR, B.CaR, B.FtR, NR, 1.f);
+	FCSPose<FCompactPose>::ConvertComponentPosesToLocalPoses(MoveTemp(P), Output.Pose);
 }
 
 void FTagRetargetProxy::ApplyLean(FPoseContext& Output) const

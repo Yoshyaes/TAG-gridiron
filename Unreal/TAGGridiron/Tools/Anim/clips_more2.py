@@ -47,14 +47,14 @@ def _throw_keys(stride=0.45, rz=1.80, slot=0.0, load_back=0.10, follow=1.0, fade
         k(18, pelvis=(0.02, fy(-0.10), 0.835), pelvis_rot=(10 + lean * 0.5, -15, 0), spine=(6, -40, 0), clav_r=(10, -8),
           hand_r=(-0.24, 0.16 + load_back - 0.10, 1.66), elbow_r=(-1, 0.3, 0.3), hand_l=(0.20, -0.35, 1.25),
           elbow_l=(1, 0.2, -0.6), foot_l=plant, foot_yaw_l=-20),
-        k(21, pelvis=(0.03, fy(-0.13), 0.815), pelvis_rot=(14 + lean, 5, 0), spine=(12 + lean, 0, -12 * slot),
+        k(23, pelvis=(0.03, fy(-0.13), 0.815), pelvis_rot=(14 + lean, 5, 0), spine=(12 + lean, 0, -12 * slot),
           clav_r=(12, 4), hand_r=(-0.16 + slot * 0.25, -0.08, hz(1.70) + slot * 0.35), elbow_r=(-1, -0.2, 0.6 + slot),
           hand_l=(0.25, -0.10, 1.10), elbow_l=(1, 0.5, -0.4), foot_l=plant, foot_yaw_l=-20, foot_pitch_r=38),
-        k(23, pelvis=(0.03, fy(-0.16), 0.81), pelvis_rot=(18 + lean, 20, 0), spine=(22 + lean, 20, -5 - 10 * slot),
+        k(25, pelvis=(0.03, fy(-0.16), 0.81), pelvis_rot=(18 + lean, 20, 0), spine=(22 + lean, 20, -5 - 10 * slot),
           clav_r=(8, 14), hand_r=(-0.10 + slot * 0.2, -0.38 * min(1.0, follow), hz(1.50) + slot * 0.2),
           elbow_r=(-1, -0.5, 0.3), hand_l=(0.26, 0.0, 1.05), elbow_l=(1, 0.6, -0.2), foot_l=plant, foot_yaw_l=-20,
           foot_pitch_r=55),
-        k(30, pelvis=(0.04, fy(-0.22), 0.80), pelvis_rot=(28 * follow + lean, 30, 0), spine=(28 * follow + lean, 25, 0),
+        k(32, pelvis=(0.04, fy(-0.22), 0.80), pelvis_rot=(28 * follow + lean, 30, 0), spine=(28 * follow + lean, 25, 0),
           clav_r=(-2, 20), hand_r=(0.18 * follow, -0.38, 0.92 + (1 - follow) * 0.45), elbow_r=(-0.5, -0.3, 1.0),
           hand_l=(0.30, 0.05, 1.0), elbow_l=(1, 0.6, -0.4), foot_l=plant, foot_yaw_l=-20, foot_pitch_r=72, foot_yaw_r=-40),
         k(38, pelvis=(0.02, fy(-0.18), 0.86), pelvis_rot=(12, 15, 0), spine=(8, 10, 0),
@@ -138,8 +138,10 @@ def qb_throw_run_l(rig):
 
 
 # release frame of each throw and where the clip starts (release - 7 frames), seconds
-THROW_RELEASE = {"QB_Throw_Quick": 16, "QB_Throw_Deep": 23, "QB_Throw_Fade": 21, "QB_Throw_Sidearm": 21,
-                 "QB_Throw_Touch": 22, "QB_Throw_RunR": 16, "QB_Throw_RunL": 16}
+# the plant lands at frame 18 (frame 14 x tempo for the quick game) and the ball leaves ~0.2 s later, the
+# foot-contact-to-release measured on NFL quarterbacks
+THROW_RELEASE = {"QB_Throw": 23, "QB_Throw_Quick": 17, "QB_Throw_Deep": 26, "QB_Throw_Fade": 23, "QB_Throw_Sidearm": 23,
+                 "QB_Throw_Touch": 24, "QB_Throw_RunR": 16, "QB_Throw_RunL": 16}
 
 
 # =============================================================================================== catches

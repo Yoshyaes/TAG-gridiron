@@ -130,6 +130,7 @@ def qb_handoff(rig):
 
 def qb_throw(rig):
     """Right handed set-feet pass, 1.6 s. Phases: set, load (ball to ear, lead arm at target), stride, plant with
+    the front foot down 0.2 s before the release (as measured on NFL quarterbacks),
     hips opening ahead of the shoulders (separation), high elbow release over the top, follow through across the
     body with the back foot pivoting, recovery step, settle. Eyes stay on the target throughout."""
     look = (0.0, -15.0, 1.7)
@@ -153,13 +154,13 @@ def qb_throw(rig):
         (18, k(pelvis=(0.02, -0.10, 0.835), pelvis_rot=(10, -15, 0), spine=(6, -40, 0), clav_r=(10, -8),
                hand_r=(-0.24, 0.16, 1.66), elbow_r=(-1, 0.3, 0.3), hand_l=(0.20, -0.35, 1.25), elbow_l=(1, 0.2, -0.6),
                foot_l=(0.16, -0.45, 0.094), foot_yaw_l=-20)),
-        (21, k(pelvis=(0.03, -0.13, 0.815), pelvis_rot=(14, 5, 0), spine=(12, 0, 0), clav_r=(12, 4),
+        (23, k(pelvis=(0.03, -0.13, 0.815), pelvis_rot=(14, 5, 0), spine=(12, 0, 0), clav_r=(12, 4),
                hand_r=(-0.16, -0.08, 1.70), elbow_r=(-1, -0.2, 0.6), hand_l=(0.25, -0.10, 1.10), elbow_l=(1, 0.5, -0.4),
                foot_l=(0.16, -0.45, 0.094), foot_yaw_l=-20, foot_pitch_r=38)),
-        (23, k(pelvis=(0.03, -0.16, 0.81), pelvis_rot=(18, 20, 0), spine=(22, 20, -5), clav_r=(8, 14),
+        (25, k(pelvis=(0.03, -0.16, 0.81), pelvis_rot=(18, 20, 0), spine=(22, 20, -5), clav_r=(8, 14),
                hand_r=(-0.10, -0.40, 1.52), elbow_r=(-1, -0.5, 0.3), hand_l=(0.26, 0.0, 1.05), elbow_l=(1, 0.6, -0.2),
                foot_l=(0.16, -0.45, 0.094), foot_yaw_l=-20, foot_pitch_r=55)),
-        (30, k(pelvis=(0.04, -0.22, 0.80), pelvis_rot=(28, 30, 0), spine=(28, 25, 0), clav_r=(-2, 20),
+        (32, k(pelvis=(0.04, -0.22, 0.80), pelvis_rot=(28, 30, 0), spine=(28, 25, 0), clav_r=(-2, 20),
                hand_r=(0.18, -0.38, 0.92), elbow_r=(-0.5, -0.3, 1.0), hand_l=(0.30, 0.05, 1.0), elbow_l=(1, 0.6, -0.4),
                foot_l=(0.16, -0.45, 0.094), foot_yaw_l=-20, foot_pitch_r=72, foot_yaw_r=-40)),
         (38, k(pelvis=(0.02, -0.18, 0.86), pelvis_rot=(12, 15, 0), spine=(8, 10, 0),
