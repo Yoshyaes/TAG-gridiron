@@ -123,6 +123,13 @@ private:
 	std::map<tag::Ent*, FVector> PostPos;
 	std::map<tag::Ent*, float> PostYaw;  // where each man faces once he has arrived (the huddle looks in)
 	void TickPostJog(float Dt);
+	/** The men between plays once the play's sim is gone (the play call): where each stands, which way he faces,
+	 *  whether he is on the next offense; and where the dead ball lay. StartPresnap walks them in from here. */
+	struct FBetweenMan { tag::Player* P = nullptr; FVector Pos = FVector::ZeroVector; float Yaw = 0.f; bool bOff = false; };
+	std::vector<FBetweenMan> Between;
+	FVector BetweenBallW = FVector::ZeroVector;
+	/** Each man's huddle spot and the facing into it (bOff: the next offense), around the dead ball's spot. */
+	FVector HuddleSpot(bool bOff, bool bQB, int32 Slot, int32 Count, const FVector& BallW, int32 InDir, float& OutYaw) const;
 	/** The umpire: stands in the offensive backfield before the snap, jogs to the dead ball at the whistle, carries it
 	 *  to the new spot and sets it down, then goes back to his position. */
 	UPROPERTY()

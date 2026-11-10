@@ -444,15 +444,73 @@ void AMatchDirector::StartPairedTackle(AAthlete* Tk, AAthlete* Cr, const FVector
 		Cr->Player ? Cr->Player->number : -1, Front, Right, Yac, Drive.Size2D(), FVector::Dist2D(Tk->GetActorLocation(), TFrom));
 }
 
+FVector AMatchDirector::HuddleSpot(bool bOff, bool bQB, int32 Slot, int32 Count, const FVector& BallW, int32 InDir, float& OutYaw) const
+{
+	// the huddle: the offense in a ring 7.5 yd behind the ball (1.3 m radius, the quarterback at the open side
+	// nearest the line, facing his men), the defense in a looser ring 5.5 yd in front; everyone faces the middle
+	const FVector Down = (ToWorld(1, 0, InDir) - ToWorld(0, 0, InDir)).GetSafeNormal();
+	const FVector Left = FVector::CrossProduct(FVector::UpVector, Down);
+	const FVector C = BallW + Down * (bOff ? -7.5f : 5.5f) * YD;
+	FVector Target;
+	if (bOff && bQB) Target = C + Down * 150.f;
+	else
+	{
+		const int32 M = FMath::Max(Count, 1);
+		const double Ang = bOff ? PI * 0.5 + PI * (Slot + 0.5) / M : 2 * PI * (Slot + 0.5) / M; // offense: the far half
+		Target = C + (Down * FMath::Cos(Ang) + Left * FMath::Sin(Ang)) * (bOff ? 130.f : 190.f);
+	}
+	Target.Z = 0.f;
+	OutYaw = (C - Target).Rotation().Yaw;
+	return Target;
+}
+
 void AMatchDirector::TickPostJog(float Dt)
 {
-	// after the whistle (a beat for the tackle and the celebration), everyone who is on his feet jogs toward the dead
-	// ball: the offense gathers 7 yd behind it around the hash it is on, the defense 5 yd in front, each man keeping
-	// his lateral spread so they don't pile onto one spot. 4.2 yd/s, slowing into the last yards. Men who are down,
-	// celebrating or carrying the ball stay as the sim shows them.
-	if (!Sim || Sim->isLive() || Sim->isReturn() || !Sim->result) return;
+	// after the whistle (a beat for the tackle and the celebration), everyone on his feet jogs to the huddle, 4.2 yd/s
+	// slowing into the last yards; men who are down, celebrating or carrying the ball stay as the sim shows them.
+	// While the play's sim is up (post-play, banners) the sim's men are moved director-side (PostPos); once it is gone
+	// (the play call) the Between list carries them and this drives the athletes itself.
+	auto Step = [Dt](FVector& Pos, const FVector& Target) -> FVector
+	{
+		FVector To = Target - Pos;
+		To.Z = 0.f;
+		const float D = To.Size();
+		if (D < 30.f) return FVector::ZeroVector;
+		const float Sp = FMath::Min(420.f, 120.f + D * 1.2f);
+		const FVector V = To / D * Sp;
+		Pos += V * FMath::Min(Dt, D / Sp);
+		return V;
+	};
+	if (!Sim)
+	{
+		if (Between.empty() || !Game) return;
+		const int32 NewDir = Game->worldDir();
+		int32 NOff = 0, NDef = 0;
+		for (const FBetweenMan& M : Between) (M.bOff ? NOff : NDef)++;
+		int32 SlotOff = 0, SlotDef = 0;
+		for (FBetweenMan& M : Between)
+		{
+			const bool bQB = M.P->pos == tag::Pos::QB;
+			const int32 Slot = M.bOff ? (bQB ? 0 : SlotOff++) : SlotDef++;
+			float FaceYaw;
+			const FVector Target = HuddleSpot(M.bOff, bQB, Slot, M.bOff ? FMath::Max(NOff - 1, 1) : NDef, BetweenBallW, NewDir, FaceYaw);
+			const FVector V = Step(M.Pos, Target);
+			AAthlete* A = AthleteFor(M.P, Game->home->hasPlayer(M.P) ? tag::TeamKey::Home : tag::TeamKey::Away);
+			if (A->IsDown()) continue;
+			const bool bMoving = V.Size() > 60.f;
+			if (bMoving) M.Yaw = V.Rotation().Yaw;
+			else M.Yaw += FMath::FindDeltaAngleDegrees(M.Yaw, FaceYaw) * FMath::Clamp(Dt * 4.f, 0.f, 1.f);
+			FAthleteFootball F;
+			F.bLook = true;
+			F.LookWorld = bMoving ? M.Pos + V.GetSafeNormal() * 800.f + FVector(0, 0, 150) : BetweenBallW + FVector(0, 0, 120);
+			A->SetFootball(F, Dt);
+			A->Drive(M.Pos, M.Yaw, V, 9.f, bMoving ? TEXT("run") : TEXT("idle"), 0.f, Dt, false);
+		}
+		return;
+	}
+	if (Sim->isLive() || Sim->isReturn() || !Sim->result) return;
 	const tag::Ball& B = Sim->ball;
-	const double BallX = FMath::Clamp(B.pos.x, 2.0, 98.0);
+	const FVector BallW = ToWorld(FMath::Clamp(B.pos.x, 2.0, 98.0), FMath::Clamp(B.pos.y, 10.0, tag::FIELD_W - 10.0), Dir);
 	for (tag::Ent* E : Sim->ents)
 	{
 		AAthlete* A = AthleteFor(E->p, E->side == tag::Side::Off ? Game->poss : tag::other(Game->poss));
@@ -465,34 +523,16 @@ void AMatchDirector::TickPostJog(float Dt)
 		if (E->animT < 1.0) continue; // the beat after the whistle: look around, then go
 		auto It = PostPos.find(E);
 		if (It == PostPos.end()) It = PostPos.emplace(E, A->GetActorLocation()).first;
-		// the huddle: the offense in a ring 7 yd behind the ball (1.3 m radius, the quarterback at the open side
-		// nearest the line, facing his men), the defense in a looser ring 5 yd in front; everyone faces the middle
 		const bool bOff = E->side == tag::Side::Off;
-		const std::vector<tag::Ent*>& Side = bOff ? Sim->off : Sim->def;
-		const int32 N = static_cast<int32>(Side.size());
-		const int32 K = static_cast<int32>(std::find(Side.begin(), Side.end(), E) - Side.begin());
-		const double Hy = FMath::Clamp(B.pos.y, 10.0, tag::FIELD_W - 10.0);
-		const FVector C = ToWorld(BallX + (bOff ? -7.5 : 5.5), Hy, Dir);
-		const FVector Down = ToWorld(1, 0, Dir) - ToWorld(0, 0, Dir); // downfield, unit
-		const FVector Left = FVector::CrossProduct(FVector::UpVector, Down);
-		FVector Target;
-		if (bOff && E->p->pos == tag::Pos::QB) Target = C + Down * 150.f;
-		else
-		{
-			const int32 M = bOff ? FMath::Max(N - 1, 1) : FMath::Max(N, 1);
-			int32 J = K;
-			if (bOff) for (int32 i = 0; i < K; ++i) if (Side[i]->p->pos == tag::Pos::QB) --J; // slots skip the QB
-			const double Ang = bOff ? PI * 0.5 + PI * (J + 0.5) / M : 2 * PI * (J + 0.5) / M; // offense: the far half
-			const float R = bOff ? 130.f : 190.f;
-			Target = C + (Down * FMath::Cos(Ang) + Left * FMath::Sin(Ang)) * R;
-		}
-		PostYaw[E] = (C - Target).Rotation().Yaw;
-		FVector To = Target - It->second;
-		To.Z = 0.f;
-		const float D = To.Size();
-		if (D < 30.f) continue;
-		const float Sp = FMath::Min(420.f, 120.f + D * 1.2f); // slows into the spot
-		It->second += To / D * FMath::Min(D, Sp * Dt);
+		const std::vector<tag::Ent*>& SideList = bOff ? Sim->off : Sim->def;
+		const int32 N = static_cast<int32>(SideList.size());
+		int32 K = static_cast<int32>(std::find(SideList.begin(), SideList.end(), E) - SideList.begin());
+		const bool bQB = E->p->pos == tag::Pos::QB;
+		if (bOff) for (int32 i = 0; i < K; ++i) if (SideList[i]->p->pos == tag::Pos::QB) --K; // slots skip the QB
+		float FaceYaw;
+		const FVector Target = HuddleSpot(bOff, bQB, K, bOff ? FMath::Max(N - 1, 1) : N, BallW, Dir, FaceYaw);
+		PostYaw[E] = FaceYaw;
+		Step(It->second, Target);
 	}
 }
 
@@ -500,22 +540,24 @@ void AMatchDirector::TickUmpire(float Dt)
 {
 	if (!Umpire || !Game) return;
 	const bool bDead = Sim && !Sim->isLive() && Sim->result && !Sim->isReturn();
+	const bool bCall = !Sim && !Between.empty();
 	const int32 NewDir = Game->worldDir();
 	const FVector Spot = ToWorld(Game->ballOn, Game->ballY, NewDir); // the next play's spot (after ApplyPlay)
+	const FVector DownNew = (ToWorld(1, 0, NewDir) - ToWorld(0, 0, NewDir)).GetSafeNormal();
+	const FVector Station = Spot - DownNew * 9.f * YD + FVector::CrossProduct(FVector::UpVector, DownNew) * 3.5f * YD; // 9 yd behind the ball
 	FVector Target = UmpPos;
 	float Jog = 380.f;
+	FVector BallW = bCall ? BetweenBallW : (Sim ? ToWorld(Sim->ball.pos.x, Sim->ball.pos.y, Dir) : Spot);
 	if (Sim && Sim->isReturn()) Target = ToWorld(FMath::Clamp(Game->ballOn, 5.0, 95.0), -2.5, Dir); // off the field for the kick
 	else if (State == EMatchState::Live) Jog = 0.f;                                               // holds his position through the play
 	else if (bDead && State == EMatchState::Post)
 	{
 		// at the whistle, to the dead ball
-		const FVector BallW = ToWorld(Sim->ball.pos.x, Sim->ball.pos.y, Dir);
 		Target = BallW;
 		if (!bUmpHasBall && !bUmpSpotted && FVector::Dist2D(UmpPos, BallW) < 75.f) bUmpHasBall = true;
 	}
-	else if (bDead && (State == EMatchState::Wait || State == EMatchState::Call))
+	else if ((bDead && (State == EMatchState::Wait || State == EMatchState::Call)) || bCall)
 	{
-		const FVector BallW = ToWorld(Sim->ball.pos.x, Sim->ball.pos.y, Dir);
 		if (!bUmpHasBall && !bUmpSpotted)
 		{
 			Target = BallW;
@@ -527,18 +569,13 @@ void AMatchDirector::TickUmpire(float Dt)
 			Target = Spot;
 			if (FVector::Dist2D(UmpPos, Spot) < 60.f) { bUmpHasBall = false; bUmpSpotted = true; }
 		}
-		else
-		{
-			// spotted: back to his position, 9 yd behind the new line, off the quarterback's line
-			const FVector Down = (ToWorld(1, 0, NewDir) - ToWorld(0, 0, NewDir)).GetSafeNormal();
-			Target = Spot - Down * 9.f * YD + FVector::CrossProduct(FVector::UpVector, Down) * 3.5f * YD;
-		}
+		else Target = Station;
 	}
 	else if (Sim)
 	{
 		// before the snap: 9 yd behind the ball in the offensive backfield, off the quarterback's line
-		const FVector Down = ToWorld(1, 0, Dir) - ToWorld(0, 0, Dir);
-		Target = ToWorld(Sim->los, Sim->by, Dir) - Down.GetSafeNormal() * 9.f * YD + FVector::CrossProduct(FVector::UpVector, Down.GetSafeNormal()) * 3.5f * YD;
+		const FVector Down = (ToWorld(1, 0, Dir) - ToWorld(0, 0, Dir)).GetSafeNormal();
+		Target = ToWorld(Sim->los, Sim->by, Dir) - Down * 9.f * YD + FVector::CrossProduct(FVector::UpVector, Down) * 3.5f * YD;
 	}
 	FVector To = Target - UmpPos;
 	To.Z = 0.f;
@@ -553,18 +590,26 @@ void AMatchDirector::TickUmpire(float Dt)
 	// facing: the way he goes, or the ball when he stands
 	float Yaw = Umpire->GetActorRotation().Yaw;
 	if (!Vel.IsNearlyZero()) Yaw = Vel.Rotation().Yaw;
-	else if (Sim)
+	else
 	{
-		const FVector BallW = Sim->isLive() || State == EMatchState::Presnap ? ToWorld(Sim->ball.pos.x, Sim->ball.pos.y, Dir) : Spot;
-		FVector F = BallW - UmpPos;
+		const FVector At = bUmpSpotted || bCall ? Spot : BallW;
+		FVector F = At - UmpPos;
 		F.Z = 0.f;
 		if (F.Size() > 30.f) Yaw = F.Rotation().Yaw;
 	}
 	FAthleteFootball F;
 	F.bLook = true;
-	F.LookWorld = Sim ? (bUmpHasBall ? UmpPos + Vel.GetSafeNormal() * 800.f + FVector(0, 0, 150) : ToWorld(Sim->ball.pos.x, Sim->ball.pos.y, Dir) + FVector(0, 0, 20)) : UmpPos + FVector(100, 0, 150);
+	F.LookWorld = bUmpHasBall ? UmpPos + Vel.GetSafeNormal() * 800.f + FVector(0, 0, 150) : (bUmpSpotted || bCall ? Spot : BallW) + FVector(0, 0, 20);
 	Umpire->SetFootball(F, Dt);
 	Umpire->Drive(UmpPos, Yaw, Vel, 7.f, Vel.IsNearlyZero() ? TEXT("idle") : TEXT("run"), 0.f, Dt, false);
+	// without a sim nothing else places the ball: in his hand, or spotted for the next play
+	if (!Sim && Ball)
+	{
+		FVector HoldLoc;
+		FRotator HoldRot;
+		if (bUmpHasBall && Umpire->GetBallHold(HoldLoc, HoldRot)) { Ball->SetActorLocation(HoldLoc); Ball->SetActorRotation(HoldRot); }
+		else if (bUmpSpotted) { Ball->SetActorLocation(Spot + FVector(0, 0, 9)); Ball->SetActorRotation(FRotator(0, NewDir > 0 ? 0 : 180, 0)); }
+	}
 }
 
 void AMatchDirector::StartPileOn(AAthlete* As, AAthlete* Cr)
@@ -1379,8 +1424,34 @@ void AMatchDirector::CallPlays(bool bTwo)
 {
 	tag::Game& G = *Game;
 	State = EMatchState::Call;
+	// the play's sim goes, the men stay where the whistle (and the jog since) left them, in the huddle or on the way
+	Between.clear();
+	if (Sim)
+	{
+		const tag::TeamKey OffWas = Sim->isReturn() ? G.poss : G.poss; // the sim's own side labels are the last play's
+		for (tag::Ent* E : Sim->ents)
+		{
+			AAthlete* A = AthleteFor(E->p, Game->home->hasPlayer(E->p) ? tag::TeamKey::Home : tag::TeamKey::Away);
+			FBetweenMan M;
+			M.P = E->p;
+			auto PJ = PostPos.find(E);
+			M.Pos = PJ != PostPos.end() ? PJ->second : A->GetActorLocation();
+			M.Pos.Z = 0.f;
+			M.Yaw = A->GetActorRotation().Yaw;
+			M.bOff = G.teamOf(G.poss).hasPlayer(E->p);
+			Between.push_back(M);
+		}
+		BetweenBallW = ToWorld(Sim->ball.pos.x, Sim->ball.pos.y, Dir);
+		(void)OffWas;
+	}
+	PostPos.clear();
+	PostYaw.clear();
 	Sim.reset();
-	ShowOnly({});
+	{
+		std::vector<tag::Player*> Keep;
+		for (const FBetweenMan& M : Between) Keep.push_back(M.P);
+		ShowOnly(Keep);
+	}
 	Dir = G.worldDir();
 	IdleFocus = ToWorld(bTwo ? 98 : G.ballOn, G.ballY, Dir);
 	Stadium->SetLines(ToWorld(bTwo ? 98 : G.ballOn, 0, Dir).X, bTwo ? -1 : ToWorld(FMath::Min(100.0, G.ballOn + G.toGo), 0, Dir).X);
@@ -1439,12 +1510,14 @@ void AMatchDirector::StartPresnap(const tag::OffPlay* Op, const tag::DefCall* Dc
 	else if (UserDef()) US = tag::Side::Def;
 	// where the last play left everyone (world), so they jog back to the new formation instead of appearing on it
 	std::map<tag::Player*, FVector> From;
+	for (const FBetweenMan& M : Between) From[M.P] = M.Pos;
 	if (Sim)
 		for (tag::Ent* E : Sim->ents)
 		{
 			auto PJ = PostPos.find(E);
 			From[E->p] = PJ != PostPos.end() ? PJ->second : ToWorld(E->pos.x, E->pos.y, Dir);
 		}
+	Between.clear();
 	PostPos.clear();
 	PostYaw.clear();
 	bUmpHasBall = false;
@@ -1452,18 +1525,23 @@ void AMatchDirector::StartPresnap(const tag::OffPlay* Op, const tag::DefCall* Dc
 	Sim = bTwoPoint ? G.twoPointSim(*Op, *Dc, US) : G.makePlay(*Op, *Dc, US);
 	Dir = G.worldDir();
 	double Far = 0.0;
+	int32 Walkers = 0, Known = 0;
 	for (tag::Ent* E : Sim->ents)
 	{
 		auto It = From.find(E->p);
 		if (It == From.end()) continue;
+		++Known;
 		const tag::V2 P = TagCoords::FromWorld(It->second, Dir);
 		const double D = tag::dist(P, E->pos);
 		if (D > 0.3 && D < 32.0) // a man far downfield (a long touchdown) takes his spot; the rest jog in
 		{
 			Sim->walkFrom(E, P);
 			Far = FMath::Max(Far, D);
+			++Walkers;
 		}
 	}
+	UE_LOG(LogTemp, Verbose, TEXT("TAG presnap walk: %d of %d known men walk in, farthest %.1f yd"), Walkers, Known, Far);
+	if (bAuto) UE_LOG(LogTemp, Display, TEXT("TAG presnap walk: %d of %d known men walk in, farthest %.1f yd"), Walkers, Known, Far);
 	std::vector<tag::Player*> Ps;
 	for (tag::Ent* E : Sim->ents) Ps.push_back(E->p);
 	ShowOnly(Ps);
@@ -2713,6 +2791,14 @@ void AMatchDirector::Tick(float Dt)
 		{
 			// automation: the formation setting up, men still walking to their spots
 			static bool bSetShot = false;
+			static int32 SetLogged = 0;
+			if (bAuto && SetLogged < 6 && PresnapClock > 0.4f && Timer > 0.f && Timer < 100.f && PresnapClock - SDt <= 0.4f)
+			{
+				++SetLogged;
+				int32 Walking = 0;
+				for (const tag::Ent* E : Sim->ents) Walking += E->shiftTo ? 1 : 0;
+				UE_LOG(LogTemp, Display, TEXT("TAG presnap at %.2f s: %d men still walking to their spots, timer %.2f"), PresnapClock, Walking, Timer);
+			}
 			if (bAuto && !bSetShot && PresnapClock > 0.4f && Sim->walking())
 			{
 				bSetShot = true;
@@ -2794,7 +2880,7 @@ void AMatchDirector::Tick(float Dt)
 		break;
 	default:
 		UpdateCamera(Dt, Sim ? FocusPoint() : IdleFocus);
-		if (Sim && State == EMatchState::Call && !Sim->isLive()) TickPostJog(SDt);
+		if (State == EMatchState::Call) TickPostJog(SDt);
 		if (Sim) SyncPlay(Dt, 1.f);
 		break;
 	}
