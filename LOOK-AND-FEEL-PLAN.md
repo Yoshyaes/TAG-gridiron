@@ -224,6 +224,7 @@ Reasons, briefly:
   - Defense: coverage audibles within the front (square), D-line shifts (D-pad up: shift a gap either way, pinch, spread to wide nine), linebacker shifts (D-pad left), the coverage shell (D-pad right: press, off, show blitz, disguise the safeties), the controlled player's assignment (triangle: deep / flat / hook zone, blitz, QB spy, man on the nearest receiver), L1 switches player. The CPU offense waits while a menu is open (up to 25 s).
   - All of it is `PlaySim`'s pre-snap API: changes are made before the first step, players walk to new spots, the line re-sets its blocking against the new look at the snap; no rng draws, so an unadjusted play runs exactly as before (100-game calibration identical to the committed build). 5 new sim tests (21/21).
   - `-TagArtTest`: a user game that runs every call on offense, then on defense, and saves `tag_art_*.png`.
+  - `-TagArtTest -TagPadTest`: the same calls made by injecting the gamepad's keys through the player controller (R2 held and let go, triangle, circle, square, cross, L1, the D-pad), each result checked: 34/34 pass (art only while R2 is held on both sides of the ball; cross closes a menu without snapping, snaps from the base screen). A physical DualSense was not connected for this run.
 - **Next.**
   - Motion matching: stride warping for the rare speeds above the 1.3× cap; football-specific motion beyond what the GASP capture covers stays keyed (Tools/Anim).
 

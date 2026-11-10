@@ -14,6 +14,8 @@
 #include "InputCoreTypes.h"
 #include "Sim/Playbook.h"
 #include "UnrealClient.h"
+#include "InputKeyEventArgs.h"
+#include "GenericPlatform/GenericPlatformInputDeviceMapper.h"
 #if WITH_EDITOR
 #include "ShaderCompiler.h"
 #endif
@@ -835,6 +837,7 @@ void AMatchDirector::TickArtTest(float Dt)
 #if WITH_EDITOR
 	if (GShaderCompilingManager && GShaderCompilingManager->GetNumRemainingJobs() > 0) return; // wait for shaders
 #endif
+	if (bPadTest) return TickPadTest(Dt);
 	auto Shot = [](const TCHAR* Name)
 	{
 		FScreenshotRequest::RequestScreenshot(FString::Printf(TEXT("tag_art_%s.png"), Name), true, false);
@@ -964,6 +967,235 @@ void AMatchDirector::TickArtTest(float Dt)
 			break;
 		case 12: if (At(8.0f)) { Shot(TEXT("d7_called")); ++ArtStep; } break;
 		case 13: if (At(8.1f)) { ArtAuto = 0.f; bArtDidDef = true; Timer = 0.f; ++ArtStep; } break;
+		default: break;
+		}
+	}
+}
+
+void AMatchDirector::PadPress(const FKey& K, float Hold)
+{
+	APlayerController* PC = GetWorld()->GetFirstPlayerController();
+	if (!PC) return;
+	FViewport* VP = GEngine && GEngine->GameViewport ? GEngine->GameViewport->Viewport : nullptr;
+	PC->InputKey(FInputKeyEventArgs(VP, IPlatformInputDeviceMapper::Get().GetDefaultInputDevice(), K, IE_Pressed, 1.f, false, FPlatformTime::Cycles64()));
+	PadHeld.Add(TPair<FKey, float>(K, GetWorld()->GetTimeSeconds() + Hold));
+	UE_LOG(LogTemp, Display, TEXT("TAG pad test press %s"), *K.ToString());
+}
+
+void AMatchDirector::PadCheck(bool bOk, const TCHAR* What)
+{
+	(bOk ? PadPasses : PadFails)++;
+	UE_LOG(LogTemp, Display, TEXT("TAG pad test %s: %s"), bOk ? TEXT("PASS") : TEXT("FAIL"), What);
+}
+
+void AMatchDirector::TickPadTest(float Dt)
+{
+	// let go of held buttons
+	if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
+	{
+		FViewport* VP = GEngine && GEngine->GameViewport ? GEngine->GameViewport->Viewport : nullptr;
+		const float Now = GetWorld()->GetTimeSeconds();
+		for (int32 i = PadHeld.Num() - 1; i >= 0; --i)
+			if (PadHeld[i].Value <= Now)
+			{
+				PC->InputKey(FInputKeyEventArgs(VP, IPlatformInputDeviceMapper::Get().GetDefaultInputDevice(), PadHeld[i].Key, IE_Released, 0.f, false, FPlatformTime::Cycles64()));
+				PadHeld.RemoveAt(i);
+			}
+	}
+	static bool bAwaitSnap = false;
+	static const tag::OffPlay* SavedOp = nullptr;
+	static const tag::DefCall* SavedDc = nullptr;
+	static std::string SavedRoute;
+	static tag::Player* SavedUser = nullptr;
+	static double SavedY = 0;
+	if (bArtDidOff && bArtDidDef)
+	{
+		if ((ArtExitT += Dt) > 3.f)
+		{
+			UE_LOG(LogTemp, Display, TEXT("TAG pad test: %d passed, %d failed"), PadPasses, PadFails);
+			FPlatformMisc::RequestExit(false);
+		}
+		return;
+	}
+	if (bAwaitSnap && State != EMatchState::Presnap)
+	{
+		bAwaitSnap = false;
+		PadCheck(State == EMatchState::Live, TEXT("cross snaps the ball from the base screen"));
+		bArtDidOff = true;
+	}
+	if (State != EMatchState::Presnap || !Sim || !Sim->preSnap() || !(UserOff() || UserDef()))
+	{
+		ArtT = 0.f;
+		ArtStep = 0;
+		return;
+	}
+	const bool bO = UserOff();
+	if (bO ? bArtDidOff : bArtDidDef) return;
+	if (bAwaitSnap) return;
+	ArtT += Dt;
+	Timer = 999.f;
+	auto At = [&](float T) { return ArtT >= T; };
+	auto Shown = [&] { return PlayArt && PlayArt->IsShown(); };
+	auto ByLabel = [&](int32 N) -> tag::Ent*
+	{
+		for (auto& KV : Labels)
+			if (KV.second == FString::FromInt(N)) return KV.first;
+		return nullptr;
+	};
+	auto Next = [&] { ++ArtStep; };
+	if (bO)
+	{
+		switch (ArtStep)
+		{
+		case 0: if (At(3.0f)) { PadCheck(!Shown(), TEXT("offense: art hidden once the intro is over")); PadPress(EKeys::Gamepad_RightTrigger, 1.5f); Next(); } break;
+		case 1: if (At(3.6f)) { PadCheck(Shown(), TEXT("offense: holding R2 shows the play art")); FScreenshotRequest::RequestScreenshot(TEXT("tag_pad_r2.png"), true, false); Next(); } break;
+		case 2: if (At(5.2f)) { PadCheck(!Shown(), TEXT("offense: letting go of R2 hides it")); PadPress(EKeys::Gamepad_FaceButton_Top); Next(); } break;
+		case 3: if (At(5.5f)) { PadCheck(PreMode == EPre::HotPick, TEXT("triangle opens hot routes")); PadPress(EKeys::Gamepad_FaceButton_Right); Next(); } break;
+		case 4:
+			if (At(5.8f))
+			{
+				PadCheck(PreMode == EPre::HotRoute && PreEnt && PreEnt == ByLabel(2), TEXT("circle picks receiver 2"));
+				SavedRoute = PreEnt ? PreEnt->routeName : std::string();
+				PadPress(EKeys::Gamepad_DPad_Up);
+				Next();
+			}
+			break;
+		case 5:
+			if (At(6.1f))
+			{
+				PadCheck(PreEnt && PreEnt->routeName != SavedRoute && InFamily(FamUp, PreEnt->routeName), TEXT("D-pad up gives him a vertical route"));
+				SavedRoute = PreEnt ? PreEnt->routeName : std::string();
+				PadPress(EKeys::Gamepad_DPad_Up);
+				Next();
+			}
+			break;
+		case 6:
+			if (At(6.4f))
+			{
+				PadCheck(PreEnt && PreEnt->routeName != SavedRoute && InFamily(FamUp, PreEnt->routeName), TEXT("D-pad up again cycles the vertical routes"));
+				FScreenshotRequest::RequestScreenshot(TEXT("tag_pad_hot.png"), true, false);
+				PadPress(EKeys::Gamepad_FaceButton_Bottom);
+				Next();
+			}
+			break;
+		case 7:
+			if (At(6.7f))
+			{
+				PadCheck(PreMode == EPre::Base && State == EMatchState::Presnap, TEXT("cross closes the hot route menu without snapping"));
+				SavedOp = Sim->cfg.offPlay;
+				PadPress(EKeys::Gamepad_FaceButton_Left);
+				Next();
+			}
+			break;
+		case 8: if (At(7.0f)) { PadCheck(PreMode == EPre::Audible, TEXT("square opens audibles")); PadPress(EKeys::Gamepad_DPad_Down); Next(); } break;
+		case 9: if (At(7.3f)) { PadCheck(AudibleSel == 1, TEXT("D-pad down moves the audible list")); PadPress(EKeys::Gamepad_FaceButton_Bottom); Next(); } break;
+		case 10:
+			if (At(7.6f))
+			{
+				PadCheck(Sim->cfg.offPlay != SavedOp && PreMode == EPre::Base && State == EMatchState::Presnap, TEXT("cross calls the audible without snapping"));
+				if (Sim->passPlay()) PadPress(EKeys::Gamepad_DPad_Down);
+				else ArtStep = 12;  // a run: no protection calls
+				Next();
+			}
+			break;
+		case 11: if (At(7.9f)) { PadCheck(PreMode == EPre::Protect, TEXT("D-pad down opens protection")); PadPress(EKeys::Gamepad_DPad_Left); Next(); } break;
+		case 12: if (At(8.2f)) { PadCheck(Sim->slide != 0, TEXT("D-pad left slides the line")); PadPress(EKeys::Gamepad_FaceButton_Right); Next(); } break;
+		case 13: if (At(8.5f)) { PadCheck(PreMode == EPre::Base, TEXT("back to the base screen")); PadPress(EKeys::Gamepad_DPad_Right); Next(); } break;
+		case 14: if (At(8.8f)) { PadCheck(PreMode == EPre::MotionPick, TEXT("D-pad right opens motion")); PadPress(EKeys::Gamepad_FaceButton_Bottom); Next(); } break;
+		case 15:
+			if (At(9.1f))
+			{
+				PadCheck(PreMode == EPre::Motion && PreEnt == ByLabel(1), TEXT("cross picks receiver 1 for motion"));
+				SavedY = PreEnt ? (PreEnt->shiftTo ? PreEnt->shiftTo->y : PreEnt->pos.y) : 0;
+				PadPress(EKeys::Gamepad_DPad_Right);
+				Next();
+			}
+			break;
+		case 16:
+			if (At(9.4f))
+			{
+				const double Y = PreEnt ? (PreEnt->shiftTo ? PreEnt->shiftTo->y : PreEnt->pos.y) : SavedY;
+				PadCheck(FMath::Abs(Y - SavedY) > 1.0, TEXT("D-pad right sends him in motion"));
+				PadPress(EKeys::Gamepad_FaceButton_Bottom);
+				Next();
+			}
+			break;
+		case 17:
+			if (At(9.7f))
+			{
+				PadCheck(PreMode == EPre::Base && State == EMatchState::Presnap, TEXT("cross closes motion without snapping"));
+				PadPress(EKeys::Gamepad_FaceButton_Bottom);
+				bAwaitSnap = true;
+				Next();
+			}
+			break;
+		default: break;
+		}
+	}
+	else
+	{
+		switch (ArtStep)
+		{
+		case 0: if (At(3.0f)) { PadCheck(!Shown(), TEXT("defense: art hidden once the intro is over")); PadPress(EKeys::Gamepad_RightTrigger, 1.5f); Next(); } break;
+		case 1: if (At(3.6f)) { PadCheck(Shown(), TEXT("defense: holding R2 shows the play art")); FScreenshotRequest::RequestScreenshot(TEXT("tag_pad_def_r2.png"), true, false); Next(); } break;
+		case 2: if (At(5.2f)) { PadCheck(!Shown(), TEXT("defense: letting go of R2 hides it")); PadPress(EKeys::Gamepad_DPad_Up); Next(); } break;
+		case 3: if (At(5.5f)) { PadCheck(PreMode == EPre::DLine, TEXT("D-pad up opens the D-line shifts")); PadPress(EKeys::Gamepad_DPad_Right); Next(); } break;
+		case 4:
+			if (At(5.8f))
+			{
+				PadCheck(Sim->dlAdj == tag::PlaySim::LineAdj::ShiftL || Sim->dlAdj == tag::PlaySim::LineAdj::ShiftR, TEXT("D-pad right shifts the line"));
+				PadPress(EKeys::Gamepad_FaceButton_Bottom);
+				Next();
+			}
+			break;
+		case 5: if (At(6.1f)) { PadCheck(PreMode == EPre::Base && State == EMatchState::Presnap, TEXT("cross closes the D-line menu")); PadPress(EKeys::Gamepad_FaceButton_Top); Next(); } break;
+		case 6: if (At(6.4f)) { PadCheck(PreMode == EPre::Assign, TEXT("triangle opens the assignment")); PadPress(EKeys::Gamepad_DPad_Down); Next(); } break;
+		case 7:
+			if (At(6.7f))
+			{
+				PadCheck(Sim->user && Sim->user->state == tag::EntState::Rush, TEXT("D-pad down sends him on a blitz"));
+				PadPress(EKeys::Gamepad_FaceButton_Right);
+				Next();
+			}
+			break;
+		case 8:
+			if (At(7.0f))
+			{
+				PadCheck(PreMode == EPre::Base, TEXT("circle closes the assignment"));
+				SavedUser = Sim->user ? Sim->user->p : nullptr;
+				PadPress(EKeys::Gamepad_LeftShoulder);
+				Next();
+			}
+			break;
+		case 9: if (At(7.3f)) { PadCheck(Sim->user && Sim->user->p != SavedUser, TEXT("L1 switches player")); PadPress(EKeys::Gamepad_DPad_Right); Next(); } break;
+		case 10: if (At(7.6f)) { PadCheck(PreMode == EPre::Shell, TEXT("D-pad right opens the coverage shell")); PadPress(EKeys::Gamepad_DPad_Left); Next(); } break;
+		case 11:
+			if (At(7.9f))
+			{
+				PadCheck(Sim->shellAdj == tag::PlaySim::ShellAdj::Press, TEXT("D-pad left presses the receivers"));
+				PadPress(EKeys::Gamepad_FaceButton_Bottom);
+				Next();
+			}
+			break;
+		case 12:
+			if (At(8.2f))
+			{
+				PadCheck(PreMode == EPre::Base, TEXT("cross closes the shell menu"));
+				SavedDc = Sim->cfg.defCall;
+				PadPress(EKeys::Gamepad_FaceButton_Left);
+				Next();
+			}
+			break;
+		case 13: if (At(8.5f)) { PadCheck(PreMode == EPre::Audible, TEXT("square opens coverage audibles")); PadPress(EKeys::Gamepad_FaceButton_Bottom); Next(); } break;
+		case 14:
+			if (At(8.8f))
+			{
+				PadCheck(Sim->cfg.defCall != SavedDc && PreMode == EPre::Base, TEXT("cross calls the coverage audible"));
+				bArtDidDef = true;
+				Timer = 0.f;
+				Next();
+			}
+			break;
 		default: break;
 		}
 	}

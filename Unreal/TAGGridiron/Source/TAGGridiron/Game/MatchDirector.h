@@ -152,6 +152,14 @@ private:
 	float ArtT = 0.f, ArtExitT = 0.f;
 	int32 ArtStep = 0;
 	void TickArtTest(float Dt);
+	/** -TagArtTest -TagPadTest: the same, but every call made by injecting the gamepad's keys (R2 held, triangle,
+	 *  the D-pad...) through the player controller, each result checked and logged PASS / FAIL. */
+	bool bPadTest = false;
+	int32 PadFails = 0, PadPasses = 0;
+	TArray<TPair<FKey, float>> PadHeld;  // keys down and when to let go
+	void PadPress(const FKey& K, float Hold = 0.1f);
+	void PadCheck(bool bOk, const TCHAR* What);
+	void TickPadTest(float Dt);
 
 	TSharedPtr<SGridironOverlay> Overlay;
 	bool bPlayStationPad = false; // a DualSense was found through RawInput (hints name its buttons)

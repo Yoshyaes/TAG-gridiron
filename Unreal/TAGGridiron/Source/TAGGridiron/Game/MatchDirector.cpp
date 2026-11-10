@@ -134,6 +134,7 @@ void AMatchDirector::BeginPlay()
 	else if (FParse::Param(FCommandLine::Get(), TEXT("TagArtTest")))
 	{
 		bArtTest = true;
+		bPadTest = FParse::Param(FCommandLine::Get(), TEXT("TagPadTest"));
 		StartMatch(3, 7, true, true, 0, true, 900);
 	}
 	else if (FParse::Param(FCommandLine::Get(), TEXT("TagMoveTest")))
