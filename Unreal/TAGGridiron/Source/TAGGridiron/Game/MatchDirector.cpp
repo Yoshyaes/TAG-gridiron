@@ -2595,6 +2595,16 @@ void AMatchDirector::Tick(float Dt)
 	case EMatchState::Presnap:
 	{
 		TickPresnap(SDt);
+		{
+			// automation: the formation setting up, men still walking to their spots
+			static bool bSetShot = false;
+			if (bAuto && !bSetShot && PresnapClock > 0.4f && Sim->walking())
+			{
+				bSetShot = true;
+				FScreenshotRequest::RequestScreenshot(TEXT("tag_auto_setup.png"), false, false);
+				UE_LOG(LogTemp, Display, TEXT("TAG auto screenshot setup: formation still setting at %.1f s"), PresnapClock);
+			}
+		}
 		const bool bMenu = PreMode != EPre::Base;
 		if (!(UserDef() && bMenu)) Timer -= SDt;
 		PresnapClock += SDt;
@@ -2642,6 +2652,16 @@ void AMatchDirector::Tick(float Dt)
 		for (tag::Ent* E : Sim->ents) E->animT += Dt;
 		TickPostJog(SDt);
 		SyncPlay(Dt, 1.f);
+		{
+			// automation: the men jogging back toward the ball after the whistle (the first scrimmage play's)
+			static bool bJogShot = false;
+			if (bAuto && !bJogShot && !Sim->isReturn() && Timer < 0.25f && PostPos.size() >= 6)
+			{
+				bJogShot = true;
+				FScreenshotRequest::RequestScreenshot(TEXT("tag_auto_postjog.png"), false, false);
+				UE_LOG(LogTemp, Display, TEXT("TAG auto screenshot postjog: %d men jogging"), static_cast<int32>(PostPos.size()));
+			}
+		}
 		UpdateCamera(Dt, FocusPoint());
 		if ((ReplayPostRec += SDt) < 1.3f) RecordReplayFrame(SDt); // the whistle and the moment after it
 		if (Timer <= 0 || (!bWatch && Timer < 1.2f && bSpace))
