@@ -372,11 +372,29 @@ void AMatchDirector::TickMoveTest(float Dt)
 		C->CurrentFocalLength = 28.f;
 		C->FocusSettings.ManualFocusDistance = 840.f;
 	}
+	// -TagMoveFrames=<route>,<from>,<to>: every frame of that window (foot skating shows between consecutive frames)
+	{
+		static FString Win = FParse::Value(FCommandLine::Get(), TEXT("TagMoveFrames="), Win, false) ? Win : FString();
+		static int32 FrameNum = 0;
+		TArray<FString> P;
+		// a 4th field "shots" also writes a screenshot per frame (run with -UseFixedTimeStep -FPS=30: writing one stalls)
+		const int32 N = Win.ParseIntoArray(P, TEXT(","));
+		if (N >= 3 && R == FCString::Atoi(*P[0]) && T >= FCString::Atof(*P[1]) && T <= FCString::Atof(*P[2]))
+		{
+			if (N > 3) FScreenshotRequest::RequestScreenshot(FString::Printf(TEXT("tag_frames_r%d_%03d.png"), R, FrameNum), false, false);
+			UE_LOG(LogTemp, Display, TEXT("TAG frame r%d %03d t=%.3f v=%s footL=%s footR=%s %s"), R, FrameNum++, T, *MoveVel.ToCompactString(),
+				*Lineup[R]->BoneWorld(TEXT("ball_l")).ToCompactString(), *Lineup[R]->BoneWorld(TEXT("ball_r")).ToCompactString(), *Lineup[R]->DebugAnimState());
+		}
+	}
 	const float ShotT = 0.8f + (MoveShot % 27) * 0.3f;
 	if (MoveShot / 27 == R && T >= ShotT)
 	{
 		FScreenshotRequest::RequestScreenshot(FString::Printf(TEXT("tag_move_r%d_%02d.png"), R, MoveShot % 27), false, false);
-		UE_LOG(LogTemp, Display, TEXT("TAG move r%d t=%.2f v=%.0f %s"), R, T, MoveVel.Size(), *Lineup[R]->DebugAnimState());
+		double SlRaw, SlShown, GSec, GM;
+		int32 GSteps;
+		AAthlete::SlideStats(SlRaw, SlShown, false);
+		AAthlete::GaitStats(GSec, GM, GSteps, false);
+		UE_LOG(LogTemp, Display, TEXT("TAG move r%d #%d t=%.2f v=%.0f slide=%.0f/%.0f steps=%d %s"), R, Lineup[R]->Player ? Lineup[R]->Player->number : -1, T, MoveVel.Size(), SlRaw, SlShown, GSteps, *Lineup[R]->DebugAnimState());
 		++MoveShot;
 	}
 	PerfT += Dt; ++PerfFrames;
@@ -1228,6 +1246,7 @@ void AMatchDirector::SpawnSidelines(const tag::Team& Home, const tag::Team& Away
 			P->number = 0;
 			FUniform U{Top, Bottom, Top, Top, Top}; // number painted in the shirt colour: none shows
 			AAthlete* A = GetWorld()->SpawnActor<AAthlete>(AAthlete::StaticClass(), FTransform::Identity);
+			A->TickAfter(this);
 			A->Setup(P.get(), U);
 			A->SetCivilian();
 			OfficialPeople.push_back(std::move(P));
@@ -1275,6 +1294,7 @@ void AMatchDirector::SpawnSidelines(const tag::Team& Home, const tag::Team& Away
 			float Yaw = SideSign > 0 ? -90.f : 90.f;            // facing the field
 			Yaw += Rand.FRandRange(-28.f, 28.f) + (i % 5 == 4 ? (Rand.FRand() < 0.5f ? 70.f : -70.f) : 0.f); // some talk to a teammate
 			AAthlete* A = GetWorld()->SpawnActor<AAthlete>(AAthlete::StaticClass(), FTransform::Identity);
+			A->TickAfter(this);
 			A->Setup(Bench[i], U);
 			A->StandOnSideline(FVector(X, Y, 0), Yaw, i + T.id * 5);
 			Sideline.Add(A);
@@ -2055,6 +2075,7 @@ AAthlete* AMatchDirector::AthleteFor(tag::Player* P, tag::TeamKey Side)
 {
 	if (TObjectPtr<AAthlete>* Found = Athletes.Find(P->id)) return *Found;
 	AAthlete* A = GetWorld()->SpawnActor<AAthlete>(AAthlete::StaticClass(), FTransform::Identity);
+			A->TickAfter(this);
 	const tag::Team& T = Game ? Game->teamOf(Side) : *League[0];
 	FUniform U;
 	if (Side == tag::TeamKey::Home)

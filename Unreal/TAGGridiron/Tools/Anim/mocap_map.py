@@ -141,6 +141,118 @@ MAP = {
     "PT_PileOn": dict(src="Madnnov04_0328_3_Late_hit_pile_on_Defender_sprint_D1_dives_over_pile_and_rolls__P01", start=0.3, end=1.5, mode="anchor"),
 }
 
+# ---------------------------------------------------------------- locomotion for motion matching (root motion on the
+# root bone, mode 'root'; Tools/Art/mm_build_dbs.py adds these to the TAG PoseSearch databases). Names: Loco_<gait>_<what>.
+# Direction codes in the names: D1 forward, D3 to the right, D5 backward, D7 to the left (the root keeps the man's
+# heading, so a D3 run is a strafe). Mirrors (_M) give the other side of the one-sided clips.
+R = dict(mode="root")
+LOCO = {
+    # sprint gait (> 6.4 m/s)
+    "Loco_Sprint_Normal": dict(src="MG_Loco_Sprint_Normal__P01", loop=4, **R),                       # 9.6 m/s
+    "Loco_Sprint_Burn": dict(src="MG_Loco_Standard_Sprint_Burn__P01", loop=4, **R),                  # 11.2 m/s
+    "Loco_Sprint_Cycle": dict(src="Cycle_Sprint_Fwd_FB16__P01", loop=4, **R),                        # 8.3 m/s
+    "Loco_Sprint_BigGuy": dict(src="MG_NonBC_BigGuy_MC_Sprint_D1_s99__P01", end=2.0, loop=4, **R),  # 10.8 m/s
+    "Loco_Sprint_Agile": dict(src="MG_NonBC_Agile_MC_ShortStride_Sprint_D1_s70__P01", end=2.0, loop=4, **R),  # 9.0 m/s
+    "Loco_Sprint_Carry": dict(src="MG_BC_Coverball_Sprint_D1_s99__P01", loop=4, **R),               # ball carrier
+    "Loco_Sprint_Curve": dict(src="CarTurn_Sprint_OSF_FBDEC14_8429_1_3__P01", **R),                 # 8 m/s arc
+    "Loco_Run_Curve": dict(src="CarTurn_Fwd_Run__P01", **R),                                        # 7.6 m/s arc
+    "Loco_Decel_Sprint": dict(src="M18_Decel_Sprint_to_Jog__P01", **R),
+    "Loco_Accel_FastJog": dict(src="Accel_Boost_FastJog__P01", **R),
+    "Loco_Accel_Jog": dict(src="Accel_Jog__P01", **R),
+    # run gait (3.2-6.4 m/s)
+    "Loco_Run_Average": dict(src="MG_Loco_Run_Average__P01", loop=4, **R),                           # 6.5 m/s
+    "Loco_Run_LB": dict(src="MG_LB_Med_Run_s99_D1__P01", loop=4, **R),                               # 6.6 m/s
+    "Loco_Run_BigMan": dict(src="MG_BIGMAN_NonBC_RUN_D2_s99__P01", loop=4, **R),                     # 6.1 m/s
+    "Loco_Run_Heavy": dict(src="MG_Loco_Heavy_Jog_LeanFwd_D1__P01", loop=4, **R),                    # 3.4 m/s
+    "Loco_Run_Side": dict(src="MG_LB_Run_D3__P01", loop=4, **R),                                     # 4.9 m/s strafe
+    "Loco_Run_Side_M": dict(src="MG_LB_Run_D3__P01", loop=4, mirror=True, **R),
+    "Loco_Run_Back": dict(src="MG_LB_Med_Run_s99_D5__P01", loop=4, **R),                             # 3.4 m/s backpedal
+    "Loco_Run_Back_Big": dict(src="MG_BIGMAN_NonBC_RUN_D5_s99__P01", loop=4, **R),                   # 6.0 m/s
+    "Loco_Run_Diag": dict(src="MG_NonBC_Agile_MC_Run_D4__P01", loop=4, **R),
+    "Loco_Run_Diag_M": dict(src="MG_NonBC_Agile_MC_Run_D4__P01", loop=4, mirror=True, **R),
+    "Loco_Backpedal_To_Run": dict(src="MADNAUG04_1174_1_DB_BACKPEDAL_D5_SPRINT_TO_STRAIGHT_RUN_D5_SPRINT__P01", **R),
+    "Loco_Jog_Agile": dict(src="MG_NonBC_Agile_MC_Jog_D1__P01", loop=4, **R),                        # 3.5 m/s
+    "Loco_Jog_LB": dict(src="MG_LB_Med_Jog_D1__P01", loop=4, **R),                                   # 3.5 m/s
+    # walk gait (< 3.2 m/s)
+    "Loco_Jog_Loop": dict(src="Loco_NonBC_15_Jog_Loop__P01", loop=4, **R),                           # 2.2 m/s
+    "Loco_Walk_Loop": dict(src="Loco_NonBC_15_Walk_Loop__P01", loop=4, **R),                         # 1.4 m/s
+    "Loco_Walk_Ready": dict(src="MG_ANTICIPATION_WALK_D1__P01", loop=4, **R),                        # 1.7 m/s
+    "Loco_Walk_Back": dict(src="MG_ANTICIPATION_WALK_D5__P01", loop=4, **R),                         # 1.4 m/s
+    "Loco_Walk_Back_Slow": dict(src="MG_LB_Med_Run_s40_D5__P01", loop=4, **R),                       # 2.0 m/s backpedal
+    "Loco_Walk_Side": dict(src="MG_LB_Walk_D3_Shuffle_MLB__P01", loop=4, **R),
+    "Loco_Walk_Side_M": dict(src="MG_LB_Walk_D3_Shuffle_MLB__P01", loop=4, mirror=True, **R),
+    # crouched line play (the linemen's gait): kick slides, shuffles, crouched runs
+    "Loco_Line_KickSlide_L": dict(src="PassBlock_OL_InitialMove_lateral_2pt_KickSlideLeft__P01", **R),
+    "Loco_Line_KickSlide_R": dict(src="PassBlock_OL_InitialMove_lateral_2pt_KickSlideRight__P01", **R),
+    "Loco_Line_KickSlide3_L": dict(src="PassBlock_OL_InitialMove_lateral_3pt_KickSlideLeft__P01", **R),
+    "Loco_Line_KickSlide3_R": dict(src="PassBlock_OL_InitialMove_lateral_3pt_KickSlideRight__P01", **R),
+    "Loco_Line_KickSlideC_L": dict(src="PassBlock_OL_InitialMove_lateral_center_KickSlideLeft__P01", **R),
+    "Loco_Line_KickSlideC_R": dict(src="PassBlock_OL_InitialMove_lateral_center_KickSlideRight__P01", **R),
+    "Loco_Line_Shuffle_Walk": dict(src="MG_motionshuffle_walk_D3__P01", loop=4, **R),
+    "Loco_Line_Shuffle_Walk_M": dict(src="MG_motionshuffle_walk_D3__P01", loop=4, mirror=True, **R),
+    "Loco_Line_Shuffle_Jog": dict(src="MG_motionshuffle_jog_D3__P01", loop=4, **R),
+    "Loco_Line_Shuffle_Jog_M": dict(src="MG_motionshuffle_jog_D3__P01", loop=4, mirror=True, **R),
+    "Loco_Line_Shuffle_Run": dict(src="MG_motionshuffle_run_D3__P01", loop=4, **R),
+    "Loco_Line_Shuffle_Run_M": dict(src="MG_motionshuffle_run_D3__P01", loop=4, mirror=True, **R),
+    "Loco_Line_Shuffle_2pt": dict(src="2pt_MotionLeft_Shuffle (Flippable)__P01", **R),
+    "Loco_Line_Shuffle_2pt_M": dict(src="2pt_MotionLeft_Shuffle (Flippable)__P01", mirror=True, **R),
+    "Loco_Line_Shuffle_LB": dict(src="MG_LB_Jog_D3_Shuffle_MLB__P01", loop=4, **R),
+    "Loco_Line_Shuffle_LB_M": dict(src="MG_LB_Jog_D3_Shuffle_MLB__P01", loop=4, mirror=True, **R),
+    "Loco_Line_Crouch_Walk": dict(src="MG_NonBC_Crouch_MC_Walk_D3__P01", loop=4, **R),
+    "Loco_Line_Crouch_Walk_M": dict(src="MG_NonBC_Crouch_MC_Walk_D3__P01", loop=4, mirror=True, **R),
+    "Loco_Line_Crouch_Run": dict(src="MG_NonBC_Crouch_MC_Run_D1__P01", loop=4, **R),                 # 4.4 m/s
+    "Loco_Line_Crouch_Run_Diag": dict(src="MG_NonBC_Crouch_MC_Run_D2__P01", loop=4, **R),
+    "Loco_Line_Crouch_Run_Diag_M": dict(src="MG_NonBC_Crouch_MC_Run_D2__P01", loop=4, mirror=True, **R),
+    "Loco_Line_Crouch_Back": dict(src="MG_NonBC_Crouch_MC_Run_D5__P01", loop=4, **R),                # 3.9 m/s
+    "Loco_Line_DL_Jog": dict(src="MG_Dline_Jog_D3__P01", loop=4, **R),
+    "Loco_Line_DL_Jog_M": dict(src="MG_Dline_Jog_D3__P01", loop=4, mirror=True, **R),
+    "Loco_Line_Ready_Shuffle": dict(src="MG_ANTICIPATION_WALK_D3_shuffle__P01", loop=4, **R),
+    "Loco_Line_Ready_Shuffle_M": dict(src="MG_ANTICIPATION_WALK_D3_shuffle__P01", loop=4, mirror=True, **R),
+    # the linemen's and linebackers' diagonal and backward footwork at 1.2-3.9 m/s (a pass set's kick slide back and
+    # out, a linebacker's shuffle back), so a man moving back-right at 2 m/s has a clip of that speed and direction
+    "Loco_Line_Back_Jog": dict(src="MG_NonBC_Crouch_MC_Jog_D5__P01", loop=4, **R),                   # 2.9 m/s back
+    "Loco_Line_Back_Walk": dict(src="MG_LB_Walk_D5_Shuffle__P01", loop=4, **R),                      # 1.7 m/s back
+    "Loco_Line_BackDiag_Walk": dict(src="MG_ANTICIPATION_WALK_D4__P01", loop=4, **R),                # 1.2 m/s back-right
+    "Loco_Line_BackDiag_Walk_M": dict(src="MG_ANTICIPATION_WALK_D4__P01", loop=4, mirror=True, **R),
+    "Loco_Line_BackDiag_Run": dict(src="MG_LB_Med_Run_s40_D4__P01", loop=4, **R),                    # 2.1 m/s back-right
+    "Loco_Line_BackDiag_Run_M": dict(src="MG_LB_Med_Run_s40_D4__P01", loop=4, mirror=True, **R),
+    "Loco_Line_BackDiag_Fast": dict(src="MG_LB_Sprint_D4__P01", loop=4, **R),                        # 3.6 m/s back-right
+    "Loco_Line_BackDiag_Fast_M": dict(src="MG_LB_Sprint_D4__P01", loop=4, mirror=True, **R),
+    "Loco_Line_Bounce_Back": dict(src="MG_LB_Walk_D4_Bounce__P01", loop=4, **R),                     # 1.7 m/s back-right
+    "Loco_Line_Bounce_Back_M": dict(src="MG_LB_Walk_D4_Bounce__P01", loop=4, mirror=True, **R),
+    "Loco_Line_Side_Run": dict(src="MG_LB_Med_Run_s40_D3__P01", loop=4, **R),                        # 3.3 m/s right
+    "Loco_Line_Side_Run_M": dict(src="MG_LB_Med_Run_s40_D3__P01", loop=4, mirror=True, **R),
+    "Loco_Line_Crouch_Jog": dict(src="MG_NonBC_Crouch_Jog_158__P01", loop=4, **R),                   # 2.0 m/s
+    # forward at a blocker's pace (the drive block after the set, 2-2.5 m/s): the crouch database had only the 4.4 m/s
+    # crouched run going forward, and the search sped a lateral kick slide up for it
+    "Loco_Line_Block_Walk": dict(src="MG_PASSBLOCK_WALK_D1__P01", loop=4, **R),
+    "Loco_Line_Bounce_Fwd": dict(src="MG_LB_Walk_D1_Bounce__P01", loop=4, **R),
+    "Loco_Line_Bounce_Side": dict(src="MG_LB_Walk_D3_Bounce__P01", loop=4, **R),
+    "Loco_Line_Bounce_Side_M": dict(src="MG_LB_Walk_D3_Bounce__P01", loop=4, mirror=True, **R),
+    "Loco_Line_Shuffle_Back": dict(src="MG_LB_Walk_D5_Shuffle__P01", loop=4, **R),
+}
+MAP.update(LOCO)
+# which TAG PoseSearch database each locomotion clip joins (Tools/Art/mm_build_dbs.py)
+# clips kept out of the databases: captures whose men shuffle in place under a travelling trajectory, or whose feet
+# never plant (Tools/Art/mm_clip_plant.py: skate ratio, planted time), still imported for reference
+LOCO_SKATE = {"Loco_Line_Bounce_Back", "Loco_Line_Bounce_Back_M", "Loco_Line_Bounce_Fwd", "Loco_Line_Bounce_Side",
+              "Loco_Line_Bounce_Side_M", "Loco_Line_Back_Walk", "Loco_Line_Shuffle_Back"}  # 85-97 % skate
+LOCO_DB = {
+    # the transitions (Decel_Sprint, Accel_*, Backpedal_To_Run) stay out of the loops: the sample's starts and stops
+    # cover acceleration, and a 3 s decelerating clip in the sprint loops held a curving back for its whole length
+    "Sprint": ["Loco_Sprint_Normal", "Loco_Sprint_Burn", "Loco_Sprint_Cycle", "Loco_Sprint_BigGuy", "Loco_Sprint_Agile",
+               "Loco_Sprint_Carry", "Loco_Sprint_Curve", "Loco_Run_Curve"],
+    "Run": ["Loco_Run_Average", "Loco_Run_LB", "Loco_Run_BigMan", "Loco_Run_Heavy", "Loco_Run_Side", "Loco_Run_Side_M",
+            "Loco_Run_Back", "Loco_Run_Back_Big", "Loco_Run_Diag", "Loco_Run_Diag_M",
+            "Loco_Jog_Agile", "Loco_Jog_LB", "Loco_Run_Curve", "Loco_Line_BackDiag_Fast", "Loco_Line_BackDiag_Fast_M",
+            "Loco_Line_Side_Run", "Loco_Line_Side_Run_M"],
+    "Walk": ["Loco_Jog_Loop", "Loco_Walk_Loop", "Loco_Walk_Ready", "Loco_Walk_Back", "Loco_Walk_Back_Slow", "Loco_Walk_Side",
+             "Loco_Walk_Side_M", "Loco_Line_Back_Jog", "Loco_Line_Back_Walk", "Loco_Line_BackDiag_Walk", "Loco_Line_BackDiag_Walk_M",
+             "Loco_Line_BackDiag_Run", "Loco_Line_BackDiag_Run_M", "Loco_Line_Bounce_Back", "Loco_Line_Bounce_Back_M"],
+    "Crouch": [n for n in LOCO if n.startswith("Loco_Line_")],
+}
+LOCO_DB = {k: [n for n in v if n not in LOCO_SKATE] for k, v in LOCO_DB.items()}
+
 # the game's mirrored variants (FAthleteAssets::MirrorOf): <name>_M is <name> built with mirror flipped
 MIRRORED = ["Tackle_Wrap", "Tackle_High", "Tackle_Low", "Tackle_Dive", "Tackle_Shoulder", "Tackle_Arm", "Tackle_Assist",
             "Tackled_Hit", "Catch_High", "Catch_Chest", "Catch_Low", "Catch_OverShoulder", "Catch_Dive", "GetUp_FaceDown",

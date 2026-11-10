@@ -56,6 +56,7 @@ struct FTagMotionMatchProxy : public FAnimSingleNodeInstanceProxy
 	FAnimNode_MotionMatching* Match = nullptr;
 	FTagLocoSwitchNode Switch;
 	int32 SeenDbSerial = -1;
+	float ForceLeft = 0.f; // seconds of ForceInterrupt left after a database change, then back to InterruptOnDatabaseChange
 };
 
 UCLASS(Transient, NotBlueprintable)
@@ -75,7 +76,23 @@ public:
 	/** Play rate of the matched clip. Keep it near 1: the pose history records the body's real bone velocities, so a
 	 *  clip played much faster than captured no longer matches its own continuation and the search churns. */
 	float MatchPlayRate = 1.f;
+	float RateSpread = 1.f; // > 1: the search may play a candidate between rate / spread and rate * spread
 	FFloatInterval* PlayRateSetting = nullptr; // the node's (private) PlayRate, found through reflection
+	/** Speed matching: the player's ground speed (cm/s). Each update the picked clip's root speed at its play position
+	 *  is measured (root motion over 0.1 s) and the clip's rate scaled so its feet cover the ground the sim covers,
+	 *  within [SpeedMatchMin, SpeedMatchMax]; set SpeedMatchMax <= 1 to turn it off. Planted feet slide by the
+	 *  difference between the two speeds, so this is the first line against skating whichever clip the search picks. */
+	float SimSpeed = 0.f;
+	float SpeedMatchMin = 0.75f, SpeedMatchMax = 1.25f;
+	/** The crouched gait's ceiling: a lineman's 1.9 m/s kick slide against the pack's 1.2 m/s back-diagonal walk reads
+	 *  as quick feet at 1.5x, where a sprint sped up that far would read as a cartoon (cadence, -TagMoveTest gait). */
+	float CrouchSpeedMatchMax = 1.5f;
+	bool bCrouchGait = false;
+	float* RateMultiplierSetting = nullptr; // the node's PlayRateMultiplier, found through reflection
+	float SpeedRate = 1.f;                  // the smoothed multiplier applied
+	/** Debug, copied after each worker thread update: where the pick is and what the search thought of it. */
+	float MatchedTime = 0.f, MatchedCost = 0.f, MatchedWantedRate = 1.f, MatchedClipSpeed = 0.f;
+	bool bMatchedContinuing = false, bMatchedLoop = false;
 	/** Databases to search (changes take effect next update; the continuing pose is kept when it is still valid). */
 	void SetDatabases(TConstArrayView<UPoseSearchDatabase*> InDatabases);
 

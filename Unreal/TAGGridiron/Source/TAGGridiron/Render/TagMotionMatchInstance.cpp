@@ -1,6 +1,7 @@
 #include "Render/TagMotionMatchInstance.h"
 
 #include "PoseSearch/PoseSearchDatabase.h"
+#include "Animation/AnimSequence.h"
 #include "Misc/CommandLine.h"
 
 void FTagLocoSwitchNode::Initialize_AnyThread(const FAnimationInitializeContext& Context)
@@ -60,25 +61,68 @@ void FTagMotionMatchProxy::PreUpdate(UAnimInstance* InAnimInstance, float DeltaS
 	Switch.bMatch = I->bMatch;
 	History->TransformTrajectory = I->Trajectory;
 	History->TrajectorySpeedMultiplier = I->TrajectorySpeedMultiplier;
-	// with a fixed PlayRate the node plays at PlayRate / TrajectorySpeedMultiplier
+	// the node plays at PlayRate / TrajectorySpeedMultiplier. A range lets the search try each candidate at the
+	// rate that fits the query's speed (the pack's loops run at their captured speeds: a 1.9 m/s kick slide against
+	// a 1.5 m/s crouch strafe is then a matter of which clip, not of the strafe sped up), capped at RateSpread
 	if (I->PlayRateSetting)
 	{
 		const float Fixed = I->MatchPlayRate * I->TrajectorySpeedMultiplier;
-		*I->PlayRateSetting = FFloatInterval(Fixed, Fixed);
+		*I->PlayRateSetting = FFloatInterval(Fixed / I->RateSpread, Fixed * I->RateSpread);
+	}
+	// speed matching (see SimSpeed): the clip's root speed around its play position against the sim's
+	if (I->RateMultiplierSetting)
+	{
+		float Mul = 1.f;
+		const UAnimSequence* Seq = Cast<UAnimSequence>(I->MatchedAsset.Get());
+		if (I->bMatch && Seq && I->SpeedMatchMax > 1.f)
+		{
+			const double Len = Seq->GetPlayLength(), W = 0.1;
+			double S = I->MatchedTime - W * 0.5, E = I->MatchedTime + W * 0.5;
+			FVector Move = FVector::ZeroVector;
+			const FAnimExtractContext Ctx(0.0, true);
+			if (!I->bMatchedLoop) { S = FMath::Clamp(S, 0.0, Len); E = FMath::Clamp(E, 0.0, Len); }
+			if (S < 0.0) { Move += Seq->ExtractRootMotionFromRange(Len + S, Len, Ctx).GetTranslation(); S = 0.0; }
+			if (E > Len) { Move += Seq->ExtractRootMotionFromRange(0.0, E - Len, Ctx).GetTranslation(); E = Len; }
+			if (E > S) Move += Seq->ExtractRootMotionFromRange(S, E, Ctx).GetTranslation();
+			const float ClipSpeed = Move.Size2D() / W;
+			I->MatchedClipSpeed = ClipSpeed;
+			// the node plays at WantedPlayRate (= MatchPlayRate for a fixed interval) x multiplier
+			if (ClipSpeed > 60.f && I->SimSpeed > 60.f)
+				Mul = FMath::Clamp(I->SimSpeed / ClipSpeed, I->SpeedMatchMin, I->bCrouchGait ? I->CrouchSpeedMatchMax : I->SpeedMatchMax) / FMath::Max(I->MatchedWantedRate, 0.1f);
+		}
+		else I->MatchedClipSpeed = 0.f;
+		I->SpeedRate += (Mul - I->SpeedRate) * FMath::Min(1.f, DeltaSeconds / 0.1f);
+		*I->RateMultiplierSetting = I->SpeedRate;
 	}
 	if (SeenDbSerial != I->DbSerial)
 	{
-		// a clip from a database no longer searched (a start once the player has stopped) must not keep playing
+		// a clip from a database no longer searched (a start once the player has stopped, or once he has been moving
+		// for 0.6 s and the loops take over) must not keep playing: InterruptOnDatabaseChange left a crouch start
+		// running for its full 2 s against the lineman's kick slide (-TagMMTrace), so the change forces one fresh
+		// search; the next update puts the mode back so the continuing pose counts again
 		SeenDbSerial = I->DbSerial;
-		Match->SetDatabasesToSearch(I->Databases, EPoseSearchInterruptMode::InterruptOnDatabaseChange);
+		Match->SetDatabasesToSearch(I->Databases, EPoseSearchInterruptMode::ForceInterrupt);
+		ForceLeft = 0.15f; // longer than the 66 ms search throttle, so the forced search actually runs
+	}
+	else if (ForceLeft > 0.f)
+	{
+		ForceLeft -= GetDeltaSeconds();
+		if (ForceLeft <= 0.f) Match->SetDatabasesToSearch(I->Databases, EPoseSearchInterruptMode::InterruptOnDatabaseChange);
 	}
 }
 
 void FTagMotionMatchProxy::PostUpdate(UAnimInstance* InAnimInstance) const
 {
 	FAnimSingleNodeInstanceProxy::PostUpdate(InAnimInstance);
-	// game thread, worker finished: safe to read the blend stack
-	CastChecked<UTagMotionMatchInstance>(InAnimInstance)->MatchedAsset = Switch.bMatch ? Match->GetAnimAsset() : nullptr;
+	// game thread, worker finished: safe to read the blend stack and the search state
+	UTagMotionMatchInstance* I = CastChecked<UTagMotionMatchInstance>(InAnimInstance);
+	I->MatchedAsset = Switch.bMatch ? Match->GetAnimAsset() : nullptr;
+	const FPoseSearchBlueprintResult& R = Match->GetMotionMatchingState().SearchResult;
+	I->MatchedTime = R.SelectedTime;
+	I->MatchedCost = R.SearchCost;
+	I->MatchedWantedRate = R.WantedPlayRate;
+	I->bMatchedContinuing = R.bIsContinuingPoseSearch;
+	I->bMatchedLoop = R.bLoop;
 }
 
 void FTagMotionMatchProxy::UpdateAnimationNode(const FAnimationUpdateContext& InContext)
@@ -105,6 +149,18 @@ UTagMotionMatchInstance::UTagMotionMatchInstance(const FObjectInitializer& Objec
 	SetMatchSetting(TEXT("PlayRate"), FFloatInterval(1.f, 1.f));
 	if (const FProperty* P = FAnimNode_MotionMatching::StaticStruct()->FindPropertyByName(TEXT("PlayRate")))
 		if (P->GetElementSize() == sizeof(FFloatInterval)) PlayRateSetting = P->ContainerPtrToValuePtr<FFloatInterval>(&MatchNode);
+	if (const FProperty* P = FAnimNode_MotionMatching::StaticStruct()->FindPropertyByName(TEXT("PlayRateMultiplier")))
+		if (P->GetElementSize() == sizeof(float)) RateMultiplierSetting = P->ContainerPtrToValuePtr<float>(&MatchNode);
+	// -TagMMSpeedMatch=min,max (default 0.75,1.25; max 1 turns speed matching off)
+	{
+		FString Range;
+		if (FParse::Value(FCommandLine::Get(), TEXT("TagMMSpeedMatch="), Range))
+		{
+			FString A, B;
+			if (Range.Split(TEXT(","), &A, &B)) { SpeedMatchMin = FCString::Atof(*A); SpeedMatchMax = FCString::Atof(*B); }
+		}
+		FParse::Value(FCommandLine::Get(), TEXT("TagMMSpeedMatchCrouch="), CrouchSpeedMatchMax);
+	}
 	// root offset: the clip turns and strides the body, the sim stays the truth (at most 25 cm / 60 deg apart)
 	OffsetNode.TranslationMode = EOffsetRootBoneMode::Interpolate;
 	OffsetNode.RotationMode = EOffsetRootBoneMode::Interpolate;

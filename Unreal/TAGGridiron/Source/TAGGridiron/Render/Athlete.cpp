@@ -283,7 +283,8 @@ void FAthleteAssets::LoadMotionMatching()
 		MMStop[g].Reset();
 		// loops: TAG's football copies when built (Tools/Art/mm_build_dbs.py: sprint without the acceleration
 		// transitions + curve loops, run + arcs), else the sample's
-		UPoseSearchDatabase* Loops = g > 0 ? LoadAsset<UPoseSearchDatabase>(*FString::Printf(TEXT("/Game/TAG/Anim/MM/PSD_TAG_%s_Loops.PSD_TAG_%s_Loops"), Gait[g], Gait[g]), false) : nullptr;
+		// the TAG copies carry the football locomotion from the mocap pack (Tools/Art/mm_build_dbs.py)
+		UPoseSearchDatabase* Loops = LoadAsset<UPoseSearchDatabase>(*FString::Printf(TEXT("/Game/TAG/Anim/MM/PSD_TAG_%s_Loops.PSD_TAG_%s_Loops"), Gait[g], Gait[g]), false);
 		if (!Loops) Loops = Db(FString::Printf(TEXT("Stand_%s_Loops"), Gait[g]));
 		if (UPoseSearchDatabase* X = Loops) { MMMove[g].Add(X); MMStart[g].Add(X); MMPivot[g].Add(X); }
 		if (UPoseSearchDatabase* X = Db(FString::Printf(TEXT("Stand_%s_Starts"), Gait[g]))) MMStart[g].Add(X);
@@ -299,18 +300,24 @@ void FAthleteAssets::LoadMotionMatching()
 		for (UPoseSearchDatabase* X : MMPivot[g]) All.AddUnique(X);
 		for (UPoseSearchDatabase* X : MMStop[g]) All.AddUnique(X);
 	}
-	// crouched footwork: the sample's crouch walk (~1.5-2 m/s); linemen shuffle a little faster, covered by the speed multiplier
+	// crouched footwork: the sample's crouch walk (~1.5-2 m/s) plus, with the TAG database, the pack's kick slides,
+	// shuffles and crouched runs (to 4.4 m/s)
+	bMMPack = bOk && FPackageName::DoesPackageExist(TEXT("/Game/TAG/Anim/MM/PSD_TAG_Crouch_Loops"));
 	if (bOk)
 	{
 		for (TArray<UPoseSearchDatabase*>& C : MMCrouch) C.Reset();
-		UPoseSearchDatabase* CLoops = Db(TEXT("Crouch_Walk_Loops"));
+		UPoseSearchDatabase* CLoops = LoadAsset<UPoseSearchDatabase>(TEXT("/Game/TAG/Anim/MM/PSD_TAG_Crouch_Loops.PSD_TAG_Crouch_Loops"), false);
+		if (!CLoops) CLoops = Db(TEXT("Crouch_Walk_Loops"));
 		UPoseSearchDatabase* CIdles = Db(TEXT("Crouch_Idles"));
 		if (CLoops && CIdles)
 		{
 			MMCrouch[0] = {CLoops};
 			MMCrouch[1] = {CLoops};
 			MMCrouch[2] = {CLoops};
-			if (UPoseSearchDatabase* X = Db(TEXT("Crouch_Walk_Starts"))) MMCrouch[1].Add(X);
+			// no crouch starts: the sample's are generic walk starts that the node kept playing for their full 2 s
+			// against the lineman's kick slide (-TagMMTrace); the pack's kick slides and shuffles in the loops are the
+			// line's own first steps
+			if (!bMMPack) if (UPoseSearchDatabase* X = Db(TEXT("Crouch_Walk_Starts"))) MMCrouch[1].Add(X);
 			if (UPoseSearchDatabase* X = Db(TEXT("Crouch_Walk_Pivots"))) MMCrouch[2].Add(X);
 			if (UPoseSearchDatabase* X = Db(TEXT("Crouch_Walk_Stops"))) MMCrouch[3].Add(X);
 			MMCrouch[3].Add(CIdles);
@@ -319,6 +326,15 @@ void FAthleteAssets::LoadMotionMatching()
 	}
 	MMAll = All;
 	bMotionMatch = bOk;
+	// the continuing pose's cost bias (a runtime value, not part of the search index): the pack has several clips of
+	// each gait from different men, and at the sample's -0.01 the search hopped between them every few tenths of a
+	// second (-TagMoveTest: 17 clip changes in 27 samples of a sprint route), each 0.3 s blend dragging the planted
+	// foot; at -0.15 (search costs run 0.05-0.4) the sprint held its clip and the route's slide fell by a third.
+	// -TagMMCont=<bias> to try others.
+	{
+		static float Cont = FParse::Value(FCommandLine::Get(), TEXT("TagMMCont="), Cont) ? Cont : -0.15f;
+		if (bOk) for (UPoseSearchDatabase* X : All) X->ContinuingPoseCostBias = Cont;
+	}
 	UE_LOG(LogTemp, Display, TEXT("TAG: motion matching %s (%d databases)"), bMotionMatch ? TEXT("enabled") : TEXT("unavailable"), All.Num());
 }
 
@@ -436,6 +452,13 @@ AAthlete::AAthlete()
 	Label->SetWorldSize(70.f);
 	Label->SetTextRenderColor(FColor(255, 212, 0));
 	Label->SetVisibility(false);
+}
+
+void AAthlete::TickAfter(AActor* Driver)
+{
+	if (!Driver) return;
+	Body->PrimaryComponentTick.AddPrerequisite(Driver, Driver->PrimaryActorTick);
+	if (MHBody) MHBody->PrimaryComponentTick.AddPrerequisite(Driver, Driver->PrimaryActorTick);
 }
 
 void AAthlete::Setup(const tag::Player* InPlayer, const FUniform& U)
@@ -872,19 +895,27 @@ bool AAthlete::DriveMotionMatching(const FVector& VelWorld, float SimYaw, float 
 		M->SetDatabases(!bMoving ? A.MMCrouch[3] : MovingTime < 0.6f ? A.MMCrouch[1] : bPivot ? A.MMCrouch[2] : A.MMCrouch[0]);
 	else
 		M->SetDatabases(!bMoving ? A.MMStop[MMGait] : MovingTime < 0.6f ? A.MMStart[MMGait] : bPivot ? A.MMPivot[MMGait] : A.MMMove[MMGait]);
-	// the capture tops out at 7 m/s forward (sprint loop), 3.5 m/s sideways and 3 m/s backwards (run loops); NFL
-	// players run up to ~10 m/s. Above those, search a proportionally slower query and play the clip faster (<= 1.5x).
+	// what the databases cover: with the mocap pack's locomotion (mm_build_dbs.py) 10-11 m/s forward (sprint loops),
+	// 4.9 m/s sideways and 6 m/s backwards; crouched 4.4 m/s forward, 3.2 sideways, 3.9 backwards. Without the TAG
+	// databases (Epic's sample alone) 7 / 3.5 / 3 m/s and 2 / 1.7 / 1.5. Above those, search a proportionally slower
+	// query and play the clip faster (<= 1.5x).
 	{
 		const FVector Fwd = FRotator(0.f, SimYaw, 0.f).Vector();
 		const float C = Speed > 1.f ? FVector::DotProduct(V / Speed, Fwd) : 1.f;
-		const float AnimMax = bCrouch ? (C >= 0.f ? FMath::Lerp(170.f, 200.f, C) : FMath::Lerp(170.f, 150.f, -C))
-			: C >= 0.f ? FMath::Lerp(350.f, 700.f, C) : FMath::Lerp(350.f, 300.f, -C);
+		const bool bPack = A.bMMPack;
+		const float AnimMax = bCrouch ? (C >= 0.f ? FMath::Lerp(bPack ? 320.f : 170.f, bPack ? 440.f : 200.f, C) : FMath::Lerp(bPack ? 320.f : 170.f, bPack ? 390.f : 150.f, -C))
+			: C >= 0.f ? FMath::Lerp(bPack ? 490.f : 350.f, bPack ? 1000.f : 700.f, C) : FMath::Lerp(bPack ? 490.f : 350.f, bPack ? 450.f : 300.f, -C);
 		M->TrajectorySpeedMultiplier = FMath::Clamp(AnimMax / FMath::Max(GaitSpeed, 1.f), 1.f / 1.5f, 1.f);
 		// quicker strides up to 1.1x (7 m/s capture -> 7.7 m/s); the rest of a sprinter's speed comes from a longer
 		// stride (ApplyStride), not quicker feet: at 1.3x the measured cadence was ~5.5 steps/s against the ~4.6 of
 		// a real sprinter at 9.4 m/s (-TagMoveTest gait log), at 1.1x ~5.3 with the step 1.6 -> 1.8 m
 		static float RateCap = FParse::Value(FCommandLine::Get(), TEXT("TagMMRateCap="), RateCap) ? RateCap : 1.1f;
 		M->MatchPlayRate = FMath::Min(1.f / M->TrajectorySpeedMultiplier, RateCap);
+		// with the pack's loops at their true speeds the search picks the clip and a rate within 15 % of it
+		static float Spread = FParse::Value(FCommandLine::Get(), TEXT("TagMMSpread="), Spread) ? Spread : 1.f;
+		M->RateSpread = bPack ? Spread : 1.f;
+		M->SimSpeed = Speed; // speed matching of the picked clip's root speed (UTagMotionMatchInstance)
+		M->bCrouchGait = bCrouch;
 		// faster still (a 10 m/s ball carrier against the 9.1 m/s the sped-up sprint covers): stretch the stride
 		if (MHBody && bMoving && !bCrouch)
 			if (UTagRetargetAnimInstance* RI = Cast<UTagRetargetAnimInstance>(MHBody->GetAnimInstance()))
@@ -914,10 +945,13 @@ bool AAthlete::DriveMotionMatching(const FVector& VelWorld, float SimYaw, float 
 			LastTrace = Now;
 			auto Loc = [&Cur](const FVector& W) { return Cur.InverseTransformPosition(W).ToCompactString(); };
 			const FTransformTrajectorySample F5 = Tr.GetSampleAtTime(0.5f), F10 = Tr.GetSampleAtTime(1.0f), H3 = Tr.GetSampleAtTime(-0.3f);
-			UE_LOG(LogTemp, Display, TEXT("TAG mm trace t=%.2f v=%s |v|=%.0f a=%s fut=%.0f hist=%d p-0.3=%s p+0.5=%s p+1.0=%s face+1.0=%.0f db=%s mm=%s"),
+			FString DbNames;
+			for (UPoseSearchDatabase* X : M->Databases) DbNames += (DbNames.IsEmpty() ? TEXT("") : TEXT("+")) + X->GetName().Replace(TEXT("PSD_"), TEXT(""));
+			UE_LOG(LogTemp, Display, TEXT("TAG mm trace t=%.2f v=%s |v|=%.0f a=%s fut=%.0f hist=%d p-0.3=%s p+0.5=%s p+1.0=%s face+1.0=%.0f db=%s mt=%.2f pivot=%d crouch=%d set=%s mm=%s at=%.2f cost=%.3f cont=%d want=%.2f clip=%.0f mul=%.2f"),
 				Now, *V.ToCompactString(), Speed, *SmoothedAccel.ToCompactString(), FutSpeed, TrajTime.Num(), *Loc(H3.Position), *Loc(F5.Position), *Loc(F10.Position),
 				FMath::RadiansToDegrees((Cur.GetRotation().Inverse() * F10.Facing).GetTwistAngle(FVector::UpVector)),
-				bMoving ? TEXT("move") : TEXT("stop"), *GetNameSafe(M->GetMatchedAsset()));
+				bMoving ? TEXT("move") : TEXT("stop"), MovingTime, bPivot ? 1 : 0, bCrouch ? 1 : 0, *DbNames, *GetNameSafe(M->GetMatchedAsset()),
+				M->MatchedTime, M->MatchedCost, M->bMatchedContinuing ? 1 : 0, M->MatchedWantedRate, M->MatchedClipSpeed, M->SpeedRate);
 		}
 	}
 
@@ -2047,7 +2081,8 @@ FString AAthlete::DebugAnimState() const
 				RI->Proc.ThrowT, RI->Proc.CarryAlpha, RI->Proc.SecureAlpha, RI->Proc.ReachAlpha, *RI->Proc.ReachTarget.ToCompactString(),
 				RI->Proc.LeanAlpha, RI->Proc.LookAlpha, *MHBody->GetComponentTransform().InverseTransformPosition(MHBody->GetSocketLocation(TEXT("hand_r"))).ToCompactString());
 	if (const UTagMotionMatchInstance* M = MatchInstance())
-		if (bInMatch) Fb += FString::Printf(TEXT(" | mm=%s gait=%d tsm=%.2f"), *GetNameSafe(M->GetMatchedAsset()), MMGait, M->TrajectorySpeedMultiplier);
+		if (bInMatch) Fb += FString::Printf(TEXT(" | mm=%s gait=%d tsm=%.2f at=%.2f cost=%.3f clip=%.0f mul=%.2f"), *GetNameSafe(M->GetMatchedAsset()), MMGait, M->TrajectorySpeedMultiplier,
+			M->MatchedTime, M->MatchedCost, M->MatchedClipSpeed, M->SpeedRate);
 	return Fb + FString::Printf(TEXT(" anim=%s mode=%d inst=%s asset=%s playing=%d pos=%.2f rate=%.2f hand_l=%s ticking=%d vis=%d"),
 		*CurrentAnim, static_cast<int32>(Body->GetAnimationMode()), Body->GetAnimInstance() ? *Body->GetAnimInstance()->GetClass()->GetName() : TEXT("none"),
 		I && I->GetAnimationAsset() ? *I->GetAnimationAsset()->GetName() : TEXT("none"), I ? I->IsPlaying() : -1, I ? I->GetCurrentTime() : -1.f,

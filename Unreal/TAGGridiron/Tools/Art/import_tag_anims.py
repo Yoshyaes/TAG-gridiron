@@ -80,7 +80,20 @@ def main():
                 raise RuntimeError("no AnimSequence imported for " + name)
             path = min(anims, key=len)
             anim = unreal.load_asset(path)
-            anim.set_editor_property("enable_root_motion", False)
+            # root motion only for the locomotion clips built with mode 'root' (the trajectory on the root bone);
+            # loops are flagged so PoseSearch treats them as cycles
+            meta_path = os.path.splitext(fbx)[0] + ".json"
+            meta0 = json.load(open(meta_path)) if os.path.exists(meta_path) else {}
+            root_motion = bool(meta0.get("source", {}).get("root_motion"))
+            anim.set_editor_property("enable_root_motion", root_motion)
+            # like the sample's loops: the root bone stays put in the pose (the travel is read from the root track), so
+            # PoseSearch's pose features and the motion matched body do not drift with the root
+            anim.set_editor_property("force_root_lock", root_motion)
+            if meta0.get("spec", {}).get("loop"):
+                try:
+                    anim.set_editor_property("loop", True)
+                except Exception:
+                    pass
             if not EAL.save_asset(path, only_if_is_dirty=False):
                 raise RuntimeError("save failed for %s (file locked, is the Unreal Editor open?)" % path)
             os.remove(tmp)

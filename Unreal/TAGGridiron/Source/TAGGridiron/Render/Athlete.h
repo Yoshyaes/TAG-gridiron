@@ -50,6 +50,10 @@ public:
 	AAthlete();
 
 	void Setup(const tag::Player* InPlayer, const FUniform& U);
+	/** The body's animation ticks after Driver's tick (the director moves the actor from its Tick; without the
+	 *  dependency the two ran in either order within the tick group, and on the frames the pose was evaluated
+	 *  against the previous position the planted feet, pinned in world space, were pulled a frame's travel off). */
+	void TickAfter(AActor* Driver);
 
 	/**
 	 * Drive from simulation state.
@@ -395,6 +399,7 @@ struct FAthleteAssets
 	TObjectPtr<UAnimationAsset> Idle;
 	// motion matching over the Game Animation Sample's Dense PoseSearch databases (rooted, never collected)
 	bool bMotionMatch = false;
+	bool bMMPack = false; // the TAG databases with the mocap pack's locomotion are present (speeds in DriveMotionMatching)
 	// per gait (walk / run / sprint), split by state the way the sample's chooser does: the start and pivot databases are
 	// only offered while starting / pivoting (offered all the time, their clips won over the loops on straight runs)
 	TArray<class UPoseSearchDatabase*> MMMove[3];   // loops

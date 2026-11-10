@@ -150,6 +150,10 @@ class Target:
             pb.rotation_mode = "QUATERNION"
             pb.matrix_basis = Matrix.Identity(4)
         bpy.ops.object.mode_set(mode="OBJECT")
+        # the armature object is UE's `root` bone (the exporter made it the armature); root motion is written on it
+        a.rotation_mode = "XYZ"
+        a.location = (0.0, 0.0, 0.0)
+        a.rotation_euler = (0.0, 0.0, 0.0)
         bpy.context.view_layer.update()
         self.W = a.matrix_world.copy()
         self.Winv = self.W.inverted()
@@ -427,6 +431,7 @@ def build(target, rt, spec, fps_out=FPS_OUT):
     scale = (dur_src / fit) if fit else 1.0  # source seconds per target second
     n_out = max(2, int(round(dur_src / scale * fps_out)) + 1)
     mode = spec.get("mode", "inplace")
+    root_motion = mode == "root"  # body in place, the trajectory written on the armature object (UE's root bone)
     yaw = math.radians(spec.get("yaw", 0.0))
     Ryaw = Matrix.Rotation(yaw, 4, "Z")
 
@@ -435,6 +440,36 @@ def build(target, rt, spec, fps_out=FPS_OUT):
     src.seek(anchor_src_frame)
     T0 = traj_frame(src.world("AITrajectory"))
     heading_fix = None
+    root_path = None
+    if root_motion:
+        # the root follows the hips' ground path (smoothed over 0.3 s), with the heading of the capture's AITrajectory
+        # but not its position: several captures carry a trajectory that steps 37-54 cm between frames or travels
+        # while the man shuffles in place, and with the body posed relative to the trajectory the feet went with it
+        # (both feet moving at the root's speed: Tools/Art/mm_clip_plant.py)
+        pts = []
+        for i in range(n_out):
+            src.seek(min(f_start + i * scale * sfps / fps_out, f_end))
+            h = src.world("Hips").to_translation()
+            pts.append(Vector((h.x, h.y, 0.0)))
+        # the captures' last frame can snap back (MG_NonBC_Crouch_MC_Run_D1: the hips 65 cm behind the frame before,
+        # Tools/Art/mm_clip_plant.py "max step"): a step out of line with its neighbours is replaced by the
+        # neighbours' step, so the loop closes without a pop
+        steps = [pts[i] - pts[i - 1] for i in range(1, n_out)]
+        if len(steps) >= 3:
+            med = sorted(st.length for st in steps)[len(steps) // 2]
+            for i, st in enumerate(steps):
+                ref = steps[i - 1] if i > 0 else steps[i + 1]
+                if (st - ref).length > max(0.08, 1.5 * med):
+                    steps[i] = ref
+            for i in range(1, n_out):
+                pts[i] = pts[i - 1] + steps[i - 1]
+        w = max(1, int(round(0.15 * fps_out)))
+        root_path = []
+        for i in range(n_out):
+            r = min(i, n_out - 1 - i, w)  # a centred window, shrunk at the ends so they do not drift
+            seg = pts[i - r:i + r + 1]
+            root_path.append(sum(seg, Vector()) / len(seg))
+        T0.translation = root_path[0]
 
     a = target.arm
     bpy.context.view_layer.objects.active = a
@@ -455,7 +490,20 @@ def build(target, rt, spec, fps_out=FPS_OUT):
             if mode == "inplace_pos":
                 T = T0.copy()
                 T.translation = traj_frame(world["AITrajectory"]).translation
+            if root_motion:
+                T.translation = root_path[i]
         actor = to_actor(world, T)
+        if root_motion:
+            # the trajectory relative to the anchor, in the actor frame: a yaw and a ground-plane translation
+            Rt = TRAJ_TO_ACTOR @ T0.inverted() @ T @ TRAJ_TO_ACTOR.inverted()
+            if yaw:
+                Rt = Ryaw @ Rt @ Ryaw.inverted()
+            if spec.get("mirror"):
+                Rt = MIRROR @ Rt @ MIRROR
+            a.location = Rt.to_translation()
+            a.rotation_euler = (0.0, 0.0, Rt.to_euler("XYZ").z)
+            a.keyframe_insert("location", frame=i)
+            a.keyframe_insert("rotation_euler", frame=i)
         if yaw:
             actor = {n: Ryaw @ m for n, m in actor.items()}
         if spec.get("mirror"):
@@ -479,7 +527,10 @@ def build(target, rt, spec, fps_out=FPS_OUT):
             return (W @ P[n]).to_translation() if n in P else Vector((0, 0, 0))
         row = {n: tuple(hw(n)) for n in ("pelvis", "head", "foot_l", "foot_r", "hand_l", "hand_r", "upperarm_r", "upperarm_l", "ball_l", "ball_r")}
         # source trajectory (actor frame of the anchor) for travel measurements
-        tr = TRAJ_TO_ACTOR @ T0.inverted() @ world["AITrajectory"]
+        trw = world["AITrajectory"].copy()
+        if root_motion:
+            trw.translation = root_path[i]
+        tr = TRAJ_TO_ACTOR @ T0.inverted() @ trw
         row["traj"] = tuple(tr.to_translation())
         rows.append(row)
     loop = spec.get("loop", 0)
@@ -487,8 +538,11 @@ def build(target, rt, spec, fps_out=FPS_OUT):
         blend_loop(a, keyed, n_out, int(loop))
     bpy.ops.object.mode_set(mode="OBJECT")
     bpy.data.objects.remove(src.arm)
+    if root_motion:
+        a.location = (0.0, 0.0, 0.0)
+        a.rotation_euler = (0.0, 0.0, 0.0)
     info = {"src": spec["src"], "src_fps": sfps, "src_frames": [round(f_start, 2), round(f_end, 2)], "src_seconds": round(dur_src, 3),
-            "time_scale": round(scale, 4), "mode": mode, "mirror": bool(spec.get("mirror")), "loop": loop, "frames_out": n_out,
+            "time_scale": round(scale, 4), "mode": mode, "root_motion": root_motion, "mirror": bool(spec.get("mirror")), "loop": loop, "frames_out": n_out,
             "anchor": [round(v, 3) for v in T0.to_translation()], "anchor_heading_deg": round(heading_deg(T0), 1)}
     return n_out, rows, info
 
@@ -509,6 +563,8 @@ def blend_loop(arm, bones, n_out, k):
                 for cb in strip.channelbags:
                     fcurves.extend(cb.fcurves)
     for fc in fcurves:
+        if not fc.data_path.startswith("pose.bones"):
+            continue  # the object's root motion is not a loop
         kps = fc.keyframe_points
         if len(kps) < 2:
             continue
