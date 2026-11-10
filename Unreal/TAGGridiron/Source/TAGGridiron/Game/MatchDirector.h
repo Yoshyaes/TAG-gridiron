@@ -168,6 +168,9 @@ private:
 	int32 LabelOf(const tag::Ent* E) const;
 	/** -TagArtTest: a user game that drives every pre-snap call (offense, then defense) and screenshots each. */
 	bool bArtTest = false;
+	/** -TagCallShot: a user game that screenshots the play-call screens (offense, then defense) with their cards up. */
+	bool bCallShot = false;
+	int32 CallShotStep = 0;
 	bool bArtDidOff = false, bArtDidDef = false, bArtLiveShot = false, bArtDrawShot = false;
 	float ArtT = 0.f, ArtExitT = 0.f;
 	int32 ArtStep = 0;

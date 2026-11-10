@@ -1,6 +1,8 @@
 #include "UI/GridironOverlay.h"
 
 #include "Game/MatchDirector.h"
+#include "Game/PlayArtStrokes.h"
+#include "UI/PlayDiagram.h"
 #include "Render/Coords.h"
 #include "Sim/Playbook.h"
 #include "Sim/Stats.h"
@@ -597,23 +599,36 @@ void SGridironOverlay::ShowPlayCall(bool bOffense, bool bFourthDown, bool bTwoPo
 		[ SNew(STextBlock).Font(Font(11, "Bold")).Text(T(TEXT("Coach's Pick"))) ]
 	];
 	TSharedRef<SWrapBox> Cards = SNew(SWrapBox).UseAllottedSize(true);
-	auto Card = [&](const FString& Kind, const FString& Name, const FString& Note, std::function<void()> Pick)
+	// every card carries the play drawn as the field will draw it: a fresh pre-snap sim of the play at the ball against
+	// a stock opponent call (the game's own randomness is untouched)
+	const double Los = bTwoPoint ? 98.0 : G.ballOn;
+	const double FirstDown = bTwoPoint ? -1.0 : FMath::Min(100.0, G.ballOn + G.toGo);
+	auto Diagram = [&](const tag::OffPlay* Op, const tag::DefCall* Dc) -> TSharedRef<SWidget>
+	{
+		FArtPicture Pic;
+		BuildCardPicture(*Director->Game, Op, Dc, bOffense, Los, G.ballY, Pic);
+		if (Pic.Marks.IsEmpty()) return SNew(SBox).WidthOverride(254).HeightOverride(150);
+		return SNew(SBox).WidthOverride(254).HeightOverride(150)[ SNew(SPlayDiagram).Picture(Pic).Offense(bOffense).FirstDown(FirstDown) ];
+	};
+	auto Card = [&](const FString& Kind, const FString& Name, const FString& Note, TSharedRef<SWidget> Art, std::function<void()> Pick)
 	{
 		Cards->AddSlot().Padding(4)
 		[
-			SNew(SBox).WidthOverride(230).HeightOverride(86)
+			SNew(SBox).WidthOverride(270).HeightOverride(236)
 			[
-				SNew(SButton).ButtonColorAndOpacity(PanelLight).ContentPadding(FMargin(12, 8))
+				SNew(SButton).ButtonColorAndOpacity(PanelLight).ContentPadding(FMargin(8, 6))
 				.OnClicked_Lambda([this, Pick] { ClearModal(); Pick(); return FReply::Handled(); })
 				[
 					SNew(SVerticalBox)
+					+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(0, 0, 0, 5)[ Art ]
 					+ SVerticalBox::Slot().AutoHeight()[ SNew(STextBlock).Font(Font(9)).ColorAndOpacity(Dim).Text(T(Kind.ToUpper())) ]
-					+ SVerticalBox::Slot().AutoHeight()[ SNew(STextBlock).Font(Font(15, "Bold")).Text(T(Name)) ]
+					+ SVerticalBox::Slot().AutoHeight()[ SNew(STextBlock).Font(Font(14, "Bold")).Text(T(Name)) ]
 					+ SVerticalBox::Slot().AutoHeight()[ SNew(STextBlock).Font(Font(9)).ColorAndOpacity(Accent).AutoWrapText(true).Text(T(Note)) ]
 				]
 			]
 		];
 	};
+	auto NoArt = [] { return StaticCastSharedRef<SWidget>(SNew(SBox).WidthOverride(254).HeightOverride(150)); };
 	if (bOffense)
 	{
 		if (bFourthDown)
@@ -621,8 +636,8 @@ void SGridironOverlay::ShowPlayCall(bool bOffense, bool bFourthDown, bool bTwoPo
 			const tag::Player* K = G.kicker(G.poss);
 			const double Dist = FMath::RoundToDouble(100 - G.ballOn + 17);
 			const int Pct = FMath::RoundToInt(G.fgProb(Dist, *K, G.poss) * 100);
-			Card(TEXT("Special teams"), TEXT("Punt"), S(G.punter(G.poss)->last), [Done] { FCallChoice C; C.Kind = FCallChoice::Punt; Done(C); });
-			Card(TEXT("Special teams"), FString::Printf(TEXT("Field Goal (%d yd)"), static_cast<int>(Dist)), FString::Printf(TEXT("%d%% est. make  -  %s"), Pct, *S(K->last)), [Done] { FCallChoice C; C.Kind = FCallChoice::FG; Done(C); });
+			Card(TEXT("Special teams"), TEXT("Punt"), S(G.punter(G.poss)->last), NoArt(), [Done] { FCallChoice C; C.Kind = FCallChoice::Punt; Done(C); });
+			Card(TEXT("Special teams"), FString::Printf(TEXT("Field Goal (%d yd)"), static_cast<int>(Dist)), FString::Printf(TEXT("%d%% est. make  -  %s"), Pct, *S(K->last)), NoArt(), [Done] { FCallChoice C; C.Kind = FCallChoice::FG; Done(C); });
 		}
 		for (const tag::OffPlay& P : tag::OFF_PLAYS())
 		{
@@ -633,10 +648,10 @@ void SGridironOverlay::ShowPlayCall(bool bOffense, bool bFourthDown, bool bTwoPo
 			if (P.hasTag("deep")) Kind += TEXT(" - shot");
 			FString Note;
 			for (const std::string& R : P.reads) Note += S(R) + TEXT(" ");
-			Card(Kind, S(P.name), Note.IsEmpty() ? FString() : TEXT("Reads: ") + Note, [Done, PP] { FCallChoice C; C.Kind = FCallChoice::Off; C.Play = PP; Done(C); });
+			Card(Kind, S(P.name), Note.IsEmpty() ? FString() : TEXT("Reads: ") + Note, Diagram(PP, nullptr), [Done, PP] { FCallChoice C; C.Kind = FCallChoice::Off; C.Play = PP; Done(C); });
 		}
-		Card(TEXT("Clock"), TEXT("QB Kneel"), TEXT(""), [Done] { FCallChoice C; C.Kind = FCallChoice::Off; C.Play = tag::playById("kneel"); Done(C); });
-		Card(TEXT("Clock"), TEXT("Spike"), TEXT(""), [Done] { FCallChoice C; C.Kind = FCallChoice::Off; C.Play = tag::playById("spike"); Done(C); });
+		Card(TEXT("Clock"), TEXT("QB Kneel"), TEXT(""), NoArt(), [Done] { FCallChoice C; C.Kind = FCallChoice::Off; C.Play = tag::playById("kneel"); Done(C); });
+		Card(TEXT("Clock"), TEXT("Spike"), TEXT(""), NoArt(), [Done] { FCallChoice C; C.Kind = FCallChoice::Off; C.Play = tag::playById("spike"); Done(C); });
 	}
 	else
 	{
@@ -649,7 +664,7 @@ void SGridironOverlay::ShowPlayCall(bool bOffense, bool bFourthDown, bool bTwoPo
 			if (FString(tag::frontName(D.front)).ToLower() != CallTab.ToLower()) continue;
 			const tag::DefCall* DD = &D;
 			const FString* Desc = Cov.Find(FString(tag::coverageName(D.coverage)));
-			Card(D.blitz.empty() ? TEXT("Coverage") : FString::Printf(TEXT("%d-man rush"), 4 + static_cast<int>(D.blitz.size())), S(D.name), Desc ? *Desc : FString(), [Done, DD] { FCallChoice C; C.Kind = FCallChoice::Def; C.Call = DD; Done(C); });
+			Card(D.blitz.empty() ? TEXT("Coverage") : FString::Printf(TEXT("%d-man rush"), 4 + static_cast<int>(D.blitz.size())), S(D.name), Desc ? *Desc : FString(), Diagram(nullptr, DD), [Done, DD] { FCallChoice C; C.Kind = FCallChoice::Def; C.Call = DD; Done(C); });
 		}
 	}
 	const FString Sit = bTwoPoint ? FString(TEXT("Two-point try from the 2"))

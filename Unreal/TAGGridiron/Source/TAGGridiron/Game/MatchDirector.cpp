@@ -4,6 +4,8 @@
 #include "Render/Stadium.h"
 #include "Render/Coords.h"
 #include "Render/PlayArt.h"
+#include "Game/PlayArtStrokes.h"
+#include "TimerManager.h"
 #include "UI/GridironOverlay.h"
 #include "CineCameraActor.h"
 #include "CineCameraComponent.h"
@@ -130,6 +132,11 @@ void AMatchDirector::BeginPlay()
 		FParse::Value(FCommandLine::Get(), TEXT("TagWeather="), Wx);
 		const bool bDay = FParse::Param(FCommandLine::Get(), TEXT("TagDay"));
 		StartMatch(3, 7, false, true, Wx, !bDay, 900);
+	}
+	else if (FParse::Param(FCommandLine::Get(), TEXT("TagCallShot")))
+	{
+		bCallShot = true;
+		StartMatch(3, 7, true, true, 0, true, 900);
 	}
 	else if (FParse::Param(FCommandLine::Get(), TEXT("TagArtTest")))
 	{
@@ -1481,6 +1488,28 @@ void AMatchDirector::CallPlays(bool bTwo)
 		const tag::OffPlay* Op = UserOff() ? tag::playById("trips_flood") : G.cpuOffense();
 		return Finish(Op, UserOff() ? G.cpuDefense(*Op) : tag::defById("base_c3"));
 	}
+	if (bCallShot && !bTwo)
+	{
+		// -TagCallShot: the call screen itself, offense first and then defense, each shot with its cards up; the play
+		// then runs on the coach's pick
+		UserTeam = CallShotStep == 0 ? G.poss : tag::other(G.poss);
+		const bool bOff = UserOff();
+		Overlay->ShowPlayCall(bOff, false, false, [](FCallChoice) {});
+		FTimerHandle H;
+		GetWorld()->GetTimerManager().SetTimer(H, FTimerDelegate::CreateWeakLambda(this, [this, Finish, bOff]
+		{
+			FScreenshotRequest::RequestScreenshot(FString::Printf(TEXT("tag_call_%s.png"), bOff ? TEXT("off") : TEXT("def")), true, false);
+			FTimerHandle H2;
+			GetWorld()->GetTimerManager().SetTimer(H2, FTimerDelegate::CreateWeakLambda(this, [this, Finish]
+			{
+				Overlay->ClearModal();
+				if (++CallShotStep >= 2) { FPlatformMisc::RequestExit(false); return; }
+				const tag::OffPlay* Op = Game->cpuOffense();
+				Finish(Op, Game->cpuDefense(*Op));
+			}), 0.6f, false);
+		}), 3.f, false);
+		return;
+	}
 	if (UserOff())
 	{
 		Overlay->ShowPlayCall(true, G.down == 4 && !bTwo, bTwo, [this, bTwo, Finish](FCallChoice C)
@@ -1583,14 +1612,7 @@ void AMatchDirector::AssignLabels()
 	// buttons by the QB's progression (cross = the primary), then the other route runners, then the eligible men
 	// kept in to block (they can be hot routed out); the blockers lose theirs at the snap (EndPresnapUI)
 	Labels.clear();
-	std::vector<tag::Ent*> Order;
-	for (const std::string& R : Sim->readOrder)
-		if (tag::Ent* E = Sim->offRole(R))
-			if (E->state == tag::EntState::Route) Order.push_back(E);
-	for (tag::Ent* E : Sim->off)
-		if (E->state == tag::EntState::Route && std::find(Order.begin(), Order.end(), E) == Order.end()) Order.push_back(E);
-	for (tag::Ent* E : Sim->off)
-		if (E->eligible && std::find(Order.begin(), Order.end(), E) == Order.end()) Order.push_back(E);
+	const std::vector<tag::Ent*> Order = ArtLabelOrder(*Sim);
 	for (size_t i = 0; i < Order.size() && i < 5; ++i) Labels[Order[i]] = FString::FromInt(static_cast<int>(i) + 1);
 }
 
@@ -2819,7 +2841,8 @@ void AMatchDirector::Tick(float Dt)
 		const bool bMenu = PreMode != EPre::Base;
 		if (!(UserDef() && bMenu)) Timer -= SDt;
 		PresnapClock += SDt;
-		if (Timer <= 0 || (UserDef() && PresnapClock > 25.f) || (UserOff() && bSpace && !bMenu && !bPreConsumed && !Sim->walking()))
+		if (Timer <= 0 || (UserDef() && PresnapClock > 25.f) || (bCallShot && PresnapClock > 4.f && !Sim->walking()) ||
+			(UserOff() && bSpace && !bMenu && !bPreConsumed && !Sim->walking()))
 		{
 			EndPresnapUI();
 			State = EMatchState::Live;
