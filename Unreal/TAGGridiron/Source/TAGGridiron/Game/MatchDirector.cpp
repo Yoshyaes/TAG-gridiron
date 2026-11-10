@@ -105,6 +105,12 @@ void AMatchDirector::BeginPlay()
 		bMoveTest = true;
 		StartMatch(3, 7, false, true, 0, false, 900);
 	}
+	else if (FParse::Param(FCommandLine::Get(), TEXT("TagTackleTest")))
+	{
+		bLineup = true;
+		bTackleTest = true;
+		StartMatch(3, 7, false, true, 0, false, 900);
+	}
 	else if (FParse::Param(FCommandLine::Get(), TEXT("TagLineTest")))
 	{
 		bLineup = true;
@@ -135,10 +141,10 @@ void AMatchDirector::TickLineup(float Dt)
 		const tag::Pos GapPick[] = {tag::Pos::QB, tag::Pos::RB, tag::Pos::WR, tag::Pos::LB, tag::Pos::CB};
 		const tag::TeamKey GapSide[] = {tag::TeamKey::Home, tag::TeamKey::Home, tag::TeamKey::Home, tag::TeamKey::Away, tag::TeamKey::Away};
 		const tag::TeamKey Side[] = {tag::TeamKey::Home, tag::TeamKey::Away, tag::TeamKey::Home, tag::TeamKey::Away, tag::TeamKey::Home, tag::TeamKey::Away};
-		for (int32 i = 0; i < (bGapTest ? 5 : bMoveTest ? 4 : 6); ++i)
+		for (int32 i = 0; i < ((bGapTest || bTackleTest) ? 5 : bMoveTest ? 4 : 6); ++i)
 		{
-			const tag::TeamKey Sd = bGapTest ? GapSide[i] : Side[i];
-			const std::vector<tag::Player*> D = tag::depth(Game->teamOf(Sd), bGapTest ? GapPick[i] : bMoveTest ? MovePick[i] : Pick[i]);
+			const tag::TeamKey Sd = (bGapTest || bTackleTest) ? GapSide[i] : Side[i];
+			const std::vector<tag::Player*> D = tag::depth(Game->teamOf(Sd), (bGapTest || bTackleTest) ? GapPick[i] : bMoveTest ? MovePick[i] : Pick[i]);
 			if (!D.empty()) Lineup.Add(AthleteFor(D[0], Sd));
 		}
 		for (auto& KV : Athletes) KV.Value->SetActorHiddenInGame(!Lineup.Contains(KV.Value));
@@ -157,6 +163,11 @@ void AMatchDirector::TickLineup(float Dt)
 	if (bLineTest)
 	{
 		TickLineTest(Dt);
+		return;
+	}
+	if (bTackleTest)
+	{
+		TickTackleTest(Dt);
 		return;
 	}
 	// 0-9 s pre-snap stances facing the camera, 9-13 s from behind, 13-15 s celebrating, 15-17 s contact / evasion:
@@ -320,6 +331,169 @@ void AMatchDirector::TickMoveTest(float Dt)
 		UE_LOG(LogTemp, Display, TEXT("TAG perf avg %.1f fps over %d frames"), PerfFrames / FMath::Max(PerfT, 0.001f), PerfFrames);
 		FPlatformMisc::RequestExit(false);
 	}
+}
+
+// the pairs as authored (Tools/Anim/clips_more4.py PAIRS): the carrier's actor in the tackler's clip frame (m; x left,
+// y back) and his yaw relative to the tackler (deg, + turns left); where the carrier's pelvis ends (his clip frame)
+namespace
+{
+	struct FTacklePairDef { float Ox, Oy, Yaw, EndX, EndY, TacklerLie, CarrierLie; };
+	const FTacklePairDef GPairs[FAthleteAssets::PairCount] = {
+		{0.f, -0.58f, 180.f, 0.f, 1.00f, 0.45f, 1.05f},  // Drive: tackler on top, gets up first
+		{-0.20f, -0.70f, 180.f, 0.f, -1.00f, 1.05f, 0.45f}, // Over: head across beside his hip; the carrier on top
+		{0.f, -0.55f, 0.f, 0.f, -1.00f, 0.45f, 1.05f},   // Behind
+		{0.f, -0.55f, -90.f, 0.84f, -0.58f, 0.45f, 1.05f}, // Side (from his right; mirrored from his left)
+		{0.f, -1.35f, 0.f, 0.f, -1.76f, 0.70f, 0.90f},   // Dive
+	};
+	// clip frame (x left, y back, m) -> actor local (forward, right, cm)
+	FVector ClipToActor(float X, float Y) { return FVector(-Y * 100.f, -X * 100.f, 0.f); }
+}
+
+void AMatchDirector::StartPairedTackle(AAthlete* Tk, AAthlete* Cr, const FVector& SimSpot, int32 Pair, bool bDive)
+{
+	const FAthleteAssets& A = FAthleteAssets::Get();
+	if (!Tk || !Cr || Tk->IsFalling() || Cr->IsFalling()) return;
+	const FVector H = Cr->GetActorLocation(); // held where the hit landed
+	FVector Fc = Cr->GetLastVel().GetSafeNormal2D();
+	if (Fc.IsNearlyZero()) Fc = Cr->GetActorForwardVector();
+	const FVector Rc(-Fc.Y, Fc.X, 0.f);       // his right
+	const FVector Rel = (Tk->GetActorLocation() - H).GetSafeNormal2D();
+	const float Front = FVector::DotProduct(Rel, Fc), Right = FVector::DotProduct(Rel, Rc);
+	const float Yac = FVector::DotProduct(SimSpot - H, Fc);
+	bool bMirror = false;
+	if (Pair < 0)
+	{
+		if (bDive) Pair = FAthleteAssets::PairDive;
+		// head on: driven back onto his back, or falling forward over the tackler - whichever lands nearer the sim's
+		// spot, so the pile never slides against the fall
+		else if (Front > 0.45f) Pair = FMath::Abs(Yac - 100.f) < FMath::Abs(Yac + 100.f) ? FAthleteAssets::PairOver : FAthleteAssets::PairDrive;
+		else if (Front < -0.45f) Pair = FAthleteAssets::PairBehind;
+		else Pair = FAthleteAssets::PairSide;
+	}
+	if (Pair == FAthleteAssets::PairSide) bMirror = Right < 0.f; // the tackler on his left: the mirrored pair
+	UAnimationAsset* TClip = A.Side(A.PairT[Pair], bMirror);
+	UAnimationAsset* CClip = A.Side(A.PairC[Pair], bMirror);
+	if (!TClip || !CClip) return;
+	const FTacklePairDef& P = GPairs[Pair];
+	const float Ox = bMirror ? -P.Ox : P.Ox, YawRel = bMirror ? -P.Yaw : P.Yaw, EndX = bMirror ? -P.EndX : P.EndX;
+	const float Yc = Fc.Rotation().Yaw;
+	const float Yt = Yc + YawRel;
+	// the carrier lies where the clip takes him; the pile drives that onto the sim's spot (within reason)
+	const FVector Travel = FRotator(0, Yc, 0).RotateVector(ClipToActor(EndX, P.EndY));
+	const FVector Drive = (FVector(SimSpot.X, SimSpot.Y, H.Z) - (H + Travel)).GetClampedToMaxSize2D(150.f);
+	// the pair's relation: the tackler where the pair puts him relative to the carrier. The two close the gap between
+	// where they are and that relation together (each moves half of it), so neither glides far.
+	const FVector Off = FRotator(0, Yt, 0).RotateVector(ClipToActor(Ox, P.Oy));
+	FVector Gap = (Tk->GetActorLocation() - (H - Off));
+	Gap.Z = 0.f;
+	Gap = Gap.GetClampedToMaxSize2D(160.f) * 0.5f;
+	const FVector CFrom = H + Gap, CTo = CFrom + FVector(Drive.X, Drive.Y, 0.f);
+	const FVector TFrom = CFrom - Off, TTo = CTo - Off;
+	const float DriveT = 0.45f;
+	const float Jit = FMath::Frac(FPlatformTime::Seconds() * 7.13) * 0.35f; // not every pile gets up on the same beat
+	Cr->BeginPairedFall(CClip, CFrom, CTo, Yc, DriveT, P.CarrierLie + Jit, true);
+	Cr->PileBodyEnd = CTo + Travel; // where his body comes to rest (a second man lands on that)
+	Tk->BeginPairedFall(TClip, TFrom, TTo, Yt, DriveT, P.TacklerLie, true);
+	UE_LOG(LogTemp, Display, TEXT("TAG tackle pair %s%s: #%d on #%d (front %.2f right %.2f, yac %.0f cm, drive %.0f cm, close %.0f cm)"),
+		*TClip->GetName(), bMirror ? TEXT(" (mirror)") : TEXT(""), Tk->Player ? Tk->Player->number : -1,
+		Cr->Player ? Cr->Player->number : -1, Front, Right, Yac, Drive.Size2D(), FVector::Dist2D(Tk->GetActorLocation(), TFrom));
+}
+
+void AMatchDirector::StartPileOn(AAthlete* As, AAthlete* Cr)
+{
+	const FAthleteAssets& A = FAthleteAssets::Get();
+	if (!As || !Cr || As->IsFalling() || !A.PileOn) return;
+	// he lands across the pile: chest over the carrier's body (the carrier's anchor end, pelvis a little past it)
+	const FVector Pile = Cr->IsFalling() ? Cr->PileBodyEnd : Cr->GetActorLocation();
+	FVector ToPile = Pile - As->GetActorLocation();
+	ToPile.Z = 0.f;
+	if (!ToPile.Normalize()) ToPile = As->GetActorForwardVector();
+	const FVector At = Pile - ToPile * 165.f; // the pile-on clip lands his chest 1.65 m ahead of where it starts
+	As->BeginPairedFall(A.PileOn, At, At, ToPile.Rotation().Yaw, 0.3f, 0.25f, true);
+}
+
+void AMatchDirector::TickTackleTest(float Dt)
+{
+	// a back running at 7 m/s along +X; the tackler arrives from the rep's angle. Reps (5 s): 0 head on (no gain),
+	// 1 head on (falls forward for yards), 2 from behind, 3 from his right, 4 from his left, 5 shoestring dive,
+	// 6 head on with a second man piling on
+	if (Lineup.Num() < 5) return;
+	const float T = LineupT;
+	AAthlete* Cr = Lineup[1];
+	AAthlete* Tk = Lineup[3];
+	AAthlete* As = Lineup[4];
+	const int32 Rep = static_cast<int32>(T / 5.f);
+	const float R = T - Rep * 5.f;
+	if (Rep > 6)
+	{
+		FPlatformMisc::RequestExit(false);
+		return;
+	}
+	static int32 LastRep = -1;
+	static bool bHit = false, bPile = false;
+	if (Rep != LastRep)
+	{
+		LastRep = Rep;
+		bHit = bPile = false;
+		Cr->ResetPose();
+		Tk->ResetPose();
+		As->ResetPose();
+	}
+	for (int32 i = 0; i < Lineup.Num(); ++i) Lineup[i]->SetActorHiddenInGame(!(i == 1 || i == 3 || (i == 4 && Rep == 6)));
+	const FVector O = TagCoords::ToWorld(40, tag::FIELD_W * 0.5, 1);
+	const float HitT = 1.2f, RunV = 700.f;
+	const float Run = FMath::Min(R, HitT);
+	const FVector CrP = O + FVector(-RunV * (HitT - Run), 0.f, 0.f);
+	// where the tackler comes from (relative to the hit point), and how fast
+	FVector From(260.f, 0.f, 0.f);
+	if (Rep == 2) From = FVector(-260.f, 0.f, 0.f);
+	else if (Rep == 3) From = FVector(40.f, 300.f, 0.f);
+	else if (Rep == 4) From = FVector(40.f, -300.f, 0.f);
+	else if (Rep == 5) From = FVector(-320.f, 60.f, 0.f);
+	const float Approach = FMath::Clamp(R / HitT, 0.f, 1.f);
+	const FVector TkP = O + From * (1.f - Approach) * 1.6f + From.GetSafeNormal() * 55.f;
+	const FVector TkV = R < HitT ? -From.GetSafeNormal() * 600.f : FVector::ZeroVector;
+	auto Foot = [&](AAthlete* Who) { FAthleteFootball F; F.bHasBall = Who == Cr; Who->SetFootball(F, Dt); };
+	Foot(Cr);
+	Foot(Tk);
+	Foot(As);
+	if (!bHit && R >= HitT)
+	{
+		bHit = true;
+		const FVector Spot = O + FVector(Rep == 1 ? 230.f : Rep == 0 || Rep == 6 ? -40.f : 120.f, 0.f, 0.f);
+		const int32 Pairs[] = {FAthleteAssets::PairDrive, FAthleteAssets::PairOver, FAthleteAssets::PairBehind,
+			FAthleteAssets::PairSide, FAthleteAssets::PairSide, FAthleteAssets::PairDive, FAthleteAssets::PairDrive};
+		StartPairedTackle(Tk, Cr, Spot, Pairs[Rep], Rep == 5);
+	}
+	if (Rep == 6 && bHit && !bPile && R >= HitT + 0.25f)
+	{
+		bPile = true;
+		StartPileOn(As, Cr);
+	}
+	// sim-side positions (the falls own the bodies once they start)
+	const FVector Spot = O;
+	Cr->Drive(R < HitT ? CrP : Spot, 0.f, R < HitT ? FVector(RunV, 0, 0) : FVector::ZeroVector, 9.f, R < HitT ? TEXT("run") : TEXT("down"), R, Dt, false);
+	Tk->Drive(R < HitT ? TkP : O + From.GetSafeNormal() * 60.f, TkV.IsNearlyZero() ? (-From).Rotation().Yaw : TkV.Rotation().Yaw, TkV, 9.f,
+		R < HitT ? TEXT("run") : TEXT("tackle"), R, Dt, false);
+	if (Rep == 6)
+	{
+		const FVector AsFrom = O + FVector(300.f, -220.f, 0.f);
+		const FVector AsP = R < HitT + 0.25f ? FMath::Lerp(AsFrom + FVector(400.f, -300.f, 0.f), AsFrom, FMath::Clamp(R / (HitT + 0.25f), 0.f, 1.f)) : AsFrom;
+		As->Drive(AsP, (O - AsFrom).Rotation().Yaw, R < HitT + 0.25f ? (AsFrom - (AsFrom + FVector(400.f, -300.f, 0.f))) : FVector::ZeroVector, 9.f,
+			TEXT("run"), R, Dt, false);
+	}
+	// side on from the field side, low, 30 mm
+	const FVector At = O + FVector(60.f, -720.f, 170.f), Look = O + FVector(60.f, 0.f, 60.f);
+	Camera->SetActorLocation(At);
+	Camera->SetActorRotation((Look - At).Rotation());
+	if (UCineCameraComponent* C = Camera->GetCineCameraComponent())
+	{
+		C->CurrentFocalLength = 30.f;
+		C->FocusSettings.ManualFocusDistance = (Look - At).Size();
+	}
+	static int32 Shot = 0;
+	if (T >= 0.1f * Shot && Shot < 360)
+		FScreenshotRequest::RequestScreenshot(FString::Printf(TEXT("tag_tackletest_r%d_%03d.png"), Rep, FMath::RoundToInt(R * 100.f)), false, false), ++Shot;
 }
 
 void AMatchDirector::TickLineTest(float Dt)
@@ -1576,7 +1750,7 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 	// still holding the ball within 3 yd)
 	for (tag::Ent* E : Sim->ents)
 	{
-		if (E->anim != tag::Anim::Tackle || E->animT > 0.06) continue;
+		if (E->anim != tag::Anim::Tackle || E->animT > 0.06 || AthOf(E)->IsFalling()) continue;
 		const tag::Ent* Best = nullptr;
 		double BestD = 3.0;
 		for (const tag::Ent* C : Sim->ents)
@@ -1589,7 +1763,7 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 		{
 			AAthlete* Tk = AthOf(E);
 			Tk->BeginTackleOn(AthOf(Best));
-			if (Best->anim == tag::Anim::Down)
+			if (Best->anim == tag::Anim::Down && !AthOf(Best)->IsFalling())
 			{
 				const FVector TvW = Dir > 0 ? FVector(E->vel.x, -E->vel.y, 0) * YD : FVector(-E->vel.x, E->vel.y, 0) * YD;
 				AthOf(Best)->ApplyHit(TvW, static_cast<float>(E->p->weightLb) * 0.4536f, Tk->GetActorLocation());
@@ -1650,6 +1824,18 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 				Bl->PlayBeaten(Ru);
 			}
 		}
+		else if (Ev.type == "tackle" && Ev.a && Ev.b)
+		{
+			// the sim's tackle: both men to the ground together, the carrier's body from the hit to the spot
+			AAthlete* Tk = AthOf(Ev.a);
+			AAthlete* Cr = AthOf(Ev.b);
+			if (Tk && Cr && Tk != Cr)
+				StartPairedTackle(Tk, Cr, ToWorld(Ev.b->pos.x, Ev.b->pos.y, Dir), -1, Ev.note == "dive");
+		}
+		else if (Ev.type == "assist" && Ev.a && Ev.b)
+		{
+			if (AAthlete* As = AthOf(Ev.a)) StartPileOn(As, AthOf(Ev.b));
+		}
 		else if (Ev.type == "pancake" && Ev.a && Ev.b)
 		{
 			// a run block won decisively: the defender goes down on his back (the sim's down state: hit, fall, get up)
@@ -1657,7 +1843,14 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 			if (AAthlete* Bl = AthOf(Ev.b))
 			{
 				Bl->PlayPancakeFinish();
-				if (AAthlete* Df = AthOf(Ev.a)) Df->SetPancaked(Df->GetActorLocation() - Bl->GetActorLocation());
+				if (AAthlete* Df = AthOf(Ev.a))
+				{
+					// knocked onto his back away from the blocker (the carrier's head-on fall, about a metre back)
+					const FVector Here = Df->GetActorLocation();
+					const float Yaw = (Bl->GetActorLocation() - Here).Rotation().Yaw;
+					if (UAnimationAsset* Fall = FAthleteAssets::Get().PairC[FAthleteAssets::PairDrive])
+						Df->BeginPairedFall(Fall, Here, Here, Yaw, 0.3f, 0.9f, false);
+				}
 			}
 			UE_LOG(LogTemp, Display, TEXT("TAG pancake: #%d puts #%d down"), Ev.b->p ? Ev.b->p->number : -1, Ev.a->p ? Ev.a->p->number : -1);
 		}
@@ -1875,6 +2068,7 @@ FVector AMatchDirector::FocusPoint() const
 
 void AMatchDirector::UpdateCamera(float Dt, const FVector& InFocus)
 {
+	if (bTackleTest || bLineTest) return; // the look-dev scenes frame their own shots
 	const double Y = YD;
 	// a dead ball keeps flying (an overthrow out of the back of the end zone, a kick into the stands): the operators
 	// stay on the field, so the framing never follows it more than a few yards past the end lines and sidelines

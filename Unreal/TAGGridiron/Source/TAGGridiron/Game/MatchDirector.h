@@ -174,6 +174,14 @@ private:
 	/** -TagLineTest: one tackle against one end, every trench interaction in turn, filmed side on. */
 	bool bLineTest = false;
 	void TickLineTest(float Dt);
+	/** -TagTackleTest: every paired tackle in turn, filmed side on. */
+	bool bTackleTest = false;
+	void TickTackleTest(float Dt);
+	/** Pair a tackle: Tk tackles Cr, the sim put the carrier down at SimSpot (world). Pair -1 picks from the hit
+	 *  (angle, yards after contact); both men fall together, anchored in the pair's authored relation. */
+	void StartPairedTackle(AAthlete* Tk, AAthlete* Cr, const FVector& SimSpot, int32 Pair, bool bDive);
+	/** A second man arriving on the pile. */
+	void StartPileOn(AAthlete* As, AAthlete* Cr);
 	int32 GapShot = 0;
 	bool bMoveTest = false;
 	FVector MovePos = FVector::ZeroVector;

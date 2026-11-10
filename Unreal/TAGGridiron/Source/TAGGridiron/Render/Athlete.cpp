@@ -165,6 +165,15 @@ void FAthleteAssets::Load()
 		TackledFromBehind = Keyed(TEXT("A_TAG_Tackled_FromBehind"));
 		TackledFromSide = Keyed(TEXT("A_TAG_Tackled_FromSide"));
 		TackleMiss = Keyed(TEXT("A_TAG_Tackle_Miss"));
+		{
+			static const TCHAR* PairNames[PairCount] = {TEXT("Drive"), TEXT("Over"), TEXT("Behind"), TEXT("Side"), TEXT("Dive")};
+			for (int32 i = 0; i < PairCount; ++i)
+			{
+				PairT[i] = Keyed(*FString::Printf(TEXT("A_TAG_PT_%s_T"), PairNames[i]));
+				PairC[i] = Keyed(*FString::Printf(TEXT("A_TAG_PT_%s_C"), PairNames[i]));
+			}
+			PileOn = Keyed(TEXT("A_TAG_PT_PileOn"));
+		}
 		BrokenStumble = Keyed(TEXT("A_TAG_Broken_Stumble"));
 		IdleHandsHips = Keyed(TEXT("A_TAG_Idle_HandsHips_Loop"));
 		IdleHandsKnees = Keyed(TEXT("A_TAG_Idle_HandsKnees_Loop"));
@@ -181,7 +190,7 @@ void FAthleteAssets::Load()
 			TEXT("Celebrate_Flex_Loop"), TEXT("Celebrate_PointUp_Loop"), TEXT("Celebrate_Leap_Loop"), TEXT("Celebrate_FirstDown_Loop"),
 			TEXT("Celebrate_Shimmy_Loop"), TEXT("Catch_OneHand"), TEXT("Catch_BackShoulder"), TEXT("Catch_Comeback"),
 			TEXT("Tackled_FromSide"), TEXT("Tackle_Miss"), TEXT("Broken_Stumble"), TEXT("Rush_LongArm"), TEXT("Rush_DipRip"),
-			TEXT("Block_Beaten"), TEXT("Shed_Swim"), TEXT("Shed_Rip"), TEXT("Rush_Club")})
+			TEXT("Block_Beaten"), TEXT("Shed_Swim"), TEXT("Shed_Rip"), TEXT("Rush_Club"), TEXT("PT_Side_T"), TEXT("PT_Side_C")})
 		{
 			UAnimationAsset* Orig = Keyed(*FString::Printf(TEXT("A_TAG_%s"), N));
 			UAnimationAsset* Mir = Keyed(*FString::Printf(TEXT("A_TAG_%s_M"), N));
@@ -1159,8 +1168,8 @@ void AAthlete::StartGetUp(const FVector& SimLoc)
 		++RI->SnapshotSerial;
 	}
 	CurrentClip = nullptr; // restart cleanly; the snapshot (not the last pose) is the blend source
-	PlayClip(Clip, false);
 	Clip = A.Side(Clip, bUpMirror);
+	PlayClip(Clip, false);
 	GetUpLeft = Clip->GetPlayLength() + (bInjuredChain && A.GetUpSlow ? A.GetUpSlow->GetPlayLength() : 0.f);
 	bGettingUp = true;
 	bStoodUp = true;
@@ -1221,6 +1230,77 @@ void AAthlete::FaceFollowBody(bool bFollow)
 {
 	if (!MHFace || !MHBody || bFaceOnLeader) return;
 	MHFace->SetLeaderPoseComponent(bFollow ? MHBody.Get() : nullptr);
+}
+
+void AAthlete::BeginPairedFall(UAnimationAsset* Clip, const FVector& From, const FVector& To, float YawW, float DriveTime,
+	float LieTime, bool bEaseIn)
+{
+	if (!Clip || bRagdoll) return;
+	ClearReplayHold();
+	OneShot = nullptr;
+	OneShotLeft = 0.f;
+	TackledLeft = 0.f;
+	FallHoldLeft = 0.f;
+	TackleOn = nullptr;
+	bMissing = false;
+	bGettingUp = false;
+	bFalling = true;
+	FallClip = Clip;
+	FallT = 0.f;
+	FallLen = Clip->GetPlayLength();
+	FallLie = LieTime;
+	FallDrive = FMath::Max(0.05f, DriveTime);
+	FallFrom = GetActorLocation();
+	FallFromYaw = GetActorRotation().Yaw;
+	AnchorA = FVector(From.X, From.Y, FallFrom.Z);
+	AnchorB = FVector(To.X, To.Y, FallFrom.Z);
+	FallYaw = YawW;
+	bFallEase = bEaseIn;
+	VisOffset = FVector::ZeroVector;
+	CurrentClip = nullptr;
+	PlayClip(Clip, false); // crossfades out of the run / tackle pose
+	if (!bEaseIn) SetActorLocationAndRotation(AnchorA, FRotator(0, YawW, 0));
+	SmoothedYaw = YawW;
+	UE_LOG(LogTemp, Verbose, TEXT("TAG fall #%d: %s, drive %.0f cm, lie %.2f s"), Player ? Player->number : -1, *Clip->GetName(),
+		FVector::Dist2D(AnchorA, AnchorB), LieTime);
+}
+
+void AAthlete::TickFall(const FVector& SimLoc, float DeltaTime)
+{
+	FallT += DeltaTime;
+	// the pile drives onto the spot early in the fall (most of the momentum is spent by the time they land)
+	const float D = FMath::Clamp(FallT / FallDrive, 0.f, 1.f);
+	FVector At = FMath::Lerp(AnchorA, AnchorB, 1.f - FMath::Square(1.f - D));
+	float Yaw = FallYaw;
+	if (bFallEase && FallT < 0.2f)
+	{
+		const float E = FMath::SmoothStep(0.f, 1.f, FallT / 0.2f);
+		At = FMath::Lerp(FallFrom, At, E);
+		Yaw = FallFromYaw + FMath::FindDeltaAngleDegrees(FallFromYaw, FallYaw) * E;
+	}
+	SetActorLocationAndRotation(At, FRotator(0, Yaw, 0));
+	SmoothedYaw = Yaw;
+	PlayClip(FallClip, false);
+	if (FallT >= FallLen + FallLie)
+	{
+		bFalling = false;
+		StartGetUp(SimLoc);
+	}
+}
+
+void AAthlete::BeginSoloFall(const FVector& SimLoc, const FVector& MoveDirW)
+{
+	// nobody paired him (a knockdown, a pancake without its blocker): fall the way he was going. Backward onto his back
+	// when knocked against his facing, forward onto his face otherwise.
+	const FAthleteAssets& A = FAthleteAssets::Get();
+	const FVector F = GetActorForwardVector();
+	const bool bBack = FVector::DotProduct(MoveDirW.GetSafeNormal2D(), F) < -0.3f;
+	UAnimationAsset* Clip = bBack ? A.PairC[FAthleteAssets::PairDrive].Get() : A.PairC[FAthleteAssets::PairBehind].Get();
+	if (!Clip) return;
+	const FVector Here = GetActorLocation();
+	const FVector Travel = F * (bBack ? -100.f : 100.f);
+	const FVector Want = FVector(SimLoc.X, SimLoc.Y, Here.Z) - Travel;
+	BeginPairedFall(Clip, Here, Here + (Want - Here).GetClampedToMaxSize2D(150.f), GetActorRotation().Yaw, 0.35f, 0.7f, false);
 }
 
 void AAthlete::SetCivilian()
@@ -1359,17 +1439,25 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 		if (DownTime > 0.6f && A.GetUpDown && A.GetUpUp) StartGetUp(Location); // ragdoll settled: get up before the next play resets him
 		if (bRagdoll) return;
 	}
+	if (bFalling)
+	{
+		TickFall(Location, DeltaTime);
+		return;
+	}
+	if (FallHoldLeft > 0.f)
+	{
+		// down, held where the hit landed while the director pairs the tackle (same frame, normally); a keyed solo
+		// fall if nobody claims him
+		FallHoldLeft -= DeltaTime;
+		SetActorLocation(Location + VisOffset);
+		if (FallHoldLeft <= 0.f) BeginSoloFall(Location, PileVel);
+		return;
+	}
 	if (TackledLeft > 0.f)
 	{
-		// held by the tackler and driven forward with the pile onto the sim's spot, then the fall is physics
 		TackledLeft -= DeltaTime;
-		VisOffset *= FMath::Exp(-9.f * DeltaTime);
 		SetActorLocation(Location + VisOffset);
-		if (TackledLeft <= 0.f)
-		{
-			VisOffset = FVector::ZeroVector;
-			StartRagdoll(PileVel);
-		}
+		if (TackledLeft <= 0.f) BeginSoloFall(Location, PileVel);
 		return;
 	}
 	if (bGettingUp)
@@ -1429,15 +1517,12 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 				PileVel = PancakeDir * 170.f - FVector(0, 0, 40);
 				bPancakePending = false;
 			}
-			static int32 GHitSeq = 0;
-			UAnimationAsset* Hit = A.Side(A.TackledHit, (GHitSeq++ % 2) == 1);
-			TackledLeft = Hit->GetPlayLength();
-			bHitApplied = false;
+			bHitApplied = true; // the paired fall plays the hit
+			FallHoldLeft = 0.12f;
 			UE_LOG(LogTemp, Verbose, TEXT("TAG tackled #%d held %.0f cm behind the sim spot"), Player ? Player->number : -1, Jump);
-			PlayClip(Hit, false);
 			return;
 		}
-		StartRagdoll(VelWorld);
+		BeginSoloFall(Location, FVector(VelWorld.X, VelWorld.Y, 0.f));
 		return;
 	}
 	// hand keyed contact and evasion clips (in place; the sim moves the actor)
@@ -1477,14 +1562,6 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 		// pileup: once the wrap clip has played out on a carrier who went down, the tackler goes down with him (a
 		// ragdoll driven onto the carrier; ragdolls collide, so gang tacklers land on and around him) instead of
 		// freezing upright in the clip's last pose until the next play
-		if (AAthlete* C = TackleOn.Get(); C && CurrentClip && AnimT >= CurrentClip->GetPlayLength() - 0.03f &&
-			(C->bRagdoll || C->TackledLeft > 0.f))
-		{
-			FVector To = C->GetActorLocation() - GetActorLocation();
-			To.Z = 0.f;
-			StartRagdoll(To.GetSafeNormal() * 260.f + FVector(VelWorld.X, VelWorld.Y, 0.f) * 0.3f - FVector(0, 0, 80));
-			UE_LOG(LogTemp, Verbose, TEXT("TAG pileup: #%d falls onto #%d"), Player ? Player->number : -1, C->Player ? C->Player->number : -1);
-		}
 		return;
 	}
 	if (Anim == TEXT("dive") && A.TackleDive)

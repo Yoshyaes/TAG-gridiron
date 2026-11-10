@@ -2195,10 +2195,12 @@ bool PlaySim::tryTackle(Ent* d, Ent* c, int gang, bool arm, bool dive) {
     d->state = EntState::Down;
     d->anim = Anim::Tackle;
     tacklers.push_back(d);
+    ev("tackle", d, c, dive ? "dive" : arm ? "arm" : "");  // presentation: the paired fall
     // assist: another defender right there
     for (Ent* o : defendersOf(c)) {
       if (o != d && o->free() && dist(o->pos, c->pos) < 1.4) {
         tacklers.push_back(o);
+        ev("assist", o, c);
         break;
       }
     }

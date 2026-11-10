@@ -14,10 +14,12 @@ import tag_anim  # noqa: E402
 
 import clips_more2  # noqa: E402
 import clips_more3  # noqa: E402
+import clips_more4  # noqa: E402
 
 clips.CLIPS.update(clips_more.MORE)
 clips.CLIPS.update(clips_more2.MORE2)
 clips.CLIPS.update(clips_more3.LINE)
+clips.CLIPS.update(clips_more4.TACKLES)
 
 argv = sys.argv[sys.argv.index("--") + 1:]
 rig_fbx, name, out_dir = argv[0], argv[1], argv[2]
@@ -29,10 +31,14 @@ rig.commit()
 import bpy  # noqa: E402
 ik_miss = {}
 ik_frame = {}
-for f in range(f0, f1 + 1, max(1, (f1 - f0) // 6)):
+ik_detail = []  # every frame with a miss over 2 cm: (frame, limb, miss, root-to-target distance)
+roots = {"l_arm": "upperarm_l", "r_arm": "upperarm_r", "l_leg": "thigh_l", "r_leg": "thigh_r"}
+for f in range(f0, f1 + 1):
     bpy.context.scene.frame_set(f)
     for key, (mid, end, c, tgt, pole, cr) in rig.chains.items():
         m = round((rig.head(end) - tgt.matrix_world.translation).length, 4)
+        if m > 0.02:
+            ik_detail.append((f, key, m, round((rig.head(roots[key]) - tgt.matrix_world.translation).length, 3)))
         if m > ik_miss.get(key, -1.0):
             ik_miss[key] = m
             ik_frame[key] = f
@@ -53,7 +59,7 @@ for side in ("l", "r"):
                              if a[2] < 0.105 and b[2] < 0.105), default=0.0), 4)
 report = {"clip": name, "frames": [f0, f1], "seconds": round((f1 - f0) / 30.0, 3), "pole_angles": rig.pole_angles,
           "pelvis_z": stat("pelvis", 2), "head_z": stat("head", 2), "hand_r_z": stat("hand_r", 2), "shoulder_r": [round(v, 3) for v in rows[0]["upperarm_r"]], "hand_r": [round(v, 3) for v in rows[0]["hand_r"]],
-          "max_planted_foot_step_m": slide, "ik_miss_m": ik_miss, "ik_miss_frame": ik_frame, "track_align": rig.track_align}
+          "max_planted_foot_step_m": slide, "ik_miss_m": ik_miss, "ik_detail": ik_detail, "ik_miss_frame": ik_frame, "track_align": rig.track_align}
 os.makedirs(out_dir, exist_ok=True)
 fbx = os.path.join(out_dir, "A_TAG_%s.fbx" % name)
 rig.export(fbx, f0, f1)

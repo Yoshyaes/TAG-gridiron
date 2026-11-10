@@ -115,6 +115,14 @@ public:
 	void PlayBeaten(const AAthlete* Rusher);
 	/** Pancake: the blocker drives through and finishes over the man he put down. */
 	void PlayPancakeFinish();
+	/** Keyed fall to the turf, see bFalling. bEaseIn: glide from where the actor is onto From in the first 0.15 s. */
+	void BeginPairedFall(UAnimationAsset* Clip, const FVector& From, const FVector& To, float YawW, float DriveTime,
+		float LieTime, bool bEaseIn);
+	bool IsFalling() const { return bFalling; }
+	/** Where the pile ends: the carrier's anchor at the end of the drive. */
+	FVector FallAnchorEnd() const { return AnchorB; }
+	FVector GetLastVel() const { return LastVelW; }
+	FVector PileBodyEnd = FVector::ZeroVector; // the carrier's body at the end of a paired fall
 	/** Pancaked: the next fall goes over backward along PushDirW (away from the blocker), about a metre, instead of
 	 *  travelling with a tackle pile. */
 	void SetPancaked(const FVector& PushDirW) { PancakeDir = PushDirW.GetSafeNormal2D(); bPancakePending = true; }
@@ -196,6 +204,17 @@ private:
 	float OneShotLeft = 0.f;
 	// get-up after a ragdoll: snapshot the lying pose, play the matching keyed get-up where the body lies
 	void StartGetUp(const FVector& SimLoc);
+	// keyed fall to the ground (paired tackle, pancake, solo knockdown): the actor is anchored and the clip carries the
+	// body; the anchor slides from From to To over DriveTime (the pile driving onto the sim's spot). Ends lying still
+	// for LieTime, then the keyed get-up out of the landing.
+	bool bFalling = false;
+	TObjectPtr<UAnimationAsset> FallClip;
+	float FallT = 0.f, FallLen = 0.f, FallLie = 0.f, FallDrive = 0.4f, FallFromYaw = 0.f, FallYaw = 0.f;
+	FVector FallFrom = FVector::ZeroVector, AnchorA = FVector::ZeroVector, AnchorB = FVector::ZeroVector;
+	bool bFallEase = false;
+	float FallHoldLeft = 0.f; // down, waiting for the director to pair the fall; a solo fall after this
+	void TickFall(const FVector& SimLoc, float DeltaTime);
+	void BeginSoloFall(const FVector& SimLoc, const FVector& MoveDirW);
 	float DownTime = 0.f;
 	float GetUpLeft = 0.f;
 	bool bGettingUp = false;
@@ -336,6 +355,9 @@ struct FAthleteAssets
 	float ThrowStart[ThrowCount] = {};   // where each clip starts so its release lands just after the sim's
 	TObjectPtr<UAnimationAsset> CatchInStride, CatchHighPoint, CatchOneHand, CatchBackShoulder, CatchComeback, CatchScoop;
 	TObjectPtr<UAnimationAsset> TackledFromBehind, TackledFromSide, TackleMiss, BrokenStumble;
+	// paired tackles to the ground (Tools/Anim/clips_more4.py): tackler (T) and carrier (C) authored together
+	enum ETacklePair : uint8 { PairDrive, PairOver, PairBehind, PairSide, PairDive, PairCount };
+	TObjectPtr<UAnimationAsset> PairT[PairCount], PairC[PairCount], PileOn;
 	/** Mirrored (other side) version of a keyed clip, built by Tools/Anim (<name>_M); the clip itself if none. */
 	TMap<UAnimationAsset*, UAnimationAsset*> MirrorOf;
 	UAnimationAsset* Side(UAnimationAsset* Clip, bool bMirror) const
