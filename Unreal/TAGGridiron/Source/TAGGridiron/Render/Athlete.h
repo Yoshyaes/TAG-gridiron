@@ -125,7 +125,7 @@ public:
 	void PlayPancakeFinish();
 	/** Keyed fall to the turf, see bFalling. bEaseIn: glide from where the actor is onto From in the first 0.15 s. */
 	void BeginPairedFall(UAnimationAsset* Clip, const FVector& From, const FVector& To, float YawW, float DriveTime,
-		float LieTime, bool bEaseIn);
+		float LieTime, bool bEaseIn, float Start = 0.f, bool bRootDrive = false);
 	bool IsFalling() const { return bFalling; }
 	/** On the ground, falling, or getting up: the body is not his to move. */
 	bool IsDown() const { return bFalling || bGettingUp || bRagdoll || FallHoldLeft > 0.f || TackledLeft > 0.f; }
@@ -228,6 +228,8 @@ private:
 	// for LieTime, then the keyed get-up out of the landing.
 	bool bFalling = false;
 	TObjectPtr<UAnimationAsset> FallClip;
+	float FallStart = 0.f;        // seconds into FallClip the fall starts (a library capture's contact)
+	bool bFallRoot = false;       // the clip's root motion carries the body through the fall (library captures)
 	float FallT = 0.f, FallLen = 0.f, FallLie = 0.f, FallDrive = 0.4f, FallFromYaw = 0.f, FallYaw = 0.f;
 	FVector FallFrom = FVector::ZeroVector, AnchorA = FVector::ZeroVector, AnchorB = FVector::ZeroVector;
 	bool bFallEase = false;
@@ -405,6 +407,8 @@ struct FAthleteAssets
 	TArray<FPackClip> PackTimed(const TCHAR* Category, std::initializer_list<const TCHAR*> Any, std::initializer_list<const TCHAR*> Any2,
 		std::initializer_list<const TCHAR*> None, int32 Max, int32 Seed, const TCHAR* Field, int32 LeadFrames, float MinAfter, float MinEventSpeed = 0.f);
 	static const FPackClip* Pick(const TArray<FPackClip>& L, int32 Seq) { return L.Num() ? &L[FMath::Abs(Seq) % L.Num()] : nullptr; }
+	/** The library by default: the placed clip is one entry among the library's N (null = the placed one). */
+	static const FPackClip* PickOr(const TArray<FPackClip>& L, int32 Seq) { const int32 i = L.Num() ? FMath::Abs(Seq) % (L.Num() + 1) : 0; return i ? &L[i - 1] : nullptr; }
 	static bool NameHas(const FString& N, std::initializer_list<const TCHAR*> L) { for (const TCHAR* T : L) if (N.Contains(T)) return true; return false; }
 	static constexpr float DropShotgunSpeed = 253.f, DropUnderSpeed = 368.f; // cm/s the drops were captured at (mocap_constants.py)
 	// batch 4: the throwing family (index = EThrow), more catches, collision reactions
@@ -416,6 +420,12 @@ struct FAthleteAssets
 	// paired tackles to the ground (Tools/Anim/clips_more4.py): tackler (T) and carrier (C) authored together
 	enum ETacklePair : uint8 { PairDrive, PairOver, PairBehind, PairSide, PairDive, PairCount };
 	TObjectPtr<UAnimationAsset> PairT[PairCount], PairC[PairCount], PileOn;
+	/** The pack library's two-man tackles (Tools/Art/pack_pairs.py: pack_pairs.json): both men's captures, their
+	 *  relation at the contact and where the carrier ends, the fall root-driven from the contact. By kind: Drive, Over,
+	 *  Behind, Side (from his right), SideL (from his left), Dive. The placed pair is one entry among them. */
+	struct FPackPair { TObjectPtr<UAnimationAsset> T, C; float Ox = 0, Oy = 0, Yaw = 0, EndX = 0, EndY = 0, TLie = 0.45f, CLie = 1.05f, Start = 0; FString Name; };
+	TArray<FPackPair> PackPairs[6];
+	void LoadPackPairs(int32 Seed);
 	/** Mirrored (other side) version of a keyed clip, built by Tools/Anim (<name>_M); the clip itself if none. */
 	TMap<UAnimationAsset*, UAnimationAsset*> MirrorOf;
 	UAnimationAsset* Side(UAnimationAsset* Clip, bool bMirror) const

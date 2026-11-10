@@ -454,8 +454,27 @@ void AMatchDirector::StartPairedTackle(AAthlete* Tk, AAthlete* Cr, const FVector
 	if (Pair == FAthleteAssets::PairSide) bMirror = Right < 0.f; // the tackler on his left: the mirrored pair
 	UAnimationAsset* TClip = A.Side(A.PairT[Pair], bMirror);
 	UAnimationAsset* CClip = A.Side(A.PairC[Pair], bMirror);
+	// the pack library's two-man tackles of that kind (the placed pair is one entry among them), the fall driven by
+	// the captures' root motion from the contact
+	FTacklePairDef P = GPairs[Pair];
+	float Start = 0.f;
+	bool bRoot = false;
+	{
+		static int32 GPairSeq = 0;
+		const int32 Kind = Pair == FAthleteAssets::PairDrive ? 0 : Pair == FAthleteAssets::PairOver ? 1 : Pair == FAthleteAssets::PairBehind ? 2 : Pair == FAthleteAssets::PairDive ? 5 : bMirror ? 4 : 3;
+		const TArray<FAthleteAssets::FPackPair>& Lib = A.PackPairs[Kind];
+		const int32 i = Lib.Num() ? (GPairSeq++ % (Lib.Num() + 1)) : 0;
+		if (i > 0)
+		{
+			const FAthleteAssets::FPackPair& L = Lib[i - 1];
+			TClip = L.T; CClip = L.C;
+			P = {L.Ox, L.Oy, L.Yaw, L.EndX, L.EndY, L.TLie, L.CLie};
+			Start = L.Start;
+			bRoot = true;
+			bMirror = false; // a SideL capture is already from his left
+		}
+	}
 	if (!TClip || !CClip) return;
-	const FTacklePairDef& P = GPairs[Pair];
 	const float Ox = bMirror ? -P.Ox : P.Ox, YawRel = bMirror ? -P.Yaw : P.Yaw, EndX = bMirror ? -P.EndX : P.EndX;
 	const float Yc = Fc.Rotation().Yaw;
 	const float Yt = Yc + YawRel;
@@ -472,9 +491,9 @@ void AMatchDirector::StartPairedTackle(AAthlete* Tk, AAthlete* Cr, const FVector
 	const FVector TFrom = CFrom - Off, TTo = CTo - Off;
 	const float DriveT = 0.45f;
 	const float Jit = FMath::Frac(FPlatformTime::Seconds() * 7.13) * 0.35f; // not every pile gets up on the same beat
-	Cr->BeginPairedFall(CClip, CFrom, CTo, Yc, DriveT, P.CarrierLie + Jit, true);
+	Cr->BeginPairedFall(CClip, CFrom, CTo, Yc, DriveT, P.CarrierLie + Jit, true, Start, bRoot);
 	Cr->PileBodyEnd = CTo + Travel; // where his body comes to rest (a second man lands on that)
-	Tk->BeginPairedFall(TClip, TFrom, TTo, Yt, DriveT, P.TacklerLie, true);
+	Tk->BeginPairedFall(TClip, TFrom, TTo, Yt, DriveT, P.TacklerLie, true, Start, bRoot);
 	UE_LOG(LogTemp, Display, TEXT("TAG tackle pair %s%s: #%d on #%d (front %.2f right %.2f, yac %.0f cm, drive %.0f cm, close %.0f cm)"),
 		*TClip->GetName(), bMirror ? TEXT(" (mirror)") : TEXT(""), Tk->Player ? Tk->Player->number : -1,
 		Cr->Player ? Cr->Player->number : -1, Front, Right, Yac, Drive.Size2D(), FVector::Dist2D(Tk->GetActorLocation(), TFrom));

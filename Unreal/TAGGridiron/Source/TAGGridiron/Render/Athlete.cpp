@@ -208,6 +208,7 @@ void FAthleteAssets::Load()
 			for (UAnimationAsset* C : PackCelebrations) Celebrations.Add(C);
 			// the timed families (PackTimed): started at the capture's own moment less a lead
 			LoadPackIndex();
+			LoadPackPairs(Seed);
 			if (PackIndex.Num())
 			{
 				const std::initializer_list<const TCHAR*> ThrowNone = {TEXT("Fake"), TEXT("Pump"), TEXT("Drop_"), TEXT("Handoff"), TEXT("Pitch"), TEXT("Scramble"), TEXT("Sack"), TEXT("Fumble"), TEXT("Kneel"), TEXT("Spike"), TEXT("Celeb"), TEXT("Idle"), TEXT("Walk"), TEXT("Jog"), TEXT("2man"), TEXT("Snap"), TEXT("Option"), TEXT("Toss"), TEXT("Lateral"), TEXT("UBRig")};
@@ -494,6 +495,45 @@ TArray<FAthleteAssets::FPackClip> FAthleteAssets::PackTimed(const TCHAR* Categor
 	}
 	PackTimedCount += Out.Num();
 	return Out;
+}
+
+void FAthleteAssets::LoadPackPairs(int32 Seed)
+{
+	FString Text;
+	if (!FFileHelper::LoadFileToString(Text, *(FPaths::ProjectContentDir() / TEXT("TAG/Anim/Pack/pack_pairs.json")))) return;
+	TArray<TSharedPtr<FJsonValue>> Rows;
+	if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Text), Rows)) return;
+	static const TCHAR* Kinds[6] = {TEXT("Drive"), TEXT("Over"), TEXT("Behind"), TEXT("Side"), TEXT("SideL"), TEXT("Dive")};
+	TArray<TSharedPtr<FJsonObject>> ByKind[6];
+	for (const TSharedPtr<FJsonValue>& V : Rows)
+	{
+		const TSharedPtr<FJsonObject>* O = nullptr;
+		if (!V.IsValid() || !V->TryGetObject(O) || !O) continue;
+		const FString K = (*O)->GetStringField(TEXT("Kind"));
+		for (int32 i = 0; i < 6; ++i) if (K == Kinds[i]) ByKind[i].Add(*O);
+	}
+	FRandomStream Rand(Seed + 200);
+	for (int32 k = 0; k < 6; ++k)
+	{
+		TArray<TSharedPtr<FJsonObject>>& L = ByKind[k];
+		for (int32 i = L.Num() - 1; i > 0; --i) L.Swap(i, Rand.RandRange(0, i));
+		for (const TSharedPtr<FJsonObject>& O : L)
+		{
+			if (PackPairs[k].Num() >= 10) break;
+			const FString TN = O->GetStringField(TEXT("T")), CN = O->GetStringField(TEXT("C"));
+			UAnimationAsset* T = LoadAsset<UAnimationAsset>(*FString::Printf(TEXT("/Game/TAG/Anim/Pack/Tackles/%s.%s"), *TN, *TN), false);
+			UAnimationAsset* C = LoadAsset<UAnimationAsset>(*FString::Printf(TEXT("/Game/TAG/Anim/Pack/Tackles/%s.%s"), *CN, *CN), false);
+			if (!T || !C) continue;
+			FPackPair P;
+			P.T = T; P.C = C; P.Name = TN;
+			P.Ox = O->GetNumberField(TEXT("Ox")); P.Oy = O->GetNumberField(TEXT("Oy")); P.Yaw = O->GetNumberField(TEXT("Yaw"));
+			P.EndX = O->GetNumberField(TEXT("EndX")); P.EndY = O->GetNumberField(TEXT("EndY"));
+			P.TLie = O->GetNumberField(TEXT("TLie")); P.CLie = O->GetNumberField(TEXT("CLie")); P.Start = O->GetNumberField(TEXT("Start"));
+			PackPairs[k].Add(P);
+		}
+	}
+	UE_LOG(LogTemp, Display, TEXT("TAG: pack library tackle pairs: drive %d over %d behind %d side %d / %d dive %d (of %d)"),
+		PackPairs[0].Num(), PackPairs[1].Num(), PackPairs[2].Num(), PackPairs[3].Num(), PackPairs[4].Num(), PackPairs[5].Num(), Rows.Num());
 }
 
 void FAthleteAssets::LoadMotionMatching()
@@ -1285,7 +1325,6 @@ void AAthlete::PlayCatch(float BallZCm, float SpeedCm, const FVector& BallVelW, 
 	else
 		C = BallZCm > 160.f ? A.CatchHigh.Get() : BallZCm < 80.f ? A.CatchLow.Get() : A.CatchChest.Get();
 	// every other catch a library capture of the same kind, from 4 frames before the hands reach
-	if (Seq % 2)
 	{
 		const TArray<FAthleteAssets::FPackClip>* Lib =
 			(C == A.CatchSidelineL || C == A.CatchSidelineR) ? &A.PackCatchSideline :
@@ -1294,7 +1333,7 @@ void AAthlete::PlayCatch(float BallZCm, float SpeedCm, const FVector& BallVelW, 
 			(C == A.CatchScoop || C == A.CatchLow) ? &A.PackCatchLow :
 			(C == A.CatchComeback) ? &A.PackCatchComeback :
 			(C == A.CatchChest) ? &A.PackCatchStand : &A.PackCatchStride;
-		if (const FAthleteAssets::FPackClip* P = FAthleteAssets::Pick(*Lib, Seq / 2)) { PlayOneShotFrom(P->Anim, P->Start); return; }
+		if (const FAthleteAssets::FPackClip* P = FAthleteAssets::PickOr(*Lib, Seq)) { PlayOneShotFrom(P->Anim, P->Start); return; }
 	}
 	if (C) PlayOneShot(A.Side(C, bMirror));
 }
@@ -1309,7 +1348,7 @@ void AAthlete::PlayThrow(int32 Kind)
 	const int32 Seq = GThrowSeq++;
 	const TArray<FAthleteAssets::FPackClip>* Lib = Kind == 1 ? &A.PackThrowsQuick : Kind == 2 ? &A.PackThrowsDeep : Kind == 6 ? &A.PackThrowsRollR : Kind == 7 ? &A.PackThrowsRollL : &A.PackThrowsSet;
 	if (!Lib->Num()) Lib = &A.PackThrowsSet;
-	if (const FAthleteAssets::FPackClip* P = (Seq % 2) ? FAthleteAssets::Pick(*Lib, Seq / 2) : nullptr)
+	if (const FAthleteAssets::FPackClip* P = FAthleteAssets::PickOr(*Lib, Seq))
 	{
 		PlayClip(P->Anim, false, 1.f, P->Start);
 		return;
@@ -1335,8 +1374,7 @@ void AAthlete::ApplyHit(const FVector& TacklerVelW, float TacklerKg, const FVect
 	// every other hit the carrier's reaction is a library capture hit from that side, from 2 frames before he goes down
 	static int32 GHitSeq = 0;
 	float Start = 0.f;
-	if (GHitSeq++ % 2)
-		if (const FAthleteAssets::FPackClip* P = FAthleteAssets::Pick(Front > 0.5f ? A.PackTackledBehind : FMath::Abs(Front) <= 0.5f ? A.PackTackledSide : A.PackTackledFront, GHitSeq / 2))
+	if (const FAthleteAssets::FPackClip* P = FAthleteAssets::PickOr(Front > 0.5f ? A.PackTackledBehind : FMath::Abs(Front) <= 0.5f ? A.PackTackledSide : A.PackTackledFront, GHitSeq++))
 		{ R = P->Anim; Start = P->Start; }
 	if (R && R != CurrentClip)
 	{
@@ -1358,7 +1396,7 @@ void AAthlete::PlayMissedTackle(bool bCarrierLeft)
 	if (!A.TackleMiss || bRagdoll) return;
 	bMissing = true;
 	static int32 GWhiffSeq = 0;
-	if (const FAthleteAssets::FPackClip* P = (GWhiffSeq++ % 2) ? FAthleteAssets::Pick(A.PackWhiffs, GWhiffSeq / 2) : nullptr) { PlayOneShotFrom(P->Anim, P->Start); return; }
+	if (const FAthleteAssets::FPackClip* P = FAthleteAssets::PickOr(A.PackWhiffs, GWhiffSeq++)) { PlayOneShotFrom(P->Anim, P->Start); return; }
 	PlayOneShot(A.Side(A.TackleMiss, !bCarrierLeft));
 	UE_LOG(LogTemp, Verbose, TEXT("TAG missed tackle #%d"), Player ? Player->number : -1);
 }
@@ -1368,7 +1406,7 @@ void AAthlete::PlayBrokenTackle(bool bHitFromRight)
 	const FAthleteAssets& A = FAthleteAssets::Get();
 	if (!A.BrokenStumble || bRagdoll) return;
 	static int32 GStumbleSeq = 0;
-	if (const FAthleteAssets::FPackClip* P = (GStumbleSeq++ % 2) ? FAthleteAssets::Pick(A.PackStumbles, GStumbleSeq / 2) : nullptr) { PlayOneShotFrom(P->Anim, P->Start); return; }
+	if (const FAthleteAssets::FPackClip* P = FAthleteAssets::PickOr(A.PackStumbles, GStumbleSeq++)) { PlayOneShotFrom(P->Anim, P->Start); return; }
 	PlayOneShot(A.Side(A.BrokenStumble, !bHitFromRight)); // the keyed one is hit on his right, stumbles left
 }
 
@@ -1385,7 +1423,7 @@ void AAthlete::PlayDiveAttempt()
 {
 	const FAthleteAssets& A = FAthleteAssets::Get();
 	static int32 GDiveSeq = 0;
-	if (const FAthleteAssets::FPackClip* P = (GDiveSeq++ % 2) ? FAthleteAssets::Pick(A.PackCatchDive, GDiveSeq / 2) : nullptr) { PlayOneShotFrom(P->Anim, P->Start); return; }
+	if (const FAthleteAssets::FPackClip* P = FAthleteAssets::PickOr(A.PackCatchDive, GDiveSeq++)) { PlayOneShotFrom(P->Anim, P->Start); return; }
 	if (A.CatchDive) PlayOneShot(A.Side(A.CatchDive, Player && (Player->id % 2) == 1));
 }
 
@@ -1521,7 +1559,7 @@ void AAthlete::PlayRushMove(const FString& Move, const AAthlete* Blocker)
 	if (!C) C = A.Side(A.ShedSwim, !bBlockerRight);
 	// every other rush a library win past the blocker on the open side
 	static int32 GRushSeq = 0;
-	if (const FAthleteAssets::FPackClip* P = (GRushSeq++ % 2) ? FAthleteAssets::Pick(bBlockerRight ? A.PackRushWinsL : A.PackRushWinsR, GRushSeq / 2) : nullptr) C = P->Anim;
+	if (const FAthleteAssets::FPackClip* P = FAthleteAssets::PickOr(bBlockerRight ? A.PackRushWinsL : A.PackRushWinsR, GRushSeq++)) C = P->Anim;
 	UE_LOG(LogTemp, Display, TEXT("TAG rush move #%d: %s (%s)"), Player ? Player->number : -1, *Move, C ? *C->GetName() : TEXT("-"));
 	if (C) PlayOneShot(C);
 }
@@ -1533,7 +1571,7 @@ void AAthlete::PlayBeaten(const AAthlete* Rusher)
 	// keyed with the rusher getting by on his left
 	const bool bRusherLeft = FVector::DotProduct(Rusher->GetActorLocation() - GetActorLocation(), GetActorRightVector()) < 0.f;
 	static int32 GBeatenSeq = 0;
-	if (const FAthleteAssets::FPackClip* P = (GBeatenSeq++ % 2) ? FAthleteAssets::Pick(bRusherLeft ? A.PackBeatenL : A.PackBeatenR, GBeatenSeq / 2) : nullptr) { PlayOneShot(P->Anim); return; }
+	if (const FAthleteAssets::FPackClip* P = FAthleteAssets::PickOr(bRusherLeft ? A.PackBeatenL : A.PackBeatenR, GBeatenSeq++)) { PlayOneShot(P->Anim); return; }
 	PlayOneShot(A.Side(A.Beaten, !bRusherLeft));
 }
 
@@ -1541,7 +1579,7 @@ void AAthlete::PlayPancakeFinish()
 {
 	const FAthleteAssets& A = FAthleteAssets::Get();
 	static int32 GPancakeSeq = 0;
-	if (const FAthleteAssets::FPackClip* P = (GPancakeSeq++ % 2) ? FAthleteAssets::Pick(A.PackPancakes, GPancakeSeq / 2) : nullptr) { PlayOneShotFrom(P->Anim, P->Start); return; }
+	if (const FAthleteAssets::FPackClip* P = FAthleteAssets::PickOr(A.PackPancakes, GPancakeSeq++)) { PlayOneShotFrom(P->Anim, P->Start); return; }
 	if (A.BlockFinish) PlayOneShot(A.BlockFinish);
 }
 
@@ -1552,7 +1590,7 @@ void AAthlete::FaceFollowBody(bool bFollow)
 }
 
 void AAthlete::BeginPairedFall(UAnimationAsset* Clip, const FVector& From, const FVector& To, float YawW, float DriveTime,
-	float LieTime, bool bEaseIn)
+	float LieTime, bool bEaseIn, float Start, bool bRootDrive)
 {
 	if (!Clip || bRagdoll) return;
 	ClearReplayHold();
@@ -1565,8 +1603,10 @@ void AAthlete::BeginPairedFall(UAnimationAsset* Clip, const FVector& From, const
 	bGettingUp = false;
 	bFalling = true;
 	FallClip = Clip;
+	FallStart = Start;
+	bFallRoot = bRootDrive && Cast<UAnimSequence>(Clip) != nullptr;
 	FallT = 0.f;
-	FallLen = Clip->GetPlayLength();
+	FallLen = Clip->GetPlayLength() - Start;
 	FallLie = LieTime;
 	FallDrive = FMath::Max(0.05f, DriveTime);
 	FallFrom = GetActorLocation();
@@ -1577,7 +1617,7 @@ void AAthlete::BeginPairedFall(UAnimationAsset* Clip, const FVector& From, const
 	bFallEase = bEaseIn;
 	VisOffset = FVector::ZeroVector;
 	CurrentClip = nullptr;
-	PlayClip(Clip, false); // crossfades out of the run / tackle pose
+	PlayClip(Clip, false, 1.f, Start); // crossfades out of the run / tackle pose
 	if (!bEaseIn) SetActorLocationAndRotation(AnchorA, FRotator(0, YawW, 0));
 	SmoothedYaw = YawW;
 	UE_LOG(LogTemp, Verbose, TEXT("TAG fall #%d: %s, drive %.0f cm, lie %.2f s"), Player ? Player->number : -1, *Clip->GetName(),
@@ -1591,6 +1631,14 @@ void AAthlete::TickFall(const FVector& SimLoc, float DeltaTime)
 	const float D = FMath::Clamp(FallT / FallDrive, 0.f, 1.f);
 	FVector At = FMath::Lerp(AnchorA, AnchorB, 1.f - FMath::Square(1.f - D));
 	float Yaw = FallYaw;
+	// a library capture: its root carries the body through the fall (the placed cuts travel within the pose)
+	if (bFallRoot)
+		if (const UAnimSequence* Seq = Cast<UAnimSequence>(FallClip.Get()))
+		{
+			const double End = FMath::Min(static_cast<double>(FallStart + FallT), Seq->GetPlayLength());
+			const FVector R = Seq->ExtractRootMotionFromRange(FallStart, End, FAnimExtractContext(0.0, true)).GetTranslation();
+			At += FRotator(0, FallYaw, 0).RotateVector(FVector(R.Y, -R.X, 0.f)); // clip x left, +Y forward -> actor forward, right
+		}
 	if (bFallEase && FallT < 0.2f)
 	{
 		const float E = FMath::SmoothStep(0.f, 1.f, FallT / 0.2f);
@@ -1599,7 +1647,7 @@ void AAthlete::TickFall(const FVector& SimLoc, float DeltaTime)
 	}
 	SetActorLocationAndRotation(At, FRotator(0, Yaw, 0));
 	SmoothedYaw = Yaw;
-	PlayClip(FallClip, false);
+	PlayClip(FallClip, false, 1.f, FallStart);
 	if (FallT >= FallLen + FallLie)
 	{
 		bFalling = false;
@@ -1958,8 +2006,8 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 			const int32 Seq = GTackleSeq++;
 			UAnimationAsset* T = A.Side(Pool[Seq % 6], (Seq / 6 + (Player ? Player->id : 0)) % 2 == 1); // wrap from either side
 			float Start = 0.f;
-			if (Seq % 2) // every other tackle a library tackler, from 6 frames before his arms close
-				if (const FAthleteAssets::FPackClip* P = FAthleteAssets::Pick(A.PackTacklers, Seq / 2)) { T = P->Anim; Start = P->Start; }
+			// a library tackler by default (the placed six are one entry among them), from 6 frames before his arms close
+			if (const FAthleteAssets::FPackClip* P = FAthleteAssets::PickOr(A.PackTacklers, Seq)) { T = P->Anim; Start = P->Start; }
 			PlayClip(T ? T : A.TackleKeyed.Get(), false, OneShotRate, Start);
 		}
 		// paired: ease into wrap distance of the carrier (his body, not the sim spot) and square up to him
@@ -2011,7 +2059,6 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 					Move = Side > 0.f ? A.SpinR.Get() : A.SpinL.Get();
 				if (!Move) Move = Side > 0.f ? A.JukeR.Get() : A.JukeL.Get();
 				// every other move a library capture of the same move to the same side, from 5 frames before its first step
-				if (Seq % 2)
 				{
 					const bool bR = Side > 0.f;
 					const TArray<FAthleteAssets::FPackClip>* Lib =
@@ -2019,7 +2066,7 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 						(Move == A.Truck || Move == A.Side(A.Truck, true)) ? &A.PackTrucks :
 						(Move == A.StiffArmR || Move == A.StiffArmL) ? (bR ? &A.PackStiffArmsR : &A.PackStiffArmsL) :
 						(Move == A.SpinR || Move == A.SpinL) ? (bR ? &A.PackSpinsR : &A.PackSpinsL) : (bR ? &A.PackJukesR : &A.PackJukesL);
-					if (const FAthleteAssets::FPackClip* P = FAthleteAssets::Pick(*Lib, Seq / 2)) { PlayClip(P->Anim, false, 1.f, P->Start); return; }
+					if (const FAthleteAssets::FPackClip* P = FAthleteAssets::PickOr(*Lib, Seq)) { PlayClip(P->Anim, false, 1.f, P->Start); return; }
 				}
 			}
 			PlayClip(Move, false);
@@ -2034,8 +2081,8 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 		const TArray<FAthleteAssets::FPackClip>& Lib = Anim == TEXT("kickoff") ? A.PackKickoffs : Anim == TEXT("punt") ? A.PackPunts : A.PackFieldGoals;
 		const float Contact = Anim == TEXT("kickoff") ? FAthleteAssets::KickoffContact : Anim == TEXT("punt") ? FAthleteAssets::PuntContact : FAthleteAssets::FieldGoalContact;
 		float Shift = 0.f;
-		if (Player && (Player->id % 2) == 1)
-			if (const FAthleteAssets::FPackClip* P = FAthleteAssets::Pick(Lib, Player->id / 2)) { K = P->Anim; Shift = P->Start - Contact; }
+		if (Player)
+			if (const FAthleteAssets::FPackClip* P = FAthleteAssets::PickOr(Lib, Player->id)) { K = P->Anim; Shift = P->Start - Contact; }
 		if (K)
 		{
 			if (bChanged) PlayClip(K, false, 1.f, FMath::Max(0.f, AnimT + Shift));
@@ -2068,7 +2115,7 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 		if (bLine && A.GetOff)
 		{
 			static int32 GGetOffSeq = 0;
-			if (const FAthleteAssets::FPackClip* P = (GGetOffSeq++ % 2) ? FAthleteAssets::Pick(A.PackGetOffs, GGetOffSeq / 2) : nullptr) PlayOneShot(P->Anim);
+			if (const FAthleteAssets::FPackClip* P = FAthleteAssets::PickOr(A.PackGetOffs, GGetOffSeq++)) PlayOneShot(P->Anim);
 			else PlayOneShot(A.GetOff);
 		}
 		else if (Player && Player->pos == tag::Pos::QB && bUnderCenter && A.UnderCenterSnap) PlayOneShot(A.UnderCenterSnap);
@@ -2129,8 +2176,8 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 		{
 			UAnimationAsset* D = bUnderCenter ? A.QBDropUnder.Get() : A.QBDropShotgun.Get();
 			float DropSpeed = bUnderCenter ? FAthleteAssets::DropUnderSpeed : FAthleteAssets::DropShotgunSpeed;
-			if ((Player->id % 2) == 1) // the quarterback's own library drop, at its own captured speed
-				if (const FAthleteAssets::FPackClip* P = FAthleteAssets::Pick(bUnderCenter ? A.PackDropsUC : A.PackDropsSG, Player->id / 2))
+			// the quarterback's own library drop (the placed one is one entry among them)
+			if (const FAthleteAssets::FPackClip* P = FAthleteAssets::PickOr(bUnderCenter ? A.PackDropsUC : A.PackDropsSG, Player->id))
 				{
 					D = P->Anim; // at the placed drop's pace: a whole capture's mean speed holds its setup and read far too slow
 				}
