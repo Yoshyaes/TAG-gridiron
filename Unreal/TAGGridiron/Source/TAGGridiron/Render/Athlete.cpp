@@ -77,7 +77,7 @@ void FAthleteAssets::Load()
 		Crouch = LoadAsset<UBlendSpace>(TEXT("/Game/TAG/Anim/BS_TAG_Crouch.BS_TAG_Crouch"), false);
 		Shove = LoadAsset<UAnimationAsset>(*(G + TEXT("Animations/Interactions/Shoves/M_relaxed_ragdoll_shove_stand_F_A.M_relaxed_ragdoll_shove_stand_F_A")), false);
 		Throw = LoadAsset<UAnimationAsset>(*(G + TEXT("Animations/Idle/M_Neutral_Stand_Turn_045_R.M_Neutral_Stand_Turn_045_R")), false);
-		// TAG hand keyed football clips (no mocap): Tools/Anim -> Tools/Art/import_tag_anims.py
+		// TAG football clips: Tools/Anim (mocap pack retargets, a few hand keyed) -> Tools/Art/import_tag_anims.py
 		const FString K = TEXT("/Game/TAG/Anim/Authored/");
 		auto Keyed = [&](const TCHAR* N) { return LoadAsset<UAnimationAsset>(*FString::Printf(TEXT("%s%s.%s"), *K, N, N), false); };
 		Stance3pt = Keyed(TEXT("A_TAG_Stance3pt_Loop"));
@@ -153,7 +153,7 @@ void FAthleteAssets::Load()
 			const TCHAR* TN[ThrowCount] = {TEXT("A_TAG_QB_Throw"), TEXT("A_TAG_QB_Throw_Quick"), TEXT("A_TAG_QB_Throw_Deep"),
 				TEXT("A_TAG_QB_Throw_Fade"), TEXT("A_TAG_QB_Throw_Sidearm"), TEXT("A_TAG_QB_Throw_Touch"), TEXT("A_TAG_QB_Throw_RunR"),
 				TEXT("A_TAG_QB_Throw_RunL")};
-			const int32 Release[ThrowCount] = {23, 17, 26, 23, 23, 24, 16, 16}; // Tools/Anim/clips_more2.py THROW_RELEASE (tempo-scaled)
+			const int32 Release[ThrowCount] = {17, 14, 17, 15, 16, 15, 15, 15}; // each clip's right-hand peak speed (Tools/Anim/mocap_constants.py)
 			for (int32 i = 0; i < ThrowCount; ++i)
 			{
 				Throws[i] = Keyed(TN[i]);
@@ -1711,7 +1711,7 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 	}
 	if (Anim == TEXT("throw"))
 	{
-		// hand keyed pass from the stride frame: plant, hip-shoulder separation, release ~0.3 s later with the sim
+		// the set throw from 7 frames before its release: plant, hip-shoulder separation, release ~0.23 s after the sim's
 		if (A.ThrowKeyed) { if (bChanged) PlayClip(A.ThrowKeyed, false, 1.f, FAthleteAssets::ThrowKeyedStart); }
 		else if (bChanged) PlayClip(A.Throw, false, 1.6f);
 		return;

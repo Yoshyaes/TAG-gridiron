@@ -75,14 +75,19 @@ REAL = [
     (r"^Celebrate_.*_Loop", (1.2, 5.0), "celebration", "loop"),
     (r"^Fan_Cheer_Loop", (1.0, 4.0), "celebration", "loop"),
 ]
-# the drops' ground speed over the moving part (travel m, moving frames at 30 fps; the rest is the hitch and settle);
+# the drops' ground speed over the moving part, from the clip's json (traj_travel_m over traj_moving_frames at 30 fps,
+# written by Tools/Anim/build_mocap.py; the game then time-scales the clip to the sim's speed, AAthlete::Drive);
 # real: shotgun 2.5-3.2 m/s, under center 3.6-4.5
-SPEEDS = {"QB_Drop_Shotgun": (1.8, 20, (2.5, 3.2)), "QB_Drop_UnderCenter": (6.0, 45, (3.6, 4.5))}
+SPEEDS = {"QB_Drop_Shotgun": (2.5, 3.2), "QB_Drop_UnderCenter": (3.6, 4.5)}
 
 
 # stance heights: hips (pelvis) in metres against the look targets' p10-p90 by stance (12 clips each) and coaching
-# (a three point stance has the hips level with or just above the shoulders, never a sprinter's set below them)
-STANCES = {"Stance3pt_Loop": "stance_3pt", "Stance4pt_Loop": "stance_3pt", "Stance2pt_Loop": "stance_2pt",
+# (a three point stance has the hips level with or just above the shoulders, never a sprinter's set below them).
+# The targets were measured on the pack's 1.90 m body; our clips are retargeted onto the 1.75 m UEFN rig with the hips
+# scaled by BODY_SCALE (Tools/Anim/mocap_retarget.HIP_SCALE), so the bands are scaled the same way. A four point stance
+# is lower than the three point band by nature (the pack's sit 0.60-0.63 on our rig) and is only reported.
+BODY_SCALE = 0.931 / 1.038
+STANCES = {"Stance3pt_Loop": "stance_3pt", "Stance4pt_Loop": None, "Stance2pt_Loop": "stance_2pt",
            "StanceRB_Loop": "stance_2pt", "StanceLB_Loop": "stance_2pt", "StanceDB_Loop": "stance_2pt",
            "QB_Shotgun_Loop": "stance_qb_shotgun"}
 
@@ -91,13 +96,16 @@ def stances(gait, rows):
     fails = 0
     for name, cat in STANCES.items():
         path = os.path.join(CLIPS, "A_TAG_%s.json" % name)
-        if not os.path.exists(path) or cat not in gait:
+        if not os.path.exists(path):
             continue
         r = json.load(open(path))
         hips = r["pelvis_z"]["start"]
-        lo, hi = gait[cat]["hips_height_m"]["p10"], gait[cat]["hips_height_m"]["p90"]
+        if cat is None or cat not in gait:
+            rows.append((name + " hips", hips, "note", "", "stance height (no band)"))
+            continue
+        lo, hi = gait[cat]["hips_height_m"]["p10"] * BODY_SCALE, gait[cat]["hips_height_m"]["p90"] * BODY_SCALE
         ok = lo - 0.02 <= hips <= hi + 0.02
-        rows.append((name + " hips", hips, "ok" if ok else "FAIL", "%.2f-%.2f m" % (lo, hi), "stance height (%s)" % cat))
+        rows.append((name + " hips", hips, "ok" if ok else "FAIL", "%.2f-%.2f m" % (lo, hi), "stance height (%s, scaled to the rig)" % cat))
         fails += 0 if ok else 1
     return fails
 
@@ -157,8 +165,9 @@ def main():
             band = "in %.2f-%.2f" % (cat["p10_s"], cat["p90_s"]) if inside else "chained (%.2f-%.2f whole clips)" % (cat["p10_s"], cat["p90_s"])
         sp = ""
         if name in SPEEDS:
-            travel, frames, (slo, shi) = SPEEDS[name]
-            v = travel / (frames / 30.0)
+            slo, shi = SPEEDS[name]
+            travel, frames = r.get("traj_travel_m", 0.0), r.get("traj_moving_frames", 0)
+            v = travel / (frames / 30.0) if frames else 0.0
             sp = " %.2f m/s" % v
             ok = ok and slo <= v <= shi
         rows.append((name, sec, "ok" if ok else "FAIL", "%.1f-%.1f s%s" % (lo, hi, sp), band + ("  " + fam[3] if fam[3] else "")))

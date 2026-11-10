@@ -328,12 +328,13 @@ struct FAthleteAssets
 	TObjectPtr<UAnimationAsset> Jump;
 	TObjectPtr<UAnimationAsset> Dash;
 	TObjectPtr<UAnimationAsset> Celebrate;
-	/** TAG hand keyed clips (Tools/Anim, Blender; imported by Tools/Art/import_tag_anims.py). Null = old behaviour. */
+	/** TAG football clips (Tools/Anim: retargeted from the mocap pack by mocap_map.py / build_mocap.py, a few still hand
+	 *  keyed in clips*.py; imported by Tools/Art/import_tag_anims.py). Null = old behaviour. */
 	TObjectPtr<UAnimationAsset> Stance3pt;      // OL / DL pre-snap loop
 	TObjectPtr<UAnimationAsset> Stance2pt;      // WR, TE, RB, LB, DB pre-snap loop
 	TObjectPtr<UAnimationAsset> StanceShotgun;  // QB pre-snap loop
 	TObjectPtr<UAnimationAsset> ThrowKeyed;     // QB pass; played from its stride frame so release meets the sim's
-	static constexpr float ThrowKeyedStart = 16.f / 30.f; // release at frame 23, 0.2 s after the plant (frame 18)
+	static constexpr float ThrowKeyedStart = 10.f / 30.f; // 7 frames before the set throw's release (frame 17, Tools/Anim/mocap_constants.py)
 	bool bCelebrateKeyed = false;
 	TObjectPtr<UAnimationAsset> GetOff;         // OL / DL explode out of the three point stance at the snap
 	TObjectPtr<UAnimationAsset> TackleKeyed;    // form tackle: sink, explode, wrap, drive (then ragdoll on "down")
@@ -369,7 +370,7 @@ struct FAthleteAssets
 	TObjectPtr<UAnimationAsset> InjuredDown; // hurt on the play, chained into the slow get-up
 	// batch 6 (Tools/Anim/clips_more5.py): the quarterback's drops and pocket, the defender's breakdown
 	TObjectPtr<UAnimationAsset> QBDropShotgun, QBDropUnder, QBPocket, Breakdown;
-	static constexpr float DropShotgunSpeed = 275.f, DropUnderSpeed = 400.f; // cm/s the drops were keyed at
+	static constexpr float DropShotgunSpeed = 253.f, DropUnderSpeed = 368.f; // cm/s the drops were captured at (mocap_constants.py)
 	// batch 4: the throwing family (index = EThrow), more catches, collision reactions
 	enum EThrow : int32 { ThrowSet = 0, ThrowQuickK, ThrowDeepK, ThrowFadeK, ThrowSidearmK, ThrowTouchK, ThrowRunRK, ThrowRunLK, ThrowCount };
 	UAnimationAsset* Throws[ThrowCount] = {};
@@ -387,10 +388,10 @@ struct FAthleteAssets
 		UAnimationAsset* const* M = MirrorOf.Find(Clip);
 		return M ? *M : Clip;
 	}
-	static constexpr float CatchDiveTravel = 115.f; // cm the dive carries the body forward (Tools/Anim CATCH_DIVE_TRAVEL)
+	static constexpr float CatchDiveTravel = 330.f; // cm the dive carries the body forward (the sprinting layout slides; Tools/Anim/mocap_constants.py)
 	TArray<UAnimationAsset*> Celebrations;                                            // keyed celebration loops
 	// where foot contact falls in each kick clip (s), so the director can line it up with the ball leaving
-	static constexpr float KickoffContact = 26.f / 30.f, FieldGoalContact = 20.f / 30.f, PuntContact = 19.f / 30.f;
+	static constexpr float KickoffContact = 40.f / 30.f, FieldGoalContact = 24.f / 30.f, PuntContact = 27.f / 30.f; // the kicking foot's peak speed (mocap_constants.py)
 	TObjectPtr<UAnimationAsset> Idle;
 	// motion matching over the Game Animation Sample's Dense PoseSearch databases (rooted, never collected)
 	bool bMotionMatch = false;

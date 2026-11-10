@@ -395,17 +395,18 @@ void AMatchDirector::TickMoveTest(float Dt)
 	}
 }
 
-// the pairs as authored (Tools/Anim/clips_more4.py PAIRS): the carrier's actor in the tackler's clip frame (m; x left,
-// y back) and his yaw relative to the tackler (deg, + turns left); where the carrier's pelvis ends (his clip frame)
+// the pairs as captured (Tools/Anim/mocap_pairs.py from the PT_* clips' jsons; both men of a pair come from one mocap
+// group in a shared space, cut at the hit): the carrier's actor in the tackler's clip frame (m; x left, y back) and his
+// yaw relative to the tackler (deg, + turns left); where the carrier's pelvis ends (his clip frame)
 namespace
 {
 	struct FTacklePairDef { float Ox, Oy, Yaw, EndX, EndY, TacklerLie, CarrierLie; };
 	const FTacklePairDef GPairs[FAthleteAssets::PairCount] = {
-		{0.f, -0.58f, 180.f, 0.f, 1.00f, 0.45f, 1.05f},  // Drive: tackler on top, gets up first
-		{-0.20f, -0.70f, 180.f, 0.f, -1.00f, 1.05f, 0.45f}, // Over: head across beside his hip; the carrier on top
-		{0.f, -0.55f, 0.f, 0.f, -1.00f, 0.45f, 1.05f},   // Behind
-		{0.f, -0.55f, -90.f, 0.84f, -0.58f, 0.45f, 1.05f}, // Side (from his right; mirrored from his left)
-		{0.f, -1.35f, 0.f, 0.f, -1.76f, 0.70f, 0.90f},   // Dive
+		{-0.07f, -0.62f, 151.3f, -0.99f, 1.29f, 0.45f, 1.05f},  // Drive: Tackle_D_Win_12_D1 - driven back onto his back, tackler on top
+		{0.01f, -0.65f, -77.7f, -1.93f, -2.10f, 1.05f, 0.45f},  // Over: Tackle_O_Win_12_D1 - the tackler goes low, the carrier pitches over him
+		{-0.05f, -0.34f, -9.8f, 1.93f, -2.39f, 0.45f, 1.05f},   // Behind: Tackle_Neu_12_D5
+		{-0.00f, -0.38f, -58.5f, 1.76f, 0.73f, 0.45f, 1.05f},   // Side: Tackle_Neu_12_D3 (from his right; mirrored from his left)
+		{-0.04f, -1.23f, 0.f, 0.28f, -5.08f, 0.70f, 0.90f},     // Dive: Tackle_Dive_Low_from_D5 - shoestring from behind at full speed, he slides
 	};
 	// clip frame (x left, y back, m) -> actor local (forward, right, cm)
 	FVector ClipToActor(float X, float Y) { return FVector(-Y * 100.f, -X * 100.f, 0.f); }
