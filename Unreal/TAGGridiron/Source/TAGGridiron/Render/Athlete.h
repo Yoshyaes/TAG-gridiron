@@ -375,6 +375,16 @@ struct FAthleteAssets
 	// batch 6 (Tools/Anim/clips_more5.py): the quarterback's drops and pocket, the defender's breakdown
 	TObjectPtr<UAnimationAsset> QBDropShotgun, QBDropUnder, QBPocket, Breakdown;
 	TArray<TObjectPtr<UAnimationAsset>> Breakdowns; // Breakdown and the pack's in-place bounces, one per player
+	/** The mocap pack library (/Game/TAG/Anim/Pack/<Category>: every capture of the pack on the rig,
+	 *  Tools/Art/import_pack_library.py). The families below draw on all of it: per family a bounded selection,
+	 *  seeded by the day (-TagPackSeed=<n> to pin one), loaded at start; a clip that has to loop (stances, idles,
+	 *  breakdowns) is taken only when its last pose returns to its first (LoopsCleanly). Chosen per player. */
+	TArray<TObjectPtr<UAnimationAsset>> PackCelebrations, PackPostPlayIdles, PackGetUpsFaceDown, PackGetUpsFaceUp, PackInjuries;
+	TMap<int32, TArray<TObjectPtr<UAnimationAsset>>> PackStances; // by tag::Pos
+	int32 PackLibraryCount = 0;
+	TArray<UAnimationAsset*> PackFamily(const TCHAR* Category, std::initializer_list<const TCHAR*> Any, std::initializer_list<const TCHAR*> Any2,
+		std::initializer_list<const TCHAR*> None, int32 Max, int32 Seed, bool bLoop);
+	static bool LoopsCleanly(const UAnimSequence* Seq);
 	static constexpr float DropShotgunSpeed = 253.f, DropUnderSpeed = 368.f; // cm/s the drops were captured at (mocap_constants.py)
 	// batch 4: the throwing family (index = EThrow), more catches, collision reactions
 	enum EThrow : int32 { ThrowSet = 0, ThrowQuickK, ThrowDeepK, ThrowFadeK, ThrowSidearmK, ThrowTouchK, ThrowRunRK, ThrowRunLK, ThrowCount };

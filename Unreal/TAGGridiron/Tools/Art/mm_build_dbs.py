@@ -40,13 +40,16 @@ def build(src, dst, drop, add, loco, always_drop=()):
         return
     removed = sum(LIB.database_remove_anims_containing(db, d) for d in drop) if fresh else 0
     removed += sum(LIB.database_remove_anims_containing(db, d) for d in always_drop)
-    # locomotion clips no longer listed for this database (mocap_map.LOCO_DB, LOCO_SKATE) leave it
+    # the wanted clips: mocap_map names (A_TAG_<name>) and the pack library's assets (full paths, mm_pack_locomotion.py)
+    want = [n if n.startswith("/Game/") else TAG_ANIM + "A_TAG_" + n for n in loco]
+    want_names = {w.rsplit("/", 1)[1] for w in want}
+    # clips no longer listed for this database leave it
     have = [str(n) for n in LIB.database_anim_names(db)]
     for n in have:
-        if n.startswith("A_TAG_Loco_") and n[6:] not in loco:
+        if (n.startswith("A_TAG_Loco_") or n.startswith("A_TAG_Pack_")) and n not in want_names:
             removed += LIB.database_remove_anims_containing(db, n)
     added, missing = [], []
-    for path in ([ANIM + a for a in add] if fresh else []) + [TAG_ANIM + "A_TAG_" + n for n in loco if "A_TAG_" + n not in have]:
+    for path in ([ANIM + a for a in add] if fresh else []) + [w for w in want if w.rsplit("/", 1)[1] not in have]:
         anim = unreal.load_asset(path) if EAL.does_asset_exist(path) else None
         if anim and LIB.database_add_anim(db, anim):
             added.append(path.split("/")[-1])
@@ -58,7 +61,13 @@ def build(src, dst, drop, add, loco, always_drop=()):
 
 try:
     unreal.AssetRegistryHelpers.get_asset_registry().scan_paths_synchronous([SRC, ANIM, TAG_ANIM], True)
-    L = mocap_map.LOCO_DB
+    L = {k: list(v) for k, v in mocap_map.LOCO_DB.items()}
+    # the pack library's locomotion sorted by rule (Tools/Art/mm_pack_locomotion.py -> Saved/pack_loco_lists.json)
+    PACK_LISTS = os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_saved_dir()), "pack_loco_lists.json")
+    if os.path.exists(PACK_LISTS):
+        for k, v in json.load(open(PACK_LISTS)).items():
+            L.setdefault(k, []).extend(v)
+        rep["pack_lists"] = {k: len(v) for k, v in json.load(open(PACK_LISTS)).items()}
     # the sprint, run and crouch loops are the pack's alone: side by side with the sample's loops the search kept the
     # sample's on pose continuity (-TagMMTrace), and the pack covers those gaits (10-11 m/s sprints, runs, strafes,
     # backpedals; kick slides, shuffles and crouched runs for the line). The walk keeps the sample's loops as well

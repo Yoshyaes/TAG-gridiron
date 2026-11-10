@@ -10,7 +10,7 @@ public class TAGGridiron : ModuleRules
 		PublicDependencyModuleNames.AddRange(new string[] {
 			"Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput",
 			"UMG", "Slate", "SlateCore", "CinematicCamera", "Niagara", "IKRig", "AnimationCore", "MassSpawner", "MassEntity", "MassCommon", "MassCore",
-			"PoseSearch", "BlendStack", "Chooser", "AnimGraphRuntime", "AnimationWarpingRuntime", "MetaHumanCharacterPalette", "MassRepresentation", "ProceduralMeshComponent", "ApplicationCore"
+			"PoseSearch", "BlendStack", "Chooser", "AnimGraphRuntime", "AnimationWarpingRuntime", "MetaHumanCharacterPalette", "MassRepresentation", "ProceduralMeshComponent", "ApplicationCore", "AssetRegistry"
 		});
 
 		// The simulation core (Sim/) is plain standard C++ shared with the headless calibration tools.

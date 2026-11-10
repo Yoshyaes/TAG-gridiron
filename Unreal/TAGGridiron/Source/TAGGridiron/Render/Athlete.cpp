@@ -13,6 +13,8 @@
 #include "Engine/Texture.h"
 #include "Misc/CommandLine.h"
 #include "Misc/PackageName.h"
+#include "AssetRegistry/AssetRegistryModule.h"
+#include "Math/RandomStream.h"
 #include "Retargeter/IKRetargeter.h"
 #include "Render/TagRetargetAnimInstance.h"
 #include "Render/TagMotionMatchInstance.h"
@@ -156,6 +158,52 @@ void FAthleteAssets::Load()
 		for (const TCHAR* N : {TEXT("A_TAG_Loco_Line_Bounce_Back"), TEXT("A_TAG_Loco_Line_Bounce_Back_M"), TEXT("A_TAG_Loco_Line_Bounce_Fwd"),
 			TEXT("A_TAG_Loco_Line_Bounce_Side"), TEXT("A_TAG_Loco_Line_Bounce_Side_M"), TEXT("A_TAG_Loco_Line_Back_Walk"), TEXT("A_TAG_Loco_Idle_Breakdown")})
 			if (UAnimationAsset* C = Keyed(N)) Breakdowns.Add(C);
+		// the whole pack behind the one-shot and idle families (see PackFamily): the cut, placed clips above stay first in
+		// each list (their timing is measured), the library's captures follow, a different draw each day
+		if (FPackageName::DoesPackageExist(TEXT("/Game/TAG/Anim/Pack/Celebrations/A_TAG_Pack_PostPlay_BC_15_Celeb_FistPump_v1")) || FPackageName::DoesPackageExist(TEXT("/Game/TAG/Anim/Pack/Locomotion/A_TAG_Pack_MG_Loco_Sprint_Normal__P01")))
+		{
+			int32 Seed = FDateTime::Now().GetDayOfYear();
+			FParse::Value(FCommandLine::Get(), TEXT("TagPackSeed="), Seed);
+			const std::initializer_list<const TCHAR*> Many = {TEXT("2Man"), TEXT("2man"), TEXT("3Man"), TEXT("4Man"), TEXT("Nman"), TEXT("NMan"), TEXT("Group"), TEXT("Mascot"), TEXT("Interaction"), TEXT("Avoid"), TEXT("Bump"), TEXT("Man0"), TEXT("Man1"), TEXT("Man2"), TEXT("Man3")};
+			for (UAnimationAsset* C : PackFamily(TEXT("Celebrations"), {TEXT("Celeb")}, {}, {TEXT("2Man"), TEXT("2man"), TEXT("3Man"), TEXT("4Man"), TEXT("Nman"), TEXT("NMan"), TEXT("Group"), TEXT("Mascot"), TEXT("Interaction"), TEXT("Avoid"), TEXT("Bump"), TEXT("Man0"), TEXT("Man1"), TEXT("Man2"), TEXT("Man3"), TEXT("Loco"), TEXT("Walk"), TEXT("Jog"), TEXT("Run"), TEXT("on_Ground"), TEXT("Toss_Ball"), TEXT("Fan")}, 24, Seed + 1, false))
+				PackCelebrations.Add(C);
+			for (UAnimationAsset* C : PackFamily(TEXT("PostPlay"), {TEXT("Idle"), TEXT("Fidget"), TEXT("Stand")}, {}, {TEXT("2Man"), TEXT("Man_"), TEXT("Interaction"), TEXT("Jog"), TEXT("Walk"), TEXT("Run"), TEXT("Avoid"), TEXT("Turn"), TEXT("Tackle"), TEXT("Getup"), TEXT("Injured"), TEXT("To_"), TEXT("Trans")}, 12, Seed + 2, true))
+				PackPostPlayIdles.Add(C);
+			for (UAnimationAsset* C : PackFamily(TEXT("GetUps"), {TEXT("Splat"), TEXT("Knees")}, {TEXT("InPlace"), TEXT("LowIntensity"), TEXT("Low_Intensity")}, {TEXT("BackSplat"), TEXT("Backsplat"), TEXT("Back_Splat"), TEXT("TwoMan"), TEXT("2Man"), TEXT("Man_"), TEXT("PTM_"), TEXT("Idle"), TEXT("BC_")}, 8, Seed + 3, false))
+				PackGetUpsFaceDown.Add(C);
+			for (UAnimationAsset* C : PackFamily(TEXT("GetUps"), {TEXT("BackSplat"), TEXT("Backsplat"), TEXT("Back_Splat"), TEXT("Sitting"), TEXT("Sit_")}, {TEXT("InPlace"), TEXT("LowIntensity"), TEXT("Low_Intensity")}, {TEXT("TwoMan"), TEXT("2Man"), TEXT("Man_"), TEXT("PTM_"), TEXT("Idle"), TEXT("BC_")}, 8, Seed + 4, false))
+				PackGetUpsFaceUp.Add(C);
+			for (UAnimationAsset* C : PackFamily(TEXT("Injuries"), {TEXT("FLD_PLYR_Injury")}, {}, {TEXT("2man"), TEXT("Reaction"), TEXT("Bench"), TEXT("Trainer"), TEXT("Cart")}, 6, Seed + 5, false))
+				PackInjuries.Add(C);
+			for (UAnimationAsset* C : PackFamily(TEXT(""), {TEXT("Breakdown")}, {}, {TEXT("Whiff"), TEXT("Tackle"), TEXT("2man"), TEXT("Trans")}, 8, Seed + 6, true))
+				Breakdowns.Add(C);
+			struct FStanceRule { int32 Pos; std::initializer_list<const TCHAR*> Any; };
+			const std::initializer_list<const TCHAR*> StanceNone = {TEXT("Point"), TEXT("Audible"), TEXT("Signal"), TEXT("Trans"), TEXT("Dead_Ball"), TEXT("Walk"), TEXT("Jog"), TEXT("BreakHuddle"), TEXT("Huddle"), TEXT("Adjust_Gear"), TEXT("Check_Sideline"), TEXT("Pump_Up"), TEXT("Shift"), TEXT("Motion"), TEXT("Snap"), TEXT("Cadence"), TEXT("Ready_Stance"), TEXT("Get_Set")};
+			const FStanceRule Rules[] = {
+				{static_cast<int32>(tag::Pos::WR), {TEXT("Stance_WR"), TEXT("WR_Stance"), TEXT("Fidgets_WR"), TEXT("WR_Idle")}},
+				{static_cast<int32>(tag::Pos::TE), {TEXT("Stance_TE"), TEXT("TE_Stance"), TEXT("Fidgets_TE")}},
+				{static_cast<int32>(tag::Pos::RB), {TEXT("STANCE_P_HB"), TEXT("Stance_HB"), TEXT("HB_Stance"), TEXT("Fidgets_HB"), TEXT("Fidgets_RB")}},
+				{static_cast<int32>(tag::Pos::LB), {TEXT("Idle_PrePlay_LB"), TEXT("LB_Idle"), TEXT("Fidgets_DEF_LB"), TEXT("Fidgets_LB")}},
+				{static_cast<int32>(tag::Pos::CB), {TEXT("Pre_Play_DB"), TEXT("DB_Idle"), TEXT("Fidgets_DB"), TEXT("Fidgets_DEF_LB_DB")}},
+				{static_cast<int32>(tag::Pos::S), {TEXT("Pre_Play_DB"), TEXT("DB_Idle"), TEXT("Fidgets_DB"), TEXT("Fidgets_DEF_LB_DB")}},
+				{static_cast<int32>(tag::Pos::QB), {TEXT("Idle_QBUC"), TEXT("QB_Idle"), TEXT("Idle_QB"), TEXT("QBIdle")}},
+				{static_cast<int32>(tag::Pos::K), {TEXT("Kicker_FG"), TEXT("Kicker_Idle")}},
+				{static_cast<int32>(tag::Pos::P), {TEXT("Punter"), TEXT("Kicker_Idle")}},
+			};
+			for (const FStanceRule& R : Rules)
+				for (UAnimationAsset* C : PackFamily(TEXT("PrePlay"), R.Any, {}, StanceNone, 6, Seed + 10 + R.Pos, true))
+					PackStances.FindOrAdd(R.Pos).Add(C);
+			// the line's three and four point stances: the pack's OL / DL fidget cycles that return to the set
+			for (UAnimationAsset* C : PackFamily(TEXT("PrePlay"), {TEXT("OL_3pt"), TEXT("OL_3_pt")}, {}, StanceNone, 6, Seed + 40, true))
+				PackStances.FindOrAdd(1000).Add(C);
+			for (UAnimationAsset* C : PackFamily(TEXT("PrePlay"), {TEXT("DL_4pt"), TEXT("DL_3pt"), TEXT("Def_4pt")}, {}, StanceNone, 6, Seed + 41, true))
+				PackStances.FindOrAdd(1001).Add(C);
+			PackLibraryCount = PackCelebrations.Num() + PackPostPlayIdles.Num() + PackGetUpsFaceDown.Num() + PackGetUpsFaceUp.Num() + PackInjuries.Num();
+			for (const auto& KV : PackStances) PackLibraryCount += KV.Value.Num();
+			for (UAnimationAsset* C : PackCelebrations) Celebrations.Add(C);
+			UE_LOG(LogTemp, Display, TEXT("TAG: pack library in play: %d celebrations, %d post-play idles, %d / %d get-ups, %d injuries, %d breakdowns, %d stances (seed %d)"),
+				PackCelebrations.Num(), PackPostPlayIdles.Num(), PackGetUpsFaceDown.Num(), PackGetUpsFaceUp.Num(), PackInjuries.Num(), Breakdowns.Num(), PackLibraryCount - PackCelebrations.Num() - PackPostPlayIdles.Num() - PackGetUpsFaceDown.Num() - PackGetUpsFaceUp.Num() - PackInjuries.Num(), Seed);
+		}
 		{
 			// the throwing family; each starts 7 frames before its release (the set throw starts at its stride frame)
 			const TCHAR* TN[ThrowCount] = {TEXT("A_TAG_QB_Throw"), TEXT("A_TAG_QB_Throw_Quick"), TEXT("A_TAG_QB_Throw_Deep"),
@@ -266,6 +314,60 @@ void FAthleteAssets::Load()
 	const FString A = TEXT("/Game/Characters/Mannequins/");
 	Mesh = LoadAsset<USkeletalMesh>(*(A + TEXT("Meshes/SKM_Manny_Simple.SKM_Manny_Simple")));
 	UE_LOG(LogTemp, Warning, TEXT("TAG: UEFN mannequin or TAG blend spaces missing; players will not animate"));
+}
+
+bool FAthleteAssets::LoopsCleanly(const UAnimSequence* Seq)
+{
+	// first and last pose close enough to loop: pelvis within 6 cm and 12 deg, the big limbs within 25 deg
+	if (!Seq || !Seq->GetSkeleton()) return false;
+	const FReferenceSkeleton& Ref = Seq->GetSkeleton()->GetReferenceSkeleton();
+	const double L = Seq->GetPlayLength();
+	for (const TCHAR* B : {TEXT("pelvis"), TEXT("spine_01"), TEXT("thigh_l"), TEXT("thigh_r"), TEXT("upperarm_l"), TEXT("upperarm_r")})
+	{
+		const int32 Idx = Ref.FindBoneIndex(B);
+		if (Idx == INDEX_NONE) return false;
+		FTransform T0, T1;
+		Seq->GetBoneTransform(T0, FSkeletonPoseBoneIndex(Idx), 0.0, false);
+		Seq->GetBoneTransform(T1, FSkeletonPoseBoneIndex(Idx), L, false);
+		const float Deg = FMath::RadiansToDegrees(T0.GetRotation().AngularDistance(T1.GetRotation()));
+		if (Deg > (Idx == Ref.FindBoneIndex(TEXT("pelvis")) ? 12.f : 25.f)) return false;
+		if (FString(B) == TEXT("pelvis") && FVector::Dist(T0.GetTranslation(), T1.GetTranslation()) > 6.f) return false;
+	}
+	return true;
+}
+
+TArray<UAnimationAsset*> FAthleteAssets::PackFamily(const TCHAR* Category, std::initializer_list<const TCHAR*> Any, std::initializer_list<const TCHAR*> Any2,
+	std::initializer_list<const TCHAR*> None, int32 Max, int32 Seed, bool bLoop)
+{
+	TArray<UAnimationAsset*> Out;
+	IAssetRegistry& AR = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry").Get();
+	const FString Path = FString::Printf(TEXT("/Game/TAG/Anim/Pack/%s"), Category);
+	AR.ScanPathsSynchronous({Path}, true); // uncooked runs fill the registry lazily
+	TArray<FAssetData> Assets;
+	AR.GetAssetsByPath(FName(*Path), Assets, FCString::Strcmp(Category, TEXT("")) == 0);
+	TArray<FAssetData> Hits;
+	for (const FAssetData& D : Assets)
+	{
+		const FString N = D.AssetName.ToString();
+		auto AnyOf = [&N](std::initializer_list<const TCHAR*> L) { if (L.size() == 0) return true; for (const TCHAR* T : L) if (N.Contains(T)) return true; return false; };
+		bool bOk = AnyOf(Any) && AnyOf(Any2);
+		for (const TCHAR* T : None) if (N.Contains(T)) { bOk = false; break; }
+		if (bOk) Hits.Add(D);
+	}
+	Hits.Sort([](const FAssetData& L, const FAssetData& R) { return L.AssetName.LexicalLess(R.AssetName); });
+	FRandomStream Rand(Seed);
+	for (int32 i = Hits.Num() - 1; i > 0; --i) Hits.Swap(i, Rand.RandRange(0, i));
+	int32 Tried = 0;
+	for (const FAssetData& D : Hits)
+	{
+		if (Out.Num() >= Max || Tried++ >= Max * 4) break; // a looping family may reject many
+		UAnimSequence* S = Cast<UAnimSequence>(D.GetAsset());
+		if (!S || S->GetPlayLength() < 0.5f) continue;
+		if (bLoop && !LoopsCleanly(S)) continue;
+		S->AddToRoot(); // held by a plain struct, like every other asset here: never collected
+		Out.Add(S);
+	}
+	return Out;
 }
 
 void FAthleteAssets::LoadMotionMatching()
@@ -1144,6 +1246,12 @@ void AAthlete::StartGetUp(const FVector& SimLoc)
 	const bool bUpMirror = (GUpSide++ % 2) == 1; // come up over either shoulder
 	static int32 GGetUpSeq = 0; // every other face-up landing rolls to the side and up instead
 	if (!bFaceDown && A.GetUpRoll && (GGetUpSeq++ % 2)) Clip = A.GetUpRoll.Get();
+	// one in three from the pack library's get-ups of that landing (in place, low intensity)
+	{
+		static int32 GLibSeq = 0;
+		const TArray<TObjectPtr<UAnimationAsset>>& Lib = bFaceDown ? A.PackGetUpsFaceDown : A.PackGetUpsFaceUp;
+		if (Lib.Num() && (GLibSeq++ % 3) == 2) Clip = Lib[(GLibSeq / 3) % Lib.Num()].Get();
+	}
 	static int32 GSlowSeq = 0;  // now and then a player is shaken up and slow to get up (hand on the ribs)
 	bInjuredChain = false;
 	if (bFaceDown && A.GetUpSlow && ((GSlowSeq++ % 5) == 4 || bForceInjury))
@@ -1154,10 +1262,11 @@ void AAthlete::StartGetUp(const FVector& SimLoc)
 		if (A.InjuredDown && ((GHurtSeq++ % 2) == 1 || bForceInjury))
 		{
 			Clip = A.InjuredDown.Get();
+			if (A.PackInjuries.Num() && (GHurtSeq % 3) != 1) Clip = A.PackInjuries[GHurtSeq % A.PackInjuries.Num()].Get(); // the pack's field injuries
 			bInjuredChain = true;
 			bInjuredMirror = bUpMirror;
 			bForceInjury = false;
-			InjuredLeft = A.InjuredDown->GetPlayLength();
+			InjuredLeft = Clip->GetPlayLength();
 			UE_LOG(LogTemp, Verbose, TEXT("TAG injury: #%d stays down"), Player ? Player->number : -1);
 		}
 	}
@@ -1792,6 +1901,13 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 		else if ((P == tag::Pos::CB || P == tag::Pos::S) && A.StanceDB) S = A.StanceDB;
 		else if (P == tag::Pos::LB && A.StanceLB) S = A.StanceLB;
 		else if ((P == tag::Pos::K || P == tag::Pos::P) && A.StanceK) S = A.StanceK;
+		// the pack library's stances for the position (index 0 keeps the measured cut), the player's own every snap
+		if (S && Player)
+		{
+			const int32 Key = bLine ? ((P == tag::Pos::DE || P == tag::Pos::DT) ? 1001 : 1000) : static_cast<int32>(P);
+			if (const TArray<TObjectPtr<UAnimationAsset>>* Lib = A.PackStances.Find(Key))
+				if (Lib->Num()) { const int32 i = Player->id % (Lib->Num() + 1); if (i > 0) S = (*Lib)[i - 1].Get(); }
+		}
 		if (S)
 		{
 			// per player phase offset so a whole line does not breathe in unison
@@ -1917,7 +2033,10 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 	// after the whistle, standing around: hands on the hips (winded players bend over, hands on the knees)
 	if (!bPreSnap && StillTime > 2.5f && Anim == TEXT("idle") && A.IdleHandsHips && A.IdleHandsKnees && Player)
 	{
-		PlayClip(Player->r.stamina < 70 ? A.IdleHandsKnees.Get() : A.IdleHandsHips.Get(), true, 1.f, FMath::Frac(Player->id * 0.53f) * 2.f);
+		UAnimationAsset* I = Player->r.stamina < 70 ? A.IdleHandsKnees.Get() : A.IdleHandsHips.Get();
+		if (Player->r.stamina >= 70 && A.PackPostPlayIdles.Num()) // the pack's post-play stands, the player's own
+			if (const int32 i = Player->id % (A.PackPostPlayIdles.Num() + 1)) I = A.PackPostPlayIdles[i - 1].Get();
+		PlayClip(I, true, 1.f, FMath::Frac(Player->id * 0.53f) * 2.f);
 		return;
 	}
 	// open field locomotion and standing: motion matching (crouched line footwork keeps its blend space)
