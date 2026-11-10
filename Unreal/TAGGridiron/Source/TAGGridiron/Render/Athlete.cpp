@@ -880,9 +880,10 @@ bool AAthlete::DriveMotionMatching(const FVector& VelWorld, float SimYaw, float 
 		const float AnimMax = bCrouch ? (C >= 0.f ? FMath::Lerp(170.f, 200.f, C) : FMath::Lerp(170.f, 150.f, -C))
 			: C >= 0.f ? FMath::Lerp(350.f, 700.f, C) : FMath::Lerp(350.f, 300.f, -C);
 		M->TrajectorySpeedMultiplier = FMath::Clamp(AnimMax / FMath::Max(GaitSpeed, 1.f), 1.f / 1.5f, 1.f);
-		// quicker strides up to 1.3x (7 m/s capture -> 9.1 m/s, NFL receiver speed, no foot slide); stable on -TagMoveTest
-		// once start / pivot databases were offered by state
-		static float RateCap = FParse::Value(FCommandLine::Get(), TEXT("TagMMRateCap="), RateCap) ? RateCap : 1.3f;
+		// quicker strides up to 1.1x (7 m/s capture -> 7.7 m/s); the rest of a sprinter's speed comes from a longer
+		// stride (ApplyStride), not quicker feet: at 1.3x the measured cadence was ~5.5 steps/s against the ~4.6 of
+		// a real sprinter at 9.4 m/s (-TagMoveTest gait log), at 1.1x ~5.3 with the step 1.6 -> 1.8 m
+		static float RateCap = FParse::Value(FCommandLine::Get(), TEXT("TagMMRateCap="), RateCap) ? RateCap : 1.1f;
 		M->MatchPlayRate = FMath::Min(1.f / M->TrajectorySpeedMultiplier, RateCap);
 		// faster still (a 10 m/s ball carrier against the 9.1 m/s the sped-up sprint covers): stretch the stride
 		if (MHBody && bMoving && !bCrouch)
@@ -1427,6 +1428,14 @@ void AAthlete::ResetPose()
 static double GSlideRaw = 0.0, GSlideShown = 0.0;
 static double GFastSec = 0.0, GFastM = 0.0;
 static int32 GFastSteps = 0;
+static double GFastHips = 0.0, GFastHead = 0.0;
+
+void AAthlete::HeightStats(double& OutHipsM, double& OutHeadM, bool bReset)
+{
+	OutHipsM = GFastHips;
+	OutHeadM = GFastHead;
+	if (bReset) GFastHips = GFastHead = 0.0;
+}
 
 void AAthlete::GaitStats(double& OutSeconds, double& OutMetres, int32& OutSteps, bool bReset)
 {
@@ -1481,6 +1490,9 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 			GFastSec += DeltaTime;
 			GFastM += FVector(VelWorld.X, VelWorld.Y, 0.f).Size() * DeltaTime / 100.0;
 			GFastSteps += RI->Touchdowns;
+			const float Ground = GetActorLocation().Z;
+			GFastHips += (MHBody->GetSocketLocation(TEXT("pelvis")).Z - Ground) / 100.0 * DeltaTime;
+			GFastHead += (MHBody->GetSocketLocation(TEXT("head")).Z - Ground) / 100.0 * DeltaTime;
 		}
 		RI->Touchdowns = 0;
 		// body physics are off while the body is down: falls, get-ups and ragdolls own the pose (set again below)

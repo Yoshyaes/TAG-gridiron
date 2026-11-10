@@ -311,7 +311,9 @@ void AMatchDirector::TickMoveTest(float Dt)
 		AAthlete::SlideStats(Raw, Shown, true);
 		AAthlete::GaitStats(Sec, Metres, Steps, true);
 		if (MoveRunner >= 0) UE_LOG(LogTemp, Display, TEXT("TAG slide r%d: animation %.0f cm, shown %.0f cm (planted-foot travel over the route)"), MoveRunner, Raw, Shown);
-		if (MoveRunner >= 0 && Sec > 0.5) UE_LOG(LogTemp, Display, TEXT("TAG gait r%d: %.2f steps/s, %.2f m per step at %.1f m/s over %.1f s (sprint reference ~4.7 steps/s, 2.1 m at 10 m/s)"), MoveRunner, Steps / Sec, Steps > 0 ? Metres / Steps : 0.0, Metres / Sec, Sec);
+		double HipsM, HeadM;
+		AAthlete::HeightStats(HipsM, HeadM, true);
+		if (MoveRunner >= 0 && Sec > 0.5) UE_LOG(LogTemp, Display, TEXT("TAG gait r%d: %.2f steps/s, %.2f m per step at %.1f m/s over %.1f s, hips %.2f m head %.2f m (sprint reference ~4.7 steps/s, 2.1 m at 10 m/s; hips 0.90-0.99, head 1.32-1.54)"), MoveRunner, Steps / Sec, Steps > 0 ? Metres / Steps : 0.0, Metres / Sec, Sec, HipsM / Sec, HeadM / Sec);
 		MoveRunner = R;
 		MovePos = Start;
 		MoveVel = FVector::ZeroVector;
@@ -378,7 +380,9 @@ void AMatchDirector::TickMoveTest(float Dt)
 		AAthlete::SlideStats(Raw, Shown, true);
 		AAthlete::GaitStats(Sec, Metres, Steps, true);
 		UE_LOG(LogTemp, Display, TEXT("TAG slide r%d: animation %.0f cm, shown %.0f cm (planted-foot travel over the route)"), MoveRunner, Raw, Shown);
-		if (Sec > 0.5) UE_LOG(LogTemp, Display, TEXT("TAG gait r%d: %.2f steps/s, %.2f m per step at %.1f m/s over %.1f s (sprint reference ~4.7 steps/s, 2.1 m at 10 m/s)"), MoveRunner, Steps / Sec, Steps > 0 ? Metres / Steps : 0.0, Metres / Sec, Sec);
+		double HipsM, HeadM;
+		AAthlete::HeightStats(HipsM, HeadM, true);
+		if (Sec > 0.5) UE_LOG(LogTemp, Display, TEXT("TAG gait r%d: %.2f steps/s, %.2f m per step at %.1f m/s over %.1f s, hips %.2f m head %.2f m (sprint reference ~4.7 steps/s, 2.1 m at 10 m/s; hips 0.90-0.99, head 1.32-1.54)"), MoveRunner, Steps / Sec, Steps > 0 ? Metres / Steps : 0.0, Metres / Sec, Sec, HipsM / Sec, HeadM / Sec);
 		UE_LOG(LogTemp, Display, TEXT("TAG perf avg %.1f fps over %d frames"), PerfFrames / FMath::Max(PerfT, 0.001f), PerfFrames);
 		FPlatformMisc::RequestExit(false);
 	}

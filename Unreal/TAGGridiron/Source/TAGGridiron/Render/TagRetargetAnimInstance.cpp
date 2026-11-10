@@ -408,7 +408,7 @@ void FTagRetargetProxy::ApplyStride(FPoseContext& Output) const
 	FTransform Pel = P.GetComponentSpaceTransform(B.Pelvis);
 	const FVector PelPos = Pel.GetLocation();
 	const FVector FL = Pos(P, B.FtL), FR = Pos(P, B.FtR);
-	Pel.SetLocation(PelPos - FVector(0, 0, (S - 1.f) * 22.f));
+	Pel.SetLocation(PelPos - FVector(0, 0, (S - 1.f) * 10.f)); // a touch lower (the sprint bands put the hips at 0.90-0.99 m)
 	const FBoneTransform BT[] = {FBoneTransform(B.Pelvis, Pel)};
 	P.LocalBlendCSBoneTransforms(BT, 1.f);
 	const FVector NL = FL + Dir * FVector::DotProduct(FL - PelPos, Dir) * (S - 1.f);

@@ -102,11 +102,42 @@ def stances(gait, rows):
     return fails
 
 
+def combine(rows):
+    """The sim's acceleration law (PlaySim: vmax = 8.6 + (speed - 50) * 0.049 yd/s, tau = 1 - (accel - 50) * 0.0078 s,
+    dv/dt = vmax / tau * max(0.12, 1 - v / vmax)) integrated from a standing start, against NFL Scouting Combine
+    splits: wide receivers average 4.52 s over 40 yd (NFL.com, 848 receivers since 2003; 4.44 in the 2026 class),
+    1.55 s over 10 yd (2026 class) and ~2.59 s over 20 (drafted players 2006-10). Starts, lean and stride warping all
+    follow this curve, so it is what the running looks like."""
+    fails = 0
+    refs = {10: (1.45, 1.65), 20: (2.45, 2.72), 40: (4.30, 4.65)}
+    for label, speed, accel in (("WR 90 speed / 85 accel", 90, 85), ("WR 86 speed / 82 accel (an average combine receiver)", 86, 82)):
+        vmax = 8.6 + (speed - 50) * 0.049
+        tau = 1 - (accel - 50) * 0.0078
+        v = x = t = 0.0
+        splits = {}
+        while x < 40 and t < 10:
+            v += vmax / tau * max(0.12, 1 - v / vmax) * 0.001
+            v = min(v, vmax)
+            x += v * 0.001
+            t += 0.001
+            for yd in (10, 20, 40):
+                if yd not in splits and x >= yd:
+                    splits[yd] = t
+        for yd in (10, 20, 40):
+            lo, hi = refs[yd]
+            sec = splits.get(yd, 99.0)
+            ok = lo <= sec <= hi
+            rows.append(("%s, %d yd" % (label, yd), sec, "ok" if ok else "FAIL", "%.2f-%.2f s" % (lo, hi), "combine split (sim acceleration law)"))
+            fails += 0 if ok else 1
+    return fails
+
+
 def main():
     data = json.load(open(TARGETS)) if os.path.exists(TARGETS) else {}
     targets = data.get("timing", {})
     fails, rows = 0, []
     fails += stances(data.get("gait_stance", {}), rows)
+    fails += combine(rows)
     for path in sorted(glob.glob(os.path.join(CLIPS, "A_TAG_*.json"))):
         r = json.load(open(path))
         name = r["clip"]
