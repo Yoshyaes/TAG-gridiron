@@ -334,6 +334,126 @@ int main() {
     check(fmtClock(65.2) == "1:06" && fmtClock(0) == "0:00", "fmtClock " + fmtClock(65.2));
   });
 
+  // ---------------- pre-snap adjustments (hot routes, protection, shifts, defensive assignments, audibles)
+  auto scrimmage = [&](uint32_t seed, int a, int b) {
+    GameOptions o;
+    o.seed = seed;
+    auto g = std::make_unique<Game>(*league[a], *league[b], o);
+    g->phase = GamePhase::Scrimmage;
+    g->ballOn = 35;
+    return g;
+  };
+
+  t("presnap: hot routes rebuild the route and the QB's reads", [&] {
+    auto g = scrimmage(51, 2, 3);
+    auto sim = g->makePlay(*playById("dbl_curls"), *defById("nk_c3"), Side::Off, false);
+    Ent* x = sim->offRole("X");
+    Ent* rb = sim->offRole("RB");
+    check(x->routeName == "curl" && rb->routeName == "checkdown", "called routes " + x->routeName + " " + rb->routeName);
+    check(sim->hotRoute(x, "go"), "hot route refused");
+    check(x->routeName == "go" && x->state == EntState::Route && x->route.back().x - sim->los > 40, "go route not rebuilt");
+    check(sim->hotRoute(rb, "block") && rb->state == EntState::PassBlock, "RB kept in");
+    bool hasRb = false;
+    for (const std::string& r : sim->readOrder) hasRb = hasRb || r == "RB";
+    check(!hasRb, "a blocker stays in the read order");
+    check(!sim->hotRoute(sim->offRole("LT"), "go") && !sim->hotRoute(sim->qb, "go"), "linemen and the QB have no routes");
+    check(!sim->hotRoute(x, "nonsense"), "unknown route accepted");
+    sim->step();
+    check(!sim->hotRoute(x, "slant"), "hot route after the snap");
+    const PlayResult& r = sim->runToEnd();
+    check(r.target == nullptr || r.target != rb->p, "threw to a blocker");
+    auto run = g->makePlay(*playById("dbl_iz"), *defById("nk_c3"), Side::Off);
+    check(!run->hotRoute(run->offRole("X"), "go"), "hot route on a run play");
+  });
+
+  t("presnap: shifts walk players over, blocking re-sets at the snap", [&] {
+    auto g = scrimmage(61, 4, 5);
+    auto sim = g->makePlay(*playById("dbl_mesh"), *defById("base_c3"), Side::Def, false);
+    Ent* le = sim->defRole("LE");
+    const double y0 = le->pos.y;
+    sim->adjustLine(PlaySim::LineAdj::ShiftL);
+    check(le->shiftTo && std::fabs(le->shiftTo->y - (y0 + 1.35)) < 1e-9, "shift target");
+    for (int i = 0; i < 60 && le->shiftTo; ++i) sim->presnapStep(1.0 / 60);
+    check(!le->shiftTo && std::fabs(le->pos.y - (y0 + 1.35)) < 1e-9, "did not arrive in a second");
+    check(sim->t == 0 && sim->preSnap(), "presnap clock moved the play clock");
+    sim->adjustLine(PlaySim::LineAdj::Base);
+    sim->adjustLBs(PlaySim::LineAdj::Pinch);
+    sim->adjustShell(PlaySim::ShellAdj::Disguise);
+    sim->step();  // the snap: everyone at his spot
+    check(std::fabs(le->pos.y - y0) < 1e-9, "base did not walk him back");
+    for (const Ent* e : sim->ents) check(!e->shiftTo, e->role + " still shifting after the snap");
+    sim->runToEnd();
+    // a slide: the line picks different men
+    auto pick = [&](int slide) {
+      auto s = g->makePlay(*playById("dbl_mesh"), *defById("nk_c0"), std::nullopt, false);
+      s->setProtection(slide, false);
+      s->step();
+      std::string out;
+      for (const Ent* e : s->off)
+        if (e->isOL) out += e->role + ">" + (e->blockTarget ? e->blockTarget->role : std::string("-")) + " ";
+      return out;
+    };
+    check(pick(1) != pick(-1), "a slide left and right block the same men: " + pick(1));
+  });
+
+  t("presnap: defensive assignments (blitz, spy, zones, man) play out", [&] {
+    auto g = scrimmage(71, 6, 7);
+    auto sim = g->makePlay(*playById("trips_flood"), *defById("base_c3"), Side::Def, false);
+    Ent* mlb = sim->defRole("MLB");
+    Ent* ss = sim->defRole("SS");
+    Ent* fs = sim->defRole("FS");
+    Ent* le = sim->defRole("LE");
+    check(sim->assignDefender(mlb, PlaySim::DefAssign::Blitz) && mlb->state == EntState::Rush, "blitz");
+    check(sim->assignDefender(ss, PlaySim::DefAssign::Spy) && ss->state == EntState::Spy, "spy");
+    check(sim->assignDefender(le, PlaySim::DefAssign::Flat) && le->state == EntState::Zone && le->zone.rfind("flat", 0) == 0, "zone drop");
+    check(sim->assignDefender(fs, PlaySim::DefAssign::Man) && fs->state == EntState::Man && fs->man, "man");
+    // the protection picks him up as he comes (a blocker sets on him or engages him)
+    bool picked = false;
+    while (sim->isLive() && sim->t < 2.0 && !picked) {
+      sim->step();
+      for (const Ent* e : sim->off) picked = picked || e->blockTarget == mlb || e->engaged == mlb;
+    }
+    check(picked, "nobody picked up the blitzing linebacker");
+    const PlayResult& r = sim->runToEnd();
+    check(r.duration > 0, "play did not run");
+  });
+
+  t("presnap: motion moves the receiver and his route, a man defender travels with him", [&] {
+    auto g = scrimmage(91, 10, 11);
+    auto sim = g->makePlay(*playById("dbl_slants"), *defById("nk_c1"), Side::Off, false);
+    Ent* z = sim->offRole("Z");
+    Ent* cb = nullptr;
+    for (Ent* d : sim->def)
+      if (d->state == EntState::Man && d->man == z) cb = d;
+    check(cb != nullptr, "nobody manned up on Z in cover 1");
+    const double zy = z->pos.y, cy = cb->pos.y, r0 = z->route.back().y;
+    check(sim->motion(z, 6), "motion refused");
+    check(z->shiftTo && std::fabs(z->shiftTo->y - (zy + 6)) < 1e-9, "receiver target");
+    check(std::fabs(z->route.back().y - (r0 + 6)) < 1.6, "route did not move with him");
+    check(cb->shiftTo && std::fabs(cb->shiftTo->y - (cy + 6)) < 1e-9, "man defender did not travel");
+    sim->previewBlocks();
+    const PlayResult& r = sim->runToEnd();
+    check(r.duration > 0, "play did not run");
+  });
+
+  t("presnap: adjusted plays stay deterministic, flip mirrors the formation", [&] {
+    auto play = [&](bool flip) {
+      auto g = scrimmage(81, 8, 9);
+      auto sim = g->makePlay(*playById("trips_dagger"), *defById("nk_c1"), std::nullopt, flip);
+      sim->hotRoute(sim->offRole("TE"), "corner");
+      sim->setProtection(-1, true);
+      sim->adjustShell(PlaySim::ShellAdj::Press);
+      sim->adjustLine(PlaySim::LineAdj::Spread);
+      for (int i = 0; i < 30; ++i) sim->presnapStep(1.0 / 60);
+      const double xY = sim->offRole("X")->pos.y - sim->by;
+      const PlayResult& r = sim->runToEnd();
+      return std::make_pair(xY, fx(r.endX, 6) + "/" + std::to_string(r.events.size()) + "/" + fx(r.duration, 6));
+    };
+    const auto a = play(false), b = play(false), c = play(true);
+    check(a.second == b.second, a.second + " vs " + b.second);
+    check(std::fabs(a.first + c.first) < 1e-9, "flip did not mirror X");
+  });
+
   std::printf("\n%d passed, %d failed\n", passCount, failCount);
   return failCount ? 1 : 0;
 }

@@ -15,6 +15,9 @@
 #include "Widgets/Input/SButton.h"
 #include "Widgets/Text/STextBlock.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Framework/Application/SlateApplication.h"
+#include "Fonts/FontMeasure.h"
+#include "Rendering/SlateRenderer.h"
 
 using namespace TagCoords;
 
@@ -60,7 +63,8 @@ void SGridironOverlay::Construct(const FArguments& InArgs)
 			SNew(SVerticalBox).Visibility(EVisibility::HitTestInvisible)
 			+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center)
 			[
-				SNew(STextBlock).Font(Font(64, "Bold")).ShadowOffset(FVector2D(3, 3)).ShadowColorAndOpacity(FLinearColor(0, 0, 0, 0.8f))
+				SNew(STextBlock).Font(Font(64, "Bold")).ShadowOffset(FVector2D(3, 3))
+				.ShadowColorAndOpacity_Lambda([this] { const float A = BannerT < 0.25f ? BannerT / 0.25f : BannerT > 1.8f ? FMath::Max(0.f, 1.f - (BannerT - 1.8f) / 0.5f) : 1.f; return FLinearColor(0, 0, 0, 0.8f * A); })
 				.Text_Lambda([this] { return T(BannerText); })
 				.ColorAndOpacity_Lambda([this] { const float A = BannerT < 0.25f ? BannerT / 0.25f : BannerT > 1.8f ? FMath::Max(0.f, 1.f - (BannerT - 1.8f) / 0.5f) : 1.f; FLinearColor C = BannerColor; C.A = A; return FSlateColor(C); })
 			]
@@ -156,6 +160,8 @@ int32 SGridironOverlay::OnPaint(const FPaintArgs& Args, const FGeometry& Allotte
 	FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const
 {
 	int32 Layer = SCompoundWidget::OnPaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
+	// pre-snap: the receivers' icons and the adjustments panel
+	if (bHud && !bModal) Layer = PaintPresnap(OutDrawElements, Layer + 1, AllottedGeometry);
 	// the focused menu button (gamepad / keyboard navigation) gets a gold frame
 	if (bModal && FSlateApplication::IsInitialized())
 	{
@@ -188,6 +194,175 @@ int32 SGridironOverlay::OnPaint(const FPaintArgs& Args, const FGeometry& Allotte
 		}
 	}
 	return Layer;
+}
+
+namespace
+{
+	const TCHAR* DefaultKey(EPadGlyph G)
+	{
+		switch (G)
+		{
+		case EPadGlyph::Cross: return TEXT("SPACE");
+		case EPadGlyph::Circle: return TEXT("BKSP");
+		case EPadGlyph::Square: return TEXT("J");
+		case EPadGlyph::Triangle: return TEXT("H");
+		case EPadGlyph::R1: return TEXT("N");
+		case EPadGlyph::L1: return TEXT("TAB");
+		case EPadGlyph::R2: return TEXT("Q");
+		case EPadGlyph::L2: return TEXT("BKSP");
+		case EPadGlyph::DUp: return TEXT("↑");
+		case EPadGlyph::DDown: return TEXT("↓");
+		case EPadGlyph::DLeft: return TEXT("←");
+		case EPadGlyph::DRight: return TEXT("→");
+		default: return TEXT("");
+		}
+	}
+	FVector2D Measure(const FString& S, const FSlateFontInfo& F)
+	{
+		return FSlateApplication::Get().GetRenderer()->GetFontMeasureService()->Measure(S, F);
+	}
+}
+
+void SGridironOverlay::PaintGlyph(FSlateWindowElementList& Out, int32 Layer, const FGeometry& G, const FVector2D& C, float Size, EPadGlyph Gl,
+	const FString& Key, bool bPad, const FLinearColor& Tint, float Alpha) const
+{
+	if (Gl == EPadGlyph::None && Key.IsEmpty()) return;
+	auto Col = [Alpha](FLinearColor X) { X.A *= Alpha; return X; };
+	auto Lines = [&](const TArray<FVector2f>& P, const FLinearColor& Cl, float Th, int32 L = 1)
+	{
+		FSlateDrawElement::MakeLines(Out, Layer + L, G.ToPaintGeometry(), P, ESlateDrawEffect::None, Col(Cl), true, Th);
+	};
+	auto Poly = [&](float R, int32 N, float Rot)
+	{
+		TArray<FVector2f> P;
+		for (int32 i = 0; i <= N; ++i)
+		{
+			const float A = Rot + 2.f * PI * i / N;
+			P.Add(FVector2f(C.X + FMath::Cos(A) * R, C.Y + FMath::Sin(A) * R));
+		}
+		return P;
+	};
+	auto Text = [&](const FString& S, int32 Pt, const FLinearColor& Cl)
+	{
+		const FSlateFontInfo F = Font(Pt, "Bold");
+		const FVector2D M = Measure(S, F);
+		FSlateDrawElement::MakeText(Out, Layer + 3, G.ToPaintGeometry(FVector2f(M), FSlateLayoutTransform(FVector2f(C - M * 0.5))), S, F,
+			ESlateDrawEffect::None, Col(Cl));
+	};
+	auto Box = [&](const FVector2D& Sz, const FLinearColor& Cl)
+	{
+		FSlateDrawElement::MakeBox(Out, Layer, G.ToPaintGeometry(FVector2f(Sz), FSlateLayoutTransform(FVector2f(C - Sz * 0.5))), White(),
+			ESlateDrawEffect::None, Col(Cl));
+	};
+	const float R = Size * 0.5f;
+	const FLinearColor Dark(0.03f, 0.035f, 0.05f, 0.94f);
+	if (!bPad || Gl == EPadGlyph::None)
+	{
+		// keyboard: the key on a keycap
+		const FString K = Key.IsEmpty() ? FString(DefaultKey(Gl)) : Key;
+		const FVector2D M = Measure(K, Font(FMath::RoundToInt(Size * 0.42f), "Bold"));
+		const FVector2D Sz(FMath::Max<double>(Size, M.X + 12), Size * 0.86f);
+		Box(Sz + FVector2D(3, 3), Tint * FLinearColor(0.7f, 0.7f, 0.7f, 1.f));
+		Box(Sz, Dark);
+		Text(K, FMath::RoundToInt(Size * 0.42f), Tint);
+		return;
+	}
+	const float Th = FMath::Max(2.f, Size * 0.085f);
+	const float S = R * 0.46f;
+	auto P2 = [&](float X, float Y) { return FVector2f(C.X + X, C.Y + Y); };
+	switch (Gl)
+	{
+	case EPadGlyph::Cross:
+	case EPadGlyph::Circle:
+	case EPadGlyph::Square:
+	case EPadGlyph::Triangle:
+		Lines(Poly(R * 0.5f, 28, 0.f), Dark, R, 0);  // the button (a ring as thick as its radius is a disc)
+		Lines(Poly(R - 0.8f, 28, 0.f), Tint * FLinearColor(1, 1, 1, 0.45f), 1.4f);
+		if (Gl == EPadGlyph::Cross)
+		{
+			Lines({P2(-S, -S), P2(S, S)}, Tint, Th);
+			Lines({P2(-S, S), P2(S, -S)}, Tint, Th);
+		}
+		else if (Gl == EPadGlyph::Circle) Lines(Poly(S * 1.02f, 24, 0.f), Tint, Th);
+		else if (Gl == EPadGlyph::Square) Lines({P2(-S * 0.92f, -S * 0.92f), P2(S * 0.92f, -S * 0.92f), P2(S * 0.92f, S * 0.92f), P2(-S * 0.92f, S * 0.92f), P2(-S * 0.92f, -S * 0.92f)}, Tint, Th);
+		else Lines(Poly(S * 1.12f, 3, -PI * 0.5f), Tint, Th);  // apex up
+		break;
+	case EPadGlyph::R1:
+	case EPadGlyph::L1:
+	case EPadGlyph::R2:
+	case EPadGlyph::L2:
+		Box(FVector2D(Size * 1.36f + 3, Size * 0.8f + 3), Tint * FLinearColor(0.6f, 0.6f, 0.6f, 1.f));
+		Box(FVector2D(Size * 1.36f, Size * 0.8f), Dark);
+		Text(Gl == EPadGlyph::R1 ? TEXT("R1") : Gl == EPadGlyph::L1 ? TEXT("L1") : Gl == EPadGlyph::L2 ? TEXT("L2") : TEXT("R2"), FMath::RoundToInt(Size * 0.36f), Tint);
+		break;
+	default:
+	{
+		// the D-pad, the pressed arm lit
+		const FLinearColor Arm(0.32f, 0.34f, 0.4f, 1.f);
+		const float A = R * 0.86f, W = R * 0.52f;
+		Lines({P2(-A, 0), P2(A, 0)}, Arm, W, 0);
+		Lines({P2(0, -A), P2(0, A)}, Arm, W, 0);
+		const FVector2f D = Gl == EPadGlyph::DUp ? FVector2f(0, -1) : Gl == EPadGlyph::DDown ? FVector2f(0, 1) : Gl == EPadGlyph::DLeft ? FVector2f(-1, 0) : FVector2f(1, 0);
+		Lines({P2(D.X * R * 0.18f, D.Y * R * 0.18f), P2(D.X * A, D.Y * A)}, Tint, W, 1);
+		break;
+	}
+	}
+}
+
+int32 SGridironOverlay::PaintPresnap(FSlateWindowElementList& Out, int32 Layer, const FGeometry& G) const
+{
+	const FVector2D Local = G.GetLocalSize();
+	// receivers' button icons over their heads
+	if (Icons.Num() && IconViewport.X > 0 && IconViewport.Y > 0)
+	{
+		const FVector2D Scale(Local.X / IconViewport.X, Local.Y / IconViewport.Y);
+		static const EPadGlyph Face[5] = {EPadGlyph::Cross, EPadGlyph::Circle, EPadGlyph::Square, EPadGlyph::Triangle, EPadGlyph::R1};
+		for (const FArtIcon& I : Icons)
+		{
+			const FVector2D C = I.Screen * Scale;
+			const float Sz = 30.f;
+			if (I.bPrimary || I.bPicked)
+			{
+				TArray<FVector2f> P;
+				for (int32 k = 0; k <= 32; ++k)
+					P.Add(FVector2f(C.X + FMath::Cos(2.f * PI * k / 32) * (Sz * 0.62f), C.Y + FMath::Sin(2.f * PI * k / 32) * (Sz * 0.62f)));
+				FSlateDrawElement::MakeLines(Out, Layer, G.ToPaintGeometry(), P, ESlateDrawEffect::None, I.bPicked ? FLinearColor::White : Accent, true, 3.f);
+			}
+			PaintGlyph(Out, Layer, G, C, Sz, Face[FMath::Clamp(I.Button, 0, 4)], FString::FromInt(I.Button + 1), bIconPad, ButtonColor(I.Button));
+			if (I.bHot)
+			{
+				const FSlateFontInfo F = Font(9, "Bold");
+				const FVector2D M = Measure(TEXT("HOT"), F);
+				FSlateDrawElement::MakeText(Out, Layer + 3, G.ToPaintGeometry(FVector2f(M), FSlateLayoutTransform(FVector2f(C + FVector2D(-M.X * 0.5, Sz * 0.58)))),
+					FString(TEXT("HOT")), F, ESlateDrawEffect::None, Accent);
+			}
+		}
+	}
+	if (PreRows.Num() == 0) return Layer + 4;
+	// the pre-snap panel, bottom right (over the icons)
+	Layer += 6;
+	const float W = 480.f, RowH = 34.f, Head = PreSub.IsEmpty() ? 44.f : 62.f;
+	const float H = Head + PreRows.Num() * RowH + 12.f;
+	const FVector2D TL(Local.X - W - 30.f, Local.Y - H - 128.f);
+	FSlateDrawElement::MakeBox(Out, Layer, G.ToPaintGeometry(FVector2f(W, H), FSlateLayoutTransform(FVector2f(TL))), White(), ESlateDrawEffect::None, Panel);
+	FSlateDrawElement::MakeBox(Out, Layer + 1, G.ToPaintGeometry(FVector2f(4.f, H), FSlateLayoutTransform(FVector2f(TL))), White(), ESlateDrawEffect::None, Accent);
+	FSlateDrawElement::MakeText(Out, Layer + 1, G.ToPaintGeometry(FVector2f(W - 30, 24), FSlateLayoutTransform(FVector2f(TL + FVector2D(20, 12)))), PreTitle,
+		Font(15, "Bold"), ESlateDrawEffect::None, Accent);
+	if (!PreSub.IsEmpty())
+		FSlateDrawElement::MakeText(Out, Layer + 1, G.ToPaintGeometry(FVector2f(W - 30, 18), FSlateLayoutTransform(FVector2f(TL + FVector2D(20, 36)))), PreSub,
+			Font(11), ESlateDrawEffect::None, Dim);
+	for (int32 i = 0; i < PreRows.Num(); ++i)
+	{
+		const FPreRow& Rw = PreRows[i];
+		const FVector2D RowTL = TL + FVector2D(8, Head + i * RowH);
+		if (Rw.bOn)
+			FSlateDrawElement::MakeBox(Out, Layer + 1, G.ToPaintGeometry(FVector2f(W - 16, RowH - 4), FSlateLayoutTransform(FVector2f(RowTL))), White(),
+				ESlateDrawEffect::None, FLinearColor(1.f, 0.83f, 0.f, 0.13f));
+		PaintGlyph(Out, Layer + 1, G, RowTL + FVector2D(30, (RowH - 4) * 0.5f), 26.f, Rw.Glyph, Rw.Key, bPrePad, Rw.Tint);
+		FSlateDrawElement::MakeText(Out, Layer + 4, G.ToPaintGeometry(FVector2f(W - 90, RowH), FSlateLayoutTransform(FVector2f(RowTL + FVector2D(64, 6)))), Rw.Label,
+			Font(13, Rw.bOn ? "Bold" : "Regular"), ESlateDrawEffect::None, Rw.bOn ? Accent : FLinearColor(0.9f, 0.92f, 0.95f));
+	}
+	return Layer + 6;
 }
 
 void SGridironOverlay::Banner(const FString& Text, const FString& Sub, const FLinearColor& Color)

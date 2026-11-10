@@ -1834,9 +1834,12 @@ void AAthlete::SetFootball(const FAthleteFootball& InF, float Dt)
 	if (AA.ThrowKeyed) F.ThrowT = -1.f;
 	if (F.bPreSnap && AA.Stance3pt) F.bStance = false;
 	const bool bThrow = F.ThrowT >= 0.f;
-	Ease(CarryA, F.bHasBall && !F.bSecure && !bThrow ? 1.f : 0.f, 9.f);
-	Ease(SecureA, F.bSecure && !bThrow ? 1.f : 0.f, 9.f);
-	Ease(ReachA, F.bReach ? 1.f : 0.f, F.bReach ? 7.f : 4.f);
+	// a hand keyed one-shot (catch, handoff, pitch, rush move, ...), a keyed fall or get-up authors its own arms: keep
+	// the procedural tuck / secure / reach off it (they would pull the hands off the catch), ease them back after
+	const bool bKeyedArms = (OneShot && OneShotLeft > 0.f) || bFalling || bGettingUp;
+	Ease(CarryA, F.bHasBall && !F.bSecure && !bThrow && !bKeyedArms ? 1.f : 0.f, bKeyedArms ? 14.f : 6.f);
+	Ease(SecureA, F.bSecure && !bThrow && !bKeyedArms ? 1.f : 0.f, 9.f);
+	Ease(ReachA, F.bReach && !bKeyedArms ? 1.f : 0.f, F.bReach && !bKeyedArms ? 7.f : 10.f);
 	Ease(LeanA, F.Lean, 5.f);
 	Ease(StanceA, F.bStance ? 1.f : 0.f, 6.f);
 	Ease(LookA, F.bLook ? 0.85f : 0.f, 4.f);

@@ -117,8 +117,41 @@ private:
 	std::vector<std::unique_ptr<tag::Player>> OfficialPeople;
 	void SpawnSidelines(const tag::Team& Home, const tag::Team& Away);
 	void TickSidelines(float Dt);
+	/** A live kick return (the sim fields the kick and runs it back; the user returns it or covers it). */
+	bool bLiveReturn = false;
+	void StartLiveReturn(const std::vector<tag::Player*>& KickTeam, const std::vector<tag::Player*>& RecvTeam);
 	int32 SidelineScore[2] = {0, 0};
 	float SidelineCheerLeft[2] = {0.f, 0.f};
+
+	// ---- pre-snap (MatchPresnap.cpp): play art on the field (hold R2), hot routes, audibles and flip, protection
+	// slides, motion; on defense coverage audibles, d-line / linebacker shifts, the coverage shell and assignments
+	enum class EPre : uint8 { Base, HotPick, HotRoute, Audible, Protect, MotionPick, Motion, DLine, LBs, Shell, Assign };
+	EPre PreMode = EPre::Base;
+	tag::Ent* PreEnt = nullptr;  // the receiver being hot routed / sent in motion
+	int32 AudibleSel = 0;
+	float ArtAuto = 0.f;         // the art shows itself for a moment as the play comes in
+	float PresnapClock = 0.f;
+	bool bPreConsumed = false;   // a pre-snap control used this frame's button (it does not also snap the ball)
+	UPROPERTY()
+	TObjectPtr<class ATagPlayArt> PlayArt;
+	void BeginPresnapUI();
+	void TickPresnap(float Dt);
+	void EndPresnapUI();
+	void BuildPlayArt();
+	void UpdateIcons();
+	void RefreshPresnapPanel();
+	void RebuildPlay(const tag::OffPlay* Op, const tag::DefCall* Dc, bool bFlip);
+	/** +1 if the screen's right is the offense's left (+y), else -1 (D-pad left / right are screen directions). */
+	int32 ScreenRightSign() const;
+	std::vector<const tag::OffPlay*> AudibleOff() const;
+	std::vector<const tag::DefCall*> AudibleDef() const;
+	int32 LabelOf(const tag::Ent* E) const;
+	/** -TagArtTest: a user game that drives every pre-snap call (offense, then defense) and screenshots each. */
+	bool bArtTest = false;
+	bool bArtDidOff = false, bArtDidDef = false, bArtLiveShot = false;
+	float ArtT = 0.f, ArtExitT = 0.f;
+	int32 ArtStep = 0;
+	void TickArtTest(float Dt);
 
 	TSharedPtr<SGridironOverlay> Overlay;
 	bool bPlayStationPad = false; // a DualSense was found through RawInput (hints name its buttons)

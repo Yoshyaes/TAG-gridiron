@@ -12,6 +12,7 @@ python "%~dp0Art\gen_uniform_textures.py" "%PROJDIR%\RawArt" || (echo Python wit
 rem 3) import textures + build materials inside Unreal (headless)
 "%UE%\Engine\Binaries\Win64\UnrealEditor-Cmd.exe" "%PROJDIR%\TAGGridiron.uproject" -run=pythonscript "-script=%~dp0Art\ue_build_materials.py" -unattended -nosplash
 "%UE%\Engine\Binaries\Win64\UnrealEditor-Cmd.exe" "%PROJDIR%\TAGGridiron.uproject" -run=pythonscript "-script=%~dp0Art\ue_build_stadium_mats.py" -unattended -nosplash
+"%UE%\Engine\Binaries\Win64\UnrealEditor-Cmd.exe" "%PROJDIR%\TAGGridiron.uproject" -run=pythonscript "-script=%~dp0Art\ue_build_playart_mat.py" -unattended -nosplash
 rem 3b) TAG football gear: procedural helmet and facemasks
 "%UE%\Engine\Binaries\Win64\UnrealEditor-Cmd.exe" "%PROJDIR%\TAGGridiron.uproject" -run=pythonscript "-script=%~dp0Art\gear_build.py" -unattended -nosplash -nullrhi
 rem 4) optional: Epic's free Game Animation Sample (download to <repo>\Assets\GASP) -> motion-captured athletes

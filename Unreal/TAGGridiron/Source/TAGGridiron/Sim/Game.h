@@ -186,7 +186,9 @@ class Game {
   void applyPresnap(const Penalty& pen);
 
   // ---- scrimmage
-  std::unique_ptr<PlaySim> makePlay(const OffPlay& offPlay, const DefCall& defCall, std::optional<Side> userSide = std::nullopt);
+  /** flip: the formation's strength (an audible keeps it, flip play changes it); unset = to the field side. */
+  std::unique_ptr<PlaySim> makePlay(const OffPlay& offPlay, const DefCall& defCall, std::optional<Side> userSide = std::nullopt,
+                                    std::optional<bool> flip = std::nullopt);
   /** Apply finished play. Returns (a copy of) the log line. */
   PlayLog finishPlay(PlaySim& sim);
   std::string describe(const PlayResult& res, const OffPlay& play, const PlaySim& sim) const;
@@ -196,15 +198,28 @@ class Game {
   Player* punter(TeamKey k) const;
   /** Probability a kick of `dist` yards is good. Fit to 2020s NFL by distance. */
   double fgProb(double dist, const Player& k, TeamKey kt) const;
-  SpecialResult kickoff(bool onside = false);
-  SpecialResult punt();
+  /** liveReturn: a returnable kick is not resolved here; it is left in pendingReturn for a live return play
+   *  (kickReturnSim / finishKickReturn). Touchbacks, fair catches, downed and onside kicks resolve as before. */
+  SpecialResult kickoff(bool onside = false, bool liveReturn = false);
+  SpecialResult punt(bool liveReturn = false);
+  struct PendingReturn {
+    KickReturnSpec spec;
+    std::string kickDesc;
+    bool punt = false;
+  };
+  std::optional<PendingReturn> pendingReturn;
+  /** The live return play: recv / kick are the units on the field (recv[0] the returner, kick[0] the kicker). */
+  std::unique_ptr<PlaySim> kickReturnSim(const std::vector<Player*>& recv, const std::vector<Player*>& kick,
+                                         std::optional<Side> userSide = std::nullopt);
+  PlayLog finishKickReturn(PlaySim& sim);
   SpecialResult fieldGoal();
   /** Decide 2-point try per a standard chart (CPU). */
   bool goForTwo();
   /** PAT kick (33 yards). */
   SpecialResult extraPoint();
   /** Two-point try: a real scrimmage play from the 2. */
-  std::unique_ptr<PlaySim> twoPointSim(const OffPlay& offPlay, const DefCall& defCall, std::optional<Side> userSide = std::nullopt);
+  std::unique_ptr<PlaySim> twoPointSim(const OffPlay& offPlay, const DefCall& defCall, std::optional<Side> userSide = std::nullopt,
+                                       std::optional<bool> flip = std::nullopt);
   void finishTwoPoint(PlaySim& sim);
   const OffPlay* cpuTwoPointPlay();
 

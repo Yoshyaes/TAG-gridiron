@@ -524,8 +524,9 @@ void Game::applyPresnap(const Penalty& pen) {
 }
 
 // ------------------------------------------------------------------ scrimmage
-std::unique_ptr<PlaySim> Game::makePlay(const OffPlay& offPlay, const DefCall& defCall, std::optional<Side> userSide) {
-  const bool flip = ballY > FIELD_W / 2 + 0.5 ? true : ballY < FIELD_W / 2 - 0.5 ? false : rng.chance(0.5);
+std::unique_ptr<PlaySim> Game::makePlay(const OffPlay& offPlay, const DefCall& defCall, std::optional<Side> userSide,
+                                       std::optional<bool> flipOverride) {
+  const bool flip = flipOverride ? *flipOverride : ballY > FIELD_W / 2 + 0.5 ? true : ballY < FIELD_W / 2 - 0.5 ? false : rng.chance(0.5);
   // strength to the field (wide) side: formation "right" is the offense's -y side
   PlayConfig cfg;
   cfg.off = &offense();
@@ -903,7 +904,7 @@ double Game::fgProb(double dist, const Player& k, TeamKey kt) const {
   return clamp(p, 0, 0.995);
 }
 
-SpecialResult Game::kickoff(bool onside) {
+SpecialResult Game::kickoff(bool onside, bool liveReturn) {
   const TeamKey kt = kicking;
   const TeamKey rt = other(kt);
   const Player* k = kicker(kt);
@@ -957,6 +958,18 @@ SpecialResult Game::kickoff(bool onside) {
   if (land >= 100 && rng.chance(0.75)) {
     start = 35;
     desc = nm(k) + " kicks " + SR(dist) + " yards into the end zone. Touchback.";
+  } else if (liveReturn) {
+    // a live return: the receiving team gets the ball when the play is over (finishKickReturn)
+    KickReturnSpec s;
+    s.kickX = 100 - fromX;
+    s.coverX = 40;  // dynamic kickoff: the coverage lines up at the receiving 40 and releases on the catch
+    s.landX = (std::max)(-6.0, 100 - land);
+    s.landY = clamp(FIELD_W / 2 + rng.normal(0, 5), 8, FIELD_W - 8);
+    s.hang = hang;
+    s.apex = 24;
+    poss = rt;
+    pendingReturn = PendingReturn{s, nm(k) + " kicks " + SR(dist) + " yards", false};
+    return SpecialResult{pendingReturn->kickDesc, mkFlight(fromX, (std::min)(land, 109.0), FIELD_W / 2, hang, 22)};
   } else {
     const double catchAt = clamp(100 - land, -5, 25);
     const double ret = (std::max)(0.0, rng.normal(23.5, 7) + (kr->r.speed - 85) * 0.2);
@@ -1002,7 +1015,7 @@ SpecialResult Game::kickoff(bool onside) {
   return SpecialResult{desc, mkFlight(fromX, (std::min)(land, 109.0), FIELD_W / 2, hang, 22)};
 }
 
-SpecialResult Game::punt() {
+SpecialResult Game::punt(bool liveReturn) {
   const TeamKey kt = poss;
   const Player* p = punter(kt);
   TeamLine& T = team[kt];
@@ -1035,6 +1048,24 @@ SpecialResult Game::punt() {
   } else {
     const double r = rng.next();
     const double catchSpot = 100 - land;  // receiving team frame
+    if (liveReturn && !(r < 0.38 || catchSpot < 12)) {
+      // a live return (no muff roll: the return play decides what happens)
+      const double hang = 4.3 + rng.normal(0, 0.3);
+      KickReturnSpec s;
+      s.punt = true;
+      s.kickX = 100 - (los - 14);
+      s.coverX = 100 - los;
+      s.landX = catchSpot;
+      s.landY = clamp(FIELD_W / 2 + rng.normal(0, 6), 8, FIELD_W - 8);
+      s.hang = hang;
+      s.kickT = 1.1;  // snap and punt
+      s.apex = 26;
+      l.punts++;
+      l.puntYds += jsRoundI(gross);
+      poss = other(kt);
+      pendingReturn = PendingReturn{s, nm(p) + " punts " + SR(gross) + " yards", true};
+      return SpecialResult{pendingReturn->kickDesc, mkFlight(los - 14, (std::min)(land, 105.0), FIELD_W / 2, hang, 26)};
+    }
     if (r < 0.38 || catchSpot < 12) {
       start = catchSpot;
       const int cs = jsRoundI(catchSpot);
@@ -1080,6 +1111,87 @@ SpecialResult Game::punt() {
   }
   const double hang = 4.3 + rng.normal(0, 0.3);
   return SpecialResult{desc, mkFlight(los - 14, (std::min)(land, 105.0), FIELD_W / 2, hang, 26)};
+}
+
+std::unique_ptr<PlaySim> Game::kickReturnSim(const std::vector<Player*>& recv, const std::vector<Player*>& kick,
+                                             std::optional<Side> userSide) {
+  // the return is the receiving team's "play": a run with no scheme (the carrier AI picks its lanes)
+  static OffPlay ret;
+  if (ret.id.empty()) {
+    ret.id = "kick_return";
+    ret.name = "Kick return";
+    ret.formation = FORMATIONS()[0].id;
+    ret.type = PlayType::Run;
+  }
+  PlayConfig cfg;
+  cfg.off = &offense();
+  cfg.def = &defense();
+  cfg.offPlay = &ret;
+  cfg.defCall = nullptr;
+  cfg.los = pendingReturn ? pendingReturn->spec.landX : ballOn;
+  cfg.ballY = FIELD_W / 2;
+  cfg.weather = weather;
+  cfg.worldDir = worldDir();
+  cfg.rng = rng.fork();
+  cfg.userSide = userSide;
+  if (pendingReturn) cfg.kick = pendingReturn->spec;
+  cfg.offUnit = recv;
+  cfg.defUnit = kick;
+  return std::make_unique<PlaySim>(cfg);
+}
+
+PlayLog Game::finishKickReturn(PlaySim& sim) {
+  const PlayResult& r = *sim.result;
+  const PendingReturn pr = pendingReturn ? *pendingReturn : PendingReturn{};
+  pendingReturn.reset();
+  const TeamKey rt = poss, kt = other(rt);
+  Player* kr = sim.returner ? sim.returner->p : nullptr;
+  runClock(r.duration, true);
+  for (Ent* e : sim.ents)
+    e->p->fatigue = clamp(e->p->fatigue + (0.028 + r.duration * 0.0035) * (1.25 - e->p->r.stamina / 120), 0, 1);
+  const std::string who = kr ? nm(kr) : std::string("the returner");
+  down = 1;
+  toGo = 10;
+  ballY = FIELD_W / 2;
+  inRedZone = false;
+  if (r.td && *r.td == Side::Off) {
+    score[rt] += 6;
+    if (kr) stats.line(*kr, teamOf(rt).abbr).defTD++;
+    phase = GamePhase::Pat;
+    ballOn = 85;
+    addLog(pr.kickDesc + ". " + who + " returns it ALL THE WAY! TOUCHDOWN " + teamOf(rt).abbr + "!", LogTag::Td);
+    return log.back();
+  }
+  if (r.turnover) {
+    if (r.td) {
+      score[kt] += 6;
+      poss = kt;
+      phase = GamePhase::Pat;
+      ballOn = 85;
+      addLog(pr.kickDesc + ". " + who + " FUMBLES, returned for a TOUCHDOWN by " + teamOf(kt).abbr + "!", LogTag::Td);
+      return log.back();
+    }
+    poss = kt;
+    ballOn = clamp(100 - r.endX, 1, 99);
+    phase = GamePhase::Scrimmage;
+    driveStartBallOn = ballOn;
+    addLog(pr.kickDesc + ". " + who + " FUMBLES the return! Recovered by " + teamOf(kt).abbr + " at the " + ydLine() + ".", LogTag::Turnover);
+    return log.back();
+  }
+  phase = GamePhase::Scrimmage;
+  // downed in his own end zone after fielding the kick: a touchback, not a safety
+  const bool tb = r.endX <= 0;
+  ballOn = tb ? (pr.punt ? 20 : 35) : clamp(r.endX, 1, 99);
+  driveStartBallOn = ballOn;
+  clockRunning = !tb && !r.outOfBounds;
+  const int rs = jsRoundI(ballOn);
+  if (tb)
+    addLog(pr.kickDesc + ", fielded in the end zone by " + who + " and downed. Touchback.");
+  else
+    addLog(pr.kickDesc + ", returned " + SR((std::max)(0.0, r.endX - sim.catchX)) + " yards by " + who + " to the " + teamOf(rt).abbr + " " +
+           S(rs <= 50 ? rs : 100 - rs) + ".");
+  if (pr.punt && q == 5) otDriveEnded();
+  return log.back();
 }
 
 SpecialResult Game::fieldGoal() {
@@ -1140,12 +1252,13 @@ SpecialResult Game::extraPoint() {
   return SpecialResult{log.back().desc, mkFlight(78, 110, FIELD_W / 2 + (good ? 0 : 4), 2.2, 12, good)};
 }
 
-std::unique_ptr<PlaySim> Game::twoPointSim(const OffPlay& offPlay, const DefCall& defCall, std::optional<Side> userSide) {
+std::unique_ptr<PlaySim> Game::twoPointSim(const OffPlay& offPlay, const DefCall& defCall, std::optional<Side> userSide,
+                                          std::optional<bool> flip) {
   ballOn = 98;
   ballY = FIELD_W / 2;
   down = 1;
   toGo = 2;
-  return makePlay(offPlay, defCall, userSide);
+  return makePlay(offPlay, defCall, userSide, flip);
 }
 
 void Game::finishTwoPoint(PlaySim& sim) {

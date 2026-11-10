@@ -3,6 +3,7 @@
 #include "Render/Athlete.h"
 #include "Render/Stadium.h"
 #include "Render/Coords.h"
+#include "Render/PlayArt.h"
 #include "UI/GridironOverlay.h"
 #include "CineCameraActor.h"
 #include "CineCameraComponent.h"
@@ -129,6 +130,11 @@ void AMatchDirector::BeginPlay()
 		FParse::Value(FCommandLine::Get(), TEXT("TagWeather="), Wx);
 		const bool bDay = FParse::Param(FCommandLine::Get(), TEXT("TagDay"));
 		StartMatch(3, 7, false, true, Wx, !bDay, 900);
+	}
+	else if (FParse::Param(FCommandLine::Get(), TEXT("TagArtTest")))
+	{
+		bArtTest = true;
+		StartMatch(3, 7, true, true, 0, true, 900);
 	}
 	else if (FParse::Param(FCommandLine::Get(), TEXT("TagMoveTest")))
 	{
@@ -1160,7 +1166,8 @@ void AMatchDirector::Next()
 		const int D = G.worldDir(KT);
 		auto KickU = Pick11(G.teamOf(KT), "K");
 		auto RecvU = Pick11(G.teamOf(tag::other(KT)), "KR");
-		const tag::SpecialResult R = G.kickoff();
+		const tag::SpecialResult R = G.kickoff(false, true);
+		if (G.pendingReturn) return StartLiveReturn(KickU, RecvU);
 		return StartKick(R, D, 0, KickU, RecvU, 35);
 	}
 	if (G.phase == tag::GamePhase::Pat)
@@ -1226,6 +1233,13 @@ void AMatchDirector::CallPlays(bool bTwo)
 			FString::Printf(TEXT("%s  %d:%02d"), G.q >= 1 && G.q <= 4 ? QName[G.q - 1] : TEXT("OT"), Secs / 60, Secs % 60));
 	}
 	auto Finish = [this](const tag::OffPlay* Op, const tag::DefCall* Dc) { StartPresnap(Op, Dc); };
+	if (bArtTest && !bTwo)
+	{
+		// -TagArtTest: the user's side of the ball is the one still to test; the calls are made for it
+		UserTeam = !bArtDidOff ? G.poss : tag::other(G.poss);
+		const tag::OffPlay* Op = UserOff() ? tag::playById("trips_flood") : G.cpuOffense();
+		return Finish(Op, UserOff() ? G.cpuDefense(*Op) : tag::defById("base_c3"));
+	}
 	if (UserOff())
 	{
 		Overlay->ShowPlayCall(true, G.down == 4 && !bTwo, bTwo, [this, bTwo, Finish](FCallChoice C)
@@ -1273,26 +1287,35 @@ void AMatchDirector::StartPresnap(const tag::OffPlay* Op, const tag::DefCall* Dc
 	Labels.clear();
 	if (US && *US == tag::Side::Off) AssignLabels();
 	State = EMatchState::Presnap;
-	Timer = bWatch ? 1.1f / Speed : (US && *US == tag::Side::Off) ? 999.f : 1.6f;
+	// the user's offense snaps when ready; against the user's defense the CPU offense gives it a few seconds to
+	// make its calls (and waits while a pre-snap menu is open, up to the play clock)
+	Timer = bWatch ? 1.1f / Speed : (US && *US == tag::Side::Off) ? 999.f : US ? 7.f : 1.6f;
+	// the pre-snap panel lists the calls; the hint is for the play itself
 	if (bPlayStationPad)
-		Overlay->SetHint(US && *US == tag::Side::Off ? TEXT("CROSS snap    CROSS CIRCLE SQUARE TRIANGLE R1 throw to 1-5 (hold L2 = touch)    L-STICK move    R2 juke    CREATE camera    OPTIONS pause")
+		Overlay->SetHint(US && *US == tag::Side::Off ? TEXT("Throw: press the receiver's button (hold L2 = touch)    L-STICK move    R2 juke    CREATE camera    OPTIONS pause")
 			: US ? TEXT("Defending    L1 switch player    L-STICK move    R2 dive tackle    CREATE camera    OPTIONS pause")
 			: TEXT("CREATE camera    OPTIONS pause"));
 	else
-		Overlay->SetHint(US && *US == tag::Side::Off ? TEXT("SPACE snap   1-5 throw (SHIFT = touch)   WASD move   C camera")
+		Overlay->SetHint(US && *US == tag::Side::Off ? TEXT("Throw: the receiver's key 1-5 (SHIFT = touch)   WASD move   C camera")
 			: US ? TEXT("Defending   TAB switch player   WASD move   SPACE dive tackle")
 			: TEXT("1/2/4 game speed   C camera   ESC pause"));
+	BeginPresnapUI();
 	SyncPlay(0.f, 1.f);
 }
 
 void AMatchDirector::AssignLabels()
 {
+	// buttons by the QB's progression (cross = the primary), then the other route runners, then the eligible men
+	// kept in to block (they can be hot routed out); the blockers lose theirs at the snap (EndPresnapUI)
+	Labels.clear();
 	std::vector<tag::Ent*> Order;
-	for (const std::string& R : Sim->cfg.offPlay->reads)
+	for (const std::string& R : Sim->readOrder)
 		if (tag::Ent* E = Sim->offRole(R))
 			if (E->state == tag::EntState::Route) Order.push_back(E);
 	for (tag::Ent* E : Sim->off)
 		if (E->state == tag::EntState::Route && std::find(Order.begin(), Order.end(), E) == Order.end()) Order.push_back(E);
+	for (tag::Ent* E : Sim->off)
+		if (E->eligible && std::find(Order.begin(), Order.end(), E) == Order.end()) Order.push_back(E);
 	for (size_t i = 0; i < Order.size() && i < 5; ++i) Labels[Order[i]] = FString::FromInt(static_cast<int>(i) + 1);
 }
 
@@ -1307,6 +1330,15 @@ void AMatchDirector::ApplyPlay()
 	tag::Game& G = *Game;
 	tag::PlaySim& P = *Sim;
 	const tag::TeamKey PossBefore = G.poss;
+	if (bLiveReturn)
+	{
+		bLiveReturn = false;
+		const tag::PlayLog L = G.finishKickReturn(P);
+		if (L.big == tag::LogTag::Turnover) Overlay->Banner(TEXT("FUMBLE"), S(L.desc), Bad);
+		State = EMatchState::Wait;
+		Timer = 0.f;
+		return;
+	}
 	if (bTwoPoint)
 	{
 		G.finishTwoPoint(P);
@@ -1350,7 +1382,7 @@ void AMatchDirector::OnPlayDead()
 		if (R.td || R.interception || R.fumbleLost || R.kind == tag::PlayKind::Sack || R.yards >= BigGain)
 			StartCutIn(Star, R.td ? 3.5f : 2.8f);
 		static const bool bReplayAll = FParse::Param(FCommandLine::Get(), TEXT("TagReplayAll")); // review: replay every play
-		bReplayWorthy = bReplayAll || R.td || R.interception || R.fumbleLost || R.kind == tag::PlayKind::Sack || R.yards >= 20;
+		bReplayWorthy = bReplayAll || R.td || R.interception || R.fumbleLost || (Sim->isReturn() ? R.yards >= 40 : (R.kind == tag::PlayKind::Sack || R.yards >= 20));
 	}
 	if (R.td)
 	{
@@ -1553,7 +1585,8 @@ void AMatchDirector::DoPunt()
 	auto KickU = Pick11(G.offense(), "P");
 	auto RecvU = Pick11(G.defense(), "KR");
 	const double Los = G.ballOn;
-	tag::SpecialResult R = G.punt();
+	tag::SpecialResult R = G.punt(true);
+	if (G.pendingReturn) return StartLiveReturn(KickU, RecvU);
 	if (R.flight) R.flight->fromX = Los - 14;
 	StartKick(R, D, 1, KickU, RecvU, Los);
 }
@@ -1567,6 +1600,36 @@ void AMatchDirector::DoFG()
 	const double Los = G.ballOn;
 	const tag::SpecialResult R = G.fieldGoal();
 	StartKick(R, D, 2, KickU, DefU, Los);
+}
+
+void AMatchDirector::StartLiveReturn(const std::vector<tag::Player*>& KickTeam, const std::vector<tag::Player*>& RecvTeam)
+{
+	tag::Game& G = *Game;
+	// the game gave the ball to the receiving team: they are the sim's offense, attacking their way
+	std::optional<tag::Side> US;
+	if (UserOff()) US = tag::Side::Off;
+	else if (UserDef()) US = tag::Side::Def;
+	Sim = G.kickReturnSim(RecvTeam, KickTeam, US);
+	bLiveReturn = true;
+	Dir = G.worldDir();
+	std::vector<tag::Player*> Ps;
+	for (tag::Ent* E : Sim->ents) Ps.push_back(E->p);
+	ShowOnly(Ps);
+	CapturePrev();
+	Stadium->SetLines(-1, -1);
+	Labels.clear();
+	State = EMatchState::Live;
+	Acc = 0;
+	ReplayBuf.Reset();
+	ReplayClock = 0.f;
+	ReplayPostRec = 0.f;
+	bReplayWorthy = false;
+	Overlay->SetHint(US && *US == tag::Side::Off ? (bPlayStationPad ? TEXT("Returning the kick    L-STICK run    R2 juke") : TEXT("Returning the kick    WASD run    SPACE juke"))
+		: US ? (bPlayStationPad ? TEXT("Kick coverage    L-STICK run    L1 switch    R2 dive tackle") : TEXT("Kick coverage    WASD run    TAB switch    SPACE dive tackle"))
+		: TEXT(""));
+	UE_LOG(LogTemp, Display, TEXT("TAG live %s return: land %.1f, hang %.1f s"), Sim->cfg.kick->punt ? TEXT("punt") : TEXT("kickoff"),
+		Sim->cfg.kick->landX, Sim->cfg.kick->hang);
+	SyncPlay(0.f, 1.f);
 }
 
 void AMatchDirector::StartKick(const tag::SpecialResult& R, int D, int Kind, const std::vector<tag::Player*>& KickTeam, const std::vector<tag::Player*>& RecvTeam, double Los)
@@ -1751,10 +1814,18 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 		const double Y = PV ? FMath::Lerp(PV->Y, E->pos.y, static_cast<double>(Alpha)) : E->pos.y;
 		AAthlete* A = AthleteFor(E->p, E->side == tag::Side::Off ? OffK : tag::other(OffK));
 		const FVector VelW = Dir > 0 ? FVector(E->vel.x, -E->vel.y, 0) * YD : FVector(-E->vel.x, E->vel.y, 0) * YD;
-		A->Drive(ToWorld(X, Y, Dir), FaceToYaw(E->face, Dir), VelW, static_cast<float>(E->vmax), FString(E->animName()), static_cast<float>(E->animT), Dt, E->isOL || E->isDL);
+		FString AnimName(E->animName());
+		float AnimT = static_cast<float>(E->animT);
+		if (Sim->isReturn() && E == Sim->kickerEnt && Sim->t < Sim->cfg.kick->kickT + 0.6)
+		{
+			// the kick: start the clip so its foot contact lands when the sim kicks the ball
+			const bool bPunt = Sim->cfg.kick->punt;
+			AnimName = bPunt ? TEXT("punt") : TEXT("kickoff");
+			AnimT = FMath::Max(0.f, (bPunt ? FAthleteAssets::PuntContact : FAthleteAssets::KickoffContact) - static_cast<float>(Sim->cfg.kick->kickT));
+		}
+		A->Drive(ToWorld(X, Y, Dir), FaceToYaw(E->face, Dir), VelW, static_cast<float>(E->vmax), AnimName, AnimT, Dt, E->isOL || E->isDL);
 		A->SetSelected(E->userControlled);
-		auto L = Labels.find(E);
-		A->SetLabel(L != Labels.end() ? L->second : FString());
+		A->SetLabel(FString()); // receivers' buttons are drawn by the overlay (UpdateIcons)
 	}
 	// ball
 	const tag::Ball& B = Sim->ball;
@@ -2114,9 +2185,13 @@ void AMatchDirector::UpdateCamera(float Dt, const FVector& InFocus)
 	switch (CamMode)
 	{
 	case ECamMode::Broadcast:
-		T = FVector(Focus.X - D * 17 * Y, Focus.Y * 0.45, 10.5 * Y);
-		Look = FVector(Focus.X + D * 7 * Y, Focus.Y * 0.8, 0);
+	{
+		// play art up: the camera rises and looks further downfield so the whole route tree fits
+		const double A = State == EMatchState::Presnap && PlayArt ? static_cast<double>(PlayArt->Alpha()) : 0.0;
+		T = FVector(Focus.X - D * (17 + 1.5 * A) * Y, Focus.Y * 0.45, (10.5 + 4 * A) * Y);
+		Look = FVector(Focus.X + D * (7 + 3.5 * A) * Y, Focus.Y * 0.8, 0);
 		break;
+	}
 	case ECamMode::Sideline:
 		// high sideline position in front of the lower bowl (press-box angle)
 		T = FVector(Focus.X - D * 4 * Y, -(tag::FIELD_W / 2 + 12) * Y, 17 * Y);
@@ -2359,6 +2434,7 @@ void AMatchDirector::Tick(float Dt)
 {
 	Super::Tick(Dt);
 	TickAutomation(Dt);
+	if (bArtTest) TickArtTest(Dt);
 	{
 		// -TagMenuShot: screenshot the main menu with its UI (gamepad focus frame), then quit
 		static const bool bMenuShot = FParse::Param(FCommandLine::Get(), TEXT("TagMenuShot"));
@@ -2410,10 +2486,14 @@ void AMatchDirector::Tick(float Dt)
 		if (Timer <= 0) Next();
 		break;
 	case EMatchState::Presnap:
-		Timer -= SDt;
-		if (UserDef() && PC && PC->WasInputKeyJustPressed(EKeys::Tab)) Sim->switchUser();
-		if (Timer <= 0 || (UserOff() && bSpace))
+	{
+		TickPresnap(SDt);
+		const bool bMenu = PreMode != EPre::Base;
+		if (!(UserDef() && bMenu)) Timer -= SDt;
+		PresnapClock += SDt;
+		if (Timer <= 0 || (UserDef() && PresnapClock > 25.f) || (UserOff() && bSpace && !bMenu && !bPreConsumed))
 		{
+			EndPresnapUI();
 			State = EMatchState::Live;
 			Acc = 0;
 			Overlay->SetHint(TEXT(""));
@@ -2425,6 +2505,7 @@ void AMatchDirector::Tick(float Dt)
 		SyncPlay(Dt, 1.f);
 		UpdateCamera(Dt, FocusPoint());
 		break;
+	}
 	case EMatchState::Live:
 	{
 		if (UserTeam) ReadUserInput();
@@ -2473,4 +2554,6 @@ void AMatchDirector::Tick(float Dt)
 		if (Sim) SyncPlay(Dt, 1.f);
 		break;
 	}
+	UpdateIcons();
+	if (PlayArt && State != EMatchState::Presnap) PlayArt->SetShown(false);
 }

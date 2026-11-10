@@ -16,6 +16,38 @@ struct FCallChoice
 	const tag::DefCall* Call = nullptr;
 };
 
+/** Controller glyphs (drawn as shapes; keyboard players see the key instead). */
+enum class EPadGlyph : uint8 { None, Cross, Circle, Square, Triangle, R1, L1, R2, L2, DUp, DDown, DLeft, DRight };
+
+/** A row of the pre-snap panel: the button, what it does, and whether it is the current choice. */
+struct FPreRow
+{
+	EPadGlyph Glyph = EPadGlyph::None;
+	FString Key;     // keyboard key ("" = the glyph's default key)
+	FString Label;
+	bool bOn = false;
+	FLinearColor Tint = FLinearColor::White;  // the glyph's colour when it stands for a receiver
+};
+
+/** A receiver's button icon over his head (screen position in viewport pixels). */
+struct FArtIcon
+{
+	FVector2D Screen = FVector2D::ZeroVector;
+	int32 Button = 0;  // 0..4: cross, circle, square, triangle, R1 (keys 1..5)
+	bool bPrimary = false;
+	bool bHot = false;  // hot routed
+	bool bPicked = false;  // being hot routed / motioned right now
+};
+
+/** The receivers' button colours: their icons and their routes in the play art share them. */
+inline FLinearColor ButtonColor(int32 Button)
+{
+	static const FLinearColor C[5] = {
+		FLinearColor(0.36f, 0.62f, 1.f), FLinearColor(1.f, 0.30f, 0.33f), FLinearColor(1.f, 0.47f, 0.84f),
+		FLinearColor(0.26f, 0.92f, 0.62f), FLinearColor(0.86f, 0.87f, 0.92f)};
+	return C[FMath::Clamp(Button, 0, 4)];
+}
+
 class SGridironOverlay : public SCompoundWidget
 {
 public:
@@ -35,6 +67,21 @@ public:
 	void SetHudVisible(bool b) { bHud = b; }
 	void SetClockOffset(double s) { ClockOffset = s; }
 	void SetFlag(bool b) { bFlag = b; }
+	/** The pre-snap panel (hot routes, audibles, protection, shifts): empty rows hide it. */
+	void SetPresnapPanel(const FString& Title, const FString& Sub, const TArray<FPreRow>& Rows, bool bPad)
+	{
+		PreTitle = Title;
+		PreSub = Sub;
+		PreRows = Rows;
+		bPrePad = bPad;
+	}
+	void ClearPresnapPanel() { PreRows.Reset(); }
+	void SetIcons(const TArray<FArtIcon>& In, const FVector2D& ViewportSize, bool bPad)
+	{
+		Icons = In;
+		IconViewport = ViewportSize;
+		bIconPad = bPad;
+	}
 
 	// screens
 	void ShowMainMenu();
@@ -63,6 +110,16 @@ private:
 	bool bFlag = false;
 	double ClockOffset = 0;
 	FString HintText;
+	FString PreTitle, PreSub;
+	TArray<FPreRow> PreRows;
+	bool bPrePad = false;
+	TArray<FArtIcon> Icons;
+	FVector2D IconViewport = FVector2D(1920, 1080);
+	bool bIconPad = false;
+	/** A controller button (or keyboard key) centred at C, Size across, in this widget's local space. */
+	void PaintGlyph(FSlateWindowElementList& Out, int32 Layer, const FGeometry& G, const FVector2D& C, float Size, EPadGlyph Gl,
+		const FString& Key, bool bPad, const FLinearColor& Tint, float Alpha = 1.f) const;
+	int32 PaintPresnap(FSlateWindowElementList& Out, int32 Layer, const FGeometry& G) const;
 	FString BannerText;
 	FString BannerSub;
 	FLinearColor BannerColor = FLinearColor::White;

@@ -91,6 +91,10 @@ class Ent {
   size_t routeIdx = 0;
   bool settle = false;
   double outSign = 1;
+  /** The route he runs ("block" for a blocker; "" when he has none: the QB, a run play). Hot routes change it. */
+  std::string routeName;
+  /** Pre-snap: walking to a new alignment (a shift, a flipped formation); PlaySim::presnapStep moves him there. */
+  std::optional<V2> shiftTo;
   std::string zone;  // "" = no zone
   std::optional<V2> zoneSpot;
   Ent* man = nullptr;
@@ -197,6 +201,18 @@ struct UserInput {
   bool switchReq = false;
 };
 
+/** A live kick return (kickoff or punt), in the RECEIVING team's frame: they are the offense and attack +x. */
+struct KickReturnSpec {
+  double kickX = 65;              // where the ball leaves the kicker's foot
+  double coverX = 65;             // the coverage team's starting line
+  double landX = 5;               // where the ball comes down (the returner fields it here)
+  double landY = FIELD_W / 2;
+  double hang = 3.9;              // seconds in the air
+  double kickT = 0.45;            // the kick happens this far into the play (the kicker's approach)
+  double apex = 22;               // flight height, yards (presentation)
+  bool punt = false;
+};
+
 struct PlayConfig {
   Team* off = nullptr;
   Team* def = nullptr;
@@ -212,6 +228,10 @@ struct PlayConfig {
   std::optional<Side> userSide;
   std::optional<double> down;
   std::optional<double> toGo;
+  /** Live kick return: the sim fields the kick and runs the return instead of a scrimmage play. The units are the
+   *  11 players on the field (offUnit[0] = the returner, defUnit[0] = the kicker / punter). */
+  std::optional<KickReturnSpec> kick;
+  std::vector<Player*> offUnit, defUnit;
 };
 
 struct TackleLogEntry {
@@ -248,6 +268,45 @@ class PlaySim {
   std::optional<PlayResult> result;
   Rng rng;
   Ent* qb = nullptr;
+  // kick returns
+  Ent* kickerEnt = nullptr;
+  Ent* returner = nullptr;
+  bool kicked = false;
+  bool isReturn() const { return cfg.kick.has_value(); }
+
+  // ---- pre-snap adjustments (before the first step only). Deterministic: none of them draws from the rng, and a
+  // play nobody adjusts runs exactly as before. Left / right are the offense's (+y / -y).
+  enum class LineAdj { Base, ShiftL, ShiftR, Pinch, Spread };
+  enum class ShellAdj { Base, Press, Off, ShowBlitz, Disguise };
+  enum class DefAssign { Blitz, Spy, Hook, Flat, Deep, Man };
+  /** The QB's progression: the play's reads, updated by hot routes (a receiver kept in to block drops out). */
+  std::vector<std::string> readOrder;
+  int slide = 0;              // pass protection slide: +1 toward +y, -1 toward -y
+  bool maxProtect = false;    // backs and tight ends stay in to block
+  LineAdj dlAdj = LineAdj::Base;
+  LineAdj lbAdj = LineAdj::Base;
+  ShellAdj shellAdj = ShellAdj::Base;
+  bool preSnap() const { return t == 0 && phase == SimPhase::Live && !cfg.kick; }
+  bool passPlay() const;
+  /** Hot route: a new route (any ROUTES() name, "block" keeps him in) for an eligible receiver on a pass play. */
+  bool hotRoute(Ent* e, const std::string& route);
+  void setProtection(int slideDir, bool maxProt);
+  void adjustLine(LineAdj a);
+  void adjustLBs(LineAdj a);
+  void adjustShell(ShellAdj a);
+  /** A defender's new assignment (the user's defensive hot route). */
+  bool assignDefender(Ent* d, DefAssign a);
+  /** Motion / receiver shift: move an eligible receiver dy yards across the formation; his route runs from the new
+   *  spot, and a defender manned up on him travels with him (motion shows man coverage). */
+  bool motion(Ent* e, double dy);
+  /** The blocking the line would set against the defense as it now stands (the play art shows it before the snap). */
+  void previewBlocks();
+  /** Walk a player to his new alignment from where he stands (an audible / flipped formation rebuilt the play). */
+  void walkFrom(Ent* e, const V2& from);
+  /** Presentation clock before the snap: shifted players walk to their new spots. */
+  void presnapStep(double dt);
+  /** A deep zone (middle of the field, thirds, halves, quarters), for the play art. */
+  static bool deepZone(const std::string& z);
   Ent* carrier = nullptr;
   UserInput input;
   Ent* user = nullptr;
@@ -341,6 +400,15 @@ class PlaySim {
   void alignDefense();
   void setupAssignments();
   void assignBlocks();
+  void assignRoute(Ent* e, const std::string& rname);
+  /** At the snap after any pre-snap change: everyone at his spot, blocking re-assigned against the new looks. */
+  void finishPresnap();
+  bool adjusted_ = false;
+  std::unordered_map<const Ent*, V2> basePos_;       // the called alignment (shifts are relative to it)
+  std::unordered_map<const Ent*, double> pressRoll_;  // the jam a pressing defender put on him at the line
+  std::unordered_map<const Ent*, std::string> maxProtFrom_;  // routes max protect took away
+  void moveTo(Ent* e, const V2& to);
+  void thinkSpy(Ent* e);
 
   void ev(const char* type, Ent* a = nullptr, Ent* b = nullptr, const std::string& note = std::string());
   const std::vector<Ent*>& defendersOf(const Ent* e) const;
@@ -376,6 +444,10 @@ class PlaySim {
   void move(Ent* e, double dt);
   void engage(Ent* blocker, Ent* d);
   void disengage(Ent* b);
+  void setupReturn();
+  /** Kick return AI before the return starts (approach, flight, coverage lanes, the wall); false = normal AI. */
+  bool thinkReturn(Ent* e);
+  void updateKickBall(double dt);
   /** The pass rush / block shedding move that beat this blocker (presentation: "swim", "rip", "club", "spin",
    *  "bull", "longarm", "diprip"). Deterministic: does not draw from the rng. */
   const char* shedMove(const Ent* d, const Ent* b, bool passPro, double push) const;
