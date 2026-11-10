@@ -124,6 +124,13 @@ MAP = {
     "Celebrate_Shimmy_Loop": dict(src="2014_PC_Generic_SwagDance__P01", start=0.5, end=5.0, loop=8),
     "Celebrate_FirstDown_Loop": dict(src="PostPlay_NonBC_15_FirstDown_Celeb_Signal_v2", loop=8),
     "Idle_HandsHips_Loop": dict(src="Idle_NonBC_PostPlay_15_Neutral_var32_NoTrajMove__P01", end=4.0, loop=8),
+    # the plain standing idle (FAthleteAssets::Idle, the crowd's idle): a neutral post-play stand, near still
+    "Idle_Stand_Loop": dict(src="Idle_NonBC_PostPlay_15_Neutral_var1_NoTrajMove__P01", end=4.0, loop=8),
+    # the pass rusher's spin: the pack has no DL spin, the ball carriers' spins are the same body turn (no ball held)
+    "Rush_Spin_L": dict(src="BC_Agile_Spin_Left_Sloppy__P01", start=0.3, end=1.2, mode="inplace_pos"),
+    "Rush_Spin_R": dict(src="BC_Big_Spin_Right__P01", end=1.0, mode="inplace_pos"),
+    # the spectators' cheer (Tools/Art/crowd_retarget.py): a jumping fist pump, the jump then the arms held up
+    "Fan_Cheer_Loop": dict(src="PostPlay_16_OTF_Celeb_Jumping_Fist_Pump_D1_V1__P01", start=0.6, end=3.0, loop=8),
     "Idle_HandsKnees_Loop": dict(src="Pre_Play_LB_Idle_Hands_on_Knee__P01", loop=8),
     "Def_Breakdown_Loop": dict(src="NonBC_DefenderBreakdown_Idle__P01", loop=4),
     # ---------------------------------------------------------------- paired tackles to the ground (anchor mode from
@@ -230,6 +237,50 @@ LOCO = {
     "Loco_Line_Bounce_Side": dict(src="MG_LB_Walk_D3_Bounce__P01", loop=4, **R),
     "Loco_Line_Bounce_Side_M": dict(src="MG_LB_Walk_D3_Bounce__P01", loop=4, mirror=True, **R),
     "Loco_Line_Shuffle_Back": dict(src="MG_LB_Walk_D5_Shuffle__P01", loop=4, **R),
+    # starts, stops, pivots and idles for the motion matching sets beside the sample's (PSD_TAG_*_Starts/Stops/Pivots,
+    # PSD_TAG_Stand_Idles, PSD_TAG_Crouch_*): the pack's step clips, whole, with root motion
+    "Loco_Start_Fwd": dict(src="Step_Loco_Start_Fwd_0_v1__P01", **R),
+    "Loco_Start_Back": dict(src="Step_Loco_Start_Back_0_v1__P01", **R),
+    "Loco_Start_Side": dict(src="Step_Loco_Start_Side_0_Sprint_v1__P01", **R),
+    "Loco_Start_Side_M": dict(src="Step_Loco_Start_Side_0_Sprint_v1__P01", mirror=True, **R),
+    "Loco_Start_Diag": dict(src="Step_Loco_Start_135_0_v1__P01", **R),
+    "Loco_Start_Diag_M": dict(src="Step_Loco_Start_135_0_v1__P01", mirror=True, **R),
+    "Loco_Start_Agile": dict(src="NonBC_Agile_Start_to_Fwd_0_FB16__P01", **R),
+    "Loco_Boost_Sprint": dict(src="Step_Loco_Boost_Fwd_Sprint_v1__P01", **R),
+    "Loco_Boost_Run": dict(src="Step_Loco_Boost_Fwd_Run_v1__P01", **R),
+    "Loco_Stop_Sprint": dict(src="Step_Loco_Fwd_to_Stop_0_Sprint_v1__P01", **R),
+    "Loco_Stop_Sprint_Slow": dict(src="BC_Sprint_to_Stop_Slow__P01", **R),
+    "Loco_Stop_Sprint_OneOff": dict(src="OneOff_NonBC_Sprint_to_Stop__P01", **R),
+    "Loco_Stop_Backpedal": dict(src="Step_Base_Bkpd_to_Stop_0_v1__P01", **R),
+    "Loco_Decel_Sprint_Walk": dict(src="MAD_loco_speedTrans_decel_sprint_toWalk__P01", **R),
+    "Loco_Pivot_Fwd_Back": dict(src="Step_Loco_Fwd_to_Back_180_H2H_v1__P01", **R),
+    "Loco_Pivot_Fwd_Fwd180": dict(src="Step_Loco_Fwd_to_Fwd_180_H2H_v01__P01", **R),
+    "Loco_Pivot_Fwd_Side90": dict(src="Step_Loco_Fwd_to_Side_90_H2L_v1__P01", **R),
+    "Loco_Pivot_Fwd_Side90_M": dict(src="Step_Loco_Fwd_to_Side_90_H2L_v1__P01", mirror=True, **R),
+    "Loco_Pivot_Fwd_Side180": dict(src="Step_Loco_Fwd_to_Side_180_H2L_v01__P01", **R),
+    "Loco_Pivot_Fwd_Side180_M": dict(src="Step_Loco_Fwd_to_Side_180_H2L_v01__P01", mirror=True, **R),
+    "Loco_Pivot_Side_Fwd90": dict(src="Step_Loco_Side_to_Fwd_90_L2H_Outside_v1__P01", **R),
+    "Loco_Pivot_Side_Fwd90_M": dict(src="Step_Loco_Side_to_Fwd_90_L2H_Outside_v1__P01", mirror=True, **R),
+    "Loco_Pivot_Back_Fwd90": dict(src="Step_Loco_Back_to_Fwd_90_L2H_v1__P01", **R),
+    "Loco_Pivot_Back_Fwd90_M": dict(src="Step_Loco_Back_to_Fwd_90_L2H_v1__P01", mirror=True, **R),
+    "Loco_Pivot_Back_Fwd180": dict(src="Step_Loco_Back_to_Fwd_180_L2H_v1__P01", **R),
+    "Loco_Pivot_Side_Side180": dict(src="Step_Loco_Side_to_Side_180_L2L_v1__P01", **R),
+    "Loco_Pivot_Side_Side180_M": dict(src="Step_Loco_Side_to_Side_180_L2L_v1__P01", mirror=True, **R),
+    "Loco_Idle_Neutral": dict(src="Idle_NonBC_PostPlay_15_Neutral_var1_NoTrajMove__P01", end=6.0, loop=8, **R),
+    "Loco_Idle_Neutral2": dict(src="Idle_NonBC_PostPlay_15_Neutral_var19_NoTrajMove__P01", end=6.0, loop=8, **R),
+    "Loco_Idle_LB": dict(src="MG_LB_Idle_v4__P01", loop=8, **R),
+    "Loco_Idle_Breakdown": dict(src="NonBC_DefenderBreakdown_Idle__P01", loop=8, **R),
+    "Loco_Idle_WR_HandsUp": dict(src="MG_NonBC_WR_Idle_HandsUp__P01", loop=8, **R),
+    "Loco_Line_Idle_Crouched": dict(src="MG_NonBC_Idle_Crouched__P01", loop=8, **R),
+    "Loco_Line_Start_Fwd": dict(src="Step_Loco_Crouch_to_Fwd_0_Sprint_v1__P01", **R),
+    "Loco_Line_Start_Side": dict(src="Step_Loco_Crouch_to_Side_90_Jog_Outside_v1__P01", **R),
+    "Loco_Line_Start_Side_M": dict(src="Step_Loco_Crouch_to_Side_90_Jog_Outside_v1__P01", mirror=True, **R),
+    "Loco_Line_Start_SideIn": dict(src="Step_Loco_Crouch_to_Side_90_Jog_Inside_v1__P01", **R),
+    "Loco_Line_Start_SideIn_M": dict(src="Step_Loco_Crouch_to_Side_90_Jog_Inside_v1__P01", mirror=True, **R),
+    "Loco_Line_Start_Back": dict(src="Step_Loco_Crouch_to_Back_90_Jog_v1__P01", **R),
+    "Loco_Line_Start_Back_M": dict(src="Step_Loco_Crouch_to_Back_90_Jog_v1__P01", mirror=True, **R),
+    "Loco_Line_Start_Fwd90": dict(src="Step_Loco_Crouch_to_Fwd_90_Sprint_v1__P01", **R),
+    "Loco_Line_Start_Fwd90_M": dict(src="Step_Loco_Crouch_to_Fwd_90_Sprint_v1__P01", mirror=True, **R),
 }
 MAP.update(LOCO)
 # which TAG PoseSearch database each locomotion clip joins (Tools/Art/mm_build_dbs.py)
@@ -249,7 +300,25 @@ LOCO_DB = {
     "Walk": ["Loco_Jog_Loop", "Loco_Walk_Loop", "Loco_Walk_Ready", "Loco_Walk_Back", "Loco_Walk_Back_Slow", "Loco_Walk_Side",
              "Loco_Walk_Side_M", "Loco_Line_Back_Jog", "Loco_Line_Back_Walk", "Loco_Line_BackDiag_Walk", "Loco_Line_BackDiag_Walk_M",
              "Loco_Line_BackDiag_Run", "Loco_Line_BackDiag_Run_M", "Loco_Line_Bounce_Back", "Loco_Line_Bounce_Back_M"],
-    "Crouch": [n for n in LOCO if n.startswith("Loco_Line_")],
+    "Crouch": [n for n in LOCO if n.startswith("Loco_Line_") and not n.startswith(("Loco_Line_Idle", "Loco_Line_Start"))],
+    # the sets beside the loops (TAG copies of the sample's, the pack's clips added)
+    "Stand_Idles": ["Loco_Idle_Neutral", "Loco_Idle_Neutral2", "Loco_Idle_LB", "Loco_Idle_WR_HandsUp"],  # (Breakdown hops: 9 % planted)
+    "Walk_Starts": ["Loco_Start_Fwd", "Loco_Start_Back", "Loco_Start_Diag", "Loco_Start_Diag_M"],
+    "Run_Starts": ["Loco_Start_Fwd", "Loco_Start_Back", "Loco_Start_Side", "Loco_Start_Side_M", "Loco_Start_Diag", "Loco_Start_Diag_M",
+                   "Loco_Start_Agile", "Loco_Boost_Run", "Loco_Accel_Jog"],
+    "Sprint_Starts": ["Loco_Start_Fwd", "Loco_Start_Side", "Loco_Start_Side_M", "Loco_Start_Agile", "Loco_Boost_Sprint", "Loco_Accel_FastJog"],
+    "Walk_Stops": ["Loco_Stop_Backpedal", "Loco_Decel_Sprint_Walk"],
+    "Run_Stops": ["Loco_Stop_Sprint_Slow", "Loco_Stop_Backpedal", "Loco_Decel_Sprint"],
+    "Sprint_Stops": ["Loco_Stop_Sprint", "Loco_Stop_Sprint_OneOff", "Loco_Stop_Sprint_Slow", "Loco_Decel_Sprint"],
+    "Walk_Pivots": ["Loco_Pivot_Fwd_Back", "Loco_Pivot_Side_Fwd90", "Loco_Pivot_Side_Fwd90_M"],
+    "Run_Pivots": ["Loco_Pivot_Fwd_Back", "Loco_Pivot_Fwd_Fwd180", "Loco_Pivot_Fwd_Side90", "Loco_Pivot_Fwd_Side90_M", "Loco_Pivot_Fwd_Side180",
+                   "Loco_Pivot_Fwd_Side180_M", "Loco_Pivot_Side_Fwd90", "Loco_Pivot_Side_Fwd90_M", "Loco_Pivot_Back_Fwd90", "Loco_Pivot_Back_Fwd90_M",
+                   "Loco_Pivot_Back_Fwd180", "Loco_Pivot_Side_Side180", "Loco_Pivot_Side_Side180_M", "Loco_Backpedal_To_Run"],
+    "Sprint_Pivots": ["Loco_Pivot_Fwd_Back", "Loco_Pivot_Fwd_Fwd180", "Loco_Pivot_Fwd_Side90", "Loco_Pivot_Fwd_Side90_M", "Loco_Pivot_Fwd_Side180",
+                      "Loco_Pivot_Fwd_Side180_M"],
+    "Crouch_Idles": ["Loco_Line_Idle_Crouched"],
+    "Crouch_Starts": ["Loco_Line_Start_Fwd", "Loco_Line_Start_Side", "Loco_Line_Start_Side_M", "Loco_Line_Start_SideIn", "Loco_Line_Start_SideIn_M",
+                      "Loco_Line_Start_Back", "Loco_Line_Start_Back_M", "Loco_Line_Start_Fwd90", "Loco_Line_Start_Fwd90_M"],
 }
 LOCO_DB = {k: [n for n in v if n not in LOCO_SKATE] for k, v in LOCO_DB.items()}
 
@@ -266,7 +335,7 @@ for _n in MIRRORED:
 
 # clips with no mocap counterpart in the pack stay hand keyed (Tools/Anim/clips*.py): the pass-rush spins and the
 # spectators' cheer
-KEEP_KEYED = ["Rush_Spin_L", "Rush_Spin_R", "Fan_Cheer_Loop"]
+KEEP_KEYED = []  # every game clip comes from the pack (2026-11-10)
 
 
 def resolve(name):

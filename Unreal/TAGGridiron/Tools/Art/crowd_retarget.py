@@ -1,7 +1,7 @@
 # Unreal Editor Python (headless). Retargets the spectator clips (UEFN skeleton) onto the MetaHuman body skeleton the
 # MetaHuman Crowd Sample's merged crowd meshes use, for the stadium hero crowd.
 #   UnrealEditor-Cmd.exe TAGGridiron.uproject -run=pythonscript -script="<this file>" -unattended -nosplash -nullrhi
-# In:  /Game/TAG/Anim/Authored/A_TAG_Fan_Cheer_Loop (our keyed cheer), GASP M_Neutral_Stand_Idle_Loop (Epic, free)
+# In:  /Game/TAG/Anim/Authored/A_TAG_Fan_Cheer_Loop and A_TAG_Idle_Stand_Loop (mocap pack retargets)
 # Out: /Game/TAG/Crowd/Anims/A_Crowd_Cheer, A_Crowd_Idle  (report: Saved/crowd_retarget.json)
 import json
 import os
@@ -15,7 +15,7 @@ SRC_MESH = "/Game/Characters/UEFN_Mannequin/Meshes/SKM_UEFN_Mannequin"
 TGT_MESH = "/MetaHumanCrowdContent/Characters/Assembled/AverageMale_Head01/MHC_AverageMale_Head01_CombinedSkelMesh"
 RTG = "/Game/TAG/Anim/RTG_TAG_UEFN_to_MH"
 CLIPS = {"A_Crowd_Cheer": "/Game/TAG/Anim/Authored/A_TAG_Fan_Cheer_Loop",
-         "A_Crowd_Idle": "/Game/Characters/UEFN_Mannequin/Animations/Idle/M_Neutral_Stand_Idle_Loop"}
+         "A_Crowd_Idle": "/Game/TAG/Anim/Authored/A_TAG_Idle_Stand_Loop"}
 # the Mass crowd's high-res actors animate SKM_MetaHumanCrowd (SKEL_MetaHumanCrowd) through ABP_MassCrowdActor
 ACTOR_MESH = "/MetaHumanCrowdContent/Animations/SKM_MetaHumanCrowd"
 ACTOR_CLIPS = {"A_CrowdActor_Cheer": "/Game/TAG/Anim/Authored/A_TAG_Fan_Cheer_Loop"}

@@ -200,8 +200,12 @@ void FAthleteAssets::Load()
 			UAnimationAsset* Mir = Keyed(*FString::Printf(TEXT("A_TAG_%s_M"), N));
 			if (Orig && Mir) MirrorOf.Add(Orig, Mir);
 		}
-		Idle = LoadAsset<UAnimationAsset>(*(G + TEXT("Animations/Idle/M_Neutral_Stand_Idle_Loop.M_Neutral_Stand_Idle_Loop")), false);
-		Jump = LoadAsset<UAnimationAsset>(*(G + TEXT("Animations/Jump/M_Neutral_Jump_F_Land_Roll_Lfoot.M_Neutral_Jump_F_Land_Roll_Lfoot")), false);
+		// the plain standing idle and the fall's lunge: the pack's neutral post-play stand and its tackle whiff (a dive
+		// to the ground), the sample's clips only when those are missing
+		Idle = Keyed(TEXT("A_TAG_Idle_Stand_Loop"));
+		if (!Idle) Idle = LoadAsset<UAnimationAsset>(*(G + TEXT("Animations/Idle/M_Neutral_Stand_Idle_Loop.M_Neutral_Stand_Idle_Loop")), false);
+		Jump = Keyed(TEXT("A_TAG_Tackle_Miss"));
+		if (!Jump) Jump = LoadAsset<UAnimationAsset>(*(G + TEXT("Animations/Jump/M_Neutral_Jump_F_Land_Roll_Lfoot.M_Neutral_Jump_F_Land_Roll_Lfoot")), false);
 		UniformMat = LoadAsset<UMaterialInterface>(*(G + TEXT("Materials/MI_UEFN_Mannequin_CMC.MI_UEFN_Mannequin_CMC")), false);
 		// safety net for blend spaces authored headlessly (see UTagEditorLib::ResampleBlendSpace)
 		UTagEditorLib::ResampleBlendSpace(Locomotion);
@@ -269,7 +273,13 @@ void FAthleteAssets::LoadMotionMatching()
 	// Epic's Game Animation Sample motion matching data (free, UEFN mannequin), Dense variant: every database is
 	// searched against the same normalization set, so costs compare across databases
 	const FString D = TEXT("/Game/Characters/UEFN_Mannequin/Animations/MotionMatchingData/Databases/Dense/PSD_Dense_");
-	auto Db = [&D](const FString& N) { return LoadAsset<UPoseSearchDatabase>(*FString::Printf(TEXT("%s%s.PSD_Dense_%s"), *D, *N, *N), false); };
+	// every set prefers its TAG copy (Tools/Art/mm_build_dbs.py: the sample's clips plus the pack's starts, stops,
+	// pivots and idles with root motion, mocap_map.LOCO_DB), else the sample's
+	auto Db = [&D](const FString& N)
+	{
+		if (UPoseSearchDatabase* T = LoadAsset<UPoseSearchDatabase>(*FString::Printf(TEXT("/Game/TAG/Anim/MM/PSD_TAG_%s.PSD_TAG_%s"), *N, *N), false)) return T;
+		return LoadAsset<UPoseSearchDatabase>(*FString::Printf(TEXT("%s%s.PSD_Dense_%s"), *D, *N, *N), false);
+	};
 	UPoseSearchDatabase* Idles = Db(TEXT("Stand_Idles"));
 	UPoseSearchDatabase* Turn = Db(TEXT("Stand_TurnInPlace"));
 	static const TCHAR* Gait[3] = {TEXT("Walk"), TEXT("Run"), TEXT("Sprint")};
@@ -314,10 +324,11 @@ void FAthleteAssets::LoadMotionMatching()
 			MMCrouch[0] = {CLoops};
 			MMCrouch[1] = {CLoops};
 			MMCrouch[2] = {CLoops};
-			// no crouch starts: the sample's are generic walk starts that the node kept playing for their full 2 s
-			// against the lineman's kick slide (-TagMMTrace); the pack's kick slides and shuffles in the loops are the
-			// line's own first steps
-			if (!bMMPack) if (UPoseSearchDatabase* X = Db(TEXT("Crouch_Walk_Starts"))) MMCrouch[1].Add(X);
+			// crouch starts: with the TAG databases the pack's own (PSD_TAG_Crouch_Starts: a lineman's first steps out of
+			// his crouch, forward, sideways and back); the sample's generic walk starts only without them (they kept
+			// playing for their full 2 s against the lineman's kick slide, -TagMMTrace)
+			if (UPoseSearchDatabase* X = bMMPack ? LoadAsset<UPoseSearchDatabase>(TEXT("/Game/TAG/Anim/MM/PSD_TAG_Crouch_Starts.PSD_TAG_Crouch_Starts"), false) : Db(TEXT("Crouch_Walk_Starts")))
+				MMCrouch[1].Add(X);
 			if (UPoseSearchDatabase* X = Db(TEXT("Crouch_Walk_Pivots"))) MMCrouch[2].Add(X);
 			if (UPoseSearchDatabase* X = Db(TEXT("Crouch_Walk_Stops"))) MMCrouch[3].Add(X);
 			MMCrouch[3].Add(CIdles);

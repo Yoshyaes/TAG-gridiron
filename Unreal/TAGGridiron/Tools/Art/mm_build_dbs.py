@@ -70,6 +70,14 @@ try:
           ["Run/M_Neutral_Run_Arc_%s_%s" % (k, s) for k in ("Small", "Wide", "Tight") for s in ("L", "R")], L["Run"], PACK_ONLY)
     build(SRC + "PSD_Dense_Stand_Walk_Loops", DST + "PSD_TAG_Walk_Loops", [], [], L["Walk"])
     build(SRC + "PSD_Dense_Crouch_Walk_Loops", DST + "PSD_TAG_Crouch_Loops", [], [], L["Crouch"], PACK_ONLY)
+    # the sets beside the loops: the sample's starts, stops, pivots and idles plus the pack's (mixed, so every move
+    # the sample covers stays covered); the crouch starts are the pack's alone (see FAthleteAssets::LoadMotionMatching)
+    for g in ("Walk", "Run", "Sprint"):
+        for k in ("Starts", "Stops", "Pivots"):
+            build(SRC + "PSD_Dense_Stand_%s_%s" % (g, k), DST + "PSD_TAG_Stand_%s_%s" % (g, k), [], [], L["%s_%s" % (g, k)])
+    build(SRC + "PSD_Dense_Stand_Idles", DST + "PSD_TAG_Stand_Idles", [], [], L["Stand_Idles"])
+    build(SRC + "PSD_Dense_Crouch_Idles", DST + "PSD_TAG_Crouch_Idles", [], [], L["Crouch_Idles"])
+    build(SRC + "PSD_Dense_Crouch_Walk_Starts", DST + "PSD_TAG_Crouch_Starts", [], [], L["Crouch_Starts"], PACK_ONLY)
     # the TAG schema: the sample's PSS_Default with the trajectory weighted 3x against the pose channels (the pack's
     # loops come from many men; on the sample's weights pose similarity outvoted speed and direction and the search
     # took a 5 m/s crouched run or a lateral kick slide for a 2 m/s forward drive, -TagMoveTest -TagMMTrace=67)
@@ -82,11 +90,11 @@ try:
             ch.set_editor_property("weight", TRAJECTORY_WEIGHT)
     sch.set_editor_property("channels", chans)
     EAL.save_asset(SCHEMA, only_if_is_dirty=False)
-    for g in ("Sprint", "Run", "Walk", "Crouch"):
-        db = unreal.load_asset(DST + "PSD_TAG_%s_Loops" % g)
+    for name in rep["dbs"]:
+        db = unreal.load_asset(DST + name)
         if db and db.get_editor_property("schema") != sch:
             db.set_editor_property("schema", sch)
-            EAL.save_asset(DST + "PSD_TAG_%s_Loops" % g, only_if_is_dirty=False)
+            EAL.save_asset(DST + name, only_if_is_dirty=False)
     rep["schema"] = {"path": SCHEMA, "trajectory_weight": TRAJECTORY_WEIGHT}
 except Exception:
     import traceback
