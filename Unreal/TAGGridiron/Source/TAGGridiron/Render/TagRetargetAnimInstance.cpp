@@ -284,7 +284,7 @@ namespace
 void FTagRetargetProxy::ApplyFootballLayer(FPoseContext& Output) const
 {
 	const bool bAny = In.ThrowT >= 0.f || In.CarryAlpha > 0.01f || In.SecureAlpha > 0.01f || In.ReachAlpha > 0.01f ||
-		In.LeanAlpha > 0.01f || In.StanceAlpha > 0.01f || In.LookAlpha > 0.01f;
+		In.LeanAlpha > 0.01f || In.StanceAlpha > 0.01f || In.StanceHandAlpha > 0.01f || In.LookAlpha > 0.01f;
 	if (!bAny) return;
 	const FBoneContainer& BC = Output.Pose.GetBoneContainer();
 	const FBones B = Resolve(BC);
@@ -293,8 +293,9 @@ void FTagRetargetProxy::ApplyFootballLayer(FPoseContext& Output) const
 	FCSPose<FCompactPose> P;
 	P.InitPose(Output.Pose);
 
-	// --- torso: drive lean (blocks/tackles) and 3-point stance flatten the back (rotate about +X = lateral)
-	const float LeanDeg = 16.f * In.LeanAlpha + 34.f * In.StanceAlpha;
+	// --- torso: drive lean (blocks/tackles) and 3-point stance flatten the back (rotate about +X = lateral); a ball
+	// carrier runs with his pad level down a little (the capture's upright sprint against a back in traffic)
+	const float LeanDeg = 16.f * In.LeanAlpha + 34.f * In.StanceAlpha + 7.f * In.CarryAlpha;
 	if (LeanDeg > 0.1f)
 	{
 		RotateCS(P, B.Spine1, FQuat(FVector(1, 0, 0), -FMath::DegreesToRadians(LeanDeg * 0.55f)), 1.f);
@@ -360,6 +361,13 @@ void FTagRetargetProxy::ApplyFootballLayer(FPoseContext& Output) const
 		{
 			const FVector Down = FVector(-18.f, 52.f, 3.f);
 			ArmIK(P, B.UR, B.LR, B.HR, Down, FVector(-0.5f, -0.2f, 0.8f).GetSafeNormal(), In.StanceAlpha);
+		}
+		// --- the keyed stances carry a flat back with the eyes up; the down hand (both in a four point) is planted on the
+		// turf here, a hand's length ahead of the foot, as far as the arm reaches
+		if (In.StanceHandAlpha > 0.01f)
+		{
+			ArmIK(P, B.UR, B.LR, B.HR, FVector(-20.f, 46.f, 2.f), FVector(-0.5f, -0.2f, 0.8f).GetSafeNormal(), In.StanceHandAlpha);
+			if (In.bStanceBothHands) ArmIK(P, B.UL, B.LL, B.HL, FVector(20.f, 46.f, 2.f), FVector(0.5f, -0.2f, 0.8f).GetSafeNormal(), In.StanceHandAlpha);
 		}
 	}
 

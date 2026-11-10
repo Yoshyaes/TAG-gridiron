@@ -173,11 +173,13 @@ class Rig:
     def _setup_look(self):
         a = self.arm
         self.look = self._empty("T_look", Vector((0, -10, 1.7)))
+        self.look_cons = []
         for bone, infl in (("neck_01", 0.25), ("neck_02", 0.35), ("head", 1.0)):
             c = a.pose.bones[bone].constraints.new("DAMPED_TRACK")
             c.target = self.look
             c.track_axis = self._axis_toward(bone, FWD)
             c.influence = infl
+            self.look_cons.append((c, infl))
         self.look_axis = self._axis_toward("head", FWD)
 
     def _setup_ik_bones(self):
@@ -216,6 +218,13 @@ class Rig:
         sp, sy, sl = k.get("spine", (0, 0, 0))
         for b, w in zip(SPINE, SPINE_W):
             self._rotate_bone_world(b, pyl(sp * w, sy * w, sl * w))
+        # head_pitch: an explicit neck and head pitch in degrees (negative lifts the face), for poses where the look
+        # constraint cannot get the eyes up (a flat back); look_w scales the look constraint (0 hands the head over)
+        if "head_pitch" in k:
+            for b, w in (("neck_01", 0.3), ("neck_02", 0.3), ("head", 0.4)):
+                self._rotate_bone_world(b, pyl(k["head_pitch"] * w, 0, 0))
+        for c, infl in getattr(self, "look_cons", []):
+            c.influence = infl * k.get("look_w", 1.0)
         for side, sgn in (("l", 1), ("r", -1)):
             raise_, fwd = k.get("clav_" + side, (0, 0))
             # raise: shoulder up (rotate about forward axis); forward: shoulder protracts (about up)
@@ -244,7 +253,7 @@ class Rig:
             self.look.location = Vector(k["look"])
         bpy.context.view_layer.update()
 
-    KEYED = ("pelvis", "spine", "clavicle")
+    KEYED = ("pelvis", "spine", "clavicle", "neck", "head")
 
     def key(self, frame, k):
         """Queue a key pose. Poses are solved first with no animation attached (the depsgraph would otherwise

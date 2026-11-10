@@ -269,7 +269,7 @@ private:
 	void SetupMetaHuman(int32 Arch, const FUniform& U);
 	FVector VisRelScale = FVector::OneVector;
 	// smoothed football-layer weights
-	float CarryA = 0.f, SecureA = 0.f, ReachA = 0.f, LeanA = 0.f, StanceA = 0.f, LookA = 0.f;
+	float CarryA = 0.f, SecureA = 0.f, ReachA = 0.f, LeanA = 0.f, StanceA = 0.f, StanceHandA = 0.f, LookA = 0.f;
 	FVector ReachSmoothed = FVector::ZeroVector, LookSmoothed = FVector::ZeroVector;
 	float ArmSlot = 0.f, StyleJitter = 0.f;
 	// body physics inputs (TagRetargetAnimInstance): the lean from the measured acceleration, planted feet pinned

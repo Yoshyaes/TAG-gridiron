@@ -22,7 +22,9 @@ struct FTagProcInput
 	FVector ReachTarget = FVector::ZeroVector;
 	float ReachSpread = 8.f;   // lateral half-gap between the hands
 	float LeanAlpha = 0.f;     // forward drive lean (blocking / tackling), 0..1
-	float StanceAlpha = 0.f;   // lineman 3-point stance
+	float StanceAlpha = 0.f;   // lineman 3-point stance (torso and hand, the procedural fallback)
+	float StanceHandAlpha = 0.f; // the down hand planted on the turf over the keyed stance (the rig's arm is short)
+	bool bStanceBothHands = false; // a four point stance
 	float LookAlpha = 0.f;     // head tracks LookTarget (ball / carrier / receiver)
 	FVector LookTarget = FVector::ZeroVector;
 	// per-player style ("signature") - stable per player, see AAthlete::Setup

@@ -1967,6 +1967,9 @@ void AAthlete::SetFootball(const FAthleteFootball& InF, float Dt)
 	FAthleteFootball F = InF;
 	// hand keyed clips already carry the throw and the stance: keep the procedural versions off them
 	if (AA.ThrowKeyed) F.ThrowT = -1.f;
+	// the keyed stance owns the body; the down hand is planted on the turf over it (the rig's arm is too short to
+	// reach from a flat back), both hands in a four point
+	const bool bHandDown = F.bStance && F.bPreSnap && AA.Stance3pt && !(OneShot && OneShotLeft > 0.f);
 	if (F.bPreSnap && AA.Stance3pt) F.bStance = false;
 	const bool bThrow = F.ThrowT >= 0.f;
 	// a hand keyed one-shot (catch, handoff, pitch, rush move, ...), a keyed fall or get-up authors its own arms: keep
@@ -1977,6 +1980,7 @@ void AAthlete::SetFootball(const FAthleteFootball& InF, float Dt)
 	Ease(ReachA, F.bReach && !bKeyedArms ? 1.f : 0.f, F.bReach && !bKeyedArms ? 7.f : 10.f);
 	Ease(LeanA, F.Lean, 5.f);
 	Ease(StanceA, F.bStance ? 1.f : 0.f, 6.f);
+	Ease(StanceHandA, bHandDown ? 1.f : 0.f, bHandDown ? 6.f : 12.f);
 	Ease(LookA, F.bLook ? 0.85f : 0.f, 4.f);
 	const FTransform& C = MHBody->GetComponentTransform();
 	if (F.bReach) ReachSmoothed = ReachSmoothed.IsZero() ? F.ReachWorld : FMath::VInterpTo(ReachSmoothed, F.ReachWorld, Dt, 18.f);
@@ -1990,6 +1994,8 @@ void AAthlete::SetFootball(const FAthleteFootball& InF, float Dt)
 	P.ReachSpread = F.ReachSpread;
 	P.LeanAlpha = LeanA;
 	P.StanceAlpha = StanceA;
+	P.StanceHandAlpha = StanceHandA;
+	P.bStanceBothHands = Player && Player->pos == tag::Pos::DT && AA.Stance4pt && (Player->id % 2);
 	P.LookAlpha = LookA;
 	P.LookTarget = C.InverseTransformPosition(LookSmoothed);
 	P.ArmSlot = ArmSlot;

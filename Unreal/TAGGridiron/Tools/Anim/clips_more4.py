@@ -149,11 +149,14 @@ def _hold(keys, until):
 
 
 def _ball(keys, upto):
-    """Ball arm locked to the chest, following the body down (frames 3 .. upto-1)."""
+    """Ball arm locked to the chest and the off hand clamped over the ball, both following the body down (frames
+    3 .. upto-1): a carrier who feels contact covers the ball with two hands."""
     for f, k in keys:
         if 3 <= f < upto:
             k["hand_r"] = body(k, (-0.12, -0.12, 0.32))
             k["elbow_r"] = (-1, 0.8, -0.2)
+            k["hand_l"] = body(k, (0.02, -0.17, 0.33))
+            k["elbow_l"] = (1, 0.7, -0.3)
     return keys
 
 

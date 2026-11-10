@@ -35,14 +35,14 @@ STANCE_3PT = {
         # hips at 0.75 m, level with the shoulders (a flat back; the look targets' 12-clip band is 0.70-0.81 and line
         # coaches want the hips no lower than the shoulders). The down arm hangs straight from a shoulder ~0.62 m up
         # and ~0.45 m ahead of the hips, so the hand meets the turf a stride ahead of the feet.
-        "pelvis": (0.0, 0.14, 0.71), "pelvis_rot": (88, 0, 0), "spine": (46, 0, 0),
-        "clav_r": (-14, 24), "clav_l": (0, 4),
-        "hand_r": (-0.20, -0.40, 0.11), "elbow_r": (-0.4, 0.3, 0.2),
-        "hand_l": (0.27, -0.22, 0.42), "elbow_l": (0.8, 0.2, 0.0),
+        "pelvis": (0.0, 0.12, 0.76), "pelvis_rot": (78, 0, 0), "spine": (30, 0, 0),
+        "clav_r": (-10, 22), "clav_l": (0, 4),
+        "hand_r": (-0.20, -0.50, 0.10), "elbow_r": (-0.4, 0.3, 0.2),   # the arm hangs toward the turf; the game plants the hand
+        "hand_l": (0.26, -0.12, 0.58), "elbow_l": (0.9, 0.1, -0.3),   # the off forearm rests across the thigh
         "foot_l": (0.25, -0.02, 0.094), "foot_r": (-0.25, 0.16, 0.094),
         "foot_pitch_l": 16, "foot_pitch_r": 22, "foot_yaw_l": 6, "foot_yaw_r": -6,
         "knee_l": (0.25, -1, 0), "knee_r": (-0.25, -1, 0),
-        "look": (0.0, -6.0, 1.0),
+        "look": (0.0, -3.0, 1.2),   # eyes up at the man across the line
 }
 
 
@@ -254,7 +254,7 @@ def lineman_getoff(rig):
         return d
     keys = [
         (0, k()),
-        (3, k(pelvis=(0.0, 0.08, 0.72), pelvis_rot=(74, 0, 0), spine=(30, 0, 0), hand_r=(-0.20, -0.44, 0.26),
+        (3, k(pelvis=(0.0, 0.08, 0.74), pelvis_rot=(68, 0, 0), spine=(26, 0, 0), hand_r=(-0.20, -0.46, 0.30),
               foot_pitch_l=20, foot_pitch_r=26)),
         (6, k(pelvis=(0.0, -0.02, 0.74), pelvis_rot=(54, 0, 0), spine=(16, 0, 0), clav_r=(0, 10), clav_l=(0, 10),
               hand_r=(-0.16, -0.40, 0.82), hand_l=(0.16, -0.40, 0.82), elbow_r=(-1, 0.3, -0.6), elbow_l=(1, 0.3, -0.6),
