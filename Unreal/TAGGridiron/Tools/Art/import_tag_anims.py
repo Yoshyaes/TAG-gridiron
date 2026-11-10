@@ -57,8 +57,11 @@ def main():
     tmp_dir = os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_saved_dir()), "TAGAnimImport")
     os.makedirs(tmp_dir, exist_ok=True)
     out = {"clips": [], "errors": []}
+    only = [n.strip() for n in os.environ.get("TAG_IMPORT_ONLY", "").split(",") if n.strip()]
     for fbx in sorted(glob.glob(os.path.join(SRC, "A_TAG_*.fbx"))):
         name = os.path.splitext(os.path.basename(fbx))[0]
+        if only and name not in only and name[6:] not in only:
+            continue
         try:
             tmp = os.path.join(tmp_dir, name + ".fbx")
             shutil.copyfile(fbx, tmp)

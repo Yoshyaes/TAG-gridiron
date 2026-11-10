@@ -36,6 +36,7 @@ void FTagRetargetProxy::PreUpdate(UAnimInstance* InAnimInstance, float DeltaSeco
 		if (bReplay) ReplayMesh = I->ReplayMesh;
 	}
 	BlendElapsed += DeltaSeconds;
+	Dt = DeltaSeconds;
 	if (In.ClipSerial != SeenSerial)
 	{
 		SeenSerial = In.ClipSerial;
@@ -77,8 +78,24 @@ bool FTagRetargetProxy::Evaluate(FPoseContext& Output)
 	}
 	Node->Evaluate_AnyThread(Output); // mocap / keyed clip retargeted onto this body
 	ApplyFootballLayer(Output);
+	ApplyLean(Output);
 	ApplyCrossfade(Output);
+	ApplyFeet(Output); // on the shown pose, after the blend (a blended foot would slide through every transition)
+	const int32 N = Output.Pose.GetNumBones();
+	LastPose.SetNum(N, EAllowShrinking::No);
+	for (FCompactPoseBoneIndex I(0); I < N; ++I) LastPose[I.GetInt()] = Output.Pose[I];
 	return true;
+}
+
+void FTagRetargetProxy::PostUpdate(UAnimInstance* InAnimInstance) const
+{
+	FAnimInstanceProxy::PostUpdate(InAnimInstance);
+	// game thread, worker finished: hand this evaluation's foot slide to the instance (AAthlete reads and clears it)
+	if (UTagRetargetAnimInstance* I = Cast<UTagRetargetAnimInstance>(InAnimInstance))
+	{
+		I->SlideRaw += SlideRawFrame;
+		I->SlideShown += SlideShownFrame;
+	}
 }
 
 void FTagRetargetProxy::ApplyCrossfade(FPoseContext& Output)
@@ -110,8 +127,6 @@ void FTagRetargetProxy::ApplyCrossfade(FPoseContext& Output)
 			T.SetScale3D(FMath::Lerp(F.GetScale3D(), T.GetScale3D(), A));
 		}
 	}
-	LastPose.SetNum(N, EAllowShrinking::No);
-	for (FCompactPoseBoneIndex I(0); I < N; ++I) LastPose[I.GetInt()] = Output.Pose[I];
 }
 
 // ------------------------------------------------------------------ football layer helpers
@@ -126,7 +141,10 @@ namespace
 	{
 		FCompactPoseBoneIndex Pelvis{INDEX_NONE}, Spine1{INDEX_NONE}, Spine3{INDEX_NONE}, Spine5{INDEX_NONE}, Neck{INDEX_NONE}, Head{INDEX_NONE};
 		FCompactPoseBoneIndex UL{INDEX_NONE}, LL{INDEX_NONE}, HL{INDEX_NONE}, UR{INDEX_NONE}, LR{INDEX_NONE}, HR{INDEX_NONE};
+		FCompactPoseBoneIndex ThL{INDEX_NONE}, CaL{INDEX_NONE}, FtL{INDEX_NONE}, ThR{INDEX_NONE}, CaR{INDEX_NONE}, FtR{INDEX_NONE};
+		FCompactPoseBoneIndex BaL{INDEX_NONE}, BaR{INDEX_NONE}; // the balls of the feet (the ankle when a rig has none)
 		bool bValid = false;
+		bool bLegs = false;
 	};
 
 	FCompactPoseBoneIndex Find(const FBoneContainer& BC, const TCHAR* Name)
@@ -152,7 +170,64 @@ namespace
 		B.HR = Find(BC, TEXT("hand_r"));
 		B.bValid = B.Pelvis.IsValid() && B.Spine1.IsValid() && B.Spine3.IsValid() && B.Spine5.IsValid() && B.Head.IsValid() &&
 			B.UL.IsValid() && B.LL.IsValid() && B.HL.IsValid() && B.UR.IsValid() && B.LR.IsValid() && B.HR.IsValid();
+		B.ThL = Find(BC, TEXT("thigh_l"));
+		B.CaL = Find(BC, TEXT("calf_l"));
+		B.FtL = Find(BC, TEXT("foot_l"));
+		B.ThR = Find(BC, TEXT("thigh_r"));
+		B.CaR = Find(BC, TEXT("calf_r"));
+		B.FtR = Find(BC, TEXT("foot_r"));
+		B.BaL = Find(BC, TEXT("ball_l"));
+		B.BaR = Find(BC, TEXT("ball_r"));
+		if (!B.BaL.IsValid()) B.BaL = B.FtL;
+		if (!B.BaR.IsValid()) B.BaR = B.FtR;
+		B.bLegs = B.Pelvis.IsValid() && B.ThL.IsValid() && B.CaL.IsValid() && B.FtL.IsValid() && B.ThR.IsValid() && B.CaR.IsValid() && B.FtR.IsValid();
 		return B;
+	}
+
+	/** Two-bone leg IK to a component-space target. The knee keeps bending the way it already does, the foot keeps its
+	 *  rotation, and the target is pulled in to the leg's reach (no locked knee). */
+	void LegIK(FCSPose<FCompactPose>& P, FCompactPoseBoneIndex Th, FCompactPoseBoneIndex Ca, FCompactPoseBoneIndex Ft,
+		FVector Target, float Alpha)
+	{
+		if (Alpha <= 0.001f) return;
+		const FTransform TT = P.GetComponentSpaceTransform(Th);
+		const FTransform TC = P.GetComponentSpaceTransform(Ca);
+		const FTransform TF = P.GetComponentSpaceTransform(Ft);
+		const FVector Hip = TT.GetLocation(), Knee = TC.GetLocation(), Foot = TF.GetLocation();
+		const double L1 = FVector::Dist(Hip, Knee), L2 = FVector::Dist(Knee, Foot);
+		if (L1 < 1.0 || L2 < 1.0) return;
+		const FVector ToT = Target - Hip;
+		const double Reach = (L1 + L2) * 0.985;
+		if (ToT.Size() > Reach) Target = Hip + ToT.GetSafeNormal() * Reach;
+		// the knee's own bend direction (off the hip-foot line), so the leg never flips
+		const FVector Axis = (Foot - Hip).GetSafeNormal();
+		FVector Bend = (Knee - Hip) - Axis * FVector::DotProduct(Knee - Hip, Axis);
+		if (!Bend.Normalize()) Bend = FVector(0, 1, 0);
+		FVector J, E;
+		AnimationCore::SolveTwoBoneIK(Hip, Knee, Foot, Knee + Bend * 40.f, Target, J, E, false, 1.0, 1.0);
+		const FQuat DU = FQuat::FindBetweenNormals((Knee - Hip).GetSafeNormal(), (J - Hip).GetSafeNormal());
+		const FVector LowerNow = DU.RotateVector(Foot - Knee).GetSafeNormal();
+		const FQuat DL = FQuat::FindBetweenNormals(LowerNow, (E - J).GetSafeNormal());
+		FTransform NT = TT, NC = TC, NF = TF;
+		NT.SetRotation((DU * TT.GetRotation()).GetNormalized());
+		NC.SetRotation((DL * DU * TC.GetRotation()).GetNormalized());
+		NC.SetLocation(J);
+		NF.SetLocation(E); // rotation kept: the sole stays where the clip put it
+		const FBoneTransform BT[] = {FBoneTransform(Th, NT), FBoneTransform(Ca, NC), FBoneTransform(Ft, NF)};
+		P.LocalBlendCSBoneTransforms(BT, FMath::Clamp(Alpha, 0.f, 1.f));
+	}
+
+	/** Reference-pose component-space position of a bone. */
+	FVector BindPos(const FPoseContext& Ctx, FCompactPoseBoneIndex B)
+	{
+		const FBoneContainer& BC = Ctx.Pose.GetBoneContainer();
+		const USkeletalMesh* Mesh = Ctx.AnimInstanceProxy->GetSkelMeshComponent()->GetSkeletalMeshAsset();
+		if (!Mesh) return FVector::ZeroVector;
+		const FReferenceSkeleton& R = Mesh->GetRefSkeleton();
+		int32 I = BC.MakeMeshPoseIndex(B).GetInt();
+		FTransform T = FTransform::Identity;
+		while (I != INDEX_NONE) { T = T * R.GetRefBonePose()[I]; I = R.GetParentIndex(I); }
+		return T.GetLocation();
 	}
 
 	/** Rotate one bone about its own pivot by a component-space rotation; children follow. */
@@ -312,4 +387,111 @@ void FTagRetargetProxy::ApplyFootballLayer(FPoseContext& Output) const
 
 	FCSPose<FCompactPose>::ConvertComponentPosesToLocalPoses(MoveTemp(P), Output.Pose);
 	(void)kTau;
+}
+
+void FTagRetargetProxy::ApplyLean(FPoseContext& Output) const
+{
+	// the body tilts from the ankles into its acceleration: the drive of a start, the lean into a cut or a curved run,
+	// sitting back into a stop. The pelvis and everything above it rotate about the point between the soles; the feet
+	// stay where the clip put them (leg IK), so the legs take the lean the way ankles and knees do.
+	const float Deg = In.LeanCS.Size2D();
+	if (Deg < 0.2f) return;
+	const FBoneContainer& BC = Output.Pose.GetBoneContainer();
+	const FBones B = Resolve(BC);
+	if (!B.bLegs) return;
+	FCSPose<FCompactPose> P;
+	P.InitPose(Output.Pose);
+	const FVector FL = Pos(P, B.FtL), FR = Pos(P, B.FtR);
+	FVector Pivot = (FL + FR) * 0.5f;
+	Pivot.Z = FMath::Min(FL.Z, FR.Z) - 8.f; // the sole
+	const FVector Dir = FVector(In.LeanCS.X, In.LeanCS.Y, 0.f) / Deg;
+	const FQuat R(FVector::CrossProduct(FVector::UpVector, Dir).GetSafeNormal(), FMath::DegreesToRadians(Deg));
+	FTransform T = P.GetComponentSpaceTransform(B.Pelvis);
+	T.SetLocation(Pivot + R.RotateVector(T.GetLocation() - Pivot));
+	T.SetRotation((R * T.GetRotation()).GetNormalized());
+	const FBoneTransform BT[] = {FBoneTransform(B.Pelvis, T)};
+	P.LocalBlendCSBoneTransforms(BT, 1.f);
+	LegIK(P, B.ThL, B.CaL, B.FtL, FL, 1.f);
+	LegIK(P, B.ThR, B.CaR, B.FtR, FR, 1.f);
+	FCSPose<FCompactPose>::ConvertComponentPosesToLocalPoses(MoveTemp(P), Output.Pose);
+}
+
+void FTagRetargetProxy::ApplyFeet(FPoseContext& Output)
+{
+	// planted feet stay where they landed: a foot that comes down low is pinned to that spot of turf (leg IK) until
+	// the clip lifts it or it has drifted too far (then the pin eases off). Keyed clips play in place while the sim
+	// moves the actor, and clips sped up past their capture speed slide too; both read as skating without this.
+	SlideRawFrame = SlideShownFrame = 0.f;
+	bool bAnyPin = In.bFootLock;
+	for (const FFootLock& L : Feet) bAnyPin = bAnyPin || L.bLocked || L.ReleaseAlpha > 0.f;
+	if (!bAnyPin) return; // nothing pinned and nothing to pin (a bench player, a body on the ground)
+	const FBoneContainer& BC = Output.Pose.GetBoneContainer();
+	const FBones B = Resolve(BC);
+	if (!B.bLegs) return;
+	const FTransform& CT = GetComponentTransform();
+	if (bHaveComp && FVector::DistSquared2D(CT.GetLocation(), PrevCompLoc) > 150.f * 150.f)
+		for (FFootLock& L : Feet) L = FFootLock(); // teleported (new play): the plants are gone
+	PrevCompLoc = CT.GetLocation();
+	bHaveComp = true;
+	if (RefFootZ < 0.f) RefFootZ = BindPos(Output, B.BaL).Z;
+	FCSPose<FCompactPose> P;
+	P.InitPose(Output.Pose);
+	const FCompactPoseBoneIndex Th[2] = {B.ThL, B.ThR}, Ca[2] = {B.CaL, B.CaR}, Ft[2] = {B.FtL, B.FtR}, Ba[2] = {B.BaL, B.BaR};
+	const float Low = RefFootZ + 6.f;    // the ball of the foot is on the turf
+	const float MaxDrift = 36.f;         // a pin that has to pull the foot further than this lets go
+	for (int32 i = 0; i < 2; ++i)
+	{
+		// the pin is on the ball of the foot: the heel rises over a planted toe through the push-off, which a pinned
+		// ankle would turn into the toe skating back
+		FFootLock& L = Feet[i];
+		const FVector FootCS = Pos(P, Ba[i]);
+		const FVector FootW = CT.TransformPosition(FootCS);
+		const bool bLow = FootCS.Z < Low;
+		if (bLow && L.bHadRaw) SlideRawFrame += FVector::Dist2D(FootW, L.PrevRawW);
+		L.PrevRawW = FootW;
+		L.bHadRaw = bLow;
+		if (!In.bFootLock)
+		{
+			if (L.bLocked) { L.bLocked = false; L.ReleaseOff = (L.World - FootW) * L.Alpha; L.ReleaseAlpha = 1.f; }
+		}
+		else if (!L.bLocked && bLow && !L.bWasLow)
+		{
+			L.bLocked = true; // the foot came down: pin it here
+			L.World = FootW;
+			L.Alpha = 0.f;
+			L.ReleaseAlpha = 0.f;
+		}
+		L.bWasLow = bLow;
+		if (L.bLocked)
+		{
+			if (!bLow || FVector::Dist2D(L.World, FootW) > MaxDrift)
+			{
+				L.bLocked = false;
+				L.ReleaseOff = (L.World - FootW) * L.Alpha;
+				L.ReleaseAlpha = 1.f;
+			}
+			else L.Alpha = FMath::Min(1.f, L.Alpha + Dt * 14.f);
+		}
+		FVector TargetW = FootW;
+		float A = 0.f;
+		if (L.bLocked) { TargetW = L.World; A = L.Alpha; }
+		else if (L.ReleaseAlpha > 0.f)
+		{
+			L.ReleaseAlpha = FMath::Max(0.f, L.ReleaseAlpha - Dt / 0.12f);
+			TargetW = FootW + L.ReleaseOff * L.ReleaseAlpha;
+			A = 1.f;
+		}
+		if (A > 0.001f)
+		{
+			FVector TargetCS = CT.InverseTransformPosition(TargetW);
+			TargetCS.Z = FootCS.Z; // the clip owns the foot's height
+			const FVector AnkleCS = Pos(P, Ft[i]);
+			LegIK(P, Th[i], Ca[i], Ft[i], AnkleCS + (FMath::Lerp(FootCS, TargetCS, A) - FootCS), 1.f); // move the ankle by the toe's correction
+		}
+		const FVector ShownW = CT.TransformPosition(Pos(P, Ba[i]));
+		if (bLow && L.bHadShown) SlideShownFrame += FVector::Dist2D(ShownW, L.PrevShownW);
+		L.PrevShownW = ShownW;
+		L.bHadShown = bLow;
+	}
+	FCSPose<FCompactPose>::ConvertComponentPosesToLocalPoses(MoveTemp(P), Output.Pose);
 }

@@ -951,7 +951,8 @@ void PlaySim::presnapStep(double dt) {
     if (!e->shiftTo) continue;
     const V2 d = sub(*e->shiftTo, e->pos);
     const double l = len(d);
-    const double sp = 3.4 * (std::min)(1.0, 0.3 + l / 0.8);  // a brisk shuffle, settling into the spot
+    // a brisk shuffle settling into the spot; a jog (~4.6 yd/s) when there is ground to cover (back from the last play)
+    const double sp = 3.4 * (std::min)(1.0, 0.3 + l / 0.8) + 1.2 * clamp((l - 4.0) / 4.0, 0.0, 1.0);
     if (l <= sp * dt || l < 0.02) {
       e->pos = *e->shiftTo;
       e->vel = V2{0, 0};
@@ -2172,6 +2173,14 @@ void PlaySim::move(Ent* e, double dt) {
   e->pos = add(e->pos, scale(e->vel, dt));
   if (ns > 0.4) e->face = angleOf(e->vel);
   else if (e->side == Side::Def) e->face = kPi;
+  // the men who move with their eyes on the ball keep facing it: the quarterback through his drop, pass blockers
+  // setting up, and defenders in coverage backpedalling or shuffling before the ball is thrown (a defender turning
+  // and running deep faces where he runs). Facing is the renderer's; nothing in the play reads it.
+  if (e == qb && ball.holder == e && !dropDone && e->state == EntState::QB) e->face = 0;
+  else if (e->side == Side::Off && e->state == EntState::PassBlock) e->face = 0;
+  else if (e->side == Side::Def && !passThrown && ball.mode != BallMode::Air && ns < 5.5 && e->vel.x > -0.3 &&
+           (e->state == EntState::Zone || e->state == EntState::Man || e->state == EntState::Spy))
+    e->face = angleOf(sub(V2{ball.pos.x, ball.pos.y}, e->pos));
   if ((e->anim != Anim::Throw && e->anim != Anim::Juke && e->anim != Anim::Tackle) || e->animT > 0.5)
     e->anim = ns > 0.6 ? Anim::Run : Anim::Idle;
   if (e->engaged == nullptr && e->state == EntState::PassBlock && ns < 2) e->anim = Anim::Block;

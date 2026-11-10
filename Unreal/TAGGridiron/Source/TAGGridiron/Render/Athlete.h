@@ -28,6 +28,8 @@ struct FAthleteFootball
 	bool bUnderCenter = false; // QB lined up under center (not shotgun / pistol)
 	bool bLook = false;
 	FVector LookWorld = FVector::ZeroVector;
+	bool bLive = false;        // the play is live (between the snap and the whistle)
+	float CarrierDist = -1.f;  // a defender's distance to the ball carrier (cm), < 0 when there is none
 };
 
 struct FUniform
@@ -128,6 +130,9 @@ public:
 	void SetPancaked(const FVector& PushDirW) { PancakeDir = PushDirW.GetSafeNormal2D(); bPancakePending = true; }
 	/** Look-dev (-TagGapTest): this player's next get-up is the injury beat. */
 	bool bForceInjury = false;
+	/** Planted-foot slide over every athlete since the last reset (cm): in the animation as retargeted, and as shown
+	 *  after the foot lock (UTagRetargetAnimInstance). */
+	static void SlideStats(double& OutRaw, double& OutShown, bool bReset);
 
 	const tag::Player* Player = nullptr;
 
@@ -260,6 +265,12 @@ private:
 	float CarryA = 0.f, SecureA = 0.f, ReachA = 0.f, LeanA = 0.f, StanceA = 0.f, LookA = 0.f;
 	FVector ReachSmoothed = FVector::ZeroVector, LookSmoothed = FVector::ZeroVector;
 	float ArmSlot = 0.f, StyleJitter = 0.f;
+	// body physics inputs (TagRetargetAnimInstance): the lean from the measured acceleration, planted feet pinned
+	void MeasureMotion(float Dt);
+	FVector LeanSmoothed = FVector::ZeroVector;
+	// the quarterback's drop and pocket, the defender's breakdown (SetFootball feeds these a frame ahead of Drive)
+	bool bHasBallF = false, bLiveF = false, bDropped = false;
+	float CarrierDistF = -1.f, DropLeft = 0.f;
 
 	UPROPERTY()
 	TObjectPtr<UAnimationAsset> CurrentClip;
@@ -349,6 +360,9 @@ struct FAthleteAssets
 	TObjectPtr<UAnimationAsset> StanceUnderCenter, UnderCenterSnap, Pitch, CatchDive, GetUpSlow;
 	TObjectPtr<UAnimationAsset> TackledHit; // the carrier's side of a tackle
 	TObjectPtr<UAnimationAsset> InjuredDown; // hurt on the play, chained into the slow get-up
+	// batch 6 (Tools/Anim/clips_more5.py): the quarterback's drops and pocket, the defender's breakdown
+	TObjectPtr<UAnimationAsset> QBDropShotgun, QBDropUnder, QBPocket, Breakdown;
+	static constexpr float DropShotgunSpeed = 275.f, DropUnderSpeed = 400.f; // cm/s the drops were keyed at
 	// batch 4: the throwing family (index = EThrow), more catches, collision reactions
 	enum EThrow : int32 { ThrowSet = 0, ThrowQuickK, ThrowDeepK, ThrowFadeK, ThrowSidearmK, ThrowTouchK, ThrowRunRK, ThrowRunLK, ThrowCount };
 	UAnimationAsset* Throws[ThrowCount] = {};

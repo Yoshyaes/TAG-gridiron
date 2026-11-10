@@ -3,6 +3,7 @@
 
 #include "CoreMinimal.h"
 #include "Sim/Playbook.h"
+#include "Sim/Vec.h"
 
 namespace TagCoords
 {
@@ -15,6 +16,13 @@ namespace TagCoords
 		return Dir > 0
 			? FVector(X * YD, (W * 0.5 - Y) * YD, Z * YD)
 			: FVector((100.0 - X) * YD, (Y - W * 0.5) * YD, Z * YD);
+	}
+
+	/** World -> offense frame (the inverse of ToWorld, ignoring height). */
+	inline tag::V2 FromWorld(const FVector& W, int Dir)
+	{
+		const double HalfW = tag::FIELD_W * 0.5;
+		return Dir > 0 ? tag::V2{W.X / YD, HalfW - W.Y / YD} : tag::V2{100.0 - W.X / YD, HalfW + W.Y / YD};
 	}
 
 	/** Offense-frame direction vector -> world yaw (degrees). */

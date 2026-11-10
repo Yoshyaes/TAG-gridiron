@@ -32,6 +32,12 @@ struct FTagProcInput
 	// shown pose into the new one over BlendTime (single node playback cannot blend on its own)
 	int32 ClipSerial = 0;
 	float BlendTime = 0.2f;
+	// body physics (AAthlete::Drive): the whole body leans from the ankles into its measured acceleration (starts,
+	// cuts, braking, the centripetal lean of a curved run), as a horizontal component-space direction scaled by the
+	// lean angle in degrees; and planted feet are pinned to the turf (keyed clips play in place while the sim moves
+	// the actor, and the capture's top speed is below a sprinter's: both slide the feet otherwise)
+	FVector LeanCS = FVector::ZeroVector;
+	bool bFootLock = false;
 };
 
 USTRUCT()
@@ -48,14 +54,33 @@ struct FTagRetargetProxy : public FAnimInstanceProxy
 	virtual FAnimNode_Base* GetCustomRootNode() override { return Node; }
 	virtual void GetCustomNodes(TArray<FAnimNode_Base*>& OutNodes) override { OutNodes.Add(Node); }
 	virtual void PreUpdate(UAnimInstance* InAnimInstance, float DeltaSeconds) override;
+	virtual void PostUpdate(UAnimInstance* InAnimInstance) const override;
 	virtual bool Evaluate(FPoseContext& Output) override;
 
 	FAnimNode_RetargetPoseFromMesh* Node = nullptr;
 	FTagProcInput In;
+	/** Planted-foot travel this evaluation (cm): in the animation as retargeted, and as shown after the foot lock. */
+	float SlideRawFrame = 0.f, SlideShownFrame = 0.f;
 
 private:
 	void ApplyFootballLayer(FPoseContext& Output) const;
+	void ApplyLean(FPoseContext& Output) const;
+	void ApplyFeet(FPoseContext& Output);
 	void ApplyCrossfade(FPoseContext& Output);
+	struct FFootLock
+	{
+		bool bLocked = false, bWasLow = false, bHadRaw = false, bHadShown = false;
+		FVector World = FVector::ZeroVector;      // where the foot planted (world)
+		float Alpha = 0.f;                        // lock eased in
+		FVector ReleaseOff = FVector::ZeroVector; // offset blending out after a release
+		float ReleaseAlpha = 0.f;
+		FVector PrevRawW = FVector::ZeroVector, PrevShownW = FVector::ZeroVector;
+	};
+	FFootLock Feet[2];
+	FVector PrevCompLoc = FVector::ZeroVector;
+	bool bHaveComp = false;
+	float Dt = 0.f;
+	float RefFootZ = -1.f;  // the foot bone's height in the reference pose (component space), computed on first use
 
 	TArray<FTransform> LastPose;   // last displayed local pose (compact order)
 	TArray<FTransform> FromPose;   // frozen pose a transition blends out of
@@ -91,6 +116,9 @@ public:
 	 *  retargeted animation and football layer. */
 	TArray<FTransform> ReplayMesh;
 	bool bReplay = false;
+
+	/** Foot slide accumulated since the game thread last cleared it (cm): the animation's and the shown body's. */
+	float SlideRaw = 0.f, SlideShown = 0.f;
 
 protected:
 	virtual FAnimInstanceProxy* CreateAnimInstanceProxy() override;

@@ -144,6 +144,10 @@ void FAthleteAssets::Load()
 		GetUpSlow = Keyed(TEXT("A_TAG_GetUp_Slow"));
 		TackledHit = Keyed(TEXT("A_TAG_Tackled_Hit"));
 		InjuredDown = Keyed(TEXT("A_TAG_Injured_Down"));
+		QBDropShotgun = Keyed(TEXT("A_TAG_QB_Drop_Shotgun"));
+		QBDropUnder = Keyed(TEXT("A_TAG_QB_Drop_UnderCenter"));
+		QBPocket = Keyed(TEXT("A_TAG_QB_Pocket_Loop"));
+		Breakdown = Keyed(TEXT("A_TAG_Def_Breakdown_Loop"));
 		{
 			// the throwing family; each starts 7 frames before its release (the set throw starts at its stride frame)
 			const TCHAR* TN[ThrowCount] = {TEXT("A_TAG_QB_Throw"), TEXT("A_TAG_QB_Throw_Quick"), TEXT("A_TAG_QB_Throw_Deep"),
@@ -785,30 +789,12 @@ bool AAthlete::DriveMotionMatching(const FVector& VelWorld, float SimYaw, float 
 	FAthleteAssets& A = FAthleteAssets::Get();
 	if (!M || !A.MotionMatchReady()) return false;
 	if (bCrouch && A.MMCrouch[0].IsEmpty()) return false; // no crouch data: the crouch blend space
-	// velocity and acceleration measured from how the body actually moves (smoothed). The sim's velocity field goes
-	// stale when play stops (dead ball: positions freeze, the velocity keeps its last value), which reads to the search
-	// as "standing, about to sprint" and picked a start clip for every frame of it.
-	const FVector Pos = Body->GetComponentLocation();
-	if (bHavePrevVel && Dt > 1e-4f)
-	{
-		FVector Raw = (Pos - PrevPos) / Dt;
-		Raw.Z = 0.f;
-		if (Raw.Size() > 1500.f) Raw = PrevVel; // teleport
-		const FVector NewVel = FMath::Lerp(PrevVel, Raw, FMath::Clamp(Dt * 15.f, 0.f, 1.f));
-		const FVector Acc = ((NewVel - PrevVel) / Dt).GetClampedToMaxSize(1500.f);
-		SmoothedAccel = FMath::Lerp(SmoothedAccel, Acc, FMath::Clamp(Dt * 6.f, 0.f, 1.f));
-		PrevVel = NewVel;
-	}
-	else
-	{
-		PrevVel = FVector(VelWorld.X, VelWorld.Y, 0.f);
-		SmoothedAccel = FVector::ZeroVector;
-	}
+	// velocity and acceleration as measured by MeasureMotion (the sim's velocity field goes stale when play stops:
+	// positions freeze, the velocity keeps its last value, which read to the search as "standing, about to sprint")
 	static const bool bNoAccel = FParse::Param(FCommandLine::Get(), TEXT("TagMMNoAccel"));
 	if (bNoAccel) SmoothedAccel = FVector::ZeroVector;
-	PrevPos = Pos;
-	bHavePrevVel = true;
 	const FVector V = PrevVel;
+	(void)VelWorld;
 
 	// trajectory of the source body component: recorded history, now, and 1.6 s of prediction
 	// (accelerate for half a second, never brake through zero, top speed 10.5 m/s; facing keeps its offset from the
@@ -1413,6 +1399,9 @@ void AAthlete::ResetPose()
 	TrajTime.Reset();
 	bHavePrevVel = false;
 	SmoothedAccel = FVector::ZeroVector;
+	LeanSmoothed = FVector::ZeroVector;
+	bDropped = false;
+	DropLeft = 0.f;
 	if (!bRagdoll) return;
 	bRagdoll = false;
 	FaceFollowBody(false);
@@ -1427,10 +1416,53 @@ void AAthlete::ResetPose()
 	CurrentAnim.Reset();
 }
 
+static double GSlideRaw = 0.0, GSlideShown = 0.0;
+
+void AAthlete::SlideStats(double& OutRaw, double& OutShown, bool bReset)
+{
+	OutRaw = GSlideRaw;
+	OutShown = GSlideShown;
+	if (bReset) GSlideRaw = GSlideShown = 0.0;
+}
+
+void AAthlete::MeasureMotion(float Dt)
+{
+	// velocity and acceleration from how the body actually moves (smoothed): the lean, and motion matching's query
+	const FVector Pos = Body->GetComponentLocation();
+	if (bHavePrevVel && Dt > 1e-4f)
+	{
+		FVector Raw = (Pos - PrevPos) / Dt;
+		Raw.Z = 0.f;
+		if (Raw.Size() > 1500.f) Raw = PrevVel; // teleport
+		const FVector NewVel = FMath::Lerp(PrevVel, Raw, FMath::Clamp(Dt * 15.f, 0.f, 1.f));
+		const FVector Acc = ((NewVel - PrevVel) / Dt).GetClampedToMaxSize(1500.f);
+		SmoothedAccel = FMath::Lerp(SmoothedAccel, Acc, FMath::Clamp(Dt * 6.f, 0.f, 1.f));
+		PrevVel = NewVel;
+	}
+	else
+	{
+		PrevVel = LastVelW;
+		SmoothedAccel = FVector::ZeroVector;
+	}
+	PrevPos = Pos;
+	bHavePrevVel = true;
+}
+
 void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld, float VMaxYds, const FString& Anim, float AnimT, float DeltaTime, bool bLineman)
 {
 	FAthleteAssets& A = FAthleteAssets::Get();
 	const FVector PrevActorLoc = GetActorLocation();
+	UTagRetargetAnimInstance* RI = MHBody ? Cast<UTagRetargetAnimInstance>(MHBody->GetAnimInstance()) : nullptr;
+	if (RI)
+	{
+		GSlideRaw += RI->SlideRaw; // foot slide over all athletes (SlideStats)
+		GSlideShown += RI->SlideShown;
+		RI->SlideRaw = RI->SlideShown = 0.f;
+		// body physics are off while the body is down: falls, get-ups and ragdolls own the pose (set again below)
+		RI->Proc.bFootLock = false;
+		RI->Proc.LeanCS = FVector::ZeroVector;
+	}
+	if (bPreSnap) { bDropped = false; DropLeft = 0.f; } // a new play: the quarterback has his drop again
 	if (Anim != TEXT("down") && FVector(VelWorld.X, VelWorld.Y, 0.f).SizeSquared() > 100.f) LastVelW = FVector(VelWorld.X, VelWorld.Y, 0.f);
 	if (bRagdoll)
 	{
@@ -1484,6 +1516,30 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 	const bool bFall = Anim == TEXT("down") || Anim == TEXT("tackle") || Anim == TEXT("dive");
 	SetActorLocation(Location + VisOffset);
 	RecordTrajectory();
+	MeasureMotion(DeltaTime);
+	if (RI)
+	{
+		// body physics: the lean from the ankles into the measured acceleration (tan a = a / g: a 5 m/s2 start is
+		// ~27 deg; capped and scaled down since the capture's starts, plants and stops carry some of their own),
+		// and planted feet pinned to the turf. -TagNoLean / -TagNoFootLock for A/B.
+		static const bool bNoLean = FParse::Param(FCommandLine::Get(), TEXT("TagNoLean"));
+		static const bool bNoFootLock = FParse::Param(FCommandLine::Get(), TEXT("TagNoFootLock"));
+		FVector Want = FVector::ZeroVector;
+		FVector Ah(SmoothedAccel.X, SmoothedAccel.Y, 0.f);
+		const float Mag = Ah.Size();
+		if (!bNoLean && !bPreSnap && Mag > 40.f)
+		{
+			// the capture's starts, plants and breaks already lean ~20 deg of their own, so this adds the part the clip
+			// can't know: a little over a third of the physical angle, at most 12 deg (a 5 m/s2 start adds ~10)
+			float Deg = FMath::RadiansToDegrees(FMath::Atan(FMath::Min(Mag, 700.f) / 981.f)) * 0.38f;
+			Deg = FMath::Min(Deg, 12.f);
+			if (OneShot && OneShotLeft > 0.f) Deg *= 0.5f; // a keyed catch / move has its own body
+			Want = MHBody->GetComponentTransform().InverseTransformVectorNoScale(Ah / Mag) * Deg;
+		}
+		LeanSmoothed = FMath::VInterpTo(LeanSmoothed, Want, DeltaTime, 7.f);
+		RI->Proc.LeanCS = LeanSmoothed;
+		RI->Proc.bFootLock = !bNoFootLock;
+	}
 	if (!bYawInit)
 	{
 		SmoothedYaw = Yaw;
@@ -1665,6 +1721,44 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 			return;
 		}
 	}
+	// the quarterback's drop: the keyed three step (shotgun) or five step (under center) drop while the sim backs him
+	// out of the snap with the ball, at the sim's speed; then the pocket (on the toes, ball at the chest, eyes
+	// scanning) instead of a standing idle. The throw cuts in from the pocket's pose.
+	if (Player && Player->pos == tag::Pos::QB && bHasBallF && bLiveF && !bPreSnap && A.QBDropShotgun && A.QBDropUnder && A.QBPocket)
+	{
+		const FVector Fwd = FRotator(0, SmoothedYaw, 0).Vector();
+		const float Back = -FVector::DotProduct(FVector(VelWorld.X, VelWorld.Y, 0.f), Fwd);
+		const bool bDropping = Anim == TEXT("run") && SpeedCm > 120.f && Back > 0.6f * SpeedCm;
+		static const bool bTrace = FParse::Param(FCommandLine::Get(), TEXT("TagQBTrace"));
+		if (bTrace) UE_LOG(LogTemp, Display, TEXT("TAG qb #%d anim=%s v=%.0f back=%.0f under=%d dropped=%d left=%.2f oneshot=%.2f"), Player->number, *Anim, SpeedCm, Back, bUnderCenter, bDropped, DropLeft, OneShotLeft);
+		if (bDropping && (DropLeft > 0.f || !bDropped))
+		{
+			UAnimationAsset* D = bUnderCenter ? A.QBDropUnder.Get() : A.QBDropShotgun.Get();
+			const float Rate = FMath::Clamp(SpeedCm / (bUnderCenter ? FAthleteAssets::DropUnderSpeed : FAthleteAssets::DropShotgunSpeed), 0.7f, 1.5f);
+			if (!bDropped)
+			{
+				DropLeft = D->GetPlayLength() / Rate;
+				bDropped = true;
+				UE_LOG(LogTemp, Display, TEXT("TAG QB drop %s #%d at %.0f cm/s (rate %.2f)"), *D->GetName(), Player->number, SpeedCm, Rate);
+			}
+			DropLeft -= DeltaTime;
+			PlayClip(D, false, Rate);
+			return;
+		}
+		if (!bDropping && SpeedCm < 90.f && (Anim == TEXT("idle") || Anim == TEXT("run")))
+		{
+			PlayClip(A.QBPocket, true, 1.f + StyleJitter * 0.08f, FMath::Frac(Player->id * 0.37f) * 1.2f);
+			return;
+		}
+	}
+	// a defender closing on the carrier in space breaks down: hips sunk, chest up, arms out, choppy feet
+	if (A.Breakdown && bLiveF && !bPreSnap && Player && !bLineman && CarrierDistF > 0.f && CarrierDistF < 320.f && SpeedCm < 230.f &&
+		!bHasBallF && (Anim == TEXT("run") || Anim == TEXT("idle")))
+	{
+		if (CurrentClip != A.Breakdown) UE_LOG(LogTemp, Display, TEXT("TAG breakdown #%d at %.0f cm from the carrier"), Player->number, CarrierDistF);
+		PlayClip(A.Breakdown, true, 1.f + StyleJitter * 0.1f, FMath::Frac(Player->id * 0.43f) * 0.8f);
+		return;
+	}
 	if (Anim == TEXT("celebrate"))
 	{
 		// each player has his own celebration (keyed loops), phase offset so nobody moves in unison
@@ -1822,6 +1916,9 @@ void AAthlete::SetFootball(const FAthleteFootball& InF, float Dt)
 {
 	UpdateFace(Dt);
 	bPreSnap = InF.bPreSnap;
+	bHasBallF = InF.bHasBall;
+	bLiveF = InF.bLive;
+	CarrierDistF = InF.CarrierDist;
 	if (InF.bPreSnap) bUnderCenter = InF.bUnderCenter; // keep the alignment through the snap
 	bEngaged = InF.bReach;
 	if (!MHBody) return;

@@ -287,6 +287,12 @@ class PlaySim {
   LineAdj lbAdj = LineAdj::Base;
   ShellAdj shellAdj = ShellAdj::Base;
   bool preSnap() const { return t == 0 && phase == SimPhase::Live && !cfg.kick; }
+  /** Someone is still walking to his spot (walkFrom / motion / a shift): the formation is not set. */
+  bool walking() const {
+    for (const Ent* e : ents)
+      if (e->shiftTo) return true;
+    return false;
+  }
   bool passPlay() const;
   /** Hot route: a new route (any ROUTES() name, "block" keeps him in) for an eligible receiver on a pass play. */
   bool hotRoute(Ent* e, const std::string& route);

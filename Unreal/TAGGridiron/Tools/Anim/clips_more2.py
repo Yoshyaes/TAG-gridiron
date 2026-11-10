@@ -32,7 +32,7 @@ def _throw_keys(stride=0.45, rz=1.80, slot=0.0, load_back=0.10, follow=1.0, fade
         d.update(kw)
         return (int(round(f * tscale)), d)
 
-    plant = (0.12, -stride, ANKLE)
+    plant = (0.16, -stride, ANKLE)   # the front foot opens a little toward the target
     fy = lambda y: y * s + fade          # pelvis travel toward the target, minus the fade
     hz = lambda z: z + (rz - 1.80)
     keys = [
@@ -44,20 +44,20 @@ def _throw_keys(stride=0.45, rz=1.80, slot=0.0, load_back=0.10, follow=1.0, fade
         k(14, pelvis=(0.0, fy(0.0), 0.87), pelvis_rot=(6, -45, 0), spine=(4, -38, 0), clav_r=(8, -6),
           hand_r=(-0.22, 0.10 + load_back - 0.10, 1.65), elbow_r=(-1, 0.4, 0.25), hand_l=(0.12, -0.45, 1.36),
           elbow_l=(1, 0, -0.5), foot_l=(0.14, -stride * 0.62, 0.17), foot_yaw_l=-22),
-        k(18, pelvis=(0.02, fy(-0.10), 0.86), pelvis_rot=(10 + lean * 0.5, -15, 0), spine=(6, -40, 0), clav_r=(10, -8),
+        k(18, pelvis=(0.02, fy(-0.10), 0.835), pelvis_rot=(10 + lean * 0.5, -15, 0), spine=(6, -40, 0), clav_r=(10, -8),
           hand_r=(-0.24, 0.16 + load_back - 0.10, 1.66), elbow_r=(-1, 0.3, 0.3), hand_l=(0.20, -0.35, 1.25),
           elbow_l=(1, 0.2, -0.6), foot_l=plant, foot_yaw_l=-20),
-        k(21, pelvis=(0.03, fy(-0.13), 0.855), pelvis_rot=(14 + lean, 5, 0), spine=(12 + lean, 0, -12 * slot),
-          clav_r=(12, 4), hand_r=(-0.20 + slot * 0.25, -0.10, hz(1.80) + slot * 0.35), elbow_r=(-1, -0.2, 0.6 + slot),
-          hand_l=(0.25, -0.10, 1.10), elbow_l=(1, 0.5, -0.4), foot_l=plant, foot_yaw_l=-20, foot_pitch_r=12),
-        k(23, pelvis=(0.03, fy(-0.16), 0.85), pelvis_rot=(18 + lean, 20, 0), spine=(22 + lean, 20, -5 - 10 * slot),
-          clav_r=(8, 14), hand_r=(-0.10 + slot * 0.2, -0.45 * min(1.0, follow), hz(1.56) + slot * 0.2),
+        k(21, pelvis=(0.03, fy(-0.13), 0.815), pelvis_rot=(14 + lean, 5, 0), spine=(12 + lean, 0, -12 * slot),
+          clav_r=(12, 4), hand_r=(-0.16 + slot * 0.25, -0.08, hz(1.70) + slot * 0.35), elbow_r=(-1, -0.2, 0.6 + slot),
+          hand_l=(0.25, -0.10, 1.10), elbow_l=(1, 0.5, -0.4), foot_l=plant, foot_yaw_l=-20, foot_pitch_r=38),
+        k(23, pelvis=(0.03, fy(-0.16), 0.81), pelvis_rot=(18 + lean, 20, 0), spine=(22 + lean, 20, -5 - 10 * slot),
+          clav_r=(8, 14), hand_r=(-0.10 + slot * 0.2, -0.38 * min(1.0, follow), hz(1.50) + slot * 0.2),
           elbow_r=(-1, -0.5, 0.3), hand_l=(0.26, 0.0, 1.05), elbow_l=(1, 0.6, -0.2), foot_l=plant, foot_yaw_l=-20,
-          foot_pitch_r=25),
-        k(30, pelvis=(0.04, fy(-0.22), 0.83), pelvis_rot=(28 * follow + lean, 30, 0), spine=(28 * follow + lean, 25, 0),
+          foot_pitch_r=55),
+        k(30, pelvis=(0.04, fy(-0.22), 0.80), pelvis_rot=(28 * follow + lean, 30, 0), spine=(28 * follow + lean, 25, 0),
           clav_r=(-2, 20), hand_r=(0.18 * follow, -0.38, 0.92 + (1 - follow) * 0.45), elbow_r=(-0.5, -0.3, 1.0),
-          hand_l=(0.30, 0.05, 1.0), elbow_l=(1, 0.6, -0.4), foot_l=plant, foot_yaw_l=-20, foot_pitch_r=45, foot_yaw_r=-40),
-        k(38, pelvis=(0.02, fy(-0.18), 0.88), pelvis_rot=(12, 15, 0), spine=(8, 10, 0),
+          hand_l=(0.30, 0.05, 1.0), elbow_l=(1, 0.6, -0.4), foot_l=plant, foot_yaw_l=-20, foot_pitch_r=72, foot_yaw_r=-40),
+        k(38, pelvis=(0.02, fy(-0.18), 0.86), pelvis_rot=(12, 15, 0), spine=(8, 10, 0),
           hand_r=(-0.22, -0.12, 1.0), elbow_r=(-1, 0.3, -1), hand_l=(0.24, -0.08, 1.0), elbow_l=(1, 0.3, -1),
           foot_l=plant, foot_yaw_l=-20, foot_r=(-0.12, -stride * 0.45 + 0.0, ANKLE), foot_yaw_r=-15),
         k(48, pelvis=(0.0, fy(-0.16), 0.90), pelvis_rot=(6, 5, 0), spine=(4, 0, 0),
@@ -69,7 +69,7 @@ def _throw_keys(stride=0.45, rz=1.80, slot=0.0, load_back=0.10, follow=1.0, fade
         dy = d["pelvis"][1] - b
         for h in ("hand_l", "hand_r"):
             x, y, z = d[h]
-            d[h] = (x, y + dy, min(z, 1.80))  # never above the reach of the throwing arm
+            d[h] = (x, y + dy, min(z, 1.72))  # never above the reach of the throwing arm
     return keys
 
 

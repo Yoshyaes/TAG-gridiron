@@ -306,6 +306,9 @@ void AMatchDirector::TickMoveTest(float Dt)
 	const FVector Start = TagCoords::ToWorld(30, tag::FIELD_W * 0.5, 1);
 	if (R != MoveRunner)
 	{
+		double Raw, Shown;
+		AAthlete::SlideStats(Raw, Shown, true);
+		if (MoveRunner >= 0) UE_LOG(LogTemp, Display, TEXT("TAG slide r%d: animation %.0f cm, shown %.0f cm (planted-foot travel over the route)"), MoveRunner, Raw, Shown);
 		MoveRunner = R;
 		MovePos = Start;
 		MoveVel = FVector::ZeroVector;
@@ -366,6 +369,9 @@ void AMatchDirector::TickMoveTest(float Dt)
 	PerfT += Dt; ++PerfFrames;
 	if (LineupT > Seg * Lineup.Num())
 	{
+		double Raw, Shown;
+		AAthlete::SlideStats(Raw, Shown, true);
+		UE_LOG(LogTemp, Display, TEXT("TAG slide r%d: animation %.0f cm, shown %.0f cm (planted-foot travel over the route)"), MoveRunner, Raw, Shown);
 		UE_LOG(LogTemp, Display, TEXT("TAG perf avg %.1f fps over %d frames"), PerfFrames / FMath::Max(PerfT, 0.001f), PerfFrames);
 		FPlatformMisc::RequestExit(false);
 	}
@@ -752,6 +758,31 @@ void AMatchDirector::TickGapTest(float Dt)
 		const FVector At = O + FVector(-600.f, 0.f, 0.f);
 		Cam(At + FVector(250.f, -520.f, 160.f), At + FVector(0.f, 0.f, 120.f), 30.f);
 	}
+	else if (T >= 51.5f)
+	{
+		// 6) the quarterback's drops, filmed from the side: under center for a beat, the five step drop at 4 m/s and
+		//    the pocket; then the shotgun three step at 2.75 m/s and the pocket again
+		Show({QB});
+		const float Qt = T - 51.5f;
+		const bool bUnderPhase = Qt < 4.5f;
+		const float Lt = Qt - (bUnderPhase ? 0.f : 4.5f);
+		const bool bPre = Lt < 0.5f;
+		const float DropLen = bUnderPhase ? 1.5f : 0.66f, Sp = bUnderPhase ? 400.f : 275.f;
+		const float Run = FMath::Clamp(Lt - 0.5f, 0.f, DropLen);
+		const FVector Start = O + FVector(bUnderPhase ? 0.f : -500.f, 200.f, 0.f);
+		const FVector P = Start - FVector(Sp * Run, 0.f, 0.f);
+		const FVector V = (Lt >= 0.5f && Lt < 0.5f + DropLen) ? FVector(-Sp, 0.f, 0.f) : FVector::ZeroVector;
+		FAthleteFootball F;
+		F.bPreSnap = bPre;
+		F.bUnderCenter = bUnderPhase;
+		F.bHasBall = !bPre;
+		F.bLive = !bPre;
+		F.bLook = true;
+		F.LookWorld = P + FVector(1500.f, 0.f, 160.f);
+		QB->SetFootball(F, Dt);
+		QB->Drive(P, 0.f, V, 9.f, V.IsNearlyZero() ? TEXT("idle") : TEXT("run"), Lt, Dt, false);
+		Cam(P + FVector(-40.f, -640.f, 160.f), P + FVector(-60.f, 0.f, 100.f), 30.f);
+	}
 	else if (T >= 38.f)
 	{
 		// 5) the catching family, one every 2.2 s, each in its situation: in stride, back shoulder, one hand, scoop at
@@ -818,13 +849,13 @@ void AMatchDirector::TickGapTest(float Dt)
 		Cam(RbAt + FVector(100.f, -900.f, 170.f), RbAt + FVector(160.f, 0.f, 60.f), 32.f);
 	}
 	const float ShotT = 0.33f * GapShot;
-	if (T >= ShotT && GapShot < 160)
+	if (T >= ShotT && GapShot < 200)
 	{
 		FScreenshotRequest::RequestScreenshot(FString::Printf(TEXT("tag_gap_%02d.png"), GapShot), false, false);
 		++GapShot;
 	}
 	PerfT += Dt; ++PerfFrames;
-	if (T > 51.5f)
+	if (T > 61.f)
 	{
 		UE_LOG(LogTemp, Display, TEXT("TAG perf avg %.1f fps over %d frames"), PerfFrames / FMath::Max(PerfT, 0.001f), PerfFrames);
 		FPlatformMisc::RequestExit(false);
@@ -1278,8 +1309,25 @@ void AMatchDirector::StartPresnap(const tag::OffPlay* Op, const tag::DefCall* Dc
 	std::optional<tag::Side> US;
 	if (UserOff()) US = tag::Side::Off;
 	else if (UserDef()) US = tag::Side::Def;
+	// where the last play left everyone (world), so they jog back to the new formation instead of appearing on it
+	std::map<tag::Player*, FVector> From;
+	if (Sim)
+		for (tag::Ent* E : Sim->ents) From[E->p] = ToWorld(E->pos.x, E->pos.y, Dir);
 	Sim = bTwoPoint ? G.twoPointSim(*Op, *Dc, US) : G.makePlay(*Op, *Dc, US);
 	Dir = G.worldDir();
+	double Far = 0.0;
+	for (tag::Ent* E : Sim->ents)
+	{
+		auto It = From.find(E->p);
+		if (It == From.end()) continue;
+		const tag::V2 P = TagCoords::FromWorld(It->second, Dir);
+		const double D = tag::dist(P, E->pos);
+		if (D > 0.3 && D < 32.0) // a man far downfield (a long touchdown) takes his spot; the rest jog in
+		{
+			Sim->walkFrom(E, P);
+			Far = FMath::Max(Far, D);
+		}
+	}
 	std::vector<tag::Player*> Ps;
 	for (tag::Ent* E : Sim->ents) Ps.push_back(E->p);
 	ShowOnly(Ps);
@@ -1291,6 +1339,8 @@ void AMatchDirector::StartPresnap(const tag::OffPlay* Op, const tag::DefCall* Dc
 	// the user's offense snaps when ready; against the user's defense the CPU offense gives it a few seconds to
 	// make its calls (and waits while a pre-snap menu is open, up to the play clock)
 	Timer = bWatch ? 1.1f / Speed : (US && *US == tag::Side::Off) ? 999.f : US ? 7.f : 1.6f;
+	// ...and nobody snaps it before the men jogging back have set (4.2 yd/s is their jog; at most a few seconds)
+	if (!(US && *US == tag::Side::Off)) Timer = FMath::Max(Timer, static_cast<float>(FMath::Min(6.0, Far / 4.2 + 0.7)) / Speed);
 	// the pre-snap panel lists the calls; the hint is for the play itself
 	if (bPlayStationPad)
 		Overlay->SetHint(US && *US == tag::Side::Off ? TEXT("Throw: press the receiver's button (hold L2 = touch)    L-STICK move    R2 juke    CREATE camera    OPTIONS pause")
@@ -2021,7 +2071,9 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 		FAthleteFootball F;
 		const bool bQB = E->p->pos == tag::Pos::QB;
 		F.bHasBall = Holder == E;
+		F.bLive = State == EMatchState::Live;
 		F.bSecure = F.bHasBall && bQB && E->speed() < 5.5 && E->anim != tag::Anim::Run;
+		if (Holder && Holder != E && E->side != Holder->side) F.CarrierDist = FVector::Dist2D(A->GetActorLocation(), AthOf(Holder)->GetActorLocation());
 		if (E->anim == tag::Anim::Throw) F.ThrowT = FMath::Clamp(static_cast<float>(E->animT) / 0.45f, 0.f, 1.f);
 		F.bStance = Sim->t < 0.05 && (E->isOL || E->isDL);
 		F.bPreSnap = Sim->t < 0.05 && State == EMatchState::Presnap;
@@ -2495,7 +2547,7 @@ void AMatchDirector::Tick(float Dt)
 		const bool bMenu = PreMode != EPre::Base;
 		if (!(UserDef() && bMenu)) Timer -= SDt;
 		PresnapClock += SDt;
-		if (Timer <= 0 || (UserDef() && PresnapClock > 25.f) || (UserOff() && bSpace && !bMenu && !bPreConsumed))
+		if (Timer <= 0 || (UserDef() && PresnapClock > 25.f) || (UserOff() && bSpace && !bMenu && !bPreConsumed && !Sim->walking()))
 		{
 			EndPresnapUI();
 			State = EMatchState::Live;
