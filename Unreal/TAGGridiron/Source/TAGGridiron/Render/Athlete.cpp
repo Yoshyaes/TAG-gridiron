@@ -1972,9 +1972,20 @@ bool AAthlete::GetBallHold(FVector& OutLoc, FRotator& OutRot) const
 	}
 	else
 	{
-		// palm side of the right hand, long axis along the forearm (tucked: nose up and forward)
+		// in the right hand: the ball sits on the palm, held between the fingers and the thumb (its centre half a ball
+		// off the palm, toward the thumb's side), long axis along the forearm (tucked: nose up and forward)
 		const FVector Along = (HR - LR).GetSafeNormal();
-		OutLoc = HR + Along * 6.f + Fwd * 3.f - GetActorRightVector() * 2.f;
+		if (MHBody->GetBoneIndex(TEXT("middle_01_r")) != INDEX_NONE && MHBody->GetBoneIndex(TEXT("thumb_02_r")) != INDEX_NONE)
+		{
+			const FVector Mid = MHBody->GetSocketLocation(TEXT("middle_01_r"));
+			const FVector Th = MHBody->GetSocketLocation(TEXT("thumb_02_r"));
+			const FVector Palm = (HR + Mid) * 0.5f;                       // palm centre, between the wrist and the knuckles
+			FVector Up = FVector::CrossProduct(Mid - HR, Th - HR);          // the palm's normal...
+			if (FVector::DotProduct(Up, Th - Palm) < 0.f) Up = -Up;         // ...toward the side the thumb curls to
+			Up.Normalize();
+			OutLoc = Palm + Up * 7.5f + Along * 2.f;
+		}
+		else OutLoc = HR + Along * 6.f + Fwd * 3.f - GetActorRightVector() * 2.f;
 		OutRot = Along.Rotation();
 	}
 	return true;

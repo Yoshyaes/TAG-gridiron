@@ -1313,7 +1313,9 @@ void PlaySim::thinkQB(Ent* e, double dt) {
     return;
   }
   // pass play: dropback
-  const double dropX = L - form_->qbDepth - play.dropDepth.value_or(2);
+  // the drop: a play's own depth, else 2 yd from the gun (a quick three step, setting up ~7 deep) and 5 yd from under
+  // center (between a three and a five step: 5 to 7 yd deep in the real game; 3 yd was a half drop)
+  const double dropX = L - form_->qbDepth - play.dropDepth.value_or(form_->qbDepth <= 1.5 ? 5.0 : 2.0);
   const bool paFake = play.type == PlayType::PlayAction && t < 0.85;
   if (paFake) {
     e->want = V2{-1.2, (cfg.flip ? 1 : -1) * 1.5};

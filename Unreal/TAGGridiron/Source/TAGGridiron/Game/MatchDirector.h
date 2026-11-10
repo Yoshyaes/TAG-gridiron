@@ -117,6 +117,11 @@ private:
 	std::vector<std::unique_ptr<tag::Player>> OfficialPeople;
 	void SpawnSidelines(const tag::Team& Home, const tag::Team& Away);
 	void TickSidelines(float Dt);
+	/** After the whistle the men jog toward the ball (the offense gathering behind it, the defense in front) until
+	 *  the next play is called; the pre-snap walk then takes them on to the formation from there. Director-side
+	 *  positions (world, cm), the dead sim's own are left alone. */
+	std::map<tag::Ent*, FVector> PostPos;
+	void TickPostJog(float Dt);
 	/** A live kick return (the sim fields the kick and runs it back; the user returns it or covers it). */
 	bool bLiveReturn = false;
 	void StartLiveReturn(const std::vector<tag::Player*>& KickTeam, const std::vector<tag::Player*>& RecvTeam);

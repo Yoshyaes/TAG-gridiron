@@ -121,6 +121,8 @@ public:
 	void BeginPairedFall(UAnimationAsset* Clip, const FVector& From, const FVector& To, float YawW, float DriveTime,
 		float LieTime, bool bEaseIn);
 	bool IsFalling() const { return bFalling; }
+	/** On the ground, falling, or getting up: the body is not his to move. */
+	bool IsDown() const { return bFalling || bGettingUp || bRagdoll || FallHoldLeft > 0.f || TackledLeft > 0.f; }
 	/** Where the pile ends: the carrier's anchor at the end of the drive. */
 	FVector FallAnchorEnd() const { return AnchorB; }
 	FVector GetLastVel() const { return LastVelW; }

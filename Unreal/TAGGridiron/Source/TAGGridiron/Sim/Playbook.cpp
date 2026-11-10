@@ -65,7 +65,10 @@ OffPlay P(const char* id, const char* name, const char* formation, PlayType type
   p.routes = std::move(routes);
   p.reads = std::move(reads);
   p.tags = std::move(tags);
-  p.dropDepth = dropDepth;
+  // the default drop is 2 yd from the gun (setting up ~7 deep); from under center the quarterback drops 5 (between a
+  // three and a five step), as in the real game. A play's own depth stands.
+  const bool underCenter = p.formation == "singleback" || p.formation == "iform";
+  p.dropDepth = (underCenter && dropDepth == 2) ? 5 : dropDepth;
   return p;
 }
 

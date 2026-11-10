@@ -443,6 +443,40 @@ void AMatchDirector::StartPairedTackle(AAthlete* Tk, AAthlete* Cr, const FVector
 		Cr->Player ? Cr->Player->number : -1, Front, Right, Yac, Drive.Size2D(), FVector::Dist2D(Tk->GetActorLocation(), TFrom));
 }
 
+void AMatchDirector::TickPostJog(float Dt)
+{
+	// after the whistle (a beat for the tackle and the celebration), everyone who is on his feet jogs toward the dead
+	// ball: the offense gathers 7 yd behind it around the hash it is on, the defense 5 yd in front, each man keeping
+	// his lateral spread so they don't pile onto one spot. 4.2 yd/s, slowing into the last yards. Men who are down,
+	// celebrating or carrying the ball stay as the sim shows them.
+	if (!Sim || Sim->isLive() || Sim->isReturn() || !Sim->result) return;
+	const tag::Ball& B = Sim->ball;
+	const double BallX = FMath::Clamp(B.pos.x, 2.0, 98.0);
+	for (tag::Ent* E : Sim->ents)
+	{
+		AAthlete* A = AthleteFor(E->p, E->side == tag::Side::Off ? Game->poss : tag::other(Game->poss));
+		const bool bHolds = B.mode == tag::BallMode::Held && B.holder == E;
+		if (A->IsDown() || E->anim == tag::Anim::Celebrate || E->anim == tag::Anim::Down || bHolds)
+		{
+			PostPos.erase(E);
+			continue;
+		}
+		if (E->animT < 1.0) continue; // the beat after the whistle: look around, then go
+		auto It = PostPos.find(E);
+		if (It == PostPos.end()) It = PostPos.emplace(E, A->GetActorLocation()).first;
+		const bool bOff = E->side == tag::Side::Off;
+		const double Ly = FMath::Clamp(E->pos.y, 8.0, tag::FIELD_W - 8.0);
+		const double Ty = Ly + (tag::FIELD_W * 0.5 - Ly) * 0.5; // halfway in toward the middle
+		const FVector Target = ToWorld(BallX + (bOff ? -7.0 : 5.0), Ty, Dir);
+		FVector To = Target - It->second;
+		To.Z = 0.f;
+		const float D = To.Size();
+		if (D < 40.f) continue;
+		const float Sp = FMath::Min(420.f, 120.f + D * 1.2f); // slows into the spot
+		It->second += To / D * FMath::Min(D, Sp * Dt);
+	}
+}
+
 void AMatchDirector::StartPileOn(AAthlete* As, AAthlete* Cr)
 {
 	const FAthleteAssets& A = FAthleteAssets::Get();
@@ -1312,7 +1346,12 @@ void AMatchDirector::StartPresnap(const tag::OffPlay* Op, const tag::DefCall* Dc
 	// where the last play left everyone (world), so they jog back to the new formation instead of appearing on it
 	std::map<tag::Player*, FVector> From;
 	if (Sim)
-		for (tag::Ent* E : Sim->ents) From[E->p] = ToWorld(E->pos.x, E->pos.y, Dir);
+		for (tag::Ent* E : Sim->ents)
+		{
+			auto PJ = PostPos.find(E);
+			From[E->p] = PJ != PostPos.end() ? PJ->second : ToWorld(E->pos.x, E->pos.y, Dir);
+		}
+	PostPos.clear();
 	Sim = bTwoPoint ? G.twoPointSim(*Op, *Dc, US) : G.makePlay(*Op, *Dc, US);
 	Dir = G.worldDir();
 	double Far = 0.0;
@@ -1864,9 +1903,20 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 		const double X = PV ? FMath::Lerp(PV->X, E->pos.x, static_cast<double>(Alpha)) : E->pos.x;
 		const double Y = PV ? FMath::Lerp(PV->Y, E->pos.y, static_cast<double>(Alpha)) : E->pos.y;
 		AAthlete* A = AthleteFor(E->p, E->side == tag::Side::Off ? OffK : tag::other(OffK));
-		const FVector VelW = Dir > 0 ? FVector(E->vel.x, -E->vel.y, 0) * YD : FVector(-E->vel.x, E->vel.y, 0) * YD;
+		FVector VelW = Dir > 0 ? FVector(E->vel.x, -E->vel.y, 0) * YD : FVector(-E->vel.x, E->vel.y, 0) * YD;
 		FString AnimName(E->animName());
 		float AnimT = static_cast<float>(E->animT);
+		FVector Loc = ToWorld(X, Y, Dir);
+		float Yaw = FaceToYaw(E->face, Dir);
+		if (auto PJ = PostPos.find(E); PJ != PostPos.end())
+		{
+			// jogging toward the ball after the whistle (TickPostJog): the director's position and velocity
+			const FVector Step = PJ->second - A->GetActorLocation();
+			VelW = Dt > 1e-4f ? FVector(Step.X, Step.Y, 0.f) / Dt : FVector::ZeroVector;
+			if (VelW.Size() > 60.f) { AnimName = TEXT("run"); Yaw = VelW.Rotation().Yaw; }
+			else { AnimName = TEXT("idle"); VelW = FVector::ZeroVector; }
+			Loc = PJ->second;
+		}
 		if (Sim->isReturn() && E == Sim->kickerEnt && Sim->t < Sim->cfg.kick->kickT + 0.6)
 		{
 			// the kick: start the clip so its foot contact lands when the sim kicks the ball
@@ -1874,7 +1924,7 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 			AnimName = bPunt ? TEXT("punt") : TEXT("kickoff");
 			AnimT = FMath::Max(0.f, (bPunt ? FAthleteAssets::PuntContact : FAthleteAssets::KickoffContact) - static_cast<float>(Sim->cfg.kick->kickT));
 		}
-		A->Drive(ToWorld(X, Y, Dir), FaceToYaw(E->face, Dir), VelW, static_cast<float>(E->vmax), AnimName, AnimT, Dt, E->isOL || E->isDL);
+		A->Drive(Loc, Yaw, VelW, static_cast<float>(E->vmax), AnimName, AnimT, Dt, E->isOL || E->isDL);
 		A->SetSelected(E->userControlled);
 		A->SetLabel(FString()); // receivers' buttons are drawn by the overlay (UpdateIcons)
 	}
@@ -2538,6 +2588,7 @@ void AMatchDirector::Tick(float Dt)
 	case EMatchState::Wait:
 		Timer -= SDt;
 		UpdateCamera(Dt, Sim ? FocusPoint() : IdleFocus);
+		if (Sim && !Sim->isLive()) TickPostJog(SDt);
 		if (Sim) SyncPlay(Dt, 1.f);
 		if (Timer <= 0) Next();
 		break;
@@ -2589,6 +2640,7 @@ void AMatchDirector::Tick(float Dt)
 	case EMatchState::Post:
 		Timer -= SDt;
 		for (tag::Ent* E : Sim->ents) E->animT += Dt;
+		TickPostJog(SDt);
 		SyncPlay(Dt, 1.f);
 		UpdateCamera(Dt, FocusPoint());
 		if ((ReplayPostRec += SDt) < 1.3f) RecordReplayFrame(SDt); // the whistle and the moment after it
@@ -2607,6 +2659,7 @@ void AMatchDirector::Tick(float Dt)
 		break;
 	default:
 		UpdateCamera(Dt, Sim ? FocusPoint() : IdleFocus);
+		if (Sim && State == EMatchState::Call && !Sim->isLive()) TickPostJog(SDt);
 		if (Sim) SyncPlay(Dt, 1.f);
 		break;
 	}
