@@ -57,4 +57,6 @@ private:
 	TObjectPtr<UMaterialInstanceDynamic> Mat;
 	bool bShown = false;
 	float Fade = 0.f;
+	/** Draw-in: each stroke grows out from its player over the first moments the art is up (0..1). */
+	float Reveal = 0.f;
 };

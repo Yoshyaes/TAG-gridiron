@@ -462,6 +462,14 @@ void AMatchDirector::RefreshPresnapPanel()
 		Overlay->ClearPresnapPanel();
 		return;
 	}
+	// holding R2 on the base screen: the field to itself (the menus keep their panel)
+	if (PreMode == EPre::Base)
+		if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
+			if (PC->IsInputKeyDown(EKeys::Gamepad_RightTrigger) || PC->IsInputKeyDown(EKeys::Q))
+			{
+				Overlay->ClearPresnapPanel();
+				return;
+			}
 	using G = EPadGlyph;
 	TArray<FPreRow> R;
 	auto Row = [&](G Gl, const FString& Label, bool bOn = false, const FString& Key = FString(), FLinearColor Tint = FLinearColor::White)
@@ -1048,7 +1056,15 @@ void AMatchDirector::TickPadTest(float Dt)
 		switch (ArtStep)
 		{
 		case 0: if (At(3.0f)) { PadCheck(!Shown(), TEXT("offense: art hidden once the intro is over")); PadPress(EKeys::Gamepad_RightTrigger, 1.5f); Next(); } break;
-		case 1: if (At(3.6f)) { PadCheck(Shown(), TEXT("offense: holding R2 shows the play art")); FScreenshotRequest::RequestScreenshot(TEXT("tag_pad_r2.png"), true, false); Next(); } break;
+		case 1:
+			if (At(3.25f) && !bArtDrawShot)
+			{
+				// the art drawing itself out from the players, a quarter second into the hold
+				bArtDrawShot = true;
+				FScreenshotRequest::RequestScreenshot(TEXT("tag_pad_drawin.png"), true, false);
+			}
+			if (At(3.6f)) { PadCheck(Shown(), TEXT("offense: holding R2 shows the play art")); FScreenshotRequest::RequestScreenshot(TEXT("tag_pad_r2.png"), true, false); Next(); }
+			break;
 		case 2: if (At(5.2f)) { PadCheck(!Shown(), TEXT("offense: letting go of R2 hides it")); PadPress(EKeys::Gamepad_FaceButton_Top); Next(); } break;
 		case 3: if (At(5.5f)) { PadCheck(PreMode == EPre::HotPick, TEXT("triangle opens hot routes")); PadPress(EKeys::Gamepad_FaceButton_Right); Next(); } break;
 		case 4:

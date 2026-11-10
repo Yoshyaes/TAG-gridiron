@@ -43,6 +43,8 @@ void ATagPlayArt::Tick(float Dt)
 	Super::Tick(Dt);
 	const float Was = Fade;
 	Fade = FMath::FInterpConstantTo(Fade, bShown ? 1.f : 0.f, Dt, bShown ? 6.f : 4.f);
+	if (bShown) Reveal = FMath::Min(1.f, Reveal + Dt / 0.5f);
+	else if (Fade <= 0.f) Reveal = 0.f;  // fully gone: draw in again next time
 	if (Fade != Was || !Mat)
 	{
 		if (!Mat)
@@ -156,10 +158,53 @@ void ATagPlayArt::EndCap(FLayer& L, const FVector2D& At, const FVector2D& Dir, E
 
 void ATagPlayArt::Line(const TArray<FVector>& Pts, const FLinearColor& Color, float Width, EArtEnd End, bool bGlow)
 {
-	TArray<FVector2D> P;
+	TArray<FVector2D> Raw;
 	for (const FVector& V : Pts)
-		if (P.Num() == 0 || FVector2D::Distance(P.Last(), FVector2D(V)) > 4.f) P.Add(FVector2D(V));
-	if (P.Num() < 2) return;
+		if (Raw.Num() == 0 || FVector2D::Distance(Raw.Last(), FVector2D(V)) > 4.f) Raw.Add(FVector2D(V));
+	if (Raw.Num() < 2) return;
+	// round the breaks: each corner becomes a short curve (a route is run through its cut, not around a post)
+	TArray<FVector2D> P;
+	P.Add(Raw[0]);
+	for (int32 i = 1; i < Raw.Num() - 1; ++i)
+	{
+		const FVector2D A = Raw[i - 1], B = Raw[i], C = Raw[i + 1];
+		const FVector2D In = (B - A).GetSafeNormal(), Out = (C - B).GetSafeNormal();
+		if (FVector2D::DotProduct(In, Out) > 0.97f)
+		{
+			P.Add(B);
+			continue;
+		}
+		const float R = FMath::Min3(110.f, static_cast<float>(FVector2D::Distance(A, B)) * 0.45f, static_cast<float>(FVector2D::Distance(B, C)) * 0.45f);
+		const FVector2D P0 = B - In * R, P2 = B + Out * R;
+		for (int32 k = 0; k <= 6; ++k)
+		{
+			const float T = k / 6.f;
+			P.Add((1 - T) * (1 - T) * P0 + 2 * (1 - T) * T * B + T * T * P2);  // quadratic Bezier through the corner
+		}
+	}
+	P.Add(Raw.Last());
+	// draw-in: cut the stroke at the revealed share of its length (eased), the head travelling out with it
+	if (Reveal < 1.f)
+	{
+		const float E = 1.f - FMath::Pow(1.f - Reveal, 3.f);
+		float Total = 0.f;
+		for (int32 i = 1; i < P.Num(); ++i) Total += FVector2D::Distance(P[i - 1], P[i]);
+		float Left = FMath::Max(Total * E, 6.f);
+		TArray<FVector2D> Cut{P[0]};
+		for (int32 i = 1; i < P.Num(); ++i)
+		{
+			const float Seg = FVector2D::Distance(P[i - 1], P[i]);
+			if (Seg >= Left)
+			{
+				Cut.Add(P[i - 1] + (P[i] - P[i - 1]).GetSafeNormal() * Left);
+				break;
+			}
+			Cut.Add(P[i]);
+			Left -= Seg;
+		}
+		P = Cut;
+		if (P.Num() < 2) return;
+	}
 	// shorten the stroke under the arrow head / bar so their tips land on the end point
 	const FVector2D Dir = (P.Last() - P[P.Num() - 2]).GetSafeNormal();
 	const FVector2D Tip = P.Last();
@@ -184,6 +229,10 @@ void ATagPlayArt::Line(const TArray<FVector>& Pts, const FLinearColor& Color, fl
 
 void ATagPlayArt::Zone(const FVector& Center, float RadiusX, float RadiusY, const FLinearColor& Color)
 {
+	// zones open out from their centre as the art draws in
+	const float E = Reveal < 1.f ? 1.f - FMath::Pow(1.f - Reveal, 3.f) : 1.f;
+	RadiusX *= FMath::Max(0.05f, E);
+	RadiusY *= FMath::Max(0.05f, E);
 	FLinearColor Fill = Color;
 	Fill.A = 0.24f;
 	Disc(Layers[0], FVector2D(Center), RadiusX, RadiusY, Fill, ZGlow);

@@ -2211,8 +2211,11 @@ void AMatchDirector::UpdateCamera(float Dt, const FVector& InFocus)
 		break;
 	}
 	}
-	// keep cameras over the field / in front of the stands (never inside geometry)
+	// keep cameras over the field / in front of the stands (never inside geometry); backed up against an end line
+	// the broadcast camera can't get its distance, so it climbs instead to keep the backfield in the frame
+	const double WantX = T.X;
 	T.X = FMath::Clamp(T.X, -6.0 * Y, 106.0 * Y);
+	if (CamMode == ECamMode::Broadcast) T.Z += FMath::Abs(WantX - T.X) * 0.9;
 	T.Y = FMath::Clamp(T.Y, -(tag::FIELD_W / 2 + 12) * Y, (tag::FIELD_W / 2 + 12) * Y);
 	if (CamMode != LastCamMode)
 	{
