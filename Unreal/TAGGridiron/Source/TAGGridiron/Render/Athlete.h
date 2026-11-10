@@ -374,6 +374,7 @@ struct FAthleteAssets
 	TObjectPtr<UAnimationAsset> InjuredDown; // hurt on the play, chained into the slow get-up
 	// batch 6 (Tools/Anim/clips_more5.py): the quarterback's drops and pocket, the defender's breakdown
 	TObjectPtr<UAnimationAsset> QBDropShotgun, QBDropUnder, QBPocket, Breakdown;
+	TArray<TObjectPtr<UAnimationAsset>> Breakdowns; // Breakdown and the pack's in-place bounces, one per player
 	static constexpr float DropShotgunSpeed = 253.f, DropUnderSpeed = 368.f; // cm/s the drops were captured at (mocap_constants.py)
 	// batch 4: the throwing family (index = EThrow), more catches, collision reactions
 	enum EThrow : int32 { ThrowSet = 0, ThrowQuickK, ThrowDeepK, ThrowFadeK, ThrowSidearmK, ThrowTouchK, ThrowRunRK, ThrowRunLK, ThrowCount };

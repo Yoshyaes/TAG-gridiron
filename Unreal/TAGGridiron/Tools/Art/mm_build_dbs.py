@@ -68,16 +68,18 @@ try:
           ["Sprint/M_Neutral_Sprint_Loop_F_L_20", "Sprint/M_Neutral_Sprint_Loop_F_R_20"], L["Sprint"], PACK_ONLY)
     build(SRC + "PSD_Dense_Stand_Run_Loops", DST + "PSD_TAG_Run_Loops", [],
           ["Run/M_Neutral_Run_Arc_%s_%s" % (k, s) for k in ("Small", "Wide", "Tight") for s in ("L", "R")], L["Run"], PACK_ONLY)
-    build(SRC + "PSD_Dense_Stand_Walk_Loops", DST + "PSD_TAG_Walk_Loops", [], [], L["Walk"])
+    build(SRC + "PSD_Dense_Stand_Walk_Loops", DST + "PSD_TAG_Walk_Loops", [], [], L["Walk"], PACK_ONLY)
     build(SRC + "PSD_Dense_Crouch_Walk_Loops", DST + "PSD_TAG_Crouch_Loops", [], [], L["Crouch"], PACK_ONLY)
-    # the sets beside the loops: the sample's starts, stops, pivots and idles plus the pack's (mixed, so every move
-    # the sample covers stays covered); the crouch starts are the pack's alone (see FAthleteAssets::LoadMotionMatching)
+    # the sets beside the loops: the pack's starts, stops, pivots and idles alone (the sample's clips leave every TAG
+    # database; the databases are copies of the sample's only for their settings)
     for g in ("Walk", "Run", "Sprint"):
         for k in ("Starts", "Stops", "Pivots"):
-            build(SRC + "PSD_Dense_Stand_%s_%s" % (g, k), DST + "PSD_TAG_Stand_%s_%s" % (g, k), [], [], L["%s_%s" % (g, k)])
-    build(SRC + "PSD_Dense_Stand_Idles", DST + "PSD_TAG_Stand_Idles", [], [], L["Stand_Idles"])
-    build(SRC + "PSD_Dense_Crouch_Idles", DST + "PSD_TAG_Crouch_Idles", [], [], L["Crouch_Idles"])
+            build(SRC + "PSD_Dense_Stand_%s_%s" % (g, k), DST + "PSD_TAG_Stand_%s_%s" % (g, k), [], [], L["%s_%s" % (g, k)], PACK_ONLY)
+    build(SRC + "PSD_Dense_Stand_Idles", DST + "PSD_TAG_Stand_Idles", [], [], L["Stand_Idles"], PACK_ONLY)
+    build(SRC + "PSD_Dense_Crouch_Idles", DST + "PSD_TAG_Crouch_Idles", [], [], L["Crouch_Idles"], PACK_ONLY)
     build(SRC + "PSD_Dense_Crouch_Walk_Starts", DST + "PSD_TAG_Crouch_Starts", [], [], L["Crouch_Starts"], PACK_ONLY)
+    build(SRC + "PSD_Dense_Crouch_Walk_Stops", DST + "PSD_TAG_Crouch_Walk_Stops", [], [], L["Crouch_Walk_Stops"], PACK_ONLY)
+    build(SRC + "PSD_Dense_Crouch_Walk_Pivots", DST + "PSD_TAG_Crouch_Walk_Pivots", [], [], L["Crouch_Walk_Pivots"], PACK_ONLY)
     # the TAG schema: the sample's PSS_Default with the trajectory weighted 3x against the pose channels (the pack's
     # loops come from many men; on the sample's weights pose similarity outvoted speed and direction and the search
     # took a 5 m/s crouched run or a lateral kick slide for a 2 m/s forward drive, -TagMoveTest -TagMMTrace=67)

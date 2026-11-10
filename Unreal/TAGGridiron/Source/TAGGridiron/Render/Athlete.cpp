@@ -75,11 +75,14 @@ void FAthleteAssets::Load()
 		Mesh = MocapMesh;
 		Locomotion = MocapLoco;
 		Crouch = LoadAsset<UBlendSpace>(TEXT("/Game/TAG/Anim/BS_TAG_Crouch.BS_TAG_Crouch"), false);
-		Shove = LoadAsset<UAnimationAsset>(*(G + TEXT("Animations/Interactions/Shoves/M_relaxed_ragdoll_shove_stand_F_A.M_relaxed_ragdoll_shove_stand_F_A")), false);
-		Throw = LoadAsset<UAnimationAsset>(*(G + TEXT("Animations/Idle/M_Neutral_Stand_Turn_045_R.M_Neutral_Stand_Turn_045_R")), false);
-		// TAG football clips: Tools/Anim (mocap pack retargets, a few hand keyed) -> Tools/Art/import_tag_anims.py
+		// TAG football clips: Tools/Anim (mocap pack retargets) -> Tools/Art/import_tag_anims.py. The sample's clips are
+		// loaded only where a pack clip is missing.
 		const FString K = TEXT("/Game/TAG/Anim/Authored/");
 		auto Keyed = [&](const TCHAR* N) { return LoadAsset<UAnimationAsset>(*FString::Printf(TEXT("%s%s.%s"), *K, N, N), false); };
+		Shove = Keyed(TEXT("A_TAG_Block_Punch"));
+		if (!Shove) Shove = LoadAsset<UAnimationAsset>(*(G + TEXT("Animations/Interactions/Shoves/M_relaxed_ragdoll_shove_stand_F_A.M_relaxed_ragdoll_shove_stand_F_A")), false);
+		Throw = Keyed(TEXT("A_TAG_QB_Throw"));
+		if (!Throw) Throw = LoadAsset<UAnimationAsset>(*(G + TEXT("Animations/Idle/M_Neutral_Stand_Turn_045_R.M_Neutral_Stand_Turn_045_R")), false);
 		Stance3pt = Keyed(TEXT("A_TAG_Stance3pt_Loop"));
 		Stance2pt = Keyed(TEXT("A_TAG_Stance2pt_Loop"));
 		StanceShotgun = Keyed(TEXT("A_TAG_QB_Shotgun_Loop"));
@@ -148,6 +151,13 @@ void FAthleteAssets::Load()
 		QBDropUnder = Keyed(TEXT("A_TAG_QB_Drop_UnderCenter"));
 		QBPocket = Keyed(TEXT("A_TAG_QB_Pocket_Loop"));
 		Breakdown = Keyed(TEXT("A_TAG_Def_Breakdown_Loop"));
+		// the breakdown's variants: the pack's bounces and the hopping breakdown idle, captures whose feet travel with the
+		// hips (they skate as locomotion, Tools/Art/mm_clip_plant.py) and so play in place here, each defender his own
+		Breakdowns.Reset();
+		if (Breakdown) Breakdowns.Add(Breakdown);
+		for (const TCHAR* N : {TEXT("A_TAG_Loco_Line_Bounce_Back"), TEXT("A_TAG_Loco_Line_Bounce_Back_M"), TEXT("A_TAG_Loco_Line_Bounce_Fwd"),
+			TEXT("A_TAG_Loco_Line_Bounce_Side"), TEXT("A_TAG_Loco_Line_Bounce_Side_M"), TEXT("A_TAG_Loco_Line_Back_Walk"), TEXT("A_TAG_Loco_Idle_Breakdown")})
+			if (UAnimationAsset* C = Keyed(N)) Breakdowns.Add(C);
 		{
 			// the throwing family; each starts 7 frames before its release (the set throw starts at its stride frame)
 			const TCHAR* TN[ThrowCount] = {TEXT("A_TAG_QB_Throw"), TEXT("A_TAG_QB_Throw_Quick"), TEXT("A_TAG_QB_Throw_Deep"),
@@ -184,8 +194,8 @@ void FAthleteAssets::Load()
 		for (const TCHAR* N : {TEXT("A_TAG_Celebrate_Flex_Loop"), TEXT("A_TAG_Celebrate_PointUp_Loop"), TEXT("A_TAG_Celebrate_Leap_Loop"),
 			TEXT("A_TAG_Celebrate_Shimmy_Loop"), TEXT("A_TAG_Celebrate_FirstDown_Loop")})
 			if (UAnimationAsset* C = Keyed(N)) Celebrations.Add(C);
-		Celebrate = LoadAsset<UAnimationAsset>(*(G + TEXT("Animations/Idle/M_Neutral_Stand_Idle_Break_v02.M_Neutral_Stand_Idle_Break_v02")), false);
-		if (UAnimationAsset* C = Keyed(TEXT("A_TAG_Celebrate_Loop"))) { Celebrate = C; bCelebrateKeyed = true; Celebrations.Insert(C, 0); } // after the GASP default
+		if (UAnimationAsset* C = Keyed(TEXT("A_TAG_Celebrate_Loop"))) { Celebrate = C; bCelebrateKeyed = true; Celebrations.Insert(C, 0); }
+		else Celebrate = LoadAsset<UAnimationAsset>(*(G + TEXT("Animations/Idle/M_Neutral_Stand_Idle_Break_v02.M_Neutral_Stand_Idle_Break_v02")), false);
 		// the other side's version of every asymmetric keyed clip (A_TAG_<name>_M)
 		for (const TCHAR* N : {TEXT("Tackle_Wrap"), TEXT("Tackle_High"), TEXT("Tackle_Low"), TEXT("Tackle_Dive"), TEXT("Tackle_Shoulder"),
 			TEXT("Tackle_Arm"), TEXT("Tackle_Assist"), TEXT("Tackled_Hit"), TEXT("Catch_High"), TEXT("Catch_Chest"), TEXT("Catch_Low"),
@@ -1838,8 +1848,9 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 	if (A.Breakdown && bLiveF && !bPreSnap && Player && !bLineman && CarrierDistF > 0.f && CarrierDistF < 320.f && SpeedCm < 230.f &&
 		!bHasBallF && (Anim == TEXT("run") || Anim == TEXT("idle")))
 	{
-		if (CurrentClip != A.Breakdown) UE_LOG(LogTemp, Display, TEXT("TAG breakdown #%d at %.0f cm from the carrier"), Player->number, CarrierDistF);
-		PlayClip(A.Breakdown, true, 1.f + StyleJitter * 0.1f, FMath::Frac(Player->id * 0.43f) * 0.8f);
+		UAnimationAsset* B = A.Breakdowns.Num() ? A.Breakdowns[Player->id % A.Breakdowns.Num()].Get() : A.Breakdown.Get();
+		if (CurrentClip != B) UE_LOG(LogTemp, Display, TEXT("TAG breakdown #%d at %.0f cm from the carrier"), Player->number, CarrierDistF);
+		PlayClip(B, true, 1.f + StyleJitter * 0.1f, FMath::Frac(Player->id * 0.43f) * 0.8f);
 		return;
 	}
 	if (Anim == TEXT("celebrate"))

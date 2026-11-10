@@ -218,25 +218,27 @@ LOCO = {
     # the linemen's and linebackers' diagonal and backward footwork at 1.2-3.9 m/s (a pass set's kick slide back and
     # out, a linebacker's shuffle back), so a man moving back-right at 2 m/s has a clip of that speed and direction
     "Loco_Line_Back_Jog": dict(src="MG_NonBC_Crouch_MC_Jog_D5__P01", loop=4, **R),                   # 2.9 m/s back
-    "Loco_Line_Back_Walk": dict(src="MG_LB_Walk_D5_Shuffle__P01", loop=4, **R),                      # 1.7 m/s back
+    # bounces and the back shuffle: in the capture both feet travel with the hips (85-97 % of the root's path, mm_clip_plant),
+    # so they play in place, as a defender's breakdown bounce squaring up to the carrier (FAthleteAssets::Breakdowns),
+    # never as travelling loops; the hopping breakdown idle below joins them
+    "Loco_Line_Back_Walk": dict(src="MG_LB_Walk_D5_Shuffle__P01", loop=4, mode="inplace"),
     "Loco_Line_BackDiag_Walk": dict(src="MG_ANTICIPATION_WALK_D4__P01", loop=4, **R),                # 1.2 m/s back-right
     "Loco_Line_BackDiag_Walk_M": dict(src="MG_ANTICIPATION_WALK_D4__P01", loop=4, mirror=True, **R),
     "Loco_Line_BackDiag_Run": dict(src="MG_LB_Med_Run_s40_D4__P01", loop=4, **R),                    # 2.1 m/s back-right
     "Loco_Line_BackDiag_Run_M": dict(src="MG_LB_Med_Run_s40_D4__P01", loop=4, mirror=True, **R),
     "Loco_Line_BackDiag_Fast": dict(src="MG_LB_Sprint_D4__P01", loop=4, **R),                        # 3.6 m/s back-right
     "Loco_Line_BackDiag_Fast_M": dict(src="MG_LB_Sprint_D4__P01", loop=4, mirror=True, **R),
-    "Loco_Line_Bounce_Back": dict(src="MG_LB_Walk_D4_Bounce__P01", loop=4, **R),                     # 1.7 m/s back-right
-    "Loco_Line_Bounce_Back_M": dict(src="MG_LB_Walk_D4_Bounce__P01", loop=4, mirror=True, **R),
+    "Loco_Line_Bounce_Back": dict(src="MG_LB_Walk_D4_Bounce__P01", loop=4, mode="inplace"),
+    "Loco_Line_Bounce_Back_M": dict(src="MG_LB_Walk_D4_Bounce__P01", loop=4, mirror=True, mode="inplace"),
     "Loco_Line_Side_Run": dict(src="MG_LB_Med_Run_s40_D3__P01", loop=4, **R),                        # 3.3 m/s right
     "Loco_Line_Side_Run_M": dict(src="MG_LB_Med_Run_s40_D3__P01", loop=4, mirror=True, **R),
     "Loco_Line_Crouch_Jog": dict(src="MG_NonBC_Crouch_Jog_158__P01", loop=4, **R),                   # 2.0 m/s
     # forward at a blocker's pace (the drive block after the set, 2-2.5 m/s): the crouch database had only the 4.4 m/s
     # crouched run going forward, and the search sped a lateral kick slide up for it
     "Loco_Line_Block_Walk": dict(src="MG_PASSBLOCK_WALK_D1__P01", loop=4, **R),
-    "Loco_Line_Bounce_Fwd": dict(src="MG_LB_Walk_D1_Bounce__P01", loop=4, **R),
-    "Loco_Line_Bounce_Side": dict(src="MG_LB_Walk_D3_Bounce__P01", loop=4, **R),
-    "Loco_Line_Bounce_Side_M": dict(src="MG_LB_Walk_D3_Bounce__P01", loop=4, mirror=True, **R),
-    "Loco_Line_Shuffle_Back": dict(src="MG_LB_Walk_D5_Shuffle__P01", loop=4, **R),
+    "Loco_Line_Bounce_Fwd": dict(src="MG_LB_Walk_D1_Bounce__P01", loop=4, mode="inplace"),
+    "Loco_Line_Bounce_Side": dict(src="MG_LB_Walk_D3_Bounce__P01", loop=4, mode="inplace"),
+    "Loco_Line_Bounce_Side_M": dict(src="MG_LB_Walk_D3_Bounce__P01", loop=4, mirror=True, mode="inplace"),
     # starts, stops, pivots and idles for the motion matching sets beside the sample's (PSD_TAG_*_Starts/Stops/Pivots,
     # PSD_TAG_Stand_Idles, PSD_TAG_Crouch_*): the pack's step clips, whole, with root motion
     "Loco_Start_Fwd": dict(src="Step_Loco_Start_Fwd_0_v1__P01", **R),
@@ -283,11 +285,9 @@ LOCO = {
     "Loco_Line_Start_Fwd90_M": dict(src="Step_Loco_Crouch_to_Fwd_90_Sprint_v1__P01", mirror=True, **R),
 }
 MAP.update(LOCO)
+# in-place bounces: the defenders' breakdown variants (not in any motion matching database)
+BREAKDOWNS = ['Loco_Line_Bounce_Back', 'Loco_Line_Bounce_Back_M', 'Loco_Line_Bounce_Fwd', 'Loco_Line_Bounce_Side', 'Loco_Line_Bounce_Side_M', 'Loco_Line_Back_Walk'] + ["Loco_Idle_Breakdown"]
 # which TAG PoseSearch database each locomotion clip joins (Tools/Art/mm_build_dbs.py)
-# clips kept out of the databases: captures whose men shuffle in place under a travelling trajectory, or whose feet
-# never plant (Tools/Art/mm_clip_plant.py: skate ratio, planted time), still imported for reference
-LOCO_SKATE = {"Loco_Line_Bounce_Back", "Loco_Line_Bounce_Back_M", "Loco_Line_Bounce_Fwd", "Loco_Line_Bounce_Side",
-              "Loco_Line_Bounce_Side_M", "Loco_Line_Back_Walk", "Loco_Line_Shuffle_Back"}  # 85-97 % skate
 LOCO_DB = {
     # the transitions (Decel_Sprint, Accel_*, Backpedal_To_Run) stay out of the loops: the sample's starts and stops
     # cover acceleration, and a 3 s decelerating clip in the sprint loops held a curving back for its whole length
@@ -298,11 +298,11 @@ LOCO_DB = {
             "Loco_Jog_Agile", "Loco_Jog_LB", "Loco_Run_Curve", "Loco_Line_BackDiag_Fast", "Loco_Line_BackDiag_Fast_M",
             "Loco_Line_Side_Run", "Loco_Line_Side_Run_M"],
     "Walk": ["Loco_Jog_Loop", "Loco_Walk_Loop", "Loco_Walk_Ready", "Loco_Walk_Back", "Loco_Walk_Back_Slow", "Loco_Walk_Side",
-             "Loco_Walk_Side_M", "Loco_Line_Back_Jog", "Loco_Line_Back_Walk", "Loco_Line_BackDiag_Walk", "Loco_Line_BackDiag_Walk_M",
-             "Loco_Line_BackDiag_Run", "Loco_Line_BackDiag_Run_M", "Loco_Line_Bounce_Back", "Loco_Line_Bounce_Back_M"],
-    "Crouch": [n for n in LOCO if n.startswith("Loco_Line_") and not n.startswith(("Loco_Line_Idle", "Loco_Line_Start"))],
+             "Loco_Walk_Side_M", "Loco_Line_Back_Jog", "Loco_Line_BackDiag_Walk", "Loco_Line_BackDiag_Walk_M",
+             "Loco_Line_BackDiag_Run", "Loco_Line_BackDiag_Run_M"],
+    "Crouch": [n for n in LOCO if n.startswith("Loco_Line_") and LOCO[n].get("mode") == "root" and not n.startswith(("Loco_Line_Start", "Loco_Line_Idle"))],
     # the sets beside the loops (TAG copies of the sample's, the pack's clips added)
-    "Stand_Idles": ["Loco_Idle_Neutral", "Loco_Idle_Neutral2", "Loco_Idle_LB", "Loco_Idle_WR_HandsUp"],  # (Breakdown hops: 9 % planted)
+    "Stand_Idles": ["Loco_Idle_Neutral", "Loco_Idle_Neutral2", "Loco_Idle_LB", "Loco_Idle_WR_HandsUp"],
     "Walk_Starts": ["Loco_Start_Fwd", "Loco_Start_Back", "Loco_Start_Diag", "Loco_Start_Diag_M"],
     "Run_Starts": ["Loco_Start_Fwd", "Loco_Start_Back", "Loco_Start_Side", "Loco_Start_Side_M", "Loco_Start_Diag", "Loco_Start_Diag_M",
                    "Loco_Start_Agile", "Loco_Boost_Run", "Loco_Accel_Jog"],
@@ -317,10 +317,14 @@ LOCO_DB = {
     "Sprint_Pivots": ["Loco_Pivot_Fwd_Back", "Loco_Pivot_Fwd_Fwd180", "Loco_Pivot_Fwd_Side90", "Loco_Pivot_Fwd_Side90_M", "Loco_Pivot_Fwd_Side180",
                       "Loco_Pivot_Fwd_Side180_M"],
     "Crouch_Idles": ["Loco_Line_Idle_Crouched"],
+    # the crouch stops and pivots (the sets' names follow the sample's databases the loader asks for)
+    "Crouch_Walk_Stops": ["Loco_Stop_Backpedal", "Loco_Line_KickSlide_L", "Loco_Line_KickSlide_R", "Loco_Line_Idle_Crouched"],
+    "Crouch_Walk_Pivots": ["Loco_Line_Start_Side", "Loco_Line_Start_Side_M", "Loco_Line_Start_SideIn", "Loco_Line_Start_SideIn_M",
+                           "Loco_Line_Start_Back", "Loco_Line_Start_Back_M", "Loco_Line_Crouch_Run_Diag", "Loco_Line_Crouch_Run_Diag_M",
+                           "Loco_Line_BackDiag_Run", "Loco_Line_BackDiag_Run_M"],
     "Crouch_Starts": ["Loco_Line_Start_Fwd", "Loco_Line_Start_Side", "Loco_Line_Start_Side_M", "Loco_Line_Start_SideIn", "Loco_Line_Start_SideIn_M",
                       "Loco_Line_Start_Back", "Loco_Line_Start_Back_M", "Loco_Line_Start_Fwd90", "Loco_Line_Start_Fwd90_M"],
 }
-LOCO_DB = {k: [n for n in v if n not in LOCO_SKATE] for k, v in LOCO_DB.items()}
 
 # the game's mirrored variants (FAthleteAssets::MirrorOf): <name>_M is <name> built with mirror flipped
 MIRRORED = ["Tackle_Wrap", "Tackle_High", "Tackle_Low", "Tackle_Dive", "Tackle_Shoulder", "Tackle_Arm", "Tackle_Assist",
