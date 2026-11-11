@@ -66,8 +66,12 @@ public:
 
 	/** Bench player in the team area: stands at Loc facing Yaw, idling (Variant picks the idle, side and timing). */
 	void StandOnSideline(const FVector& Loc, float Yaw, int32 Variant);
-	/** Sideline staff (chain crew, coaches): no helmet, facemask, pads or numbers; just the clothes and shoes. */
-	void SetCivilian();
+	/** Who a non-player is (model pack characters): chain crew, head coach, official, assistant coach, trainer. */
+	enum class ECivilian : uint8 { Generic, Crew, Coach, Official, Assistant, Trainer };
+	/** Sideline staff (chain crew, coaches, officials): no helmet, facemask, pads or numbers; just the clothes and
+	 *  shoes. With the model pack characters the role picks the person (crew vest, coach top in the team colour,
+	 *  official's stripes) and Index varies him. */
+	void SetCivilian(ECivilian Who = ECivilian::Generic, int32 Index = 0);
 	/** Bench reaction to a score: celebrate, or settle back into the idle. */
 	void SidelineCheer(bool bCheer);
 
@@ -184,6 +188,15 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USkeletalMeshComponent> MHFace;
 
+	/** Model pack helmet (shell, facemask, chin strap), skinned to the head: follows the body by leader pose. */
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<USkeletalMeshComponent> HeroHelmet;
+
+	/** Helmet on or off (model pack players): the hair shows when it is off. */
+	void SetHelmetOn(bool bOn);
+	/** A sideline cap (the pack's ball caps and visor hat) in place of the helmet. */
+	void WearCap(int32 Variant);
+
 	/** Facemask cage bars and shoulder-pad caps (created in Setup). */
 	UPROPERTY()
 	TArray<TObjectPtr<UStaticMeshComponent>> Gear;
@@ -278,6 +291,15 @@ private:
 	bool bEngaged = false;   // hands on an opponent (football layer reach), picks the engaged block loop
 	void StartRagdoll(const FVector& VelWorld);
 	void SetupMetaHuman(int32 Arch, const FUniform& U);
+	// model pack characters (FAthleteAssets::bHero): body (kit / coach / official / crew), head and helmet meshes on
+	// the pack's hero rig, retargeted from the hidden mannequin like the MetaHumans were
+	void SetupHero(const FUniform& U);
+	void DressHero(class USkeletalMesh* BodyMesh, class USkeletalMesh* HeadMesh, class USkeletalMesh* HelmetMesh, const FString& Rig);
+	void HideHair(bool bHide);
+	void PaintHero(const FUniform& U);
+	FUniform CurUniform{};
+	int32 HeroTone = 1;      // 1..8, the pack's skin tones (arms and legs match the head)
+	bool bHeroHelmetOn = true;
 	FVector VisRelScale = FVector::OneVector;
 	// smoothed football-layer weights
 	float CarryA = 0.f, SecureA = 0.f, ReachA = 0.f, LeanA = 0.f, StanceA = 0.f, StanceHandA = 0.f, LookA = 0.f;
@@ -316,10 +338,43 @@ struct FMHArchetype
 	float Depth = 1.f; // chest depth relative to the skill body (number placement)
 };
 
+/** One character mesh from the model pack catalog (Tools/Art/hero_import.py -> Content/TAG/Hero/hero_catalog.json). */
+struct FHeroItem
+{
+	FString Kind, Name, Path, Build, Style, Top, Shell, Rig, Weather;
+	int32 Tone = 1;
+	int32 Cells = 1;
+	float Height = 0.f;   // bind-pose height (cm); partial recipes (head only) are short
+	float Far = 0.f;      // share of vertices skinned to a bone > 60 cm away (a torn mesh in the pack scores high)
+	bool bHat = false;
+	bool bNoHead = false; // a coach "head" recipe with the cap and headset but no face
+	TObjectPtr<class USkeletalMesh> Mesh; // loaded (and rooted) on first use
+};
+
 /** Shared asset cache for athletes (loaded once). */
 struct FAthleteAssets
 {
 	static FAthleteAssets& Get();
+	/** Model pack characters (players, coaches, officials, crew, fans) replace the MetaHumans when the catalog is there
+	 *  (-TagNoHero for the MetaHumans). */
+	bool bHero = false;
+	TArray<FHeroItem> HeroItems;
+	TObjectPtr<class UIKRetargeter> HeroRetargeter;
+	TObjectPtr<class UIKRetargeter> CrowdRetargeter;
+	/** The runtime retargeter for a skeleton family (hero, crowd, male, female, child, sideplayer). */
+	class UIKRetargeter* RetargeterFor(const FString& Rig);
+	/** A clip baked for the people that stand around (Idle, Cheer, Clap, Kneel) on a skeleton family. */
+	UAnimationAsset* HeroClip(const FString& Rig, const TCHAR* Clip);
+	TMap<FString, TObjectPtr<class UIKRetargeter>> HeroRetargeters;
+	TMap<FString, TObjectPtr<UAnimationAsset>> HeroClips;
+	TArray<TObjectPtr<class UTexture>> HeroSkinArm, HeroSkinLegs, HeroEyes;
+	TArray<TObjectPtr<class UTexture>> HeroJerseyMasks, HeroPantsMasks, HeroHelmetMasks; // stripe layouts, one per team
+	float HeroHeightCm = 187.f;   // the pack rig's standing height (bind pose, head included)
+	int32 HeroWeather = 0;        // 0 warm, 1 cold, 2 rain (coach tops, officials); set by the director per game
+	bool LoadHero();
+	class USkeletalMesh* HeroMesh(int32 Index);
+	/** Indices of the catalog items of a kind (optionally filtered), in catalog order. */
+	TArray<int32> HeroOf(const TCHAR* Kind, TFunctionRef<bool(const FHeroItem&)> Pred = [](const FHeroItem&) { return true; }) const;
 	bool bLoaded = false;
 	bool bMocap = false; // Game Animation Sample (UEFN mannequin) assets available
 	bool bMetaHumans = false; // TAG MetaHuman bodies available (retargeted from the mocap)

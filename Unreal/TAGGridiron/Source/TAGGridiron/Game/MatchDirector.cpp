@@ -28,6 +28,10 @@
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
 #include "Kismet/GameplayStatics.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Engine/SkeletalMesh.h"
+#include "Animation/AnimSingleNodeInstance.h"
+#include "Materials/MaterialInstanceDynamic.h"
 #include "UnrealClient.h"
 #include "AssetCompilingManager.h"
 #if WITH_EDITOR
@@ -215,9 +219,176 @@ void AMatchDirector::BeginPlay()
 	}
 }
 
+/**
+ * -TagLineup -TagHeroGallery[=<Kind>]: every model pack character in the catalog, page by page (10 x 4, one kind per
+ * page), each in its bind-sized cell playing its skeleton family's idle, shot to tag_gallery_<kind>_<page>.png. After
+ * the pose settles each character's rendered bounds are checked against its bind-pose bounds: a body stretched by a
+ * skinning / retarget fault (the 100x pelvis kind) is logged "TAG gallery SUSPICIOUS". Exits when done.
+ */
+static bool TickHeroGallery(UWorld* World, ACineCameraActor* Camera, float Dt)
+{
+	static bool bOn = FParse::Param(FCommandLine::Get(), TEXT("TagHeroGallery")) || FCommandLine::Get() && FCString::Strifind(FCommandLine::Get(), TEXT("TagHeroGallery="));
+	if (!bOn || !World || !Camera) return false;
+	FAthleteAssets& A = FAthleteAssets::Get();
+	struct FPage { FString Kind; TArray<int32> Items; };
+	static TArray<FPage> Pages;
+	static int32 PageI = -1, Suspicious = 0, Shown = 0;
+	static float T = -3.f;
+	static TWeakObjectPtr<AActor> Holder;
+	static TArray<TWeakObjectPtr<USkeletalMeshComponent>> Comps;
+	static TArray<FVector> RefExt;
+	static bool bChecked = false;
+	if (PageI == -1)
+	{
+		FString Only;
+		FParse::Value(FCommandLine::Get(), TEXT("TagHeroGallery="), Only);
+		static const TCHAR* Order[] = {TEXT("Kit"), TEXT("Helmet"), TEXT("Cap"), TEXT("Head"), TEXT("CoachHead"), TEXT("CoachFull"), TEXT("Coach"), TEXT("Ref"),
+			TEXT("RefHead"), TEXT("Staff"), TEXT("SidePlayer"), TEXT("Crew"), TEXT("Fan"), TEXT("FanProp"), TEXT("Story")};
+		for (const TCHAR* K : Order)
+		{
+			if (!Only.IsEmpty() && Only != K) continue;
+			const TArray<int32> L = A.HeroOf(K);
+			for (int32 i = 0; i < L.Num(); i += 40)
+			{
+				FPage P;
+				P.Kind = K;
+				for (int32 j = i; j < FMath::Min(i + 40, L.Num()); ++j) P.Items.Add(L[j]);
+				Pages.Add(P);
+			}
+		}
+		PageI = 0;
+		UE_LOG(LogTemp, Display, TEXT("TAG gallery %d pages over %d catalog items"), Pages.Num(), A.HeroItems.Num());
+	}
+	T += Dt;
+	if (T < 0.f) return true;
+	if (PageI >= Pages.Num())
+	{
+		if (T > 1.f)
+		{
+			UE_LOG(LogTemp, Display, TEXT("TAG gallery done: %d characters shown, %d suspicious"), Shown, Suspicious);
+			FPlatformMisc::RequestExit(false);
+		}
+		return true;
+	}
+	if (Comps.Num() == 0)
+	{
+		// lay the page out: 10 columns x 4 rows in a wall facing the camera (-X), cells sized to the largest bind bounds
+		if (!Holder.IsValid())
+		{
+			AActor* H = World->SpawnActor<AActor>(AActor::StaticClass(), FTransform::Identity);
+			USceneComponent* R = NewObject<USceneComponent>(H, TEXT("Root"));
+			H->SetRootComponent(R);
+			R->RegisterComponent();
+			Holder = H;
+		}
+		const FPage& P = Pages[PageI];
+		float CW = 30.f, CH = 30.f;
+		for (int32 It : P.Items)
+			if (USkeletalMesh* M = A.HeroMesh(It))
+			{
+				const FBoxSphereBounds B = M->GetBounds();
+				CW = FMath::Max(CW, static_cast<float>(FMath::Max(B.BoxExtent.X, B.BoxExtent.Y)) * 2.f + 12.f);
+				CH = FMath::Max(CH, static_cast<float>(B.BoxExtent.Z) * 2.f + 12.f);
+			}
+		const FVector Wall(50 * YD + 600.f, 0, 0);
+		RefExt.Reset();
+		for (int32 k = 0; k < P.Items.Num(); ++k)
+		{
+			USkeletalMesh* M = A.HeroMesh(P.Items[k]);
+			if (!M) continue;
+			USkeletalMeshComponent* C = NewObject<USkeletalMeshComponent>(Holder.Get());
+			C->SetSkeletalMesh(M);
+			C->SetupAttachment(Holder->GetRootComponent());
+			C->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			C->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
+			C->RegisterComponent();
+			const FBoxSphereBounds B = M->GetBounds();
+			const int32 Col = k % 10, Row = k / 10;
+			const FVector Cell = Wall + FVector(0, (Col - 4.5f) * CW, 40.f + (3 - Row) * CH + CH * 0.5f);
+			const FRotator Rot(0, 90.f, 0); // the pack characters face +Y; this turns them to the camera
+			C->SetWorldRotation(Rot);
+			C->SetWorldLocation(Cell - Rot.RotateVector(B.Origin));
+			// a sample team (blue / gold) on every team-painted slot, as the game paints them
+			for (int32 Mi = 0; Mi < C->GetNumMaterials(); ++Mi)
+			{
+				float Mode = 0.f;
+				UMaterialInterface* Cur = C->GetMaterial(Mi);
+				if (!Cur || !Cur->GetScalarParameterValue(FHashedMaterialParameterInfo(TEXT("Mode")), Mode) || Mode < 0.5f) continue;
+				if (UMaterialInstanceDynamic* D = C->CreateDynamicMaterialInstance(Mi))
+				{
+					const bool bBottom = C->GetMaterialSlotNames().IsValidIndex(Mi) && C->GetMaterialSlotNames()[Mi].ToString().StartsWith(TEXT("Bottom"));
+					D->SetVectorParameterValue(TEXT("Tint"), bBottom ? FLinearColor(0.55f, 0.47f, 0.33f) : FLinearColor(0.05f, 0.18f, 0.6f));
+					D->SetVectorParameterValue(TEXT("Trim"), FLinearColor(0.9f, 0.65f, 0.05f));
+					D->SetVectorParameterValue(TEXT("Trim2"), FLinearColor(0.05f, 0.18f, 0.6f));
+				}
+			}
+			const FString Rig = A.HeroItems[P.Items[k]].Rig;
+			const bool bWhole = !(P.Kind == TEXT("Head") || P.Kind == TEXT("CoachHead") || P.Kind == TEXT("RefHead") || P.Kind == TEXT("Helmet") ||
+				P.Kind == TEXT("Cap") || P.Kind == TEXT("FanProp"));
+			if (bWhole)
+				if (UAnimationAsset* Idle = A.HeroClip(Rig, TEXT("Idle")))
+				{
+					C->PlayAnimation(Idle, true);
+					if (UAnimSingleNodeInstance* I = C->GetSingleNodeInstance()) I->SetPosition(FMath::Frac(k * 0.37f) * Idle->GetPlayLength(), false);
+				}
+			Comps.Add(C);
+			RefExt.Add(B.BoxExtent);
+		}
+		const float WallW = 10 * CW, WallH = 4 * CH;
+		const float Dist = FMath::Max(WallW * 0.62f, WallH * 1.05f) + 150.f;
+		Camera->SetActorLocation(Wall + FVector(-Dist, 0, 40.f + WallH * 0.5f));
+		Camera->SetActorRotation(FRotator::ZeroRotator);
+		if (UCineCameraComponent* Cc = Camera->GetCineCameraComponent())
+		{
+			Cc->CurrentFocalLength = 24.f;
+			Cc->FocusSettings.ManualFocusDistance = Dist;
+		}
+		T = 0.f;
+		bChecked = false;
+		UE_LOG(LogTemp, Display, TEXT("TAG gallery page %d %s: %d items (cell %.0f x %.0f cm)"), PageI, *P.Kind, Comps.Num(), CW, CH);
+		return true;
+	}
+	if (!bChecked && T > 1.8f)
+	{
+		bChecked = true;
+		const FPage& P = Pages[PageI];
+		for (int32 k = 0; k < Comps.Num(); ++k)
+		{
+			USkeletalMeshComponent* C = Comps[k].Get();
+			if (!C) continue;
+			++Shown;
+			const FVector E = C->Bounds.BoxExtent;
+			const FVector R = RefExt[k];
+			const float Grow = static_cast<float>(FMath::Max3(E.X / FMath::Max(R.X, 5.0), E.Y / FMath::Max(R.Y, 5.0), E.Z / FMath::Max(R.Z, 5.0)));
+			if (E.GetMax() > R.GetMax() * 1.6 + 40.0 || !FMath::IsFinite(E.X))
+			{
+				++Suspicious;
+				UE_LOG(LogTemp, Warning, TEXT("TAG gallery SUSPICIOUS %s (%s): bounds %s vs bind %s (x%.1f)"), *A.HeroItems[P.Items[k]].Name, *P.Kind,
+					*E.ToCompactString(), *R.ToCompactString(), Grow);
+			}
+		}
+		FScreenshotRequest::RequestScreenshot(FString::Printf(TEXT("tag_gallery_%s_%02d.png"), *P.Kind, PageI), false, false);
+	}
+	if (T > 2.6f)
+	{
+		for (TWeakObjectPtr<USkeletalMeshComponent>& C : Comps)
+			if (C.IsValid()) C->DestroyComponent();
+		Comps.Reset();
+		++PageI;
+		T = 0.f;
+	}
+	return true;
+}
+
 void AMatchDirector::TickLineup(float Dt)
 {
 	LineupT += Dt;
+	if (Lineup.Num() > 0 && TickHeroGallery(GetWorld(), Camera, Dt))
+	{
+		for (AAthlete* L : Lineup)
+			if (L) L->SetActorHiddenInGame(true);
+		return;
+	}
 	if (Lineup.Num() == 0)
 	{
 		const tag::Pos Pick[] = {tag::Pos::OT, tag::Pos::DE, tag::Pos::LB, tag::Pos::RB, tag::Pos::WR, tag::Pos::QB};
@@ -1250,6 +1421,8 @@ void AMatchDirector::BuildWorld(const tag::Team& Home, const tag::Team& Away, co
 	for (auto& KV : Athletes)
 		if (KV.Value) KV.Value->Destroy();
 	Athletes.Empty();
+	// model pack people dress for the weather: coaches' polo / windbreaker / rain jacket, officials' sleeves, fans
+	FAthleteAssets::Get().HeroWeather = W.precip != tag::Precip::None ? 2 : W.tempF < 50.0 ? 1 : 0;
 	Stadium = GetWorld()->SpawnActor<AStadium>(AStadium::StaticClass(), FTransform::Identity);
 	Stadium->Build(Home, Away, W, bNight);
 	SpawnSidelines(Home, Away);
@@ -1294,7 +1467,8 @@ void AMatchDirector::SpawnSidelines(const tag::Team& Home, const tag::Team& Away
 	// chain crew (orange shirts, black trousers) on the rods and the down box, and a head coach in each team's colours
 	{
 		OfficialPeople.clear();
-		auto Staff = [&](int32 Id, double HeightIn, double WeightLb, const FLinearColor& Top, const FLinearColor& Bottom)
+		auto Staff = [&](int32 Id, double HeightIn, double WeightLb, const FLinearColor& Top, const FLinearColor& Bottom,
+			AAthlete::ECivilian Who, int32 Index)
 		{
 			auto P = std::make_unique<tag::Player>();
 			P->id = 900000 + Id;
@@ -1306,7 +1480,7 @@ void AMatchDirector::SpawnSidelines(const tag::Team& Home, const tag::Team& Away
 			AAthlete* A = GetWorld()->SpawnActor<AAthlete>(AAthlete::StaticClass(), FTransform::Identity);
 			A->TickAfter(this);
 			A->Setup(P.get(), U);
-			A->SetCivilian();
+			A->SetCivilian(Who, Index);
 			OfficialPeople.push_back(std::move(P));
 			Officials.Add(A);
 			return A;
@@ -1315,16 +1489,29 @@ void AMatchDirector::SpawnSidelines(const tag::Team& Home, const tag::Team& Away
 		for (int32 k = 0; k < 3; ++k)
 			if (USceneComponent* Post = Stadium ? Stadium->CrewPost(k) : nullptr)
 			{
-				AAthlete* A = Staff(k, 70 + k * 2, 185 + k * 15, Orange, Black);
+				AAthlete* A = Staff(k, 70 + k * 2, 185 + k * 15, Orange, Black, AAthlete::ECivilian::Crew, k);
 				A->StandOnSideline(Post->GetComponentTransform().TransformPosition(FVector(-40, 14, 0)), -90.f, 3 * k);
 				A->AttachToComponent(Post, FAttachmentTransformRules::KeepWorldTransform);
 			}
-		AAthlete* HC = Staff(5, 72, 210, Hex(Home.colors.primary) * 0.8f, Khaki);
+		AAthlete* HC = Staff(5, 72, 210, Hex(Home.colors.primary) * 0.8f, Khaki, AAthlete::ECivilian::Coach, Home.id);
 		HC->StandOnSideline(FVector(46 * YD, (tag::FIELD_W / 2 + 1.7) * YD, 0), -90.f, 1);
-		AAthlete* AC = Staff(6, 70, 200, Hex(Away.colors.primary) * 0.8f, Khaki);
+		AAthlete* AC = Staff(6, 70, 200, Hex(Away.colors.primary) * 0.8f, Khaki, AAthlete::ECivilian::Coach, Away.id);
 		AC->StandOnSideline(FVector(54 * YD, -(tag::FIELD_W / 2 + 1.7) * YD, 0), 90.f, 4);
+		// each team area also has an assistant coach by the head coach and a trainer at the end of the bench (the
+		// model pack's sideline people; the stand-in bodies have nobody to show)
+		if (FAthleteAssets::Get().bHero)
+			for (int32 T = 0; T < 2; ++T)
+			{
+				const double Side = T == 0 ? 1.0 : -1.0;
+				const double CoachX = T == 0 ? 46.0 : 54.0;
+				const FLinearColor Col = Hex((T == 0 ? Home : Away).colors.primary) * 0.8f;
+				AAthlete* As = Staff(10 + T, 71, 205, Col, Khaki, AAthlete::ECivilian::Assistant, T);
+				As->StandOnSideline(FVector((CoachX - Side * 3.0) * YD, Side * (tag::FIELD_W / 2 + 2.2) * YD, 0), Side > 0 ? -100.f : 80.f, 6 + T);
+				AAthlete* Tr = Staff(12 + T, 70, 190, Col, Khaki, AAthlete::ECivilian::Trainer, T);
+				Tr->StandOnSideline(FVector((T == 0 ? 31.0 : 69.0) * YD, Side * (tag::FIELD_W / 2 + 3.4) * YD, 0), Side > 0 ? -60.f : 120.f, 8 + T);
+			}
 		// the umpire (white cap, striped shirt reads as white at distance) works from the offensive backfield
-		Umpire = Staff(7, 71, 195, FLinearColor(0.85f, 0.85f, 0.85f), Black);
+		Umpire = Staff(7, 71, 195, FLinearColor(0.85f, 0.85f, 0.85f), Black, AAthlete::ECivilian::Official, 0);
 		UmpPos = FVector(50 * YD, 8 * YD, 0);
 		Umpire->StandOnSideline(UmpPos, -90.f, 2);
 	}
@@ -1404,8 +1591,13 @@ void AMatchDirector::QuitToMenu()
 
 void AMatchDirector::StartMatch(int HomeIdx, int AwayIdx, bool bUserPlays, bool bUserHome, int WeatherKind, bool bNight, double QuarterLen)
 {
-	tag::Rng R(static_cast<uint32_t>(FMath::Rand()) * 2654435761u + 17u);
+	// -TagWeatherSeed=<n>: the same weather every run (like-for-like performance comparisons)
+	int32 WeatherSeed = -1;
+	FParse::Value(FCommandLine::Get(), TEXT("TagWeatherSeed="), WeatherSeed);
+	tag::Rng R(static_cast<uint32_t>(WeatherSeed >= 0 ? WeatherSeed : FMath::Rand()) * 2654435761u + 17u);
 	tag::Weather W = tag::randomWeather(R);
+	UE_LOG(LogTemp, Display, TEXT("TAG weather: %s, %.0f F, wind %.1f yd/s"), W.precip == tag::Precip::Rain ? TEXT("rain") : W.precip == tag::Precip::Snow ? TEXT("snow") : TEXT("dry"),
+		W.tempF, FMath::Sqrt(W.windX * W.windX + W.windY * W.windY));
 	switch (WeatherKind)
 	{
 	case 1: W.precip = tag::Precip::None; W.windX *= 0.4; W.windY *= 0.4; W.tempF = FMath::Max(50.0, W.tempF); break;

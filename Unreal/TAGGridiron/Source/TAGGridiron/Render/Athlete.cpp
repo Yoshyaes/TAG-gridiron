@@ -1,4 +1,5 @@
 #include "Render/Athlete.h"
+#include "Algo/Sort.h"
 
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -7,9 +8,13 @@
 #include "Animation/BlendSpace.h"
 #include "Animation/AnimSequence.h"
 #include "Engine/SkeletalMesh.h"
+#include "Rendering/SkeletalMeshRenderData.h"
+#include "Rendering/SkeletalMeshLODRenderData.h"
 #include "Engine/StaticMesh.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "PhysicsEngine/PhysicsAsset.h"
+#include "PhysicsEngine/SkeletalBodySetup.h"
+#include "PhysicsEngine/PhysicsConstraintTemplate.h"
 #include "Engine/Texture.h"
 #include "Misc/CommandLine.h"
 #include "Misc/PackageName.h"
@@ -242,8 +247,11 @@ void FAthleteAssets::Load()
 		// -TagNoMM for the blend spaces, e.g. to A/B)
 		if (!FParse::Param(FCommandLine::Get(), TEXT("TagNoMM"))) LoadMotionMatching();
 
+		// model pack characters (Tools/Art/hero_*.py), driven by runtime IK retargeting like the MetaHumans were
+		if (!FParse::Param(FCommandLine::Get(), TEXT("TagNoHero"))) bHero = LoadHero();
+		UE_LOG(LogTemp, Display, TEXT("TAG: model pack characters %s (%d in the catalog)"), bHero ? TEXT("enabled") : TEXT("unavailable (Tools/Art/hero_import.py)"), HeroItems.Num());
 		// MetaHuman bodies (built by Tools/Art/mh_create.py), driven by runtime IK retargeting.
-		if (!FParse::Param(FCommandLine::Get(), TEXT("TagNoMH")))
+		if (!bHero && !FParse::Param(FCommandLine::Get(), TEXT("TagNoMH")))
 		{
 			// 0 OL, 1 skill (RB/WR/DB), 2 big (LB/TE/FB), 3 defensive line, 4 lean (QB/K/P). 0-2 are required;
 			// 3 and 4 are optional and ArchetypeFor falls back until mh_create.py has built them.
@@ -806,6 +814,118 @@ bool FAthleteAssets::MotionMatchReady()
 	return true;
 }
 
+bool FAthleteAssets::LoadHero()
+{
+	FString Text;
+	const FString File = FPaths::ProjectContentDir() / TEXT("TAG/Hero/hero_catalog.json");
+	if (!FFileHelper::LoadFileToString(Text, *File)) return false;
+	TSharedPtr<FJsonObject> Root;
+	if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Text), Root) || !Root.IsValid()) return false;
+	HeroItems.Reset();
+	const TArray<TSharedPtr<FJsonValue>>* Items = nullptr;
+	if (Root->TryGetArrayField(TEXT("items"), Items))
+		for (const TSharedPtr<FJsonValue>& V : *Items)
+		{
+			const TSharedPtr<FJsonObject> O = V.IsValid() ? V->AsObject() : nullptr;
+			if (!O.IsValid()) continue;
+			FHeroItem I;
+			I.Kind = O->GetStringField(TEXT("kind"));
+			I.Name = O->GetStringField(TEXT("name"));
+			I.Path = O->GetStringField(TEXT("path"));
+			O->TryGetStringField(TEXT("build"), I.Build);
+			O->TryGetStringField(TEXT("style"), I.Style);
+			O->TryGetStringField(TEXT("top"), I.Top);
+			O->TryGetStringField(TEXT("shell"), I.Shell);
+			O->TryGetNumberField(TEXT("tone"), I.Tone);
+			O->TryGetNumberField(TEXT("cells"), I.Cells);
+			O->TryGetBoolField(TEXT("hat"), I.bHat);
+			O->TryGetStringField(TEXT("rig"), I.Rig);
+			O->TryGetStringField(TEXT("weather"), I.Weather);
+			O->TryGetNumberField(TEXT("height"), I.Height);
+			O->TryGetNumberField(TEXT("far"), I.Far);
+			O->TryGetBoolField(TEXT("nohead"), I.bNoHead);
+			if (I.Rig.IsEmpty()) I.Rig = TEXT("hero");
+			I.Tone = FMath::Clamp(I.Tone, 1, 8);
+			HeroItems.Add(MoveTemp(I));
+		}
+	auto Textures = [&Root](const TCHAR* Field, TArray<TObjectPtr<UTexture>>& Out)
+	{
+		const TArray<TSharedPtr<FJsonValue>>* L = nullptr;
+		if (Root->TryGetArrayField(Field, L))
+			for (const TSharedPtr<FJsonValue>& V : *L)
+				Out.Add(LoadAsset<UTexture>(*V->AsString(), false));
+	};
+	Textures(TEXT("skin_arm"), HeroSkinArm);
+	Textures(TEXT("skin_legs"), HeroSkinLegs);
+	Textures(TEXT("eyes"), HeroEyes);
+	const TSharedPtr<FJsonObject>* Masks = nullptr;
+	if (Root->TryGetObjectField(TEXT("masks"), Masks))
+		for (TPair<const TCHAR*, TArray<TObjectPtr<UTexture>>*> M : {TPair<const TCHAR*, TArray<TObjectPtr<UTexture>>*>(TEXT("Jersey"), &HeroJerseyMasks),
+			TPair<const TCHAR*, TArray<TObjectPtr<UTexture>>*>(TEXT("Pants"), &HeroPantsMasks), TPair<const TCHAR*, TArray<TObjectPtr<UTexture>>*>(TEXT("Helmet"), &HeroHelmetMasks)})
+		{
+			const TArray<TSharedPtr<FJsonValue>>* L = nullptr;
+			if ((*Masks)->TryGetArrayField(M.Key, L))
+				for (const TSharedPtr<FJsonValue>& V : *L)
+					if (UTexture* T = LoadAsset<UTexture>(*V->AsString(), false)) M.Value->Add(T);
+		}
+	HeroRetargeter = LoadAsset<UIKRetargeter>(TEXT("/Game/TAG/Hero/Rig/RTG_TAG_UEFN_to_Hero.RTG_TAG_UEFN_to_Hero"), false);
+	CrowdRetargeter = LoadAsset<UIKRetargeter>(TEXT("/Game/TAG/Hero/Rig/RTG_TAG_UEFN_to_Crowd.RTG_TAG_UEFN_to_Crowd"), false);
+	const bool bOk = HeroRetargeter && HeroOf(TEXT("Kit")).Num() && HeroOf(TEXT("Head")).Num() && HeroOf(TEXT("Helmet")).Num();
+	if (const UPhysicsAsset* PA = LoadObject<UPhysicsAsset>(nullptr, TEXT("/Game/TAG/Hero/Rig/SKM_TAG_HeroRig_PhysicsAsset.SKM_TAG_HeroRig_PhysicsAsset"), nullptr, LOAD_NoWarn | LOAD_Quiet))
+	{
+		FString Bones;
+		for (const USkeletalBodySetup* B : PA->SkeletalBodySetups)
+			if (B) Bones += B->BoneName.ToString() + TEXT(" ");
+		UE_LOG(LogTemp, Display, TEXT("TAG: model pack ragdoll %d bodies, %d constraints: %s"), PA->SkeletalBodySetups.Num(), PA->ConstraintSetup.Num(), *Bones);
+	}
+	UE_LOG(LogTemp, Display, TEXT("TAG: model pack catalog %d items: kits %d, heads %d, helmets %d, coaches %d+%d, officials %d, crew %d, fans %d"),
+		HeroItems.Num(), HeroOf(TEXT("Kit")).Num(), HeroOf(TEXT("Head")).Num(), HeroOf(TEXT("Helmet")).Num(), HeroOf(TEXT("Coach")).Num(),
+		HeroOf(TEXT("CoachHead")).Num(), HeroOf(TEXT("Ref")).Num(), HeroOf(TEXT("Crew")).Num(), HeroOf(TEXT("Fan")).Num());
+	return bOk;
+}
+
+UIKRetargeter* FAthleteAssets::RetargeterFor(const FString& Rig)
+{
+	if (Rig == TEXT("hero") || Rig.IsEmpty()) return HeroRetargeter;
+	if (Rig == TEXT("crowd")) return CrowdRetargeter;
+	if (const TObjectPtr<UIKRetargeter>* R = HeroRetargeters.Find(Rig)) return *R;
+	static const TMap<FString, FString> Tags = {{TEXT("male"), TEXT("Male")}, {TEXT("female"), TEXT("Female")}, {TEXT("child"), TEXT("Child")},
+		{TEXT("sideplayer"), TEXT("SidePlayer")}};
+	const FString* T = Tags.Find(Rig);
+	UIKRetargeter* R = T ? LoadAsset<UIKRetargeter>(*FString::Printf(TEXT("/Game/TAG/Hero/Rig/RTG_TAG_UEFN_to_%s.RTG_TAG_UEFN_to_%s"), **T, **T), false) : nullptr;
+	HeroRetargeters.Add(Rig, R);
+	return R ? R : HeroRetargeter.Get();
+}
+
+UAnimationAsset* FAthleteAssets::HeroClip(const FString& Rig, const TCHAR* Clip)
+{
+	static const TMap<FString, FString> Prefix = {{TEXT("hero"), TEXT("Hero")}, {TEXT("crowd"), TEXT("Fan")}, {TEXT("male"), TEXT("Male")},
+		{TEXT("female"), TEXT("Female")}, {TEXT("child"), TEXT("Child")}, {TEXT("sideplayer"), TEXT("SidePlayer")}};
+	const FString* P = Prefix.Find(Rig.IsEmpty() ? FString(TEXT("hero")) : Rig);
+	if (!P) return nullptr;
+	const FString Key = *P + TEXT("_") + Clip;
+	if (const TObjectPtr<UAnimationAsset>* A = HeroClips.Find(Key)) return *A;
+	UAnimationAsset* A = LoadAsset<UAnimationAsset>(*FString::Printf(TEXT("/Game/TAG/Hero/Crowd/Anims/A_%s.A_%s"), *Key, *Key), false);
+	HeroClips.Add(Key, A);
+	return A;
+}
+
+USkeletalMesh* FAthleteAssets::HeroMesh(int32 Index)
+{
+	if (!HeroItems.IsValidIndex(Index)) return nullptr;
+	FHeroItem& I = HeroItems[Index];
+	if (!I.Mesh) I.Mesh = LoadAsset<USkeletalMesh>(*I.Path);
+	return I.Mesh;
+}
+
+TArray<int32> FAthleteAssets::HeroOf(const TCHAR* Kind, TFunctionRef<bool(const FHeroItem&)> Pred) const
+{
+	TArray<int32> Out;
+	for (int32 i = 0; i < HeroItems.Num(); ++i)
+		if (HeroItems[i].Kind == Kind && Pred(HeroItems[i])) Out.Add(i);
+	return Out;
+}
+
 int32 FAthleteAssets::ArchetypeFor(int32 PosIndex)
 {
 	const FAthleteAssets& A = Get();
@@ -927,9 +1047,9 @@ void AAthlete::Setup(const tag::Player* InPlayer, const FUniform& U)
 		StyleJitter = static_cast<float>((H >> 18) % 1000) / 500.f - 1.f;
 	}
 	float Depth = 1.f;
-	if (A.bMetaHumans)
+	if (A.bHero || A.bMetaHumans)
 	{
-		// the mannequin only plays the mocap now; the MetaHuman is what you see
+		// the mannequin only plays the mocap now; the model pack character (or MetaHuman) is what you see
 		Body->SetRelativeScale3D(FVector::OneVector);
 		Body->SetForcedLOD(1);
 		if (FParse::Param(FCommandLine::Get(), TEXT("TagShowSource")))
@@ -943,8 +1063,15 @@ void AAthlete::Setup(const tag::Player* InPlayer, const FUniform& U)
 			Body->SetVisibility(false);
 			Body->SetCastShadow(false);
 		}
-		SetupMetaHuman(Arch, U);
-		Depth = A.MH[Arch].Depth;
+		if (A.bHero)
+		{
+			SetupHero(U);
+		}
+		else
+		{
+			SetupMetaHuman(Arch, U);
+			Depth = A.MH[Arch].Depth;
+		}
 	}
 	else
 	{
@@ -1086,6 +1213,15 @@ void AAthlete::Setup(const tag::Player* InPlayer, const FUniform& U)
 			AddGear(A.Sphere, *FootN.ToString(), Rel.GetLocation(), Rel.Rotator(), FVector(0.115f, 0.30f, 0.12f), ShoeMat);
 		}
 	}
+	if (A.bHero)
+	{
+		// the pack's helmet, pads (in the jersey), cleats and gloves are part of the character: no stand-in gear
+		for (UStaticMeshComponent* C : {Helmet.Get(), Facemask.Get(), Pads.Get()})
+			if (C) C->SetVisibility(false);
+		for (UStaticMeshComponent* G : Gear)
+			if (G) G->DestroyComponent();
+		Gear.Reset();
+	}
 	Ring->SetStaticMesh(A.Cylinder);
 	Ring->SetRelativeScale3D(FVector(1.3f, 1.3f, 0.01f));
 	Ring->SetRelativeLocation(FVector(0, 0, 1));
@@ -1183,6 +1319,249 @@ void AAthlete::SetupMetaHuman(int32 Arch, const FUniform& U)
 				*Pelvis.ToString(), *Neck.ToString(), *Knee.ToString(), *Ankle.ToString(), *Shoulder.ToString(), *Elbow.ToString(), *Hand.ToString(), *Thigh.ToString());
 		}
 	}
+}
+
+void AAthlete::SetupHero(const FUniform& U)
+{
+	FAthleteAssets& A = FAthleteAssets::Get();
+	using tag::Pos;
+	const Pos P = Player ? Player->pos : Pos::WR;
+	const bool bLine = P == Pos::OT || P == Pos::OG || P == Pos::C || P == Pos::DE || P == Pos::DT;
+	const double Lb = Player ? Player->weightLb : 215.0;
+	// body type from the build (the pack's thin / default / muscular / heavy), gear from the position
+	const FString Build = (bLine || Lb >= 275.0) ? TEXT("h") : Lb >= 235.0 ? TEXT("m") : Lb >= 200.0 ? TEXT("d") : TEXT("t");
+	const FString Style = (bLine || P == Pos::TE || P == Pos::FB) ? TEXT("line") : P == Pos::QB ? TEXT("qb")
+		: (P == Pos::K || P == Pos::P) ? TEXT("kick") : TEXT("skill");
+	const FString Mask = bLine ? TEXT("cage") : (P == Pos::RB || P == Pos::FB || P == Pos::TE || P == Pos::LB) ? TEXT("std")
+		: (P == Pos::K || P == Pos::P) ? TEXT("kick") : TEXT("open");
+	const uint32 H = (Player ? static_cast<uint32>(Player->id) : 7u) * 2654435761u;
+	TArray<int32> Kits = A.HeroOf(TEXT("Kit"), [&](const FHeroItem& I) { return I.Build == Build && I.Style == Style; });
+	if (!Kits.Num()) Kits = A.HeroOf(TEXT("Kit"), [&](const FHeroItem& I) { return I.Build == Build; });
+	if (!Kits.Num()) Kits = A.HeroOf(TEXT("Kit"));
+	TArray<int32> Helmets = A.HeroOf(TEXT("Helmet"), [&](const FHeroItem& I) { return I.Style == Mask; });
+	if (!Helmets.Num()) Helmets = A.HeroOf(TEXT("Helmet"));
+	const TArray<int32> Heads = A.HeroOf(TEXT("Head"));
+	const int32 Head = Heads.Num() ? Heads[(H >> 5) % Heads.Num()] : INDEX_NONE;
+	HeroTone = Head != INDEX_NONE ? A.HeroItems[Head].Tone : 4;
+	DressHero(Kits.Num() ? A.HeroMesh(Kits[(H >> 9) % Kits.Num()]) : nullptr, A.HeroMesh(Head),
+		Helmets.Num() ? A.HeroMesh(Helmets[(H >> 13) % Helmets.Num()]) : nullptr, TEXT("hero"));
+	SetHelmetOn(true);
+	PaintHero(U);
+}
+
+void AAthlete::DressHero(USkeletalMesh* BodyMesh, USkeletalMesh* HeadMesh, USkeletalMesh* HelmetMesh, const FString& Rig)
+{
+	FAthleteAssets& A = FAthleteAssets::Get();
+	if (!BodyMesh) return;
+	if (!MHBody)
+	{
+		MHBody = NewObject<USkeletalMeshComponent>(this, TEXT("MHBody"));
+		MHBody->SetupAttachment(Root);
+		MHBody->RegisterComponent();
+		AddInstanceComponent(MHBody);
+	}
+	if (!MHFace)
+	{
+		MHFace = NewObject<USkeletalMeshComponent>(this, TEXT("MHFace"));
+		MHFace->SetupAttachment(MHBody);
+		MHFace->RegisterComponent();
+		AddInstanceComponent(MHFace);
+	}
+	if (!HeroHelmet)
+	{
+		HeroHelmet = NewObject<USkeletalMeshComponent>(this, TEXT("HeroHelmet"));
+		HeroHelmet->SetupAttachment(MHBody);
+		HeroHelmet->RegisterComponent();
+		AddInstanceComponent(HeroHelmet);
+	}
+	// a new body (a staff role, another rig) gets a fresh retarget instance for its skeleton
+	MHBody->SetAnimInstanceClass(nullptr);
+	MHBody->SetSkeletalMesh(BodyMesh);
+	MHBody->EmptyOverrideMaterials();
+	MHBody->SetRelativeLocationAndRotation(FVector::ZeroVector, FRotator(0, -90, 0)); // the pack characters face +Y
+	const float HeightCm = Player && Player->heightIn > 0 ? static_cast<float>(Player->heightIn * 2.54) : A.HeroHeightCm;
+	VisRelScale = FVector(FMath::Clamp(HeightCm / A.HeroHeightCm, 0.93f, 1.08f));
+	MHBody->SetRelativeScale3D(VisRelScale);
+	MHBody->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	MHBody->bCastDynamicShadow = true;
+	MHBody->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
+	static const bool bRefPose = FParse::Param(FCommandLine::Get(), TEXT("TagHeroRefPose")); // debug: the bind pose, no retarget
+	if (!bRefPose) MHBody->SetAnimInstanceClass(UTagRetargetAnimInstance::StaticClass());
+	if (UTagRetargetAnimInstance* RI = Cast<UTagRetargetAnimInstance>(MHBody->GetAnimInstance()))
+		RI->Configure(A.RetargeterFor(Rig), Body);
+	MHBody->AddTickPrerequisiteComponent(Body); // mocap pose first, then retarget
+	// head and helmet: same skeleton, they wear the body's pose
+	USkeletalMeshComponent* Comps[2] = {MHFace.Get(), HeroHelmet.Get()};
+	USkeletalMesh* Meshes[2] = {HeadMesh, HelmetMesh};
+	for (int32 k = 0; k < 2; ++k)
+	{
+		USkeletalMeshComponent* C = Comps[k];
+		C->SetAnimInstanceClass(nullptr);
+		C->SetSkeletalMesh(Meshes[k]);
+		C->EmptyOverrideMaterials();
+		C->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		C->bCastDynamicShadow = true;
+		C->SetVisibility(Meshes[k] != nullptr);
+		C->SetLeaderPoseComponent(Meshes[k] ? MHBody.Get() : nullptr, true);
+	}
+	bFaceOnLeader = true;
+	bMaterialNumbers = false;
+}
+
+void AAthlete::SetHelmetOn(bool bOn)
+{
+	bHeroHelmetOn = bOn;
+	if (HeroHelmet) HeroHelmet->SetVisibility(bOn && HeroHelmet->GetSkeletalMeshAsset() != nullptr);
+	HideHair(bOn);
+}
+
+void AAthlete::WearCap(int32 Variant)
+{
+	FAthleteAssets& A = FAthleteAssets::Get();
+	const TArray<int32> Caps = A.HeroOf(TEXT("Cap"));
+	if (!Caps.Num() || !HeroHelmet || !MHBody) return;
+	HeroHelmet->SetSkeletalMesh(A.HeroMesh(Caps[Variant % Caps.Num()]));
+	HeroHelmet->EmptyOverrideMaterials();
+	HeroHelmet->SetLeaderPoseComponent(MHBody.Get(), true);
+	HeroHelmet->SetVisibility(true);
+	bHeroHelmetOn = false;
+	HideHair(true); // the cap sits over the hair
+}
+
+void AAthlete::HideHair(bool bHide)
+{
+	// the hair (not the cap of short hair painted on the scalp) would show through a helmet or a cap
+	const bool bOn = bHide;
+	USkeletalMesh* M = MHFace ? MHFace->GetSkeletalMeshAsset() : nullptr;
+	FSkeletalMeshRenderData* RD = M ? M->GetResourceForRendering() : nullptr;
+	if (!RD) return;
+	const TArray<FSkeletalMaterial>& Mats = M->GetMaterials();
+	for (int32 L = 0; L < RD->LODRenderData.Num(); ++L)
+		for (int32 S = 0; S < RD->LODRenderData[L].RenderSections.Num(); ++S)
+		{
+			const int32 Mi = RD->LODRenderData[L].RenderSections[S].MaterialIndex;
+			if (Mats.IsValidIndex(Mi) && Mats[Mi].MaterialSlotName == FName(TEXT("Hair")))
+				MHFace->ShowMaterialSection(Mi, S, !bOn, L);
+		}
+}
+
+/** True when a slot's material paints a team colour over a placeholder (the hero master's colour Mode 2). */
+static bool TeamPainted(USkeletalMeshComponent* C, const FName& Slot)
+{
+	const int32 I = C ? C->GetMaterialIndex(Slot) : INDEX_NONE;
+	UMaterialInterface* M = I != INDEX_NONE ? C->GetMaterial(I) : nullptr;
+	float Mode = 0.f;
+	return M && M->GetScalarParameterValue(FHashedMaterialParameterInfo(TEXT("Mode")), Mode) && Mode > 1.5f && Mode < 2.5f;
+}
+
+void AAthlete::PaintHero(const FUniform& U)
+{
+	FAthleteAssets& A = FAthleteAssets::Get();
+	CurUniform = U;
+	auto Each = [](USkeletalMeshComponent* C, TFunctionRef<void(const FName&, TFunctionRef<UMaterialInstanceDynamic*()>)> Fn)
+	{
+		if (!C || !C->GetSkeletalMeshAsset()) return;
+		const TArray<FSkeletalMaterial>& Mats = C->GetSkeletalMeshAsset()->GetMaterials();
+		for (int32 i = 0; i < Mats.Num(); ++i)
+			Fn(Mats[i].MaterialSlotName, [C, i]() { return C->CreateDynamicMaterialInstance(i); });
+	};
+	const int32 Tone = FMath::Clamp(HeroTone, 1, 8) - 1;
+	UTexture* Arm = A.HeroSkinArm.IsValidIndex(Tone) ? A.HeroSkinArm[Tone].Get() : nullptr;
+	UTexture* Legs = A.HeroSkinLegs.IsValidIndex(Tone) ? A.HeroSkinLegs[Tone].Get() : nullptr;
+	const bool bKit = MHBody && MHBody->GetSkeletalMeshAsset() && MHBody->GetSkeletalMeshAsset()->GetName().StartsWith(TEXT("Kit_"));
+	// numbers are placed from this body's bind pose (neck height, the torso's front / back divide)
+	float NeckZ = 157.f, TorsoY = 0.f;
+	if (MHBody && MHBody->GetSkeletalMeshAsset())
+	{
+		const FReferenceSkeleton& R = MHBody->GetSkeletalMeshAsset()->GetRefSkeleton();
+		if (R.FindBoneIndex(TEXT("neck_01")) != INDEX_NONE && R.FindBoneIndex(TEXT("pelvis")) != INDEX_NONE)
+		{
+			const FVector Neck = RefBonePos(R, TEXT("neck_01")), Pelvis = RefBonePos(R, TEXT("pelvis"));
+			NeckZ = Neck.Z;
+			TorsoY = 0.5f * (Neck.Y + Pelvis.Y);
+		}
+	}
+	// the team's stripe layouts (the pack's uniform sets), fixed per team: picked from its colours
+	const uint32 TeamHash = GetTypeHash(U.Jersey.ToFColor(true).ToPackedARGB()) ^ (GetTypeHash(U.Helmet.ToFColor(true).ToPackedARGB()) * 31u);
+	auto MaskFor = [TeamHash](const TArray<TObjectPtr<UTexture>>& L, uint32 Salt) -> UTexture*
+	{
+		return L.Num() ? L[((TeamHash >> 3) + Salt) % L.Num()].Get() : nullptr;
+	};
+	UTexture* JerseyMask = MaskFor(A.HeroJerseyMasks, 0), *PantsMask = nullptr, *HelmetMask = MaskFor(A.HeroHelmetMasks, 5);
+	if (JerseyMask && A.HeroPantsMasks.Num() == A.HeroJerseyMasks.Num()) PantsMask = A.HeroPantsMasks[A.HeroJerseyMasks.IndexOfByKey(JerseyMask)];
+	const tag::Pos P = Player ? Player->pos : tag::Pos::WR;
+	const bool bDarkGloves = P == tag::Pos::OT || P == tag::Pos::OG || P == tag::Pos::C || P == tag::Pos::DE || P == tag::Pos::DT || P == tag::Pos::TE;
+	Each(MHBody, [&](const FName& Slot, TFunctionRef<UMaterialInstanceDynamic*()> Mid)
+	{
+		if (Slot == TEXT("Skin") && Arm && (bKit || MHFace->GetSkeletalMeshAsset())) Mid()->SetTextureParameterValue(TEXT("BaseColor"), Arm);
+		else if (Slot == TEXT("SkinLegs") && Legs) Mid()->SetTextureParameterValue(TEXT("BaseColor"), Legs);
+		else if (Slot == TEXT("Jersey"))
+		{
+			UMaterialInstanceDynamic* M = Mid();
+			M->SetVectorParameterValue(TEXT("Tint"), U.Jersey);
+			M->SetVectorParameterValue(TEXT("Trim"), U.Trim);
+			M->SetVectorParameterValue(TEXT("Trim2"), U.Trim);
+			if (JerseyMask) M->SetTextureParameterValue(TEXT("Mask"), JerseyMask);
+			M->SetVectorParameterValue(TEXT("NumColor"), U.Number);
+			M->SetScalarParameterValue(TEXT("Number"), Player ? static_cast<float>(Player->number) : 0.f);
+			M->SetScalarParameterValue(TEXT("NumOn"), Player && Player->number > 0 ? 1.f : 0.f);
+			M->SetScalarParameterValue(TEXT("NeckZ"), NeckZ);
+			M->SetScalarParameterValue(TEXT("TorsoY"), TorsoY);
+			bMaterialNumbers = true;
+		}
+		else if (Slot == TEXT("Pants") && bKit)
+		{
+			// the side stripe in whichever team colour stands out on the pants (gold trim vanished on gold pants)
+			auto Dist = [](const FLinearColor& X, const FLinearColor& Y) { return FMath::Abs(X.R - Y.R) + FMath::Abs(X.G - Y.G) + FMath::Abs(X.B - Y.B); };
+			const bool bJerseyEdge = Dist(U.Jersey, U.Pants) > Dist(U.Trim, U.Pants);
+			UMaterialInstanceDynamic* M = Mid();
+			M->SetVectorParameterValue(TEXT("Tint"), U.Pants);
+			M->SetVectorParameterValue(TEXT("Trim"), bJerseyEdge ? U.Jersey : U.Trim);
+			M->SetVectorParameterValue(TEXT("Trim2"), bJerseyEdge ? U.Trim : U.Jersey);
+			if (PantsMask) M->SetTextureParameterValue(TEXT("Mask"), PantsMask);
+		}
+		else if (Slot == TEXT("Socks")) Mid()->SetVectorParameterValue(TEXT("Tint"), U.Jersey);
+		else if (Slot == TEXT("Hands") && bKit && !bDarkGloves) Mid()->SetVectorParameterValue(TEXT("Tint"), U.Jersey * 0.85f);
+		else if (!bKit && TeamPainted(MHBody, Slot))
+		{
+			// coach / staff clothing the pack leaves in placeholder colours: tops and caps in the team colour, the
+			// trousers in the bottom colour
+			UMaterialInstanceDynamic* M = Mid();
+			M->SetVectorParameterValue(TEXT("Tint"), Slot.ToString().StartsWith(TEXT("Bottom")) ? U.Pants : U.Jersey);
+			M->SetVectorParameterValue(TEXT("Trim"), U.Trim);
+		}
+	});
+	Each(HeroHelmet, [&](const FName& Slot, TFunctionRef<UMaterialInstanceDynamic*()> Mid)
+	{
+		if (Slot == TEXT("Shell"))
+		{
+			UMaterialInstanceDynamic* M = Mid();
+			// stripe colours that stand out on the shell (a trim close to the helmet colour vanished)
+			auto D = [](const FLinearColor& X, const FLinearColor& Y) { return FMath::Abs(X.R - Y.R) + FMath::Abs(X.G - Y.G) + FMath::Abs(X.B - Y.B); };
+			FLinearColor Cand[4] = {U.Trim, U.Number, U.Jersey, U.Pants};
+			Algo::Sort(Cand, [&](const FLinearColor& X, const FLinearColor& Y) { return D(X, U.Helmet) > D(Y, U.Helmet); });
+			static TSet<uint32> GLoggedTeams;
+			if (!GLoggedTeams.Contains(TeamHash))
+			{
+				GLoggedTeams.Add(TeamHash);
+				UE_LOG(LogTemp, Display, TEXT("TAG uniform layout: helmet %s (shell %s, stripe %s), jersey %s, pants %s"), *GetNameSafe(HelmetMask),
+					*U.Helmet.ToFColor(true).ToHex(), *Cand[0].ToFColor(true).ToHex(), *GetNameSafe(JerseyMask), *GetNameSafe(PantsMask));
+			}
+			M->SetVectorParameterValue(TEXT("Tint"), U.Helmet);
+			M->SetVectorParameterValue(TEXT("Trim"), Cand[0]);
+			M->SetVectorParameterValue(TEXT("Trim2"), D(Cand[1], Cand[0]) > 0.3f ? Cand[1] : FLinearColor(0.92f, 0.92f, 0.92f));
+			if (HelmetMask) M->SetTextureParameterValue(TEXT("Mask"), HelmetMask);
+		}
+	});
+	Each(MHFace, [&](const FName& Slot, TFunctionRef<UMaterialInstanceDynamic*()> Mid)
+	{
+		if (TeamPainted(MHFace, Slot))
+		{
+			UMaterialInstanceDynamic* M = Mid();
+			M->SetVectorParameterValue(TEXT("Tint"), U.Jersey);
+			M->SetVectorParameterValue(TEXT("Trim"), U.Trim);
+		}
+	});
 }
 
 void AAthlete::PlayOneShot(UAnimationAsset* Clip)
@@ -1704,6 +2083,12 @@ void AAthlete::StandOnSideline(const FVector& Loc, float Yaw, int32 Variant)
 		bFaceOnLeader = true;
 	}
 	if (MHBody) MHBody->bEnableUpdateRateOptimizations = true;
+	// model pack players: about four in ten on the bench have the helmet off
+	if (FAthleteAssets::Get().bHero && HeroHelmet && HeroHelmet->GetSkeletalMeshAsset() && Player && Player->id < 900000)
+	{
+		SetHelmetOn(FMath::Frac(Variant * 0.618f + 0.11f) >= 0.4f);
+		if (!bHeroHelmetOn && Variant % 3 == 0) WearCap(Variant / 3); // some wear a cap on the bench
+	}
 	SidelineCheer(false);
 }
 
@@ -1835,8 +2220,65 @@ void AAthlete::BeginSoloFall(const FVector& SimLoc, const FVector& MoveDirW)
 	BeginPairedFall(Clip, Here, Here + (Want - Here).GetClampedToMaxSize2D(150.f), GetActorRotation().Yaw, 0.35f, 0.7f, false);
 }
 
-void AAthlete::SetCivilian()
+void AAthlete::SetCivilian(ECivilian Who, int32 Index)
 {
+	FAthleteAssets& A = FAthleteAssets::Get();
+	if (A.bHero && Who != ECivilian::Generic)
+	{
+		const int32 W = A.HeroWeather; // 0 warm, 1 cold, 2 rain
+		const uint32 H = static_cast<uint32>(Index + 1) * 2654435761u;
+		auto Pick = [&](const TCHAR* Kind, TFunctionRef<bool(const FHeroItem&)> Pred) -> int32
+		{
+			TArray<int32> L = A.HeroOf(Kind, Pred);
+			if (!L.Num()) L = A.HeroOf(Kind);
+			return L.Num() ? L[(H >> 7) % L.Num()] : INDEX_NONE;
+		};
+		const TCHAR* Weather = W == 2 ? TEXT("rain") : W == 1 ? TEXT("cold") : TEXT("warm");
+		USkeletalMesh* BodyM = nullptr;
+		int32 HeadI = INDEX_NONE;
+		int32 BodyI = INDEX_NONE;
+		FString Rig = TEXT("hero");
+		if (Who == ECivilian::Coach)
+		{
+			// every coach character of the pack is in the rotation: a named coach in his own warm / cold clothes, or a
+			// coach body (coach-referee polo / windbreaker / rain jacket, create-a-coach outfits) with one of the heads
+			const FString Wx = W == 0 ? TEXT("warm") : TEXT("cold");
+			const FString Top = W == 2 ? TEXT("rainjacket") : W == 1 ? TEXT("windbreaker") : TEXT("poloshirt");
+			if ((H >> 3) % 2 == 0)
+			{
+				BodyI = Pick(TEXT("CoachFull"), [&](const FHeroItem& I) { return I.Weather == Wx; });
+			}
+			if (BodyI == INDEX_NONE)
+			{
+				BodyI = Pick(TEXT("Coach"), [&](const FHeroItem& I) { return I.Top == Top || (I.Top.IsEmpty() && I.Weather == Wx); });
+				HeadI = Pick(TEXT("CoachHead"), [](const FHeroItem& I) { return !I.bNoHead; });
+			}
+			BodyM = A.HeroMesh(BodyI);
+		}
+		else if (Who == ECivilian::Official)
+		{
+			BodyM = A.HeroMesh(Pick(TEXT("Ref"), [&](const FHeroItem& I) { return I.Name.EndsWith(W == 0 ? TEXT("warm") : TEXT("cold")); }));
+			HeadI = Pick(TEXT("RefHead"), [](const FHeroItem&) { return true; });
+		}
+		else
+		{
+			// crowd rig people: the chain crew carry their own rods and down box
+			const TCHAR* Part = Who == ECivilian::Crew ? (Index >= 2 ? TEXT("chaingangdownmarker") : TEXT("chaingangscrimage"))
+				: Who == ECivilian::Assistant ? (Index % 2 ? TEXT("asstcoachnegative") : TEXT("asstcoachpositive"))
+				: (Index % 2 ? TEXT("teamtrainernegative") : TEXT("teamtrainerpositive"));
+			int32 I = Pick(TEXT("Crew"), [&](const FHeroItem& It) { return It.Name.Contains(Part) && It.Name.Contains(Weather); });
+			if (I == INDEX_NONE || !A.HeroItems[I].Name.Contains(Part)) I = Pick(TEXT("Crew"), [&](const FHeroItem& It) { return It.Name.Contains(Part); });
+			BodyM = A.HeroMesh(I);
+			Rig = TEXT("crowd");
+		}
+		if (BodyM)
+		{
+			// arms in the head's skin tone (coaches' and officials' arms use the players' tone textures)
+			HeroTone = HeadI != INDEX_NONE ? A.HeroItems[HeadI].Tone : BodyI != INDEX_NONE ? A.HeroItems[BodyI].Tone : 4;
+			DressHero(BodyM, A.HeroMesh(HeadI), nullptr, Rig);
+			PaintHero(CurUniform);
+		}
+	}
 	for (UStaticMeshComponent* C : {Helmet.Get(), Facemask.Get(), Pads.Get()})
 		if (C) C->SetVisibility(false);
 	for (UStaticMeshComponent* C : Gear)
@@ -2624,6 +3066,33 @@ FString AAthlete::DebugAnimState() const
 			Fb = FString::Printf(TEXT(" | throw=%.2f carry=%.2f secure=%.2f reach=%.2f@%s lean=%.2f look=%.2f handR=%s"),
 				RI->Proc.ThrowT, RI->Proc.CarryAlpha, RI->Proc.SecureAlpha, RI->Proc.ReachAlpha, *RI->Proc.ReachTarget.ToCompactString(),
 				RI->Proc.LeanAlpha, RI->Proc.LookAlpha, *MHBody->GetComponentTransform().InverseTransformPosition(MHBody->GetSocketLocation(TEXT("hand_r"))).ToCompactString());
+	if (MHBody && MHBody->GetSkeletalMeshAsset() && FAthleteAssets::Get().bHero)
+	{
+		// model pack body: a spread of bone heights (component space) and the mesh, to check the skinning frame
+		Fb += FString::Printf(TEXT(" | hero %s"), *MHBody->GetSkeletalMeshAsset()->GetName());
+		{
+			const TArray<FTransform>& CS = MHBody->GetComponentSpaceTransforms();
+			int32 Hi = 0, Sc = 0, Lo = 0;
+			for (int32 i = 1; i < CS.Num(); ++i)
+			{
+				if (CS[i].GetLocation().Z > CS[Hi].GetLocation().Z) Hi = i;
+				if (CS[i].GetLocation().Z < CS[Lo].GetLocation().Z) Lo = i;
+				if (CS[i].GetScale3D().GetAbsMax() > CS[Sc].GetScale3D().GetAbsMax() || CS[i].GetScale3D().GetAbsMin() < CS[Sc].GetScale3D().GetAbsMin()) Sc = i;
+			}
+			if (CS.Num())
+				Fb += FString::Printf(TEXT(" top=%s %.0f low=%s %.0f scale=%s %s"), *MHBody->GetBoneName(Hi).ToString(), CS[Hi].GetLocation().Z,
+					*MHBody->GetBoneName(Lo).ToString(), CS[Lo].GetLocation().Z, *MHBody->GetBoneName(Sc).ToString(), *CS[Sc].GetScale3D().ToCompactString());
+		}
+		for (const TCHAR* Bn : {TEXT("root"), TEXT("pelvis"), TEXT("spine_05"), TEXT("thigh_l"), TEXT("calf_l"), TEXT("foot_l"), TEXT("upperarm_l"), TEXT("RM_LeftUpLegTwist1"), TEXT("RM_BackPads"), TEXT("helmetPlacement")})
+		{
+			const int32 Bi = MHBody->GetBoneIndex(Bn);
+			if (Bi != INDEX_NONE && MHBody->GetComponentSpaceTransforms().IsValidIndex(Bi))
+			{
+				const FTransform& T = MHBody->GetComponentSpaceTransforms()[Bi];
+				Fb += FString::Printf(TEXT(" %s=%.0f/%.2f"), Bn, T.GetLocation().Z, T.GetScale3D().GetMax());
+			}
+		}
+	}
 	if (const UTagMotionMatchInstance* M = MatchInstance())
 		if (bInMatch) Fb += FString::Printf(TEXT(" | mm=%s gait=%d tsm=%.2f at=%.2f cost=%.3f clip=%.0f mul=%.2f"), *GetNameSafe(M->GetMatchedAsset()), MMGait, M->TrajectorySpeedMultiplier,
 			M->MatchedTime, M->MatchedCost, M->MatchedClipSpeed, M->SpeedRate);

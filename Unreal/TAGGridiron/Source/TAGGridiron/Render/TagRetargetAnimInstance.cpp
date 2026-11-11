@@ -6,6 +6,8 @@
 #include "Animation/AnimNodeBase.h"
 #include "BonePose.h"
 #include "TwoBoneIK.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(TagRetargetAnimInstance)
 
@@ -82,6 +84,7 @@ bool FTagRetargetProxy::Evaluate(FPoseContext& Output)
 	ApplyLean(Output);
 	ApplyCrossfade(Output);
 	ApplyFeet(Output); // on the shown pose, after the blend (a blended foot would slide through every transition)
+	ApplyTwist(Output);
 	const int32 N = Output.Pose.GetNumBones();
 	LastPose.SetNum(N, EAllowShrinking::No);
 	for (FCompactPoseBoneIndex I(0); I < N; ++I) LastPose[I.GetInt()] = Output.Pose[I];
@@ -97,6 +100,73 @@ void FTagRetargetProxy::PostUpdate(UAnimInstance* InAnimInstance) const
 		I->SlideRaw += SlideRawFrame;
 		I->SlideShown += SlideShownFrame;
 		I->Touchdowns += TouchdownsFrame;
+	}
+}
+
+void FTagRetargetProxy::ApplyTwist(FPoseContext& Output)
+{
+	static const bool bOff = FParse::Param(FCommandLine::Get(), TEXT("TagNoTwist"));
+	if (bOff) return;
+	const FBoneContainer& BC = Output.Pose.GetBoneContainer();
+	const void* Mesh = BC.GetSkeletalMeshAsset();
+	if (Mesh != TwistMesh)
+	{
+		TwistMesh = Mesh;
+		Twists.Reset();
+		const FReferenceSkeleton& R = BC.GetReferenceSkeleton();
+		const TArray<FTransform>& RefPose = R.GetRefBonePose();
+		struct FSet { const TCHAR* Bone; const TCHAR* Parent; const TCHAR* Ref; bool bCounter; int32 Count; };
+		static const FSet Sets[] = {
+			{TEXT("ForeArmTwist"), TEXT("lowerarm_"), TEXT("hand_"), false, 3},
+			{TEXT("ArmTwist"), TEXT("upperarm_"), TEXT("lowerarm_"), true, 3},
+			{TEXT("LegTwist"), TEXT("calf_"), TEXT("foot_"), false, 2},
+			{TEXT("UpLegTwist"), TEXT("thigh_"), TEXT("calf_"), true, 3}};
+		for (const FSet& Set : Sets)
+			for (const TCHAR* Side : {TEXT("l"), TEXT("r")})
+			{
+				const TCHAR* Long = Side[0] == 'l' ? TEXT("Left") : TEXT("Right");
+				const int32 P = R.FindBoneIndex(FName(*(FString(Set.Parent) + Side)));
+				const int32 Q = R.FindBoneIndex(FName(*(FString(Set.Ref) + Side)));
+				if (P == INDEX_NONE || Q == INDEX_NONE) continue;
+				const FVector Axis = RefPose[Q].GetTranslation(); // the limb, in the parent's frame
+				for (int32 k = 1; k <= Set.Count; ++k)
+				{
+					const int32 B = R.FindBoneIndex(FName(*(FString(TEXT("RM_")) + Long + Set.Bone + FString::FromInt(k))));
+					if (B == INDEX_NONE || R.GetParentIndex(B) != P || Axis.SizeSquared() < 1e-6f) continue;
+					FTwistBone T;
+					T.Bone = B;
+					T.Parent = P;
+					T.Ref = Q;
+					T.Along = FMath::Clamp(static_cast<float>(FVector::DotProduct(RefPose[B].GetTranslation(), Axis) / Axis.SizeSquared()), 0.f, 1.f);
+					T.bCounter = Set.bCounter;
+					Twists.Add(T);
+				}
+			}
+	}
+	if (!Twists.Num()) return;
+	for (const FTwistBone& T : Twists)
+	{
+		const FCompactPoseBoneIndex B = BC.MakeCompactPoseIndex(FMeshPoseBoneIndex(T.Bone));
+		const FCompactPoseBoneIndex P = BC.MakeCompactPoseIndex(FMeshPoseBoneIndex(T.Parent));
+		const FCompactPoseBoneIndex Q = BC.MakeCompactPoseIndex(FMeshPoseBoneIndex(T.Ref));
+		if (B.GetInt() == INDEX_NONE || P.GetInt() == INDEX_NONE || Q.GetInt() == INDEX_NONE) continue;
+		FQuat Swing, Twist;
+		if (!T.bCounter)
+		{
+			// the hand's (foot's) turn about the forearm (calf), in the forearm's frame, shared out along it
+			const FVector Axis = Output.Pose.GetRefPose(Q).GetTranslation().GetSafeNormal();
+			const FQuat Delta = Output.Pose[Q].GetRotation() * Output.Pose.GetRefPose(Q).GetRotation().Inverse();
+			Delta.ToSwingTwist(Axis, Swing, Twist);
+			Output.Pose[B].SetRotation((FQuat::Slerp(FQuat::Identity, Twist, T.Along) * Output.Pose.GetRefPose(B).GetRotation()).GetNormalized());
+		}
+		else
+		{
+			// the upper arm's (thigh's) own turn about itself, held back near the shoulder (hip)
+			const FVector Axis = Output.Pose.GetRefPose(Q).GetTranslation().GetSafeNormal();
+			const FQuat Delta = Output.Pose.GetRefPose(P).GetRotation().Inverse() * Output.Pose[P].GetRotation();
+			Delta.ToSwingTwist(Axis, Swing, Twist);
+			Output.Pose[B].SetRotation((FQuat::Slerp(FQuat::Identity, Twist.Inverse(), 1.f - T.Along) * Output.Pose.GetRefPose(B).GetRotation()).GetNormalized());
+		}
 	}
 }
 

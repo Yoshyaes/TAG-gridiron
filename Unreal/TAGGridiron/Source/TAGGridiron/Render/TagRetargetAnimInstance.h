@@ -75,6 +75,12 @@ private:
 	void ApplyLean(FPoseContext& Output) const;
 	void ApplyFeet(FPoseContext& Output);
 	void ApplyCrossfade(FPoseContext& Output);
+	/** Model pack bodies: the forearm / calf twist helpers take their share of the hand / foot turn and the upper arm /
+	 *  thigh helpers hold back the limb's own turn near the shoulder / hip (the pack rig's skinning expects it). */
+	void ApplyTwist(FPoseContext& Output);
+	struct FTwistBone { int32 Bone = INDEX_NONE, Parent = INDEX_NONE, Ref = INDEX_NONE; float Along = 0.f; bool bCounter = false; };
+	TArray<FTwistBone> Twists;      // mesh pose indices, resolved once per mesh
+	const void* TwistMesh = nullptr;
 	struct FFootLock
 	{
 		bool bLocked = false, bWasLow = false, bHadRaw = false, bHadShown = false;

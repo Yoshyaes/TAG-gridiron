@@ -64,6 +64,18 @@ private:
 	/** 3D spectators (MetaHuman Crowd Sample merged meshes) in the lowest rows of the sideline stands, idling and
 	 *  cheering with Hype. Superseded by the Mass fan spawner (TagFanSpawner); kept as a fallback. */
 	void BuildHeroCrowd(const FVector& StandC, float Yaw);
+	/** Model pack spectators (crowd rig) in the given seats; false when the pack characters are not in. */
+	bool BuildPackFans(const TArray<FTransform>& Seats, const tag::Team& Home, const tag::Team& Away);
+	/** Model pack sideline people that stand and idle (media crews, photographers, coordinators, sideline players). */
+	void BuildPackSideline(const tag::Team& Home, const tag::Team& Away);
+	class USkeletalMeshComponent* AddStaticPerson(int32 Item, int32 HeadItem, const FVector& Rel, float FaceYaw, const FLinearColor& Team,
+		const FLinearColor& Bottom, bool bKneel, int32 Seed);
+	UPROPERTY()
+	TArray<TObjectPtr<class USkeletalMeshComponent>> SidelinePeople;
+	UPROPERTY()
+	TArray<TObjectPtr<class UAnimationAsset>> FanIdles;   // per fan (the clip for its skeleton family)
+	UPROPERTY()
+	TArray<TObjectPtr<class UAnimationAsset>> FanCheers;
 	void UpdateHeroCrowd(float Dt);
 
 	UPROPERTY()
@@ -75,6 +87,8 @@ private:
 	TObjectPtr<class UAnimationAsset> FanIdle;
 	UPROPERTY()
 	TObjectPtr<class UAnimationAsset> FanCheer;
+	UPROPERTY()
+	TObjectPtr<class UAnimationAsset> FanClap;
 	UPROPERTY()
 	TArray<TObjectPtr<class USkeletalMesh>> FanMeshes;
 	/** Mass crowd (TagFanSpawner): cheer on Hype by swapping the close-up crowd actors' body to the keyed cheer. */

@@ -539,9 +539,14 @@ void AStadium::Build(const tag::Team& Home, const tag::Team& Away, const tag::We
 					Seats.Add(FTransform(FRotator(0, FaceYaw + Rand.FRandRange(-14, 14), 0), GetActorTransform().TransformPosition(Feet)));
 				}
 		}
-		FActorSpawnParameters SP;
-		SP.Owner = this;
-		if (ATagFanSpawner* FanSpawner = GetWorld()->SpawnActor<ATagFanSpawner>(ATagFanSpawner::StaticClass(), FTransform::Identity, SP))
+		// model pack spectators when the pack characters are in (one skeletal mesh per fan on the 29 bone crowd rig,
+		// dressed in the home or visiting colours); the Mass MetaHuman crowd otherwise
+		if (BuildPackFans(Seats, Home, Away))
+		{
+			UE_LOG(LogTemp, Display, TEXT("TAG: model pack fans %d in %d seats"), Fans.Num(), Seats.Num());
+		}
+		else if (ATagFanSpawner* FanSpawner = [this]() { FActorSpawnParameters SP; SP.Owner = this;
+			return GetWorld()->SpawnActor<ATagFanSpawner>(ATagFanSpawner::StaticClass(), FTransform::Identity, SP); }())
 		{
 			const bool bOk = FanSpawner->Setup(Seats);
 			if (bOk) FanSpawner->SpawnFans();
@@ -552,6 +557,7 @@ void AStadium::Build(const tag::Team& Home, const tag::Team& Away, const tag::We
 	}
 	if (!A.CrowdMat) BuildCrowd(Home);
 	BuildOfficials();
+	BuildPackSideline(Home, Away);
 	// sideline benches & personnel area tint
 	// team benches (home on the far sideline, visitors near): seat, backrest and a team-colour skirt
 	for (double S : {-1.0, 1.0})
@@ -718,6 +724,218 @@ bool AStadium::LoadFanMeshes()
 	return FanMeshes.Num() > 0;
 }
 
+USkeletalMeshComponent* AStadium::AddStaticPerson(int32 Item, int32 HeadItem, const FVector& Rel, float FaceYaw, const FLinearColor& Team,
+	const FLinearColor& Bottom, bool bKneel, int32 Seed)
+{
+	FAthleteAssets& A = FAthleteAssets::Get();
+	USkeletalMesh* M = A.HeroMesh(Item);
+	if (!M) return nullptr;
+	const FString Rig = A.HeroItems[Item].Rig;
+	UAnimationAsset* Clip = A.HeroClip(Rig, bKneel ? TEXT("Kneel") : TEXT("Idle"));
+	USkeletalMeshComponent* P = NewObject<USkeletalMeshComponent>(this);
+	P->SetSkeletalMesh(M);
+	P->SetupAttachment(RootComponent);
+	P->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	P->bCastDynamicShadow = true;
+	P->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::OnlyTickPoseWhenRendered;
+	P->bEnableUpdateRateOptimizations = true;
+	P->RegisterComponent();
+	P->SetRelativeLocationAndRotation(Rel, FRotator(0, FaceYaw - 90.f, 0)); // the pack characters face +Y
+	// team colour on placeholder clothing (recolour slots) and on the untextured sideline players
+	auto Paint = [&](USkeletalMeshComponent* C)
+	{
+		for (int32 Mi = 0; Mi < C->GetNumMaterials(); ++Mi)
+		{
+			float Mode = 0.f;
+			UMaterialInterface* Cur = C->GetMaterial(Mi);
+			const FString Slot = Mi < C->GetMaterialSlotNames().Num() ? C->GetMaterialSlotNames()[Mi].ToString() : FString();
+			const bool bRecolour = Cur && Cur->GetScalarParameterValue(FHashedMaterialParameterInfo(TEXT("Mode")), Mode) && Mode > 1.5f && Mode < 2.5f;
+			const bool bFlatTeam = A.HeroItems[Item].Kind == TEXT("SidePlayer"); // region-painted uniform (Mode 4)
+			if (!bRecolour && !bFlatTeam) continue;
+			if (UMaterialInstanceDynamic* Mid = C->CreateDynamicMaterialInstance(Mi))
+			{
+				Mid->SetVectorParameterValue(TEXT("Tint"), Slot.StartsWith(TEXT("Bottom")) ? Bottom : Team);
+				Mid->SetVectorParameterValue(TEXT("Trim"), bFlatTeam ? Bottom : Team); // neon placeholder pixels take the team colour
+				Mid->SetVectorParameterValue(TEXT("Trim2"), Team);                     // a sideline player's helmet
+			}
+		}
+	};
+	Paint(P);
+	if (USkeletalMesh* HM = A.HeroMesh(HeadItem))
+	{
+		USkeletalMeshComponent* Hc = NewObject<USkeletalMeshComponent>(this);
+		Hc->SetSkeletalMesh(HM);
+		Hc->SetupAttachment(P);
+		Hc->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		Hc->RegisterComponent();
+		Hc->SetLeaderPoseComponent(P);
+		Paint(Hc);
+	}
+	if (Clip)
+	{
+		P->PlayAnimation(Clip, !bKneel); // the kneel holds its last frame
+		if (UAnimSingleNodeInstance* I = P->GetSingleNodeInstance())
+		{
+			if (!bKneel) I->SetPosition(FMath::Frac(Seed * 0.618f) * Clip->GetPlayLength(), false);
+			I->SetPlayRate(0.9f + FMath::Frac(Seed * 0.37f) * 0.2f);
+		}
+	}
+	SidelinePeople.Add(P);
+	return P;
+}
+
+void AStadium::BuildPackSideline(const tag::Team& Home, const tag::Team& Away)
+{
+	FAthleteAssets& A = FAthleteAssets::Get();
+	if (!A.bHero || FParse::Param(FCommandLine::Get(), TEXT("TagNoPackSideline"))) return;
+	const TCHAR* Wx = A.HeroWeather == 2 ? TEXT("rain") : A.HeroWeather == 1 ? TEXT("cold") : TEXT("warm");
+	const FString Top = A.HeroWeather == 2 ? TEXT("rainjacket") : A.HeroWeather == 1 ? TEXT("windbreaker") : TEXT("poloshirt");
+	auto Of = [&](const TCHAR* Token) -> TArray<int32>
+	{
+		TArray<int32> L = A.HeroOf(TEXT("Crew"), [&](const FHeroItem& I) { return I.Name.Contains(Token) && I.Name.Contains(Wx); });
+		if (!L.Num()) L = A.HeroOf(TEXT("Crew"), [&](const FHeroItem& I) { return I.Name.Contains(Token); });
+		return L;
+	};
+	const TArray<int32> Heads = A.HeroOf(TEXT("CoachHead"), [](const FHeroItem& I) { return !I.bNoHead; });
+	const FLinearColor Grey(0.2f, 0.2f, 0.22f), Khaki(0.55f, 0.47f, 0.33f), Black(0.03f, 0.03f, 0.035f);
+	const double Edge = FW / 2;
+	int32 Seed = Home.id * 13 + Away.id;
+	auto Put = [&](const TArray<int32>& L, int32 k, double Xyd, double Yyd, float Face, bool bKneel = false)
+	{
+		if (L.Num()) AddStaticPerson(L[k % L.Num()], INDEX_NONE, FVector(Xyd * YD, Yyd * YD, 0), Face, Grey, Black, bKneel, ++Seed);
+	};
+	// photographers behind both end lines (standing, on monopods, kneeling), facing up the field
+	const TArray<int32> Slr = Of(TEXT("handheldslr")), Mono = Of(TEXT("monopodslr_")), Kneel = Of(TEXT("monopodslrkneeling"));
+	for (int32 End = 0; End < 2; ++End)
+	{
+		const double X = End ? 112.5 : -12.5;
+		const float Face = End ? 180.f : 0.f;
+		for (int32 k = 0; k < 4; ++k) Put(Slr, k + End * 4, X + (End ? 0.6 : -0.6) * (k % 2), -14.0 + k * 9.0, Face);
+		Put(Mono, End, X, 10.0 * (End ? -1 : 1), Face);
+		Put(Kneel, End, X + (End ? -0.8 : 0.8), 3.0 * (End ? 1 : -1), Face, true);
+	}
+	// broadcast crews on the near sideline outside the team area: steadicam, handheld video, parabolic audio dish
+	const TArray<int32> Steadi = Of(TEXT("steadicam")), Video = Of(TEXT("broadcastvideo")), Dish = Of(TEXT("audiodish"));
+	const double NearY = -(Edge + 3.0);
+	Put(Steadi, 0, 22.0, NearY, 90.f);
+	Put(Video, 0, 26.0, NearY - 0.4, 90.f);
+	Put(Dish, 0, 74.0, NearY, 90.f);
+	Put(Steadi, 1, 78.0, NearY - 0.3, 90.f);
+	Put(Video, 1, 12.0, Edge + 3.2, -90.f);
+	Put(Dish, 1, 88.0, Edge + 3.2, -90.f);
+	// TV camera operators (media vests) by the far-side 20s
+	const TArray<int32> Tv = A.HeroOf(TEXT("Staff"), [](const FHeroItem& I) { return I.Name.Contains(TEXT("tvcameraman")); });
+	for (int32 k = 0; k < Tv.Num(); ++k)
+		AddStaticPerson(Tv[k], Heads.Num() ? Heads[(Seed + k * 5) % Heads.Num()] : INDEX_NONE, FVector((20.0 + k * 60.0) * YD, (Edge + 3.6) * YD, 0), -90.f, Grey, Black, false, ++Seed);
+	// coordinators with headsets beside each head coach (the pack's coordinator outfits in the team colour)
+	const TArray<int32> Coord = A.HeroOf(TEXT("Staff"), [&](const FHeroItem& I) { return I.Name.Contains(TEXT("coordinator")) && I.Top == Top; });
+	for (int32 T = 0; T < 2 && Coord.Num(); ++T)
+	{
+		const tag::Team& Tm = T == 0 ? Home : Away;
+		const double Side = T == 0 ? 1.0 : -1.0;
+		const double CoachX = T == 0 ? 46.0 : 54.0;
+		for (int32 k = 0; k < 2; ++k)
+		{
+			const int32 HeadI = Heads.Num() ? Heads[(Tm.id * 7 + k * 11 + 3) % Heads.Num()] : INDEX_NONE;
+			AddStaticPerson(Coord[(Tm.id + k) % Coord.Num()], HeadI, FVector((CoachX + Side * (k ? 2.2 : -2.0) + 0.6) * YD, Side * (Edge + 2.0 + k * 0.6) * YD, 0),
+				Side > 0 ? -90.f : 90.f, Hex(Tm.colors.primary) * 0.8f, Khaki, false, ++Seed);
+		}
+		// the pack's sideline players (helmets on, team colours) at the back of the team area
+		const TArray<int32> Sp = A.HeroOf(TEXT("SidePlayer"));
+		for (int32 k = 0; k < Sp.Num(); ++k)
+			AddStaticPerson(Sp[k], INDEX_NONE, FVector((36.0 + k * 13.0 + T * 4.0) * YD, Side * (Edge + 5.2) * YD, 0), Side > 0 ? -90.f : 90.f,
+				Hex(Tm.colors.primary), Hex(Tm.colors.secondary), false, ++Seed);
+	}
+	UE_LOG(LogTemp, Display, TEXT("TAG: model pack sideline people %d (media, coordinators, sideline players)"), SidelinePeople.Num());
+}
+
+bool AStadium::BuildPackFans(const TArray<FTransform>& Seats, const tag::Team& Home, const tag::Team& Away)
+{
+	FAthleteAssets& A = FAthleteAssets::Get();
+	if (!A.bHero || FParse::Param(FCommandLine::Get(), TEXT("TagMassFans"))) return false;
+	const TArray<int32> Kinds = A.HeroOf(TEXT("Fan"));
+	if (!Kinds.Num()) return false;
+	FanIdle = A.HeroClip(TEXT("crowd"), TEXT("Idle"));
+	FanCheer = A.HeroClip(TEXT("crowd"), TEXT("Cheer"));
+	FanClap = A.HeroClip(TEXT("crowd"), TEXT("Clap"));
+	if (!FanIdle || !FanCheer) return false;
+	// the season's fans: warm weather in shirts, cold in jackets, rain in ponchos where the pack has them
+	const TCHAR* Wx = A.HeroWeather == 2 ? TEXT("_rain_") : A.HeroWeather == 1 ? TEXT("_cold_") : TEXT("_warm_");
+	// fans whose skin weights the pack has wrong (they tear apart once animated) stay out of the seats
+	TArray<int32> Pool = A.HeroOf(TEXT("Fan"), [Wx](const FHeroItem& I) { return I.Name.Contains(Wx) && I.Far < 0.15f; });
+	if (Pool.Num() < 6) Pool = A.HeroOf(TEXT("Fan"), [](const FHeroItem& I) { return I.Far < 0.15f; });
+	const FLinearColor HomeC[2] = {Hex(Home.colors.primary), Hex(Home.colors.secondary)};
+	const FLinearColor AwayC[2] = {Hex(Away.colors.primary), Hex(Away.colors.secondary)};
+	FRandomStream Rand(Home.id * 977 + 13);
+	// the pack's story characters take every 24th seat, a different run of them each game (all 166 over a few games)
+	const TArray<int32> Story = A.HeroOf(TEXT("Story"), [](const FHeroItem& I) { return (I.Height <= 0.f || I.Height > 140.f) && I.Far < 0.15f; }); // whole people, intact skins only
+	const TArray<int32> Props = A.HeroOf(TEXT("FanProp"));
+	int32 StoryNext = Story.Num() ? (Home.id * 61 + Away.id * 7) % Story.Num() : 0;
+	for (int32 SeatI = 0; SeatI < Seats.Num(); ++SeatI)
+	{
+		const FTransform& Seat = Seats[SeatI];
+		const bool bStory = Story.Num() && SeatI % 24 == 3;
+		const int32 Item = bStory ? Story[StoryNext++ % Story.Num()] : Pool[Rand.RandRange(0, Pool.Num() - 1)];
+		const FString Rig = A.HeroItems[Item].Rig;
+		UAnimationAsset* Idle = A.HeroClip(Rig, TEXT("Idle"));
+		UAnimationAsset* Cheer = A.HeroClip(Rig, TEXT("Cheer"));
+		if (!Idle || !Cheer) continue;
+		USkeletalMesh* M = A.HeroMesh(Item);
+		if (!M) continue;
+		USkeletalMeshComponent* F = NewObject<USkeletalMeshComponent>(this);
+		F->SetSkeletalMesh(M);
+		F->SetupAttachment(RootComponent);
+		F->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		F->SetCastShadow(false);
+		F->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::OnlyTickPoseWhenRendered;
+		F->bEnableUpdateRateOptimizations = true;
+		F->RegisterComponent();
+		// the pack characters face +Y: yaw -90 turns them to the field
+		F->SetWorldLocationAndRotation(Seat.GetLocation(), FRotator(0, Seat.Rotator().Yaw - 90.f, 0));
+		// one of the N x N people in the fan's texture, in the home colours (three in four) or the visitors'
+		const int32 Cells = FMath::Max(1, A.HeroItems[Item].Cells);
+		const bool bAway = Rand.FRand() < 0.25f;
+		const FLinearColor C = (bAway ? AwayC : HomeC)[Rand.FRand() < 0.7f ? 0 : 1];
+		const FLinearColor Tint = Rand.FRand() < 0.12f ? FLinearColor(0.85f, 0.85f, 0.85f) : C;
+		for (int32 Mi = 0; Mi < F->GetNumMaterials(); ++Mi)
+		{
+			float Mode = 0.f;
+			UMaterialInterface* Cur = F->GetMaterial(Mi);
+			if (!Cur || !Cur->GetScalarParameterValue(FHashedMaterialParameterInfo(TEXT("Mode")), Mode) || Mode < 0.5f || Mode > 2.5f) continue;
+			// crowd atlases: one of the N x N people; team colour on the shirt (fans) or the placeholder clothes (story)
+			UMaterialInstanceDynamic* Mid = F->CreateDynamicMaterialInstance(Mi);
+			Mid->SetScalarParameterValue(TEXT("CellU"), static_cast<float>(Rand.RandRange(0, Cells - 1)));
+			Mid->SetScalarParameterValue(TEXT("CellV"), static_cast<float>(Rand.RandRange(0, Cells - 1)));
+			Mid->SetVectorParameterValue(TEXT("Tint"), Tint);
+		}
+		// a sign, towel or foam finger in a few hands (crowd rig props follow the fan's pose)
+		if (!bStory && Props.Num() && Rig == TEXT("crowd") && Rand.FRand() < 0.15f)
+			if (USkeletalMesh* PM = A.HeroMesh(Props[Rand.RandRange(0, Props.Num() - 1)]))
+			{
+				USkeletalMeshComponent* Pc = NewObject<USkeletalMeshComponent>(this);
+				Pc->SetSkeletalMesh(PM);
+				Pc->SetupAttachment(F);
+				Pc->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+				Pc->SetCastShadow(false);
+				Pc->RegisterComponent();
+				Pc->SetLeaderPoseComponent(F);
+				if (UMaterialInstanceDynamic* Mid = Pc->CreateDynamicMaterialInstance(0)) Mid->SetVectorParameterValue(TEXT("Tint"), C);
+			}
+		F->PlayAnimation(Idle, true);
+		if (UAnimSingleNodeInstance* I = F->GetSingleNodeInstance())
+		{
+			I->SetPosition(Rand.FRandRange(0.f, Idle->GetPlayLength()), false);
+			I->SetPlayRate(Rand.FRandRange(0.85f, 1.15f));
+		}
+		Fans.Add(F);
+		FanIdles.Add(Idle);
+		FanCheers.Add((A.HeroClip(Rig, TEXT("Clap")) && Fans.Num() % 3 == 2) ? A.HeroClip(Rig, TEXT("Clap")) : Cheer);
+		FanDelay.Add(Rand.FRandRange(0.f, 0.9f));
+		FanCheering.Add(0);
+	}
+	return Fans.Num() > 0;
+}
+
 void AStadium::BuildHeroCrowd(const FVector& C, float Yaw)
 {
 	if (!LoadFanMeshes()) return;
@@ -838,7 +1056,9 @@ void AStadium::UpdateHeroCrowd(float Dt)
 		if (bTarget == bCheer || HypeHeld < FanDelay[i]) continue;
 		FanCheering[i] = bTarget ? 1 : 0;
 		USkeletalMeshComponent* F = Fans[i];
-		UAnimationAsset* Clip = bTarget ? FanCheer.Get() : FanIdle.Get();
+		// each fan's own clips (its skeleton family); some clap instead of throwing their arms up
+		UAnimationAsset* Clip = FanIdles.IsValidIndex(i) ? (bTarget ? FanCheers[i].Get() : FanIdles[i].Get())
+			: (bTarget ? ((FanClap && i % 3 == 1) ? FanClap.Get() : FanCheer.Get()) : FanIdle.Get());
 		F->PlayAnimation(Clip, true);
 		if (UAnimSingleNodeInstance* I = F->GetSingleNodeInstance())
 		{
@@ -924,6 +1144,8 @@ void AStadium::BuildOfficials()
 	{
 		USceneComponent* R = Rig(k ? TEXT("ChainFront") : TEXT("ChainRear"));
 		(k ? ChainFront : ChainRear) = R;
+		if (A.bHero && A.HeroOf(TEXT("Crew"), [](const FHeroItem& I) { return I.Name.Contains(TEXT("chaingangscrimage")); }).Num())
+			continue; // the model pack's rod men carry their own rods (the down box stays: it shows the down)
 		Part(R, A.Cylinder, FVector(0, -30, 122), FVector(0.04, 0.04, 2.44), Black, 0.5f);
 		Part(R, A.Cylinder, FVector(0, -30, 236), FVector(0.16, 0.16, 0.3), Orange, 0.6f);
 	}
