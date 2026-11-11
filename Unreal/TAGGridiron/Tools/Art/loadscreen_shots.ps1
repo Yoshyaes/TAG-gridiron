@@ -15,7 +15,7 @@ public static class Win { [DllImport("user32.dll")] public static extern bool Ge
   [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr h); }
 "@
 $exe = "C:\Program Files\Epic Games\UE_5.8\Engine\Binaries\Win64\UnrealEditor.exe"
-$args = @(("`"" + (Join-Path $Proj "TAGGridiron.uproject") + "`""), "-Tag$Mode", "-TagLoadSecs=14", "-game", "-windowed", "-ResX=1600", "-ResY=900", "-WinX=40", "-WinY=40", "-NoLiveCoding", "-log=tag_$($Mode.ToLower()).log")
+$args = @(("`"" + (Join-Path $Proj "TAGGridiron.uproject") + "`""), "-Tag$Mode", "-TagLoadSecs=14", "-game", "-windowed", "-ResX=1600", "-ResY=900", "-WinX=40", "-WinY=40", "-LiveCoding=0", "-log=tag_$($Mode.ToLower()).log")
 $p = Start-Process -FilePath $exe -ArgumentList $args -PassThru
 $t0 = Get-Date
 $i = 0

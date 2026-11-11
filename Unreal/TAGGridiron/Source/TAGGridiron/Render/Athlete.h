@@ -2,6 +2,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Engine/StreamableManager.h"
 #include "GameFramework/Actor.h"
 #include "Athlete.generated.h"
 
@@ -227,6 +228,7 @@ private:
 	// body; the anchor slides from From to To over DriveTime (the pile driving onto the sim's spot). Ends lying still
 	// for LieTime, then the keyed get-up out of the landing.
 	bool bFalling = false;
+	UPROPERTY()
 	TObjectPtr<UAnimationAsset> FallClip;
 	float FallStart = 0.f;        // seconds into FallClip the fall starts (a library capture's contact)
 	bool bFallRoot = false;       // the clip's root motion carries the body through the fall (library captures)
@@ -387,14 +389,18 @@ struct FAthleteAssets
 	TArray<TObjectPtr<UAnimationAsset>> PackCelebrations, PackPostPlayIdles, PackGetUpsFaceDown, PackGetUpsFaceUp, PackInjuries;
 	TMap<int32, TArray<TObjectPtr<UAnimationAsset>>> PackStances; // by tag::Pos
 	int32 PackLibraryCount = 0;
-	TArray<UAnimationAsset*> PackFamily(const TCHAR* Category, std::initializer_list<const TCHAR*> Any, std::initializer_list<const TCHAR*> Any2,
-		std::initializer_list<const TCHAR*> None, int32 Max, int32 Seed, bool bLoop);
+	/** Registers a family for the next batch (SelectPack): up to Max * PackScale captures matching the names, drawn by
+	 *  the seed, delivered into Sink() when the batch has loaded (the sink's own entries up to its first registration
+	 *  are kept: the keyed breakdowns stay first). */
+	using FFamilySink = TFunction<TArray<TObjectPtr<UAnimationAsset>>&()>;
+	void PackFamily(const TCHAR* Category, std::initializer_list<const TCHAR*> Any, std::initializer_list<const TCHAR*> Any2,
+		std::initializer_list<const TCHAR*> None, int32 Max, int32 Seed, bool bLoop, FFamilySink Sink);
 	static bool LoopsCleanly(const UAnimSequence* Seq);
 	/** The timed families: a whole capture started at its moment (pack_index.json, Tools/Art/pack_index.py: the
 	 *  right hand's peak = a throw's release or a catch's reach, the right foot's peak = a kick's contact, the pelvis
 	 *  going down = the hit, the root's first sideways step = a juke's onset) less a lead, the way the placed clips
 	 *  were cut by hand. Every family keeps its placed clip and takes a library capture every other time. */
-	struct FPackClip { TObjectPtr<UAnimationAsset> Anim; float Start = 0.f; float Len = 0.f; float Speed = 0.f; FString Name; };
+	struct FPackClip { TObjectPtr<UAnimationAsset> Anim; float Start = 0.f; float Len = 0.f; float Speed = 0.f; FString Name; FSoftObjectPath Path; };
 	TArray<FPackClip> PackThrowsSet, PackThrowsQuick, PackThrowsDeep, PackThrowsRollR, PackThrowsRollL;
 	TArray<FPackClip> PackKickoffs, PackFieldGoals, PackPunts, PackDropsSG, PackDropsUC;
 	TArray<FPackClip> PackCatchStride, PackCatchHigh, PackCatchLow, PackCatchOverShoulder, PackCatchSideline, PackCatchStand, PackCatchComeback, PackCatchDive;
@@ -404,8 +410,8 @@ struct FAthleteAssets
 	TMap<FString, TSharedPtr<FJsonObject>> PackIndex;
 	int32 PackTimedCount = 0;
 	void LoadPackIndex();
-	TArray<FPackClip> PackTimed(const TCHAR* Category, std::initializer_list<const TCHAR*> Any, std::initializer_list<const TCHAR*> Any2,
-		std::initializer_list<const TCHAR*> None, int32 Max, int32 Seed, const TCHAR* Field, int32 LeadFrames, float MinAfter, float MinEventSpeed = 0.f);
+	void PackTimed(const TCHAR* Category, std::initializer_list<const TCHAR*> Any, std::initializer_list<const TCHAR*> Any2,
+		std::initializer_list<const TCHAR*> None, int32 Max, int32 Seed, const TCHAR* Field, int32 LeadFrames, float MinAfter, float MinEventSpeed, TArray<FPackClip>& Sink);
 	static const FPackClip* Pick(const TArray<FPackClip>& L, int32 Seq) { return L.Num() ? &L[FMath::Abs(Seq) % L.Num()] : nullptr; }
 	/** The library by default: the placed clip is one entry among the library's N (null = the placed one). */
 	static const FPackClip* PickOr(const TArray<FPackClip>& L, int32 Seq) { const int32 i = L.Num() ? FMath::Abs(Seq) % (L.Num() + 1) : 0; return i ? &L[i - 1] : nullptr; }
@@ -426,6 +432,35 @@ struct FAthleteAssets
 	struct FPackPair { TObjectPtr<UAnimationAsset> T, C; float Ox = 0, Oy = 0, Yaw = 0, EndX = 0, EndY = 0, TLie = 0.45f, CLie = 1.05f, Start = 0; FString Name; };
 	TArray<FPackPair> PackPairs[6];
 	void LoadPackPairs(int32 Seed);
+	/** The library streams in behind the game. SelectPack picks every family's captures for a seed from the asset
+	 *  registry (no loading), the batch loads asynchronously (PackStreamer) and OnPackBatchLoaded fills the families,
+	 *  each replacing its previous draw. The director reseeds every quarter (ReseedPack), so a game runs through
+	 *  four draws; the batch before last is released then. -TagPackScale=<n> multiplies every family's bound (3). */
+	int32 PackSeed = 0, PackScale = 8, PackBatch = 0;
+	bool bPackLoading = false;
+	FStreamableManager PackStreamer;
+	TSharedPtr<FStreamableHandle> PackHandle;
+	/** The batch loads in chunks, families interleaved (every family gets some of its draw early) and stops when
+	 *  the batch has grown the process by the memory budget (-TagPackMB=<MB>, default 2500): an uncooked capture costs
+	 *  several MB resident, so the budget, not the bounds, sets how much of the pack a draw holds. */
+	TArray<FSoftObjectPath> PackQueue;
+	int32 PackQueuePos = 0, PackChunk = 0;
+	TSet<FSoftObjectPath> PackPlaced;
+	double PackBudgetMB = 0.0, PackT0 = 0.0;
+	void LoadNextPackChunk();
+	void FillPackLoaded();
+	struct FPendingFamily { FFamilySink Sink; int32 Max = 0; bool bLoop = false; TArray<FSoftObjectPath> Paths; };
+	struct FPendingTimed { TArray<FPackClip>* Sink = nullptr; TArray<FPackClip> Clips; };
+	struct FPendingPair { int32 Kind = 0; FPackPair P; FSoftObjectPath TP, CP; };
+	TArray<FPendingFamily> PendingFamilies;
+	TArray<FPendingTimed> PendingTimed;
+	TArray<FPendingPair> PendingPairs;
+	TMap<void*, int32> SinkBase;             // each sink's own entries before the library's (kept across batches)
+	TArray<TObjectPtr<UAnimSequence>> BatchRoots[2]; // the draw in play and the one before it (released once the next has landed)
+	double PackLoadedMB = 0.0;                        // the batch's own clips by their resource size: the budget bounds this, not the process
+	void SelectPack(int32 Seed);
+	void ReseedPack(int32 Seed);
+	void OnPackBatchLoaded();
 	/** Mirrored (other side) version of a keyed clip, built by Tools/Anim (<name>_M); the clip itself if none. */
 	TMap<UAnimationAsset*, UAnimationAsset*> MirrorOf;
 	UAnimationAsset* Side(UAnimationAsset* Clip, bool bMirror) const

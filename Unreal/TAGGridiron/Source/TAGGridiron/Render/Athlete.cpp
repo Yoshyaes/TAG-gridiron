@@ -14,6 +14,7 @@
 #include "Misc/CommandLine.h"
 #include "Misc/PackageName.h"
 #include "AssetRegistry/AssetRegistryModule.h"
+#include "HAL/PlatformMemory.h"
 #include "Math/RandomStream.h"
 #include "Dom/JsonObject.h"
 #include "Serialization/JsonReader.h"
@@ -164,106 +165,16 @@ void FAthleteAssets::Load()
 			TEXT("A_TAG_Loco_Line_Bounce_Side"), TEXT("A_TAG_Loco_Line_Bounce_Side_M"), TEXT("A_TAG_Loco_Line_Back_Walk"), TEXT("A_TAG_Loco_Idle_Breakdown")})
 			if (UAnimationAsset* C = Keyed(N)) Breakdowns.Add(C);
 		// the whole pack behind the one-shot and idle families (see PackFamily): the cut, placed clips above stay first in
-		// each list (their timing is measured), the library's captures follow, a different draw each day
+		// each list (their timing is measured), the library's captures stream in behind the game (SelectPack), a fresh
+		// draw every quarter (ReseedPack from the director)
 		if (FPackageName::DoesPackageExist(TEXT("/Game/TAG/Anim/Pack/Celebrations/A_TAG_Pack_PostPlay_BC_15_Celeb_FistPump_v1")) || FPackageName::DoesPackageExist(TEXT("/Game/TAG/Anim/Pack/Locomotion/A_TAG_Pack_MG_Loco_Sprint_Normal__P01")))
 		{
-			int32 Seed = FDateTime::Now().GetDayOfYear();
-			FParse::Value(FCommandLine::Get(), TEXT("TagPackSeed="), Seed);
-			const std::initializer_list<const TCHAR*> Many = {TEXT("2Man"), TEXT("2man"), TEXT("3Man"), TEXT("4Man"), TEXT("Nman"), TEXT("NMan"), TEXT("Group"), TEXT("Mascot"), TEXT("Interaction"), TEXT("Avoid"), TEXT("Bump"), TEXT("Man0"), TEXT("Man1"), TEXT("Man2"), TEXT("Man3")};
-			for (UAnimationAsset* C : PackFamily(TEXT("Celebrations"), {TEXT("Celeb")}, {}, {TEXT("2Man"), TEXT("2man"), TEXT("3Man"), TEXT("4Man"), TEXT("Nman"), TEXT("NMan"), TEXT("Group"), TEXT("Mascot"), TEXT("Interaction"), TEXT("Avoid"), TEXT("Bump"), TEXT("Man0"), TEXT("Man1"), TEXT("Man2"), TEXT("Man3"), TEXT("Loco"), TEXT("Walk"), TEXT("Jog"), TEXT("Run"), TEXT("on_Ground"), TEXT("Toss_Ball"), TEXT("Fan")}, 24, Seed + 1, false))
-				PackCelebrations.Add(C);
-			for (UAnimationAsset* C : PackFamily(TEXT("PostPlay"), {TEXT("Idle"), TEXT("Fidget"), TEXT("Stand")}, {}, {TEXT("2Man"), TEXT("Man_"), TEXT("Interaction"), TEXT("Jog"), TEXT("Walk"), TEXT("Run"), TEXT("Avoid"), TEXT("Turn"), TEXT("Tackle"), TEXT("Getup"), TEXT("Injured"), TEXT("To_"), TEXT("Trans")}, 12, Seed + 2, true))
-				PackPostPlayIdles.Add(C);
-			for (UAnimationAsset* C : PackFamily(TEXT("GetUps"), {TEXT("Splat"), TEXT("Knees")}, {TEXT("InPlace"), TEXT("LowIntensity"), TEXT("Low_Intensity")}, {TEXT("BackSplat"), TEXT("Backsplat"), TEXT("Back_Splat"), TEXT("TwoMan"), TEXT("2Man"), TEXT("Man_"), TEXT("PTM_"), TEXT("Idle"), TEXT("BC_")}, 8, Seed + 3, false))
-				PackGetUpsFaceDown.Add(C);
-			for (UAnimationAsset* C : PackFamily(TEXT("GetUps"), {TEXT("BackSplat"), TEXT("Backsplat"), TEXT("Back_Splat"), TEXT("Sitting"), TEXT("Sit_")}, {TEXT("InPlace"), TEXT("LowIntensity"), TEXT("Low_Intensity")}, {TEXT("TwoMan"), TEXT("2Man"), TEXT("Man_"), TEXT("PTM_"), TEXT("Idle"), TEXT("BC_")}, 8, Seed + 4, false))
-				PackGetUpsFaceUp.Add(C);
-			for (UAnimationAsset* C : PackFamily(TEXT("Injuries"), {TEXT("FLD_PLYR_Injury")}, {}, {TEXT("2man"), TEXT("Reaction"), TEXT("Bench"), TEXT("Trainer"), TEXT("Cart")}, 6, Seed + 5, false))
-				PackInjuries.Add(C);
-			for (UAnimationAsset* C : PackFamily(TEXT(""), {TEXT("Breakdown")}, {}, {TEXT("Whiff"), TEXT("Tackle"), TEXT("2man"), TEXT("Trans")}, 8, Seed + 6, true))
-				Breakdowns.Add(C);
-			struct FStanceRule { int32 Pos; std::initializer_list<const TCHAR*> Any; };
-			const std::initializer_list<const TCHAR*> StanceNone = {TEXT("Point"), TEXT("Audible"), TEXT("Signal"), TEXT("Trans"), TEXT("Dead_Ball"), TEXT("Walk"), TEXT("Jog"), TEXT("BreakHuddle"), TEXT("Huddle"), TEXT("Adjust_Gear"), TEXT("Check_Sideline"), TEXT("Pump_Up"), TEXT("Shift"), TEXT("Motion"), TEXT("Snap"), TEXT("Cadence"), TEXT("Ready_Stance"), TEXT("Get_Set")};
-			const FStanceRule Rules[] = {
-				{static_cast<int32>(tag::Pos::WR), {TEXT("Stance_WR"), TEXT("WR_Stance"), TEXT("Fidgets_WR"), TEXT("WR_Idle")}},
-				{static_cast<int32>(tag::Pos::TE), {TEXT("Stance_TE"), TEXT("TE_Stance"), TEXT("Fidgets_TE")}},
-				{static_cast<int32>(tag::Pos::RB), {TEXT("STANCE_P_HB"), TEXT("Stance_HB"), TEXT("HB_Stance"), TEXT("Fidgets_HB"), TEXT("Fidgets_RB")}},
-				{static_cast<int32>(tag::Pos::LB), {TEXT("Idle_PrePlay_LB"), TEXT("LB_Idle"), TEXT("Fidgets_DEF_LB"), TEXT("Fidgets_LB")}},
-				{static_cast<int32>(tag::Pos::CB), {TEXT("Pre_Play_DB"), TEXT("DB_Idle"), TEXT("Fidgets_DB"), TEXT("Fidgets_DEF_LB_DB")}},
-				{static_cast<int32>(tag::Pos::S), {TEXT("Pre_Play_DB"), TEXT("DB_Idle"), TEXT("Fidgets_DB"), TEXT("Fidgets_DEF_LB_DB")}},
-				{static_cast<int32>(tag::Pos::QB), {TEXT("Idle_QBUC"), TEXT("QB_Idle"), TEXT("Idle_QB"), TEXT("QBIdle")}},
-				{static_cast<int32>(tag::Pos::K), {TEXT("Kicker_FG"), TEXT("Kicker_Idle")}},
-				{static_cast<int32>(tag::Pos::P), {TEXT("Punter"), TEXT("Kicker_Idle")}},
-			};
-			for (const FStanceRule& R : Rules)
-				for (UAnimationAsset* C : PackFamily(TEXT("PrePlay"), R.Any, {}, StanceNone, 6, Seed + 10 + R.Pos, true))
-					PackStances.FindOrAdd(R.Pos).Add(C);
-			// the line's three and four point stances: the pack's OL / DL fidget cycles that return to the set
-			for (UAnimationAsset* C : PackFamily(TEXT("PrePlay"), {TEXT("OL_3pt"), TEXT("OL_3_pt")}, {}, StanceNone, 6, Seed + 40, true))
-				PackStances.FindOrAdd(1000).Add(C);
-			for (UAnimationAsset* C : PackFamily(TEXT("PrePlay"), {TEXT("DL_4pt"), TEXT("DL_3pt"), TEXT("Def_4pt")}, {}, StanceNone, 6, Seed + 41, true))
-				PackStances.FindOrAdd(1001).Add(C);
-			PackLibraryCount = PackCelebrations.Num() + PackPostPlayIdles.Num() + PackGetUpsFaceDown.Num() + PackGetUpsFaceUp.Num() + PackInjuries.Num();
-			for (const auto& KV : PackStances) PackLibraryCount += KV.Value.Num();
-			for (UAnimationAsset* C : PackCelebrations) Celebrations.Add(C);
-			// the timed families (PackTimed): started at the capture's own moment less a lead
+			PackSeed = FDateTime::Now().GetDayOfYear();
+			FParse::Value(FCommandLine::Get(), TEXT("TagPackSeed="), PackSeed);
+			FParse::Value(FCommandLine::Get(), TEXT("TagPackScale="), PackScale);
+			PackScale = FMath::Clamp(PackScale, 1, 20);
 			LoadPackIndex();
-			LoadPackPairs(Seed);
-			if (PackIndex.Num())
-			{
-				const std::initializer_list<const TCHAR*> ThrowNone = {TEXT("Fake"), TEXT("Pump"), TEXT("Drop_"), TEXT("Handoff"), TEXT("Pitch"), TEXT("Scramble"), TEXT("Sack"), TEXT("Fumble"), TEXT("Kneel"), TEXT("Spike"), TEXT("Celeb"), TEXT("Idle"), TEXT("Walk"), TEXT("Jog"), TEXT("2man"), TEXT("Snap"), TEXT("Option"), TEXT("Toss"), TEXT("Lateral"), TEXT("UBRig")};
-				PackThrowsSet = PackTimed(TEXT("Quarterback"), {TEXT("Pass_Set"), TEXT("Throw"), TEXT("Pass_")}, {}, ThrowNone, 24, Seed + 50, TEXT("release"), 7, 0.6f, 8.f);
-				PackThrowsQuick = PackTimed(TEXT("Quarterback"), {TEXT("Quick"), TEXT("Short"), TEXT("Bullet_D2"), TEXT("Slant")}, {TEXT("Pass"), TEXT("Throw")}, ThrowNone, 12, Seed + 51, TEXT("release"), 7, 0.6f, 8.f);
-				PackThrowsDeep = PackTimed(TEXT("Quarterback"), {TEXT("Deep"), TEXT("D8"), TEXT("Bomb"), TEXT("Long")}, {TEXT("Pass"), TEXT("Throw")}, ThrowNone, 12, Seed + 52, TEXT("release"), 7, 0.6f, 8.f);
-				PackThrowsRollR = PackTimed(TEXT("Quarterback"), {TEXT("Rollout"), TEXT("Roll_"), TEXT("Run_")}, {TEXT("Right"), TEXT("_Rt"), TEXT("HeadRight"), TEXT("_R_")}, ThrowNone, 8, Seed + 53, TEXT("release"), 7, 0.6f, 8.f);
-				PackThrowsRollL = PackTimed(TEXT("Quarterback"), {TEXT("Rollout"), TEXT("Roll_"), TEXT("Run_")}, {TEXT("Left"), TEXT("_Lt"), TEXT("HeadLeft"), TEXT("_L_")}, ThrowNone, 8, Seed + 54, TEXT("release"), 7, 0.6f, 8.f);
-				const std::initializer_list<const TCHAR*> KickNone = {TEXT("Fake"), TEXT("Block"), TEXT("Holder"), TEXT("Hold"), TEXT("Snap"), TEXT("Return"), TEXT("Catch"), TEXT("Onside"), TEXT("Celeb"), TEXT("Miss"), TEXT("Hurr"), TEXT("Lineup"), TEXT("LINEUP"), TEXT("Idle"), TEXT("Walk"), TEXT("Jog"), TEXT("Long_Snap")};
-				PackKickoffs = PackTimed(TEXT("Kicking"), {TEXT("kick_off"), TEXT("Kickoff"), TEXT("KICKOFF"), TEXT("KO_")}, {}, KickNone, 8, Seed + 60, TEXT("contact"), 0, 0.8f, 10.f);
-				PackFieldGoals = PackTimed(TEXT("Kicking"), {TEXT("FG"), TEXT("Field_Goal"), TEXT("FieldGoal"), TEXT("PAT")}, {}, KickNone, 8, Seed + 61, TEXT("contact"), 0, 0.8f, 10.f);
-				PackPunts = PackTimed(TEXT("Kicking"), {TEXT("Punt")}, {}, KickNone, 8, Seed + 62, TEXT("contact"), 0, 0.8f, 10.f);
-				const std::initializer_list<const TCHAR*> DropNone = {TEXT("Pump"), TEXT("Fake"), TEXT("PA_"), TEXT("Boot"), TEXT("Roll"), TEXT("Bubble"), TEXT("Spike"), TEXT("Pocket"), TEXT("Throw"), TEXT("Pass")};
-				PackDropsSG = PackTimed(TEXT(""), {TEXT("QB_Drop_SG")}, {}, DropNone, 8, Seed + 63, nullptr, 0, 1.0f);
-				PackDropsUC = PackTimed(TEXT(""), {TEXT("QB_Drop_UC")}, {}, DropNone, 8, Seed + 64, nullptr, 0, 1.0f);
-				const std::initializer_list<const TCHAR*> CatchNone = {TEXT("2man"), TEXT("Drop"), TEXT("Def_"), TEXT("INT"), TEXT("Int_"), TEXT("Swat"), TEXT("Knock"), TEXT("Tip"), TEXT("Bobble"), TEXT("Miss"), TEXT("Fumble"), TEXT("Kick"), TEXT("Punt"), TEXT("Pump"), TEXT("Handoff"), TEXT("Pitch"), TEXT("Almost"), TEXT("Out_of_Bounds"), TEXT("Celeb"), TEXT("Jump_Ball"), TEXT("Juggl")};
-				PackCatchStride = PackTimed(TEXT("Catching"), {TEXT("Catch_Run"), TEXT("InStride"), TEXT("In_Stride")}, {}, CatchNone, 16, Seed + 70, TEXT("release"), 4, 0.7f);
-				PackCatchHigh = PackTimed(TEXT("Catching"), {TEXT("Jump"), TEXT("AboveHead"), TEXT("HighPoint"), TEXT("High_Point")}, {TEXT("Catch")}, CatchNone, 12, Seed + 71, TEXT("release"), 4, 0.7f);
-				PackCatchLow = PackTimed(TEXT("Catching"), {TEXT("Low"), TEXT("Shoestring"), TEXT("Scoop"), TEXT("Shoe")}, {TEXT("Catch")}, CatchNone, 8, Seed + 72, TEXT("release"), 4, 0.7f);
-				PackCatchOverShoulder = PackTimed(TEXT("Catching"), {TEXT("OverShoulder"), TEXT("Over_Shoulder"), TEXT("OvrShldr"), TEXT("BackShoulder"), TEXT("Back_Shoulder")}, {}, CatchNone, 12, Seed + 73, TEXT("release"), 4, 0.7f);
-				PackCatchSideline = PackTimed(TEXT("Catching"), {TEXT("Sideline")}, {TEXT("Catch")}, CatchNone, 8, Seed + 74, TEXT("release"), 4, 0.7f);
-				PackCatchStand = PackTimed(TEXT("Catching"), {TEXT("Catch_Stand"), TEXT("Stand_"), TEXT("Strafe"), TEXT("Chest")}, {TEXT("Catch")}, CatchNone, 12, Seed + 75, TEXT("release"), 4, 0.7f);
-				PackCatchComeback = PackTimed(TEXT("Catching"), {TEXT("Bkpd"), TEXT("Comeback"), TEXT("Curl")}, {TEXT("Catch")}, CatchNone, 8, Seed + 76, TEXT("release"), 4, 0.7f);
-				PackCatchDive = PackTimed(TEXT("Catching"), {TEXT("Dive"), TEXT("Layout")}, {TEXT("Catch")}, CatchNone, 8, Seed + 77, TEXT("release"), 6, 0.9f);
-				const std::initializer_list<const TCHAR*> TackleNone = {TEXT("Dive"), TEXT("Strip"), TEXT("Whiff"), TEXT("Miss"), TEXT("Sack"), TEXT("Pile"), TEXT("Gang"), TEXT("Sideline"), TEXT("Spin"), TEXT("Brkn"), TEXT("Broken"), TEXT("Hurdle"), TEXT("Truck"), TEXT("StiffArm"), TEXT("Celeb"), TEXT("Fumble")};
-				PackTackledFront = PackTimed(TEXT("Tackles"), {TEXT("_D1"), TEXT("_D2"), TEXT("_D8")}, {TEXT("__P01")}, TackleNone, 12, Seed + 80, TEXT("hit"), 2, 0.8f);
-				PackTackledBehind = PackTimed(TEXT("Tackles"), {TEXT("_D5"), TEXT("_D4"), TEXT("_D6")}, {TEXT("__P01")}, TackleNone, 12, Seed + 81, TEXT("hit"), 2, 0.8f);
-				PackTackledSide = PackTimed(TEXT("Tackles"), {TEXT("_D3"), TEXT("_D7")}, {TEXT("__P01")}, TackleNone, 12, Seed + 82, TEXT("hit"), 2, 0.8f);
-				PackTacklers = PackTimed(TEXT("Tackles"), {TEXT("Tackle")}, {TEXT("__P02")}, TackleNone, 16, Seed + 83, TEXT("release"), 6, 0.8f, 3.f);
-				PackWhiffs = PackTimed(TEXT(""), {TEXT("Whiff"), TEXT("Miss_Tackle"), TEXT("MissTackle"), TEXT("Missed")}, {}, {TEXT("Strip"), TEXT("2man"), TEXT("Catch"), TEXT("Kick"), TEXT("Celeb")}, 8, Seed + 84, TEXT("hit"), 10, 0.8f);
-				PackStumbles = PackTimed(TEXT("BrokenTackles"), {TEXT("Stumble"), TEXT("Brkn"), TEXT("Broken")}, {TEXT("__P01")}, {TEXT("Strip"), TEXT("Fumble"), TEXT("Spin"), TEXT("Hurdle")}, 12, Seed + 85, TEXT("onset"), 3, 0.8f);
-				const std::initializer_list<const TCHAR*> JukeNone = {TEXT("Spin"), TEXT("Hurdle"), TEXT("Truck"), TEXT("StiffArm"), TEXT("Stiff_Arm"), TEXT("Hesi"), TEXT("2man"), TEXT("Strip"), TEXT("Fumble"), TEXT("Celeb"), TEXT("Catch"), TEXT("Tackle")};
-				PackJukesL = PackTimed(TEXT("BallCarrier"), {TEXT("Juke"), TEXT("Cut"), TEXT("SkillMoves")}, {TEXT("Left"), TEXT("_L_"), TEXT("Lt_"), TEXT("_L0"), TEXT("D7"), TEXT("D8")}, JukeNone, 12, Seed + 90, TEXT("onset"), 5, 0.6f);
-				PackJukesR = PackTimed(TEXT("BallCarrier"), {TEXT("Juke"), TEXT("Cut"), TEXT("SkillMoves")}, {TEXT("Right"), TEXT("_R_"), TEXT("Rt_"), TEXT("_R0"), TEXT("D3"), TEXT("D2")}, JukeNone, 12, Seed + 91, TEXT("onset"), 5, 0.6f);
-				PackSpinsL = PackTimed(TEXT("BallCarrier"), {TEXT("Spin")}, {TEXT("Left"), TEXT("_L_"), TEXT("Lt_")}, {TEXT("2man"), TEXT("Strip")}, 8, Seed + 92, TEXT("onset"), 5, 0.6f);
-				PackSpinsR = PackTimed(TEXT("BallCarrier"), {TEXT("Spin")}, {TEXT("Right"), TEXT("_R_"), TEXT("Rt_")}, {TEXT("2man"), TEXT("Strip")}, 8, Seed + 93, TEXT("onset"), 5, 0.6f);
-				PackTrucks = PackTimed(TEXT(""), {TEXT("Truck"), TEXT("LowerShoulder"), TEXT("Lower_Shoulder"), TEXT("Bruiser_Shoulder")}, {}, {TEXT("2man"), TEXT("Strip"), TEXT("Catch")}, 8, Seed + 94, TEXT("onset"), 5, 0.6f);
-				PackHurdles = PackTimed(TEXT(""), {TEXT("Hurdle")}, {}, {TEXT("2man"), TEXT("Strip")}, 8, Seed + 95, TEXT("onset"), 5, 0.6f);
-				PackStiffArmsL = PackTimed(TEXT(""), {TEXT("StiffArm"), TEXT("Stiff_Arm"), TEXT("Stiffarm")}, {}, {TEXT("2man"), TEXT("Strip")}, 8, Seed + 96, TEXT("release"), 6, 0.6f);
-				PackStiffArmsR = PackTimed(TEXT(""), {TEXT("StiffArm"), TEXT("Stiff_Arm"), TEXT("Stiffarm")}, {}, {TEXT("2man"), TEXT("Strip")}, 8, Seed + 97, TEXT("release"), 6, 0.6f);
-				const std::initializer_list<const TCHAR*> BlockNone = {TEXT("2man"), TEXT("Celeb"), TEXT("Idle"), TEXT("Stance"), TEXT("Double"), TEXT("3Man"), TEXT("Jammed"), TEXT("FakeFG"), TEXT("Option")};
-				PackRushWinsL = PackTimed(TEXT("Blocking"), {TEXT("Win")}, {TEXT("Left"), TEXT("_L_")}, BlockNone, 10, Seed + 100, nullptr, 0, 0.8f);
-				PackRushWinsR = PackTimed(TEXT("Blocking"), {TEXT("Win")}, {TEXT("Right"), TEXT("_R_")}, BlockNone, 10, Seed + 101, nullptr, 0, 0.8f);
-				PackBeatenL = PackTimed(TEXT("Blocking"), {TEXT("Loss")}, {TEXT("Left"), TEXT("_L_")}, BlockNone, 10, Seed + 102, nullptr, 0, 0.8f);
-				PackBeatenR = PackTimed(TEXT("Blocking"), {TEXT("Loss")}, {TEXT("Right"), TEXT("_R_")}, BlockNone, 10, Seed + 103, nullptr, 0, 0.8f);
-				PackPancakes = PackTimed(TEXT("Blocking"), {TEXT("Pancake"), TEXT("Impact"), TEXT("Stand_Loss_Big")}, {}, BlockNone, 8, Seed + 104, TEXT("hit"), 4, 0.8f);
-				PackGetOffs = PackTimed(TEXT(""), {TEXT("InitialMove"), TEXT("InitMove"), TEXT("Get_Off"), TEXT("GetOff"), TEXT("RunBlock_D1")}, {TEXT("OL"), TEXT("DL"), TEXT("Dline"), TEXT("Block")}, {TEXT("KickSlide"), TEXT("lateral"), TEXT("2man"), TEXT("Idle"), TEXT("Celeb"), TEXT("Stance")}, 10, Seed + 105, nullptr, 0, 0.8f);
-			}
-			UE_LOG(LogTemp, Display, TEXT("TAG: pack library timed families: %d captures (throws %d/%d/%d/%d/%d, kicks %d/%d/%d, drops %d/%d, catches %d/%d/%d/%d/%d/%d/%d/%d, tackled %d/%d/%d, tacklers %d, whiffs %d, stumbles %d, jukes %d/%d, spins %d/%d, trucks %d, hurdles %d, stiff arms %d/%d, rush wins %d/%d, beaten %d/%d, pancakes %d, get-offs %d; index %d)"),
-				PackTimedCount, PackThrowsSet.Num(), PackThrowsQuick.Num(), PackThrowsDeep.Num(), PackThrowsRollR.Num(), PackThrowsRollL.Num(), PackKickoffs.Num(), PackFieldGoals.Num(), PackPunts.Num(),
-				PackDropsSG.Num(), PackDropsUC.Num(), PackCatchStride.Num(), PackCatchHigh.Num(), PackCatchLow.Num(), PackCatchOverShoulder.Num(), PackCatchSideline.Num(), PackCatchStand.Num(), PackCatchComeback.Num(), PackCatchDive.Num(),
-				PackTackledFront.Num(), PackTackledBehind.Num(), PackTackledSide.Num(), PackTacklers.Num(), PackWhiffs.Num(), PackStumbles.Num(), PackJukesL.Num(), PackJukesR.Num(), PackSpinsL.Num(), PackSpinsR.Num(),
-				PackTrucks.Num(), PackHurdles.Num(), PackStiffArmsL.Num(), PackStiffArmsR.Num(), PackRushWinsL.Num(), PackRushWinsR.Num(), PackBeatenL.Num(), PackBeatenR.Num(), PackPancakes.Num(), PackGetOffs.Num(), PackIndex.Num());
-			UE_LOG(LogTemp, Display, TEXT("TAG: pack library in play: %d celebrations, %d post-play idles, %d / %d get-ups, %d injuries, %d breakdowns, %d stances (seed %d)"),
-				PackCelebrations.Num(), PackPostPlayIdles.Num(), PackGetUpsFaceDown.Num(), PackGetUpsFaceUp.Num(), PackInjuries.Num(), Breakdowns.Num(), PackLibraryCount - PackCelebrations.Num() - PackPostPlayIdles.Num() - PackGetUpsFaceDown.Num() - PackGetUpsFaceUp.Num() - PackInjuries.Num(), Seed);
+			ReseedPack(PackSeed);
 		}
 		{
 			// the throwing family; each starts 7 frames before its release (the set throw starts at its stride frame)
@@ -397,10 +308,9 @@ bool FAthleteAssets::LoopsCleanly(const UAnimSequence* Seq)
 	return true;
 }
 
-TArray<UAnimationAsset*> FAthleteAssets::PackFamily(const TCHAR* Category, std::initializer_list<const TCHAR*> Any, std::initializer_list<const TCHAR*> Any2,
-	std::initializer_list<const TCHAR*> None, int32 Max, int32 Seed, bool bLoop)
+void FAthleteAssets::PackFamily(const TCHAR* Category, std::initializer_list<const TCHAR*> Any, std::initializer_list<const TCHAR*> Any2,
+	std::initializer_list<const TCHAR*> None, int32 Max, int32 Seed, bool bLoop, FFamilySink Sink)
 {
-	TArray<UAnimationAsset*> Out;
 	IAssetRegistry& AR = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry").Get();
 	const FString Path = FString::Printf(TEXT("/Game/TAG/Anim/Pack/%s"), Category);
 	AR.ScanPathsSynchronous({Path}, true); // uncooked runs fill the registry lazily
@@ -418,17 +328,21 @@ TArray<UAnimationAsset*> FAthleteAssets::PackFamily(const TCHAR* Category, std::
 	Hits.Sort([](const FAssetData& L, const FAssetData& R) { return L.AssetName.LexicalLess(R.AssetName); });
 	FRandomStream Rand(Seed);
 	for (int32 i = Hits.Num() - 1; i > 0; --i) Hits.Swap(i, Rand.RandRange(0, i));
-	int32 Tried = 0;
+	FPendingFamily F;
+	F.Sink = Sink;
+	F.Max = Max * PackScale;
+	F.bLoop = bLoop;
+	const int32 Want = bLoop ? F.Max * 3 : F.Max + 2; // a looping family rejects many once loaded
 	for (const FAssetData& D : Hits)
 	{
-		if (Out.Num() >= Max || Tried++ >= Max * 4) break; // a looping family may reject many
-		UAnimSequence* S = Cast<UAnimSequence>(D.GetAsset());
-		if (!S || S->GetPlayLength() < 0.5f) continue;
-		if (bLoop && !LoopsCleanly(S)) continue;
-		S->AddToRoot(); // held by a plain struct, like every other asset here: never collected
-		Out.Add(S);
+		if (F.Paths.Num() >= Want) break;
+		F.Paths.Add(D.GetSoftObjectPath());
 	}
-	return Out;
+	{
+		TArray<TObjectPtr<UAnimationAsset>>& S = Sink();
+		if (!SinkBase.Contains(&S)) SinkBase.Add(&S, S.Num());
+	}
+	PendingFamilies.Add(MoveTemp(F));
 }
 
 void FAthleteAssets::LoadPackIndex()
@@ -446,10 +360,9 @@ void FAthleteAssets::LoadPackIndex()
 		}
 }
 
-TArray<FAthleteAssets::FPackClip> FAthleteAssets::PackTimed(const TCHAR* Category, std::initializer_list<const TCHAR*> Any, std::initializer_list<const TCHAR*> Any2,
-	std::initializer_list<const TCHAR*> None, int32 Max, int32 Seed, const TCHAR* Field, int32 LeadFrames, float MinAfter, float MinEventSpeed)
+void FAthleteAssets::PackTimed(const TCHAR* Category, std::initializer_list<const TCHAR*> Any, std::initializer_list<const TCHAR*> Any2,
+	std::initializer_list<const TCHAR*> None, int32 Max, int32 Seed, const TCHAR* Field, int32 LeadFrames, float MinAfter, float MinEventSpeed, TArray<FPackClip>& Sink)
 {
-	TArray<FPackClip> Out;
 	IAssetRegistry& AR = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry").Get();
 	const FString Path = FString::Printf(TEXT("/Game/TAG/Anim/Pack/%s"), Category);
 	AR.ScanPathsSynchronous({Path}, true);
@@ -467,9 +380,11 @@ TArray<FAthleteAssets::FPackClip> FAthleteAssets::PackTimed(const TCHAR* Categor
 	Hits.Sort([](const FAssetData& L, const FAssetData& R) { return L.AssetName.LexicalLess(R.AssetName); });
 	FRandomStream Rand(Seed);
 	for (int32 i = Hits.Num() - 1; i > 0; --i) Hits.Swap(i, Rand.RandRange(0, i));
+	FPendingTimed T;
+	T.Sink = &Sink;
 	for (const FAssetData& D : Hits)
 	{
-		if (Out.Num() >= Max) break;
+		if (T.Clips.Num() >= Max * PackScale) break;
 		const FString N = D.AssetName.ToString();
 		const TSharedPtr<FJsonObject>* E = PackIndex.Find(N);
 		if (!E || !E->IsValid()) continue;
@@ -487,14 +402,10 @@ TArray<FAthleteAssets::FPackClip> FAthleteAssets::PackTimed(const TCHAR* Categor
 		if (C.Len - C.Start < MinAfter) continue;
 		double Speed = 0.0;
 		if ((*E)->TryGetNumberField(TEXT("speed"), Speed)) C.Speed = static_cast<float>(Speed);
-		UAnimSequence* S = Cast<UAnimSequence>(D.GetAsset());
-		if (!S) continue;
-		S->AddToRoot();
-		C.Anim = S;
-		Out.Add(C);
+		C.Path = D.GetSoftObjectPath();
+		T.Clips.Add(C);
 	}
-	PackTimedCount += Out.Num();
-	return Out;
+	PendingTimed.Add(MoveTemp(T));
 }
 
 void FAthleteAssets::LoadPackPairs(int32 Seed)
@@ -517,23 +428,277 @@ void FAthleteAssets::LoadPackPairs(int32 Seed)
 	{
 		TArray<TSharedPtr<FJsonObject>>& L = ByKind[k];
 		for (int32 i = L.Num() - 1; i > 0; --i) L.Swap(i, Rand.RandRange(0, i));
+		int32 Taken = 0;
 		for (const TSharedPtr<FJsonObject>& O : L)
 		{
-			if (PackPairs[k].Num() >= 10) break;
+			if (Taken >= 10 * PackScale) break;
 			const FString TN = O->GetStringField(TEXT("T")), CN = O->GetStringField(TEXT("C"));
-			UAnimationAsset* T = LoadAsset<UAnimationAsset>(*FString::Printf(TEXT("/Game/TAG/Anim/Pack/Tackles/%s.%s"), *TN, *TN), false);
-			UAnimationAsset* C = LoadAsset<UAnimationAsset>(*FString::Printf(TEXT("/Game/TAG/Anim/Pack/Tackles/%s.%s"), *CN, *CN), false);
-			if (!T || !C) continue;
-			FPackPair P;
-			P.T = T; P.C = C; P.Name = TN;
+			FPendingPair Q;
+			Q.Kind = k;
+			Q.TP = FSoftObjectPath(FString::Printf(TEXT("/Game/TAG/Anim/Pack/Tackles/%s.%s"), *TN, *TN));
+			Q.CP = FSoftObjectPath(FString::Printf(TEXT("/Game/TAG/Anim/Pack/Tackles/%s.%s"), *CN, *CN));
+			FPackPair& P = Q.P;
+			P.Name = TN;
 			P.Ox = O->GetNumberField(TEXT("Ox")); P.Oy = O->GetNumberField(TEXT("Oy")); P.Yaw = O->GetNumberField(TEXT("Yaw"));
 			P.EndX = O->GetNumberField(TEXT("EndX")); P.EndY = O->GetNumberField(TEXT("EndY"));
 			P.TLie = O->GetNumberField(TEXT("TLie")); P.CLie = O->GetNumberField(TEXT("CLie")); P.Start = O->GetNumberField(TEXT("Start"));
-			PackPairs[k].Add(P);
+			PendingPairs.Add(MoveTemp(Q));
+			++Taken;
 		}
 	}
-	UE_LOG(LogTemp, Display, TEXT("TAG: pack library tackle pairs: drive %d over %d behind %d side %d / %d dive %d (of %d)"),
-		PackPairs[0].Num(), PackPairs[1].Num(), PackPairs[2].Num(), PackPairs[3].Num(), PackPairs[4].Num(), PackPairs[5].Num(), Rows.Num());
+}
+
+void FAthleteAssets::SelectPack(int32 Seed)
+{
+	const std::initializer_list<const TCHAR*> Many = {TEXT("2Man"), TEXT("2man"), TEXT("3Man"), TEXT("4Man"), TEXT("Nman"), TEXT("NMan"), TEXT("Group"), TEXT("Mascot"), TEXT("Interaction"), TEXT("Avoid"), TEXT("Bump"), TEXT("Man0"), TEXT("Man1"), TEXT("Man2"), TEXT("Man3")};
+	PackFamily(TEXT("Celebrations"), {TEXT("Celeb")}, {}, {TEXT("2Man"), TEXT("2man"), TEXT("3Man"), TEXT("4Man"), TEXT("Nman"), TEXT("NMan"), TEXT("Group"), TEXT("Mascot"), TEXT("Interaction"), TEXT("Avoid"), TEXT("Bump"), TEXT("Man0"), TEXT("Man1"), TEXT("Man2"), TEXT("Man3"), TEXT("Loco"), TEXT("Walk"), TEXT("Jog"), TEXT("Run"), TEXT("on_Ground"), TEXT("Toss_Ball"), TEXT("Fan")}, 24, Seed + 1, false, [this]() -> TArray<TObjectPtr<UAnimationAsset>>& { return PackCelebrations; });
+	PackFamily(TEXT("PostPlay"), {TEXT("Idle"), TEXT("Fidget"), TEXT("Stand")}, {}, {TEXT("2Man"), TEXT("Man_"), TEXT("Interaction"), TEXT("Jog"), TEXT("Walk"), TEXT("Run"), TEXT("Avoid"), TEXT("Turn"), TEXT("Tackle"), TEXT("Getup"), TEXT("Injured"), TEXT("To_"), TEXT("Trans")}, 12, Seed + 2, true, [this]() -> TArray<TObjectPtr<UAnimationAsset>>& { return PackPostPlayIdles; });
+	PackFamily(TEXT("GetUps"), {TEXT("Splat"), TEXT("Knees")}, {TEXT("InPlace"), TEXT("LowIntensity"), TEXT("Low_Intensity")}, {TEXT("BackSplat"), TEXT("Backsplat"), TEXT("Back_Splat"), TEXT("TwoMan"), TEXT("2Man"), TEXT("Man_"), TEXT("PTM_"), TEXT("Idle"), TEXT("BC_")}, 8, Seed + 3, false, [this]() -> TArray<TObjectPtr<UAnimationAsset>>& { return PackGetUpsFaceDown; });
+	PackFamily(TEXT("GetUps"), {TEXT("BackSplat"), TEXT("Backsplat"), TEXT("Back_Splat"), TEXT("Sitting"), TEXT("Sit_")}, {TEXT("InPlace"), TEXT("LowIntensity"), TEXT("Low_Intensity")}, {TEXT("TwoMan"), TEXT("2Man"), TEXT("Man_"), TEXT("PTM_"), TEXT("Idle"), TEXT("BC_")}, 8, Seed + 4, false, [this]() -> TArray<TObjectPtr<UAnimationAsset>>& { return PackGetUpsFaceUp; });
+	PackFamily(TEXT("Injuries"), {TEXT("FLD_PLYR_Injury")}, {}, {TEXT("2man"), TEXT("Reaction"), TEXT("Bench"), TEXT("Trainer"), TEXT("Cart")}, 6, Seed + 5, false, [this]() -> TArray<TObjectPtr<UAnimationAsset>>& { return PackInjuries; });
+	PackFamily(TEXT(""), {TEXT("Breakdown")}, {}, {TEXT("Whiff"), TEXT("Tackle"), TEXT("2man"), TEXT("Trans")}, 8, Seed + 6, true, [this]() -> TArray<TObjectPtr<UAnimationAsset>>& { return Breakdowns; });
+	struct FStanceRule { int32 Pos; std::initializer_list<const TCHAR*> Any; };
+	const std::initializer_list<const TCHAR*> StanceNone = {TEXT("Point"), TEXT("Audible"), TEXT("Signal"), TEXT("Trans"), TEXT("Dead_Ball"), TEXT("Walk"), TEXT("Jog"), TEXT("BreakHuddle"), TEXT("Huddle"), TEXT("Adjust_Gear"), TEXT("Check_Sideline"), TEXT("Pump_Up"), TEXT("Shift"), TEXT("Motion"), TEXT("Snap"), TEXT("Cadence"), TEXT("Ready_Stance"), TEXT("Get_Set")};
+	const FStanceRule Rules[] = {
+		{static_cast<int32>(tag::Pos::WR), {TEXT("Stance_WR"), TEXT("WR_Stance"), TEXT("Fidgets_WR"), TEXT("WR_Idle")}},
+		{static_cast<int32>(tag::Pos::TE), {TEXT("Stance_TE"), TEXT("TE_Stance"), TEXT("Fidgets_TE")}},
+		{static_cast<int32>(tag::Pos::RB), {TEXT("STANCE_P_HB"), TEXT("Stance_HB"), TEXT("HB_Stance"), TEXT("Fidgets_HB"), TEXT("Fidgets_RB")}},
+		{static_cast<int32>(tag::Pos::LB), {TEXT("Idle_PrePlay_LB"), TEXT("LB_Idle"), TEXT("Fidgets_DEF_LB"), TEXT("Fidgets_LB")}},
+		{static_cast<int32>(tag::Pos::CB), {TEXT("Pre_Play_DB"), TEXT("DB_Idle"), TEXT("Fidgets_DB"), TEXT("Fidgets_DEF_LB_DB")}},
+		{static_cast<int32>(tag::Pos::S), {TEXT("Pre_Play_DB"), TEXT("DB_Idle"), TEXT("Fidgets_DB"), TEXT("Fidgets_DEF_LB_DB")}},
+		{static_cast<int32>(tag::Pos::QB), {TEXT("Idle_QBUC"), TEXT("QB_Idle"), TEXT("Idle_QB"), TEXT("QBIdle")}},
+		{static_cast<int32>(tag::Pos::K), {TEXT("Kicker_FG"), TEXT("Kicker_Idle")}},
+		{static_cast<int32>(tag::Pos::P), {TEXT("Punter"), TEXT("Kicker_Idle")}},
+	};
+	for (const FStanceRule& R : Rules)
+		PackFamily(TEXT("PrePlay"), R.Any, {}, StanceNone, 6, Seed + 10 + R.Pos, true, [this, Pos = R.Pos]() -> TArray<TObjectPtr<UAnimationAsset>>& { return PackStances.FindOrAdd(Pos); });
+	// the line's three and four point stances: the pack's OL / DL fidget cycles that return to the set
+	PackFamily(TEXT("PrePlay"), {TEXT("OL_3pt"), TEXT("OL_3_pt")}, {}, StanceNone, 6, Seed + 40, true, [this]() -> TArray<TObjectPtr<UAnimationAsset>>& { return PackStances.FindOrAdd(1000); });
+	PackFamily(TEXT("PrePlay"), {TEXT("DL_4pt"), TEXT("DL_3pt"), TEXT("Def_4pt")}, {}, StanceNone, 6, Seed + 41, true, [this]() -> TArray<TObjectPtr<UAnimationAsset>>& { return PackStances.FindOrAdd(1001); });
+	// the timed families (PackTimed): started at the capture's own moment less a lead
+	LoadPackPairs(Seed);
+	if (PackIndex.Num())
+	{
+		const std::initializer_list<const TCHAR*> ThrowNone = {TEXT("Fake"), TEXT("Pump"), TEXT("Drop_"), TEXT("Handoff"), TEXT("Pitch"), TEXT("Scramble"), TEXT("Sack"), TEXT("Fumble"), TEXT("Kneel"), TEXT("Spike"), TEXT("Celeb"), TEXT("Idle"), TEXT("Walk"), TEXT("Jog"), TEXT("2man"), TEXT("Snap"), TEXT("Option"), TEXT("Toss"), TEXT("Lateral"), TEXT("UBRig")};
+		PackTimed(TEXT("Quarterback"), {TEXT("Pass_Set"), TEXT("Throw"), TEXT("Pass_")}, {}, ThrowNone, 24, Seed + 50, TEXT("release"), 7, 0.6f, 8.f, PackThrowsSet);
+		PackTimed(TEXT("Quarterback"), {TEXT("Quick"), TEXT("Short"), TEXT("Bullet_D2"), TEXT("Slant")}, {TEXT("Pass"), TEXT("Throw")}, ThrowNone, 12, Seed + 51, TEXT("release"), 7, 0.6f, 8.f, PackThrowsQuick);
+		PackTimed(TEXT("Quarterback"), {TEXT("Deep"), TEXT("D8"), TEXT("Bomb"), TEXT("Long")}, {TEXT("Pass"), TEXT("Throw")}, ThrowNone, 12, Seed + 52, TEXT("release"), 7, 0.6f, 8.f, PackThrowsDeep);
+		PackTimed(TEXT("Quarterback"), {TEXT("Rollout"), TEXT("Roll_"), TEXT("Run_")}, {TEXT("Right"), TEXT("_Rt"), TEXT("HeadRight"), TEXT("_R_")}, ThrowNone, 8, Seed + 53, TEXT("release"), 7, 0.6f, 8.f, PackThrowsRollR);
+		PackTimed(TEXT("Quarterback"), {TEXT("Rollout"), TEXT("Roll_"), TEXT("Run_")}, {TEXT("Left"), TEXT("_Lt"), TEXT("HeadLeft"), TEXT("_L_")}, ThrowNone, 8, Seed + 54, TEXT("release"), 7, 0.6f, 8.f, PackThrowsRollL);
+		const std::initializer_list<const TCHAR*> KickNone = {TEXT("Fake"), TEXT("Block"), TEXT("Holder"), TEXT("Hold"), TEXT("Snap"), TEXT("Return"), TEXT("Catch"), TEXT("Onside"), TEXT("Celeb"), TEXT("Miss"), TEXT("Hurr"), TEXT("Lineup"), TEXT("LINEUP"), TEXT("Idle"), TEXT("Walk"), TEXT("Jog"), TEXT("Long_Snap")};
+		PackTimed(TEXT("Kicking"), {TEXT("kick_off"), TEXT("Kickoff"), TEXT("KICKOFF"), TEXT("KO_")}, {}, KickNone, 8, Seed + 60, TEXT("contact"), 0, 0.8f, 10.f, PackKickoffs);
+		PackTimed(TEXT("Kicking"), {TEXT("FG"), TEXT("Field_Goal"), TEXT("FieldGoal"), TEXT("PAT")}, {}, KickNone, 8, Seed + 61, TEXT("contact"), 0, 0.8f, 10.f, PackFieldGoals);
+		PackTimed(TEXT("Kicking"), {TEXT("Punt")}, {}, KickNone, 8, Seed + 62, TEXT("contact"), 0, 0.8f, 10.f, PackPunts);
+		const std::initializer_list<const TCHAR*> DropNone = {TEXT("Pump"), TEXT("Fake"), TEXT("PA_"), TEXT("Boot"), TEXT("Roll"), TEXT("Bubble"), TEXT("Spike"), TEXT("Pocket"), TEXT("Throw"), TEXT("Pass")};
+		PackTimed(TEXT(""), {TEXT("QB_Drop_SG")}, {}, DropNone, 8, Seed + 63, nullptr, 0, 1.0f, 0.f, PackDropsSG);
+		PackTimed(TEXT(""), {TEXT("QB_Drop_UC")}, {}, DropNone, 8, Seed + 64, nullptr, 0, 1.0f, 0.f, PackDropsUC);
+		const std::initializer_list<const TCHAR*> CatchNone = {TEXT("2man"), TEXT("Drop"), TEXT("Def_"), TEXT("INT"), TEXT("Int_"), TEXT("Swat"), TEXT("Knock"), TEXT("Tip"), TEXT("Bobble"), TEXT("Miss"), TEXT("Fumble"), TEXT("Kick"), TEXT("Punt"), TEXT("Pump"), TEXT("Handoff"), TEXT("Pitch"), TEXT("Almost"), TEXT("Out_of_Bounds"), TEXT("Celeb"), TEXT("Jump_Ball"), TEXT("Juggl")};
+		PackTimed(TEXT("Catching"), {TEXT("Catch_Run"), TEXT("InStride"), TEXT("In_Stride")}, {}, CatchNone, 16, Seed + 70, TEXT("release"), 4, 0.7f, 0.f, PackCatchStride);
+		PackTimed(TEXT("Catching"), {TEXT("Jump"), TEXT("AboveHead"), TEXT("HighPoint"), TEXT("High_Point")}, {TEXT("Catch")}, CatchNone, 12, Seed + 71, TEXT("release"), 4, 0.7f, 0.f, PackCatchHigh);
+		PackTimed(TEXT("Catching"), {TEXT("Low"), TEXT("Shoestring"), TEXT("Scoop"), TEXT("Shoe")}, {TEXT("Catch")}, CatchNone, 8, Seed + 72, TEXT("release"), 4, 0.7f, 0.f, PackCatchLow);
+		PackTimed(TEXT("Catching"), {TEXT("OverShoulder"), TEXT("Over_Shoulder"), TEXT("OvrShldr"), TEXT("BackShoulder"), TEXT("Back_Shoulder")}, {}, CatchNone, 12, Seed + 73, TEXT("release"), 4, 0.7f, 0.f, PackCatchOverShoulder);
+		PackTimed(TEXT("Catching"), {TEXT("Sideline")}, {TEXT("Catch")}, CatchNone, 8, Seed + 74, TEXT("release"), 4, 0.7f, 0.f, PackCatchSideline);
+		PackTimed(TEXT("Catching"), {TEXT("Catch_Stand"), TEXT("Stand_"), TEXT("Strafe"), TEXT("Chest")}, {TEXT("Catch")}, CatchNone, 12, Seed + 75, TEXT("release"), 4, 0.7f, 0.f, PackCatchStand);
+		PackTimed(TEXT("Catching"), {TEXT("Bkpd"), TEXT("Comeback"), TEXT("Curl")}, {TEXT("Catch")}, CatchNone, 8, Seed + 76, TEXT("release"), 4, 0.7f, 0.f, PackCatchComeback);
+		PackTimed(TEXT("Catching"), {TEXT("Dive"), TEXT("Layout")}, {TEXT("Catch")}, CatchNone, 8, Seed + 77, TEXT("release"), 6, 0.9f, 0.f, PackCatchDive);
+		const std::initializer_list<const TCHAR*> TackleNone = {TEXT("Dive"), TEXT("Strip"), TEXT("Whiff"), TEXT("Miss"), TEXT("Sack"), TEXT("Pile"), TEXT("Gang"), TEXT("Sideline"), TEXT("Spin"), TEXT("Brkn"), TEXT("Broken"), TEXT("Hurdle"), TEXT("Truck"), TEXT("StiffArm"), TEXT("Celeb"), TEXT("Fumble")};
+		PackTimed(TEXT("Tackles"), {TEXT("_D1"), TEXT("_D2"), TEXT("_D8")}, {TEXT("__P01")}, TackleNone, 12, Seed + 80, TEXT("hit"), 2, 0.8f, 0.f, PackTackledFront);
+		PackTimed(TEXT("Tackles"), {TEXT("_D5"), TEXT("_D4"), TEXT("_D6")}, {TEXT("__P01")}, TackleNone, 12, Seed + 81, TEXT("hit"), 2, 0.8f, 0.f, PackTackledBehind);
+		PackTimed(TEXT("Tackles"), {TEXT("_D3"), TEXT("_D7")}, {TEXT("__P01")}, TackleNone, 12, Seed + 82, TEXT("hit"), 2, 0.8f, 0.f, PackTackledSide);
+		PackTimed(TEXT("Tackles"), {TEXT("Tackle")}, {TEXT("__P02")}, TackleNone, 16, Seed + 83, TEXT("release"), 6, 0.8f, 3.f, PackTacklers);
+		PackTimed(TEXT(""), {TEXT("Whiff"), TEXT("Miss_Tackle"), TEXT("MissTackle"), TEXT("Missed")}, {}, {TEXT("Strip"), TEXT("2man"), TEXT("Catch"), TEXT("Kick"), TEXT("Celeb")}, 8, Seed + 84, TEXT("hit"), 10, 0.8f, 0.f, PackWhiffs);
+		PackTimed(TEXT("BrokenTackles"), {TEXT("Stumble"), TEXT("Brkn"), TEXT("Broken")}, {TEXT("__P01")}, {TEXT("Strip"), TEXT("Fumble"), TEXT("Spin"), TEXT("Hurdle")}, 12, Seed + 85, TEXT("onset"), 3, 0.8f, 0.f, PackStumbles);
+		const std::initializer_list<const TCHAR*> JukeNone = {TEXT("Spin"), TEXT("Hurdle"), TEXT("Truck"), TEXT("StiffArm"), TEXT("Stiff_Arm"), TEXT("Hesi"), TEXT("2man"), TEXT("Strip"), TEXT("Fumble"), TEXT("Celeb"), TEXT("Catch"), TEXT("Tackle")};
+		PackTimed(TEXT("BallCarrier"), {TEXT("Juke"), TEXT("Cut"), TEXT("SkillMoves")}, {TEXT("Left"), TEXT("_L_"), TEXT("Lt_"), TEXT("_L0"), TEXT("D7"), TEXT("D8")}, JukeNone, 12, Seed + 90, TEXT("onset"), 5, 0.6f, 0.f, PackJukesL);
+		PackTimed(TEXT("BallCarrier"), {TEXT("Juke"), TEXT("Cut"), TEXT("SkillMoves")}, {TEXT("Right"), TEXT("_R_"), TEXT("Rt_"), TEXT("_R0"), TEXT("D3"), TEXT("D2")}, JukeNone, 12, Seed + 91, TEXT("onset"), 5, 0.6f, 0.f, PackJukesR);
+		PackTimed(TEXT("BallCarrier"), {TEXT("Spin")}, {TEXT("Left"), TEXT("_L_"), TEXT("Lt_")}, {TEXT("2man"), TEXT("Strip")}, 8, Seed + 92, TEXT("onset"), 5, 0.6f, 0.f, PackSpinsL);
+		PackTimed(TEXT("BallCarrier"), {TEXT("Spin")}, {TEXT("Right"), TEXT("_R_"), TEXT("Rt_")}, {TEXT("2man"), TEXT("Strip")}, 8, Seed + 93, TEXT("onset"), 5, 0.6f, 0.f, PackSpinsR);
+		PackTimed(TEXT(""), {TEXT("Truck"), TEXT("LowerShoulder"), TEXT("Lower_Shoulder"), TEXT("Bruiser_Shoulder")}, {}, {TEXT("2man"), TEXT("Strip"), TEXT("Catch")}, 8, Seed + 94, TEXT("onset"), 5, 0.6f, 0.f, PackTrucks);
+		PackTimed(TEXT(""), {TEXT("Hurdle")}, {}, {TEXT("2man"), TEXT("Strip")}, 8, Seed + 95, TEXT("onset"), 5, 0.6f, 0.f, PackHurdles);
+		PackTimed(TEXT(""), {TEXT("StiffArm"), TEXT("Stiff_Arm"), TEXT("Stiffarm")}, {}, {TEXT("2man"), TEXT("Strip")}, 8, Seed + 96, TEXT("release"), 6, 0.6f, 0.f, PackStiffArmsL);
+		PackTimed(TEXT(""), {TEXT("StiffArm"), TEXT("Stiff_Arm"), TEXT("Stiffarm")}, {}, {TEXT("2man"), TEXT("Strip")}, 8, Seed + 97, TEXT("release"), 6, 0.6f, 0.f, PackStiffArmsR);
+		const std::initializer_list<const TCHAR*> BlockNone = {TEXT("2man"), TEXT("Celeb"), TEXT("Idle"), TEXT("Stance"), TEXT("Double"), TEXT("3Man"), TEXT("Jammed"), TEXT("FakeFG"), TEXT("Option")};
+		PackTimed(TEXT("Blocking"), {TEXT("Win")}, {TEXT("Left"), TEXT("_L_")}, BlockNone, 10, Seed + 100, nullptr, 0, 0.8f, 0.f, PackRushWinsL);
+		PackTimed(TEXT("Blocking"), {TEXT("Win")}, {TEXT("Right"), TEXT("_R_")}, BlockNone, 10, Seed + 101, nullptr, 0, 0.8f, 0.f, PackRushWinsR);
+		PackTimed(TEXT("Blocking"), {TEXT("Loss")}, {TEXT("Left"), TEXT("_L_")}, BlockNone, 10, Seed + 102, nullptr, 0, 0.8f, 0.f, PackBeatenL);
+		PackTimed(TEXT("Blocking"), {TEXT("Loss")}, {TEXT("Right"), TEXT("_R_")}, BlockNone, 10, Seed + 103, nullptr, 0, 0.8f, 0.f, PackBeatenR);
+		PackTimed(TEXT("Blocking"), {TEXT("Pancake"), TEXT("Impact"), TEXT("Stand_Loss_Big")}, {}, BlockNone, 8, Seed + 104, TEXT("hit"), 4, 0.8f, 0.f, PackPancakes);
+		PackTimed(TEXT(""), {TEXT("InitialMove"), TEXT("InitMove"), TEXT("Get_Off"), TEXT("GetOff"), TEXT("RunBlock_D1")}, {TEXT("OL"), TEXT("DL"), TEXT("Dline"), TEXT("Block")}, {TEXT("KickSlide"), TEXT("lateral"), TEXT("2man"), TEXT("Idle"), TEXT("Celeb"), TEXT("Stance")}, 10, Seed + 105, nullptr, 0, 0.8f, 0.f, PackGetOffs);
+	}
+}
+
+void FAthleteAssets::ReseedPack(int32 Seed)
+{
+	if (bPackLoading) return; // the last draw is still on its way; the next quarter tries again
+	PendingFamilies.Reset();
+	PendingTimed.Reset();
+	PendingPairs.Reset();
+	SelectPack(Seed);
+	// the families refill from the placed clips up; the previous draw stays resident until this one has landed
+	for (FPendingFamily& F : PendingFamilies)
+	{
+		TArray<TObjectPtr<UAnimationAsset>>& S = F.Sink();
+		const int32* Base = SinkBase.Find(&S);
+		S.SetNum(Base ? *Base : 0);
+	}
+	for (const TObjectPtr<UAnimationAsset>& O : PackCelebrations) Celebrations.Remove(O.Get());
+	PackCelebrations.Reset();
+	for (FPendingTimed& T : PendingTimed) T.Sink->Reset();
+	for (TArray<FPackPair>& L : PackPairs) L.Reset();
+	PackPlaced.Reset();
+	// the queue: families interleaved, so a budget cut still leaves every family part of its draw
+	PackQueue.Reset();
+	PackQueuePos = 0;
+	PackChunk = 0;
+	TSet<FSoftObjectPath> Seen;
+	auto Push = [&](const FSoftObjectPath& P) { if (!Seen.Contains(P)) { Seen.Add(P); PackQueue.Add(P); } };
+	bool bMore = true;
+	for (int32 i = 0; bMore; ++i)
+	{
+		bMore = false;
+		for (const FPendingFamily& F : PendingFamilies) if (F.Paths.IsValidIndex(i)) { Push(F.Paths[i]); bMore = true; }
+		for (const FPendingTimed& T : PendingTimed) if (T.Clips.IsValidIndex(i)) { Push(T.Clips[i].Path); bMore = true; }
+		if (i < 10 * PackScale)
+			for (int32 k = 0; k < 6; ++k)
+			{
+				int32 n = 0;
+				for (const FPendingPair& Q : PendingPairs)
+					if (Q.Kind == k && n++ == i) { Push(Q.TP); Push(Q.CP); bMore = true; break; }
+			}
+	}
+	if (PackBudgetMB <= 0.0)
+	{
+		PackBudgetMB = 2500.0;
+		FParse::Value(FCommandLine::Get(), TEXT("TagPackMB="), PackBudgetMB);
+	}
+	PackLoadedMB = 0.0;
+	UE_LOG(LogTemp, Display, TEXT("TAG: pack batch %d: %d captures queued (seed %d, scale %d), loading behind the game, up to %.0f MB of clips (%.0f MB in use now)"), PackBatch, PackQueue.Num(), Seed, PackScale, PackBudgetMB, FPlatformMemory::GetStats().UsedPhysical / (1024.0 * 1024.0));
+	if (PackQueue.Num() == 0) return;
+	bPackLoading = true;
+	PackT0 = FPlatformTime::Seconds();
+	LoadNextPackChunk();
+}
+
+void FAthleteAssets::LoadNextPackChunk()
+{
+	// the budget counts the clips themselves (their resource size), not the process, which grows with the world
+	// loading alongside; the process still gets a ceiling at 80 % of physical memory so a wrong estimate cannot swap
+	const FPlatformMemoryStats Mem = FPlatformMemory::GetStats();
+	const double UsedMB = Mem.UsedPhysical / (1024.0 * 1024.0), CeilingMB = Mem.TotalPhysical / (1024.0 * 1024.0) * 0.80;
+	const int32 Rooted = BatchRoots[PackBatch % 2].Num();
+	if (PackChunk > 0 && PackChunk % 4 == 0)
+		UE_LOG(LogTemp, Display, TEXT("TAG: pack batch %d: %d of %d captures, %d rooted, %.0f MB of clips (%.1f MB a clip), %.0f MB used, %.0f s"), PackBatch, PackQueuePos, PackQueue.Num(), Rooted,
+			PackLoadedMB, Rooted ? PackLoadedMB / Rooted : 0.0, UsedMB, FPlatformTime::Seconds() - PackT0);
+	const bool bDone = PackQueuePos >= PackQueue.Num();
+	if (bDone || PackLoadedMB > PackBudgetMB || UsedMB > CeilingMB)
+	{
+		UE_LOG(LogTemp, Display, TEXT("TAG: pack batch %d %s: %d of %d captures in %.0f s, %d rooted, %.0f MB of clips (%.0f MB used)"), PackBatch,
+			bDone ? TEXT("complete") : UsedMB > CeilingMB ? TEXT("stopped at the memory ceiling") : TEXT("stopped at the clip budget"), PackQueuePos, PackQueue.Num(), FPlatformTime::Seconds() - PackT0, Rooted, PackLoadedMB, UsedMB);
+		OnPackBatchLoaded();
+		return;
+	}
+	TArray<FSoftObjectPath> Chunk;
+	for (int32 i = 0; i < 48 && PackQueuePos < PackQueue.Num(); ++i) Chunk.Add(PackQueue[PackQueuePos++]);
+	PackHandle = PackStreamer.RequestAsyncLoad(Chunk, FStreamableDelegate::CreateLambda([this]
+	{
+		FillPackLoaded();
+		LoadNextPackChunk();
+	}));
+	if (!PackHandle.IsValid()) { FillPackLoaded(); LoadNextPackChunk(); }
+}
+
+void FAthleteAssets::FillPackLoaded()
+{
+	// whatever has landed goes into its family now (the game draws on it from this frame); the rest waits
+	auto Keep = [this](UAnimSequence* S)
+	{
+		S->AddToRoot();
+		BatchRoots[PackBatch % 2].Add(S);
+		// the sequence's own data: an uncooked capture is held raw (its data model) and compressed
+		double Bytes = S->GetApproxCompressedSize();
+#if WITH_EDITOR
+		Bytes += S->GetApproxRawSize();
+#endif
+		PackLoadedMB += Bytes / (1024.0 * 1024.0);
+	};
+	for (FPendingFamily& F : PendingFamilies)
+	{
+		TArray<TObjectPtr<UAnimationAsset>>& S = F.Sink();
+		const int32* Base = SinkBase.Find(&S);
+		const int32 B = Base ? *Base : 0;
+		for (const FSoftObjectPath& P : F.Paths)
+		{
+			if (S.Num() - B >= F.Max) break;
+			if (PackPlaced.Contains(P)) continue;
+			UAnimSequence* Seq = Cast<UAnimSequence>(P.ResolveObject());
+			if (!Seq || !Seq->HasAnyFlags(RF_LoadCompleted)) continue;
+			PackPlaced.Add(P);
+			if (Seq->GetPlayLength() < 0.5f) continue;
+			if (F.bLoop && !LoopsCleanly(Seq)) continue;
+			Keep(Seq);
+			S.Add(Seq);
+			if (&S == &PackCelebrations) Celebrations.Add(Seq);
+		}
+	}
+	PackTimedCount = 0;
+	for (FPendingTimed& T : PendingTimed)
+	{
+		for (FPackClip& C : T.Clips)
+		{
+			if (C.Anim) continue;
+			UAnimSequence* Seq = Cast<UAnimSequence>(C.Path.ResolveObject());
+			if (!Seq || !Seq->HasAnyFlags(RF_LoadCompleted)) continue;
+			Keep(Seq);
+			C.Anim = Seq;
+			T.Sink->Add(C);
+		}
+		PackTimedCount += T.Sink->Num();
+	}
+	for (FPendingPair& Q : PendingPairs)
+	{
+		if (Q.P.T) continue;
+		UAnimSequence* T = Cast<UAnimSequence>(Q.TP.ResolveObject());
+		UAnimSequence* C = Cast<UAnimSequence>(Q.CP.ResolveObject());
+		if (!T || !C || !T->HasAnyFlags(RF_LoadCompleted) || !C->HasAnyFlags(RF_LoadCompleted)) continue;
+		Keep(T);
+		Keep(C);
+		Q.P.T = T;
+		Q.P.C = C;
+		PackPairs[Q.Kind].Add(Q.P);
+	}
+	++PackChunk;
+}
+
+void FAthleteAssets::OnPackBatchLoaded()
+{
+	// this draw is in; the one before the previous goes (a clip still playing is held by its mesh), and anything the
+	// two live draws share stays rooted
+	{
+		TArray<TObjectPtr<UAnimSequence>>& Old = BatchRoots[(PackBatch + 1) % 2];
+		for (const TObjectPtr<UAnimSequence>& S : Old) if (S) S->RemoveFromRoot();
+		Old.Reset();
+		for (const TObjectPtr<UAnimSequence>& S : BatchRoots[PackBatch % 2]) if (S) S->AddToRoot();
+	}
+	++PackBatch;
+	PendingFamilies.Reset();
+	PendingTimed.Reset();
+	PendingPairs.Reset();
+	PackHandle.Reset();
+	PackQueue.Reset();
+	bPackLoading = false;
+	PackLibraryCount = PackCelebrations.Num() + PackPostPlayIdles.Num() + PackGetUpsFaceDown.Num() + PackGetUpsFaceUp.Num() + PackInjuries.Num();
+	for (const auto& KV : PackStances) PackLibraryCount += KV.Value.Num();
+	UE_LOG(LogTemp, Display, TEXT("TAG: pack library tackle pairs: drive %d over %d behind %d side %d / %d dive %d"),
+		PackPairs[0].Num(), PackPairs[1].Num(), PackPairs[2].Num(), PackPairs[3].Num(), PackPairs[4].Num(), PackPairs[5].Num());
+	UE_LOG(LogTemp, Display, TEXT("TAG: pack library timed families: %d captures (throws %d/%d/%d/%d/%d, kicks %d/%d/%d, drops %d/%d, catches %d/%d/%d/%d/%d/%d/%d/%d, tackled %d/%d/%d, tacklers %d, whiffs %d, stumbles %d, jukes %d/%d, spins %d/%d, trucks %d, hurdles %d, stiff arms %d/%d, rush wins %d/%d, beaten %d/%d, pancakes %d, get-offs %d; index %d)"),
+		PackTimedCount, PackThrowsSet.Num(), PackThrowsQuick.Num(), PackThrowsDeep.Num(), PackThrowsRollR.Num(), PackThrowsRollL.Num(), PackKickoffs.Num(), PackFieldGoals.Num(), PackPunts.Num(),
+		PackDropsSG.Num(), PackDropsUC.Num(), PackCatchStride.Num(), PackCatchHigh.Num(), PackCatchLow.Num(), PackCatchOverShoulder.Num(), PackCatchSideline.Num(), PackCatchStand.Num(), PackCatchComeback.Num(), PackCatchDive.Num(),
+		PackTackledFront.Num(), PackTackledBehind.Num(), PackTackledSide.Num(), PackTacklers.Num(), PackWhiffs.Num(), PackStumbles.Num(), PackJukesL.Num(), PackJukesR.Num(), PackSpinsL.Num(), PackSpinsR.Num(),
+		PackTrucks.Num(), PackHurdles.Num(), PackStiffArmsL.Num(), PackStiffArmsR.Num(), PackRushWinsL.Num(), PackRushWinsR.Num(), PackBeatenL.Num(), PackBeatenR.Num(), PackPancakes.Num(), PackGetOffs.Num(), PackIndex.Num());
+	const FPlatformMemoryStats Mem = FPlatformMemory::GetStats();
+	UE_LOG(LogTemp, Display, TEXT("TAG: pack library in play: %d celebrations, %d post-play idles, %d / %d get-ups, %d injuries, %d breakdowns, %d stances (batch %d, %d clips rooted, %.0f MB used)"),
+		PackCelebrations.Num(), PackPostPlayIdles.Num(), PackGetUpsFaceDown.Num(), PackGetUpsFaceUp.Num(), PackInjuries.Num(), Breakdowns.Num(), PackLibraryCount - PackCelebrations.Num() - PackPostPlayIdles.Num() - PackGetUpsFaceDown.Num() - PackGetUpsFaceUp.Num() - PackInjuries.Num(),
+		PackBatch - 1, BatchRoots[(PackBatch + 1) % 2].Num(), Mem.UsedPhysical / (1024.0 * 1024.0));
 }
 
 void FAthleteAssets::LoadMotionMatching()

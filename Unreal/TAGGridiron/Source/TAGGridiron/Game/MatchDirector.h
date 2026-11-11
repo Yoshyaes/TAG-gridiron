@@ -205,6 +205,10 @@ private:
 	void TickHighlights(float Dt);
 	/** -TagPauseTest (a -TagPlayNow user game): once the play call is up, Esc; checks the world is held (bone
 	 *  positions a second apart), Esc again; checks the play call is back. Screenshots each step, PASS / FAIL lines. */
+	/** -TagSoak=<seconds> (-TagQuarterLen=<s>): a CPU game left running that long, then exit (the pack library's
+	 *  per-quarter draws, memory, errors over a whole game). */
+	float SoakSecs = 0.f;
+	double SoakStart = 0.0;
 	bool bPauseTest = false;
 	bool bPlayNowPending = false;  // -TagPlayNow: the match starts once the startup movie is over (the loading screen then shows)
 	int32 PauseStep = 0;
@@ -239,6 +243,7 @@ private:
 	int Dir = 1;
 	bool bTwoPoint = false;
 	int LastQ = 1;
+	int32 PackQ = 1;  // the quarter the pack library's current draw is for (FAthleteAssets::ReseedPack each new one)
 	EMatchState ResumeState = EMatchState::Menu;
 	float MenuOrbit = 0.f;
 	// automation (-TagAutoWatch): start a CPU game and capture screenshots, then exit

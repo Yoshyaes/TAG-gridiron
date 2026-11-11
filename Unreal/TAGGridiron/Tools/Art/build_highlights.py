@@ -50,7 +50,7 @@ def capture():
             os.remove(f)
     # off screen: a window that is minimised or covered stops drawing, and with it the screenshots
     cmd = [UE, os.path.join(PROJ, "TAGGridiron.uproject"), "-TagHighlights", "-game", "-RenderOffscreen", "-ResX=1280", "-ResY=720", "-ForceRes",
-           "-UseFixedTimeStep", "-FPS=30", "-nosplash", "-NoLoadingScreen", "-NoLiveCoding", "-log=tag_highlights.log",
+           "-UseFixedTimeStep", "-FPS=30", "-nosplash", "-NoLoadingScreen", "-LiveCoding=0", "-log=tag_highlights.log",
            "-ExecCmds=DisableAllScreenMessages,r.Streaming.PoolSize 3000"]  # no red debug text in the picture
     t0 = time.time()
     subprocess.call(cmd, timeout=1800)

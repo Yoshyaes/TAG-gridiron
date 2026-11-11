@@ -162,6 +162,14 @@ void AMatchDirector::BeginPlay()
 		bPauseTest = FParse::Param(FCommandLine::Get(), TEXT("TagPauseTest"));
 		bPlayNowPending = true;
 	}
+	else if (FParse::Value(FCommandLine::Get(), TEXT("TagSoak="), SoakSecs) && SoakSecs > 0.f)
+	{
+		double QLen = 900.0;
+		FParse::Value(FCommandLine::Get(), TEXT("TagQuarterLen="), QLen);
+		SoakStart = FPlatformTime::Seconds();
+		bWatch = true;
+		StartMatch(3, 7, false, true, 1, true, QLen);
+	}
 	else if (FParse::Param(FCommandLine::Get(), TEXT("TagHighlights")))
 	{
 		bHighlights = true;
@@ -1420,6 +1428,7 @@ void AMatchDirector::StartMatch(int HomeIdx, int AwayIdx, bool bUserPlays, bool 
 	bWatch = !bUserPlays;
 	Speed = 1.f;
 	LastQ = 1;
+	PackQ = 1;
 	const bool bLoadScreen = BeginLoadingScreen(Home, Away, W, bNight);
 	BuildWorld(Home, Away, W, bNight);
 	if (bLoadScreen) GetMoviePlayer()->WaitForMovieToFinish(); // the reel runs its minimum, then the game is back
@@ -1434,7 +1443,7 @@ void AMatchDirector::StartMatch(int HomeIdx, int AwayIdx, bool bUserPlays, bool 
 
 bool AMatchDirector::BeginLoadingScreen(const tag::Team& Home, const tag::Team& Away, const tag::Weather& W, bool bNight)
 {
-	if (bAuto || bCallShot || bArtTest || bLineup || bHighlights || FParse::Param(FCommandLine::Get(), TEXT("TagNoLoad"))) return false;
+	if (bAuto || bCallShot || bArtTest || bLineup || bHighlights || SoakSecs > 0.f || FParse::Param(FCommandLine::Get(), TEXT("TagNoLoad"))) return false;
 	if (!IsMoviePlayerEnabled() || !GetMoviePlayer()->IsInitialized() || GetMoviePlayer()->IsMovieCurrentlyPlaying()) return false;
 	const FString Reel = FPaths::ProjectContentDir() / TEXT("Movies/TAG_Highlights.mp4");
 	const bool bReel = FPaths::FileExists(Reel);
@@ -3057,6 +3066,12 @@ void AMatchDirector::Tick(float Dt)
 	Super::Tick(Dt);
 	TickAutomation(Dt);
 	TickHighlights(Dt);
+	if (SoakSecs > 0.f && Game && FPlatformTime::Seconds() - SoakStart > SoakSecs)
+	{
+		UE_LOG(LogTemp, Display, TEXT("TAG soak done: %.0f s, Q%d %d-%d, pack batches %d"), SoakSecs, Game->q, Game->score.away, Game->score.home, FAthleteAssets::Get().PackBatch);
+		SoakSecs = 0.f;
+		FPlatformMisc::RequestExit(false);
+	}
 	if (bArtTest) TickArtTest(Dt);
 	{
 		// -TagMenuShot: screenshot the main menu with its UI (gamepad focus frame), then quit
@@ -3114,6 +3129,13 @@ void AMatchDirector::Tick(float Dt)
 	}
 	const float SDt = Dt * (bWatch ? Speed : 1.f);
 	const bool bSpace = PC && (PC->WasInputKeyJustPressed(EKeys::SpaceBar) || PC->WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Bottom));
+	if (Game && Game->q != PackQ && (State == EMatchState::Wait || State == EMatchState::Call))
+	{
+		// a new quarter: a fresh draw of the pack library streams in behind the game
+		PackQ = Game->q;
+		FAthleteAssets& A = FAthleteAssets::Get();
+		A.ReseedPack(A.PackSeed + PackQ * 1000);
+	}
 	switch (State)
 	{
 	case EMatchState::Wait:

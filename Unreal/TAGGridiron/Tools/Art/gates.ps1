@@ -1,5 +1,5 @@
 ﻿# The game's automation gates, one after the other, each a -game run that exits by itself; prints each run's error
-# count and its TAG summary lines. -NoLiveCoding keeps a running gate from holding the build lock.
+# count and its TAG summary lines. -LiveCoding=0 keeps a running gate from holding the build lock.
 #   powershell -File Tools/Art/gates.ps1 [-Only autowatch,gaptest,movetest,pausetest]
 param([string[]]$Only = @("autowatch", "gaptest", "movetest", "pausetest"))
 $Only = @($Only | ForEach-Object { $_ -split "," })  # -File hands the list over as one string
@@ -14,7 +14,7 @@ $runs = @{
 }
 foreach ($k in $Only) {
     $log = "tag_gate_$k.log"
-    $args = @("`"$up`"") + $runs[$k] + @("-game", "-windowed", "-ResX=1600", "-ResY=900", "-nosplash", "-NoLiveCoding", "-log=$log")
+    $args = @("`"$up`"") + $runs[$k] + @("-game", "-windowed", "-ResX=1600", "-ResY=900", "-nosplash", "-LiveCoding=0", "-log=$log")
     Write-Output "== $k"
     $p = Start-Process -FilePath $exe -ArgumentList $args -PassThru -Wait
     $path = Join-Path $Proj "Saved\Logs\$log"
