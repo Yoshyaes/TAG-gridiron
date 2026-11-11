@@ -61,10 +61,17 @@ public:
 	void ShowModal(TSharedRef<SWidget> W, bool bKeepFocus = false);
 	void ClearModal();
 	bool HasModal() const { return bModal; }
+	/** The screen the pause menu came over (a play call, the try choice): back as it was, or nothing. */
+	void RestoreSuspended();
+	void DropSuspended() { Suspended.Reset(); }
+	/** Which pad's buttons the glyphs are: Sony's shapes, else Xbox letters. */
+	void SetPadKind(bool bSony) { bSonyPad = bSony; }
 	void Banner(const FString& Text, const FString& Sub, const FLinearColor& Color);
 	void Toast(const FString& Text);
 	void SetHint(const FString& Text) { HintText = Text; }
 	void SetHudVisible(bool b) { bHud = b; }
+	/** Broadcast only: the score bug without the ticker and the weather panel (the highlight reel). */
+	void SetBroadcastOnly(bool b) { bBroadcastOnly = b; }
 	void SetClockOffset(double s) { ClockOffset = s; }
 	void SetFlag(bool b) { bFlag = b; }
 	/** The pre-snap panel (hot routes, audibles, protection, shifts): empty rows hide it. */
@@ -106,7 +113,11 @@ private:
 	AMatchDirector* Director = nullptr;
 	TSharedPtr<SBox> ModalBox;
 	bool bModal = false;
+	TSharedPtr<SWidget> ModalContent, Suspended;
+	int32 SuspendedFocus = -1;
+	bool bSonyPad = false;
 	bool bHud = false;
+	bool bBroadcastOnly = false;
 	bool bFlag = false;
 	double ClockOffset = 0;
 	FString HintText;

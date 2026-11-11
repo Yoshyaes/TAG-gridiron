@@ -186,6 +186,35 @@ private:
 
 	TSharedPtr<SGridironOverlay> Overlay;
 	bool bPlayStationPad = false; // a DualSense was found through RawInput (hints name its buttons)
+	/** The device the player used last: a pad (its buttons are drawn and named) or the keyboard (its keys). */
+	bool bPadActive = false;
+	TArray<FKey> PadKeys, KeyboardKeys;
+	void TrackInputDevice(APlayerController* PC);
+	bool PadUI() const { return bPadActive; }
+	/** A hint written with PlayStation names, renamed for an Xbox-style pad when that is what is plugged in. */
+	FString PadHint(const TCHAR* PS) const;
+	/** The match loading screen: the highlight reel under UI/LoadingScreen while BuildWorld runs (the engine's movie
+	 *  player draws it on its own thread). On when a user starts a match from the menu, off for automation. */
+	bool BeginLoadingScreen(const tag::Team& Home, const tag::Team& Away, const tag::Weather& W, bool bNight);
+	/** -TagHighlights: a CPU game filmed play by play (a screenshot every frame of every live play, post-whistle and
+	 *  replay, under Saved/Screenshots/<platform>/Highlights) for Tools/Art/build_highlights.py to cut the reel from. */
+	bool bHighlights = false;
+	int32 HlClip = 0, HlFrame = 0;
+	bool bHlInClip = false, bHlReplayLogged = false;
+	double HlStart = 0.0;
+	void TickHighlights(float Dt);
+	/** -TagPauseTest (a -TagPlayNow user game): once the play call is up, Esc; checks the world is held (bone
+	 *  positions a second apart), Esc again; checks the play call is back. Screenshots each step, PASS / FAIL lines. */
+	bool bPauseTest = false;
+	bool bPlayNowPending = false;  // -TagPlayNow: the match starts once the startup movie is over (the loading screen then shows)
+	int32 PauseStep = 0;
+	double PauseT = 0.0;
+	FVector PauseProbe[3];
+	void TickPauseTest();
+	bool bKickCatchLogged = false;
+	/** The pause menu holds the whole world (engine pause); Esc / OPTIONS again, or Resume, lets it go. */
+	bool bEnginePaused = false;
+	void Unpause();
 	std::map<tag::Ent*, FVector2D> Prev;
 	std::map<tag::Ent*, FString> Labels;
 	ECamMode CamMode = ECamMode::Broadcast;

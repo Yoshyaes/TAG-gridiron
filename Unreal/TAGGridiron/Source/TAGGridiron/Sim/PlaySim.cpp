@@ -1213,7 +1213,11 @@ void PlaySim::think(Ent* e, double dt) {
     e->want = scale(e->vel, 0.5);
     return;
   }
-  if (cfg.kick && (!kicked || ball.mode == BallMode::Air) && !(e->userControlled && kicked && e->side == Side::Def)) {
+  // a kick in the air: the return play's own rules drive everyone (dynamic kickoff: the coverage, the user's man
+  // included, may not move until the ball is caught; a punt's coverage releases half a second after the kick and
+  // the user's man is his own from then)
+  if (cfg.kick && (!kicked || ball.mode == BallMode::Air) &&
+      !(e->userControlled && kicked && e->side == Side::Def && cfg.kick->punt && t > cfg.kick->kickT + 0.5)) {
     if (thinkReturn(e)) return;
   }
   if (e->userControlled && applyUser(e)) return;

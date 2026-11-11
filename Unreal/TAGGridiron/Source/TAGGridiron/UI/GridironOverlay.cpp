@@ -46,7 +46,7 @@ void SGridironOverlay::Construct(const FArguments& InArgs)
 		+ SOverlay::Slot().HAlign(HAlign_Left).VAlign(VAlign_Top).Padding(24)
 		[
 			SNew(SBorder).BorderImage(White()).BorderBackgroundColor(Panel).Padding(FMargin(14, 10))
-			.Visibility_Lambda([this] { return bHud ? EVisibility::HitTestInvisible : EVisibility::Collapsed; })
+			.Visibility_Lambda([this] { return bHud && !bBroadcastOnly ? EVisibility::HitTestInvisible : EVisibility::Collapsed; })
 			[
 				SNew(SBox).WidthOverride(560)
 				[ SNew(STextBlock).Font(Font(12)).ColorAndOpacity(FLinearColor(0.92f, 0.94f, 0.97f)).AutoWrapText(true).Text_Lambda([this] { return TickerText(); }) ]
@@ -56,7 +56,7 @@ void SGridironOverlay::Construct(const FArguments& InArgs)
 		+ SOverlay::Slot().HAlign(HAlign_Right).VAlign(VAlign_Top).Padding(24)
 		[
 			SNew(SBorder).BorderImage(White()).BorderBackgroundColor(Panel).Padding(FMargin(14, 8))
-			.Visibility_Lambda([this] { return bHud ? EVisibility::HitTestInvisible : EVisibility::Collapsed; })
+			.Visibility_Lambda([this] { return bHud && !bBroadcastOnly ? EVisibility::HitTestInvisible : EVisibility::Collapsed; })
 			[ SNew(STextBlock).Font(Font(12)).ColorAndOpacity(Dim).Text_Lambda([this] { return WeatherText(); }) ]
 		]
 		// banner
@@ -146,6 +146,7 @@ void SGridironOverlay::ShowModal(TSharedRef<SWidget> W, bool bKeepFocus)
 {
 	const int32 Was = bKeepFocus ? FocusedIndex() : -1;
 	ModalBox->SetContent(W);
+	ModalContent = W;
 	bModal = true;
 	PendingFocus = FMath::Max(0, Was); // focused next tick, once laid out
 }
@@ -153,6 +154,7 @@ void SGridironOverlay::ShowModal(TSharedRef<SWidget> W, bool bKeepFocus)
 void SGridironOverlay::ClearModal()
 {
 	ModalBox->SetContent(SNullWidget::NullWidget);
+	ModalContent.Reset();
 	bModal = false;
 	PendingFocus = -1;
 	if (FSlateApplication::IsInitialized()) FSlateApplication::Get().SetAllUserFocusToGameViewport();
@@ -280,6 +282,12 @@ void SGridironOverlay::PaintGlyph(FSlateWindowElementList& Out, int32 Layer, con
 	case EPadGlyph::Triangle:
 		Lines(Poly(R * 0.5f, 28, 0.f), Dark, R, 0);  // the button (a ring as thick as its radius is a disc)
 		Lines(Poly(R - 0.8f, 28, 0.f), Tint * FLinearColor(1, 1, 1, 0.45f), 1.4f);
+		if (!bSonyPad)
+		{
+			// an Xbox-style pad: the face buttons by their letters
+			Text(Gl == EPadGlyph::Cross ? TEXT("A") : Gl == EPadGlyph::Circle ? TEXT("B") : Gl == EPadGlyph::Square ? TEXT("X") : TEXT("Y"), FMath::RoundToInt(Size * 0.46f), Tint);
+			break;
+		}
 		if (Gl == EPadGlyph::Cross)
 		{
 			Lines({P2(-S, -S), P2(S, S)}, Tint, Th);
@@ -295,7 +303,8 @@ void SGridironOverlay::PaintGlyph(FSlateWindowElementList& Out, int32 Layer, con
 	case EPadGlyph::L2:
 		Box(FVector2D(Size * 1.36f + 3, Size * 0.8f + 3), Tint * FLinearColor(0.6f, 0.6f, 0.6f, 1.f));
 		Box(FVector2D(Size * 1.36f, Size * 0.8f), Dark);
-		Text(Gl == EPadGlyph::R1 ? TEXT("R1") : Gl == EPadGlyph::L1 ? TEXT("L1") : Gl == EPadGlyph::L2 ? TEXT("L2") : TEXT("R2"), FMath::RoundToInt(Size * 0.36f), Tint);
+		Text(bSonyPad ? (Gl == EPadGlyph::R1 ? TEXT("R1") : Gl == EPadGlyph::L1 ? TEXT("L1") : Gl == EPadGlyph::L2 ? TEXT("L2") : TEXT("R2"))
+			: (Gl == EPadGlyph::R1 ? TEXT("RB") : Gl == EPadGlyph::L1 ? TEXT("LB") : Gl == EPadGlyph::L2 ? TEXT("LT") : TEXT("RT")), FMath::RoundToInt(Size * 0.36f), Tint);
 		break;
 	default:
 	{
@@ -694,11 +703,25 @@ void SGridironOverlay::ShowPatChoice(std::function<void(bool)> Done)
 	ShowModal(Centered(SNew(SBorder).BorderImage(White()).BorderBackgroundColor(Panel).Padding(20)[V], 0.4f));
 }
 
+void SGridironOverlay::RestoreSuspended()
+{
+	if (Suspended.IsValid())
+	{
+		ShowModal(Suspended.ToSharedRef());
+		PendingFocus = FMath::Max(0, SuspendedFocus);
+		Suspended.Reset();
+	}
+	else ClearModal();
+}
+
 void SGridironOverlay::ShowPause(std::function<void()> Resume, std::function<void()> SimToEnd, std::function<void()> Quit)
 {
+	// the screen the pause comes over (the play call, the try choice) waits underneath and comes back with Resume
+	Suspended = bModal ? ModalContent : nullptr;
+	SuspendedFocus = bModal ? FocusedIndex() : -1;
 	TSharedRef<SVerticalBox> V = SNew(SVerticalBox)
 		+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(0, 0, 0, 10)[ SNew(STextBlock).Font(Font(26, "Bold")).Text(T(TEXT("PAUSED"))) ];
-	V->AddSlot().AutoHeight()[ MakeButton(TEXT("Resume"), TEXT(""), [this, Resume] { ClearModal(); Resume(); }) ];
+	V->AddSlot().AutoHeight()[ MakeButton(TEXT("Resume"), TEXT(""), [this, Resume] { ClearModal(); Resume(); }) ]; // the director restores the suspended screen
 	V->AddSlot().AutoHeight()[ MakeButton(TEXT("Box Score"), TEXT(""), [this, Resume] { ShowBoxScore(TEXT("Box Score"), TEXT("Resume"), [Resume] { Resume(); }); }) ];
 	V->AddSlot().AutoHeight()[ MakeButton(TEXT("Sim to End of Game"), TEXT(""), [this, SimToEnd] { ClearModal(); SimToEnd(); }) ];
 	V->AddSlot().AutoHeight()[ MakeButton(TEXT("Quit to Main Menu"), TEXT(""), [this, Quit] { ClearModal(); Quit(); }) ];

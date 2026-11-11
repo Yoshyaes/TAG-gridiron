@@ -634,7 +634,7 @@ void AMatchDirector::RefreshPresnapPanel()
 	default:
 		break;
 	}
-	Overlay->SetPresnapPanel(Title, Sub, R, bPlayStationPad);
+	Overlay->SetPresnapPanel(Title, Sub, R, PadUI());
 }
 
 void AMatchDirector::UpdateIcons()
@@ -668,7 +668,7 @@ void AMatchDirector::UpdateIcons()
 			Out.Add(I);
 		}
 	}
-	Overlay->SetIcons(Out, VP, bPlayStationPad);
+	Overlay->SetIcons(Out, VP, PadUI());
 }
 
 void AMatchDirector::BuildPlayArt()
