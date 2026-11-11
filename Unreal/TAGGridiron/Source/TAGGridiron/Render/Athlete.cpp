@@ -2390,6 +2390,17 @@ void AAthlete::ResetPose()
 	LeanSmoothed = FVector::ZeroVector;
 	bDropped = false;
 	DropLeft = 0.f;
+	// a fall still running (a long library capture with its lie) ends here too: otherwise TickFall keeps the actor at
+	// the last play's pile, root motion and all, and the next play starts from wherever he lies
+	if (bFalling || FallHoldLeft > 0.f)
+	{
+		bFalling = false;
+		bFallRoot = false;
+		FallClip = nullptr;
+		FallHoldLeft = 0.f;
+		CurrentClip = nullptr;
+		CurrentAnim.Reset();
+	}
 	if (!bRagdoll) return;
 	bRagdoll = false;
 	FaceFollowBody(false);
