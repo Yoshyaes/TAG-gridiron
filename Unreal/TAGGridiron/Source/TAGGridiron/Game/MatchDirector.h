@@ -47,6 +47,23 @@ public:
 	/** What the scorebug's down box shows while a kick or try is on screen: the sim has already moved the game on (the next
 	 *  phase, down and spot) before the play is animated. Empty = read the game live (scrimmage presnap and play). */
 	FString HudDown;
+	/** The score the scorebug shows while a canned kick is on screen (the sim has already added the points before the ball
+	 *  is in the air: an extra point read 10-0 at the snap of the try). -1 = read the game live. Index: tag::TeamKey. */
+	int32 HudScore[2] = {-1, -1};
+	/** Between plays: the sim takes the whole runoff off the game clock at the play call (Game::preSnap); the scorebug
+	 *  winds it down instead, over the call and the pre-snap (HudRunoffLeft game seconds still to come off), and shows
+	 *  the 40 s play clock running with it (PlayClockUse = the seconds the offense uses before the snap). */
+	double HudRunoff = 0.0, HudRunoffLeft = 0.0;
+	/** From the whistle to the call the clock already runs on the scorebug (HudPreRun game seconds, at most 12 and only a
+	 *  running clock); the call's runoff then takes up from there. The play clock (PlayClockF) runs from 40 at the whistle
+	 *  and reaches its snap value (40 - the seconds the offense uses) by the snap. */
+	double HudPreRun = 0.0;
+	bool bPreRun = false;
+	float PlayClockF = 40.f, PlayClockSnap = 10.f, PlayClockRate = 1.f;
+	bool bPlayClockOn = false;
+	int32 PlayClockShown() const { return bPlayClockOn ? FMath::Max(0, FMath::CeilToInt(PlayClockF)) : -1; }
+	void HoldHudScore() { HudScore[0] = Game->score[tag::TeamKey::Home]; HudScore[1] = Game->score[tag::TeamKey::Away]; }
+	void ReleaseHudScore() { HudScore[0] = HudScore[1] = -1; }
 	std::unique_ptr<tag::PlaySim> Sim;
 	const tag::PlaySim* EventSim = nullptr;  // sim whose events were last scanned for keyed one-shots
 	size_t SeenEvents = 0;
@@ -124,7 +141,9 @@ private:
 	 *  the next play is called; the pre-snap walk then takes them on to the formation from there. Director-side
 	 *  positions (world, cm), the dead sim's own are left alone. */
 	std::map<tag::Ent*, FVector> PostPos;
-	std::map<tag::Ent*, float> PostYaw;  // where each man faces once he has arrived (the huddle looks in)
+	std::map<tag::Ent*, float> PostYaw;
+	TMap<const void*, float> PostSpd; // each man's jog speed after the whistle (cm/s): he speeds up, he does not start at a jog
+	float PostAge = 0.f;                  // seconds since the whistle  // where each man faces once he has arrived (the huddle looks in)
 	void TickPostJog(float Dt);
 	/** The men between plays once the play's sim is gone (the play call): where each stands, which way he faces,
 	 *  whether he is on the next offense; and where the dead ball lay. StartPresnap walks them in from here. */
@@ -140,6 +159,18 @@ private:
 	FVector UmpPos = FVector::ZeroVector;
 	bool bUmpHasBall = false, bUmpSpotted = false;
 	void TickUmpire(float Dt);
+	/** The rest of the crew (NFL mechanics; the referee above): 0 umpire in the offensive backfield opposite the referee,
+	 *  1 down judge and 2 line judge on the sidelines at the line, 3 side judge and 4 field judge 20 yd deep on the
+	 *  sidelines, 5 back judge 25 yd deep in the middle (deep men on the goal line / end line in the red zone). Wings
+	 *  follow the ball along their sideline and mark its spot at the whistle, deep men stay ahead of the deepest player,
+	 *  everyone steps around players in every phase. */
+	UPROPERTY()
+	TArray<TObjectPtr<AAthlete>> Crew;
+	TArray<FVector> CrewPos;
+	void TickCrew(float Dt);
+	/** Where an official at Pos steps to stay Keep (cm) clear of every player over the next Look seconds (each man's
+	 *  path read from his sim velocity: sidestep his line, not just back away); Urgency 0..1 = how close the nearest gets. */
+	FVector OfficialDodge(const FVector& Pos, float Keep, float Look, float& Urgency);
 	/** A live kick return (the sim fields the kick and runs it back; the user returns it or covers it). */
 	bool bLiveReturn = false;
 	void StartLiveReturn(const std::vector<tag::Player*>& KickTeam, const std::vector<tag::Player*>& RecvTeam);
@@ -320,6 +351,9 @@ private:
 		double FromX = 35;
 		double ToX = 75;
 		bool bAnnounced = false;
+		/** The ball's flight, solved once: (yards past FromX, height in yards) every 1/60 s from the kick, under gravity
+		 *  and air drag (a kicked ball climbs fast and drops steeply; the old symmetric arc read as a lob). */
+		std::vector<FVector2D> Path;
 	};
 	std::unique_ptr<FKick> Kick;
 

@@ -143,6 +143,13 @@ bool setTune(const std::string& name, double v) {
   if (name == "assistRange") return t.assistRange = v, true;
   if (name == "tackleReach") return t.tackleReach = v, true;
   if (name == "pursuitK") return t.pursuitK = v, true;
+  if (name == "deepKeep") return t.deepKeep = v, true;
+  if (name == "releaseRate") return t.releaseRate = v, true;
+  if (name == "intBias") return t.intBias = v, true;
+  if (name == "holdK") return t.holdK = v, true;
+  if (name == "holdShed") return t.holdShed = v, true;
+  if (name == "yacNoise") return t.yacNoise = v, true;
+  if (name == "runNoise") return t.runNoise = v, true;
   return false;
 }
 
@@ -1169,7 +1176,23 @@ void PlaySim::step(double dt) {
   collide();
   for (Ent* e : off)
     if (e->isOL && e->engaged && !cfg.kick) olBlockDepth = (std::max)(olBlockDepth, e->pos.x - los);
+  if (wrap_ && phase == SimPhase::Live) stepWrap(dt);
   updateBall(dt);
+  if (!cfg.kick && qb && passPlay()) {
+    if (!passThrown && ball.holder == qb) {
+      // contact past 5 yd: a cover man on top of his receiver downfield (hand fighting is what draws the flag)
+      for (Ent* r : off) {
+        if (r->state != EntState::Route || r->pos.x < los + 5) continue;
+        for (Ent* d : def)
+          if ((d->state == EntState::Man || d->state == EntState::Zone) && dist(d->pos, r->pos) < 0.75)
+            foulDhold.add(0.7 * dt * (1.2 - d->r().manCov / 100), d->p);
+      }
+    } else if (passThrown && t - throwStart < 0.6 && qb->state != EntState::Down) {
+      // a rusher arriving after the ball is gone (a step or two late is a hit on the passer)
+      for (Ent* d : def)
+        if (d->free() && dist(d->pos, qb->pos) < 1.0 && t - throwStart > 0.25) foulRough.add(0.5 * dt, d->p);
+    }
+  }
   if (phase == SimPhase::Live) checkTackles();
   if (phase == SimPhase::Live) checkBounds();
   if (onStep) onStep(*this);
@@ -1260,6 +1283,10 @@ void PlaySim::setCarrier(Ent* e) {
 
 // ------------------------------------------------------------------ AI
 void PlaySim::think(Ent* e, double dt) {
+  if (wrap_ && (e == wrap_->c || e == wrap_->d)) {
+    e->want = V2{0, 0};
+    return;
+  }
   if (e->state == EntState::Down) {
     e->want = V2{0, 0};
     return;
@@ -1598,8 +1625,11 @@ V2 PlaySim::routeWant(const Ent* e, const V2& pos, const V2& vel, size_t& idx) c
   const size_t n = e->route.size();
   const V2 dir = n >= 2 ? norm(sub(e->route[n - 1], e->route[n - 2])) : V2{1, 0};
   V2 w = scale(dir, e->vmax);
-  if (pos.y < 2 && w.y < 0) w = V2{e->vmax, 0};
-  if (pos.y > FIELD_W - 2 && w.y > 0) w = V2{e->vmax, 0};
+  // turn upfield before the sideline: as far out as he needs to take his sideways speed off at a human rate (a flat
+  // at 4-5 yd/s needs ~2 yd of room; turning at a fixed 2 yd ran half of them out of bounds)
+  const double edge = 1.2 + vel.y * vel.y / (2 * 6.0);
+  if (pos.y < edge && w.y < 0) w = V2{e->vmax, 0};
+  if (pos.y > FIELD_W - edge && w.y > 0) w = V2{e->vmax, 0};
   if (pos.x > DEEP_AIM - 1.5 && w.x > 0) {
     // out of room at the back of the end zone: stop, square up to the QB and work along the end line
     const double toQB = qb ? jsSign(qb->pos.y - pos.y) : 0;
@@ -1845,7 +1875,9 @@ void PlaySim::thinkRoute(Ent* e) {
     const double trackT = 0.22 + (airYd > 18 ? 0.25 : 0) + (99 - e->r().catching) * 0.004;
     if (ball.t >= trackT) {
       e->catchAdjust = true;
-      const V2 spot = ballLanding();
+      // a ball drifting out: he keeps his feet in (a toe tap at the sideline, the end line) and reaches for it
+      const V2 land = ballLanding();
+      const V2 spot{(std::min)(land.x, END_LINE - 0.35), clamp(land.y, 0.35, FIELD_W - 0.35)};
       e->want = scale(norm(sub(spot, e->pos)), (std::min)(e->vmax, dist(spot, e->pos) * 5 + 1));
       return;
     }
@@ -2191,8 +2223,8 @@ void PlaySim::thinkPursue(Ent* e) {
   const double lead = (std::min)(tInt, (d / e->vmax) * 1.1 + 0.1) * k;
   V2 tgt = d < 1.2 ? c->pos : add(c->pos, scale(c->vel, lead));
   // last line of defense: deep defenders keep depth (stay over the top) until the carrier is close
-  if (e->deepRole && c->side == Side::Off && d > 3.5) {
-    const double keep = (std::min)(c->pos.x + (std::min)(4.0, 1 + d * 0.3), DEEP_AIM);
+  if (e->deepRole && c->side == Side::Off && d > 3.5 && tune().deepKeep > 0) {
+    const double keep = (std::min)(c->pos.x + (std::min)(4.0, 1 + d * 0.3) * tune().deepKeep, DEEP_AIM);
     if (tgt.x < keep) tgt = V2{keep, tgt.y};
   }
   // break down: close under control in the last few yards (a pursuer at full tilt overruns a cut and misses)
@@ -2284,7 +2316,8 @@ void PlaySim::thinkCarrier(Ent* e) {
     gain = dir.x * gd;
     double score = gain * 1.6 - danger * 2.4;
     if (preLOS) score -= std::fabs(e->pos.y + dir.y * 3 - aimY) * (0.05 + (vis < 70 ? 0.08 : 0));
-    score += rng.normal(0, 0.05 + (99 - vis) * 0.009);
+    // reading the field at speed: a receiver who has just caught it reads it worse than a back reading his blocks
+    score += rng.normal(0, (0.05 + (99 - vis) * 0.009) * (e == catcher ? tune().yacNoise : tune().runNoise));
     if (score > bestScore) {
       bestScore = score;
       best = a;
@@ -2356,6 +2389,7 @@ void PlaySim::impulse(Ent* e, const V2& dv, double dur) {
 }
 
 void PlaySim::move(Ent* e, double dt) {
+  if (wrap_ && (e == wrap_->c || e == wrap_->d)) return;  // the pile moves them (stepWrap)
   if (e->engaged) return;  // engaged pairs are moved by updateEngagements
   if (e->state == EntState::Down || (e->pancaked && e->stun > 0)) {
     e->vel = scale(e->vel, 0.85);
@@ -2489,6 +2523,10 @@ void PlaySim::updateEngagements(double dt) {
     const double push = clamp(diff / 25, -1, 1);
     d->linePush = push;
     for (Ent* b : blockers) b->linePush = push;
+    // a blocker losing the rep hangs on: the worse he is beaten, the likelier the hold is seen (run or pass)
+    if (push > 0.3 && ball.mode != BallMode::Snap)
+      for (Ent* b : blockers)
+        if (b->side == Side::Off) foulHold.add(tune().holdK * (push - 0.3) * dt * (passPro ? 0.75 : 1.4), b->p);  // (a return's blocks after a turnover are not offensive holding)
     const V2 pileV = push > 0 ? scale(toGoal, push * (passPro ? 1.3 : 1.6))
                               : scale(norm(V2{-toGoal.x, -toGoal.y * 0.3}), -push * (passPro ? 0.35 : 1.6));
     // defender also slides laterally toward the goal when not winning
@@ -2513,7 +2551,11 @@ void PlaySim::updateEngagements(double dt) {
     const double base = passPro ? tune().passProShed : 0.09;
     const bool holderNear = holder && holder->side != d->side && dist(holder->pos, d->pos) < 1.6;
     const double decay = (std::max)(0.0, blockers[0]->engT - (passPro ? 2.6 : 1.6)) * 0.5;
-    const double lambda = (base * std::exp(diff / 17) + decay) * (holderNear ? 3.2 : 1);
+    double lambda = (base * std::exp(diff / 17) + decay) * (holderNear ? 3.2 : 1);
+    // the ball is caught (or handed off) away from the quarterback: a pass rusher stops rushing a quarterback who no
+    // longer has it, turns and chases; his blocker cannot hold him (that is holding), so the rep breaks up in a beat
+    // (the blockers turned convoy at the catch: a pass rep still running when the ball was caught)
+    if (passThrown && holder && holder != qb && holder->side != d->side && blockers[0]->engT > t - throwStart) lambda += tune().releaseRate;
     // pancake: a run block won decisively puts the defender on his back (rare; the drive has to be dominant)
     if (!passPro && push < -0.6 && blockers[0]->engT > 0.5 &&
         pancakeRoll(d) < 1 - std::exp(-0.35 * (-push - 0.6) / 0.4 * dt)) {
@@ -2536,6 +2578,7 @@ void PlaySim::updateEngagements(double dt) {
       // shed! the beaten blocker is left behind and can't re-engage this rusher. The move that won it (for the
       // presentation): picked from the rusher's build and leverage, not from the rng, so the sim is unchanged
       if (ball.mode != BallMode::Snap) ev("shed", d, blockers[0], shedMove(d, blockers[0], passPro, push)); // events start at the snap
+      if (ball.mode != BallMode::Snap && blockers[0]->side == Side::Off) foulHold.add(tune().holdShed, blockers[0]->p);
       for (Ent* b : blockers) {
         disengage(b);
         b->stun = (passPro ? 0.6 : 0.35) + rng.range(0, 0.3);
@@ -2722,6 +2765,15 @@ void PlaySim::resolveAir() {
       double nearOpp = 9;
       for (Ent* o : oppNear) nearOpp = (std::min)(nearOpp, dist(o->pos, e->pos));
       const double tight = contested ? clamp(1 - nearOpp / (deepBall ? 2.2 : 1.3), 0, 1) : 0;
+      if (contested && e == b.target) {
+        // a defender in phase and not ahead to the ball is playing the man: the tighter, the likelier the flag
+        Ent* dm = oppNear[0];
+        for (Ent* o : oppNear)
+          if (dist(o->pos, e->pos) < dist(dm->pos, e->pos)) dm = o;
+        const bool behind = dist(dm->pos, bp) > d - 0.2;
+        foulDpi.add(tight * tight * (deepBall ? 2.4 : 0.8) * (behind ? 1.0 : 0.35), dm->p);
+        foulOpi.add(tight * 0.075, e->p);
+      }
       const double tough = offT * 1.2 + (ballSpeed > 24 ? 0.25 : 0) + (contested ? tune().contested + tight * (deepBall ? tune().tightDeep : tune().tightShort) : 0) +
                            (b.pos.z > 2.6 ? 0.5 : 0) + (b.pos.z < 0.6 ? 0.4 : 0);
       const double wet = cfg.weather.precip != Precip::None ? 0.25 : 0;
@@ -2742,7 +2794,7 @@ void PlaySim::resolveAir() {
           b.vel.z = 1.5;
           b.target = nullptr;
           // defender in great position may come down with it; or tipped and picked
-          const double pInt = sigmoid((dbest->r().catching - 62) / 10 + edge * 1.2 - 1.4 - (deepBall ? 1.0 : 0));
+          const double pInt = sigmoid((dbest->r().catching - 62) / 10 + edge * 1.2 - 1.4 - (deepBall ? 1.0 : 0) + tune().intBias);
           if (rng.chance(pInt)) intercept(dbest);
           return;
         }
@@ -2793,7 +2845,7 @@ void PlaySim::resolveAir() {
       const double edge = clamp(rd - d, -2, 1.5);  // defender beat the receiver to the ball
       const double pPlay = sigmoid((e->r().ballSkills - 70) / 10 + edge * 1.0 - 1.1 - d * 0.8 - (b.pos.z > 2.5 ? 0.8 : 0));
       if (!rng.chance(pPlay)) continue;
-      const double pInt = sigmoid((e->r().catching - 62) / 10 + edge * 0.6 - 1.2 - (b.pos.x - los > 18 ? 1.0 : 0));
+      const double pInt = sigmoid((e->r().catching - 62) / 10 + edge * 0.6 - 1.2 - (b.pos.x - los > 18 ? 1.0 : 0) + tune().intBias);
       if (rng.chance(pInt)) {
         intercept(e);
       } else {
@@ -2834,6 +2886,7 @@ void PlaySim::intercept(Ent* e) {
 
 // ------------------------------------------------------------------ tackling
 void PlaySim::checkTackles() {
+  if (wrap_) return;  // a pile on the move: it ends itself (stepWrap)
   Ent* c = ball.holder;
   if (!c || ball.mode != BallMode::Held) return;
   // QB in pocket is a sack target; others are carriers
@@ -2923,52 +2976,38 @@ bool PlaySim::tryTackle(Ent* d, Ent* c, int gang, bool arm, bool dive) {
     double fall = vComb.x * gd * 0.38 + (c->r().strength - d->r().strength) * 0.006 + rng.normal(0.35, 0.35);
     fall = clamp(fall, -1.5, 2.6);
     if (isSack) fall = (std::min)(fall, 0.3);
-    // yards after contact: ball carriers drive the pile / fall forward unless gang-tackled
+    // yards after contact: ball carriers drive the pile forward unless gang-tackled
+    double drive = 0;
     if (!isSack && vComb.x * gd > -1) {
       double help = 0;
       for (Ent* o : defendersOf(c))
         if (o != d && o->free() && dist(o->pos, c->pos) < 2.2) help++;
       const double mu = 0.45 + (c->r().breakTackle * 0.5 + c->r().strength * 0.5 - d->r().tackling) * 0.025 + (mc - md) * 0.012 +
                         c->speed() * 0.07 - help * 0.55 - (facing > 0.3 ? 0.25 : 0);
-      fall += clamp(rng.normal(mu, 0.75), 0, 4);
+      drive = clamp(rng.normal(mu, 0.75), 0, 4);
     }
     // QB sneak: the whole line surges, QB lunges over the pile
     if (cfg.offPlay->run && cfg.offPlay->run->style == RunStyle::Sneak && c == qb)
       fall += 0.9 + rng.range(0, 0.8) + (c->r().strength - 60) * 0.01;
-    c->pos = V2{c->pos.x + fall * gd, c->pos.y + vComb.y * 0.25};
-    c->state = EntState::Down;
-    c->anim = Anim::Down;
-    c->animT = 0;
-    d->state = EntState::Down;
-    d->anim = Anim::Tackle;
-    tacklers.push_back(d);
-    ev("tackle", d, c, dive ? "dive" : arm ? "arm" : "");  // presentation: the paired fall
-    // gang tackle: pursuers arriving with the tackle join it (about a third of NFL tackles are shared). Anyone free
-    // within ~2 yd and closing, nearest first, up to two assists.
-    {
-      std::vector<std::pair<double, Ent*>> near;
-      for (Ent* o : defendersOf(c)) {
-        if (o == d || !o->free() || o->state == EntState::Down) continue;
-        const double od = dist(o->pos, c->pos);
-        const double closing = dot(sub(o->vel, c->vel), norm(sub(c->pos, o->pos)));
-        if (od < 1.4 || (od < tune().assistRange && closing > 1.0)) near.push_back(std::make_pair(od, o));
-      }
-      std::stable_sort(near.begin(), near.end(), [](const std::pair<double, Ent*>& a, const std::pair<double, Ent*>& b) { return a.first < b.first; });
-      for (size_t k = 0; k < near.size() && k < 2; k++) {
-        tacklers.push_back(near[k].second);
-        ev("assist", near[k].second, c);
-      }
-    }
-    if (isSack) sackBy = d;
-    // fumble?
-    const double hit = (md * vd) / 900;
-    const double pf = 0.0105 * std::exp((70 - c->r().carrying) / 16) * (0.6 + hit) * (isSack ? 3.5 : 1) *
-                      (cfg.weather.precip != Precip::None ? 1.3 : 1) * (cfg.kick ? 0.12 : 1);  // returners: ~1% (they are picked for it)
-    if (rng.chance(pf) && !(isSack && rng.chance(0.3))) {
-      fumble(c, d);
+    if (drive > 0.4 && !cfg.kick) {
+      // the pile moves: the carrier drives on with the tackler wrapped on him (stepWrap) and goes down at its end
+      Wrap w;
+      w.c = c;
+      w.d = d;
+      w.left = drive;
+      w.natFall = fall;
+      w.latY = vComb.y * 0.25;
+      w.dive = dive;
+      w.arm = arm;
+      w.vd = vd;
+      w.md = md;
+      w.off = sub(d->pos, c->pos);
+      if (len(w.off) > 1.0) w.off = scale(norm(w.off), 1.0);
+      wrap_ = w;
+      ev("wrap", d, c);
       return true;
     }
-    endPlay(isSack ? "sack" : "tackle");
+    finishTackle(d, c, fall + drive, vComb.y * 0.25, dive, arm, vd, md, isSack, nullptr);
     return true;
   }
   // missed / broken tackle
@@ -2980,6 +3019,77 @@ bool PlaySim::tryTackle(Ent* d, Ent* c, int gang, bool arm, bool dive) {
   impulse(c, scale(c->vel, (dive ? 0.82 : 0.68) - 1), 0.3);
   c->animT = 0;
   return false;
+}
+
+void PlaySim::stepWrap(double dt) {
+  Wrap& w = *wrap_;
+  Ent* c = w.c;
+  Ent* d = w.d;
+  const double gd = goalDir(c);
+  // help arriving stops the pile (the next man in finishes it, an assist)
+  Ent* help = nullptr;
+  for (Ent* o : defendersOf(c))
+    if (o != d && o->free() && o->state != EntState::Down && dist(o->pos, c->pos) < c->radius + o->radius + 0.35) {
+      help = o;
+      break;
+    }
+  const double v = 2.2 + (c->r().strength - 60) * 0.015;  // a pile moves at a hard walk
+  const double step = (std::min)(w.left, v * dt);
+  const bool edge = c->pos.y < 0.15 || c->pos.y > FIELD_W - 0.15;  // driven to the sideline: the drive ends there
+  if (!edge && !help) {
+    c->pos = V2{c->pos.x + step * gd, c->pos.y};
+    w.left -= step;
+  }
+  c->vel = V2{(edge || help ? 0.0 : step / dt) * gd, 0};
+  d->pos = add(c->pos, w.off);
+  d->vel = c->vel;
+  c->anim = Anim::Run;
+  d->anim = Anim::Tackle;
+  if (w.left <= 1e-6 || help || edge) {
+    const Wrap done = w;
+    wrap_.reset();
+    finishTackle(done.d, done.c, done.natFall, done.latY, done.dive, done.arm, done.vd, done.md, false, help);
+  }
+}
+
+void PlaySim::finishTackle(Ent* d, Ent* c, double fall, double latY, bool dive, bool arm, double vd, double md, bool isSack, Ent* help) {
+  const double gd = goalDir(c);
+  c->pos = V2{c->pos.x + fall * gd, c->pos.y + latY};
+  c->state = EntState::Down;
+  c->anim = Anim::Down;
+  c->animT = 0;
+  d->state = EntState::Down;
+  d->anim = Anim::Tackle;
+  tacklers.push_back(d);
+  ev("tackle", d, c, dive ? "dive" : arm ? "arm" : "");  // presentation: the paired fall
+  foulMask.add(0.0012 + 0.0024 * (vd / (std::max)(1.0, d->vmax)) * (arm || dive ? 1.5 : 1), d->p);
+  // gang tackle: the man who stopped the pile, then pursuers arriving with the tackle (about a third of NFL tackles
+  // are shared). Anyone free within ~2 yd and closing, nearest first, up to two assists.
+  {
+    std::vector<std::pair<double, Ent*>> near;
+    if (help) near.push_back(std::make_pair(-1.0, help));
+    for (Ent* o : defendersOf(c)) {
+      if (o == d || o == help || !o->free() || o->state == EntState::Down) continue;
+      const double od = dist(o->pos, c->pos);
+      const double closing = dot(sub(o->vel, c->vel), norm(sub(c->pos, o->pos)));
+      if (od < 1.4 || (od < tune().assistRange && closing > 1.0)) near.push_back(std::make_pair(od, o));
+    }
+    std::stable_sort(near.begin(), near.end(), [](const std::pair<double, Ent*>& a, const std::pair<double, Ent*>& b) { return a.first < b.first; });
+    for (size_t k = 0; k < near.size() && k < 2; k++) {
+      tacklers.push_back(near[k].second);
+      ev("assist", near[k].second, c);
+    }
+  }
+  if (isSack) sackBy = d;
+  // fumble?
+  const double hit = (md * vd) / 900;
+  const double pf = 0.0105 * std::exp((70 - c->r().carrying) / 16) * (0.6 + hit) * (isSack ? 3.5 : 1) *
+                    (cfg.weather.precip != Precip::None ? 1.3 : 1) * (cfg.kick ? 0.12 : 1);  // returners: ~1% (they are picked for it)
+  if (rng.chance(pf) && !(isSack && rng.chance(0.3))) {
+    fumble(c, d);
+    return;
+  }
+  endPlay(isSack ? "sack" : "tackle");
 }
 
 void PlaySim::fumble(Ent* c, Ent* byEnt) {
@@ -3023,6 +3133,7 @@ void PlaySim::checkBounds() {
 // ------------------------------------------------------------------ end of play
 void PlaySim::endPlay(const std::string& reason) {
   if (phase == SimPhase::Dead) return;
+  wrap_.reset();
   phase = SimPhase::Dead;
   endReason = reason;
   const Ball& b = ball;
@@ -3106,6 +3217,12 @@ void PlaySim::endPlay(const std::string& reason) {
   r.pressured = pressured;
   r.timeToThrow = throwStart > 0 ? throwStart : t;
   r.brokenTackles = brokenTackles;
+  r.foulHold = foulHold;
+  r.foulDpi = foulDpi;
+  r.foulDhold = foulDhold;
+  r.foulRough = foulRough;
+  r.foulMask = foulMask;
+  r.foulOpi = foulOpi;
   if (ball.targetSpot) r.targetSpotY = ball.targetSpot->y;
   r.endY = holder ? holder->pos.y : by;
   r.events = events;

@@ -82,6 +82,11 @@ int main(int argc, char** argv) {
   const PlaySim* accSim = nullptr;
   // where passes arrive relative to the target (TAG_MISS=1): along his run (+ ahead) and across
   const bool missOn = std::getenv("TAG_MISS") != nullptr;
+  const bool yacDbg = std::getenv("TAG_YACDBG") != nullptr;
+  std::string yacTrace;
+  const PlaySim* yacSim = nullptr;
+  double yacT0 = -1, yacLastT = 0, yacNext = 0;
+  int yacShown = 0;
   const PlaySim* missSim = nullptr;
   double missLastT = 0;
   bool missDone = false;
@@ -100,6 +105,13 @@ int main(int argc, char** argv) {
   std::map<std::string, double> J;  // --json
   double qbSwaps = 0, qbSnaps = 0;
   double yacSum = 0, compAirSum = 0, compN = 0;
+  double fHold[2] = {0, 0}, fN[2] = {0, 0}, fDpi = 0, fDpiN = 0, fDhold = 0, fRough = 0, fOpi = 0, fOpiN = 0, fMask = 0;
+  std::vector<double> runYds, passYdsEarly;
+  double edN = 0, edSucc = 0, edRun = 0, edRunSucc = 0;
+  double tdN[4] = {0, 0, 0, 0}, tdConv[4] = {0, 0, 0, 0}, tdPass[4] = {0, 0, 0, 0};
+  double mtBroken = 0, mtMade = 0, yac0 = 0, yac0N = 0, yacMt = 0, yacMtN = 0;
+  double yacSep[5] = {0, 0, 0, 0, 0}, yacSepN[5] = {0, 0, 0, 0, 0};
+  double yacB[4] = {0, 0, 0, 0}, yacBN[4] = {0, 0, 0, 0}, yacBig[4] = {0, 0, 0, 0};
 
   for (int g = 0; g < N; g++) {
     const int hi = rng.intRange(0, 31);
@@ -122,6 +134,10 @@ int main(int argc, char** argv) {
         lastQb = qid;
         lastQbPoss = static_cast<int>(game.poss);
         qbSnaps++;
+      }
+      if (yacDbg && r.complete && r.catchSep >= 2 && r.catchSep < 3.5 && r.yac >= 8 && r.airYards >= 1 && yacShown < 10) {
+        yacShown++;
+        std::printf("YAC %.0f air %.0f sep %.1f play %s missed %d\n%s", static_cast<double>(r.yac), static_cast<double>(r.airYards), r.catchSep, sim.cfg.offPlay->id.c_str(), r.brokenTackles, yacTrace.c_str());
       }
       if (r.olBlockDepth > -99) olDeep.push_back(r.olBlockDepth);
       if (r.kind == PlayKind::Sack) {
@@ -163,6 +179,12 @@ int main(int argc, char** argv) {
         airSum += r.airYards;
         if (r.complete) {
           yacSum += r.yac;
+          yacB[b] += r.yac;
+          if (r.catchSep >= 0 && r.catchSep < 90) { const int sb = r.catchSep < 1 ? 0 : r.catchSep < 2 ? 1 : r.catchSep < 3 ? 2 : r.catchSep < 5 ? 3 : 4; yacSep[sb] += r.yac; yacSepN[sb]++; }
+          (r.brokenTackles ? yacMt : yac0) += r.yac;
+          (r.brokenTackles ? yacMtN : yac0N)++;
+          yacBN[b]++;
+          if (r.yac >= 15) yacBig[b]++;
           compAirSum += r.airYards;
           compN++;
         }
@@ -174,11 +196,72 @@ int main(int argc, char** argv) {
         if (r.pressured || r.kind == PlayKind::Sack) pressured++;
         if (r.kind == PlayKind::Pass && r.timeToThrow > 0) ttt.push_back(r.timeToThrow);
       }
+      mtBroken += r.brokenTackles;
+      if (!sim.isReturn() && sim.cfg.down && *sim.cfg.down <= 2 && sim.cfg.toGo && r.kind != PlayKind::Kneel && r.kind != PlayKind::Spike) {
+        const double need = (*sim.cfg.down == 1 ? 0.4 : 0.6) * *sim.cfg.toGo;
+        const bool ok = r.yards >= need || r.td == Side::Off;
+        edN++;
+        edSucc += ok;
+        if (r.kind == PlayKind::Run) { edRun++; edRunSucc += ok; runYds.push_back(r.yards); }
+        else passYdsEarly.push_back(r.yards);
+      }
+      if (!sim.isReturn() && sim.cfg.down && *sim.cfg.down == 3 && sim.cfg.toGo && r.kind != PlayKind::Kneel && r.kind != PlayKind::Spike) {
+        const double tg = *sim.cfg.toGo;
+        const int tb = tg <= 2 ? 0 : tg <= 5 ? 1 : tg <= 9 ? 2 : 3;
+        tdN[tb]++;
+        if (r.yards >= tg || r.td == Side::Off) tdConv[tb]++;
+        if (r.kind != PlayKind::Run) tdPass[tb]++;
+      }
+      if (r.kind != PlayKind::Kneel && r.kind != PlayKind::Spike && !sim.isReturn()) {
+        const int pk = (r.kind == PlayKind::Run) ? 1 : 0;
+        fHold[pk] += r.foulHold.p;
+        fN[pk]++;
+        if (pk == 0) {
+          fDhold += r.foulDhold.p;
+          fRough += r.foulRough.p;
+          if (r.incomplete && r.airYards >= 5) { fDpi += r.foulDpi.p; fDpiN++; }
+          if (r.complete && r.airYards >= 8) { fOpi += r.foulOpi.p; fOpiN++; }
+        }
+        fMask += r.foulMask.p;
+      }
+      if (!r.tacklers.empty()) mtMade++;
       if (!r.tacklers.empty() && r.kind != PlayKind::Sack) {
         tackles++;
         tacklerSum += static_cast<double>(r.tacklers.size());
       }
     };
+    if (yacDbg)
+      game.onSimStep = [&](const PlaySim& sim) {
+        if (&sim != yacSim || sim.t < yacLastT) {
+          yacSim = &sim;
+          yacT0 = -1;
+          yacTrace.clear();
+        }
+        yacLastT = sim.t;
+        const Ent* c = sim.ball.holder;
+        if (yacT0 < 0) {
+          if (!c || !sim.passThrown || sim.ball.mode != BallMode::Held || c->side != Side::Off || c == sim.qb) return;
+          yacT0 = sim.t;
+          yacNext = sim.t;
+        }
+        if (!c || sim.t < yacNext) return;
+        yacNext = sim.t + 0.25;
+        char buf[512];
+        std::snprintf(buf, sizeof buf, "  t+%.2f carrier %s (%.1f,%.1f) v(%.1f,%.1f) %s |", sim.t - yacT0, c->role.c_str(), c->pos.x - sim.los, c->pos.y,
+                      c->vel.x, c->vel.y, c->stateName());
+        yacTrace += buf;
+        std::vector<std::pair<double, const Ent*>> nd;
+        for (const Ent* d : (c->side == Side::Off ? sim.def : sim.off)) nd.push_back(std::make_pair(dist(d->pos, c->pos), d));
+        std::sort(nd.begin(), nd.end(), [](const std::pair<double, const Ent*>& a, const std::pair<double, const Ent*>& b) { return a.first < b.first; });
+        for (size_t k = 0; k < 3 && k < nd.size(); k++) {
+          const Ent* d = nd[k].second;
+          const double closing = dot(sub(d->vel, c->vel), norm(sub(c->pos, d->pos)));
+          std::snprintf(buf, sizeof buf, " %s %s d%.1f sp%.1f cl%.1f%s%s", d->role.c_str(), d->stateName(), nd[k].first, d->speed(), closing,
+                        d->engaged ? " ENG" : "", d->stun > 0 ? " STUN" : "");
+          yacTrace += buf;
+        }
+        yacTrace += "\n";
+      };
     if (missOn)
       game.onSimStep = [&](const PlaySim& sim) {
         if (&sim != missSim || sim.t < missLastT) {
@@ -368,6 +451,35 @@ int main(int argc, char** argv) {
     J["qb_changes_per_game"] = qbSwaps / (std::max)(1, N);
     std::printf("per completion: air yards %.1f, YAC %.1f (NFL 2024 ~5.6 / ~5.2)\n", compAirSum / (std::max)(1.0, compN),
                 yacSum / (std::max)(1.0, compN));
+    J["missed_tackle_rate"] = mtBroken / (std::max)(1.0, mtBroken + mtMade);
+    std::printf("missed tackles: %.1f%% of attempts (PFF team range 12-16%%); YAC with none %.1f, with one+ %.1f (%.0f%% of catches)\n",
+                100 * mtBroken / (std::max)(1.0, mtBroken + mtMade), yac0 / (std::max)(1.0, yac0N), yacMt / (std::max)(1.0, yacMtN),
+                100 * yacMtN / (std::max)(1.0, yac0N + yacMtN));
+    std::printf("YAC by separation at the catch (<1, 1-2, 2-3, 3-5, 5+ yd): %.1f (%.0f%%)  %.1f (%.0f%%)  %.1f (%.0f%%)  %.1f (%.0f%%)  %.1f (%.0f%%)\n",
+                yacSep[0] / (std::max)(1.0, yacSepN[0]), 100 * yacSepN[0] / (std::max)(1.0, compN), yacSep[1] / (std::max)(1.0, yacSepN[1]), 100 * yacSepN[1] / (std::max)(1.0, compN),
+                yacSep[2] / (std::max)(1.0, yacSepN[2]), 100 * yacSepN[2] / (std::max)(1.0, compN), yacSep[3] / (std::max)(1.0, yacSepN[3]), 100 * yacSepN[3] / (std::max)(1.0, compN),
+                yacSep[4] / (std::max)(1.0, yacSepN[4]), 100 * yacSepN[4] / (std::max)(1.0, compN));
+    std::printf("foul risk per play (old flat rolls): holding pass %.3f (0.026) run %.3f (0.036), DPI per incomplete 5+ %.3f (~0.03), def holding %.3f (0.014), roughing %.4f (~0.004), OPI per complete 8+ %.4f (0.005), facemask %.4f (0.002)\n",
+                fHold[0] / (std::max)(1.0, fN[0]), fHold[1] / (std::max)(1.0, fN[1]), fDpi / (std::max)(1.0, fDpiN), fDhold / (std::max)(1.0, fN[0]),
+                fRough / (std::max)(1.0, fN[0]), fOpi / (std::max)(1.0, fOpiN), fMask / (std::max)(1.0, fN[0] + fN[1]));
+    {
+      auto pc = [](std::vector<double> v, double q) { if (v.empty()) return 0.0; std::sort(v.begin(), v.end()); return v[static_cast<size_t>(q * (v.size() - 1))]; };
+      double neg = 0, zero = 0;
+      for (double y : runYds) { neg += y < 0; zero += y <= 0; }
+      std::printf("early downs: success %.0f%% (NFL ~47%%), runs %.0f%% (NFL ~42%%); run yards p10 %.0f p25 %.0f p50 %.0f p75 %.0f p90 %.0f, lost yards %.0f%%, <=0 %.0f%% (NFL ~ p50 3, <=0 ~22%%); early pass plays p25 %.0f p50 %.0f p75 %.0f\n",
+                  100 * edSucc / (std::max)(1.0, edN), 100 * edRunSucc / (std::max)(1.0, edRun), pc(runYds, 0.1), pc(runYds, 0.25), pc(runYds, 0.5), pc(runYds, 0.75), pc(runYds, 0.9),
+                  100 * neg / (std::max)(1.0, (double)runYds.size()), 100 * zero / (std::max)(1.0, (double)runYds.size()), pc(passYdsEarly, 0.25), pc(passYdsEarly, 0.5), pc(passYdsEarly, 0.75));
+    }
+    std::printf("3rd downs (share of 3rd downs / converted / pass rate) NFL ~ 1-2: 22%% 62%%, 3-5: 25%% 48%%, 6-9: 26%% 36%%, 10+: 27%% 20%%\n");
+    {
+      const double tot = (std::max)(1.0, tdN[0] + tdN[1] + tdN[2] + tdN[3]);
+      const char* nm3[4] = {"1-2", "3-5", "6-9", "10+"};
+      for (int k = 0; k < 4; k++)
+        std::printf("   3rd & %s: %4.0f%% of 3rd downs, converted %4.0f%%, passed %4.0f%%\n", nm3[k], 100 * tdN[k] / tot, 100 * tdConv[k] / (std::max)(1.0, tdN[k]), 100 * tdPass[k] / (std::max)(1.0, tdN[k]));
+    }
+    std::printf("YAC by air depth (NFL ~ behind 7.5, 0-9 5.0, 10-19 4.0, 20+ 4.5):  behind %.1f  0-9 %.1f  10-19 %.1f  20+ %.1f   15+ YAC share: %.0f%% %.0f%% %.0f%% %.0f%%\n",
+                yacB[0] / (std::max)(1.0, yacBN[0]), yacB[1] / (std::max)(1.0, yacBN[1]), yacB[2] / (std::max)(1.0, yacBN[2]), yacB[3] / (std::max)(1.0, yacBN[3]),
+                100 * yacBig[0] / (std::max)(1.0, yacBN[0]), 100 * yacBig[1] / (std::max)(1.0, yacBN[1]), 100 * yacBig[2] / (std::max)(1.0, yacBN[2]), 100 * yacBig[3] / (std::max)(1.0, yacBN[3]));
     {
       const char* pn[4] = {"read", "hot", "pressure", "quick"};
       std::printf("throws by decision:");

@@ -279,9 +279,23 @@ for _, p in P[P.snap.notna()].iterrows():
     last = d[d.frame == d.frame.max()]
     los = f0.bx.iloc[0]   # the ball on the line when the play goes live
     end_x = last.bx.iloc[0]
-    sign = 1  # sim x is the offense frame (+x downfield)
-    shown = end_x - los
-    cmp_.append(dict(clip=c, scored=y, shown=round(float(shown), 1), diff=round(float(shown - y), 1), desc=dsc[:70]))
+    sim_shown = end_x - los  # the sim's ball at the whistle (before the carrier's forward fall is added)
+    # what the viewer sees: the visible ball once it has settled after the whistle (the fall played out), in yards along
+    # the offense's direction (world X sign from the ball's sim / world travel over the live frames)
+    shown = sim_shown
+    bw = D[(D["clip"] == c)].drop_duplicates("frame").set_index("frame")[["state", "bx", "bwx"]]
+    lv = bw[bw.state == "live"]
+    if len(lv) > 5 and lv.bwx.notna().all():
+        sgn = 1.0 if np.corrcoef(lv.bx, lv.bwx)[0, 1] >= 0 else -1.0
+        if np.isnan(sgn) or lv.bx.std() < 0.2:
+            sgn = 1.0 if (lv.bwx.iloc[-1] - lv.bwx.iloc[0]) * (lv.bx.iloc[-1] - lv.bx.iloc[0]) >= 0 else -1.0
+        after = bw[(bw.index > lv.index.max()) & (bw.index <= lv.index.max() + 60)].bwx.dropna()
+        if len(after) > 3:
+            v = after.diff().abs()
+            still = after[v < 1.0]  # the first settled frame (the ball moving < 1 cm a frame)
+            end_w = (still.iloc[0] if len(still) else after.iloc[-1])
+            shown = sgn * (end_w - lv.bwx.iloc[0]) / 91.44
+    cmp_.append(dict(clip=c, scored=y, shown=round(float(shown), 1), sim=round(float(sim_shown), 1), diff=round(float(shown - y), 1), desc=dsc[:70]))
 CM = pd.DataFrame(cmp_)
 if len(CM):
     R["shown_vs_scored"] = {"plays": int(len(CM)), "median_abs_diff_yd": round(float(CM["diff"].abs().median()), 1),
@@ -342,6 +356,14 @@ R["foot_plants"] = {"plants_moving": int(len(MVP)), "median_slide_cm": round(flo
 wa = MVP.groupby("asset").agg(n=("path", "size"), med=("path", "median"), gt10=("path", lambda s: (s > 10).mean())).query("n >= 40")
 R["foot_plants"]["worst_assets"] = wa.sort_values("gt10", ascending=False).head(10).round(3).reset_index().to_dict("records")
 R["foot_plants"]["best_assets"] = wa.sort_values("gt10").head(8).round(3).reset_index().to_dict("records")
+# ---------------------------------------------------------------- foot lock: planted-foot travel as the clip has it vs as shown
+# (slr / sls columns, the retarget layer's own per-update measure: a lock that works shows much less than the clip)
+if "slr" in D.columns and "sls" in D.columns:
+    FL = D[(D.hidden == 0) & (D.down == 0) & (np.hypot(D.svx, D.svy) * YD > 1.0) & ~D["mode"].isin(["fall", "ragdoll", "replay", "getup"])]
+    R["foot_lock"] = {"frames": int(len(FL)), "raw_cm_per_s": round(float(FL.slr.sum() / max(1, len(FL)) * 30), 1),
+                      "shown_cm_per_s": round(float(FL.sls.sum() / max(1, len(FL)) * 30), 1),
+                      "shown_over_raw": round(float(FL.sls.sum() / max(1e-6, FL.slr.sum())), 3),
+                      "by_mode_shown_over_raw": {k: round(float(v.sls.sum() / max(1e-6, v.slr.sum())), 3) for k, v in FL.groupby("mode") if len(v) > 300}}
 # ---------------------------------------------------------------- realism-plan measures (rubric.json)
 # the ball in the air never past the end line (110) or far outside the sidelines (sim yards)
 air = D[D.ballmode == "air"].drop_duplicates(["clip", "frame"])
@@ -380,4 +402,4 @@ if "refd" in D.columns:
                     "min_cm": round(float(rf.refd.min()), 1) if len(rf) else None, "n": int(len(rf))}
 
 json.dump({"R": R, "plays": P.to_dict("records"), "desc": desc, "cmp": CM.to_dict("records")}, open(OUT, "w"), indent=1, default=float)
-print(json.dumps({k: R.get(k) for k in ("accel_free", "foot_plants", "ball_air_max_x_yd", "celebrations", "role_mismatch", "framing", "referee")}, indent=1, default=float)[:4000])
+print(json.dumps({k: R.get(k) for k in ("accel_free", "foot_plants", "foot_lock", "ball_air_max_x_yd", "celebrations", "role_mismatch", "framing", "referee")}, indent=1, default=float)[:4000])

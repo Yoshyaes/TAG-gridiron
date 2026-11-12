@@ -44,32 +44,39 @@ constexpr double SIM_DT = 1.0 / 60.0;
  *  can override them (SimCalibrate --set name=value) to fit the sim to NFL numbers. Values from Tools/Realism/fit.py
  *  (2026-11-12: 150 games seed 11, validated on 200 games seed 29: loss 18.4 -> 15.2, 15 -> 10 stats out of NFL tolerance). */
 struct Tune {
-  double tackleBase = 3.05;  // tackle success logit base
+  double tackleBase = 3.14;  // tackle success logit base
   double accBase = 0.3;  // throw placement error: base sd (yd)
-  double accSlope = 0.017;  // throw placement error: per rating point below 99
-  double deepErr = 0.01216;  // extra error per air yard past 20
-  double deepReadK = 1.65;  // QB read penalty for a target past 15 yd
+  double accSlope = 0.017648;  // throw placement error: per rating point below 99
+  double deepErr = 0.01138;  // extra error per air yard past 20
+  double deepReadK = 1.95;  // QB read penalty for a target past 15 yd
   double deepReadSlope = 0.1581;  // ... per yard past 15
-  double hotDeepK = 0.9767;  // hot-read penalty for a target past 12 yd
-  double hotDeepSlope = 0.1374;  // ... per yard past 12
+  double hotDeepK = 0.8771;  // hot-read penalty for a target past 12 yd
+  double hotDeepSlope = 0.1614;  // ... per yard past 12
   double manCushion = 1.8;  // man coverage cushion on routes past 8 yd
   double zoneCushion = 3;  // deep zone cushion
   double zoneCushionV = 0.55;  // ... per yd/s of the receiver's speed
-  double routeRead = 0.6;  // how far a good cover man plays the route ahead
+  double routeRead = 0.75;  // how far a good cover man plays the route ahead
   double passProShed = 0.045;  // pass-pro shed hazard base (per s)
-  double qbThresh = 2.6;  // QB openness bar at the snap
+  double qbThresh = 2.6324;  // QB openness bar at the snap
   double qbDecay = 0.21;  // ... drop per second
   double qbLate = 0.7;  // ... extra drop per second past 2.5 s
-  double tightDeep = 1.97;  // catch difficulty from a defender in phase, deep
-  double tightShort = 1.5;  // ... short
-  double contested = 0.7;  // catch difficulty of any contested ball
+  double tightDeep = 1.8116;  // catch difficulty from a defender in phase, deep
+  double tightShort = 1.6694;  // ... short
+  double contested = 0.7324;  // catch difficulty of any contested ball
   double breakdownBase = 1.5;  // pursuit breakdown: speed over the carrier's
-  double breakdownK = 1.8;  // ... per yard away
+  double breakdownK = 1.98;  // ... per yard away
   double catchKeep = 0.45;  // speed kept through an uncontested catch
-  double penScale = 1;  // penalty rate multiplier
-  double assistRange = 3.24;  // a closing pursuer this near joins the tackle (yd)
-  double tackleReach = 0.52;  // contact reach beyond the two bodies (yd)
-  double pursuitK = 0.75;  // pursuit lead base
+  double penScale = 1.0324;  // penalty rate multiplier
+  double assistRange = 3;  // a closing pursuer this near joins the tackle (yd)
+  double tackleReach = 0.44;  // contact reach beyond the two bodies (yd)
+  double pursuitK = 0.69;  // pursuit lead base
+  double deepKeep = 1.25;   // how far a deep defender stays over the top of a carrier (1 = 4 yd cap)
+  double yacNoise = 2.5;   // a receiver's path-reading noise after the catch (x a back's)
+  double runNoise = 1.0;   // a ball carrier's path-reading noise
+  double releaseRate = 8;  // per second: a pass-pro rep breaks up once the ball is caught away from the QB
+  double intBias = 1.2;  // a defender at the ball comes down with it (logit shift; NFL ~2.4% of passes intercepted)
+  double holdK = 0.06;       // holding: per second of a rep the defender is winning (x how badly)
+  double holdShed = 0.003;   // holding: a beaten blocker grabbing as his man gets away
 };
 Tune& tune();
 /** Set a tune field by name; false if there is none. */
@@ -196,6 +203,22 @@ struct PlayEvent {
 };
 
 enum class PlayKind { Run, Pass, Sack, Scramble, Kneel, Spike };
+
+/** A foul the play gave the officials to see: the chance it is flagged and the man it would be on (the one whose act
+ *  carried the most of it). Game::rollPostsnap makes the calls. */
+struct FoulRisk {
+  double p = 0;
+  double top = 0;
+  Player* by = nullptr;
+  void add(double q, Player* who) {
+    if (q <= 0) return;
+    p = 1 - (1 - p) * (1 - (std::min)(q, 1.0));
+    if (q > top) {
+      top = q;
+      by = who;
+    }
+  }
+};
 const char* playKindName(PlayKind k);
 
 struct PlayResult {
@@ -233,6 +256,10 @@ struct PlayResult {
   bool pressured = false;
   double timeToThrow = 0;
   int brokenTackles = 0;
+  // fouls from what happened on the field: a blocker beaten and hanging on (holding), a defender playing the man and not
+  // the ball (pass interference), a cover man grabbing past 5 yd (defensive holding / illegal contact), a rusher landing
+  // on the passer after the ball is gone (roughing), a tackle with a hand in the mask, a receiver pushing off
+  FoulRisk foulHold, foulDpi, foulDhold, foulRough, foulMask, foulOpi;
   std::optional<double> targetSpotY;
   double endY = 0;
   std::vector<PlayEvent> events;
@@ -382,6 +409,7 @@ class PlaySim {
   std::optional<PendingThrow> pendingThrow;
   bool pressured = false;
   bool scramble = false;
+  FoulRisk foulHold, foulDpi, foulDhold, foulRough, foulMask, foulOpi;
   int brokenTackles = 0;
   double catchX = 0;
   double catchSep = -1;
@@ -527,6 +555,22 @@ class PlaySim {
   void checkTackles();
   bool clearPath(const Ent* d, const Ent* c) const;
   bool tryTackle(Ent* d, Ent* c, int gang, bool arm, bool dive = false);
+  /** A tackle made with the pile still moving: the carrier drives on for his yards after contact with the tackler
+   *  wrapped on him (stepWrap, ~2.2 yd/s), until the yards are spent, help arrives or the sideline stops it; then he goes
+   *  down there (finishTackle). The old tackle jumped him up to four yards ahead in one step, a spot no body reached. */
+  struct Wrap {
+    Ent* c = nullptr;
+    Ent* d = nullptr;
+    double left = 0;     // yards still to drive
+    double natFall = 0;  // the forward fall at the end (body over the feet)
+    double latY = 0;     // sideways drift of the fall
+    bool dive = false, arm = false;
+    double vd = 0, md = 0;
+    V2 off{0, 0};        // the tackler's place on the carrier
+  };
+  std::optional<Wrap> wrap_;
+  void stepWrap(double dt);
+  void finishTackle(Ent* d, Ent* c, double fall, double latY, bool dive, bool arm, double vd, double md, bool isSack, Ent* help);
   void fumble(Ent* c, Ent* by);
   void checkBounds();
 };

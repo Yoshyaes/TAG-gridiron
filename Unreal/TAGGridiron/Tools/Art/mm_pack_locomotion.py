@@ -31,7 +31,12 @@ opts = unreal.AnimPoseEvaluationOptions()
 SKIP = ("2man", "Reaction", "MidAir", "Fidget", "Idle", "Stand", "Defeat", "Dismay", "Frustrated", "RunOut", "ReturnToLocker",
         "Endzone", "TeamSelect", "Zone", "Boot", "Option", "TEST", "FIFAMG", "FI3OMAU1", "Fall", "Knockout", "Injury",
         "Flippable", "Almost", "Pissed", "mon_Man", "Pursuit", "FE_", "Smallsteps", "GrabFaceMask", "_idle", "Celebrat",
-        "Handoff", "Pitch", "KickReturn", "mirrorphase", "redux")
+        "Handoff", "Pitch", "KickReturn", "mirrorphase", "redux",
+        # a receiver tracking a ball in the air (one or both arms up): never a stride for a runner, a blocker or a man in coverage
+        "ArmsUp", "HandsUp",
+        # captures whose planted feet slid a metre a step in the full-game captures (p8 foot plants: median 0.5-1.2 m over
+        # 50-312 plants each): their root travel does not match their steps
+        "WR_Jog_D4_99", "Agile_MC_Sprint_D3_s70", "ANTICIPATION_RUN_D3", "NonBC_Agile_MC_Sprint_D2__P01")
 CROUCH = ("Crouch", "Dline", "DL_", "OL_", "motionshuffle", "2pt", "3pt", "Shuffle", "PassBlock", "PASSBLOCK")
 
 

@@ -73,6 +73,8 @@ void SGridironOverlay::Construct(const FArguments& InArgs)
 			+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center)
 			[
 				SNew(STextBlock).Font(Font(18, "Bold")).ShadowOffset(FVector2D(2, 2))
+				// the shadow goes with the text (it stayed behind as black text over the field after the banner faded)
+				.ShadowColorAndOpacity_Lambda([this] { return FLinearColor(0, 0, 0, BannerT < 2.3f ? 0.8f : 0.f); })
 				.Text_Lambda([this] { return T(BannerSub); })
 				.ColorAndOpacity_Lambda([this] { return FSlateColor(FLinearColor(1, 1, 1, BannerT < 2.3f ? 1.f : 0.f)); })
 			]
@@ -421,7 +423,7 @@ TSharedRef<SWidget> SGridironOverlay::MakeScoreBug()
 					+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(8, 0)
 					[ SNew(STextBlock).Font(Font(12, "Bold")).ColorAndOpacity(Accent).Text_Lambda([this, K] { return Director && Director->Game && Director->Game->poss == K && !Director->Game->isFinal() ? T(TEXT("●")) : FText(); }) ]
 					+ SHorizontalBox::Slot().FillWidth(1).HAlign(HAlign_Right).VAlign(VAlign_Center)
-					[ SNew(STextBlock).Font(Font(28, "Bold")).ShadowOffset(FVector2D(1, 1)).Text_Lambda([this, K] { return Director && Director->Game ? FText::AsNumber(Director->Game->score[K]) : FText(); }) ]
+					[ SNew(STextBlock).Font(Font(28, "Bold")).ShadowOffset(FVector2D(1, 1)).Text_Lambda([this, K] { return Director && Director->Game ? FText::AsNumber(Director->HudScore[K == tag::TeamKey::Home ? 0 : 1] >= 0 ? Director->HudScore[K == tag::TeamKey::Home ? 0 : 1] : Director->Game->score[K]) : FText(); }) ]
 				]
 			];
 	};
@@ -446,13 +448,25 @@ TSharedRef<SWidget> SGridironOverlay::MakeScoreBug()
 				SNew(SBox).MinDesiredWidth(190).VAlign(VAlign_Center).HAlign(HAlign_Center)
 				[ SNew(STextBlock).Font(Font(16, "Bold")).ColorAndOpacity(FLinearColor(0.05f, 0.05f, 0.05f)).Text_Lambda([this] { return DownText(); }) ]
 			]
+		]
+		// the play clock (40 s from the whistle), as broadcasts show it beside the down: red in its last 5 seconds
+		+ SHorizontalBox::Slot().AutoWidth()
+		[
+			SNew(SBorder).BorderImage(White()).Padding(FMargin(10, 4)).BorderBackgroundColor(FLinearColor(0.07f, 0.08f, 0.1f))
+			.Visibility_Lambda([this] { return Director && Director->PlayClockShown() >= 0 ? EVisibility::HitTestInvisible : EVisibility::Collapsed; })
+			[
+				SNew(SBox).MinDesiredWidth(44).VAlign(VAlign_Center).HAlign(HAlign_Center)
+				[ SNew(STextBlock).Font(Font(16, "Bold"))
+					.ColorAndOpacity_Lambda([this] { return FSlateColor(Director && Director->PlayClockShown() >= 0 && Director->PlayClockShown() <= 5 ? FLinearColor(1.f, 0.25f, 0.2f) : FLinearColor::White); })
+					.Text_Lambda([this] { return Director ? FText::FromString(FString::Printf(TEXT(":%02d"), FMath::Max(0, Director->PlayClockShown()))) : FText(); }) ]
+			]
 		];
 }
 
 FText SGridironOverlay::ClockText() const
 {
 	if (!Director || !Director->Game) return FText();
-	return T(S(tag::fmtClock(FMath::Max(0.0, Director->Game->clock - ClockOffset))));
+	return T(S(tag::fmtClock(FMath::Max(0.0, Director->Game->clock + Director->HudRunoffLeft - Director->HudPreRun - ClockOffset))));
 }
 
 FText SGridironOverlay::DownText() const

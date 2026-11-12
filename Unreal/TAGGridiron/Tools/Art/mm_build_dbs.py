@@ -78,6 +78,32 @@ try:
     build(SRC + "PSD_Dense_Stand_Run_Loops", DST + "PSD_TAG_Run_Loops", [],
           ["Run/M_Neutral_Run_Arc_%s_%s" % (k, s) for k in ("Small", "Wide", "Tight") for s in ("L", "R")], L["Run"], PACK_ONLY)
     build(SRC + "PSD_Dense_Stand_Walk_Loops", DST + "PSD_TAG_Walk_Loops", [], [], L["Walk"], PACK_ONLY)
+    # style variants of the moving loops (PSD_TAG_<gait>_Loops_S1 / _S2): each man searches one of the three sets
+    # (FAthleteAssets: player id % 3), so a dozen men jogging the same way do not all pick the same capture. A variant
+    # leaves out a third of the clips of every direction that has three or more, one of two where there are two, and
+    # keeps a direction's only clip (coverage stays whole).
+    import re as _re
+    def style_subset(names, v):
+        groups = {}
+        for n in names:
+            m = _re.search(r"_D(\d)", n.rsplit("/", 1)[-1])
+            groups.setdefault(m.group(1) if m else "?", []).append(n)
+        keep = []
+        for k, g in groups.items():
+            g = sorted(g)
+            if len(g) >= 3:
+                keep += [n for i, n in enumerate(g) if i % 3 != v]
+            elif len(g) == 2:
+                keep += [g[1 - (v - 1)]]
+            else:
+                keep += g
+        return keep
+    for v in (1, 2):
+        build(SRC + "PSD_Dense_Stand_Sprint_Loops", DST + "PSD_TAG_Sprint_Loops_S%d" % v, ["Transition"],
+              ["Sprint/M_Neutral_Sprint_Loop_F_L_20", "Sprint/M_Neutral_Sprint_Loop_F_R_20"], style_subset(L["Sprint"], v), PACK_ONLY)
+        build(SRC + "PSD_Dense_Stand_Run_Loops", DST + "PSD_TAG_Run_Loops_S%d" % v, [],
+              ["Run/M_Neutral_Run_Arc_%s_%s" % (k, s) for k in ("Small", "Wide", "Tight") for s in ("L", "R")], style_subset(L["Run"], v), PACK_ONLY)
+        build(SRC + "PSD_Dense_Stand_Walk_Loops", DST + "PSD_TAG_Walk_Loops_S%d" % v, [], [], style_subset(L["Walk"], v), PACK_ONLY)
     build(SRC + "PSD_Dense_Crouch_Walk_Loops", DST + "PSD_TAG_Crouch_Loops", [], [], L["Crouch"], PACK_ONLY)
     # the sets beside the loops: the pack's starts, stops, pivots and idles alone (the sample's clips leave every TAG
     # database; the databases are copies of the sample's only for their settings)

@@ -758,6 +758,16 @@ void FAthleteAssets::LoadMotionMatching()
 		for (UPoseSearchDatabase* X : MMStart[g]) All.AddUnique(X);
 		for (UPoseSearchDatabase* X : MMPivot[g]) All.AddUnique(X);
 		for (UPoseSearchDatabase* X : MMStop[g]) All.AddUnique(X);
+		for (int32 v = 0; v < 3 && bOk; ++v)
+		{
+			UPoseSearchDatabase* LV = v == 0 ? Loops : LoadAsset<UPoseSearchDatabase>(*FString::Printf(TEXT("/Game/TAG/Anim/MM/PSD_TAG_%s_Loops_S%d.PSD_TAG_%s_Loops_S%d"), Gait[g], v, Gait[g], v), false);
+			if (!LV) LV = Loops;
+			auto Swap = [Loops, LV](const TArray<UPoseSearchDatabase*>& In) { TArray<UPoseSearchDatabase*> O = In; for (UPoseSearchDatabase*& X : O) if (X == Loops) X = LV; return O; };
+			MMMoveV[g][v] = Swap(MMMove[g]);
+			MMStartV[g][v] = Swap(MMStart[g]);
+			MMPivotV[g][v] = Swap(MMPivot[g]);
+			All.AddUnique(LV);
+		}
 	}
 	// crouched footwork: the sample's crouch walk (~1.5-2 m/s) plus, with the TAG database, the pack's kick slides,
 	// shuffles and crouched runs (to 4.4 m/s)
@@ -1519,6 +1529,9 @@ void AAthlete::PaintHero(const FUniform& U)
 			M->SetScalarParameterValue(TEXT("NumOn"), Player && Player->number > 0 ? 1.f : 0.f);
 			M->SetScalarParameterValue(TEXT("NeckZ"), NeckZ);
 			M->SetScalarParameterValue(TEXT("TorsoY"), TorsoY);
+			// front numbers 9 in tall (NFL 8-10 in), their top 13 cm under the neck: at 19 cm they did not read on the field
+			M->SetScalarParameterValue(TEXT("NumHF"), 23.f);
+			M->SetScalarParameterValue(TEXT("NumTopF"), 13.f);
 			bMaterialNumbers = true;
 		}
 		else if (Slot == TEXT("Pants") && bKit)
@@ -1563,6 +1576,15 @@ void AAthlete::PaintHero(const FUniform& U)
 			M->SetVectorParameterValue(TEXT("Trim"), Cand[0]);
 			M->SetVectorParameterValue(TEXT("Trim2"), D(Cand[1], Cand[0]) > 0.3f ? Cand[1] : FLinearColor(0.92f, 0.92f, 0.92f));
 			if (HelmetMask) M->SetTextureParameterValue(TEXT("Mask"), HelmetMask);
+			if (U.TeamId >= 0 && U.TeamId < 32)
+			{
+				// the team mark on both sides: its second colour, outlined in whichever of the trims stands off the shell
+				M->SetScalarParameterValue(TEXT("LogoOn"), 1.f);
+				M->SetScalarParameterValue(TEXT("LogoIdx"), static_cast<float>(U.TeamId));
+				const FLinearColor Fill = D(U.Logo, U.Helmet) > 0.35f ? U.Logo : Cand[0];
+				M->SetVectorParameterValue(TEXT("LogoFill"), Fill);
+				M->SetVectorParameterValue(TEXT("LogoLine"), D(Cand[1], Fill) > 0.35f ? Cand[1] : (Fill.GetLuminance() > 0.5f ? FLinearColor(0.03f, 0.03f, 0.035f) : FLinearColor(0.92f, 0.92f, 0.92f)));
+			}
 		}
 	});
 	Each(MHFace, [&](const FName& Slot, TFunctionRef<UMaterialInstanceDynamic*()> Mid)
@@ -1734,7 +1756,11 @@ bool AAthlete::DriveMotionMatching(const FVector& VelWorld, float SimYaw, float 
 	if (bCrouch)
 		M->SetDatabases(!bMoving ? A.MMCrouch[3] : MovingTime < 0.6f ? A.MMCrouch[1] : bPivot ? A.MMCrouch[2] : A.MMCrouch[0]);
 	else
-		M->SetDatabases(!bMoving ? A.MMStop[MMGait] : MovingTime < 0.6f ? A.MMStart[MMGait] : bPivot ? A.MMPivot[MMGait] : A.MMMove[MMGait]);
+	{
+		// his style's sets (a third of the men on each: the same gait does not mean the same capture)
+		const int32 Sv = Player ? FMath::Abs(Player->id) % 3 : 0;
+		M->SetDatabases(!bMoving ? A.MMStop[MMGait] : MovingTime < 0.6f ? A.MMStartV[MMGait][Sv] : bPivot ? A.MMPivotV[MMGait][Sv] : A.MMMoveV[MMGait][Sv]);
+	}
 	// what the databases cover: with the mocap pack's locomotion (mm_build_dbs.py) 10-11 m/s forward (sprint loops),
 	// 4.9 m/s sideways and 6 m/s backwards; crouched 4.4 m/s forward, 3.2 sideways, 3.9 backwards. Without the TAG
 	// databases (Epic's sample alone) 7 / 3.5 / 3 m/s and 2 / 1.7 / 1.5. Above those, search a proportionally slower
@@ -1774,6 +1800,19 @@ bool AAthlete::DriveMotionMatching(const FVector& VelWorld, float SimYaw, float 
 				}
 				RI->Proc.StrideScale = S;
 				RI->Proc.StrideDirCS = MHBody->GetComponentTransform().InverseTransformVectorNoScale(V.GetSafeNormal2D());
+				// orientation warping: the angle from where the clip's root travels to where he travels (both in the
+				// shared component frame: the source and the shown body sit at the same -90 yaw), at most 60 degrees
+				// (past that the search should have found a different clip), eased so a new match does not snap the hips
+				float WarpWant = 0.f;
+				if (M->bMatch && !M->MatchedClipDir.IsNearlyZero() && M->MatchedClipSpeed > 80.f && Speed > 80.f)
+				{
+					const FVector Want2 = FVector(RI->Proc.StrideDirCS.X, RI->Proc.StrideDirCS.Y, 0.f).GetSafeNormal();
+					const FVector Clip2 = M->MatchedClipDir;
+					const float Ang = FMath::RadiansToDegrees(FMath::Atan2(Clip2.X * Want2.Y - Clip2.Y * Want2.X, Clip2.X * Want2.X + Clip2.Y * Want2.Y));
+					WarpWant = FMath::Clamp(Ang, -60.f, 60.f);
+				}
+				OrientWarpSm = FMath::FInterpTo(OrientWarpSm, WarpWant, Dt, 10.f);
+				RI->Proc.OrientWarpDeg = OrientWarpSm;
 			}
 	}
 
@@ -2503,6 +2542,8 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 	UTagRetargetAnimInstance* RI = MHBody ? Cast<UTagRetargetAnimInstance>(MHBody->GetAnimInstance()) : nullptr;
 	if (RI)
 	{
+		LastSlideRaw = RI->SlideRaw;
+		LastSlideShown = RI->SlideShown;
 		GSlideRaw += RI->SlideRaw; // foot slide over all athletes (SlideStats)
 		GSlideShown += RI->SlideShown;
 		RI->SlideRaw = RI->SlideShown = 0.f;
@@ -2520,6 +2561,8 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 		RI->Proc.bFootLock = false;
 		RI->Proc.LeanCS = FVector::ZeroVector;
 		RI->Proc.StrideScale = 1.f; // motion matching sets it when the man outruns the capture
+		OrientWarpSm = FMath::FInterpTo(OrientWarpSm, 0.f, DeltaTime, 4.f); // and the orientation warp while he moves
+		RI->Proc.OrientWarpDeg = OrientWarpSm;
 	}
 	if (bPreSnap) { bDropped = false; DropLeft = 0.f; } // a new play: the quarterback has his drop again
 	if (Anim != TEXT("down") && FVector(VelWorld.X, VelWorld.Y, 0.f).SizeSquared() > 100.f) LastVelW = FVector(VelWorld.X, VelWorld.Y, 0.f);
@@ -2890,11 +2933,14 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 			if (D > 1.f && D < 260.f)
 			{
 				Want = (To / D * (D - 110.f) * 0.5f).GetClampedToMaxSize(80.f); // hip to hip: both lean in, arms on the chest plate
-				SmoothedYaw += FMath::FindDeltaAngleDegrees(SmoothedYaw, To.Rotation().Yaw) * FMath::Clamp(DeltaTime * 6.f, 0.f, 1.f);
+				// squaring up at a human turn rate (a fifth of the angle a frame turned a man 36 degrees in one frame)
+				const float DYaw = FMath::FindDeltaAngleDegrees(SmoothedYaw, To.Rotation().Yaw) * FMath::Clamp(DeltaTime * 6.f, 0.f, 1.f);
+				SmoothedYaw += FMath::Clamp(DYaw, -240.f * DeltaTime, 240.f * DeltaTime);
 				SetActorRotation(FRotator(0, SmoothedYaw, 0));
 			}
 		}
-		BlockAlign = FMath::Lerp(BlockAlign, Want, 1.f - FMath::Exp(-8.f * DeltaTime));
+		// closing to hand-fighting range at a shuffle's pace (1.2 m/s): the old ease covered 80 cm at up to 6 m/s, a glide
+		BlockAlign = FMath::VInterpConstantTo(BlockAlign, Want, DeltaTime, 120.f);
 		if (!BlockAlign.IsNearlyZero(0.5f)) SetActorLocation(Location + VisOffset + BlockAlign);
 		// the strike: both men's hands shoot to the chest plate the moment they meet (once per engagement)
 		SincePunch += DeltaTime;

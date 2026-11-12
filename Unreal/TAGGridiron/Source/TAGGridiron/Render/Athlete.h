@@ -42,6 +42,8 @@ struct FUniform
 	FLinearColor Helmet;
 	FLinearColor Trim;
 	FLinearColor Number;
+	int32 TeamId = -1;  // the team's mark on the helmet (gen_team_logos.py atlas cell); -1 none
+	FLinearColor Logo = FLinearColor::White; // the mark's fill
 };
 
 UCLASS()
@@ -91,6 +93,8 @@ public:
 	/** -TagHlFull telemetry: what drives the body this frame, "mm:<matched clip>", "clip:<asset>", "one:<asset>",
 	 *  "fall:<asset>@t", "getup:<asset>", "ragdoll" or "replay" (the sim's own anim name is logged beside it). */
 	FString TelemetryAnim() const;
+	/** Planted-foot travel (cm) over the last animation update: as the clip had it, and as shown after the foot lock. */
+	float LastSlideRaw = 0.f, LastSlideShown = 0.f;
 	/** Take the body's offset from the sim spot (a fall that ended away from it) as its position from now on. */
 	void AbsorbVisOffset() { VisOffset = FVector::ZeroVector; }
 	/** How long a fall eases from where he was onto its anchor (a pile-on from a few yards away travels there). */
@@ -268,6 +272,7 @@ private:
 	bool bStoodUp = false;
 	FVector VisOffset = FVector::ZeroVector;
 	float FallEaseT = 0.2f;
+	float OrientWarpSm = 0.f; // the smoothed orientation warp (deg) handed to the retarget layer
 	int32 TackleCount = 0;
 	float StillTime = 0.f;   // seconds standing still (post-play idles)
 	// face (UTagFaceAnimInstance): blinks, effort, breathing, focus, celebration
@@ -557,6 +562,9 @@ struct FAthleteAssets
 	TArray<class UPoseSearchDatabase*> MMStart[3];  // starts + loops
 	TArray<class UPoseSearchDatabase*> MMPivot[3];  // pivots + spins + loops
 	TArray<class UPoseSearchDatabase*> MMStop[3];
+	// per-man style variants of the move / start / pivot sets: [gait][player id % 3], each with its own loops database
+	// (PSD_TAG_<gait>_Loops_S1/_S2 hold a different two thirds of each direction's clips; variant 0 is the full set)
+	TArray<class UPoseSearchDatabase*> MMMoveV[3][3], MMStartV[3][3], MMPivotV[3][3];
 	// crouched line footwork (pass sets, pulls, drive blocks), same state split: [0] loops, [1] starts, [2] pivots, [3] stops + idles
 	TArray<class UPoseSearchDatabase*> MMCrouch[4];   // that gait's stops + standing idles + turns in place
 	TArray<class UPoseSearchDatabase*> MMAll;

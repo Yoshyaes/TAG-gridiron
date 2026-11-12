@@ -86,11 +86,16 @@ void FTagMotionMatchProxy::PreUpdate(UAnimInstance* InAnimInstance, float DeltaS
 			if (E > S) Move += Seq->ExtractRootMotionFromRange(S, E, Ctx).GetTranslation();
 			const float ClipSpeed = Move.Size2D() / W;
 			I->MatchedClipSpeed = ClipSpeed;
+			I->MatchedClipDir = Move.GetSafeNormal2D();
 			// the node plays at WantedPlayRate (= MatchPlayRate for a fixed interval) x multiplier
 			if (ClipSpeed > 60.f && I->SimSpeed > 60.f)
 				Mul = FMath::Clamp(I->SimSpeed / ClipSpeed, I->SpeedMatchMin, I->bCrouchGait ? I->CrouchSpeedMatchMax : I->SpeedMatchMax) / FMath::Max(I->MatchedWantedRate, 0.1f);
 		}
-		else I->MatchedClipSpeed = 0.f;
+		else
+		{
+			I->MatchedClipSpeed = 0.f;
+			I->MatchedClipDir = FVector::ZeroVector;
+		}
 		I->SpeedRate += (Mul - I->SpeedRate) * FMath::Min(1.f, DeltaSeconds / 0.1f);
 		*I->RateMultiplierSetting = I->SpeedRate;
 	}

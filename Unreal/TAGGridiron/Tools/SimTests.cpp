@@ -510,6 +510,28 @@ int main() {
     check(deepest <= 17, "an OL was still blocking " + fx(deepest, 1) + " yd past the line");
   });
 
+  t("realism: flags come from the play (holding on a blocker, interference on a defender)", [&] {
+    double hold = 0, n = 0;
+    int badHold = 0, badDpi = 0, dpiSeen = 0;
+    for (int i = 0; i < 400; ++i) {
+      auto g = scrimmage(1700 + i, i % 32, (i + 13) % 32);
+      g->ballOn = 25 + (i % 4) * 10;
+      auto sim = g->makePlay(*playById(i % 3 == 0 ? "i_power" : i % 3 == 1 ? "empty_verts" : "dbl_slants"), *defById(i % 2 ? "nk_c3" : "base_c1"));
+      const PlayResult& r = sim->runToEnd();
+      hold += r.foulHold.p;
+      n++;
+      if (r.foulHold.p > 0 && (!r.foulHold.by || !g->offense().hasPlayer(r.foulHold.by))) badHold++;
+      if (r.foulDpi.p > 0) {
+        dpiSeen++;
+        if (!r.foulDpi.by || !g->defense().hasPlayer(r.foulDpi.by)) badDpi++;
+      }
+    }
+    check(badHold == 0, std::to_string(badHold) + " holding risks not on an offensive player");
+    check(badDpi == 0, std::to_string(badDpi) + " interference risks not on a defender");
+    check(dpiSeen > 0, "no pass interference risk in 400 plays");
+    check(hold / n > 0.01 && hold / n < 0.08, "holding risk per play " + fx(hold / n, 3));
+  });
+
   std::printf("\n%d passed, %d failed\n", passCount, failCount);
   return failCount ? 1 : 0;
 }

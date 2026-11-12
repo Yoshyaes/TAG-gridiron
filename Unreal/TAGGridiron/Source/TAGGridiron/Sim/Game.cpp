@@ -459,15 +459,34 @@ const DefCall* Game::cpuDefense(const OffPlay& offPlay) {
 }
 
 // ------------------------------------------------------------------ penalties
+/** The man who jumped: a starter at the spots that false start / jump offside, the less aware the likelier. */
+static Player* jumper(Rng& rng, const Team& t, std::initializer_list<Pos> spots, int per) {
+  std::vector<Player*> c;
+  std::vector<double> w;
+  for (Pos ps : spots) {
+    const std::vector<Player*> d = depth(t, ps);
+    for (int i = 0; i < per && i < static_cast<int>(d.size()); i++) {
+      c.push_back(d[i]);
+      w.push_back((std::max)(5.0, 105 - d[i]->r.awareness));
+    }
+  }
+  return c.empty() ? nullptr : rng.weighted(c, w);
+}
+
+static std::string onWho(const std::string& name, const Player* p) {
+  return p ? name + " (#" + std::to_string(p->number) + " " + nm(p) + ")" : name;
+}
+
 std::optional<Penalty> Game::rollPresnap() {
   const double r = rng.next();
-  const double road = poss == TeamKey::Away ? 0.004 : 0;
+  const double road = poss == TeamKey::Away ? 0.004 : 0;  // crowd noise
   const double ps = tune().penScale;
-  if (r < (0.014 + road) * ps) return mkPen("False Start", Side::Off, 5, false, PenaltySpot::Los, true);
+  if (r < (0.014 + road) * ps)
+    return mkPen(onWho("False Start", jumper(rng, offense(), {Pos::OT, Pos::OG, Pos::C, Pos::TE, Pos::WR}, 2)), Side::Off, 5, false, PenaltySpot::Los, true);
   if (r < (0.018 + road) * ps) return mkPen("Delay of Game", Side::Off, 5, false, PenaltySpot::Los, true);
   if (r < (0.028 + road) * ps) {
     static const std::vector<std::string> kNames = {"Neutral Zone Infraction", "Offside", "Encroachment"};
-    return mkPen(rng.pick(kNames), Side::Def, 5, false, PenaltySpot::Los, true);
+    return mkPen(onWho(rng.pick(kNames), jumper(rng, defense(), {Pos::DE, Pos::DT, Pos::LB}, 2)), Side::Def, 5, false, PenaltySpot::Los, true);
   }
   return std::nullopt;
 }
@@ -478,18 +497,19 @@ std::optional<Penalty> Game::rollPostsnap(const PlayResult& res, const OffPlay& 
   double acc = 0;
   auto roll = [&](double p) { return r < (acc += p * tune().penScale); };
   if (res.kind == PlayKind::Kneel || res.kind == PlayKind::Spike) return std::nullopt;
-  if (roll(isPass ? 0.026 : 0.036)) return mkPen("Offensive Holding", Side::Off, 10, false, PenaltySpot::Los, true);
-  if (isPass && res.incomplete && res.airYards >= 5 && roll(res.deepContested ? 0.09 : 0.012))
-    return mkPen("Defensive Pass Interference", Side::Def, 0, true, PenaltySpot::Spot, false, static_cast<double>(res.airYards));
-  if (isPass && roll(0.014))
-    return mkPen(rng.chance(0.6) ? "Defensive Holding" : "Illegal Contact", Side::Def, 5, true, PenaltySpot::Los, false);
-  if (isPass && res.pressured && roll(0.012)) return mkPen("Roughing the Passer", Side::Def, 15, true, PenaltySpot::End, false);
-  if (isPass && res.complete && res.airYards >= 8 && roll(0.005))
-    return mkPen("Offensive Pass Interference", Side::Off, 10, false, PenaltySpot::Los, true);
-  if (roll(0.004)) {
-    static const std::vector<std::string> kNames = {"Unnecessary Roughness", "Face Mask"};
-    return mkPen(rng.pick(kNames), Side::Def, 15, true, PenaltySpot::End, false);
-  }
+  // the officials call what the play gave them (PlayResult foul risks, from the sim): one draw, the fouls stacked in
+  // the order they are looked at, so at most one flag a play
+  auto call = [&](const FoulRisk& f) { return f.p > 0 && roll(f.p); };
+  if (call(res.foulHold)) return mkPen(onWho("Offensive Holding", res.foulHold.by), Side::Off, 10, false, PenaltySpot::Los, true);
+  if (isPass && res.incomplete && res.airYards >= 5 && call(res.foulDpi))
+    return mkPen(onWho("Defensive Pass Interference", res.foulDpi.by), Side::Def, 0, true, PenaltySpot::Spot, false, static_cast<double>(res.airYards));
+  if (isPass && call(res.foulDhold))
+    return mkPen(onWho(rng.chance(0.6) ? "Defensive Holding" : "Illegal Contact", res.foulDhold.by), Side::Def, 5, true, PenaltySpot::Los, false);
+  if (isPass && call(res.foulRough)) return mkPen(onWho("Roughing the Passer", res.foulRough.by), Side::Def, 15, true, PenaltySpot::End, false);
+  if (isPass && res.complete && res.airYards >= 8 && call(res.foulOpi))
+    return mkPen(onWho("Offensive Pass Interference", res.foulOpi.by), Side::Off, 10, false, PenaltySpot::Los, true);
+  if (call(res.foulMask)) return mkPen(onWho("Face Mask", res.foulMask.by), Side::Def, 15, true, PenaltySpot::End, false);
+  if (roll(0.0015)) return mkPen("Unnecessary Roughness", Side::Def, 15, true, PenaltySpot::End, false);
   if (roll(0.002)) return mkPen("Illegal Block in the Back", Side::Off, 10, false, PenaltySpot::Los, true);
   return std::nullopt;
 }

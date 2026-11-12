@@ -1,7 +1,7 @@
 # Unreal Editor Python (headless). Imports the TAG character meshes built from the personal model pack
 # (Tools/Art/hero_jobs.py + hero_build.py, RawArt/Hero) into /Game/TAG/Hero, with their textures and materials.
 #   UnrealEditor-Cmd.exe TAGGridiron.uproject -run=pythonscript -script="<this file>" -unattended -nosplash
-# Env: TAG_HERO_ONLY=<regex> (mesh names), TAG_HERO_MATS=1 rebuilds the master materials, TAG_HERO_SKIP_MESH=1 only
+# Env: TAG_HERO_RETEX=<regex> re-imports matching textures (a regenerated in-house map), TAG_HERO_ONLY=<regex> (mesh names), TAG_HERO_MATS=1 rebuilds the master materials, TAG_HERO_SKIP_MESH=1 only
 # redoes materials + catalog. Report: Saved/hero_import.json. Catalog for the game: Content/TAG/Hero/hero_catalog.json.
 #
 # Two skeletons: SKM_TAG_HeroRig_Skeleton (players, coaches, officials; the pack's 268 bone hero rig with Unreal names)
@@ -30,7 +30,6 @@ MATDIR = ROOT + "/Materials"
 PACK = "D:/MaddenRef/ModelPack/"
 NUMBERS = "/Game/TAG/Textures/T_TagNumbers"
 EYE = PACK + "Textures/characters/common/textures/eyes/eye_6_1_color.png"
-UNI = PACK + "Textures/characters/player/parts/uniforms/49ers/2018/"
 SKIN = PACK + "Textures/characters/common/textures/skintones/"
 FOLDER = {"Kit": "Kits", "Rig": "Rig", "Helmet": "Helmets", "Cap": "Helmets", "Head": "Heads", "Coach": "Coaches",
           "CoachHead": "Coaches", "CoachFull": "Coaches", "Ref": "Officials", "RefHead": "Officials", "Fan": "Crowd",
@@ -68,6 +67,21 @@ else
     // uniform cloth: team colour with the stripe masks (R main trim, G second trim)
     c = lerp(lerp(Tint.rgb, Trim.rgb, M.r), Trim2.rgb, M.g) * saturate(lum / max(LumRef, 0.02));
 }
+if (LogoOn > 0.5 && abs(P.x) > LogoX)
+{
+    // the team mark on both sides of the shell (gen_team_logos.py atlas, 8 x 4 cells: R fill, G outline / badge),
+    // projected across the side from the bind pose (front = +Y); upright and read left to right from either side
+    float s = P.x < 0.0 ? 1.0 : -1.0;
+    float u = s * (P.y - LogoY) / LogoW + 0.5;
+    float v = (LogoZ - P.z) / LogoH + 0.5;
+    if (u > 0.0 && u < 1.0 && v > 0.0 && v < 1.0)
+    {
+        float2 cell = float2(fmod(LogoIdx, 8.0), floor(LogoIdx / 8.0));
+        float2 m = Texture2DSampleLevel(Logos, LogosSampler, (cell + float2(u, v)) / float2(8.0, 4.0), 0).rg;
+        c = lerp(c, LogoLine.rgb, m.g);
+        c = lerp(c, LogoFill.rgb, m.r);
+    }
+}
 if (NumOn > 0.5)
 {
     // numbers on chest and back, placed in the bind pose (front = +Y): TAG digit atlas, R fill, G outline
@@ -103,8 +117,11 @@ if (NumOn > 0.5)
 return c;
 """
 SCALARS = {"Mode": 0.0, "AlphaTint": 1.0, "LumRef": 1.0, "NumOn": 0.0, "Number": 0.0, "NeckZ": 157.0, "TorsoY": 3.0, "NumFlip": 1.0,
-           "NumHF": 19.0, "NumTopF": 14.0, "NumHB": 25.0, "NumTopB": 12.0}
-VECTORS = {"Tint": (1, 1, 1), "Trim": (0.8, 0.1, 0.1), "Trim2": (0.05, 0.05, 0.05), "NumColor": (1, 1, 1)}
+           "NumHF": 19.0, "NumTopF": 14.0, "NumHB": 25.0, "NumTopB": 12.0,
+           # helmet side mark (Shell): centre a touch behind the ear line, 11 x 10 cm, on the side past |x| 7 cm
+           "LogoOn": 0.0, "LogoIdx": 0.0, "LogoX": 7.0, "LogoY": -1.0, "LogoZ": 174.5, "LogoW": 11.0, "LogoH": 10.0}
+VECTORS = {"Tint": (1, 1, 1), "Trim": (0.8, 0.1, 0.1), "Trim2": (0.05, 0.05, 0.05), "NumColor": (1, 1, 1),
+           "LogoFill": (1, 1, 1), "LogoLine": (0.05, 0.05, 0.05)}
 
 
 def ensure_dir(p):
@@ -137,7 +154,8 @@ def texture(src, kind="color"):
     folder = TEXDIR + "/" + sub
     name = tex_name(src) + ("_N" if kind == "normal" else "_L" if kind in ("linear", "mask") else "")
     path = folder + "/" + name
-    if not EAL.does_asset_exist(path):
+    retex = os.environ.get("TAG_HERO_RETEX")  # regex: re-import these textures over their assets (a regenerated map)
+    if not EAL.does_asset_exist(path) or (retex and re.search(retex, name)):
         task = unreal.AssetImportTask()
         task.filename = src
         task.destination_path = folder
@@ -257,7 +275,7 @@ def master(name, masked):
         vi = node(unreal.MaterialExpressionVertexInterpolator)
         MEL.connect_material_expressions(pos, "", vi, "")
         col = custom(COLOR_HLSL, unreal.CustomMaterialOutputType.CMOT_FLOAT3,
-                     ["BC", "M", "P", "Numbers"] + list(VECTORS) + list(SCALARS), "TAG hero colour", -450)
+                     ["BC", "M", "P", "Numbers", "Logos"] + list(VECTORS) + list(SCALARS), "TAG hero colour", -450)
         MEL.connect_material_expressions(bc, "RGBA", col, "BC")
         MEL.connect_material_expressions(mask, "RGB", col, "M")
         MEL.connect_material_expressions(vi, "", col, "P")
@@ -266,6 +284,11 @@ def master(name, masked):
         num.set_editor_property("texture", unreal.load_asset(NUMBERS))
         num.set_editor_property("sampler_type", unreal.MaterialSamplerType.SAMPLERTYPE_LINEAR_COLOR)
         MEL.connect_material_expressions(num, "", col, "Numbers")
+        logo = node(unreal.MaterialExpressionTextureObjectParameter)
+        logo.set_editor_property("parameter_name", "Logos")
+        logo.set_editor_property("texture", raw_tex("T_TAG_TeamLogos", "linear"))
+        logo.set_editor_property("sampler_type", unreal.MaterialSamplerType.SAMPLERTYPE_LINEAR_COLOR)
+        MEL.connect_material_expressions(logo, "", col, "Logos")
         for k, v in VECTORS.items():
             MEL.connect_material_expressions(vector(k, v), "", col, k)
         for k, v in SCALARS.items():
@@ -375,11 +398,13 @@ def slot_params(entry, slot, info):
         P = {"BaseColor": texture(SKIN + "genericpadless_legs_st1.png"), "Normal": texture(nrm, "normal"),
              "RSM": texture(skin_rsm, "linear"), "MetalWeight": 0.0, "SpecFlat": 0.3}
     elif role == "Jersey":
-        P = {"Mode": 3.0, "NumOn": 1.0, "Mask": raw_tex("T_TAG_Hero_JerseyMask"), "Normal": texture(UNI + "nin_jersey_2018_whialt_jersey_norm.png", "normal"),
-             "RSM": texture(UNI + "nin_jersey_2018_whialt_jersey_rsm.png", "linear"), "MetalWeight": 0.0}
+        # in-house cloth (gen_kit_cloth_maps.py): mesh knit, roughness ~0.8 (a team's licensed jersey maps read as plastic)
+        P = {"Mode": 3.0, "NumOn": 1.0, "Mask": raw_tex("T_TAG_Hero_JerseyMask"), "Normal": raw_tex("T_TAG_Hero_JerseyKnitN", "normal"),
+             "RSM": raw_tex("T_TAG_Hero_JerseyRSM", "linear"), "MetalWeight": 0.0}
     elif role == "Pants" and kind in ("Kit", "Rig"):
-        P = {"Mode": 3.0, "Mask": raw_tex("T_TAG_Hero_PantsMask"), "Normal": texture(UNI + "nin_pants_2018_whialt_pants_norm.png", "normal"),
-             "RSM": texture(UNI + "nin_pants_2018_whialt_pants_rsm.png", "linear"), "MetalWeight": 0.0}
+        # in-house tackle twill, a dull sheen (roughness ~0.66)
+        P = {"Mode": 3.0, "Mask": raw_tex("T_TAG_Hero_PantsMask"), "Normal": raw_tex("T_TAG_Hero_PantsTwillN", "normal"),
+             "RSM": raw_tex("T_TAG_Hero_PantsRSM", "linear"), "MetalWeight": 0.0}
     elif role == "Socks":
         P = {"Mode": 3.0, "BaseColor": texture(col), "LumRef": 0.85, "Normal": texture(nrm, "normal"), "RSM": texture(rsm, "linear"), "MetalWeight": 0.0}
     elif role == "Shell":

@@ -80,6 +80,7 @@ bool FTagRetargetProxy::Evaluate(FPoseContext& Output)
 	}
 	Node->Evaluate_AnyThread(Output); // mocap / keyed clip retargeted onto this body
 	ApplyFootballLayer(Output);
+	ApplyOrient(Output);
 	ApplyStride(Output);
 	ApplyLean(Output);
 	ApplyCrossfade(Output);
@@ -493,6 +494,21 @@ void FTagRetargetProxy::ApplyStride(FPoseContext& Output) const
 	const FVector NR = FR + Dir * FVector::DotProduct(FR - PelPos, Dir) * (S - 1.f);
 	LegIK(P, B.ThL, B.CaL, B.FtL, NL, 1.f);
 	LegIK(P, B.ThR, B.CaR, B.FtR, NR, 1.f);
+	FCSPose<FCompactPose>::ConvertComponentPosesToLocalPoses(MoveTemp(P), Output.Pose);
+}
+
+void FTagRetargetProxy::ApplyOrient(FPoseContext& Output) const
+{
+	const float Deg = In.OrientWarpDeg;
+	if (FMath::Abs(Deg) < 0.5f) return;
+	const FBoneContainer& BC = Output.Pose.GetBoneContainer();
+	const FBones B = Resolve(BC);
+	if (!B.bLegs || !B.Spine1.IsValid()) return;
+	FCSPose<FCompactPose> P;
+	P.InitPose(Output.Pose);
+	const FQuat Q(FVector::UpVector, FMath::DegreesToRadians(Deg));
+	RotateCS(P, B.Pelvis, Q, 1.f);         // the hips and both legs turn about the pelvis
+	RotateCS(P, B.Spine1, Q.Inverse(), 1.f); // the trunk turns back: the upper body keeps its facing
 	FCSPose<FCompactPose>::ConvertComponentPosesToLocalPoses(MoveTemp(P), Output.Pose);
 }
 

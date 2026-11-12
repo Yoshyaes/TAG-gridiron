@@ -22,6 +22,8 @@
     "pff_mtr": "PFF 2024 team missed-tackle rates ~12-16%",
     "fourth_2024": "UW-Madison NFL analytics recap 2024: 1.4 fourth-down attempts per team per game",
     "pff_deep": "PFF: deep passes have stayed under 12% of attempts for six years",
+    "ngs_comp": "NFL Next Gen Stats 2024 completion % by air-yard band (20+ ~37%, 0-9 ~74%)",
+    "ypc_2024": "Pro Football Reference 2024 league rushing: 4.4 yards per carry",
     "phys": "physics / the rules (a fixed right answer)",
     "approx": "approximate, not yet sourced"
   },
@@ -52,8 +54,11 @@
     {"id": "shown_vs_scored", "cat": "interactions", "label": "Shown vs scored yardage, median gap (yd)", "src": "game:shown_vs_scored.median_abs_diff_yd", "lo": 0, "hi": 0.5, "fail_lo": 0, "fail_hi": 4, "w": 1.5, "ref": "phys"},
     {"id": "referee_contact", "cat": "interactions", "label": "Frames with the referee within 1 m of a player (share)", "src": "game:referee.within_1m_share", "lo": 0, "hi": 0.002, "fail_lo": 0, "fail_hi": 0.05, "w": 1, "ref": "phys"},
     {"id": "framing", "cat": "presentation", "label": "Live frames with the carrier inside the safe frame (share)", "src": "game:framing.carrier_in_safe_frame_share", "lo": 0.99, "hi": 1.0, "fail_lo": 0.8, "fail_hi": 1.0, "w": 1, "ref": "approx"},
+    {"id": "missed_tackles", "cat": "interactions", "label": "Missed tackles per tackle attempt", "src": "sim:missed_tackle_rate", "lo": 0.11, "hi": 0.16, "fail_lo": 0.03, "fail_hi": 0.30, "w": 1, "ref": "pff_mtr"},
     {"id": "yac", "cat": "interactions", "label": "Yards after the catch per completion", "src": "sim:yac_per_completion", "lo": 4.8, "hi": 5.8, "fail_lo": 2.5, "fail_hi": 9, "w": 1, "ref": "approx"},
 
+    {"id": "deep_comp", "cat": "ai", "label": "Completion rate, 20+ air yards (%)", "src": "sim:pass.comp.deep", "lo": 33, "hi": 41, "fail_lo": 15, "fail_hi": 60, "w": 1, "ref": "ngs_comp"},
+    {"id": "short_comp", "cat": "ai", "label": "Completion rate, 0-9 air yards (%)", "src": "sim:pass.comp.short", "lo": 71, "hi": 77, "fail_lo": 55, "fail_hi": 90, "w": 0.5, "ref": "ngs_comp"},
     {"id": "ttt", "cat": "ai", "label": "Time to throw, median (s)", "src": "sim:ttt_median_s", "lo": 2.6, "hi": 3.0, "fail_lo": 1.4, "fail_hi": 4.2, "w": 1.5, "ref": "pff_ttt"},
     {"id": "pressure", "cat": "ai", "label": "Dropbacks under pressure (%)", "src": "sim:pressured_pct", "lo": 27, "hi": 36, "fail_lo": 5, "fail_hi": 60, "w": 1, "ref": "ftn_pressure"},
     {"id": "deep_share", "cat": "ai", "label": "Passes of 20+ air yards (% of attempts)", "src": "sim:pass.share.deep", "lo": 9.5, "hi": 12.5, "fail_lo": 3, "fail_hi": 25, "w": 1, "ref": "pff_deep"},
@@ -78,6 +83,7 @@
     {"id": "ypa", "cat": "stats", "label": "Yards per pass attempt", "src": "sim:box.ypa", "lo": 6.6, "hi": 7.2, "fail_lo": 5, "fail_hi": 9.5, "w": 1, "ref": "sharp"},
     {"id": "comp", "cat": "stats", "label": "Completion %", "src": "sim:box.compPct", "lo": 63.5, "hi": 66.5, "fail_lo": 55, "fail_hi": 75, "w": 1, "ref": "sharp"},
     {"id": "points_sd", "cat": "stats", "label": "Spread of team scores (SD, points)", "src": "sim:box.pointsSD", "lo": 9, "hi": 10.8, "fail_lo": 5, "fail_hi": 16, "w": 1, "ref": "approx"},
+    {"id": "ypc", "cat": "stats", "label": "Yards per carry", "src": "sim:box.ypc", "lo": 4.1, "hi": 4.6, "fail_lo": 3.0, "fail_hi": 6.0, "w": 1, "ref": "ypc_2024"},
     {"id": "points", "cat": "stats", "label": "Points per team-game", "src": "sim:box.points", "lo": 21, "hi": 23.5, "fail_lo": 14, "fail_hi": 32, "w": 1, "ref": "sharp"}
   ]
 }

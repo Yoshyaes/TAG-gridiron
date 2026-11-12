@@ -44,6 +44,10 @@ struct FTagProcInput
 	// stretched along the direction of travel instead of letting the feet skate (NFL ball carriers reach 10 m/s)
 	float StrideScale = 1.f;
 	FVector StrideDirCS = FVector(0, 1, 0);
+	// orientation warping: the hips and legs turn (degrees, about the vertical) so the clip's steps go where the man
+	// actually travels (a back-right jog under a man drifting straight back skated its planted foot sideways); the
+	// spine turns back by the same angle, so the chest and the eyes keep their facing
+	float OrientWarpDeg = 0.f;
 };
 
 USTRUCT()
@@ -72,6 +76,7 @@ struct FTagRetargetProxy : public FAnimInstanceProxy
 private:
 	void ApplyFootballLayer(FPoseContext& Output) const;
 	void ApplyStride(FPoseContext& Output) const;
+	void ApplyOrient(FPoseContext& Output) const;
 	void ApplyLean(FPoseContext& Output) const;
 	void ApplyFeet(FPoseContext& Output);
 	void ApplyCrossfade(FPoseContext& Output);

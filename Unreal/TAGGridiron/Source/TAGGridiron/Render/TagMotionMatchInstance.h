@@ -92,6 +92,8 @@ public:
 	float SpeedRate = 1.f;                  // the smoothed multiplier applied
 	/** Debug, copied after each worker thread update: where the pick is and what the search thought of it. */
 	float MatchedTime = 0.f, MatchedCost = 0.f, MatchedWantedRate = 1.f, MatchedClipSpeed = 0.f;
+	/** Which way the playing clip's root travels around its play position (component space of the source mesh, unit, 2D). */
+	FVector MatchedClipDir = FVector::ZeroVector;
 	bool bMatchedContinuing = false, bMatchedLoop = false;
 	/** Databases to search (changes take effect next update; the continuing pose is kept when it is still valid). */
 	void SetDatabases(TConstArrayView<UPoseSearchDatabase*> InDatabases);
