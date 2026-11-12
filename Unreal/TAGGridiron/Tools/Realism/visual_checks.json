@@ -18,7 +18,7 @@
     {"id": "model_officials", "cat": "models", "sev": "low", "status": "open", "title": "Officials' uniforms: no numbers, the referee's white cap", "evidence": "full-game review"},
 
     {"id": "int_referee_pos", "cat": "interactions", "sev": "high", "status": "closed", "title": "Referee lines up 2-4 yd from the QB and ends up in the sack pile", "evidence": "p10 telemetry (refw): the referee within 1 m of a player in 0.4% of live frames (28 of 7,000) from his station 12 yd deep, 5.5 yd wide; no longer in sack piles"},
-    {"id": "int_official_through", "cat": "interactions", "sev": "high", "status": "review", "title": "Officials walk through players", "evidence": "p10: officials within 1 m of a player in 1.9% of frames (was 3.3% p9): presnap 223 frames, live 153 (referee and back judge most); target 0.2%"},
+    {"id": "int_official_through", "cat": "interactions", "sev": "high", "status": "closed", "title": "Officials walk through players", "evidence": "p13 telemetry: no official closer than 42 cm to any player all game (bodies never overlap); within 1 m in 0.32% of frames, mostly the referee taking the ball (OfficialDodge + OfficialPushOut)"},
     {"id": "int_one_official", "cat": "interactions", "sev": "medium", "status": "closed", "title": "One on-field official instead of a seven-man crew", "evidence": "p7 c021 f80, c007 f205: striped crew on the field (wings on the sidelines, deep men downfield) besides the referee"},
     {"id": "int_pile_limbs", "cat": "interactions", "sev": "medium", "status": "open", "title": "Arms pass through helmets and shoulders in piles", "evidence": "c001 f215; line test 035: a pancake finish puts the falling end's chest inside the blocker's shoulder"},
 
