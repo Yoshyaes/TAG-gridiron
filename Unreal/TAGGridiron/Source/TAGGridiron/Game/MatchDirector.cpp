@@ -179,7 +179,9 @@ void AMatchDirector::BeginPlay()
 		FParse::Value(FCommandLine::Get(), TEXT("TagQuarterLen="), QLen);
 		SoakStart = FPlatformTime::Seconds();
 		bWatch = true;
-		StartMatch(3, 7, false, true, 1, true, QLen);
+		int32 SoakWx = 1; // dry unless -TagWeather= asks for wind (2), rain (3) or snow (4)
+		FParse::Value(FCommandLine::Get(), TEXT("TagWeather="), SoakWx);
+		StartMatch(3, 7, false, true, SoakWx, true, QLen);
 	}
 	else if (FParse::Param(FCommandLine::Get(), TEXT("TagHighlights")))
 	{
@@ -1802,6 +1804,11 @@ void AMatchDirector::SpawnSidelines(const tag::Team& Home, const tag::Team& Away
 
 void AMatchDirector::TickSidelines(float Dt)
 {
+	// the benches and the staff animate only while they are in shot (the umpire works the play: he is driven)
+	for (AAthlete* A : Sideline)
+		if (A) A->SleepWhenOffscreen(Dt);
+	for (AAthlete* A : Officials)
+		if (A && A != Umpire) A->SleepWhenOffscreen(Dt);
 	if (!Game || Sideline.Num() == 0) return;
 	// a score sets the scoring team's bench off for a few seconds (longer for a touchdown)
 	const int32 Now[2] = {Game->score.home, Game->score.away};

@@ -77,6 +77,9 @@ public:
 	void SetCivilian(ECivilian Who = ECivilian::Generic, int32 Index = 0);
 	/** Bench reaction to a score: celebrate, or settle back into the idle. */
 	void SidelineCheer(bool bCheer);
+	/** Bench / staff, once a frame: the mocap body and its retarget stop animating while he is off screen (they run
+	 *  every frame otherwise, seen or not) and pick the idle up again the frame he is back in shot. */
+	void SleepWhenOffscreen(float Dt);
 
 	/** Instant replay: the visible body's world transform and local pose (mesh bone order) as shown this frame. */
 	bool CaptureReplayPose(FTransform& OutWorld, TArray<FTransform>& OutLocal) const;
@@ -229,6 +232,8 @@ private:
 	void RecordTrajectory();
 	bool bInMatch = false;
 	int32 SidelineVariant = 0;
+	bool bAnimAwake = true;  // SleepWhenOffscreen: the bodies' ticks are on
+	float SleepClock = 0.f;  // seconds since the first SleepWhenOffscreen (the first second always animates: a pose to freeze in)
 	bool bReplaying = false;
 	bool bReplayHold = false;     // down at the end of a replay: keeps its last pose until the get-up
 	FTransform ReplayRel;

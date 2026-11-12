@@ -3,12 +3,26 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Components/InstancedStaticMeshComponent.h"
 #include "Stadium.generated.h"
 
-class UInstancedStaticMeshComponent;
 class UStaticMeshComponent;
 
 namespace tag { struct Team; struct Weather; }
+
+/** The precipitation column: its instances never move within it and it moves every frame, so its bounds come from a
+ *  box measured once (the stock bounds pass walks all ~20k instances on every move). */
+UCLASS()
+class TAGGRIDIRON_API UTagPrecipComponent : public UInstancedStaticMeshComponent
+{
+	GENERATED_BODY()
+public:
+	FBox LocalBox = FBox(ForceInit);
+	virtual FBoxSphereBounds CalcBounds(const FTransform& LocalToWorld) const override
+	{
+		return LocalBox.IsValid ? FBoxSphereBounds(LocalBox.TransformBy(LocalToWorld)) : Super::CalcBounds(LocalToWorld);
+	}
+};
 
 UCLASS()
 class TAGGRIDIRON_API AStadium : public AActor
@@ -117,7 +131,8 @@ private:
 	TArray<int32> CrowdSectionOf;
 	TArray<int32> CrowdLocal;
 	int32 CrowdCursor = 0;
-	TArray<FVector> RainPos;
+	FVector RainStep = FVector::ZeroVector; // one fall period's travel of the precipitation column (BuildRain)
+	float RainPeriod = 1.f, RainPhase = 0.f;
 	FVector Wind = FVector::ZeroVector;
 	bool bSnow = false;
 	float Time = 0.f;

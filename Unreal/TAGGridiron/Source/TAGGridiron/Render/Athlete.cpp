@@ -20,6 +20,7 @@
 #include "Misc/PackageName.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "HAL/PlatformMemory.h"
+#include "HAL/IConsoleManager.h"
 #include "Math/RandomStream.h"
 #include "Dom/JsonObject.h"
 #include "Serialization/JsonReader.h"
@@ -316,18 +317,35 @@ bool FAthleteAssets::LoopsCleanly(const UAnimSequence* Seq)
 	return true;
 }
 
+/**
+ * The pack's assets under a category folder (recursive for the root), read from the registry once a run: a forced
+ * rescan of the folders and a fresh registry query for every family at each quarter's re-draw held the game thread for
+ * over 2 s. An uncooked run fills the registry lazily, hence the one synchronous scan.
+ */
+struct FPackAssets { TArray<FAssetData> Data; TArray<FString> Names; };
+static const FPackAssets& PackAssets(const TCHAR* Category)
+{
+	static TMap<FString, FPackAssets> Cache;
+	if (const FPackAssets* Hit = Cache.Find(Category)) return *Hit;
+	IAssetRegistry& AR = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry").Get();
+	const FString Path = FString::Printf(TEXT("/Game/TAG/Anim/Pack/%s"), Category);
+	AR.ScanPathsSynchronous({Path}, true);
+	FPackAssets& Out = Cache.Add(Category);
+	AR.GetAssetsByPath(FName(*Path), Out.Data, FCString::Strcmp(Category, TEXT("")) == 0);
+	Out.Names.Reserve(Out.Data.Num());
+	for (const FAssetData& D : Out.Data) Out.Names.Add(D.AssetName.ToString());
+	return Out;
+}
+
 void FAthleteAssets::PackFamily(const TCHAR* Category, std::initializer_list<const TCHAR*> Any, std::initializer_list<const TCHAR*> Any2,
 	std::initializer_list<const TCHAR*> None, int32 Max, int32 Seed, bool bLoop, FFamilySink Sink)
 {
-	IAssetRegistry& AR = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry").Get();
-	const FString Path = FString::Printf(TEXT("/Game/TAG/Anim/Pack/%s"), Category);
-	AR.ScanPathsSynchronous({Path}, true); // uncooked runs fill the registry lazily
-	TArray<FAssetData> Assets;
-	AR.GetAssetsByPath(FName(*Path), Assets, FCString::Strcmp(Category, TEXT("")) == 0);
+	const FPackAssets& Assets = PackAssets(Category);
 	TArray<FAssetData> Hits;
-	for (const FAssetData& D : Assets)
+	for (int32 Ai = 0; Ai < Assets.Data.Num(); ++Ai)
 	{
-		const FString N = D.AssetName.ToString();
+		const FAssetData& D = Assets.Data[Ai];
+		const FString& N = Assets.Names[Ai];
 		auto AnyOf = [&N](std::initializer_list<const TCHAR*> L) { if (L.size() == 0) return true; for (const TCHAR* T : L) if (N.Contains(T)) return true; return false; };
 		bool bOk = AnyOf(Any) && AnyOf(Any2);
 		for (const TCHAR* T : None) if (N.Contains(T)) { bOk = false; break; }
@@ -371,15 +389,12 @@ void FAthleteAssets::LoadPackIndex()
 void FAthleteAssets::PackTimed(const TCHAR* Category, std::initializer_list<const TCHAR*> Any, std::initializer_list<const TCHAR*> Any2,
 	std::initializer_list<const TCHAR*> None, int32 Max, int32 Seed, const TCHAR* Field, int32 LeadFrames, float MinAfter, float MinEventSpeed, TArray<FPackClip>& Sink)
 {
-	IAssetRegistry& AR = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry").Get();
-	const FString Path = FString::Printf(TEXT("/Game/TAG/Anim/Pack/%s"), Category);
-	AR.ScanPathsSynchronous({Path}, true);
-	TArray<FAssetData> Assets;
-	AR.GetAssetsByPath(FName(*Path), Assets, FCString::Strcmp(Category, TEXT("")) == 0);
+	const FPackAssets& Assets = PackAssets(Category);
 	TArray<FAssetData> Hits;
-	for (const FAssetData& D : Assets)
+	for (int32 Ai = 0; Ai < Assets.Data.Num(); ++Ai)
 	{
-		const FString N = D.AssetName.ToString();
+		const FAssetData& D = Assets.Data[Ai];
+		const FString& N = Assets.Names[Ai];
 		auto AnyOf = [&N](std::initializer_list<const TCHAR*> L) { if (L.size() == 0) return true; for (const TCHAR* T : L) if (N.Contains(T)) return true; return false; };
 		bool bOk = AnyOf(Any) && AnyOf(Any2);
 		for (const TCHAR* T : None) if (N.Contains(T)) { bOk = false; break; }
@@ -555,7 +570,14 @@ void FAthleteAssets::ReseedPack(int32 Seed)
 	PendingFamilies.Reset();
 	PendingTimed.Reset();
 	PendingPairs.Reset();
+	const double SelectT0 = FPlatformTime::Seconds();
 	SelectPack(Seed);
+	UE_LOG(LogTemp, Display, TEXT("TAG: pack draw selected in %.0f ms"), (FPlatformTime::Seconds() - SelectT0) * 1000.0);
+	// the last draw's celebrations leave the shared list first: PackCelebrations is one of the family sinks truncated
+	// below, and a clip left in Celebrations is unrooted when this draw lands, collected at the next GC and played by
+	// the next bench cheer (the access violation in SidelineCheer after a quarter's re-draw)
+	for (const TObjectPtr<UAnimationAsset>& O : PackCelebrations) Celebrations.Remove(O.Get());
+	PackCelebrations.Reset();
 	// the families refill from the placed clips up; the previous draw stays resident until this one has landed
 	for (FPendingFamily& F : PendingFamilies)
 	{
@@ -563,8 +585,6 @@ void FAthleteAssets::ReseedPack(int32 Seed)
 		const int32* Base = SinkBase.Find(&S);
 		S.SetNum(Base ? *Base : 0);
 	}
-	for (const TObjectPtr<UAnimationAsset>& O : PackCelebrations) Celebrations.Remove(O.Get());
-	PackCelebrations.Reset();
 	for (FPendingTimed& T : PendingTimed) T.Sink->Reset();
 	for (TArray<FPackPair>& L : PackPairs) L.Reset();
 	PackPlaced.Reset();
@@ -601,8 +621,37 @@ void FAthleteAssets::ReseedPack(int32 Seed)
 	LoadNextPackChunk();
 }
 
+/**
+ * While a pack draw streams in behind the game the loader gets 1 ms of the game thread a frame and gives back what it
+ * does not use (the engine default is 5 ms, always used in full). The clips land a little later and the frame rate holds
+ * (Tools/Perf/ab.ps1 over a streaming window: 75 -> 92 fps). The engine's own values come back once the draw is in.
+ */
+static void PackLoadBudget(bool bStreaming)
+{
+	static bool bOn = false;
+	static float SavedLimit = 5.f;
+	static int32 SavedFull = 1;
+	IConsoleVariable* Limit = IConsoleManager::Get().FindConsoleVariable(TEXT("s.AsyncLoadingTimeLimit"));
+	IConsoleVariable* Full = IConsoleManager::Get().FindConsoleVariable(TEXT("s.AsyncLoadingUseFullTimeLimit"));
+	if (bStreaming == bOn || !Limit || !Full) return;
+	if (bStreaming)
+	{
+		SavedLimit = Limit->GetFloat();
+		SavedFull = Full->GetInt();
+		Limit->Set(1.f, ECVF_SetByCode);
+		Full->Set(0, ECVF_SetByCode);
+	}
+	else
+	{
+		Limit->Set(SavedLimit, ECVF_SetByCode);
+		Full->Set(SavedFull, ECVF_SetByCode);
+	}
+	bOn = bStreaming;
+}
+
 void FAthleteAssets::LoadNextPackChunk()
 {
+	PackLoadBudget(true);
 	// the budget counts the clips themselves (their resource size), not the process, which grows with the world
 	// loading alongside; the process still gets a ceiling at 80 % of physical memory so a wrong estimate cannot swap
 	const FPlatformMemoryStats Mem = FPlatformMemory::GetStats();
@@ -708,6 +757,7 @@ void FAthleteAssets::OnPackBatchLoaded()
 	PackHandle.Reset();
 	PackQueue.Reset();
 	bPackLoading = false;
+	PackLoadBudget(false);
 	PackLibraryCount = PackCelebrations.Num() + PackPostPlayIdles.Num() + PackGetUpsFaceDown.Num() + PackGetUpsFaceUp.Num() + PackInjuries.Num();
 	for (const auto& KV : PackStances) PackLibraryCount += KV.Value.Num();
 	UE_LOG(LogTemp, Display, TEXT("TAG: pack library tackle pairs: drive %d over %d behind %d side %d / %d dive %d"),
@@ -1086,6 +1136,7 @@ void AAthlete::Setup(const tag::Player* InPlayer, const FUniform& U)
 		{
 			Body->SetVisibility(false);
 			Body->SetCastShadow(false);
+			Body->bComponentUseFixedSkelBounds = true; // never drawn: no bounds pass over its pose each frame
 		}
 		if (A.bHero)
 		{
@@ -1427,6 +1478,7 @@ void AAthlete::DressHero(USkeletalMesh* BodyMesh, USkeletalMesh* HeadMesh, USkel
 		C->bCastDynamicShadow = true;
 		C->SetVisibility(Meshes[k] != nullptr);
 		C->SetLeaderPoseComponent(Meshes[k] ? MHBody.Get() : nullptr, true);
+		C->bUseBoundsFromLeaderPoseComponent = true; // the body's bounds hold the head and the helmet: no bounds pass of their own
 	}
 	bFaceOnLeader = true;
 	bMaterialNumbers = false;
@@ -2177,6 +2229,20 @@ void AAthlete::StandOnSideline(const FVector& Loc, float Yaw, int32 Variant)
 		if (!bHeroHelmetOn && Variant % 3 == 0) WearCap(Variant / 3); // some wear a cap on the bench
 	}
 	SidelineCheer(false);
+}
+
+void AAthlete::SleepWhenOffscreen(float Dt)
+{
+	if (!Body || !MHBody) return;
+	SleepClock += Dt;
+	// on screen this frame or the last (the shadow pass alone does not count: a bench shadow holding still reads fine)
+	const double Now = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0;
+	auto Seen = [Now](const UPrimitiveComponent* C) { return C && C->IsVisible() && Now - C->GetLastRenderTimeOnScreen() < 0.12; };
+	const bool bAwake = SleepClock < 1.f || Seen(MHBody) || Seen(MHFace) || Seen(HeroHelmet);
+	if (bAwake == bAnimAwake) return;
+	bAnimAwake = bAwake;
+	Body->SetComponentTickEnabled(bAwake);
+	MHBody->SetComponentTickEnabled(bAwake);
 }
 
 void AAthlete::PlayRushMove(const FString& Move, const AAthlete* Blocker)

@@ -767,6 +767,7 @@ USkeletalMeshComponent* AStadium::AddStaticPerson(int32 Item, int32 HeadItem, co
 		Hc->SetSkeletalMesh(HM);
 		Hc->SetupAttachment(P);
 		Hc->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		Hc->bUseBoundsFromLeaderPoseComponent = true;
 		Hc->RegisterComponent();
 		Hc->SetLeaderPoseComponent(P);
 		Paint(Hc);
@@ -849,6 +850,17 @@ void AStadium::BuildPackSideline(const tag::Team& Home, const tag::Team& Away)
 	UE_LOG(LogTemp, Display, TEXT("TAG: model pack sideline people %d (media, coordinators, sideline players)"), SidelinePeople.Num());
 }
 
+/**
+ * A seated fan: out of the ray tracing scene (hundreds of skinned meshes rebuilding their ray tracing geometry every
+ * frame cost more than the rest of the render thread; Lumen still lights them from the screen) and on the mesh's fixed
+ * bounds (a fan sways in place, so no bounds pass over the pose each frame).
+ */
+static void CrowdCheap(USkeletalMeshComponent* F)
+{
+	F->bVisibleInRayTracing = false;
+	F->bComponentUseFixedSkelBounds = true;
+}
+
 bool AStadium::BuildPackFans(const TArray<FTransform>& Seats, const tag::Team& Home, const tag::Team& Away)
 {
 	FAthleteAssets& A = FAthleteAssets::Get();
@@ -889,6 +901,7 @@ bool AStadium::BuildPackFans(const TArray<FTransform>& Seats, const tag::Team& H
 		F->SetCastShadow(false);
 		F->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::OnlyTickPoseWhenRendered;
 		F->bEnableUpdateRateOptimizations = true;
+		CrowdCheap(F);
 		F->RegisterComponent();
 		// the pack characters face +Y: yaw -90 turns them to the field
 		F->SetWorldLocationAndRotation(Seat.GetLocation(), FRotator(0, Seat.Rotator().Yaw - 90.f, 0));
@@ -917,6 +930,8 @@ bool AStadium::BuildPackFans(const TArray<FTransform>& Seats, const tag::Team& H
 				Pc->SetupAttachment(F);
 				Pc->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 				Pc->SetCastShadow(false);
+				CrowdCheap(Pc);
+				Pc->bUseBoundsFromLeaderPoseComponent = true;
 				Pc->RegisterComponent();
 				Pc->SetLeaderPoseComponent(F);
 				if (UMaterialInstanceDynamic* Mid = Pc->CreateDynamicMaterialInstance(0)) Mid->SetVectorParameterValue(TEXT("Tint"), C);
@@ -966,6 +981,7 @@ void AStadium::BuildHeroCrowd(const FVector& C, float Yaw)
 			F->SetCastShadow(false);
 			F->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::OnlyTickPoseWhenRendered;
 			F->bEnableUpdateRateOptimizations = true;
+			CrowdCheap(F);
 			F->RegisterComponent();
 			// MetaHumans face +Y in component space: yaw -90 turns them to the field; a little head turn variety
 			F->SetWorldLocationAndRotation(Feet, FRotator(0, FaceYaw - 90.f + Rand.FRandRange(-14, 14), 0));
@@ -1106,16 +1122,46 @@ void AStadium::BuildCrowd(const tag::Team& Home)
 void AStadium::BuildRain(const tag::Weather& W)
 {
 	FAthleteAssets& A = FAthleteAssets::Get();
-	Rain = AddISM(A.Cube, bSnow ? FLinearColor(1, 1, 1) : FLinearColor(0.6f, 0.65f, 0.75f), 0.2f, false);
+	UTagPrecipComponent* Col = NewObject<UTagPrecipComponent>(this);
+	Col->SetupAttachment(RootComponent);
+	Col->SetStaticMesh(A.Cube);
+	Col->SetMaterial(0, TagColorMat(this, bSnow ? FLinearColor(1, 1, 1) : FLinearColor(0.6f, 0.65f, 0.75f), 0.2f));
+	Col->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	Col->SetCastShadow(false);
+	Rain = Col;
+	// The streaks (flakes) stand still in the component and the component falls: one period carries it a column height
+	// down and the wind's drift along, then it wraps. The column is laid twice, the copy one period back (up and
+	// upwind), so at the wrap the copy sits exactly where the first one started. Moving every instance on the CPU and
+	// rebuilding the render state each frame cost the game thread ~3 ms in snow. The tiny cubes stay out of the ray
+	// tracing scene and the distance field lighting (a moving field of 20k instances would invalidate both every frame).
+	Rain->bVisibleInRayTracing = false;
+	Rain->bAffectDistanceFieldLighting = false;
+	const double H = 60 * YD;
+	const double Fall = (bSnow ? 2.0 : 30.0) * YD; // cm/s
+	FVector Drift = Wind * (bSnow ? 1.0 : 0.6) * (H / Fall);
+	Drift.Z = 0;
+	const double MaxDrift = 15 * YD; // a gale would carry the column off the field in one period
+	if (Drift.Size() > MaxDrift) Drift *= MaxDrift / Drift.Size();
+	RainStep = FVector(Drift.X, Drift.Y, -H);
+	RainPeriod = static_cast<float>(H / Fall);
+	RainPhase = 0.f;
+	const FRotator Slant = bSnow ? FRotator::ZeroRotator : FRotationMatrix::MakeFromZ(RainStep.GetSafeNormal()).Rotator();
+	const FVector S = bSnow ? FVector(0.03f) : FVector(0.01f, 0.01f, 0.6f);
 	FRandomStream R(11);
 	const int N = bSnow ? 9000 : 12000;
+	TArray<FTransform> Ts;
+	Ts.Reserve(N * 2);
 	for (int i = 0; i < N; ++i)
 	{
 		const FVector P(R.FRandRange(-30, 130) * YD, R.FRandRange(-60, 60) * YD, R.FRandRange(0, 60) * YD);
-		RainPos.Add(P);
-		const FVector S = bSnow ? FVector(0.03f) : FVector(0.01f, 0.01f, 0.6f);
-		Rain->AddInstance(FTransform(FRotator::ZeroRotator, P, S));
+		Ts.Add(FTransform(Slant, P, S));
+		Ts.Add(FTransform(Slant, P - RainStep, S));
 	}
+	// the column's box (instance centres padded by the streak length), then the instances
+	for (const FTransform& T : Ts) Col->LocalBox += T.GetLocation();
+	Col->LocalBox = Col->LocalBox.ExpandBy(100.0);
+	Col->RegisterComponent();
+	Rain->AddInstances(Ts, false);
 	(void)W;
 }
 
@@ -1258,16 +1304,7 @@ void AStadium::Tick(float Dt)
 	// precipitation
 	if (Rain)
 	{
-		const float Fall = (bSnow ? 2.0f : 30.f) * YD * Dt;
-		for (int32 i = 0; i < RainPos.Num(); ++i)
-		{
-			FVector& P = RainPos[i];
-			P += Wind * Dt * (bSnow ? 1.f : 0.6f) - FVector(0, 0, Fall);
-			if (bSnow) P.X += FMath::Sin(Time * 1.3f + i) * 3.f * Dt * 60.f;
-			if (P.Z < 0) P.Z += 60 * YD;
-			const FVector S = bSnow ? FVector(0.03f) : FVector(0.01f, 0.01f, 0.6f);
-			Rain->UpdateInstanceTransform(i, FTransform(FRotator::ZeroRotator, P, S), false, false, true);
-		}
-		Rain->MarkRenderStateDirty();
+		RainPhase = FMath::Fmod(RainPhase + Dt / FMath::Max(RainPeriod, 0.01f), 1.f);
+		Rain->SetRelativeLocation(RainStep * RainPhase);
 	}
 }
