@@ -532,7 +532,9 @@ void FAthleteAssets::SelectPack(int32 Seed)
 		PackTimed(TEXT(""), {TEXT("Hurdle")}, {}, {TEXT("2man"), TEXT("Strip")}, 8, Seed + 95, TEXT("onset"), 5, 0.6f, 0.f, PackHurdles);
 		PackTimed(TEXT(""), {TEXT("StiffArm"), TEXT("Stiff_Arm"), TEXT("Stiffarm")}, {}, {TEXT("2man"), TEXT("Strip")}, 8, Seed + 96, TEXT("release"), 6, 0.6f, 0.f, PackStiffArmsL);
 		PackTimed(TEXT(""), {TEXT("StiffArm"), TEXT("Stiff_Arm"), TEXT("Stiffarm")}, {}, {TEXT("2man"), TEXT("Strip")}, 8, Seed + 97, TEXT("release"), 6, 0.6f, 0.f, PackStiffArmsR);
-		const std::initializer_list<const TCHAR*> BlockNone = {TEXT("2man"), TEXT("Celeb"), TEXT("Idle"), TEXT("Stance"), TEXT("Double"), TEXT("3Man"), TEXT("Jammed"), TEXT("FakeFG"), TEXT("Option")};
+		// (the Dline "Stationary_to_<side>" captures spin the man through a turn the in-place import cannot follow: a
+		// one-frame jump of the body and a metre of foot slide a step in the full-game captures)
+		const std::initializer_list<const TCHAR*> BlockNone = {TEXT("2man"), TEXT("Celeb"), TEXT("Idle"), TEXT("Stance"), TEXT("Double"), TEXT("3Man"), TEXT("Jammed"), TEXT("FakeFG"), TEXT("Option"), TEXT("Stationary_to")};
 		PackTimed(TEXT("Blocking"), {TEXT("Win")}, {TEXT("Left"), TEXT("_L_")}, BlockNone, 10, Seed + 100, nullptr, 0, 0.8f, 0.f, PackRushWinsL);
 		PackTimed(TEXT("Blocking"), {TEXT("Win")}, {TEXT("Right"), TEXT("_R_")}, BlockNone, 10, Seed + 101, nullptr, 0, 0.8f, 0.f, PackRushWinsR);
 		PackTimed(TEXT("Blocking"), {TEXT("Loss")}, {TEXT("Left"), TEXT("_L_")}, BlockNone, 10, Seed + 102, nullptr, 0, 0.8f, 0.f, PackBeatenL);
@@ -2952,12 +2954,13 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 			SincePunch = 0.f;
 			LineLoop = 0;
 			SmoothedPush = 0.f;
-			// every other strike from a capture of real first contact (his side's man in it), the keyed punch otherwise
+			// three strikes in four from a capture of real first contact (his side's man in it), the keyed punch otherwise
+			// (every other one left the keyed punch a quarter of all one-shots)
 			const bool bDefender = Player && (Player->pos == tag::Pos::DE || Player->pos == tag::Pos::DT || Player->pos == tag::Pos::LB ||
 				Player->pos == tag::Pos::CB || Player->pos == tag::Pos::S);
 			const TArray<FAthleteAssets::FPackClip>& EPool = bDefender ? A.PackEngageDef : A.PackEngageOff;
 			const int32 PunchSeq = (Player ? Player->id : 0) + PunchedThisPlay.Num();
-			const FAthleteAssets::FPackClip* EP = (PunchSeq % 2) ? FAthleteAssets::PickOr(EPool, PunchSeq / 2) : nullptr;
+			const FAthleteAssets::FPackClip* EP = (PunchSeq % 4) ? FAthleteAssets::PickOr(EPool, PunchSeq) : nullptr;
 			if (EP)
 			{
 				PlayOneShotFrom(EP->Anim, EP->Start);

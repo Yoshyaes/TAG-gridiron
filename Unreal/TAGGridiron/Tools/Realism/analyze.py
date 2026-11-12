@@ -97,7 +97,13 @@ bj = np.hypot((D.d_flx + D.d_frx) / 2, (D.d_fly + D.d_fry) / 2)
 # a swinging foot carries the midpoint ~1.5x the body's speed: a pop is a jump the motion cannot explain
 # (> 60 cm and > 2.5 x what the sim speed covers in a frame), outside replays (which cut by design)
 expect = 2.5 * D.sim_v * 100 * DT
-bjumps = D[ok & (bj > 60) & (bj > expect) & D.state.isin(["presnap", "live", "post"]) & (D.frame > 4)]
+# and a jump, not fast motion: a leap or a dive carries the feet 50-70 cm a frame for several frames in a row (a pile-on
+# dive measured 41, 61, 67, 47); a pop stands out from the frames on both sides of it
+grp = [D["clip"], D["pid"]]
+bj_prev = bj.groupby(grp).shift(1)
+bj_next = bj.groupby(grp).shift(-1)
+spike = bj > 1.8 * np.fmax(bj_prev.fillna(0), bj_next.fillna(0))
+bjumps = D[ok & (bj > 60) & (bj > expect) & spike & D.state.isin(["presnap", "live", "post"]) & (D.frame > 4)]
 # a scene reset (the next play set up, everyone re-placed) moves many men in the same frame: not a glitch on one body
 mass = bjumps.groupby(["clip", "frame"]).pid.transform("size") >= 5
 bjumps = bjumps[~mass]

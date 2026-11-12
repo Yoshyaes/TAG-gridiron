@@ -131,6 +131,8 @@ public:
 	void BeginTackleOn(AAthlete* Carrier);
 	/** Paired block: the man this lineman is locked up with this frame (null when not engaged). */
 	void SetBlockPartner(AAthlete* Partner) { BlockPartner = Partner; }
+	AAthlete* GetBlockPartner() const { return BlockPartner.Get(); }
+	const FString& GetAnimName() const { return CurrentAnim; }
 	/** Engaged rep state from the sim: Push -1 (blocker driving the defender) .. +1 (defender driving the blocker). */
 	void SetLinePush(float Push, bool bDefender, bool bPassPro) { LinePush = Push; bLineDefender = bDefender; bLinePassPro = bPassPro; }
 	/** The rusher beat his blocker with Move ("swim", "rip", "club", "spin", "bull", "longarm", "diprip"): play it to

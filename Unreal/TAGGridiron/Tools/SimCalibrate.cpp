@@ -106,6 +106,7 @@ int main(int argc, char** argv) {
   double qbSwaps = 0, qbSnaps = 0;
   double yacSum = 0, compAirSum = 0, compN = 0;
   double fHold[2] = {0, 0}, fN[2] = {0, 0}, fDpi = 0, fDpiN = 0, fDhold = 0, fRough = 0, fOpi = 0, fOpiN = 0, fMask = 0;
+  double dN[5] = {0, 0, 0, 0, 0}, dYds[5] = {0, 0, 0, 0, 0}, dPass[5] = {0, 0, 0, 0, 0}, dTg[5] = {0, 0, 0, 0, 0}, dSucc[5] = {0, 0, 0, 0, 0};
   std::vector<double> runYds, passYdsEarly;
   double edN = 0, edSucc = 0, edRun = 0, edRunSucc = 0;
   double tdN[4] = {0, 0, 0, 0}, tdConv[4] = {0, 0, 0, 0}, tdPass[4] = {0, 0, 0, 0};
@@ -197,6 +198,14 @@ int main(int argc, char** argv) {
         if (r.kind == PlayKind::Pass && r.timeToThrow > 0) ttt.push_back(r.timeToThrow);
       }
       mtBroken += r.brokenTackles;
+      if (!sim.isReturn() && sim.cfg.down && sim.cfg.toGo && r.kind != PlayKind::Kneel && r.kind != PlayKind::Spike) {
+        const int dn = (std::min)(4, (std::max)(1, static_cast<int>(*sim.cfg.down)));
+        dN[dn]++;
+        dYds[dn] += r.yards;
+        dPass[dn] += r.kind != PlayKind::Run;
+        dTg[dn] += *sim.cfg.toGo;
+        dSucc[dn] += r.yards >= *sim.cfg.toGo || r.td == Side::Off;
+      }
       if (!sim.isReturn() && sim.cfg.down && *sim.cfg.down <= 2 && sim.cfg.toGo && r.kind != PlayKind::Kneel && r.kind != PlayKind::Spike) {
         const double need = (*sim.cfg.down == 1 ? 0.4 : 0.6) * *sim.cfg.toGo;
         const bool ok = r.yards >= need || r.td == Side::Off;
@@ -470,6 +479,10 @@ int main(int argc, char** argv) {
                   100 * edSucc / (std::max)(1.0, edN), 100 * edRunSucc / (std::max)(1.0, edRun), pc(runYds, 0.1), pc(runYds, 0.25), pc(runYds, 0.5), pc(runYds, 0.75), pc(runYds, 0.9),
                   100 * neg / (std::max)(1.0, (double)runYds.size()), 100 * zero / (std::max)(1.0, (double)runYds.size()), pc(passYdsEarly, 0.25), pc(passYdsEarly, 0.5), pc(passYdsEarly, 0.75));
     }
+    for (int dn = 1; dn <= 3; dn++)
+      std::printf("down %d: %.0f%% of plays, to go %.1f, pass %.0f%%, avg gain %.2f, converted %.0f%%   (NFL ~ 1st: 41%%, 10.0, 49%%, 5.5; 2nd: 32%%, 7.6, 56%%, 5.2, 30%%; 3rd: 23%%, 7.3, 75%%, 5.4, 39%%)\n",
+                  dn, 100 * dN[dn] / (std::max)(1.0, dN[1] + dN[2] + dN[3] + dN[4]), dTg[dn] / (std::max)(1.0, dN[dn]), 100 * dPass[dn] / (std::max)(1.0, dN[dn]),
+                  dYds[dn] / (std::max)(1.0, dN[dn]), 100 * dSucc[dn] / (std::max)(1.0, dN[dn]));
     std::printf("3rd downs (share of 3rd downs / converted / pass rate) NFL ~ 1-2: 22%% 62%%, 3-5: 25%% 48%%, 6-9: 26%% 36%%, 10+: 27%% 20%%\n");
     {
       const double tot = (std::max)(1.0, tdN[0] + tdN[1] + tdN[2] + tdN[3]);

@@ -48,11 +48,11 @@ struct Tune {
   double accBase = 0.3;  // throw placement error: base sd (yd)
   double accSlope = 0.017648;  // throw placement error: per rating point below 99
   double deepErr = 0.01138;  // extra error per air yard past 20
-  double deepReadK = 1.95;  // QB read penalty for a target past 15 yd
-  double deepReadSlope = 0.1581;  // ... per yard past 15
-  double hotDeepK = 0.8771;  // hot-read penalty for a target past 12 yd
-  double hotDeepSlope = 0.1614;  // ... per yard past 12
-  double manCushion = 1.8;  // man coverage cushion on routes past 8 yd
+  double deepReadK = 1.9267;  // QB read penalty for a target past 15 yd
+  double deepReadSlope = 0.16121;  // ... per yard past 15
+  double hotDeepK = 0.90043;  // hot-read penalty for a target past 12 yd
+  double hotDeepSlope = 0.1374;  // ... per yard past 12
+  double manCushion = 2.1;  // man coverage cushion on routes past 8 yd
   double zoneCushion = 3;  // deep zone cushion
   double zoneCushionV = 0.55;  // ... per yd/s of the receiver's speed
   double routeRead = 0.75;  // how far a good cover man plays the route ahead
@@ -60,12 +60,12 @@ struct Tune {
   double qbThresh = 2.6324;  // QB openness bar at the snap
   double qbDecay = 0.21;  // ... drop per second
   double qbLate = 0.7;  // ... extra drop per second past 2.5 s
-  double tightDeep = 1.8116;  // catch difficulty from a defender in phase, deep
-  double tightShort = 1.6694;  // ... short
+  double tightDeep = 1.7727;  // catch difficulty from a defender in phase, deep
+  double tightShort = 1.7234;  // ... short
   double contested = 0.7324;  // catch difficulty of any contested ball
   double breakdownBase = 1.5;  // pursuit breakdown: speed over the carrier's
   double breakdownK = 1.98;  // ... per yard away
-  double catchKeep = 0.45;  // speed kept through an uncontested catch
+  double catchKeep = 0.32;  // speed kept through an uncontested catch
   double penScale = 1.0324;  // penalty rate multiplier
   double assistRange = 3;  // a closing pursuer this near joins the tackle (yd)
   double tackleReach = 0.44;  // contact reach beyond the two bodies (yd)
@@ -74,7 +74,10 @@ struct Tune {
   double yacNoise = 2.5;   // a receiver's path-reading noise after the catch (x a back's)
   double runNoise = 1.0;   // a ball carrier's path-reading noise
   double releaseRate = 8;  // per second: a pass-pro rep breaks up once the ball is caught away from the QB
-  double intBias = 1.2;  // a defender at the ball comes down with it (logit shift; NFL ~2.4% of passes intercepted)
+  double hotRate = 1.0;   // how readily a QB with a free rusher closing gets rid of it (x the hazard)
+  double outletPen = 0.3; // how much a QB passes up a target at or behind the line
+  double runShed = 0.065;  // run-block shed hazard base (per s)
+  double intBias = 1.344;  // a defender at the ball comes down with it (logit shift; NFL ~2.4% of passes intercepted)
   double holdK = 0.06;       // holding: per second of a rep the defender is winning (x how badly)
   double holdShed = 0.003;   // holding: a beaten blocker grabbing as his man gets away
 };

@@ -302,7 +302,7 @@ LOCO_DB = {
              "Loco_Line_BackDiag_Run", "Loco_Line_BackDiag_Run_M"],
     "Crouch": [n for n in LOCO if n.startswith("Loco_Line_") and LOCO[n].get("mode") == "root" and not n.startswith(("Loco_Line_Start", "Loco_Line_Idle"))],
     # the sets beside the loops (TAG copies of the sample's, the pack's clips added)
-    "Stand_Idles": ["Loco_Idle_Neutral", "Loco_Idle_Neutral2", "Loco_Idle_LB", "Loco_Idle_WR_HandsUp"],
+    "Stand_Idles": ["Loco_Idle_Neutral", "Loco_Idle_Neutral2", "Loco_Idle_LB"],  # (the WR hands-up idle on every man read as a clone)
     "Walk_Starts": ["Loco_Start_Fwd", "Loco_Start_Back", "Loco_Start_Diag", "Loco_Start_Diag_M"],
     "Run_Starts": ["Loco_Start_Fwd", "Loco_Start_Back", "Loco_Start_Side", "Loco_Start_Side_M", "Loco_Start_Diag", "Loco_Start_Diag_M",
                    "Loco_Start_Agile", "Loco_Boost_Run", "Loco_Accel_Jog"],

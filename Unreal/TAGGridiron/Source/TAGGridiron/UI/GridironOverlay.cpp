@@ -81,7 +81,7 @@ void SGridironOverlay::Construct(const FArguments& InArgs)
 			+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(0, 24, 0, 0)
 			[
 				SNew(SBorder).BorderImage(White()).BorderBackgroundColor(FLinearColor(0.07f, 0.09f, 0.13f, 0.9f)).Padding(FMargin(18, 8))
-				.Visibility_Lambda([this] { return ToastT < 1.3f ? EVisibility::HitTestInvisible : EVisibility::Collapsed; })
+				.Visibility_Lambda([this] { return ToastT < (ToastText.Len() > 14 ? 3.2f : 1.3f) ? EVisibility::HitTestInvisible : EVisibility::Collapsed; }) // a stat line stays long enough to read
 				[ SNew(STextBlock).Font(Font(16, "Bold")).ColorAndOpacity(Accent).Text_Lambda([this] { return T(ToastText); }) ]
 			]
 		]

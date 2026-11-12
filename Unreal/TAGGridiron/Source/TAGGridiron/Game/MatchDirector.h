@@ -94,6 +94,9 @@ private:
 	AAthlete* AthleteFor(tag::Player* P, tag::TeamKey Side);
 	void ShowOnly(const std::vector<tag::Player*>& Ps);
 	void SyncPlay(float Dt, float Alpha);
+	/** Locked-up blockers: the upper bodies of a clip lean in further than the hips' spacing allows (a rusher's chest
+	 *  inside the blocker's shoulder); each frame the pair is eased apart until chest and helmet clear the other man. */
+	void ResolveEngagedOverlap();
 	void CapturePrev();
 	void UpdateCamera(float Dt, const FVector& Focus);
 	FVector FocusPoint() const;
@@ -171,6 +174,8 @@ private:
 	/** Where an official at Pos steps to stay Keep (cm) clear of every player over the next Look seconds (each man's
 	 *  path read from his sim velocity: sidestep his line, not just back away); Urgency 0..1 = how close the nearest gets. */
 	FVector OfficialDodge(const FVector& Pos, float Keep, float Look, float& Urgency);
+	/** Last resort: a player inside 1.2 m pushes the official straight out (up to 6 m/s), whatever his target. */
+	void OfficialPushOut(FVector& Pos, float Dt);
 	/** A live kick return (the sim fields the kick and runs it back; the user returns it or covers it). */
 	bool bLiveReturn = false;
 	void StartLiveReturn(const std::vector<tag::Player*>& KickTeam, const std::vector<tag::Player*>& RecvTeam);

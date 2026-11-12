@@ -87,6 +87,14 @@ report = []
 for path in sorted(EAL.list_assets(LIB, recursive=False, include_folder=False)):
     asset = path.split(".")[0]
     name = asset.rsplit("/", 1)[1][11:]  # after A_TAG_Pack_
+    # standing idles of players (the stand-idle set had four, so a dozen men standing played the same one): the plain
+    # idle captures of the pack, kept when they stand still (root under 30 cm/s)
+    if re.search(r"^(MADNAUG04_\d+_1_\d_Idle|MADNAUG04_0001_1_2_idle|MADNMAY04_2316_1_8_Idle_Fidget|MAP_QBIdle_Neutral_Global|MG_LB_Idle_v4|2014_Idle_Hands_Idle)", name)             and "GrabFaceMask" not in name and "Smallsteps" not in name:
+        anim = unreal.load_asset(asset)
+        if isinstance(anim, unreal.AnimSequence) and measure(anim)["speed"] < 30:
+            lists.setdefault("Stand_Idles", []).append(asset)
+            report.append((name, "Stand_Idles"))
+        continue
     if any(s in name for s in SKIP):
         continue
     if norm(name) in listed or norm(re.sub(r"__P\d+$", "", name) + "__P01") in listed:

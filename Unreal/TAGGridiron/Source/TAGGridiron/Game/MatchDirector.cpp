@@ -851,9 +851,9 @@ void AMatchDirector::TickUmpire(float Dt)
 	{
 		// holds his position through the play, but gets out of anyone's way (officials are not run through)
 		float Urg = 0.f;
-		const FVector Away = OfficialDodge(UmpPos, 3.f * YD, 1.2f, Urg);
+		const FVector Away = OfficialDodge(UmpPos, 4.f * YD, 1.6f, Urg);
 		Target = UmpPos + Away;
-		Jog = Away.IsNearlyZero() ? 0.f : 350.f + 400.f * Urg;
+		Jog = Away.IsNearlyZero() ? 0.f : 380.f + 500.f * Urg;
 	}
 	else if (bDead && State == EMatchState::Post)
 	{
@@ -896,11 +896,11 @@ void AMatchDirector::TickUmpire(float Dt)
 	if (Sim && State != EMatchState::Live && FVector::Dist2D(Target, BallW) > 0.9f * YD)
 	{
 		float Urg = 0.f;
-		const FVector Away = OfficialDodge(UmpPos, 2.2f * YD, 1.0f, Urg);
+		const FVector Away = OfficialDodge(UmpPos, 3.f * YD, 1.4f, Urg);
 		if (!Away.IsNearlyZero())
 		{
 			Target += Away;
-			Jog = FMath::Max(Jog, 300.f + 350.f * Urg);
+			Jog = FMath::Max(Jog, 340.f + 450.f * Urg);
 		}
 	}
 	FVector To = Target - UmpPos;
@@ -909,10 +909,11 @@ void AMatchDirector::TickUmpire(float Dt)
 	FVector Vel = FVector::ZeroVector;
 	if (Jog > 0.f && D > 25.f)
 	{
-		const float Sp = FMath::Min(Jog, 110.f + D * 1.3f);
+		const float Sp = FMath::Min(Jog, 110.f + D * 3.f); // a short sidestep is quick, not a stroll
 		Vel = To / D * Sp;
 		UmpPos += Vel * FMath::Min(Dt, D / Sp);
 	}
+	if (FVector::Dist2D(UmpPos, BallW) > 1.5f * YD) OfficialPushOut(UmpPos, Dt); // (at the ball he takes it from the man: close by design)
 	// facing: the way he goes, or the ball when he stands
 	float Yaw = Umpire->GetActorRotation().Yaw;
 	if (!Vel.IsNearlyZero()) Yaw = Vel.Rotation().Yaw;
@@ -963,10 +964,31 @@ FVector AMatchDirector::OfficialDodge(const FVector& Pos, float Keep, float Look
 		if (Dc >= Keep) continue;
 		if (Dc < 5.f) { Rc = FVector::CrossProduct(FVector::UpVector, V.IsNearlyZero() ? R : V).GetSafeNormal() * 5.f; Dc = 5.f; }
 		const float W = 1.f / (1.f + Tc * 2.f); // the man arriving now matters more than the one a second away
-		Push += Rc / Dc * (Keep - Dc) * W * 1.6f;
+		Push += Rc / Dc * (Keep - Dc) * W * 2.4f;
 		Urgency = FMath::Max(Urgency, (Keep - Dc) / Keep * W);
 	}
 	return Push;
+}
+
+void AMatchDirector::OfficialPushOut(FVector& Pos, float Dt)
+{
+	if (!Sim || !Game) return;
+	const float Min = 120.f;
+	FVector Out = FVector::ZeroVector;
+	float Worst = 0.f;
+	for (const tag::Ent* E : Sim->ents)
+	{
+		AAthlete* P = AthleteFor(E->p, E->side == tag::Side::Off ? Game->poss : tag::other(Game->poss));
+		if (!P || P->IsHidden()) continue;
+		FVector R = Pos - P->GetActorLocation();
+		R.Z = 0.f;
+		const float L = R.Size();
+		if (L >= Min) continue;
+		Out += (L > 1.f ? R / L : FVector(1, 0, 0)) * (Min - L);
+		Worst = FMath::Max(Worst, Min - L);
+	}
+	if (Out.IsNearlyZero()) return;
+	Pos += Out.GetSafeNormal() * FMath::Min(Worst, 600.f * Dt);
 }
 
 void AMatchDirector::TickCrew(float Dt)
@@ -1052,11 +1074,11 @@ void AMatchDirector::TickCrew(float Dt)
 		if (Sim)
 		{
 			float Urg = 0.f;
-			const FVector Away = OfficialDodge(Pos, (bLiveNow ? 3.f : 2.2f) * YD, bLiveNow ? 1.2f : 1.0f, Urg);
+			const FVector Away = OfficialDodge(Pos, (bLiveNow ? 4.f : 3.f) * YD, bLiveNow ? 1.6f : 1.4f, Urg);
 			if (!Away.IsNearlyZero())
 			{
 				Target += Away;
-				Jog = FMath::Max(Jog, 320.f + 420.f * Urg);
+				Jog = FMath::Max(Jog, 380.f + 500.f * Urg);
 			}
 		}
 		FVector To = Target - Pos;
@@ -1065,10 +1087,11 @@ void AMatchDirector::TickCrew(float Dt)
 		FVector Vel = FVector::ZeroVector;
 		if (Jog > 0.f && Dd > 25.f)
 		{
-			const float Sp = FMath::Min(Jog, 110.f + Dd * 1.3f);
+			const float Sp = FMath::Min(Jog, 110.f + Dd * 3.f);
 			Vel = To / Dd * Sp;
 			Pos += Vel * FMath::Min(Dt, Dd / Sp);
 		}
+		OfficialPushOut(Pos, Dt);
 		// facing: the way he runs, the ball when he holds (a wing running the sideline watches the ball)
 		const FVector BallNow = bPlayFrame ? ToWorld(BallX, BallY, D) : ToWorld(Game->ballOn, Game->ballY, Game->worldDir());
 		FVector Fb = BallNow - Pos;
@@ -1302,6 +1325,7 @@ void AMatchDirector::TickLineTest(float Dt)
 	Feed(DL, OL);
 	OL->Drive(OLp, 0.f, OLv, 7.f, OLa, R, Dt, true);
 	DL->Drive(DLp, 180.f, DLv, 7.f, DLa, R, Dt, true);
+	ResolveEngagedOverlap();
 	// side on from the offense's right, low, a 35 mm lens on the pair
 	const FVector At = O + FVector(0.f, -560.f, 150.f), Look = O + FVector(0.f, 0.f, 95.f);
 	Camera->SetActorLocation(At);
@@ -2390,11 +2414,9 @@ void AMatchDirector::ApplyPlay()
 			}
 			Overlay->Banner(TEXT("FLAG"), Call, Flag);
 		}
+		else if (P.result && (P.result->td || P.result->yards >= 20)) { if (P.result->yards >= 20) Stadium->Hype = 0.6f; } // (its stat line went up at the whistle)
 		else if (G.poss == PossBefore && G.phase == tag::GamePhase::Scrimmage && G.down == 1 && P.result && !P.result->td && P.result->yards > 0)
-		{
-			if (P.result->yards >= 20) Stadium->Hype = 0.6f;
 			Overlay->Toast(TEXT("FIRST DOWN"));
-		}
 		else if (L.desc.find("Turnover on downs") != std::string::npos) Overlay->Banner(TEXT("TURNOVER ON DOWNS"), TEXT(""), Bad);
 	}
 	State = EMatchState::Wait;
@@ -2418,6 +2440,21 @@ void AMatchDirector::OnPlayDead()
 	PlayClockF = 40.f;
 	bPlayClockOn = true;
 	PostAge = 0.f;
+	// a big play: the broadcast's lower third with the man's game so far, this play counted (the book adds it later)
+	if ((R.td == tag::Side::Off || R.yards >= 20) && (R.receiver || R.rusher) && !Sim->isReturn() && Game)
+	{
+		const bool bRec = R.receiver != nullptr && R.complete;
+		const tag::Player* Who = bRec ? R.receiver : R.rusher;
+		if (Who)
+		{
+			const tag::PlayerLine& Ln = Game->stats.line(*Who, Game->offense().abbr);
+			const int32 Td = (bRec ? Ln.recTD : Ln.rushTD) + (R.td == tag::Side::Off ? 1 : 0);
+			const FString Name = FString::Printf(TEXT("#%d %s. %s"), Who->number, *FString(1, UTF8_TO_TCHAR(Who->first.empty() ? "?" : Who->first.substr(0, 1).c_str())), UTF8_TO_TCHAR(Who->last.c_str()));
+			const FString TdS = Td ? FString::Printf(TEXT(", %d TD"), Td) : FString();
+			Overlay->Toast(bRec ? FString::Printf(TEXT("%s   %d rec, %d yds%s"), *Name, Ln.rec + 1, Ln.recYds + R.yards, *TdS)
+								: FString::Printf(TEXT("%s   %d car, %d yds%s"), *Name, Ln.rushAtt + 1, Ln.rushYds + R.yards, *TdS));
+		}
+	}
 	PostSpd.Empty();
 	HudPreRun = 0.0;
 	// (from the result: the game's own clock flag is set when the play is applied, later)
@@ -2440,8 +2477,12 @@ void AMatchDirector::OnPlayDead()
 		Shake = 25.f;
 		if (tag::Ent* Scorer = Sim->ball.holder)
 		{
-			Scorer->anim = tag::Anim::Celebrate;
-			Scorer->animT = 0;
+			// (a scorer tackled into the end zone falls first: the celebrate anim would skip the fall and jump him onto the spot)
+			if (Scorer->state != tag::EntState::Down)
+			{
+				Scorer->anim = tag::Anim::Celebrate;
+				Scorer->animT = 0;
+			}
 			// the teammates around him celebrate with him (a touchdown is a group celebration, not one man's)
 			for (tag::Ent* E : Sim->ents)
 				if (E != Scorer && E->side == Scorer->side && E->state != tag::EntState::Down && tag::dist(E->pos, Scorer->pos) < 12.0)
@@ -3439,6 +3480,37 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 			R.Roll = FMath::RadiansToDegrees(B.spin);
 			Ball->SetActorRotation(R);
 		}
+	}
+	ResolveEngagedOverlap();
+}
+
+void AMatchDirector::ResolveEngagedOverlap()
+{
+	// every locked-up pair (the blocker holds the partner link both ways: each pair once, by address)
+	TArray<AAthlete*, TInlineAllocator<64>> All;
+	for (const auto& KV : Athletes) if (AAthlete* X = KV.Value.Get()) All.Add(X);
+	for (AAthlete* X : Lineup) if (X) All.AddUnique(X); // the look-dev scenes' men
+	// any two men standing near each other (a locked-up pair, a rusher ripping past the blocker's shoulder, a crossing
+	// route through traffic): upper bodies clear each other; falls and tackles keep their own contact
+	All.RemoveAll([](AAthlete* X) { return X->IsHidden() || X->IsFalling() || X->IsDown() || X->GetAnimName() == TEXT("tackle") || X->GetAnimName() == TEXT("dive"); });
+	for (int32 i = 0; i < All.Num(); ++i)
+	for (int32 j = i + 1; j < All.Num(); ++j)
+	{
+		AAthlete* A = All[i];
+		AAthlete* B = All[j];
+		if (FVector::DistSquared2D(A->GetActorLocation(), B->GetActorLocation()) > 160.f * 160.f) continue;
+		const FVector CA = A->BoneWorld(TEXT("spine_04")), CB = B->BoneWorld(TEXT("spine_04"));
+		const FVector HA = A->BoneWorld(TEXT("head")), HB = B->BoneWorld(TEXT("head"));
+		FVector Sep = A->GetActorLocation() - B->GetActorLocation();
+		Sep.Z = 0.f;
+		if (Sep.IsNearlyZero()) continue;
+		Sep.Normalize();
+		// how far each pair of parts is inside its clearance (chest to chest 52 cm, a helmet to the other chest 38 cm)
+		const float In = FMath::Max3(52.f - FVector::Dist2D(CA, CB), 38.f - FVector::Dist2D(HA, CB), 38.f - FVector::Dist2D(HB, CA));
+		if (In <= 0.f) continue;
+		const FVector Off = Sep * FMath::Min(In, 40.f) * 0.5f;
+		A->AddActorWorldOffset(Off);
+		B->AddActorWorldOffset(-Off);
 	}
 }
 

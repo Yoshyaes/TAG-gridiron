@@ -36,7 +36,7 @@
     {"id": "speedup_p99", "cat": "movement", "label": "Hardest 1% of speeding up (m/s2; a 4.3 forty starts near 15)", "src": "sim:accel.speedup_p99", "lo": 6.0, "hi": 11.0, "fail_lo": 3, "fail_hi": 15, "w": 0.5, "ref": "phys"},
     {"id": "foot_slide_share", "cat": "movement", "label": "Planted feet sliding > 10 cm (share)", "src": "game:foot_plants.share_over_10cm", "lo": 0, "hi": 0.05, "fail_lo": 0, "fail_hi": 0.6, "w": 2, "ref": "phys"},
     {"id": "foot_slide_median", "cat": "movement", "label": "Median planted-foot slide (cm)", "src": "game:foot_plants.median_slide_cm", "lo": 0, "hi": 2.5, "fail_lo": 0, "fail_hi": 25, "w": 1, "ref": "phys"},
-    {"id": "pops", "cat": "movement", "label": "Visible-body pops > 60 cm in one frame, per game", "src": "game:derived.pops_per_game", "lo": 0, "hi": 0, "fail_lo": 0, "fail_hi": 100, "w": 2, "ref": "phys"},
+    {"id": "pops", "cat": "movement", "label": "Visible-body pops (a > 60 cm one-frame jump that stands out from the frames around it), per game", "src": "game:derived.pops_per_game", "lo": 0, "hi": 0, "fail_lo": 0, "fail_hi": 100, "w": 2, "ref": "phys"},
     {"id": "sprint_pelvis", "cat": "movement", "label": "Sprinting hip height (cm)", "src": "game:sprint_posture_cm.pelvis_median", "lo": 90, "hi": 99, "fail_lo": 75, "fail_hi": 110, "w": 0.5, "ref": "approx"},
     {"id": "sprint_head", "cat": "movement", "label": "Sprinting head height (cm)", "src": "game:sprint_posture_cm.head_median", "lo": 132, "hi": 154, "fail_lo": 110, "fail_hi": 170, "w": 0.5, "ref": "approx"},
 

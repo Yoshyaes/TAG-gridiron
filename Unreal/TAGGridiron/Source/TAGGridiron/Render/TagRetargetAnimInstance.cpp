@@ -562,7 +562,7 @@ void FTagRetargetProxy::ApplyFeet(FPoseContext& Output)
 	P.InitPose(Output.Pose);
 	const FCompactPoseBoneIndex Th[2] = {B.ThL, B.ThR}, Ca[2] = {B.CaL, B.CaR}, Ft[2] = {B.FtL, B.FtR}, Ba[2] = {B.BaL, B.BaR};
 	const float Low = RefFootZ + 6.f;    // the ball of the foot is on the turf
-	const float MaxDrift = 36.f;         // a pin that has to pull the foot further than this lets go
+	const float MaxDrift = 60.f;         // a pin that has to pull the foot further than this lets go
 	for (int32 i = 0; i < 2; ++i)
 	{
 		// the pin is on the ball of the foot: the heel rises over a planted toe through the push-off, which a pinned
@@ -579,9 +579,11 @@ void FTagRetargetProxy::ApplyFeet(FPoseContext& Output)
 		{
 			if (L.bLocked) { L.bLocked = false; L.ReleaseOff = (L.World - FootW) * L.Alpha; L.ReleaseAlpha = 1.f; }
 		}
-		else if (!L.bLocked && bLow && !L.bWasLow)
+		else if (!L.bLocked && bLow && (!L.bWasLow || L.ReleaseAlpha <= 0.f))
 		{
-			L.bLocked = true; // the foot came down: pin it here
+			// the foot came down: pin it here. A foot still low after a pin let go (a shuffle, a slide of the clip) pins
+			// again once the release has eased off: without that, half the low-foot frames of a game carried no pin at all
+			L.bLocked = true;
 			L.World = FootW;
 			L.Alpha = 0.f;
 			L.ReleaseAlpha = 0.f;
@@ -595,7 +597,7 @@ void FTagRetargetProxy::ApplyFeet(FPoseContext& Output)
 				L.ReleaseOff = (L.World - FootW) * L.Alpha;
 				L.ReleaseAlpha = 1.f;
 			}
-			else L.Alpha = FMath::Min(1.f, L.Alpha + Dt * 14.f);
+			else L.Alpha = FMath::Min(1.f, L.Alpha + Dt * 30.f);
 		}
 		FVector TargetW = FootW;
 		float A = 0.f;
@@ -606,12 +608,16 @@ void FTagRetargetProxy::ApplyFeet(FPoseContext& Output)
 			TargetW = FootW + L.ReleaseOff * L.ReleaseAlpha;
 			A = 1.f;
 		}
-		if (A > 0.001f)
+		// the ground: a ball of the foot pushed under the turf (a crouched clip on a shorter body, the stride's lowered hips)
+		// is lifted back onto it
+		const float ZFix = FMath::Max(0.f, 0.5f - FootCS.Z);
+		if (A > 0.001f || ZFix > 0.f)
 		{
-			FVector TargetCS = CT.InverseTransformPosition(TargetW);
-			TargetCS.Z = FootCS.Z; // the clip owns the foot's height
+			FVector TargetCS = A > 0.001f ? CT.InverseTransformPosition(TargetW) : FootCS;
+			FVector NewCS = FMath::Lerp(FootCS, TargetCS, A > 0.001f ? A : 0.f);
+			NewCS.Z = FootCS.Z + ZFix; // the clip owns the foot's height, above the ground
 			const FVector AnkleCS = Pos(P, Ft[i]);
-			LegIK(P, Th[i], Ca[i], Ft[i], AnkleCS + (FMath::Lerp(FootCS, TargetCS, A) - FootCS), 1.f); // move the ankle by the toe's correction
+			LegIK(P, Th[i], Ca[i], Ft[i], AnkleCS + (NewCS - FootCS), 1.f); // move the ankle by the toe's correction
 		}
 		const FVector ShownW = CT.TransformPosition(Pos(P, Ba[i]));
 		if (bLow && L.bHadShown) SlideShownFrame += FVector::Dist2D(ShownW, L.PrevShownW);

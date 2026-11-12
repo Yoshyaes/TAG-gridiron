@@ -104,8 +104,9 @@ Ent::Ent(Player* player, Side s, std::string r_, const V2& position)
   const double fat = 1 - 0.1 * p->fatigue;
   mass = p->weightLb * 0.4536;
   radius = clamp(0.36 + (p->weightLb - 180) / 900, 0.36, 0.55);
-  // 99 speed ~ 11.0 yd/s (22.5 mph); 50 ~ 8.6 yd/s
-  vmax = (8.6 + (rt.speed - 50) * 0.049) * fat;
+  // 99 speed ~ 10.7 yd/s (21.9 mph, the fastest in-game speeds of an NFL season ~22); 50 ~ 7.9 yd/s (16 mph, a 5.25 forty).
+  // (8.6 at 50 put linemen at 18+ mph and most receivers at their top speed on most plays)
+  vmax = (8.1 + (rt.speed - 50) * 0.06) * 0.97 * fat;
   tau = (1.0 - (rt.accel - 50) * 0.0078) / fat;
   latA = (8 + (rt.agility - 50) * 0.12) * fat;
 }
@@ -146,6 +147,9 @@ bool setTune(const std::string& name, double v) {
   if (name == "deepKeep") return t.deepKeep = v, true;
   if (name == "releaseRate") return t.releaseRate = v, true;
   if (name == "intBias") return t.intBias = v, true;
+  if (name == "runShed") return t.runShed = v, true;
+  if (name == "hotRate") return t.hotRate = v, true;
+  if (name == "outletPen") return t.outletPen = v, true;
   if (name == "holdK") return t.holdK = v, true;
   if (name == "holdShed") return t.holdShed = v, true;
   if (name == "yacNoise") return t.yacNoise = v, true;
@@ -1445,14 +1449,16 @@ void PlaySim::thinkQB(Ent* e, double dt) {
   // and drops faster once the play is late (past ~2.5 s the QB takes what is there)
   const double thresh = (quick ? 0.8 : tune().qbThresh) - tPocket * tune().qbDecay - (std::max)(0.0, tPocket - 2.5) * tune().qbLate - pressure * 1.1;
   if (cur) {
-    const double depthT = predictPos(cur, 1.2).x - L;
+    // how deep the catch would be: where he is when a throw now arrives (a go route at 12 yd is caught at 25), not in 1.2 s
+    const double arriveT = dist(e->pos, cur->pos) / (throwSpeed(e) * 0.85) + 0.3 + releaseTime(e);
+    const double depthT = predictPos(cur, (std::max)(1.2, arriveT)).x - L;
     double open = openness(cur, e) - (depthT > 15 ? tune().deepReadK + (depthT - 15) * tune().deepReadSlope : 0);
     // situational: on 3rd/4th down, routes past the sticks are worth more
     const double down = cfg.down.value_or(1);
     const double toGo = cfg.toGo.value_or(10);
     if (down >= 3) open += depthT >= toGo ? 0.6 : depthT < toGo - 3 ? -0.9 : 0;
     // QBs read downfield first: an outlet at or behind the line is the last option until the play has had time
-    if (!quick && depthT < 2 && tPocket < 2.4) open -= 1.2;
+    if (!quick && depthT < 2 && tPocket < 2.4) open -= 1.2 + tune().outletPen;
     // a receiver is a target once his route has declared itself (past his release / first break), not before
     const bool developed = quick || cur->route.empty() || cur->routeIdx >= 1 || cur->settle;
     // mental noise: poor decision makers misjudge
@@ -1473,13 +1479,13 @@ void PlaySim::thinkQB(Ent* e, double dt) {
   const double eta = rushETA(e);
   // a hazard per second (aware QBs feel it sooner), not a per-tick coin flip
   if (eta < 0.7) pressured = true;  // a free rusher 0.7 s from him: a hurry even if he gets it off
-  if (eta < 0.75 + e->r().awareness * 0.004 && rng.chance((2.5 + e->r().awareness * 0.05) * dt)) {
+  if (eta < 0.75 + e->r().awareness * 0.004 && rng.chance((2.5 + e->r().awareness * 0.05) * tune().hotRate * dt)) {
     Ent* hot = nullptr;
     double ho = -99;
     for (Ent* r : reads) {
       // under pressure the QB gets it out short: a hot read is a quick target, not a shot downfield
-      const double rd = r->pos.x - L;
-      const double o = openness(r, e) + (rd >= 1 && rd < 8 ? 0.4 : rd < 1 ? -0.3 : 0) - (rd > 12 ? tune().hotDeepK + (rd - 12) * tune().hotDeepSlope : 0);
+      const double rd = predictPos(r, dist(e->pos, r->pos) / (throwSpeed(e) * 0.85) + 0.3 + releaseTime(e)).x - L;  // where he catches it
+      const double o = openness(r, e) + (rd >= 1 && rd < 8 ? 0.4 : rd < 1 ? -tune().outletPen : 0) - (rd > 12 ? tune().hotDeepK + (rd - 12) * tune().hotDeepSlope : 0);
       if (o > ho) {
         ho = o;
         hot = r;
@@ -2548,7 +2554,7 @@ void PlaySim::updateEngagements(double dt) {
     // shed hazard: skill matchup plus blocks degrade the longer they're held
     for (Ent* b : blockers) b->engT += dt;
     // pass pro: an average matchup holds 2.5 s about 90% of the time (ESPN pass block win rates ~0.9 per lineman)
-    const double base = passPro ? tune().passProShed : 0.09;
+    const double base = passPro ? tune().passProShed : tune().runShed;
     const bool holderNear = holder && holder->side != d->side && dist(holder->pos, d->pos) < 1.6;
     const double decay = (std::max)(0.0, blockers[0]->engT - (passPro ? 2.6 : 1.6)) * 0.5;
     double lambda = (base * std::exp(diff / 17) + decay) * (holderNear ? 3.2 : 1);
