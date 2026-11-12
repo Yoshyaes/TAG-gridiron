@@ -462,9 +462,10 @@ const DefCall* Game::cpuDefense(const OffPlay& offPlay) {
 std::optional<Penalty> Game::rollPresnap() {
   const double r = rng.next();
   const double road = poss == TeamKey::Away ? 0.004 : 0;
-  if (r < 0.014 + road) return mkPen("False Start", Side::Off, 5, false, PenaltySpot::Los, true);
-  if (r < 0.018 + road) return mkPen("Delay of Game", Side::Off, 5, false, PenaltySpot::Los, true);
-  if (r < 0.028 + road) {
+  const double ps = tune().penScale;
+  if (r < (0.014 + road) * ps) return mkPen("False Start", Side::Off, 5, false, PenaltySpot::Los, true);
+  if (r < (0.018 + road) * ps) return mkPen("Delay of Game", Side::Off, 5, false, PenaltySpot::Los, true);
+  if (r < (0.028 + road) * ps) {
     static const std::vector<std::string> kNames = {"Neutral Zone Infraction", "Offside", "Encroachment"};
     return mkPen(rng.pick(kNames), Side::Def, 5, false, PenaltySpot::Los, true);
   }
@@ -475,7 +476,7 @@ std::optional<Penalty> Game::rollPostsnap(const PlayResult& res, const OffPlay& 
   const double r = rng.next();
   const bool isPass = play.type != PlayType::Run && res.kind != PlayKind::Kneel && res.kind != PlayKind::Spike;
   double acc = 0;
-  auto roll = [&](double p) { return r < (acc += p); };
+  auto roll = [&](double p) { return r < (acc += p * tune().penScale); };
   if (res.kind == PlayKind::Kneel || res.kind == PlayKind::Spike) return std::nullopt;
   if (roll(isPass ? 0.026 : 0.036)) return mkPen("Offensive Holding", Side::Off, 10, false, PenaltySpot::Los, true);
   if (isPass && res.incomplete && res.airYards >= 5 && roll(res.deepContested ? 0.09 : 0.012))
@@ -528,6 +529,14 @@ std::unique_ptr<PlaySim> Game::makePlay(const OffPlay& offPlay, const DefCall& d
                                        std::optional<bool> flipOverride) {
   const bool flip = flipOverride ? *flipOverride : ballY > FIELD_W / 2 + 0.5 ? true : ballY < FIELD_W / 2 - 0.5 ? false : rng.chance(0.5);
   // strength to the field (wide) side: formation "right" is the offense's -y side
+  // garbage time: four scores up in the 4th quarter (or a 38-point lead in the 3rd), a team plays its backups at the
+  // skill spots, as NFL teams do (and the blowout stops growing); it comes off again if the game tightens
+  // (decided when the ball changes hands, so nobody is pulled in the middle of a drive)
+  if (!pullDecided_ || pullPoss_ != poss) {
+    for (TeamKey k : {TeamKey::Home, TeamKey::Away}) teamOf(k).pullStarters = (q >= 4 && margin(k) >= 28) || (q == 3 && margin(k) >= 38);
+    pullDecided_ = true;
+    pullPoss_ = poss;
+  }
   PlayConfig cfg;
   cfg.off = &offense();
   cfg.def = &defense();

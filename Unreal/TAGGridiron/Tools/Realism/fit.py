@@ -1,0 +1,146 @@
+# Fit the sim's tag::Tune constants to the NFL bands in rubric.json (headless, SimCalibrate --set).
+#   python fit.py [--games 100] [--seed 11] [--rounds 12] [--jobs 6] [--out fit_result.json]
+# Loss: for every rubric metric read from the sim, the squared distance outside its band (in units of the band-to-fail
+# distance), times its weight; plus each box-score stat's z beyond 1 (SimCalibrate's NFL table). Coordinate search with
+# common random numbers (one seed for every candidate, so differences are the parameters, not noise), step halving, and a
+# held-out validation on another seed at the end.
+import argparse, json, os, subprocess, sys, tempfile
+from concurrent.futures import ThreadPoolExecutor
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+EXE = os.path.join(HERE, "..", "build", "SimCalibrate.exe")
+ap = argparse.ArgumentParser()
+ap.add_argument("--games", type=int, default=100)
+ap.add_argument("--seed", type=int, default=11)
+ap.add_argument("--val-seed", type=int, default=29)
+ap.add_argument("--rounds", type=int, default=12)
+ap.add_argument("--jobs", type=int, default=6)
+ap.add_argument("--out", default=os.path.join(HERE, "fit_result.json"))
+ap.add_argument("--start", help="a previous fit_result.json to start from")
+a = ap.parse_args()
+
+# name: (default, lo, hi, first step)
+P = {
+    "tackleBase": (3.05, 2.4, 4.2, 0.25),
+    "accBase": (0.30, 0.18, 0.50, 0.05),
+    "accSlope": (0.017, 0.008, 0.03, 0.003),
+    "deepErr": (0.01, 0.0, 0.04, 0.006),
+    "deepReadK": (1.35, 0.5, 3.0, 0.3),
+    "deepReadSlope": (0.16, 0.04, 0.35, 0.04),
+    "hotDeepK": (1.0, 0.0, 2.5, 0.3),
+    "hotDeepSlope": (0.12, 0.0, 0.3, 0.04),
+    "manCushion": (1.8, 0.8, 3.0, 0.3),
+    "zoneCushion": (3.0, 1.5, 5.0, 0.4),
+    "zoneCushionV": (0.55, 0.2, 0.9, 0.08),
+    "routeRead": (0.6, 0.0, 1.0, 0.15),
+    "passProShed": (0.045, 0.02, 0.12, 0.012),
+    "qbThresh": (2.6, 1.6, 3.6, 0.25),
+    "qbDecay": (0.24, 0.1, 0.45, 0.05),
+    "qbLate": (0.7, 0.2, 1.4, 0.15),
+    "tightDeep": (2.1, 1.0, 3.5, 0.3),
+    "tightShort": (1.5, 0.6, 2.8, 0.25),
+    "contested": (0.7, 0.3, 1.4, 0.15),
+    "breakdownBase": (1.5, 0.5, 3.0, 0.3),
+    "breakdownK": (1.8, 0.8, 3.0, 0.3),
+    "catchKeep": (0.45, 0.25, 0.7, 0.06),
+    "penScale": (1.0, 0.8, 2.0, 0.15),
+    "assistRange": (2.2, 1.4, 4.0, 0.4),
+    "tackleReach": (0.52, 0.3, 0.9, 0.08),
+    "pursuitK": (0.75, 0.4, 1.1, 0.1),
+}
+rub = json.load(open(os.path.join(HERE, "rubric.json"), encoding="utf-8"))
+SIM_METRICS = [m for m in rub["metrics"] if m["src"].startswith("sim:") and not m["src"].startswith("sim:accel.")
+               and m["src"] != "sim:box.offTolerance"]
+
+
+def run(params, seed, games):
+    fd, path = tempfile.mkstemp(suffix=".json")
+    os.close(fd)
+    cmd = [EXE, str(games), str(seed), "--json", path]
+    for k, v in params.items():
+        cmd += ["--set", f"{k}={v:.6g}"]
+    subprocess.run(cmd, capture_output=True, check=True)
+    J = json.load(open(path))
+    os.remove(path)
+    return J
+
+
+def loss(J):
+    L = 0.0
+    parts = {}
+    for m in SIM_METRICS:
+        v = J.get(m["src"][4:])
+        if v is None:
+            continue
+        if v < m["lo"]:
+            d = (m["lo"] - v) / max(m["lo"] - m["fail_lo"], 1e-9)
+        elif v > m["hi"]:
+            d = (v - m["hi"]) / max(m["fail_hi"] - m["hi"], 1e-9)
+        else:
+            d = 0.0
+        x = m["w"] * 10 * d * d
+        parts[m["id"]] = round(x, 3)
+        L += x
+    for k, z in J.items():
+        if k.startswith("boxz."):
+            x = max(0.0, abs(z) - 1.0) ** 2 * 0.5
+            if x:
+                parts[k] = round(x, 3)
+            L += x
+    return L, parts
+
+
+cur = {k: v[0] for k, v in P.items()}
+if a.start:
+    cur.update({k: v for k, v in json.load(open(a.start))["params"].items() if k in P})
+step = {k: v[3] for k, v in P.items()}
+pool = ThreadPoolExecutor(a.jobs)
+base = run(cur, a.seed, a.games)
+best, parts = loss(base)
+print(f"start loss {best:.3f}  off-tolerance {base['box.offTolerance']:.0f}", flush=True)
+hist = [dict(round=0, loss=best, params=dict(cur))]
+for rnd in range(1, a.rounds + 1):
+    cands = []
+    for k in P:
+        for sgn in (-1, 1):
+            v = min(P[k][2], max(P[k][1], cur[k] + sgn * step[k]))
+            if abs(v - cur[k]) > 1e-12:
+                c = dict(cur)
+                c[k] = v
+                cands.append((k, v, c))
+    res = list(pool.map(lambda kc: (kc[0], kc[1], loss(run(kc[2], a.seed, a.games))[0]), cands))
+    res.sort(key=lambda r: r[2])
+    moved = []
+    # take the best move, then any other improving move on a different parameter (re-checked together)
+    if res and res[0][2] < best:
+        trial = dict(cur)
+        for k, v, l in res:
+            if l < best and k not in moved and len(moved) < 4:
+                trial[k] = v
+                moved.append(k)
+        lt = loss(run(trial, a.seed, a.games))[0]
+        if lt < res[0][2]:
+            cur, best = trial, lt
+        else:
+            cur[res[0][0]] = res[0][1]
+            best = res[0][2]
+            moved = [res[0][0]]
+    tried = {r[0] for r in res if r[2] >= best}
+    for k in P:
+        if k not in moved:
+            step[k] *= 0.6
+    hist.append(dict(round=rnd, loss=best, moved=moved, params=dict(cur)))
+    print(f"round {rnd}: loss {best:.3f} moved {moved}", flush=True)
+    json.dump(dict(params=cur, history=hist), open(a.out, "w"), indent=1)
+    if all(step[k] < P[k][3] * 0.05 for k in P):
+        break
+
+final = run(cur, a.seed, a.games)
+val = run(cur, a.val_seed, 200)
+val0 = run({k: v[0] for k, v in P.items()}, a.val_seed, 200)
+lv, pv = loss(val)
+lv0, _ = loss(val0)
+print(f"validation seed {a.val_seed} (200 games): loss {lv:.3f} vs defaults {lv0:.3f}; off-tolerance {val['box.offTolerance']:.0f} vs {val0['box.offTolerance']:.0f}")
+print("remaining loss parts:", json.dumps(dict(sorted(pv.items(), key=lambda kv: -kv[1])[:12])))
+json.dump(dict(params=cur, history=hist, validation=val, validation_defaults=val0, validation_loss=lv, validation_loss_defaults=lv0),
+          open(a.out, "w"), indent=1)

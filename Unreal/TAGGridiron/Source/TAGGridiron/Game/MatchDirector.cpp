@@ -794,7 +794,13 @@ void AMatchDirector::TickPostJog(float Dt)
 		}
 		if (E->animT < 1.0) continue; // the beat after the whistle: look around, then go
 		auto It = PostPos.find(E);
-		if (It == PostPos.end()) It = PostPos.emplace(E, A->GetActorLocation()).first;
+		// after the whistle he goes on from where his body got up: the get-up's offset from the sim spot is absorbed (Drive
+		// added it on top of the actor's location, a 1.6-4.3 m pop, and easing it off slid him back over the turf)
+		if (It == PostPos.end())
+		{
+			A->AbsorbVisOffset();
+			It = PostPos.emplace(E, A->GetActorLocation()).first;
+		}
 		const bool bOff = E->side == tag::Side::Off;
 		const std::vector<tag::Ent*>& SideList = bOff ? Sim->off : Sim->def;
 		const int32 N = static_cast<int32>(SideList.size());
@@ -816,16 +822,42 @@ void AMatchDirector::TickUmpire(float Dt)
 	const int32 NewDir = Game->worldDir();
 	const FVector Spot = ToWorld(Game->ballOn, Game->ballY, NewDir); // the next play's spot (after ApplyPlay)
 	const FVector DownNew = (ToWorld(1, 0, NewDir) - ToWorld(0, 0, NewDir)).GetSafeNormal();
-	const FVector Station = Spot - DownNew * 9.f * YD + FVector::CrossProduct(FVector::UpVector, DownNew) * 3.5f * YD; // 9 yd behind the ball
+	// the referee's spot: 12 yd behind the ball and 5.5 yd wide of the quarterback (NFL mechanics put him 10-12 yd deep,
+	// to the side of the passer, clear of the pocket; at 9 yd and 3.5 yd off he ended up in sack piles)
+	const FVector Station = Spot - DownNew * 12.f * YD + FVector::CrossProduct(FVector::UpVector, DownNew) * 5.5f * YD;
 	FVector Target = UmpPos;
 	float Jog = 380.f;
 	FVector BallW = bCall ? BetweenBallW : (Sim ? ToWorld(Sim->ball.pos.x, Sim->ball.pos.y, Dir) : Spot);
 	if (Sim && Sim->isReturn()) Target = ToWorld(FMath::Clamp(Game->ballOn, 5.0, 95.0), -2.5, Dir); // off the field for the kick
-	else if (State == EMatchState::Live) Jog = 0.f;                                               // holds his position through the play
+	else if (State == EMatchState::Live)
+	{
+		// holds his position through the play, but gives ground to anyone coming at him (officials are not run through)
+		FVector Away = FVector::ZeroVector;
+		if (Sim)
+			for (const tag::Ent* E : Sim->ents)
+				if (AAthlete* P = AthleteFor(E->p, E->side == tag::Side::Off ? Game->poss : tag::other(Game->poss)))
+				{
+					FVector D = UmpPos - P->GetActorLocation();
+					D.Z = 0.f;
+					const float L = D.Size();
+					if (L > 1.f && L < 3.f * YD) Away += D / L * (3.f * YD - L);
+				}
+		Target = UmpPos + Away;
+		Jog = Away.IsNearlyZero() ? 0.f : 450.f;
+	}
 	else if (bDead && State == EMatchState::Post)
 	{
-		// at the whistle, to the dead ball
+		// at the whistle, to the dead ball, but he waits off the pile until the men on the ball are up
 		Target = BallW;
+		if (Sim)
+			for (const tag::Ent* E : Sim->ents)
+				if (AAthlete* P = AthleteFor(E->p, E->side == tag::Side::Off ? Game->poss : tag::other(Game->poss)); P && P->IsDown() && FVector::Dist2D(P->GetActorLocation(), BallW) < 1.8f * YD)
+				{
+					FVector Back = UmpPos - BallW;
+					Back.Z = 0.f;
+					Target = BallW + Back.GetSafeNormal() * 2.6f * YD;
+					break;
+				}
 		if (!bUmpHasBall && !bUmpSpotted && FVector::Dist2D(UmpPos, BallW) < 75.f) bUmpHasBall = true;
 	}
 	else if ((bDead && (State == EMatchState::Wait || State == EMatchState::Call)) || bCall)
@@ -845,9 +877,28 @@ void AMatchDirector::TickUmpire(float Dt)
 	}
 	else if (Sim)
 	{
-		// before the snap: 9 yd behind the ball in the offensive backfield, off the quarterback's line
+		// before the snap: the referee's spot, 12 yd deep and 5.5 yd wide of the quarterback
 		const FVector Down = (ToWorld(1, 0, Dir) - ToWorld(0, 0, Dir)).GetSafeNormal();
-		Target = ToWorld(Sim->los, Sim->by, Dir) - Down * 9.f * YD + FVector::CrossProduct(FVector::UpVector, Down) * 3.5f * YD;
+		Target = ToWorld(Sim->los, Sim->by, Dir) - Down * 12.f * YD + FVector::CrossProduct(FVector::UpVector, Down) * 5.5f * YD;
+	}
+	// in every phase he walks around players, never through them (presnap through the huddle and the formation was the
+	// worst of it); the last yard into a loose ball he has to pick up is exempt
+	if (Sim && State != EMatchState::Live && FVector::Dist2D(Target, BallW) > 0.9f * YD)
+	{
+		FVector Away = FVector::ZeroVector;
+		for (const tag::Ent* E : Sim->ents)
+			if (AAthlete* P = AthleteFor(E->p, E->side == tag::Side::Off ? Game->poss : tag::other(Game->poss)); P && !P->IsHidden())
+			{
+				FVector D2 = UmpPos - P->GetActorLocation();
+				D2.Z = 0.f;
+				const float L = D2.Size();
+				if (L > 1.f && L < 2.f * YD) Away += D2 / L * (2.f * YD - L) * 1.5f;
+			}
+		if (!Away.IsNearlyZero())
+		{
+			Target += Away;
+			Jog = FMath::Max(Jog, 300.f);
+		}
 	}
 	FVector To = Target - UmpPos;
 	To.Z = 0.f;
@@ -895,6 +946,8 @@ void AMatchDirector::StartPileOn(AAthlete* As, AAthlete* Cr)
 	if (!ToPile.Normalize()) ToPile = As->GetActorForwardVector();
 	const FVector At = Pile - ToPile * 165.f; // the pile-on clip lands his chest 1.65 m ahead of where it starts
 	As->BeginPairedFall(A.PileOn, At, At, ToPile.Rotation().Yaw, 0.3f, 0.25f, true);
+	// from a few yards off he covers the ground at a sprinter's ~4.5 m/s, not in the fixed 0.2 s ease (3 m in six frames)
+	As->SetFallEaseTime(FMath::Clamp(FVector::Dist2D(As->GetActorLocation(), At) / 450.f, 0.2f, 0.7f));
 }
 
 void AMatchDirector::TickTackleTest(float Dt)
@@ -1773,7 +1826,19 @@ void AMatchDirector::HlTelemetry(int32 Frame)
 		: State == EMatchState::Replay ? TEXT("replay") : State == EMatchState::Kick ? TEXT("kick") : TEXT("other");
 	if (HlTele.IsEmpty())
 		HlTele = TEXT("frame,state,simt,ballmode,bx,by,bz,bwx,bwy,bwz,pid,num,pos,side,role,sstate,sanim,sx,sy,svx,svy,face,eng,ball,stun,hidden,wx,wy,wz,yaw,down,")
-			TEXT("flx,fly,flz,frx,fry,frz,pz,hdz,hrx,hry,hrz,hlx,hly,hlz,anim\n");
+			TEXT("flx,fly,flz,frx,fry,frz,pz,hdz,hrx,hry,hrz,hlx,hly,hlz,scrx,scry,refd,anim\n");
+	// where each man is on screen (0..1, for the framing check) and how close the referee is to anyone (cm)
+	APlayerController* PC = GetWorld() ? GetWorld()->GetFirstPlayerController() : nullptr;
+	FVector2D VP(1.0, 1.0);
+	if (GEngine && GEngine->GameViewport) GEngine->GameViewport->GetViewportSize(VP);
+	float RefD = NAN;
+	if (Umpire && !Umpire->IsHidden())
+		for (tag::Ent* E : Sim->ents)
+			if (AAthlete* P = AthleteFor(E->p, E->side == tag::Side::Off ? OffK : tag::other(OffK)); P && !P->IsHidden())
+			{
+				const float Dd = FVector::Dist2D(P->GetActorLocation(), Umpire->GetActorLocation());
+				RefD = FMath::IsNaN(RefD) ? Dd : FMath::Min(RefD, Dd);
+			}
 	for (tag::Ent* E : Sim->ents)
 	{
 		AAthlete* A = AthleteFor(E->p, E->side == tag::Side::Off ? OffK : tag::other(OffK));
@@ -1786,14 +1851,21 @@ void AMatchDirector::HlTelemetry(int32 Frame)
 		Bone(M, TEXT("head"), Hd);
 		Bone(M, TEXT("hand_r"), HR);
 		Bone(M, TEXT("hand_l"), HL);
+		FVector2D Scr(NAN, NAN);
+		if (PC && A && VP.X > 0 && VP.Y > 0)
+		{
+			FVector2D S2;
+			if (PC->ProjectWorldLocationToScreen(W + FVector(0, 0, 90), S2, false)) Scr = S2 / VP;
+		}
 		HlTele += FString::Printf(TEXT("%d,%s,%.3f,%s,%.2f,%.2f,%.2f,%.1f,%.1f,%.1f,%d,%d,%s,%s,%s,%s,%s,%.3f,%.3f,%.3f,%.3f,%.3f,%s,%d,%.2f,%d,%.1f,%.1f,%.1f,%.1f,%d,")
-			TEXT("%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%s\n"),
+			TEXT("%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.3f,%.3f,%.1f,%s\n"),
 			Frame, St, Sim->t, UTF8_TO_TCHAR(tag::ballModeName(Sim->ball.mode)), Sim->ball.pos.x, Sim->ball.pos.y, Sim->ball.pos.z, BallW.X, BallW.Y, BallW.Z,
 			E->p->id, E->p->number, UTF8_TO_TCHAR(tag::posName(E->p->pos)), UTF8_TO_TCHAR(tag::sideName(E->side)), UTF8_TO_TCHAR(E->role.c_str()),
 			UTF8_TO_TCHAR(E->stateName()), UTF8_TO_TCHAR(E->animName()), E->pos.x, E->pos.y, E->vel.x, E->vel.y, E->face,
 			E->engaged ? UTF8_TO_TCHAR(E->engaged->role.c_str()) : TEXT(""), E->hasBall ? 1 : 0, E->stun, A && A->IsHidden() ? 1 : 0,
 			W.X, W.Y, W.Z, A ? A->GetActorRotation().Yaw : 0.f, A && A->IsDown() ? 1 : 0,
-			FL.X, FL.Y, FL.Z, FR.X, FR.Y, FR.Z, Pv.Z, Hd.Z, HR.X, HR.Y, HR.Z, HL.X, HL.Y, HL.Z, A ? *A->TelemetryAnim() : TEXT(""));
+			FL.X, FL.Y, FL.Z, FR.X, FR.Y, FR.Z, Pv.Z, Hd.Z, HR.X, HR.Y, HR.Z, HL.X, HL.Y, HL.Z, Scr.X, Scr.Y, RefD,
+			A ? *A->TelemetryAnim() : TEXT(""));
 	}
 }
 
@@ -2158,10 +2230,17 @@ void AMatchDirector::OnPlayDead()
 	{
 		Stadium->Hype = 1.f;
 		Shake = 25.f;
-		if (Sim->ball.holder)
+		if (tag::Ent* Scorer = Sim->ball.holder)
 		{
-			Sim->ball.holder->anim = tag::Anim::Celebrate;
-			Sim->ball.holder->animT = 0;
+			Scorer->anim = tag::Anim::Celebrate;
+			Scorer->animT = 0;
+			// the teammates around him celebrate with him (a touchdown is a group celebration, not one man's)
+			for (tag::Ent* E : Sim->ents)
+				if (E != Scorer && E->side == Scorer->side && E->state != tag::EntState::Down && tag::dist(E->pos, Scorer->pos) < 12.0)
+				{
+					E->anim = tag::Anim::Celebrate;
+					E->animT = 0;
+				}
 		}
 		Overlay->Banner(TEXT("TOUCHDOWN"), TEXT(""), Good);
 	}
@@ -2948,6 +3027,10 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 		if (E->anim == tag::Anim::Throw) F.ThrowT = FMath::Clamp(static_cast<float>(E->animT) / 0.45f, 0.f, 1.f);
 		F.bStance = Sim->t < 0.05 && (E->isOL || E->isDL);
 		F.bPreSnap = Sim->t < 0.05 && State == EMatchState::Presnap;
+		// the lineman's job at the snap picks his get-off (pass set, run block, or a defensive lineman's)
+		if (E->isDL && E->side == tag::Side::Def) F.GetOffKind = 3;
+		else if (E->isOL || E->role == "TE" || E->role == "TE2")
+			F.GetOffKind = E->state == tag::EntState::PassBlock ? 1 : E->state == tag::EntState::RunBlock ? 2 : 0;
 		if (bQB && F.bPreSnap)
 			for (const tag::Ent* C : Sim->ents)
 				if (C->role == "C") F.bUnderCenter = tag::dist(C->pos, E->pos) < 1.7; // hands under the center
@@ -3162,9 +3245,19 @@ void AMatchDirector::UpdateCamera(float Dt, const FVector& InFocus)
 	// lead the ball the way an operator does: frame where the play is going, not where it was
 	if (Sim && CamMode != ECamMode::Player)
 	{
+		// the play's velocity: the carrier's while the ball is held (a held ball's own velocity is not kept up), else the ball's
 		const tag::Ball& B = Sim->ball;
-		const FVector BV = Dir > 0 ? FVector(B.vel.x, -B.vel.y, 0) * Y : FVector(-B.vel.x, B.vel.y, 0) * Y;
+		const double VX = B.mode == tag::BallMode::Held && B.holder ? B.holder->vel.x : B.vel.x;
+		const double VY = B.mode == tag::BallMode::Held && B.holder ? B.holder->vel.y : B.vel.y;
+		const FVector BV = (Dir > 0 ? FVector(VX, -VY, 0) * Y : FVector(-VX, VY, 0) * Y).GetClampedToMaxSize(12.f * Y);
 		Look += (BV * 0.35f).GetClampedToMaxSize(6.f * Y);
+		// a critically damped spring trails a target moving at v by ~1.44 x halflife x v (4.5 m at 9 m/s for the dolly):
+		// feed that much of the velocity forward while the play is live, so a long run stays in the frame
+		if (Sim->isLive() || Sim->isReturn())
+		{
+			T += BV * (1.44f * 0.35f);
+			Look += BV * (1.44f * 0.22f);
+		}
 	}
 	// critically damped moves (no overshoot, no linear-lerp drag): ~0.35 s to settle the dolly, ~0.25 s the pan
 	auto Spring = [Dt](FVector& X, FVector& V, const FVector& Goal, float Halflife)

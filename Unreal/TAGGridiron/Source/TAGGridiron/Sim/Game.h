@@ -196,6 +196,8 @@ class Game {
   std::function<void(const PlaySim&, const PlayResult&)> onPlayResult;
   /** Optional observer handed to every scrimmage sim (called after each step). */
   std::function<void(const PlaySim&)> onSimStep;
+  bool pullDecided_ = false;  // garbage-time substitutions, decided per possession
+  TeamKey pullPoss_ = TeamKey::Home;
   std::string describe(const PlayResult& res, const OffPlay& play, const PlaySim& sim) const;
 
   // ---- special teams

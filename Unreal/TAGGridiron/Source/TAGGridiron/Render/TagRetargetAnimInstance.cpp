@@ -475,7 +475,7 @@ void FTagRetargetProxy::ApplyStride(FPoseContext& Output) const
 	// the hips sit a touch lower, the legs follow through IK (the clip's cadence stays; the ground covered per step
 	// grows with the speed, as a sprinter's does)
 	const float S = In.StrideScale;
-	if (S < 1.005f) return;
+	if (FMath::Abs(S - 1.f) < 0.005f) return; // shorter steps too (a clip covering more ground than the man does)
 	const FBoneContainer& BC = Output.Pose.GetBoneContainer();
 	const FBones B = Resolve(BC);
 	if (!B.bLegs) return;
@@ -486,7 +486,7 @@ void FTagRetargetProxy::ApplyStride(FPoseContext& Output) const
 	FTransform Pel = P.GetComponentSpaceTransform(B.Pelvis);
 	const FVector PelPos = Pel.GetLocation();
 	const FVector FL = Pos(P, B.FtL), FR = Pos(P, B.FtR);
-	Pel.SetLocation(PelPos - FVector(0, 0, (S - 1.f) * 10.f)); // a touch lower (the sprint bands put the hips at 0.90-0.99 m)
+	Pel.SetLocation(PelPos - FVector(0, 0, (FMath::Max(S, 1.f) - 1.f) * 10.f)); // a touch lower when longer (the sprint bands put the hips at 0.90-0.99 m)
 	const FBoneTransform BT[] = {FBoneTransform(B.Pelvis, Pel)};
 	P.LocalBlendCSBoneTransforms(BT, 1.f);
 	const FVector NL = FL + Dir * FVector::DotProduct(FL - PelPos, Dir) * (S - 1.f);

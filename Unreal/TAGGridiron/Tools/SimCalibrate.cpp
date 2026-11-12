@@ -23,10 +23,24 @@ int main(int argc, char** argv) {
   int N = 40;
   uint32_t seed = 7;
   bool printScores = false;
+  const char* jsonOut = nullptr;  // --json <file>: every number below as one JSON object (Tools/Realism/score.py reads it)
   int positional = 0;
   for (int i = 1; i < argc; i++) {
     if (std::strcmp(argv[i], "--scores") == 0) {
       printScores = true;
+      continue;
+    }
+    if (std::strcmp(argv[i], "--set") == 0 && i + 1 < argc) {  // --set name=value: override a tag::Tune constant
+      const std::string kv = argv[++i];
+      const size_t eq = kv.find('=');
+      if (eq == std::string::npos || !setTune(kv.substr(0, eq), std::atof(kv.c_str() + eq + 1))) {
+        std::fprintf(stderr, "unknown tune %s\n", kv.c_str());
+        return 2;
+      }
+      continue;
+    }
+    if (std::strcmp(argv[i], "--json") == 0 && i + 1 < argc) {
+      jsonOut = argv[++i];
       continue;
     }
     if (positional == 0) N = std::atoi(argv[i]);
@@ -82,6 +96,8 @@ int main(int argc, char** argv) {
   std::vector<double> sackT;
   double pathN[4] = {0, 0, 0, 0}, pathBehind[4] = {0, 0, 0, 0}, pathAir[4] = {0, 0, 0, 0};
   int lastQb = -1, lastQbPoss = -1;
+  double kickoffs = 0, koReturned = 0, fourthGo = 0;
+  std::map<std::string, double> J;  // --json
   double qbSwaps = 0, qbSnaps = 0;
   double yacSum = 0, compAirSum = 0, compN = 0;
 
@@ -155,7 +171,7 @@ int main(int argc, char** argv) {
       }
       if (r.kind == PlayKind::Pass || r.kind == PlayKind::Sack) {
         dropbacksX++;
-        if (r.pressured) pressured++;
+        if (r.pressured || r.kind == PlayKind::Sack) pressured++;
         if (r.kind == PlayKind::Pass && r.timeToThrow > 0) ttt.push_back(r.timeToThrow);
       }
       if (!r.tacklers.empty() && r.kind != PlayKind::Sack) {
@@ -231,6 +247,21 @@ int main(int argc, char** argv) {
         ots++;
         break;
       }
+    for (size_t li = 0; li < game.log.size(); li++) {
+      const PlayLog& l = game.log[li];
+      const std::string& d = l.desc;
+      if (d.find(" kicks ") != std::string::npos && d.find("onside") == std::string::npos) {
+        kickoffs++;
+        if (d.find("Touchback") == std::string::npos && d.find("out of bounds") == std::string::npos) koReturned++;
+      }
+      // a log line carries the state AFTER its play: a 4th-down play is the next scrimmage line after one that left 4th down
+      auto scrimmage = [](const std::string& s) {
+        for (const char* k : {" punts ", "field goal", "PENALTY", " kicks ", "kneel", "extra point", "Timeout", "END OF", "spike", "two-point"})
+          if (s.find(k) != std::string::npos) return false;
+        return true;
+      };
+      if (li > 0 && game.log[li - 1].down == 4 && game.log[li - 1].poss == l.poss && scrimmage(d)) fourthGo++;
+    }
     for (TeamKey k : {TeamKey::Home, TeamKey::Away}) {
       const TeamLine& T = game.team[k];
       const double sacks = T.sacks;
@@ -289,13 +320,23 @@ int main(int argc, char** argv) {
     const char* verdict = std::fabs(z) <= 1 ? "ok" : std::fabs(z) <= 2 ? (z > 0 ? "high" : "low") : z > 0 ? "HIGH!!" : "LOW!!";
     if (std::fabs(z) > 1) off++;
     std::printf("%-14s %8.2f %8.2f   %s\n", kv.first.c_str(), v, target, verdict);
+    J["box." + kv.first] = v;
+    J["boxz." + kv.first] = z;
   }
   std::printf("QB rating avg: %.1f (NFL ~ 92)\n", mean(qbRatings));
   const double ms = mean(scores);
   std::vector<double> sq;
   for (double s : scores) sq.push_back((s - ms) * (s - ms));
   std::printf("Points SD: %.1f (NFL ~ 10)\n", std::sqrt(mean(sq)));
+  J["box.pointsSD"] = std::sqrt(mean(sq));
   std::printf("%d stats outside tolerance\n", off);
+  J["box.qbRating"] = mean(qbRatings);
+  J["box.offTolerance"] = off;
+  J["games"] = N;
+  J["ko_return_rate"] = koReturned / (std::max)(1.0, kickoffs);
+  J["fourth_down_go_per_team_game"] = fourthGo / (2.0 * N);
+  std::printf("kickoffs returned %.1f%% (2025 NFL 74.5%%), 4th-down attempts %.2f per team-game (2024 ~1.4)\n",
+              100 * J["ko_return_rate"], J["fourth_down_go_per_team_game"]);
   // Realism extras. NFL 2023-24 approximations until Phase 0 re-sources them:
   // attempt share / completion % by air yards: behind LOS ~18% / 80%, 0-9 ~45% / 74%, 10-19 ~25% / 57%, 20+ ~12% / 37%;
   // aDOT ~7.9; NGS time to throw ~2.8 s; pressure ~33% of dropbacks; ~1.35 tacklers per tackle.
@@ -305,14 +346,26 @@ int main(int argc, char** argv) {
     double all = 0;
     for (double a : depthAtt) all += a;
     std::printf("\nPass depth        share%%  (NFL)   comp%%  (NFL)\n");
-    for (int i = 0; i < 4; i++)
+    const char* key[4] = {"behind", "short", "mid", "deep"};
+    for (int i = 0; i < 4; i++) {
       std::printf("%-14s %8.1f %7.0f %7.1f %6.0f\n", nm[i], 100 * depthAtt[i] / (std::max)(1.0, all), nflShare[i],
                   100 * depthComp[i] / (std::max)(1.0, depthAtt[i]), nflComp[i]);
+      J[std::string("pass.share.") + key[i]] = 100 * depthAtt[i] / (std::max)(1.0, all);
+      J[std::string("pass.comp.") + key[i]] = 100 * depthComp[i] / (std::max)(1.0, depthAtt[i]);
+    }
     std::sort(ttt.begin(), ttt.end());
     std::printf("aDOT %.1f (NFL ~7.9), longest air %d yd, time to throw median %.2f s (NFL ~2.8), pressured %.1f%% (NFL ~33)\n",
                 airSum / (std::max)(1.0, airN), maxAirSeen, ttt.empty() ? 0.0 : ttt[ttt.size() / 2],
                 100 * pressured / (std::max)(1.0, dropbacksX));
     std::printf("tacklers per tackle %.2f (NFL ~1.35)\n", tacklerSum / (std::max)(1.0, tackles));
+    J["adot"] = airSum / (std::max)(1.0, airN);
+    J["max_air_yd"] = maxAirSeen;
+    J["ttt_median_s"] = ttt.empty() ? 0.0 : ttt[ttt.size() / 2];
+    J["pressured_pct"] = 100 * pressured / (std::max)(1.0, dropbacksX);
+    J["tacklers_per_tackle"] = tacklerSum / (std::max)(1.0, tackles);
+    J["yac_per_completion"] = yacSum / (std::max)(1.0, compN);
+    J["air_per_completion"] = compAirSum / (std::max)(1.0, compN);
+    J["qb_changes_per_game"] = qbSwaps / (std::max)(1, N);
     std::printf("per completion: air yards %.1f, YAC %.1f (NFL 2024 ~5.6 / ~5.2)\n", compAirSum / (std::max)(1.0, compN),
                 yacSum / (std::max)(1.0, compN));
     {
@@ -362,16 +415,22 @@ int main(int argc, char** argv) {
       std::printf("free-running accel (m/s2, 0.2 s windows): over 1 g %.1f%% of samples | speed-up p99 %.1f | braking p1 %.1f | "
                   "lateral p95 at >6 m/s %.1f   (telemetry baseline 17.3%% / 11.9 / -17.4 / 10.4)\n",
                   100 * accOver1g / accN, tanA[tanA.size() * 99 / 100], tanA[tanA.size() / 100], latA[latA.size() * 95 / 100]);
+      J["accel.over_1g_pct"] = 100 * accOver1g / accN;
+      J["accel.speedup_p99"] = tanA[tanA.size() * 99 / 100];
+      J["accel.braking_p1"] = tanA[tanA.size() / 100];
+      J["accel.lateral_p95_at_6ms"] = latA[latA.size() * 95 / 100];
     }
     std::sort(olDeep.begin(), olDeep.end());
     if (!olDeep.empty())
       std::printf("deepest engaged OL block past the LOS: p50 %.1f p99 %.1f max %.1f yd (real: rarely past ~12)\n",
                   olDeep[olDeep.size() / 2], olDeep[olDeep.size() * 99 / 100], olDeep.back());
+    if (!olDeep.empty()) J["ol_block_depth_max_yd"] = olDeep.back();
     std::printf("QB changes within a possession: %.0f in %.0f snaps (NFL ~0 outside injuries)\n", qbSwaps, qbSnaps);
     std::printf("separation at the catch (median yd, NGS ~2.9 overall):");
     for (int i = 0; i < 4; i++) {
       std::sort(sepAt[i].begin(), sepAt[i].end());
       std::printf("  %s %.2f", nm[i], sepAt[i].empty() ? 0.0 : sepAt[i][sepAt[i].size() / 2]);
+      J[std::string("separation.") + key[i]] = sepAt[i].empty() ? 0.0 : sepAt[i][sepAt[i].size() / 2];
     }
     std::printf("\n");
     std::printf("20+ yd outcomes:");
@@ -379,6 +438,19 @@ int main(int argc, char** argv) {
     std::printf("\n0-9 yd outcomes:");
     for (const auto& kv : shortOutcome) std::printf("  %s %d", kv.first.c_str(), kv.second);
     std::printf("\n");
+  }
+  if (jsonOut) {
+    if (FILE* f = std::fopen(jsonOut, "w")) {
+      std::fprintf(f, "{");
+      bool first = true;
+      for (const auto& kv : J) {
+        std::fprintf(f, "%s\n  \"%s\": %.6g", first ? "" : ",", kv.first.c_str(), kv.second);
+        first = false;
+      }
+      std::fprintf(f, "\n}\n");
+      std::fclose(f);
+      std::printf("wrote %s\n", jsonOut);
+    }
   }
   return 0;
 }

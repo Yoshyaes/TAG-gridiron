@@ -1,0 +1,45 @@
+{
+  "_about": "Frame-review checklist for scorecard v2. status: open | review (fixed in code, not yet seen in frames; still counts as open) | closed (seen fixed, evidence given). severity: high | medium | low. Seeded from the 2026-11-11 full-game review (D:/TAGFullGame).",
+  "checks": [
+    {"id": "anim_getoff_role", "cat": "animation", "sev": "high", "status": "open", "title": "Get-offs from the wrong side's pool (C fires off with a DL clip, DL with an OL pass-set or a guard pull)", "evidence": "c002 f176-196; role_mismatch in telemetry"},
+    {"id": "anim_kr_crouch", "cat": "animation", "sev": "high", "status": "open", "title": "Kick returner sprints in the crouched comeback-catch clip", "evidence": "c001 f140-165"},
+    {"id": "anim_no_celebration", "cat": "animation", "sev": "high", "status": "open", "title": "No touchdown celebrations (183 clips loaded, none played)", "evidence": "c038 f440, c114 f250-335; p1 0 of 1"},
+    {"id": "anim_armsup_runs", "cat": "animation", "sev": "medium", "status": "open", "title": "Receivers sprint with an arm raised on run plays", "evidence": "c002 f180-192"},
+    {"id": "anim_rush_into_blocker", "cat": "animation", "sev": "medium", "status": "open", "title": "At contact the rusher's torso passes into the blocker's shoulder", "evidence": "line test tag_linetest_035"},
+    {"id": "anim_no_postplay", "cat": "animation", "sev": "low", "status": "open", "title": "No help-up, ball to the official or varied jog back after the whistle", "evidence": "full-game review"},
+
+    {"id": "model_gloss", "cat": "models", "sev": "high", "status": "open", "title": "Jerseys and pants read as glossy plastic (no knit / twill)", "evidence": "c038 f440, c001 f215"},
+    {"id": "model_front_numbers", "cat": "models", "sev": "high", "status": "open", "title": "No front jersey numbers", "evidence": "c038 f440"},
+    {"id": "model_helmet_logo", "cat": "models", "sev": "medium", "status": "open", "title": "No helmet logos (fictional teams have no marks)", "evidence": "close-ups"},
+    {"id": "model_tv_numbers", "cat": "models", "sev": "low", "status": "open", "title": "No shoulder/sleeve TV numbers", "evidence": "close-ups"},
+    {"id": "model_kicker_number", "cat": "models", "sev": "low", "status": "open", "title": "Kicker wears #82", "evidence": "c031"},
+    {"id": "model_crowd_cards", "cat": "models", "sev": "medium", "status": "open", "title": "Crowd near the sideline reads as low-detail cards in close shots", "evidence": "c001 f215"},
+    {"id": "model_chain_rods", "cat": "models", "sev": "low", "status": "open", "title": "Chain-crew rods render as a slanted orange bar", "evidence": "full-game review"},
+    {"id": "model_officials", "cat": "models", "sev": "low", "status": "open", "title": "Officials' uniforms: no numbers, the referee's white cap", "evidence": "full-game review"},
+
+    {"id": "int_referee_pos", "cat": "interactions", "sev": "high", "status": "open", "title": "Referee lines up 2-4 yd from the QB and ends up in the sack pile", "evidence": "c022 f430-580"},
+    {"id": "int_official_through", "cat": "interactions", "sev": "high", "status": "open", "title": "Officials walk through players", "evidence": "c114 f310-335"},
+    {"id": "int_one_official", "cat": "interactions", "sev": "medium", "status": "open", "title": "One on-field official instead of a seven-man crew", "evidence": "MatchDirector SpawnSidelines"},
+    {"id": "int_pile_limbs", "cat": "interactions", "sev": "medium", "status": "open", "title": "Arms pass through helmets and shoulders in piles", "evidence": "c001 f215"},
+
+    {"id": "ai_deep_off_field", "cat": "ai", "sev": "high", "status": "closed", "title": "Deep passes thrown past the end line, men running into the stands", "evidence": "p1 telemetry: ball max x 111.3 (was 188.4); SimTests 'passes stay on the field'"},
+    {"id": "ai_ol_downfield", "cat": "ai", "sev": "high", "status": "closed", "title": "Linemen block 65 yd downfield on a breakaway", "evidence": "200 headless games: deepest engaged OL block 16 yd (was 48); SimTests leash"},
+    {"id": "ai_qb_rotation", "cat": "ai", "sev": "medium", "status": "closed", "title": "Backup QBs rotate in mid-drive", "evidence": "200 games: 7 changes, all injuries; SimTests 'starters stay in'"},
+    {"id": "ai_coverage_loose", "cat": "ai", "sev": "low", "status": "open", "title": "Coverage too loose at 10-19 yd after the movement limits (separation 3.2-3.6 yd)", "evidence": "SimCalibrate 200 games"},
+
+    {"id": "rules_halftime", "cat": "rules", "sev": "high", "status": "closed", "title": "CPU games stall at halftime", "evidence": "p1 filmed game went through halftime on its own (commit 8e89838)"},
+    {"id": "rules_moving_snap", "cat": "rules", "sev": "high", "status": "closed", "title": "Men still walking at the snap (illegal motion, teleport)", "evidence": "p1: plays with a pop 61 -> 3, none at the snap"},
+    {"id": "rules_facemask", "cat": "rules", "sev": "medium", "status": "open", "title": "Facemask tackle clips used as clean tackles, never flagged", "evidence": "telemetry + tackle test"},
+    {"id": "rules_canned_kicks", "cat": "rules", "sev": "medium", "status": "open", "title": "Punts, field goals and extra points are canned animations, not played", "evidence": "State Kick / UpdateKick"},
+    {"id": "rules_dice_penalties", "cat": "rules", "sev": "medium", "status": "open", "title": "Penalties are dice rolls, not from what happens on the field", "evidence": "Game.cpp rollPresnap/rollPostsnap"},
+    {"id": "rules_clock_presnap", "cat": "rules", "sev": "medium", "status": "open", "title": "Game clock frozen through the presnap (runoff applied after)", "evidence": "full-game review"},
+
+    {"id": "phys_canned_kick_flight", "cat": "physics", "sev": "medium", "status": "open", "title": "Kicked balls (punt/FG/PAT) fly on a scripted arc", "evidence": "UpdateKick"},
+
+    {"id": "pres_hud_stale", "cat": "presentation", "sev": "medium", "status": "review", "title": "Stale HUD: '1st & 10' on kickoffs, 'KICKOFF' on a PAT, a flag line through the next play", "evidence": "fixed in 8e89838 (HudDown, ticker between plays); needs a frame check"},
+    {"id": "pres_camera_lag", "cat": "presentation", "sev": "low", "status": "open", "title": "Camera lags the ball on long runs (tackle at the frame edge)", "evidence": "c003 f300-318"},
+    {"id": "pres_pat_text", "cat": "presentation", "sev": "low", "status": "open", "title": "Kick result text floats in the scene", "evidence": "c031 f110"},
+    {"id": "pres_tv_graphics", "cat": "presentation", "sev": "medium", "status": "open", "title": "No first-down line or play-clock graphic", "evidence": "full-game review"},
+    {"id": "pres_stats_cut", "cat": "presentation", "sev": "low", "status": "open", "title": "No stat overlays after big plays", "evidence": "full-game review"}
+  ]
+}

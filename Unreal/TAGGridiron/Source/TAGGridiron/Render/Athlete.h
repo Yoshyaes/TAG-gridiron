@@ -28,6 +28,7 @@ struct FAthleteFootball
 	bool bStance = false;
 	bool bPreSnap = false;     // before the snap: hand keyed stance loops
 	bool bUnderCenter = false; // QB lined up under center (not shotgun / pistol)
+	uint8 GetOffKind = 0;      // a lineman's job at the snap: 1 pass set, 2 run block, 3 defensive line (0 = not a lineman)
 	bool bLook = false;
 	FVector LookWorld = FVector::ZeroVector;
 	bool bLive = false;        // the play is live (between the snap and the whistle)
@@ -90,6 +91,10 @@ public:
 	/** -TagHlFull telemetry: what drives the body this frame, "mm:<matched clip>", "clip:<asset>", "one:<asset>",
 	 *  "fall:<asset>@t", "getup:<asset>", "ragdoll" or "replay" (the sim's own anim name is logged beside it). */
 	FString TelemetryAnim() const;
+	/** Take the body's offset from the sim spot (a fall that ended away from it) as its position from now on. */
+	void AbsorbVisOffset() { VisOffset = FVector::ZeroVector; }
+	/** How long a fall eases from where he was onto its anchor (a pile-on from a few yards away travels there). */
+	void SetFallEaseTime(float T) { FallEaseT = FMath::Max(0.05f, T); }
 
 	/** Feed the procedural football layer (throw, ball security, catch, block, tackle, stance, look). */
 	void SetFootball(const FAthleteFootball& F, float DeltaTime);
@@ -234,9 +239,12 @@ private:
 	bool bPreSnap = false;
 	bool bWasPreSnap = false;
 	bool bUnderCenter = false;
+	uint8 GetOffKind = 0;
 	UPROPERTY()
 	TObjectPtr<UAnimationAsset> OneShot;   // keyed one-shot in progress (get-off, snap catch, handoff)
 	float OneShotLeft = 0.f;
+	bool bOneShotCatch = false;  // the running one-shot is a catch (it hands over to the run once he is away with it)
+	float OneShotAge = 0.f;
 	float OneShotStart = 0.f;     // seconds into the one-shot's clip it starts at (a library capture's moment less its lead)
 	// get-up after a ragdoll: snapshot the lying pose, play the matching keyed get-up where the body lies
 	void StartGetUp(const FVector& SimLoc);
@@ -259,6 +267,7 @@ private:
 	bool bGettingUp = false;
 	bool bStoodUp = false;
 	FVector VisOffset = FVector::ZeroVector;
+	float FallEaseT = 0.2f;
 	int32 TackleCount = 0;
 	float StillTime = 0.f;   // seconds standing still (post-play idles)
 	// face (UTagFaceAnimInstance): blinks, effort, breathing, focus, celebration
@@ -273,6 +282,9 @@ private:
 	TWeakObjectPtr<AAthlete> TackleOn;
 	TWeakObjectPtr<AAthlete> BlockPartner;
 	TWeakObjectPtr<AAthlete> PunchedPartner; // the man this lineman struck at first contact (one punch per engagement)
+	TArray<TWeakObjectPtr<AAthlete>> PunchedThisPlay; // everyone he has struck this play: a double team handing off or a
+	                                                  // partner flickering back does not re-punch
+	float SincePunch = 99.f;
 	float LinePush = 0.f, SmoothedPush = 0.f;
 	bool bLineDefender = false, bLinePassPro = true;
 	int32 LineLoop = 0; // engaged loop in use: +1 defender winning, -1 blocker winning, 0 hand fight
@@ -465,6 +477,10 @@ struct FAthleteAssets
 	TArray<FPackClip> PackTackledFront, PackTackledBehind, PackTackledSide, PackTacklers, PackWhiffs, PackStumbles;
 	TArray<FPackClip> PackJukesL, PackJukesR, PackSpinsL, PackSpinsR, PackTrucks, PackHurdles, PackStiffArmsL, PackStiffArmsR;
 	TArray<FPackClip> PackRushWinsL, PackRushWinsR, PackBeatenL, PackBeatenR, PackPancakes, PackGetOffs;
+	// get-offs by job (the shared PackGetOffs pool gave centers a DL get-off and DL a guard's pull)
+	TArray<FPackClip> PackGetOffsPass, PackGetOffsRun, PackGetOffsDL;
+	// first contact of a block from the captures (the blocker __P01, the defender __P02), started just before contact
+	TArray<FPackClip> PackEngageOff, PackEngageDef;
 	TMap<FString, TSharedPtr<FJsonObject>> PackIndex;
 	int32 PackTimedCount = 0;
 	void LoadPackIndex();

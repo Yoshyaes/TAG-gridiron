@@ -40,6 +40,41 @@ constexpr double END_LINE = 110.0;
 constexpr double DEEP_AIM = 108.5;
 constexpr double SIM_DT = 1.0 / 60.0;
 
+/** Calibration constants of the play sim (realism plan): defaults are the shipped values; the headless tools
+ *  can override them (SimCalibrate --set name=value) to fit the sim to NFL numbers. Values from Tools/Realism/fit.py
+ *  (2026-11-12: 150 games seed 11, validated on 200 games seed 29: loss 18.4 -> 15.2, 15 -> 10 stats out of NFL tolerance). */
+struct Tune {
+  double tackleBase = 3.05;  // tackle success logit base
+  double accBase = 0.3;  // throw placement error: base sd (yd)
+  double accSlope = 0.017;  // throw placement error: per rating point below 99
+  double deepErr = 0.01216;  // extra error per air yard past 20
+  double deepReadK = 1.65;  // QB read penalty for a target past 15 yd
+  double deepReadSlope = 0.1581;  // ... per yard past 15
+  double hotDeepK = 0.9767;  // hot-read penalty for a target past 12 yd
+  double hotDeepSlope = 0.1374;  // ... per yard past 12
+  double manCushion = 1.8;  // man coverage cushion on routes past 8 yd
+  double zoneCushion = 3;  // deep zone cushion
+  double zoneCushionV = 0.55;  // ... per yd/s of the receiver's speed
+  double routeRead = 0.6;  // how far a good cover man plays the route ahead
+  double passProShed = 0.045;  // pass-pro shed hazard base (per s)
+  double qbThresh = 2.6;  // QB openness bar at the snap
+  double qbDecay = 0.21;  // ... drop per second
+  double qbLate = 0.7;  // ... extra drop per second past 2.5 s
+  double tightDeep = 1.97;  // catch difficulty from a defender in phase, deep
+  double tightShort = 1.5;  // ... short
+  double contested = 0.7;  // catch difficulty of any contested ball
+  double breakdownBase = 1.5;  // pursuit breakdown: speed over the carrier's
+  double breakdownK = 1.8;  // ... per yard away
+  double catchKeep = 0.45;  // speed kept through an uncontested catch
+  double penScale = 1;  // penalty rate multiplier
+  double assistRange = 3.24;  // a closing pursuer this near joins the tackle (yd)
+  double tackleReach = 0.52;  // contact reach beyond the two bodies (yd)
+  double pursuitK = 0.75;  // pursuit lead base
+};
+Tune& tune();
+/** Set a tune field by name; false if there is none. */
+bool setTune(const std::string& name, double v);
+
 enum class Precip { None, Rain, Snow };
 inline const char* precipName(Precip p) { return p == Precip::Rain ? "rain" : p == Precip::Snow ? "snow" : "none"; }
 

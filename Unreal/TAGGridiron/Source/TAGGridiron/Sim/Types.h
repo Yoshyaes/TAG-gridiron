@@ -117,6 +117,8 @@ struct Team {
   std::string division;
   /** Owning storage; Player addresses are stable for the Team's lifetime. */
   std::vector<std::unique_ptr<Player>> roster;
+  /** Garbage time: well ahead late, the starters at QB/RB/WR/TE sit (set by Game before each play). */
+  bool pullStarters = false;
   /** Offensive identity 0..1 (0 = run heavy, 1 = air raid). Drives CPU play calling. */
   double passLean = 0.5;
   /** Aggressiveness on 4th downs 0..1. */

@@ -441,6 +441,8 @@ void FAthleteAssets::LoadPackPairs(int32 Seed)
 		{
 			if (Taken >= 10 * PackScale) break;
 			const FString TN = O->GetStringField(TEXT("T")), CN = O->GetStringField(TEXT("C"));
+			// fouls (facemask, horse collar) are not clean tackles
+			if (TN.Contains(TEXT("Facemask"), ESearchCase::IgnoreCase) || TN.Contains(TEXT("HorseCollar"), ESearchCase::IgnoreCase)) continue;
 			FPendingPair Q;
 			Q.Kind = k;
 			Q.TP = FSoftObjectPath(FString::Printf(TEXT("/Game/TAG/Anim/Pack/Tackles/%s.%s"), *TN, *TN));
@@ -501,15 +503,20 @@ void FAthleteAssets::SelectPack(int32 Seed)
 		PackTimed(TEXT(""), {TEXT("QB_Drop_SG")}, {}, DropNone, 8, Seed + 63, nullptr, 0, 1.0f, 0.f, PackDropsSG);
 		PackTimed(TEXT(""), {TEXT("QB_Drop_UC")}, {}, DropNone, 8, Seed + 64, nullptr, 0, 1.0f, 0.f, PackDropsUC);
 		const std::initializer_list<const TCHAR*> CatchNone = {TEXT("2man"), TEXT("Drop"), TEXT("Def_"), TEXT("INT"), TEXT("Int_"), TEXT("Swat"), TEXT("Knock"), TEXT("Tip"), TEXT("Bobble"), TEXT("Miss"), TEXT("Fumble"), TEXT("Kick"), TEXT("Punt"), TEXT("Pump"), TEXT("Handoff"), TEXT("Pitch"), TEXT("Almost"), TEXT("Out_of_Bounds"), TEXT("Celeb"), TEXT("Jump_Ball"), TEXT("Juggl")};
-		PackTimed(TEXT("Catching"), {TEXT("Catch_Run"), TEXT("InStride"), TEXT("In_Stride")}, {}, CatchNone, 16, Seed + 70, TEXT("release"), 4, 0.7f, 0.f, PackCatchStride);
-		PackTimed(TEXT("Catching"), {TEXT("Jump"), TEXT("AboveHead"), TEXT("HighPoint"), TEXT("High_Point")}, {TEXT("Catch")}, CatchNone, 12, Seed + 71, TEXT("release"), 4, 0.7f, 0.f, PackCatchHigh);
-		PackTimed(TEXT("Catching"), {TEXT("Low"), TEXT("Shoestring"), TEXT("Scoop"), TEXT("Shoe")}, {TEXT("Catch")}, CatchNone, 8, Seed + 72, TEXT("release"), 4, 0.7f, 0.f, PackCatchLow);
-		PackTimed(TEXT("Catching"), {TEXT("OverShoulder"), TEXT("Over_Shoulder"), TEXT("OvrShldr"), TEXT("BackShoulder"), TEXT("Back_Shoulder")}, {}, CatchNone, 12, Seed + 73, TEXT("release"), 4, 0.7f, 0.f, PackCatchOverShoulder);
-		PackTimed(TEXT("Catching"), {TEXT("Sideline")}, {TEXT("Catch")}, CatchNone, 8, Seed + 74, TEXT("release"), 4, 0.7f, 0.f, PackCatchSideline);
-		PackTimed(TEXT("Catching"), {TEXT("Catch_Stand"), TEXT("Stand_"), TEXT("Strafe"), TEXT("Chest")}, {TEXT("Catch")}, CatchNone, 12, Seed + 75, TEXT("release"), 4, 0.7f, 0.f, PackCatchStand);
-		PackTimed(TEXT("Catching"), {TEXT("Bkpd"), TEXT("Comeback"), TEXT("Curl")}, {TEXT("Catch")}, CatchNone, 8, Seed + 76, TEXT("release"), 4, 0.7f, 0.f, PackCatchComeback);
+		// a diving / layout capture carries the body forward on its own; it plays only when the catch is a dive (the sim ends the
+		// play there): on any other catch the body dived ahead while the runner turned upfield, then snapped back
+		const std::initializer_list<const TCHAR*> CatchNoDive = {TEXT("2man"), TEXT("Drop"), TEXT("Def_"), TEXT("INT"), TEXT("Int_"), TEXT("Swat"), TEXT("Knock"), TEXT("Tip"), TEXT("Bobble"), TEXT("Miss"), TEXT("Fumble"), TEXT("Kick"), TEXT("Punt"), TEXT("Pump"), TEXT("Handoff"), TEXT("Pitch"), TEXT("Almost"), TEXT("Out_of_Bounds"), TEXT("Celeb"), TEXT("Jump_Ball"), TEXT("Juggl"), TEXT("Dive"), TEXT("Layout"), TEXT("Slide"), TEXT("Fall")};
+		PackTimed(TEXT("Catching"), {TEXT("Catch_Run"), TEXT("InStride"), TEXT("In_Stride")}, {}, CatchNoDive, 16, Seed + 70, TEXT("release"), 4, 0.7f, 0.f, PackCatchStride);
+		PackTimed(TEXT("Catching"), {TEXT("Jump"), TEXT("AboveHead"), TEXT("HighPoint"), TEXT("High_Point")}, {TEXT("Catch")}, CatchNoDive, 12, Seed + 71, TEXT("release"), 4, 0.7f, 0.f, PackCatchHigh);
+		PackTimed(TEXT("Catching"), {TEXT("Low"), TEXT("Shoestring"), TEXT("Scoop"), TEXT("Shoe")}, {TEXT("Catch")}, CatchNoDive, 8, Seed + 72, TEXT("release"), 4, 0.7f, 0.f, PackCatchLow);
+		PackTimed(TEXT("Catching"), {TEXT("OverShoulder"), TEXT("Over_Shoulder"), TEXT("OvrShldr"), TEXT("BackShoulder"), TEXT("Back_Shoulder")}, {}, CatchNoDive, 12, Seed + 73, TEXT("release"), 4, 0.7f, 0.f, PackCatchOverShoulder);
+		PackTimed(TEXT("Catching"), {TEXT("Sideline")}, {TEXT("Catch")}, CatchNoDive, 8, Seed + 74, TEXT("release"), 4, 0.7f, 0.f, PackCatchSideline);
+		PackTimed(TEXT("Catching"), {TEXT("Catch_Stand"), TEXT("Stand_"), TEXT("Strafe"), TEXT("Chest")}, {TEXT("Catch")}, CatchNoDive, 12, Seed + 75, TEXT("release"), 4, 0.7f, 0.f, PackCatchStand);
+		PackTimed(TEXT("Catching"), {TEXT("Bkpd"), TEXT("Comeback"), TEXT("Curl")}, {TEXT("Catch")}, CatchNoDive, 8, Seed + 76, TEXT("release"), 4, 0.7f, 0.f, PackCatchComeback);
 		PackTimed(TEXT("Catching"), {TEXT("Dive"), TEXT("Layout")}, {TEXT("Catch")}, CatchNone, 8, Seed + 77, TEXT("release"), 6, 0.9f, 0.f, PackCatchDive);
-		const std::initializer_list<const TCHAR*> TackleNone = {TEXT("Dive"), TEXT("Strip"), TEXT("Whiff"), TEXT("Miss"), TEXT("Sack"), TEXT("Pile"), TEXT("Gang"), TEXT("Sideline"), TEXT("Spin"), TEXT("Brkn"), TEXT("Broken"), TEXT("Hurdle"), TEXT("Truck"), TEXT("StiffArm"), TEXT("Celeb"), TEXT("Fumble")};
+		const std::initializer_list<const TCHAR*> TackleNone = {TEXT("Dive"), TEXT("Strip"), TEXT("Whiff"), TEXT("Miss"), TEXT("Sack"), TEXT("Pile"), TEXT("Gang"), TEXT("Sideline"), TEXT("Spin"), TEXT("Brkn"), TEXT("Broken"), TEXT("Hurdle"), TEXT("Truck"), TEXT("StiffArm"), TEXT("Celeb"), TEXT("Fumble"),
+			// a facemask tackle is a 15-yard foul, not a clean tackle: kept out until the penalty that calls for it exists
+			TEXT("FaceMask"), TEXT("Facemask"), TEXT("Horsecollar"), TEXT("HorseCollar")};
 		PackTimed(TEXT("Tackles"), {TEXT("_D1"), TEXT("_D2"), TEXT("_D8")}, {TEXT("__P01")}, TackleNone, 12, Seed + 80, TEXT("hit"), 2, 0.8f, 0.f, PackTackledFront);
 		PackTimed(TEXT("Tackles"), {TEXT("_D5"), TEXT("_D4"), TEXT("_D6")}, {TEXT("__P01")}, TackleNone, 12, Seed + 81, TEXT("hit"), 2, 0.8f, 0.f, PackTackledBehind);
 		PackTimed(TEXT("Tackles"), {TEXT("_D3"), TEXT("_D7")}, {TEXT("__P01")}, TackleNone, 12, Seed + 82, TEXT("hit"), 2, 0.8f, 0.f, PackTackledSide);
@@ -532,6 +539,11 @@ void FAthleteAssets::SelectPack(int32 Seed)
 		PackTimed(TEXT("Blocking"), {TEXT("Loss")}, {TEXT("Right"), TEXT("_R_")}, BlockNone, 10, Seed + 103, nullptr, 0, 0.8f, 0.f, PackBeatenR);
 		PackTimed(TEXT("Blocking"), {TEXT("Pancake"), TEXT("Impact"), TEXT("Stand_Loss_Big")}, {}, BlockNone, 8, Seed + 104, TEXT("hit"), 4, 0.8f, 0.f, PackPancakes);
 		PackTimed(TEXT(""), {TEXT("InitialMove"), TEXT("InitMove"), TEXT("Get_Off"), TEXT("GetOff"), TEXT("RunBlock_D1")}, {TEXT("OL"), TEXT("DL"), TEXT("Dline"), TEXT("Block")}, {TEXT("KickSlide"), TEXT("lateral"), TEXT("2man"), TEXT("Idle"), TEXT("Celeb"), TEXT("Stance")}, 10, Seed + 105, nullptr, 0, 0.8f, 0.f, PackGetOffs);
+		PackTimed(TEXT(""), {TEXT("PassBlock_OL_InitialMove")}, {}, {TEXT("lateral"), TEXT("2man"), TEXT("DbleTm")}, 10, Seed + 106, nullptr, 0, 0.8f, 0.f, PackGetOffsPass);
+		PackTimed(TEXT(""), {TEXT("InitMove_RunBlock"), TEXT("OL_InitMove_Zone"), TEXT("RunBlock_D1")}, {}, {TEXT("lateral"), TEXT("2man"), TEXT("Pull")}, 10, Seed + 107, nullptr, 0, 0.8f, 0.f, PackGetOffsRun);
+		PackTimed(TEXT(""), {TEXT("InitMove_DL"), TEXT("DL_InitialMove")}, {}, {TEXT("lateral"), TEXT("2man"), TEXT("OptionRead")}, 10, Seed + 108, nullptr, 0, 0.8f, 0.f, PackGetOffsDL);
+		PackTimed(TEXT("Blocking"), {TEXT("Block_Impact"), TEXT("GetEng")}, {TEXT("__P01")}, {TEXT("Loss_Big"), TEXT("Pancake"), TEXT("3man")}, 12, Seed + 109, TEXT("contact"), 4, 0.8f, 0.f, PackEngageOff);
+		PackTimed(TEXT("Blocking"), {TEXT("Block_Impact"), TEXT("GetEng")}, {TEXT("__P02")}, {TEXT("Loss_Big"), TEXT("Pancake"), TEXT("3man")}, 12, Seed + 110, TEXT("contact"), 4, 0.8f, 0.f, PackEngageDef);
 	}
 }
 
@@ -1573,6 +1585,8 @@ void AAthlete::PlayOneShotFrom(UAnimationAsset* Clip, float Start)
 {
 	if (!Clip || bRagdoll) return;
 	OneShot = Clip;
+	bOneShotCatch = false;
+	OneShotAge = 0.f;
 	OneShotStart = Start;
 	OneShotRate = 1.f + StyleJitter * 0.07f; // each player's own timing, within 7 %
 	OneShotLeft = FMath::Max(0.05f, Clip->GetPlayLength() - Start) / OneShotRate;
@@ -1705,7 +1719,9 @@ bool AAthlete::DriveMotionMatching(const FVector& VelWorld, float SimYaw, float 
 	if (MMGait == 1 && GaitSpeed < 260.f) MMGait = 0;
 	if (MMGait == 1 && GaitSpeed > 640.f) MMGait = 2;
 	if (MMGait == 2 && GaitSpeed < 560.f) MMGait = 1;
-	const bool bMoving = FutSpeed > 50.f || Speed > 450.f;
+	// the stop / idle databases only once he is really slowing to a stand: from 4.5 m/s a predicted stop searched them and
+	// an idle loop played under a man still moving 1-4 m/s (80-100 cm of slide per plant in the p3 capture)
+	const bool bMoving = FutSpeed > 50.f || Speed > 250.f;
 	MovingTime = bMoving ? MovingTime + Dt : 0.f;
 	// pivot: the predicted path turns sharply in the next half second (cut, plant, break on the ball)
 	bool bPivot = false;
@@ -1741,11 +1757,22 @@ bool AAthlete::DriveMotionMatching(const FVector& VelWorld, float SimYaw, float 
 		M->SimSpeed = Speed; // speed matching of the picked clip's root speed (UTagMotionMatchInstance)
 		M->bCrouchGait = bCrouch;
 		// faster still (a 10 m/s ball carrier against the 9.1 m/s the sped-up sprint covers): stretch the stride
-		if (MHBody && bMoving && !bCrouch)
+		if (MHBody && bMoving)
 			if (UTagRetargetAnimInstance* RI = Cast<UTagRetargetAnimInstance>(MHBody->GetAnimInstance()))
 			{
-				const float Covered = AnimMax * RateCap;
-				RI->Proc.StrideScale = GaitSpeed > Covered ? FMath::Min(GaitSpeed / Covered, 1.25f) : 1.f;
+				// what the feet of the playing clip actually cover (its root speed at the play position x the rate it
+				// plays at) against the ground the sim covers: the speed match's clamp leaves a remainder that skated
+				// the planted foot (sideways, backpedal and crouched gaits most). Each step is stretched or shortened
+				// along the direction of travel by that remainder.
+				const float Eff = M->MatchedClipSpeed * M->MatchedWantedRate * M->SpeedRate;
+				float S = 1.f;
+				if (M->bMatch && Eff > 60.f && Speed > 60.f) S = FMath::Clamp(Speed / Eff, 0.7f, bCrouch ? 1.3f : 1.35f);
+				else if (!bCrouch)
+				{
+					const float Covered = AnimMax * RateCap;
+					S = GaitSpeed > Covered ? FMath::Min(GaitSpeed / Covered, 1.25f) : 1.f;
+				}
+				RI->Proc.StrideScale = S;
 				RI->Proc.StrideDirCS = MHBody->GetComponentTransform().InverseTransformVectorNoScale(V.GetSafeNormal2D());
 			}
 	}
@@ -1877,9 +1904,10 @@ void AAthlete::PlayCatch(float BallZCm, float SpeedCm, const FVector& BallVelW, 
 			(C == A.CatchScoop || C == A.CatchLow) ? &A.PackCatchLow :
 			(C == A.CatchComeback) ? &A.PackCatchComeback :
 			(C == A.CatchChest) ? &A.PackCatchStand : &A.PackCatchStride;
-		if (const FAthleteAssets::FPackClip* P = FAthleteAssets::PickOr(*Lib, Seq)) { PlayOneShotFrom(P->Anim, P->Start); return; }
+		if (const FAthleteAssets::FPackClip* P = FAthleteAssets::PickOr(*Lib, Seq)) { PlayOneShotFrom(P->Anim, P->Start); bOneShotCatch = true; return; }
 	}
 	if (C) PlayOneShot(A.Side(C, bMirror));
+	bOneShotCatch = C != nullptr;
 }
 
 void AAthlete::PlayThrow(int32 Kind)
@@ -2165,6 +2193,7 @@ void AAthlete::BeginPairedFall(UAnimationAsset* Clip, const FVector& From, const
 	AnchorB = FVector(To.X, To.Y, FallFrom.Z);
 	FallYaw = YawW;
 	bFallEase = bEaseIn;
+	FallEaseT = 0.2f;
 	VisOffset = FVector::ZeroVector;
 	CurrentClip = nullptr;
 	PlayClip(Clip, false, 1.f, Start); // crossfades out of the run / tackle pose
@@ -2189,9 +2218,9 @@ void AAthlete::TickFall(const FVector& SimLoc, float DeltaTime)
 			const FVector R = Seq->ExtractRootMotionFromRange(FallStart, End, FAnimExtractContext(0.0, true)).GetTranslation();
 			At += FRotator(0, FallYaw, 0).RotateVector(FVector(R.Y, -R.X, 0.f)); // clip x left, +Y forward -> actor forward, right
 		}
-	if (bFallEase && FallT < 0.2f)
+	if (bFallEase && FallT < FallEaseT)
 	{
-		const float E = FMath::SmoothStep(0.f, 1.f, FallT / 0.2f);
+		const float E = FMath::SmoothStep(0.f, 1.f, FallT / FallEaseT);
 		At = FMath::Lerp(FallFrom, At, E);
 		Yaw = FallFromYaw + FMath::FindDeltaAngleDegrees(FallFromYaw, FallYaw) * E;
 	}
@@ -2376,6 +2405,8 @@ void AAthlete::ResetPose()
 	TackleOn = nullptr;
 	BlockPartner = nullptr;
 	PunchedPartner = nullptr;
+	PunchedThisPlay.Reset();
+	SincePunch = 99.f;
 	LineLoop = 0;
 	SmoothedPush = 0.f;
 	BlockAlign = FVector::ZeroVector;
@@ -2733,7 +2764,10 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 		if (bLine && A.GetOff)
 		{
 			static int32 GGetOffSeq = 0;
-			if (const FAthleteAssets::FPackClip* P = FAthleteAssets::PickOr(A.PackGetOffs, GGetOffSeq++)) PlayOneShot(P->Anim);
+			// the pool for this man's job at the snap; the shared pool only when the job's pool is empty
+			const TArray<FAthleteAssets::FPackClip>& Pool = GetOffKind == 1 && A.PackGetOffsPass.Num() ? A.PackGetOffsPass
+				: GetOffKind == 2 && A.PackGetOffsRun.Num() ? A.PackGetOffsRun : GetOffKind == 3 && A.PackGetOffsDL.Num() ? A.PackGetOffsDL : A.PackGetOffs;
+			if (const FAthleteAssets::FPackClip* P = FAthleteAssets::PickOr(Pool, GGetOffSeq++)) PlayOneShot(P->Anim);
 			else PlayOneShot(A.GetOff);
 		}
 		else if (Player && Player->pos == tag::Pos::QB && bUnderCenter && A.UnderCenterSnap) PlayOneShot(A.UnderCenterSnap);
@@ -2743,6 +2777,11 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 	if (OneShotLeft > 0.f && OneShot && !bPreSnap)
 	{
 		OneShotLeft -= DeltaTime;
+		OneShotAge += DeltaTime;
+		// a catch is over once he is away with the ball: a returner or receiver sprinting off does not keep the crouched
+		// catch pose for the clip's full length (the run crossfades in from where the catch is)
+		const bool bDiveClip = OneShot == A.CatchDive || OneShot == A.Side(A.CatchDive, true);
+		if (bOneShotCatch && !bDiveClip && OneShotAge > 0.3f && SpeedCm > 450.f) OneShotLeft = 0.f; // a layout dive plays out
 		PlayClip(OneShot, false, OneShotRate, OneShotStart);
 		if (!BlockAlign.IsNearlyZero(0.5f)) SetActorLocation(Location + VisOffset + BlockAlign);
 		if (OneShotLeft <= 0.f)
@@ -2858,12 +2897,27 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 		BlockAlign = FMath::Lerp(BlockAlign, Want, 1.f - FMath::Exp(-8.f * DeltaTime));
 		if (!BlockAlign.IsNearlyZero(0.5f)) SetActorLocation(Location + VisOffset + BlockAlign);
 		// the strike: both men's hands shoot to the chest plate the moment they meet (once per engagement)
-		if (AAthlete* O = BlockPartner.Get(); O && Anim == TEXT("block") && O != PunchedPartner.Get() && A.BlockPunch)
+		SincePunch += DeltaTime;
+		if (AAthlete* O = BlockPartner.Get(); O && Anim == TEXT("block") && O != PunchedPartner.Get() && A.BlockPunch &&
+			SincePunch > 1.f && !PunchedThisPlay.Contains(O) && PunchedThisPlay.Num() < 4)
 		{
 			PunchedPartner = O;
+			PunchedThisPlay.Add(O);
+			SincePunch = 0.f;
 			LineLoop = 0;
 			SmoothedPush = 0.f;
-			PlayOneShot(A.BlockPunch);
+			// every other strike from a capture of real first contact (his side's man in it), the keyed punch otherwise
+			const bool bDefender = Player && (Player->pos == tag::Pos::DE || Player->pos == tag::Pos::DT || Player->pos == tag::Pos::LB ||
+				Player->pos == tag::Pos::CB || Player->pos == tag::Pos::S);
+			const TArray<FAthleteAssets::FPackClip>& EPool = bDefender ? A.PackEngageDef : A.PackEngageOff;
+			const int32 PunchSeq = (Player ? Player->id : 0) + PunchedThisPlay.Num();
+			const FAthleteAssets::FPackClip* EP = (PunchSeq % 2) ? FAthleteAssets::PickOr(EPool, PunchSeq / 2) : nullptr;
+			if (EP)
+			{
+				PlayOneShotFrom(EP->Anim, EP->Start);
+				OneShotLeft = FMath::Min(OneShotLeft, 0.9f); // the strike, then back to the engaged loop
+			}
+			else PlayOneShot(A.BlockPunch);
 			return;
 		}
 	}
@@ -2989,6 +3043,7 @@ void AAthlete::SetFootball(const FAthleteFootball& InF, float Dt)
 	bLiveF = InF.bLive;
 	CarrierDistF = InF.CarrierDist;
 	if (InF.bPreSnap) bUnderCenter = InF.bUnderCenter; // keep the alignment through the snap
+	if (InF.bPreSnap || InF.GetOffKind) GetOffKind = InF.GetOffKind;
 	bEngaged = InF.bReach;
 	if (!MHBody) return;
 	UTagRetargetAnimInstance* I = Cast<UTagRetargetAnimInstance>(MHBody->GetAnimInstance());
@@ -3074,7 +3129,11 @@ FString AAthlete::TelemetryAnim() const
 	if (bGettingUp) return FString::Printf(TEXT("getup:%s"), *GetNameSafe(CurrentClip));
 	if (OneShot && OneShotLeft > 0.f) return FString::Printf(TEXT("one:%s"), *GetNameSafe(OneShot));
 	if (const UTagMotionMatchInstance* M = MatchInstance())
+	{
+		// the motion matching node also plays plain clips (stances, celebrations, loops): report the clip then
+		if (!M->bMatch && CurrentClip) return FString::Printf(TEXT("clip:%s"), *GetNameSafe(CurrentClip));
 		return FString::Printf(TEXT("mm:%s"), *GetNameSafe(M->GetMatchedAsset()));
+	}
 	if (UAnimSingleNodeInstance* I = Body->GetSingleNodeInstance())
 		return FString::Printf(TEXT("clip:%s"), *GetNameSafe(I->GetCurrentAsset()));
 	return FString::Printf(TEXT("clip:%s"), *GetNameSafe(CurrentClip));

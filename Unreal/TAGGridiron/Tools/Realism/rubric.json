@@ -1,0 +1,83 @@
+{
+  "_about": "Realism scorecard v2 (realism plan, Phase 0). Each metric scores 10 inside its band [lo, hi] and falls linearly to 0 at fail_lo / fail_hi. A category is the weighted mean of its measured metrics, capped by open visual checks (any open high = 8.0, any open medium = 9.0; visual-only categories score 10 - 2 per high - 1 per medium - 0.5 per low). src: 'sim:<key>' = SimCalibrate --json (200 headless games), 'game:<dotted.path>' = analyze.py R dict of a filmed game, 'box:<key>' = gamestats.py of a filmed game. ref: where the band comes from; 'approx' = not yet sourced.",
+  "categories": {
+    "movement": {"label": "Movement & locomotion", "weight": 15},
+    "animation": {"label": "Animation quality & fit", "weight": 15},
+    "models": {"label": "Character models & gear", "weight": 10},
+    "interactions": {"label": "Player interactions", "weight": 15},
+    "ai": {"label": "AI & decisions", "weight": 15},
+    "physics": {"label": "Physics", "weight": 10},
+    "rules": {"label": "Rules & game flow", "weight": 10},
+    "stats": {"label": "Box score realism", "weight": 5},
+    "presentation": {"label": "Broadcast presentation", "weight": 5}
+  },
+  "refs": {
+    "ngs_speed": "NFL Next Gen Stats fastest ball carriers 2024 (22.36 mph season max)",
+    "pff_ttt": "PFF, time to throw trends (2.81 s)",
+    "sharp": "Sharp Football Analysis 2024 league rates",
+    "pft_ko": "ProFootballTalk: 74.5% of kickoffs returned in 2025 (PFF ~76%)",
+    "sis_ko": "Sports Info Solutions kickoff study (hang 3.86 s)",
+    "pen_2024": "thehogsty.com 2024 wrap-up: 3,507 penalties in 272 games, 6.45 per team per game",
+    "ftn_pressure": "FTN 2024: median team pressure rate 31.3%",
+    "pff_mtr": "PFF 2024 team missed-tackle rates ~12-16%",
+    "fourth_2024": "UW-Madison NFL analytics recap 2024: 1.4 fourth-down attempts per team per game",
+    "pff_deep": "PFF: deep passes have stayed under 12% of attempts for six years",
+    "phys": "physics / the rules (a fixed right answer)",
+    "approx": "approximate, not yet sourced"
+  },
+  "metrics": [
+    {"id": "top_speed_max", "cat": "movement", "label": "Fastest player in a game (mph)", "src": "game:derived.max_speed", "lo": 20.5, "hi": 22.6, "fail_lo": 17, "fail_hi": 26, "w": 1, "ref": "ngs_speed"},
+    {"id": "wr_p90_play_top", "cat": "movement", "label": "WR/DB top 10% of per-play top speeds (mph)", "src": "game:top_speed_mph.WR.p90_of_play_max", "lo": 18.0, "hi": 20.5, "fail_lo": 15, "fail_hi": 23.5, "w": 1, "ref": "approx"},
+    {"id": "ol_top", "cat": "movement", "label": "Offensive lineman top speed (mph)", "src": "game:top_speed_mph.OL.game_max", "lo": 13.5, "hi": 17.5, "fail_lo": 10, "fail_hi": 21, "w": 0.5, "ref": "approx"},
+    {"id": "braking_p1", "cat": "movement", "label": "Hardest 1% of braking (m/s2)", "src": "sim:accel.braking_p1", "lo": -10.5, "hi": -5.5, "fail_lo": -19, "fail_hi": -2, "w": 1.5, "ref": "approx"},
+    {"id": "lateral_p95", "cat": "movement", "label": "Sideways acceleration at speed, p95 (m/s2)", "src": "sim:accel.lateral_p95_at_6ms", "lo": 2.5, "hi": 7.0, "fail_lo": 0, "fail_hi": 11.5, "w": 1.5, "ref": "approx"},
+    {"id": "speedup_p99", "cat": "movement", "label": "Hardest 1% of speeding up (m/s2; a 4.3 forty starts near 15)", "src": "sim:accel.speedup_p99", "lo": 6.0, "hi": 11.0, "fail_lo": 3, "fail_hi": 15, "w": 0.5, "ref": "phys"},
+    {"id": "foot_slide_share", "cat": "movement", "label": "Planted feet sliding > 10 cm (share)", "src": "game:foot_plants.share_over_10cm", "lo": 0, "hi": 0.05, "fail_lo": 0, "fail_hi": 0.6, "w": 2, "ref": "phys"},
+    {"id": "foot_slide_median", "cat": "movement", "label": "Median planted-foot slide (cm)", "src": "game:foot_plants.median_slide_cm", "lo": 0, "hi": 2.5, "fail_lo": 0, "fail_hi": 25, "w": 1, "ref": "phys"},
+    {"id": "pops", "cat": "movement", "label": "Visible-body pops > 60 cm in one frame, per game", "src": "game:derived.pops_per_game", "lo": 0, "hi": 0, "fail_lo": 0, "fail_hi": 100, "w": 2, "ref": "phys"},
+    {"id": "sprint_pelvis", "cat": "movement", "label": "Sprinting hip height (cm)", "src": "game:sprint_posture_cm.pelvis_median", "lo": 90, "hi": 99, "fail_lo": 75, "fail_hi": 110, "w": 0.5, "ref": "approx"},
+    {"id": "sprint_head", "cat": "movement", "label": "Sprinting head height (cm)", "src": "game:sprint_posture_cm.head_median", "lo": 132, "hi": 154, "fail_lo": 110, "fail_hi": 170, "w": 0.5, "ref": "approx"},
+
+    {"id": "celebrations", "cat": "animation", "label": "Touchdowns followed by a celebration (share)", "src": "game:celebrations.share", "lo": 1, "hi": 1, "fail_lo": 0, "fail_hi": 1, "w": 2, "ref": "approx"},
+    {"id": "top_oneshot", "cat": "animation", "label": "Most-repeated one-shot's share of one-shots", "src": "game:anim.top_oneshot_share", "lo": 0, "hi": 0.12, "fail_lo": 0, "fail_hi": 0.6, "w": 1.5, "ref": "approx"},
+    {"id": "role_mismatch", "cat": "animation", "label": "Live frames on a clip made for another job (share)", "src": "game:role_mismatch.share", "lo": 0, "hi": 0.002, "fail_lo": 0, "fail_hi": 0.08, "w": 2, "ref": "approx"},
+    {"id": "clones", "cat": "animation", "label": "Frames with 4+ men on the same loop (share)", "src": "game:anim.frames_with_4plus_same_loop_share", "lo": 0, "hi": 0.15, "fail_lo": 0, "fail_hi": 0.6, "w": 1, "ref": "approx"},
+    {"id": "distinct_clips", "cat": "animation", "label": "Distinct clips in a game", "src": "game:anim.distinct_assets", "lo": 300, "hi": 100000, "fail_lo": 50, "fail_hi": 100000, "w": 0.5, "ref": "approx"},
+    {"id": "feet_under_turf", "cat": "animation", "label": "Frames with a foot > 3 cm under the turf (share)", "src": "game:ground.foot_below_-3cm_share", "lo": 0, "hi": 0.005, "fail_lo": 0, "fail_hi": 0.08, "w": 1, "ref": "phys"},
+
+    {"id": "engaged_spacing", "cat": "interactions", "label": "Engaged blockers' spacing (cm)", "src": "game:engaged_spacing_cm.median", "lo": 85, "hi": 105, "fail_lo": 50, "fail_hi": 150, "w": 1, "ref": "approx"},
+    {"id": "body_overlap", "cat": "interactions", "label": "Live frames with two bodies through each other (share)", "src": "game:body_overlap.frames_with_overlap_share", "lo": 0, "hi": 0.003, "fail_lo": 0, "fail_hi": 0.05, "w": 1, "ref": "phys"},
+    {"id": "ball_in_hand", "cat": "interactions", "label": "Ball to carrier's hand, median (cm)", "src": "game:ball_in_hand_cm.median", "lo": 0, "hi": 14, "fail_lo": 0, "fail_hi": 40, "w": 1, "ref": "phys"},
+    {"id": "tacklers", "cat": "interactions", "label": "Tacklers per tackle", "src": "sim:tacklers_per_tackle", "lo": 1.25, "hi": 1.55, "fail_lo": 1.0, "fail_hi": 2.2, "w": 1.5, "ref": "approx"},
+    {"id": "shown_vs_scored", "cat": "interactions", "label": "Shown vs scored yardage, median gap (yd)", "src": "game:shown_vs_scored.median_abs_diff_yd", "lo": 0, "hi": 0.5, "fail_lo": 0, "fail_hi": 4, "w": 1.5, "ref": "phys"},
+    {"id": "referee_contact", "cat": "interactions", "label": "Frames with the referee within 1 m of a player (share)", "src": "game:referee.within_1m_share", "lo": 0, "hi": 0.002, "fail_lo": 0, "fail_hi": 0.05, "w": 1, "ref": "phys"},
+    {"id": "framing", "cat": "presentation", "label": "Live frames with the carrier inside the safe frame (share)", "src": "game:framing.carrier_in_safe_frame_share", "lo": 0.99, "hi": 1.0, "fail_lo": 0.8, "fail_hi": 1.0, "w": 1, "ref": "approx"},
+    {"id": "yac", "cat": "interactions", "label": "Yards after the catch per completion", "src": "sim:yac_per_completion", "lo": 4.8, "hi": 5.8, "fail_lo": 2.5, "fail_hi": 9, "w": 1, "ref": "approx"},
+
+    {"id": "ttt", "cat": "ai", "label": "Time to throw, median (s)", "src": "sim:ttt_median_s", "lo": 2.6, "hi": 3.0, "fail_lo": 1.4, "fail_hi": 4.2, "w": 1.5, "ref": "pff_ttt"},
+    {"id": "pressure", "cat": "ai", "label": "Dropbacks under pressure (%)", "src": "sim:pressured_pct", "lo": 27, "hi": 36, "fail_lo": 5, "fail_hi": 60, "w": 1, "ref": "ftn_pressure"},
+    {"id": "deep_share", "cat": "ai", "label": "Passes of 20+ air yards (% of attempts)", "src": "sim:pass.share.deep", "lo": 9.5, "hi": 12.5, "fail_lo": 3, "fail_hi": 25, "w": 1, "ref": "pff_deep"},
+    {"id": "behind_share", "cat": "ai", "label": "Passes behind the line (% of attempts)", "src": "sim:pass.share.behind", "lo": 15, "hi": 21, "fail_lo": 5, "fail_hi": 35, "w": 0.5, "ref": "approx"},
+    {"id": "sep_mid", "cat": "ai", "label": "Separation at the catch, 10-19 yd (yd)", "src": "sim:separation.mid", "lo": 2.2, "hi": 3.2, "fail_lo": 0.8, "fail_hi": 5, "w": 1, "ref": "approx"},
+    {"id": "qb_changes", "cat": "ai", "label": "QB changes inside a drive per game (injuries count)", "src": "sim:qb_changes_per_game", "lo": 0, "hi": 0.1, "fail_lo": 0, "fail_hi": 2, "w": 1, "ref": "approx"},
+    {"id": "ol_depth", "cat": "ai", "label": "Deepest engaged OL block, 200 games (yd past LOS)", "src": "sim:ol_block_depth_max_yd", "lo": 0, "hi": 16, "fail_lo": 0, "fail_hi": 60, "w": 1, "ref": "approx"},
+    {"id": "fourth_go", "cat": "ai", "label": "Fourth-down attempts per team-game", "src": "sim:fourth_down_go_per_team_game", "lo": 1.1, "hi": 1.8, "fail_lo": 0, "fail_hi": 5, "w": 0.5, "ref": "fourth_2024"},
+
+    {"id": "gravity", "cat": "physics", "label": "Gravity measured on the ball (m/s2)", "src": "game:ball_flight.gravity_ms2_median", "lo": 9.6, "hi": 10.0, "fail_lo": 8, "fail_hi": 12, "w": 1, "ref": "phys"},
+    {"id": "release", "cat": "physics", "label": "Pass release speed, median (mph)", "src": "game:ball_flight.release_mph_median", "lo": 44, "hi": 60, "fail_lo": 30, "fail_hi": 75, "w": 1, "ref": "approx"},
+    {"id": "air_max_x", "cat": "physics", "label": "Furthest a pass gets in the air (yd, end line 110)", "src": "game:ball_air_max_x_yd", "lo": 0, "hi": 111.5, "fail_lo": 0, "fail_hi": 190, "w": 2, "ref": "phys"},
+    {"id": "max_air", "cat": "physics", "label": "Longest air yards, 200 games", "src": "sim:max_air_yd", "lo": 55, "hi": 72, "fail_lo": 30, "fail_hi": 120, "w": 1, "ref": "approx"},
+    {"id": "accel_over_1g", "cat": "physics", "label": "Free-running samples over 1 g (%)", "src": "sim:accel.over_1g_pct", "lo": 0, "hi": 10, "fail_lo": 0, "fail_hi": 30, "w": 1, "ref": "approx"},
+
+    {"id": "penalties", "cat": "rules", "label": "Accepted penalties per team-game", "src": "sim:box.penalties", "lo": 5.8, "hi": 7.1, "fail_lo": 1, "fail_hi": 12, "w": 1.5, "ref": "pen_2024"},
+    {"id": "ko_return", "cat": "rules", "label": "Kickoffs returned (share, 2025 rules)", "src": "sim:ko_return_rate", "lo": 0.68, "hi": 0.82, "fail_lo": 0.2, "fail_hi": 1.0, "w": 1, "ref": "pft_ko"},
+    {"id": "punts", "cat": "rules", "label": "Punts per team-game", "src": "sim:box.punts", "lo": 3.2, "hi": 4.3, "fail_lo": 1, "fail_hi": 7, "w": 0.5, "ref": "approx"},
+
+    {"id": "box_off", "cat": "stats", "label": "Box-score stats outside NFL tolerance (of 21)", "src": "sim:box.offTolerance", "lo": 0, "hi": 1, "fail_lo": 0, "fail_hi": 15, "w": 2, "ref": "approx"},
+    {"id": "qb_rating", "cat": "stats", "label": "Average passer rating", "src": "sim:box.qbRating", "lo": 88, "hi": 96, "fail_lo": 70, "fail_hi": 115, "w": 1, "ref": "approx"},
+    {"id": "ypa", "cat": "stats", "label": "Yards per pass attempt", "src": "sim:box.ypa", "lo": 6.6, "hi": 7.2, "fail_lo": 5, "fail_hi": 9.5, "w": 1, "ref": "sharp"},
+    {"id": "comp", "cat": "stats", "label": "Completion %", "src": "sim:box.compPct", "lo": 63.5, "hi": 66.5, "fail_lo": 55, "fail_hi": 75, "w": 1, "ref": "sharp"},
+    {"id": "points_sd", "cat": "stats", "label": "Spread of team scores (SD, points)", "src": "sim:box.pointsSD", "lo": 9, "hi": 10.8, "fail_lo": 5, "fail_hi": 16, "w": 1, "ref": "approx"},
+    {"id": "points", "cat": "stats", "label": "Points per team-game", "src": "sim:box.points", "lo": 21, "hi": 23.5, "fail_lo": 14, "fail_hi": 32, "w": 1, "ref": "sharp"}
+  ]
+}
