@@ -54,6 +54,34 @@ const char* entStateName(EntState s) {
   return "?";
 }
 
+const char* moveName(Move m) {
+  switch (m) {
+    case Move::None: return "";
+    case Move::Juke: return "juke";
+    case Move::Spin: return "spin";
+    case Move::Truck: return "truck";
+    case Move::StiffArm: return "stiffarm";
+    case Move::Hurdle: return "hurdle";
+    case Move::Hit: return "hitstick";
+    case Move::Cut: return "cut";
+  }
+  return "";
+}
+
+double moveWindow(Move m) {
+  switch (m) {
+    case Move::None: return 0;
+    case Move::Juke: return 0.35;
+    case Move::Spin: return 0.5;
+    case Move::Truck: return 0.45;
+    case Move::StiffArm: return 0.6;
+    case Move::Hurdle: return 0.55;
+    case Move::Hit: return 0.45;
+    case Move::Cut: return 0.45;
+  }
+  return 0;
+}
+
 const char* animName(Anim a) {
   switch (a) {
     case Anim::Idle: return "idle";
@@ -119,6 +147,7 @@ Tune& tune() {
 bool setTune(const std::string& name, double v) {
   Tune& t = tune();
   if (name == "tackleBase") return t.tackleBase = v, true;
+  if (name == "aiMoveK") return t.aiMoveK = v, true;
   if (name == "accBase") return t.accBase = v, true;
   if (name == "accSlope") return t.accSlope = v, true;
   if (name == "deepErr") return t.deepErr = v, true;
@@ -463,14 +492,56 @@ void PlaySim::alignDefense() {
     Ent* e = defRole(r);
     if (e) e->pos = V2{x, clamp(y, 1, FIELD_W - 1)};
   };
-  set("LE", L + 0.9, (teL ? teL->pos.y : lt) + 1.0);
-  set("LDT", L + 0.85, by + 1.9);
-  set("RDT", L + 0.85, by - 0.7);
-  set("RE", L + 0.9, (teR ? teR->pos.y : rt) - 1.0);
+  // the strength: the tight end's side, else the side with more receivers (+1 = +y)
+  double strongS = 0;
+  {
+    int nl = 0, nr = 0;
+    for (Ent* e : off)
+      if (e->eligible && std::fabs(e->pos.y - by) > 2) (e->pos.y > by ? nl : nr)++;
+    strongS = teL && !teR ? 1 : teR && !teL ? -1 : nl > nr ? 1 : nr > nl ? -1 : -1;
+  }
+  const FrontAlign fa = cfg.defCall->align;
+  const bool odd = cfg.defCall->front == Front::Base34;
   const double lbDepth = gl ? 2.5 : 4.6;
-  set("WLB", L + lbDepth, by + 3.6);
-  set("MLB", L + lbDepth + 0.3, by + 0.2);
-  set("SLB", L + lbDepth, by - 3.6);
+  if (odd) {
+    // 3-4: ends in 4i/5 techniques on the tackles, the nose over the center; the outside backers stand on the
+    // edges outside the end man, the two inside backers off the guards
+    const double edgeL = (teL ? teL->pos.y : lt) + 1.6, edgeR = (teR ? teR->pos.y : rt) - 1.6;
+    if (fa == FrontAlign::Bear) {
+      set("LE", L + 0.85, by + 1.6);  // both guards and the center covered
+      set("LDT", L + 0.8, by);
+      set("RE", L + 0.85, by - 1.6);
+    } else {
+      set("LE", L + 0.9, lt + 0.35);
+      set("LDT", L + 0.8, by + (fa == FrontAlign::Over ? strongS * 0.7 : 0));
+      set("RE", L + 0.9, rt - 0.35);
+    }
+    set("LOLB", L + 0.95, edgeL);
+    set("ROLB", L + 0.95, edgeR);
+    set("WLB", L + lbDepth, by + 2.2);
+    set("MLB", L + lbDepth + 0.2, by - 2.2);
+  } else {
+    set("LE", L + 0.9, (teL ? teL->pos.y : lt) + 1.0);
+    set("LDT", L + 0.85, by + 1.9);
+    set("RDT", L + 0.85, by - 0.7);
+    set("RE", L + 0.9, (teR ? teR->pos.y : rt) - 1.0);
+    // the set's look: Over puts the 3 technique to the strength, Under away from it, Wide 9 splits the ends, Bear
+    // covers both guards
+    if (fa == FrontAlign::Over || fa == FrontAlign::Under) {
+      const double threeTech = fa == FrontAlign::Over ? strongS : -strongS;
+      set("LDT", L + 0.85, by + (threeTech > 0 ? 1.9 : 0.7));
+      set("RDT", L + 0.85, by - (threeTech > 0 ? 0.7 : 1.9));
+    } else if (fa == FrontAlign::Wide9) {
+      set("LE", L + 1.0, (teL ? teL->pos.y : lt) + 2.6);
+      set("RE", L + 1.0, (teR ? teR->pos.y : rt) - 2.6);
+    } else if (fa == FrontAlign::Bear) {
+      set("LDT", L + 0.85, by + 1.35);
+      set("RDT", L + 0.85, by - 1.35);
+    }
+    set("WLB", L + lbDepth, by + 3.6);
+    set("MLB", L + lbDepth + 0.3, by + 0.2);
+    set("SLB", L + lbDepth, by - 3.6);
+  }
   // corners over widest receivers each side
   const std::vector<Ent*> elig = eligibles();
   std::vector<Ent*> leftR, rightR;
@@ -481,11 +552,14 @@ void PlaySim::alignDefense() {
     if (e->pos.y < by - 5) rightR.push_back(e);
   std::stable_sort(rightR.begin(), rightR.end(), [](const Ent* a, const Ent* b) { return a->pos.y - b->pos.y < 0; });
   const bool press = cov == Coverage::C0 || cov == Coverage::C1 || cov == Coverage::C2M;
-  auto cbDepth = [&](const Ent* e) { return (press && e) ? 1.1 : cov == Coverage::C2 ? 4.5 : 7.0; };
+  // squat corners in the two-deep shells (Cover 6: the cloud corner on the half side, to the right)
+  auto cbDepth = [&](const Ent* e, bool right) {
+    return (press && e) ? 1.1 : (cov == Coverage::C2 || cov == Coverage::C2T || (cov == Coverage::C6 && right)) ? 4.5 : 7.0;
+  };
   Ent* lW = leftR.empty() ? nullptr : leftR[0];
   Ent* rW = rightR.empty() ? nullptr : rightR[0];
-  set("LCB", L + cbDepth(lW), lW ? lW->pos.y - 0.7 : by + 13);
-  set("RCB", L + cbDepth(rW), rW ? rW->pos.y + 0.7 : by - 13);
+  set("LCB", L + cbDepth(lW, false), lW ? lW->pos.y - 0.7 : by + 13);
+  set("RCB", L + cbDepth(rW, true), rW ? rW->pos.y + 0.7 : by - 13);
   std::vector<Ent*> slots;
   for (size_t i = 1; i < leftR.size(); i++) slots.push_back(leftR[i]);
   for (size_t i = 1; i < rightR.size(); i++) slots.push_back(rightR[i]);
@@ -497,7 +571,7 @@ void PlaySim::alignDefense() {
     Ent* s = slots.size() > 1 ? slots[1] : nullptr;
     set("DB", L + (s ? 5.5 : 10), s ? s->pos.y + (s->pos.y > by ? -0.8 : 0.8) : by - 8);
   }
-  const bool twoHigh = cov == Coverage::C2 || cov == Coverage::C4 || cov == Coverage::C2M;
+  const bool twoHigh = cov == Coverage::C2 || cov == Coverage::C4 || cov == Coverage::C2M || cov == Coverage::C2T || cov == Coverage::C6;
   if (cov == Coverage::C0) {
     set("FS", L + 6, by + 5);
     set("SS", L + 5, by - 5);
@@ -570,6 +644,8 @@ void PlaySim::setupAssignments() {
     case Coverage::C3: deepZones = {{"thirdL", "LCB"}, {"thirdM", "FS"}, {"thirdR", "RCB"}}; break;
     case Coverage::C3Fire: deepZones = {{"thirdL", "LCB"}, {"thirdM", "FS"}, {"thirdR", "RCB"}}; break;
     case Coverage::C4: deepZones = {{"q1", "LCB"}, {"q2", "FS"}, {"q3", "SS"}, {"q4", "RCB"}}; break;
+    case Coverage::C2T: deepZones = {{"halfL", "FS"}, {"halfR", "SS"}}; break;
+    case Coverage::C6: deepZones = {{"q1", "LCB"}, {"q2", "FS"}, {"halfR", "SS"}}; break;
     case Coverage::C0: break;
   }
   std::vector<Ent*> assigned;
@@ -626,7 +702,7 @@ void PlaySim::setupAssignments() {
       Ent* d = defRole("RCB");
       if (d && contains(rest, d)) take(d, widest(-1));
     }
-    for (const char* r : {"NB", "DB", "SS", "SLB", "WLB", "MLB", "FS"}) {
+    for (const char* r : {"NB", "DB", "SS", "SLB", "LOLB", "ROLB", "WLB", "MLB", "FS"}) {
       Ent* d = defRole(r);
       if (d && contains(rest, d)) take(d, nearest(d));
     }
@@ -643,12 +719,25 @@ void PlaySim::setupAssignments() {
       case Coverage::C3: zs = {"flatL", "hookL", "hookR", "flatR"}; break;
       case Coverage::C3Fire: zs = {"flatL", "hookM", "flatR"}; break;
       case Coverage::C4: zs = {"flatL", "hookM", "flatR"}; break;
+      case Coverage::C2T: zs = {"flatL", "hookL", "midM", "hookR", "flatR"}; break;
+      case Coverage::C6: zs = {"flatL", "hookL", "hookM", "flatR"}; break;
       default: zs = {"hookM"}; break;
     }
-    // CBs in cover 2 take flats regardless of order
-    if (cov == Coverage::C2) {
+    // Tampa 2: the Mike opens and runs the middle hole between the safeties
+    if (cov == Coverage::C2T) {
+      Ent* m = defRole("MLB");
+      if (m && contains(rest, m)) {
+        m->state = EntState::Zone;
+        m->zone = "midM";
+        removeValue(rest, m);
+        zs.erase(std::find(zs.begin(), zs.end(), std::string("midM")));
+      }
+    }
+    // CBs in cover 2 take flats regardless of order (cover 6: the cloud corner on the half side)
+    if (cov == Coverage::C2 || cov == Coverage::C2T || cov == Coverage::C6) {
       const std::pair<const char*, const char*> cbFlats[] = {{"LCB", "flatL"}, {"RCB", "flatR"}};
       for (const auto& rz : cbFlats) {
+        if (cov == Coverage::C6 && std::string(rz.first) == "LCB") continue;  // he has the deep quarter
         Ent* e = defRole(rz.first);
         if (e && contains(rest, e)) {
           e->state = EntState::Zone;
@@ -695,7 +784,8 @@ void PlaySim::setupAssignments() {
   }
   // run-fit gaps for linebackers
   for (Ent* e : def)
-    if (e->role == "WLB" || e->role == "MLB" || e->role == "SLB") e->gap = e->pos.y;
+    if ((e->role == "WLB" || e->role == "MLB" || e->role == "SLB" || e->role == "LOLB" || e->role == "ROLB") && e->state != EntState::Rush)
+      e->gap = e->pos.y;
 }
 
 /** Snap-time blocking assignments: unique blocker->defender pairs, closest first. */
@@ -752,11 +842,11 @@ void PlaySim::assignBlocks() {
 namespace {
 /** A back's check release / a screen's slow release (the route's own delay before he goes). */
 double routeDelay(const Ent* e) {
-  if (e->role == "RB" && (e->routeName == "checkdown" || e->routeName == "flat")) return 0.9;
+  if (e->role == "RB" && (e->routeName == "checkdown" || e->routeName == "flat" || e->routeName == "release" || e->routeName == "releaseflat")) return 0.9;
   if (e->routeName == "screen") return 1.1;
   return 0;
 }
-bool isLB(const Ent* e) { return e->role == "WLB" || e->role == "MLB" || e->role == "SLB"; }
+bool isLB(const Ent* e) { return e->role == "WLB" || e->role == "MLB" || e->role == "SLB" || e->role == "LOLB" || e->role == "ROLB"; }
 bool isCorner(const Ent* e) { return e->role == "LCB" || e->role == "RCB" || e->role == "NB" || e->role == "DB"; }
 }  // namespace
 
@@ -1087,6 +1177,7 @@ V2 PlaySim::zoneLandmark(const std::string& z) const {
   if (z == "flatR") return V2{dx(4.5), cl((std::min)(by - 11, 8.0))};
   if (z == "hookL") return V2{dx(8), cl(by + 5.5)};
   if (z == "hookR") return V2{dx(8), cl(by - 5.5)};
+  if (z == "midM") return V2{dx(12), cl(by)};  // Tampa 2: the hole between the safeties
   return V2{dx(7), cl(by)};
 }
 
@@ -1162,6 +1253,7 @@ void PlaySim::step(double dt) {
     if (e->tackleCd > 0) e->tackleCd -= dt;
     if (e->pressDelay > 0) e->pressDelay -= dt;
     e->animT += dt;
+    e->moveT += dt;
     e->velHist.push_back(e->vel);
     if (e->velHist.size() > 40) e->velHist.pop_front();
   }
@@ -1348,6 +1440,12 @@ bool PlaySim::applyUser(Ent* e) {
     scramble = true;
     setCarrier(e);
   }
+  // the highlight stick (a move started here plays out under the AI or the stick alike)
+  if (i.stickMove != Move::None) {
+    const Move mv = i.stickMove;
+    i.stickMove = Move::None;
+    startMove(e, mv, i.stickSide);
+  }
   if (ml < 0.05) {
     // no input: let AI drive non-QB entities, QB just holds position
     if (e == qb && e->state == EntState::QB) {
@@ -1361,14 +1459,134 @@ bool PlaySim::applyUser(Ent* e) {
   e->want = scale(norm(m), sp);
   if (i.juke && e->hasBall && e->animT > 0.6) {
     i.juke = false;
-    // juke: sharp lateral impulse with brief speed loss
+    // juke: sharp lateral impulse with brief speed loss, to the side the stick leans
     const V2 lat{-e->vel.y, e->vel.x};
-    const double side = dot(norm(lat), m) >= 0 ? 1 : -1;
-    impulse(e, sub(add(scale(e->vel, 0.55), scale(norm(lat), side * 3.2 * (0.7 + e->r().agility / 330))), e->vel), 0.4);
-    e->anim = Anim::Juke;
-    e->animT = 0;
+    startMove(e, Move::Juke, dot(norm(lat), m) >= 0 ? 1 : -1);
   }
   return true;
+}
+
+bool PlaySim::startMove(Ent* e, Move m, double side) {
+  if (!e || m == Move::None || e->state == EntState::Down || e->engaged || e->stun > 0 || (wrap_ && (e == wrap_->c || e == wrap_->d)))
+    return false;
+  const bool carrierMove = m != Move::Hit && m != Move::Cut;
+  Ent* c = ball.holder;
+  if (carrierMove) {
+    if (!e->hasBall || ball.mode != BallMode::Held || e->animT <= 0.6 || e->anim == Anim::Throw) return false;
+  } else {
+    // a tackling move: a free defender with a carrier to hit, not one already mid-move
+    if (!c || ball.mode != BallMode::Held || c->side == e->side || e->moveT < 0.9 || e->tackleCd > 0) return false;
+  }
+  const double s0 = e->speed();
+  const V2 fwd = s0 > 0.5 ? norm(e->vel) : V2{goalDir(e), 0};
+  const V2 lat{-fwd.y, fwd.x};  // his left
+  const Ent* threat = nullptr;
+  if (carrierMove) suggestMove(e, &threat);
+  if (side == 0) {
+    if (threat) {
+      const double ty = dot(sub(threat->pos, e->pos), lat);  // + = the tackler is to his left
+      side = m == Move::StiffArm ? (ty >= 0 ? 1 : -1) : (ty >= 0 ? -1 : 1);  // the arm toward him, a cut away
+    } else side = dot(lat, e->want) >= 0 ? 1 : -1;
+  }
+  const double agi = 0.7 + e->r().agility / 330;
+  switch (m) {
+    case Move::Juke:  // a sharp cut: the hips stay, the feet go
+      impulse(e, sub(add(scale(e->vel, 0.55), scale(lat, side * 3.2 * agi)), e->vel), 0.4);
+      break;
+    case Move::Spin:  // a full turn out of the arms: gives up speed, slides a step over
+      impulse(e, sub(add(scale(e->vel, 0.76), scale(lat, side * 1.2 * agi)), e->vel), 0.45);
+      break;
+    case Move::Truck:  // the shoulder down: a short gather, straight ahead
+      impulse(e, scale(e->vel, -0.1), 0.3);
+      break;
+    case Move::StiffArm:  // the arm out: he keeps his line and leans away from the man
+      impulse(e, sub(add(scale(e->vel, 0.93), scale(lat, -side * 0.6)), e->vel), 0.3);
+      break;
+    case Move::Hurdle:  // a leap: no cutting in the air
+      impulse(e, scale(e->vel, -0.15), 0.35);
+      break;
+    case Move::Hit:
+    case Move::Cut: {
+      // the lunge: at where the carrier will be, a burst past running speed (a missed lunge is a long way down)
+      const V2 aim = add(c->pos, scale(c->vel, 0.25));
+      const V2 dir = norm(sub(aim, e->pos));
+      const double burst = m == Move::Hit ? 2.6 : 1.6;
+      impulse(e, sub(scale(dir, (std::max)(s0, e->vmax * 0.8) + burst), e->vel), 0.25);
+      break;
+    }
+    case Move::None: break;
+  }
+  e->move = m;
+  e->moveT = 0;
+  e->moveSide = side;
+  if (carrierMove) {
+    e->anim = Anim::Juke;  // the renderer plays the move's clip (moveName) for it
+    e->animT = 0;
+  } else {
+    e->anim = m == Move::Cut ? Anim::Dive : Anim::Tackle;
+    e->animT = 0;
+  }
+  ev("move", e, const_cast<Ent*>(carrierMove ? threat : c), moveName(m));
+  return true;
+}
+
+Move PlaySim::suggestMove(const Ent* c, const Ent** threat) const {
+  if (threat) *threat = nullptr;
+  if (!c || !c->hasBall) return Move::None;
+  const double s0 = c->speed();
+  const V2 fwd = s0 > 0.5 ? norm(c->vel) : V2{goalDir(c), 0};
+  const V2 lat{-fwd.y, fwd.x};
+  const Ent* best = nullptr;
+  double bd = 3.6;
+  for (const Ent* d : defendersOf(c)) {
+    if (!d->free()) continue;
+    const V2 rel = sub(d->pos, c->pos);
+    const double dd = len(rel);
+    const double ahead = dot(rel, fwd);
+    // closing on him: in front, or beside and coming; not one he has already run past
+    const double closing = dot(sub(d->vel, c->vel), scale(rel, -1 / (std::max)(0.1, dd)));
+    if (ahead < -0.6 || (ahead < 0.8 && closing < 0.5)) continue;
+    if (dd < bd) {
+      bd = dd;
+      best = d;
+    }
+  }
+  if (!best) return Move::None;
+  if (threat) *threat = best;
+  const V2 rel = sub(best->pos, c->pos);
+  const double facing = dot(norm(rel), fwd);
+  const Ratings& r = c->r();
+  const double power = r.breakTackle * 0.5 + r.strength * 0.5;
+  const double wiggle = r.elusiveness * 0.5 + r.agility * 0.5;
+  if (best->anim == Anim::Dive || best->moveOn(Move::Cut)) return Move::Hurdle;
+  if (facing < 0.55 && std::fabs(dot(rel, lat)) > 0.5) return Move::StiffArm;  // he comes from the side
+  if (power > wiggle + 4) return Move::Truck;
+  return wiggle > 78 && bd < 2.0 ? Move::Spin : Move::Juke;
+}
+
+double PlaySim::moveTackleAdj(const Ent* d, const Ent* c, double facing, bool arm, bool dive) const {
+  const Ratings& cr = c->r();
+  const Ratings& dr = d->r();
+  const double k = c->userControlled ? 1.0 : tune().aiMoveK;
+  double adj = 0;
+  // the carrier's moves (these lower the tackle odds; the wrong one for the man raises them)
+  if (c->moveOn(Move::Spin) && facing > -0.3) adj -= (0.9 + (cr.agility * 0.5 + cr.elusiveness * 0.5 - 70) * 0.025) * k;
+  if (c->moveOn(Move::Truck) && facing > 0.2) {
+    // power against mass: a back not built for it bounces off, a big man runs a corner over
+    const double tr = 0.8 + (cr.breakTackle * 0.5 + cr.strength * 0.5 - 70) / 12 + std::log(c->mass / d->mass) * 1.6;
+    adj -= clamp(tr, -1.0, 2.6) * k;
+  }
+  if (c->moveOn(Move::StiffArm) && facing > -0.4 && facing < 0.85)
+    adj -= (0.7 + (cr.strength - 70) / 15 + (cr.breakTackle - 70) / 20 + (arm || dive ? 0.5 : 0)) * k;
+  if (c->moveOn(Move::Hurdle)) adj += (dive || d->moveOn(Move::Cut)) ? -2.2 * k : facing > 0.3 ? 0.6 : 0;  // hit in the air
+  // the defender's
+  if (d->moveOn(Move::Hit)) {
+    const double vd = d->speed() / (std::max)(1.0, d->vmax);
+    adj += facing > -0.3 ? 1.0 + (dr.tackling * 0.5 + dr.strength * 0.5 - 70) / 20 + vd * 0.5 : -0.6;  // from behind: a shove
+    if (c->moveOn(Move::Truck)) adj += (dr.strength - cr.strength) / 25;  // two men meeting square: the stronger wins
+  }
+  if (d->moveOn(Move::Cut) && !c->moveOn(Move::Hurdle)) adj += c->moveOn(Move::Truck) ? 1.2 : 0.5;  // under the shoulder
+  return adj;
 }
 
 void PlaySim::thinkIdle(Ent* e) {
@@ -2345,10 +2563,25 @@ void PlaySim::thinkCarrier(Ent* e) {
       const double ahead = rel.x * gd;
       if (ahead > 0.8 && ahead < 2.4 && std::fabs(rel.y) < 1.2 &&
           rng.chance(0.004 + (std::max)(0.0, e->r().elusiveness - 60) * 0.0003)) {
-        const double side = rel.y > 0 ? -1 : 1;
-        impulse(e, sub(add(scale(e->vel, 0.6), V2{0, side * 2.8 * (0.7 + e->r().agility / 330)}), e->vel), 0.4);
-        e->anim = Anim::Juke;
-        e->animT = 0;
+        // the move that fits the runner and the man (the highlight a user would see); now and then a plain juke
+        const Move m = rng.chance(0.3) ? Move::Juke : suggestMove(e);
+        if (m == Move::Juke || m == Move::None) {
+          const double side = rel.y > 0 ? -1 : 1;
+          impulse(e, sub(add(scale(e->vel, 0.6), V2{0, side * 2.8 * (0.7 + e->r().agility / 330)}), e->vel), 0.4);
+          e->anim = Anim::Juke;
+          e->animT = 0;
+          e->move = Move::Juke;
+          e->moveT = 0;
+          e->moveSide = side;
+          ev("move", e, d, "juke");
+        } else startMove(e, m);
+        break;
+      }
+      // a man coming from the side at a power runner: the stiff arm
+      const double pw = e->r().breakTackle * 0.5 + e->r().strength * 0.5;
+      if (ahead > -0.4 && ahead < 1.4 && std::fabs(rel.y) > 0.8 && std::fabs(rel.y) < 1.9 && pw > 70 &&
+          rng.chance(0.003 + (pw - 70) * 0.0003)) {
+        startMove(e, Move::StiffArm, rel.y * gd > 0 ? 1 : -1);
         break;
       }
     }
@@ -2902,7 +3135,8 @@ void PlaySim::checkTackles() {
     if (d->state == EntState::Down || d->stun > 0) continue;
     const double dd = dist(d->pos, c->pos);
     const bool qbPocket = c == qb && !passThrown && !scramble && cfg.offPlay->type != PlayType::Run;
-    const double range = c->radius + d->radius + (d->userControlled && input.dive ? 1.0 : qbPocket ? 0.3 : tune().tackleReach);
+    const double range = c->radius + d->radius + (d->userControlled && input.dive ? 1.0 : qbPocket ? 0.3 : tune().tackleReach) +
+                         (d->moveOn(Move::Hit) ? 0.6 : d->moveOn(Move::Cut) ? 0.4 : 0);
     if (d->engaged) {
       // engaged defenders can still reach out for a nearby carrier
       // a hazard per second (a blocked man gets an arm free now and then), not a per-tick roll
@@ -2967,10 +3201,11 @@ bool PlaySim::tryTackle(Ent* d, Ent* c, int gang, bool arm, bool dive) {
   if (arm) x -= 1.1;
   if (dive) x -= 1.3;
   if (isSack) x += 0.6;
-  if (c->anim == Anim::Juke && c->animT < 0.35) x -= 0.6 + (std::max)(0.0, c->r().elusiveness - 70) * 0.02;
+  if (c->moveOn(Move::Juke)) x -= 0.6 + (std::max)(0.0, c->r().elusiveness - 70) * 0.02;
   if (c->userControlled && input.juke) x -= 0.4;
+  x += moveTackleAdj(d, c, facing, arm, dive);
   const double p = sigmoid(x);
-  if (tackleLog) tackleLog->push_back(TackleLogEntry{p, facing, dive, arm, gang, c->pos.x - los, vc, c->anim == Anim::Juke});
+  if (tackleLog) tackleLog->push_back(TackleLogEntry{p, facing, dive, arm, gang, c->pos.x - los, vc, c->move != Move::None && c->moveOn(c->move)});
   d->tackleCd = 0.55;
   d->anim = Anim::Tackle;
   d->animT = 0;
@@ -2989,8 +3224,15 @@ bool PlaySim::tryTackle(Ent* d, Ent* c, int gang, bool arm, bool dive) {
       for (Ent* o : defendersOf(c))
         if (o != d && o->free() && dist(o->pos, c->pos) < 2.2) help++;
       const double mu = 0.45 + (c->r().breakTackle * 0.5 + c->r().strength * 0.5 - d->r().tackling) * 0.025 + (mc - md) * 0.012 +
-                        c->speed() * 0.07 - help * 0.55 - (facing > 0.3 ? 0.25 : 0);
+                        c->speed() * 0.07 - help * 0.55 - (facing > 0.3 ? 0.25 : 0) - (d->moveOn(Move::Cut) ? 0.8 : 0) +
+                        (c->moveOn(Move::Truck) && facing > 0.2 ? 0.5 : 0);  // cut at the knees / the shoulder still driving
       drive = clamp(rng.normal(mu, 0.75), 0, 4);
+    }
+    // a big hit stops him where he stands: no pile to drive, he goes back the way the hit came
+    if (d->moveOn(Move::Hit) && facing > -0.3 && !isSack) {
+      drive = 0;
+      fall = (std::min)(fall, 0.2) - 0.4;
+      ev("bighit", d, c);
     }
     // QB sneak: the whole line surges, QB lunges over the pile
     if (cfg.offPlay->run && cfg.offPlay->run->style == RunStyle::Sneak && c == qb)
@@ -3018,12 +3260,42 @@ bool PlaySim::tryTackle(Ent* d, Ent* c, int gang, bool arm, bool dive) {
   }
   // missed / broken tackle
   brokenTackles++;
-  ev(dive ? "divemiss" : "broken", c, d);
+  // the move that beat him (the presentation plays its clip instead of a stumble)
+  Move won = Move::None;
+  for (Move m : {Move::Truck, Move::StiffArm, Move::Spin, Move::Hurdle, Move::Juke})
+    if (c->moveOn(m)) {
+      won = m;
+      break;
+    }
+  ev(dive ? "divemiss" : "broken", c, d, moveName(won));
   d->stun = (dive ? 1.0 : 0.6) + rng.range(0, 0.6);
   if (dive) d->anim = Anim::Dive;
   d->state = d->state == EntState::Rush ? EntState::Pursue : d->state;
-  impulse(c, scale(c->vel, (dive ? 0.82 : 0.68) - 1), 0.3);
-  c->animT = 0;
+  double keep = dive ? 0.82 : 0.68;
+  if (won == Move::Truck && facing > 0.2) {
+    // run over: the tackler goes down on his back, the runner barely breaks stride
+    keep = 0.85;
+    d->pancaked = true;
+    d->stun = 1.8 + rng.range(0, 0.5);
+    d->anim = Anim::Down;
+    d->animT = 0;
+    d->vel = scale(cdir, 1.6);
+    ev("trucked", c, d);
+  } else if (won == Move::StiffArm) {
+    keep = 0.85;  // the hand in his chest: shoved off, the runner keeps his line
+    d->stun += 0.4;
+    impulse(d, scale(norm(sub(d->pos, c->pos)), 2.6), 0.25);
+  } else if (won == Move::Spin) {
+    keep = 0.82;  // spun out of it: he comes out of the turn still running
+  } else if (won == Move::Hurdle) {
+    keep = 0.85;
+  }
+  if (d->moveOn(Move::Hit) || d->moveOn(Move::Cut)) {
+    d->stun += 0.8;  // the whiffed lunge: on the turf
+    d->anim = Anim::Dive;
+  }
+  impulse(c, scale(c->vel, keep - 1), 0.3);
+  if (won == Move::None) c->animT = 0;  // (a move's own clip plays on)
   return false;
 }
 
@@ -3089,8 +3361,10 @@ void PlaySim::finishTackle(Ent* d, Ent* c, double fall, double latY, bool dive, 
   if (isSack) sackBy = d;
   // fumble?
   const double hit = (md * vd) / 900;
+  // the hit stick jars it loose; a spin or a hurdle leaves the ball out away from the body
+  const double moveF = (d->moveOn(Move::Hit) ? 2.4 : 1) * (c->moveOn(Move::Spin) ? 1.5 : 1) * (c->moveOn(Move::Hurdle) && !dive ? 1.8 : 1);
   const double pf = 0.0105 * std::exp((70 - c->r().carrying) / 16) * (0.6 + hit) * (isSack ? 3.5 : 1) *
-                    (cfg.weather.precip != Precip::None ? 1.3 : 1) * (cfg.kick ? 0.12 : 1);  // returners: ~1% (they are picked for it)
+                    (cfg.weather.precip != Precip::None ? 1.3 : 1) * (cfg.kick ? 0.12 : 1) * moveF;  // returners: ~1% (they are picked for it)
   if (rng.chance(pf) && !(isSack && rng.chance(0.3))) {
     fumble(c, d);
     return;

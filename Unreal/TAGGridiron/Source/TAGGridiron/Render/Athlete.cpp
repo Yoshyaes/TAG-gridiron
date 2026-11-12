@@ -2750,10 +2750,14 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 		if (bChanged) PlayClip(A.TackleDive, false);
 		return;
 	}
-	if (Anim == TEXT("juke") && A.JukeL && A.JukeR)
+	// a ball carrier's move: "juke" (no move named: picked from the runner, as before the highlight stick) or the sim's
+	// own move, "mv_<juke|spin|truck|stiffarm|hurdle>_<l|r>" (the side he cuts to; a stiff arm's arm)
+	const bool bNamedMove = Anim.StartsWith(TEXT("mv_"));
+	if ((Anim == TEXT("juke") || bNamedMove) && A.JukeL && A.JukeR)
 	{
-		// cut direction from the carrier's lateral velocity relative to his facing
-		const float Side = FVector::DotProduct(FVector(VelWorld.X, VelWorld.Y, 0), GetActorRightVector());
+		// cut direction from the carrier's lateral velocity relative to his facing (a named move says it)
+		float Side = FVector::DotProduct(FVector(VelWorld.X, VelWorld.Y, 0), GetActorRightVector());
+		if (bNamedMove) Side = Anim.EndsWith(TEXT("_r")) ? 1.f : -1.f;
 		if (bChanged)
 		{
 			// the move fits the runner: elusive backs juke and spin, power backs lower the shoulder or stiff arm,
@@ -2761,10 +2765,20 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 			static int32 GMoveSeq = 0;
 			const int32 Seq = GMoveSeq++;
 			UAnimationAsset* Move = Side > 0.f ? A.JukeR.Get() : A.JukeL.Get();
+			if (bNamedMove)
+			{
+				// the highlight stick: exactly the move the sim made
+				if (Anim.Contains(TEXT("_spin"))) Move = Side > 0.f ? A.SpinR.Get() : A.SpinL.Get();
+				else if (Anim.Contains(TEXT("_truck"))) Move = A.Side(A.Truck, Side > 0.f);
+				else if (Anim.Contains(TEXT("_stiffarm"))) Move = Side > 0.f ? A.StiffArmR.Get() : A.StiffArmL.Get();
+				else if (Anim.Contains(TEXT("_hurdle"))) Move = A.Side(A.Hurdle, Side > 0.f);
+				if (!Move) Move = Side > 0.f ? A.JukeR.Get() : A.JukeL.Get();
+			}
 			if (Player)
 			{
 				const tag::Ratings& R = Player->r;
-				if (A.Hurdle && R.agility > 85 && Seq % 7 == 3) Move = A.Side(A.Hurdle, Side > 0.f);
+				if (bNamedMove) {}
+				else if (A.Hurdle && R.agility > 85 && Seq % 7 == 3) Move = A.Side(A.Hurdle, Side > 0.f);
 				else if (R.breakTackle > R.elusiveness + 5)
 					Move = (Seq % 2) ? A.Side(A.Truck, Side > 0.f) : (Side > 0.f ? A.StiffArmR.Get() : A.StiffArmL.Get());
 				else if (Seq % 3 == 1)

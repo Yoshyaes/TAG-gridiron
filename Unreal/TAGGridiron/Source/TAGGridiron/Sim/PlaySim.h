@@ -80,6 +80,7 @@ struct Tune {
   double intBias = 1.344;  // a defender at the ball comes down with it (logit shift; NFL ~2.4% of passes intercepted)
   double holdK = 0.06;       // holding: per second of a rep the defender is winning (x how badly)
   double holdShed = 0.003;   // holding: a beaten blocker grabbing as his man gets away
+  double aiMoveK = 0.65;     // a CPU ball carrier's move is worth this much of a user's well-timed one (calibrated)
 };
 Tune& tune();
 /** Set a tune field by name; false if there is none. */
@@ -104,6 +105,16 @@ const char* entStateName(EntState s);
 /** Animation state for the renderer ("idle","run","throw","juke","tackle","block","kneel","catch","down","dive","celebrate"). */
 enum class Anim { Idle, Run, Throw, Juke, Tackle, Block, Kneel, Catch, Down, Dive, Celebrate };
 const char* animName(Anim a);
+
+/** The highlight stick. A ball carrier's moves (the renderer plays Anim::Juke with the move's own clip): a juke (a
+ *  sharp cut), a spin (a full turn out of a tackler's arms), a truck (the shoulder lowered into a man in front), a stiff
+ *  arm (a hand to the chest of a man coming from the side), a hurdle (over a man going low). A defender's: the hit
+ *  stick (a lunge into the carrier for a big hit: it stops him dead and jars the ball, a whiff leaves him on the turf)
+ *  and the cut (a low tackle at the legs: it beats a truck, a hurdle beats it). Each is live for a fraction of a
+ *  second (moveWindow) and changes the tackle odds of a contact in that time by who has the leverage. */
+enum class Move { None, Juke, Spin, Truck, StiffArm, Hurdle, Hit, Cut };
+const char* moveName(Move m);
+double moveWindow(Move m);
 
 class Ent {
  public:
@@ -163,6 +174,11 @@ class Ent {
   /** A velocity change (juke, catch, broken tackle) spread over a human contact time instead of one tick. */
   V2 impulseRate{0, 0};
   double impulseT = 0;
+  /** The highlight-stick move in progress (moveT = seconds since it started; live while moveT < moveWindow). */
+  Move move = Move::None;
+  double moveT = 9;
+  double moveSide = 0;  // +1 = to his left (the offense frame's +y as he faces), -1 right
+  bool moveOn(Move m) const { return move == m && moveT < moveWindow(m); }
   bool catchAdjust = false;  // tracking a pass thrown to him (relaxed lateral limit)
   /** deep-third / half / quarter / single-high defender: keeps last-line leverage */
   bool deepRole = false;
@@ -277,6 +293,10 @@ struct UserInput {
   bool juke = false;
   bool dive = false;
   bool switchReq = false;
+  /** A highlight-stick move asked for this frame (consumed by the sim): the carrier's juke / spin / truck / stiff arm /
+   *  hurdle, the defender's hit stick / cut. stickSide: +1 left, -1 right, 0 = let the sim pick (toward the tackler). */
+  Move stickMove = Move::None;
+  double stickSide = 0;
 };
 
 /** A live kick return (kickoff or punt), in the RECEIVING team's frame: they are the offense and attack +x. */
@@ -471,6 +491,15 @@ class PlaySim {
   bool trailPlay(Ent* e, Ent* c);
   /** Change e's velocity by dv over dur seconds (no single-frame velocity jumps). */
   void impulse(Ent* e, const V2& dv, double dur);
+  /** Start a highlight-stick move (false if he can't now: no ball, a move still on, down, engaged). side 0 = the sim
+   *  picks (a juke away from the tackler, a stiff arm toward him). */
+  bool startMove(Ent* e, Move m, double side = 0);
+  /** The highlight: the move that suits this carrier against the man about to tackle him (Move::None if nobody is
+   *  close), and that man. A power back trucks a man in front, an elusive one spins him; a man coming from the side
+   *  gets the stiff arm, a man going low gets hurdled. */
+  Move suggestMove(const Ent* c, const Ent** threat = nullptr) const;
+  /** The tackle logit shift from the moves live at a contact (the carrier's lower it, the defender's raise it). */
+  double moveTackleAdj(const Ent* d, const Ent* c, double facing, bool arm, bool dive) const;
   V2 steerVel(const Ent* e, const V2& vel, const V2& want, double dt) const;
   V2 routeWant(const Ent* e, const V2& pos, const V2& vel, size_t& idx) const;
   /** Expected separation (yards) at the catch point if thrown now. */

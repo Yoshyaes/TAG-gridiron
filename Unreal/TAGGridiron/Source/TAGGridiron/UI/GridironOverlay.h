@@ -39,6 +39,19 @@ struct FArtIcon
 	bool bPicked = false;  // being hot routed / motioned right now
 };
 
+/** The highlight stick's cue: the man about to tackle the user's ball carrier (a ring at his feet) and the move that
+ *  beats him over the carrier (its button and its name). Screen positions in viewport pixels. */
+struct FHighlightCue
+{
+	bool bOn = false;
+	FVector2D Carrier = FVector2D::ZeroVector;
+	FVector2D Threat = FVector2D::ZeroVector;
+	float ThreatR = 40.f;  // the ring's radius on screen
+	FString Move;          // "TRUCK"
+	EPadGlyph Glyph = EPadGlyph::None;  // a face button, or None for a right-stick flick (Key says which way)
+	FString Key;
+};
+
 /** The receivers' button colours: their icons and their routes in the play art share them. */
 inline FLinearColor ButtonColor(int32 Button)
 {
@@ -89,6 +102,7 @@ public:
 		IconViewport = ViewportSize;
 		bIconPad = bPad;
 	}
+	void SetHighlight(const FHighlightCue& C) { Highlight = C; }
 
 	// screens
 	void ShowMainMenu();
@@ -129,6 +143,7 @@ private:
 	TArray<FPreRow> PreRows;
 	bool bPrePad = false;
 	TArray<FArtIcon> Icons;
+	FHighlightCue Highlight;
 	FVector2D IconViewport = FVector2D(1920, 1080);
 	bool bIconPad = false;
 	int32 PaintPresnap(FSlateWindowElementList& Out, int32 Layer, const FGeometry& G) const;
@@ -146,8 +161,13 @@ private:
 	bool bSelNight = true;
 	int SelQuarter = 1;
 	FString CallTab;
-	// the play call (Madden's layout): formation tabs (L1 / R1), three plays a page called by their face buttons
-	// (square, cross, circle), the pages by the d-pad, the coach's pick on triangle
+	/** The formation (offense: its id) or set (defense: its name) shown inside the tab's family. */
+	FString CallSet;
+	/** The formations / sets of the current tab, in the book's order (D-pad up / down steps through them). */
+	TArray<FString> CallSets;
+	// the play call (Madden's layout): the team's playbook by formation family (L1 / R1), the formations of the family
+	// (D-pad up / down), three plays a page called by their face buttons (square, cross, circle), the pages by D-pad
+	// left / right, the coach's pick on triangle
 	struct FCallCard
 	{
 		FString Kind, Name, Note;

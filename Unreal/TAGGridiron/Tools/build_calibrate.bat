@@ -25,5 +25,10 @@ cl %FLAGS% SimCalibrate.cpp %OBJS% /Fobuild\ /Febuild\SimCalibrate.exe || exit /
 echo [3/3] Building SimTests.exe...
 cl %FLAGS% SimTests.cpp %OBJS% /Fobuild\ /Febuild\SimTests.exe || exit /b 1
 
+echo [+] Building PlaybookDump.exe...
+cl %FLAGS% PlaybookDump.cpp %OBJS% /Fobuild\ /Febuild\PlaybookDump.exe || exit /b 1
+cl %FLAGS% ConceptCal.cpp %OBJS% /Fobuild\ /Febuild\ConceptCal.exe || exit /b 1
+cl %FLAGS% MoveCal.cpp %OBJS% /Fobuild\ /Febuild\MoveCal.exe || exit /b 1
+
 echo Build OK: %~dp0build\SimCalibrate.exe, %~dp0build\SimTests.exe
 endlocal

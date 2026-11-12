@@ -101,23 +101,49 @@ int32 AMatchDirector::LabelOf(const tag::Ent* E) const
 	return It == Labels.end() ? -1 : FCString::Atoi(*It->second) - 1;
 }
 
+namespace
+{
+	/** The audibles: up to eight, the two kinds taken in turn (two passes and a run; two coverages and a pressure). */
+	template <class T, class Pred>
+	std::vector<const T*> Mix(const std::vector<const T*>& All, Pred bSecond)
+	{
+		std::vector<const T*> A, B, Out;
+		for (const T* X : All) (bSecond(X) ? B : A).push_back(X);
+		size_t i = 0, j = 0;
+		while (Out.size() < 8 && (i < A.size() || j < B.size()))
+		{
+			for (int k = 0; k < 2 && i < A.size() && Out.size() < 8; k++) Out.push_back(A[i++]);
+			if (j < B.size() && Out.size() < 8) Out.push_back(B[j++]);
+			if (i >= A.size())
+				while (j < B.size() && Out.size() < 8) Out.push_back(B[j++]);
+		}
+		return Out;
+	}
+}
+
 std::vector<const tag::OffPlay*> AMatchDirector::AudibleOff() const
 {
-	// the plays out of the same formation (same personnel on the field)
-	std::vector<const tag::OffPlay*> Out;
-	for (const tag::OffPlay& P : tag::OFF_PLAYS())
-		if (P.formation == Sim->cfg.offPlay->formation && &P != Sim->cfg.offPlay && P.type != tag::PlayType::Kneel && P.type != tag::PlayType::Spike)
-			Out.push_back(&P);
-	return Out;
+	// the team's plays out of the same formation (same personnel on the field)
+	std::vector<const tag::OffPlay*> All;
+	for (const tag::OffPlay* P : tag::offBookFor(Game->offense()).playsIn(Sim->cfg.offPlay->formation))
+		if (P != Sim->cfg.offPlay && P->type != tag::PlayType::Kneel && P->type != tag::PlayType::Spike) All.push_back(P);
+	if (All.empty())
+		for (const tag::OffPlay& P : tag::OFF_PLAYS())
+			if (P.formation == Sim->cfg.offPlay->formation && &P != Sim->cfg.offPlay && P.type != tag::PlayType::Kneel && P.type != tag::PlayType::Spike)
+				All.push_back(&P);
+	return Mix<tag::OffPlay>(All, [](const tag::OffPlay* P) { return P->type == tag::PlayType::Run; });
 }
 
 std::vector<const tag::DefCall*> AMatchDirector::AudibleDef() const
 {
-	// coverages out of the same front (no substitutions at the line)
-	std::vector<const tag::DefCall*> Out;
-	for (const tag::DefCall& D : tag::DEF_PLAYS())
-		if (D.front == Sim->cfg.defCall->front && &D != Sim->cfg.defCall) Out.push_back(&D);
-	return Out;
+	// the team's calls out of the same front (no substitutions at the line)
+	std::vector<const tag::DefCall*> All;
+	for (const tag::DefCall* D : tag::defBookFor(Game->defense()).calls)
+		if (D->front == Sim->cfg.defCall->front && D != Sim->cfg.defCall) All.push_back(D);
+	if (All.empty())
+		for (const tag::DefCall& D : tag::DEF_PLAYS())
+			if (D.front == Sim->cfg.defCall->front && &D != Sim->cfg.defCall) All.push_back(&D);
+	return Mix<tag::DefCall>(All, [](const tag::DefCall* D) { return D->rushers() > 4; });
 }
 
 void AMatchDirector::BeginPresnapUI()
@@ -670,6 +696,43 @@ void AMatchDirector::UpdateIcons()
 		}
 	}
 	Overlay->SetIcons(Out, VP, PadUI());
+}
+
+void AMatchDirector::UpdateHighlight()
+{
+	if (!Overlay) return;
+	FHighlightCue Cue;
+	APlayerController* PC = GetWorld() ? GetWorld()->GetFirstPlayerController() : nullptr;
+	tag::Ent* U = Sim ? Sim->user : nullptr;
+	static const bool bNoHighlight = FParse::Param(FCommandLine::Get(), TEXT("TagNoHighlight"));
+	if (!bNoHighlight && PC && UserTeam && State == EMatchState::Live && U && U->hasBall && Sim->ball.mode == tag::BallMode::Held &&
+		(U != Sim->qb || U->state == tag::EntState::Carrier || Sim->scramble) && U->state != tag::EntState::Down)
+	{
+		const tag::Ent* Th = nullptr;
+		const tag::Move M = Sim->suggestMove(U, &Th);
+		AAthlete* Me = AthleteFor(U->p, U->side == tag::Side::Off ? Game->poss : tag::other(Game->poss));
+		AAthlete* Him = Th ? AthleteFor(Th->p, Th->side == tag::Side::Off ? Game->poss : tag::other(Game->poss)) : nullptr;
+		FVector2D A, B, B2;
+		if (M != tag::Move::None && Me && Him && PC->ProjectWorldLocationToScreen(Me->GetActorLocation() + FVector(0, 0, 250), A, true) &&
+			PC->ProjectWorldLocationToScreen(Him->GetActorLocation() + FVector(0, 0, 4), B, true) &&
+			PC->ProjectWorldLocationToScreen(Him->GetActorLocation() + FVector(0, 55, 4), B2, true))
+		{
+			Cue.bOn = true;
+			Cue.Carrier = A;
+			Cue.Threat = B;
+			Cue.ThreatR = FMath::Clamp(static_cast<float>(FVector2D::Distance(B, B2)) * 1.3f, 18.f, 90.f);
+			const bool bPad = PadUI();
+			switch (M)
+			{
+			case tag::Move::Truck: Cue.Move = TEXT("TRUCK"); Cue.Key = bPad ? TEXT("R\u2191") : TEXT("F"); break;
+			case tag::Move::StiffArm: Cue.Move = TEXT("STIFF ARM"); Cue.Key = bPad ? TEXT("R\u2193") : TEXT("G"); break;
+			case tag::Move::Spin: Cue.Move = TEXT("SPIN"); Cue.Glyph = bPad ? EPadGlyph::Circle : EPadGlyph::None; Cue.Key = bPad ? FString() : TEXT("R"); break;
+			case tag::Move::Hurdle: Cue.Move = TEXT("HURDLE"); Cue.Glyph = bPad ? EPadGlyph::Triangle : EPadGlyph::None; Cue.Key = bPad ? FString() : TEXT("V"); break;
+			default: Cue.Move = TEXT("JUKE"); Cue.Key = bPad ? TEXT("R\u2194") : TEXT("Q/E"); break;
+			}
+		}
+	}
+	Overlay->SetHighlight(Cue);
 }
 
 void AMatchDirector::BuildPlayArt()

@@ -125,6 +125,10 @@ struct Team {
   double aggression = 0.5;
   /** Defensive blitz tendency 0..1 */
   double blitzLean = 0.28;
+  /** The playbooks: an offensive scheme ("West Coast", "Spread", ...) and a defensive one ("4-3 Cover 3", "3-4
+   *  Multiple", ...), from Playbook.h OFF_SCHEMES / DEF_SCHEMES; the team's own book is built from them (offBookFor). */
+  std::string offScheme;
+  std::string defScheme;
 
   bool hasPlayer(const Player* p) const {
     for (const auto& q : roster)

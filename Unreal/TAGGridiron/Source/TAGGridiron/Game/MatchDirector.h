@@ -238,6 +238,17 @@ private:
 	TArray<FKey> PadKeys, KeyboardKeys;
 	void TrackInputDevice(APlayerController* PC);
 	bool PadUI() const { return bPadActive; }
+	/** The highlight stick: the right stick has to come back to the middle before the next flick counts. */
+	bool bRStickArmed = true;
+	/** -TagMoveShot (look-dev): the user runs the ball every play and takes the highlighted move when it shows;
+	 *  screenshots of the cue (tag_hl_*.png) and of each move (tag_mv_*.png), then quits. */
+	bool bMoveShot = false;
+	int32 MoveShotsHl = 0, MoveShotsMv = 0, MoveShotPlays = 0;
+	bool bMoveShotHlThisPlay = false;
+	/** The live hint is the ball carrier's (his moves) since he got the ball this play. */
+	bool bCarrierHint = false;
+	/** The highlight over the user's ball carrier: the move that suits the man about to tackle him (UpdateIcons). */
+	void UpdateHighlight();
 	/** A hint written with PlayStation names, renamed for an Xbox-style pad when that is what is plugged in. */
 	FString PadHint(const TCHAR* PS) const;
 	/** The match loading screen: the highlight reel under UI/LoadingScreen while BuildWorld runs (the engine's movie

@@ -3,6 +3,9 @@
 // RNG call order and all decision thresholds follow the TS exactly.
 #include "Game.h"
 
+#include <cmath>
+#include <map>
+
 #include <algorithm>
 #include <cctype>
 #include <cmath>
@@ -393,27 +396,40 @@ const OffPlay* Game::cpuOffense() {
   const bool goal = ballOn >= 95;
   const bool shortY = tg <= 2;
   const bool longY = tg >= 8;
+  // the team's own book
   std::vector<const OffPlay*> pool;
-  for (const OffPlay& p : OFF_PLAYS()) {
+  for (const OffPlay* pp : offBookFor(t).plays) {
+    const OffPlay& p = *pp;
     if (p.type == PlayType::Kneel || p.type == PlayType::Spike) continue;
     const bool isPass = p.type != PlayType::Run;
     if (isPass != pass) continue;
     if (goal && p.hasTag("deep")) continue;
-    if (!goal && p.formation == "heavy" && !shortY) continue;
-    if (p.id == "gl_sneak" && !(shortY && tg <= 1)) continue;
+    const Formation* f = formationById(p.formation);
+    if (!goal && f && f->personnel == "22" && !shortY) continue;  // the heavy sets come out for short yardage
+    if (p.run && p.run->style == RunStyle::Sneak && !(shortY && tg <= 1)) continue;
     pool.push_back(&p);
   }
+  if (pool.empty())  // (a book with nothing for the call: the league's stock plays)
+    for (const OffPlay& p : OFF_PLAYS())
+      if (p.stock && p.type != PlayType::Kneel && p.type != PlayType::Spike && (p.type != PlayType::Run) == pass) pool.push_back(&p);
+  // a book weighs a set by how many plays it has in it; a formation with more plays should not be called more
+  // often for it, so each play is weighted by 1 / sqrt(plays in its formation)
+  std::map<std::string, int> perForm;
+  for (const OffPlay* pp : pool) perForm[pp->formation]++;
   std::vector<double> w;
   w.reserve(pool.size());
   for (const OffPlay* pp : pool) {
     const OffPlay& p = *pp;
     double x = 1;
     if (shortY && p.hasTag("shortyard")) x += 2.5;
+    x /= std::sqrt(static_cast<double>((std::max)(1, perForm[p.formation])) / 6.0);
     if (goal && p.hasTag("goalline")) x += 2;
     if (longY && (p.hasTag("long") || p.hasTag("deep") || p.hasTag("mid"))) x += 1.2;
     if (longY && p.hasTag("quick")) x *= 0.5;
     if (tp == Tempo::Hurry && (p.hasTag("quick") || p.hasTag("short"))) x += 0.8;
     if (p.type == PlayType::PlayAction && d == 1) x += 0.6;
+    // from under center a team throws mostly off play action; the straight dropbacks come from the gun
+    if (const Formation* fp = formationById(p.formation); fp && fp->qbDepth <= 1.5 && p.type == PlayType::Pass && !p.hasTag("quick")) x *= 0.4;
     if (p.type == PlayType::Screen && longY) x += 0.6;
     if (std::find(recent.begin(), recent.end(), p.id) != recent.end()) x *= 0.4;
     // money downs: favor concepts with a route that settles at/just past the sticks
@@ -442,18 +458,22 @@ const DefCall* Game::cpuDefense(const OffPlay& offPlay) {
   const bool goal = ballOn >= 93;
   const bool shortY = toGo <= 2;
   const bool longY = toGo >= 8 && down >= 2;
+  const DefBook& book = defBookFor(t);
   Front front;
   if (goal || (shortY && (pers == "22" || pers == "21"))) front = Front::Goalline;
-  else if (pers == "21" || pers == "12" || pers == "22") front = Front::Base;
+  else if (pers == "21" || pers == "12" || pers == "22" || pers == "13") front = book.base;
   else front = (longY && down == 3 && rng.chance(0.5)) ? Front::Dime : Front::Nickel;
   std::vector<const DefCall*> pool;
-  for (const DefCall& d : DEF_PLAYS())
-    if (d.front == front) pool.push_back(&d);
+  for (const DefCall* d : book.calls)
+    if (d->front == front) pool.push_back(d);
+  if (pool.empty())
+    for (const DefCall& d : DEF_PLAYS())
+      if (d.front == front && d.set.empty()) pool.push_back(&d);
   std::vector<double> w;
   for (const DefCall* dp : pool) {
     const DefCall& d = *dp;
-    double x = 1;
-    const bool blitz = !d.blitz.empty();
+    double x = defSchemeLean(book.scheme, d);
+    const bool blitz = d.rushers() > 4;
     if (blitz) x *= t.blitzLean * 3;
     if (longY && d.hasTag("long")) x += 1;
     if (shortY && d.hasTag("shortyard")) x += 1;
@@ -1323,10 +1343,17 @@ void Game::afterPAT(TeamKey kt) {
 }
 
 const OffPlay* Game::cpuTwoPointPlay() {
-  static const std::vector<std::string> kIds = {"trips_stick", "dbl_slants", "dbl_mesh", "gl_dive", "gl_pa", "pistol_power", "empty_quick"};
+  // the team's short game from its book: quick passes, the goal line set, the short-yardage runs
   std::vector<const OffPlay*> pool;
-  for (const OffPlay& p : OFF_PLAYS())
-    if (std::find(kIds.begin(), kIds.end(), p.id) != kIds.end()) pool.push_back(&p);
+  for (const OffPlay* p : offBookFor(offense()).plays) {
+    if (p->hasTag("deep") || p->type == PlayType::Screen || (p->run && p->run->style == RunStyle::Sneak)) continue;
+    if (p->hasTag("quick") || p->hasTag("goalline") || (p->run && p->hasTag("shortyard"))) pool.push_back(p);
+  }
+  if (pool.empty()) {
+    static const std::vector<std::string> kIds = {"trips_stick", "dbl_slants", "dbl_mesh", "gl_dive", "gl_pa", "pistol_power", "empty_quick"};
+    for (const OffPlay& p : OFF_PLAYS())
+      if (std::find(kIds.begin(), kIds.end(), p.id) != kIds.end()) pool.push_back(&p);
+  }
   return rng.pick(pool);
 }
 

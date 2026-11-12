@@ -3,7 +3,11 @@
 // RNG call order matches the TS exactly, so createLeague(2027) yields the same league.
 #include "League.h"
 
+#include <algorithm>
+#include <numeric>
 #include <set>
+
+#include "Playbook.h"
 #include <utility>
 
 namespace tag {
@@ -278,6 +282,20 @@ League createLeague(uint32_t seed) {
   out.reserve(kTeamSeeds.size());
   for (size_t i = 0; i < kTeamSeeds.size(); i++)
     out.push_back(makeTeam(rng, static_cast<int>(i), kTeamSeeds[i], static_cast<int>(i)));
+  // the playbooks follow the identity the draw gave each team (no RNG, so the league itself is unchanged): ranked by
+  // how much they throw, the run-first teams get the power and zone books and the pass-first ones the spread, the
+  // run and shoot and the air raid; ranked by how often they bring pressure, the sit-back defenses play Tampa 2 and
+  // quarters and the blitzing ones the 3-4 pressure book
+  {
+    std::vector<size_t> ix(out.size());
+    std::iota(ix.begin(), ix.end(), size_t{0});
+    std::stable_sort(ix.begin(), ix.end(), [&out](size_t a, size_t b) { return out[a]->passLean < out[b]->passLean; });
+    static const char* const kOffOrder[] = {"Power Run", "Zone Run", "Pro Style", "West Coast", "Vertical", "Spread", "Run and Shoot", "Air Raid"};
+    for (size_t k = 0; k < ix.size(); k++) out[ix[k]]->offScheme = kOffOrder[(k * 8) / ix.size()];
+    std::stable_sort(ix.begin(), ix.end(), [&out](size_t a, size_t b) { return out[a]->blitzLean < out[b]->blitzLean; });
+    static const char* const kDefOrder[] = {"Tampa 2", "4-3 Quarters", "4-3 Cover 3", "3-4 Multiple", "3-4 Pressure"};
+    for (size_t k = 0; k < ix.size(); k++) out[ix[k]]->defScheme = kDefOrder[(k * 5) / ix.size()];
+  }
   return out;
 }
 

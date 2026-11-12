@@ -532,6 +532,135 @@ int main() {
     check(hold / n > 0.01 && hold / n < 0.08, "holding risk per play " + fx(hold / n, 3));
   });
 
+  t("playbooks: every team has its own full book, and every play in it can be run", [&] {
+    std::set<std::string> offSchemes, defSchemes, sizes;
+    for (const auto& tm : league) {
+      check(!tm->offScheme.empty() && !tm->defScheme.empty(), tm->abbr + " has no scheme");
+      const OffBook& ob = offBookFor(*tm);
+      const DefBook& db = defBookFor(*tm);
+      offSchemes.insert(ob.scheme);
+      defSchemes.insert(db.scheme);
+      sizes.insert(std::to_string(ob.plays.size()) + "/" + std::to_string(db.calls.size()));
+      check(ob.formations.size() >= 9, tm->abbr + " offense has " + std::to_string(ob.formations.size()) + " formations");
+      check(ob.plays.size() >= 150, tm->abbr + " offense has " + std::to_string(ob.plays.size()) + " plays");
+      check(db.sets.size() >= 5 && db.calls.size() >= 50, tm->abbr + " defense has " + std::to_string(db.calls.size()) + " calls");
+      bool goalLine = false, runs = false, pa = false;
+      for (const std::string& f : ob.formations) check(ob.playsIn(f).size() >= 6, tm->abbr + " " + f + " has too few plays");
+      for (const OffPlay* p : ob.plays) {
+        const Formation* f = formationById(p->formation);
+        check(f != nullptr, p->id + " formation missing");
+        goalLine = goalLine || f->personnel == "22";
+        runs = runs || p->type == PlayType::Run;
+        pa = pa || p->type == PlayType::PlayAction;
+        // every read is an eligible man in the formation with a route
+        for (const std::string& r : p->reads) {
+          bool inForm = false;
+          for (const FormationSlot& s : f->slots) inForm = inForm || s.role == r;
+          check(inForm, p->id + " reads " + r + " who is not in " + f->id);
+          const std::string* rt = p->routeFor(r);
+          check(rt && *rt != "block" && routeByName(*rt), p->id + " reads " + r + " without a route");
+        }
+        for (const auto& kv : p->routes) check(routeByName(kv.second) != nullptr, p->id + " unknown route " + kv.second);
+        if (p->type != PlayType::Run && p->type != PlayType::Screen) check(p->reads.size() >= 2, p->id + " has one read");
+      }
+      check(goalLine && runs && pa, tm->abbr + " book lacks the goal line set, runs or play action");
+    }
+    check(offSchemes.size() == 8 && defSchemes.size() == 5, "every scheme is someone's");
+    check(sizes.size() >= 24, "books are not each team's own: only " + std::to_string(sizes.size()) + " distinct sizes");
+  });
+
+  t("playbooks: the CPU calls only from its own book, the 3-4 lines up with three down", [&] {
+    auto g = scrimmage(4100, 1, 4);
+    const OffBook& ob = offBookFor(g->offense());
+    for (int i = 0; i < 300; i++) {
+      g->down = 1 + i % 3;
+      g->toGo = 1 + i % 12;
+      g->ballOn = 20 + (i * 7) % 75;
+      const OffPlay* p = g->cpuOffense();
+      check(p->type == PlayType::Kneel || p->type == PlayType::Spike || ob.has(p), p->id + " is not in the " + ob.name + " book");
+      const DefCall* d = g->cpuDefense(*p);
+      check(defBookFor(g->defense()).has(d) || d->set.empty(), d->id + " is not in the defense's book");
+    }
+    for (const DefCall& d : DEF_PLAYS()) {
+      if (d.front != Front::Base34) continue;
+      auto sim = g->makePlay(*playById("dbl_iz"), d);
+      int dl = 0, olb = 0;
+      for (const Ent* e : sim->def) {
+        dl += e->isDL;
+        olb += e->role == "LOLB" || e->role == "ROLB";
+      }
+      check(dl == 3 && olb == 2, d.id + " has " + std::to_string(dl) + " down linemen");
+      sim->runToEnd();
+      break;
+    }
+  });
+
+  t("highlight stick: moves change the tackle odds the way they should", [&] {
+    auto g = scrimmage(4200, 3, 6);
+    auto sim = g->makePlay(*playById("dbl_iz"), *defById("base_c3"), Side::Off);
+    Ent* c = sim->offRole("RB");
+    Ent* d = sim->defRole("MLB");
+    c->userControlled = true;
+    auto adj = [&](Move cm, Move dm, double facing, bool dive) {
+      c->move = cm;
+      c->moveT = cm == Move::None ? 9 : 0.1;
+      d->move = dm;
+      d->moveT = dm == Move::None ? 9 : 0.1;
+      return sim->moveTackleAdj(d, c, facing, false, dive);
+    };
+    const Ratings keep = c->p->r;
+    c->p->r.strength = 75;  // a league-average starter (the roster's own man may be anyone)
+    c->p->r.breakTackle = 78;
+    c->p->r.agility = 86;
+    c->p->r.elusiveness = 80;
+    check(adj(Move::None, Move::None, 1, false) == 0, "no move, no change");
+    check(adj(Move::Spin, Move::None, 1, false) < -0.5, "a spin in his face helps the runner");
+    check(adj(Move::StiffArm, Move::None, 0.2, false) < -0.3, "a stiff arm on a man from the side helps");
+    check(adj(Move::StiffArm, Move::None, -0.9, false) == 0, "a stiff arm does nothing for a man behind him");
+    check(adj(Move::Hurdle, Move::None, 1, true) < -1.5, "a hurdle beats a diving tackle");
+    check(adj(Move::Hurdle, Move::None, 1, false) > 0, "a hurdle into a man standing up gets him hit in the air");
+    check(adj(Move::None, Move::Hit, 1, false) > 0.5, "the hit stick from the front raises the tackle odds");
+    check(adj(Move::Truck, Move::Cut, 1, false) > adj(Move::Truck, Move::None, 1, false) + 1, "the cut beats the truck");
+    check(adj(Move::Hurdle, Move::Cut, 1, false) < -1.5, "the hurdle beats the cut");
+    // a power back trucks better than a scat back
+    c->p->r.strength = 90;
+    c->p->r.breakTackle = 92;
+    const double big = adj(Move::Truck, Move::None, 1, false);
+    c->p->r.strength = 50;
+    c->p->r.breakTackle = 55;
+    const double small = adj(Move::Truck, Move::None, 1, false);
+    c->p->r = keep;
+    check(big < small - 1, "truck: strength matters (" + fx(big) + " vs " + fx(small) + ")");
+    // a user's move starts through the input and plays out: the event, the move, its window
+    c->move = Move::None;
+    d->move = Move::None;
+    c->moveT = d->moveT = 9;
+    int started = 0;
+    for (int i = 0; i < 200; i++) {
+      auto g2 = scrimmage(4300 + i, i % 32, (i + 5) % 32);
+      auto s2 = g2->makePlay(*playById(i % 2 ? "i_power" : "dbl_iz"), *defById("base_c3"), Side::Off);
+      while (s2->isLive() && s2->t < 12) {
+        Ent* h = s2->ball.holder;
+        if (h && h != s2->qb && h->side == Side::Off && s2->user != h) {
+          s2->user->userControlled = false;
+          s2->user = h;
+          h->userControlled = true;
+        }
+        if (h && h->userControlled && h->animT > 0.7) {
+          const Ent* th = nullptr;
+          const Move m = s2->suggestMove(h, &th);
+          if (th && dist(th->pos, h->pos) < 2) s2->input.stickMove = m;
+        }
+        s2->step();
+        s2->input.stickMove = Move::None;
+      }
+      if (s2->isLive()) s2->runToEnd();
+      for (const PlayEvent& e : s2->events) started += e.type == "move" && e.a && e.a->userControlled;
+      for (const Ent* e : s2->ents) check(std::isfinite(e->pos.x) && std::isfinite(e->pos.y), "NaN after a move");
+    }
+    check(started > 60, "only " + std::to_string(started) + " user moves started in 200 carries");
+  });
+
   std::printf("\n%d passed, %d failed\n", passCount, failCount);
   return failCount ? 1 : 0;
 }

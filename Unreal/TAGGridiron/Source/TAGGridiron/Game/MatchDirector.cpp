@@ -162,6 +162,11 @@ void AMatchDirector::BeginPlay()
 		bCallShot = true;
 		StartMatch(3, 7, true, true, 0, true, 900);
 	}
+	else if (FParse::Param(FCommandLine::Get(), TEXT("TagMoveShot")))
+	{
+		bMoveShot = true;
+		StartMatch(3, 7, true, true, 0, false, 900);
+	}
 	else if (FParse::Param(FCommandLine::Get(), TEXT("TagPlayNow")) || FParse::Param(FCommandLine::Get(), TEXT("TagPauseTest")))
 	{
 		// straight into a user game, once the startup movie has played (the loading screen then shows, as from the menu)
@@ -1882,7 +1887,7 @@ void AMatchDirector::StartMatch(int HomeIdx, int AwayIdx, bool bUserPlays, bool 
 
 bool AMatchDirector::BeginLoadingScreen(const tag::Team& Home, const tag::Team& Away, const tag::Weather& W, bool bNight)
 {
-	if (bAuto || bCallShot || bArtTest || bLineup || bHighlights || SoakSecs > 0.f || FParse::Param(FCommandLine::Get(), TEXT("TagNoLoad"))) return false;
+	if (bAuto || bCallShot || bMoveShot || bArtTest || bLineup || bHighlights || SoakSecs > 0.f || FParse::Param(FCommandLine::Get(), TEXT("TagNoLoad"))) return false;
 	if (!IsMoviePlayerEnabled() || !GetMoviePlayer()->IsInitialized() || GetMoviePlayer()->IsMovieCurrentlyPlaying()) return false;
 	const FString Reel = FPaths::ProjectContentDir() / TEXT("Movies/TAG_Highlights.mp4");
 	const bool bReel = FPaths::FileExists(Reel);
@@ -2260,6 +2265,24 @@ void AMatchDirector::CallPlays(bool bTwo)
 		const tag::OffPlay* Op = UserOff() ? tag::playById("trips_flood") : G.cpuOffense();
 		return Finish(Op, UserOff() ? G.cpuDefense(*Op) : tag::defById("base_c3"));
 	}
+	if (bMoveShot && !bTwo)
+	{
+		// -TagMoveShot: the user has the ball every snap: a run from his book (power and inside zone first)
+		UserTeam = G.poss;
+		bMoveShotHlThisPlay = false;
+		if (++MoveShotPlays > 14 || MoveShotsMv >= 8)
+		{
+			UE_LOG(LogTemp, Display, TEXT("TAG moveshot done: %d plays, %d cue shots, %d move shots"), MoveShotPlays - 1, MoveShotsHl, MoveShotsMv);
+			FPlatformMisc::RequestExit(false);
+			return;
+		}
+		std::vector<const tag::OffPlay*> Runs;
+		for (const tag::OffPlay* P : tag::offBookFor(G.offense()).plays)
+			if (P->run && P->run->carrier == "RB" && P->run->style != tag::RunStyle::Draw && tag::formationById(P->formation)->personnel != "22") Runs.push_back(P);
+		const tag::OffPlay* Op = Runs.empty() ? G.cpuOffense() : Runs[(MoveShotPlays * 7) % Runs.size()];
+		UE_LOG(LogTemp, Display, TEXT("TAG moveshot play %d: %s (%s)"), MoveShotPlays, UTF8_TO_TCHAR(Op->name.c_str()), UTF8_TO_TCHAR(Op->formation.c_str()));
+		return Finish(Op, G.cpuDefense(*Op));
+	}
 	if (bCallShot && !bTwo)
 	{
 		// -TagCallShot: the call screen itself, offense first and then defense, each shot with its cards up; the play
@@ -2370,13 +2393,14 @@ void AMatchDirector::StartPresnap(const tag::OffPlay* Op, const tag::DefCall* Dc
 	// ...and nobody snaps it before the men jogging back have set (4.2 yd/s is their jog; at most a few seconds)
 	if (!(US && *US == tag::Side::Off)) Timer = FMath::Max(Timer, static_cast<float>(FMath::Min(6.0, Far / 4.2 + 0.7)) / Speed);
 	// the pre-snap panel lists the calls; the hint is for the play itself
+	bCarrierHint = false;
 	if (PadUI())
 		Overlay->SetHint(PadHint(US && *US == tag::Side::Off ? TEXT("Throw: press the receiver's button (hold L2 = touch)    L-STICK move    R2 juke    CREATE camera    OPTIONS pause")
-			: US ? TEXT("Defending    L1 switch player    L-STICK move    R2 dive tackle    CREATE camera    OPTIONS pause")
+			: US ? TEXT("Defending    L1 switch player    L-STICK move    R-STICK up hit stick / down cut    R2 dive tackle    OPTIONS pause")
 			: TEXT("CREATE camera    OPTIONS pause")));
 	else
 		Overlay->SetHint(US && *US == tag::Side::Off ? TEXT("Throw: the receiver's key 1-5 (SHIFT = touch)   WASD move   C camera")
-			: US ? TEXT("Defending   TAB switch player   WASD move   SPACE dive tackle")
+			: US ? TEXT("Defending   TAB switch player   WASD move   SPACE dive tackle   F hit stick   V cut")
 			: TEXT("1/2/4 game speed   C camera   ESC pause"));
 	BeginPresnapUI();
 	SyncPlay(0.f, 1.f);
@@ -3145,6 +3169,9 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 		AAthlete* A = AthleteFor(E->p, E->side == tag::Side::Off ? OffK : tag::other(OffK));
 		FVector VelW = Dir > 0 ? FVector(E->vel.x, -E->vel.y, 0) * YD : FVector(-E->vel.x, E->vel.y, 0) * YD;
 		FString AnimName(E->animName());
+		// a ball carrier's highlight-stick move: the clip of exactly that move, to his side (sim +1 = his left)
+		if (E->anim == tag::Anim::Juke && E->move != tag::Move::None && E->move != tag::Move::Hit && E->move != tag::Move::Cut)
+			AnimName = FString::Printf(TEXT("mv_%s_%s"), UTF8_TO_TCHAR(tag::moveName(E->move)), E->moveSide > 0 ? TEXT("l") : TEXT("r"));
 		float AnimT = static_cast<float>(E->animT);
 		FVector Loc = ToWorld(X, Y, Dir);
 		float Yaw = FaceToYaw(E->face, Dir);
@@ -3309,14 +3336,48 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 		}
 		else if ((Ev.type == "broken") && Ev.a && Ev.b)
 		{
-			// broken tackle: the defender whiffs, the carrier bounces off and keeps going
+			// broken tackle: the defender whiffs, the carrier bounces off and keeps going (a move that beat him plays
+			// on: the spin, the stiff arm, the hurdle carry the carrier; a truck puts the tackler down, "trucked")
 			AAthlete* Cr = AthOf(Ev.a);
 			AAthlete* Df = AthOf(Ev.b);
 			if (Cr && Df)
 			{
-				Cr->PlayBrokenTackle(FVector::DotProduct(Df->GetActorLocation() - Cr->GetActorLocation(), Cr->GetActorRightVector()) > 0.f);
-				Df->PlayMissedTackle(FVector::DotProduct(Cr->GetActorLocation() - Df->GetActorLocation(), Df->GetActorRightVector()) < 0.f);
+				if (Ev.note.empty())
+					Cr->PlayBrokenTackle(FVector::DotProduct(Df->GetActorLocation() - Cr->GetActorLocation(), Cr->GetActorRightVector()) > 0.f);
+				if (Ev.note != "truck")
+					Df->PlayMissedTackle(FVector::DotProduct(Cr->GetActorLocation() - Df->GetActorLocation(), Df->GetActorRightVector()) < 0.f);
 			}
+			if (!Ev.note.empty())
+				UE_LOG(LogTemp, Display, TEXT("TAG move won: #%d %s beats #%d"), Ev.a->p ? Ev.a->p->number : -1, UTF8_TO_TCHAR(Ev.note.c_str()), Ev.b->p ? Ev.b->p->number : -1);
+		}
+		else if (Ev.type == "trucked" && Ev.a && Ev.b)
+		{
+			// run over: knocked onto his back the way the runner was going (the pancake's fall)
+			if (AAthlete* Df = AthOf(Ev.b))
+				if (AAthlete* Cr = AthOf(Ev.a))
+				{
+					const FVector Here = Df->GetActorLocation();
+					const float Yaw = (Cr->GetActorLocation() - Here).Rotation().Yaw;
+					if (UAnimationAsset* Fall = FAthleteAssets::Get().PairC[FAthleteAssets::PairDrive])
+						Df->BeginPairedFall(Fall, Here, Here, Yaw, 0.3f, 0.9f, false);
+				}
+			UE_LOG(LogTemp, Display, TEXT("TAG truck: #%d runs over #%d"), Ev.a->p ? Ev.a->p->number : -1, Ev.b->p ? Ev.b->p->number : -1);
+		}
+		else if (Ev.type == "move" && Ev.a)
+		{
+			UE_LOG(LogTemp, Display, TEXT("TAG move: #%d %s%s at %.2f s"), Ev.a->p ? Ev.a->p->number : -1, UTF8_TO_TCHAR(Ev.note.c_str()),
+				Ev.a->userControlled ? TEXT(" (user)") : TEXT(""), Ev.t);
+			if (bMoveShot && Ev.a->userControlled && MoveShotsMv < 8)
+			{
+				// the move a beat in (the clip's key pose)
+				const FString Name = FString::Printf(TEXT("tag_mv_%02d_%s.png"), MoveShotsMv++, UTF8_TO_TCHAR(Ev.note.c_str()));
+				FTimerHandle H;
+				GetWorld()->GetTimerManager().SetTimer(H, FTimerDelegate::CreateWeakLambda(this, [Name] { FScreenshotRequest::RequestScreenshot(Name, true, false); }), 0.28f, false);
+			}
+		}
+		else if (Ev.type == "bighit" && Ev.a && Ev.b)
+		{
+			UE_LOG(LogTemp, Display, TEXT("TAG big hit: #%d lays out #%d"), Ev.a->p ? Ev.a->p->number : -1, Ev.b->p ? Ev.b->p->number : -1);
 		}
 		else if (Ev.type == "divecatch" && Ev.a)
 		{
@@ -3825,6 +3886,82 @@ void AMatchDirector::ReadUserInput()
 	const bool bAction = PC->WasInputKeyJustPressed(EKeys::SpaceBar) || PC->WasInputKeyJustPressed(EKeys::Gamepad_RightTrigger);
 	P.input.juke = P.input.juke || bAction;
 	P.input.dive = bAction;
+	// the highlight stick. With the ball: flick the right stick ahead of him to truck, back to stiff arm, to a side to
+	// juke that way; CIRCLE spins, TRIANGLE hurdles (keyboard F truck, G stiff arm, Q / E juke left / right, R spin,
+	// V hurdle). On defense: flick it up for the hit stick, down to cut him low (keyboard F / V). A flick counts once
+	// the stick has come back to the middle.
+	{
+		tag::Ent* U = P.user;
+		const bool bCarrier = U && U->hasBall && P.ball.mode == tag::BallMode::Held && (U != P.qb || U->state == tag::EntState::Carrier || P.scramble);
+		const bool bDefender = U && P.ball.holder && P.ball.mode == tag::BallMode::Held && U->side != P.ball.holder->side;
+		const float RX = PC->GetInputAnalogKeyState(EKeys::Gamepad_RightX), RY = PC->GetInputAnalogKeyState(EKeys::Gamepad_RightY);
+		const float RM = FMath::Sqrt(RX * RX + RY * RY);
+		tag::Move Want = tag::Move::None;
+		double WantSide = 0;
+		if (RM < 0.35f) bRStickArmed = true;
+		else if (RM > 0.75f && bRStickArmed)
+		{
+			bRStickArmed = false;
+			if (bCarrier)
+			{
+				// the flick in the world (up the screen = away from the camera), then in the runner's own frame
+				FVector Wf = (R * RX + F * RY).GetSafeNormal2D();
+				const tag::V2 Sv = Dir > 0 ? tag::V2{Wf.X, -Wf.Y} : tag::V2{-Wf.X, Wf.Y};
+				const tag::V2 Fd = U->speed() > 0.5 ? tag::norm(U->vel) : tag::V2{U->side == tag::Side::Off ? 1.0 : -1.0, 0.0};
+				const double Ahead = tag::dot(Sv, Fd), Lat = tag::dot(Sv, tag::V2{-Fd.y, Fd.x});
+				if (Ahead > 0.6) Want = tag::Move::Truck;
+				else if (Ahead < -0.6) Want = tag::Move::StiffArm;
+				else
+				{
+					Want = tag::Move::Juke;
+					WantSide = Lat >= 0 ? 1 : -1;
+				}
+			}
+			else if (bDefender) Want = RY > 0.f ? tag::Move::Hit : tag::Move::Cut;
+		}
+		if (bCarrier && Labels.empty())
+		{
+			// (the face buttons are the receivers' while the quarterback can still throw)
+			if (PC->WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Right) || PC->WasInputKeyJustPressed(EKeys::R)) Want = tag::Move::Spin;
+			if (PC->WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Top) || PC->WasInputKeyJustPressed(EKeys::V)) Want = tag::Move::Hurdle;
+		}
+		if (bCarrier)
+		{
+			if (PC->WasInputKeyJustPressed(EKeys::F)) Want = tag::Move::Truck;
+			if (PC->WasInputKeyJustPressed(EKeys::G)) Want = tag::Move::StiffArm;
+			if (PC->WasInputKeyJustPressed(EKeys::Q)) { Want = tag::Move::Juke; WantSide = 1; }
+			if (PC->WasInputKeyJustPressed(EKeys::E)) { Want = tag::Move::Juke; WantSide = -1; }
+		}
+		else if (bDefender)
+		{
+			if (PC->WasInputKeyJustPressed(EKeys::F)) Want = tag::Move::Hit;
+			if (PC->WasInputKeyJustPressed(EKeys::V)) Want = tag::Move::Cut;
+		}
+		if (bMoveShot && bCarrier)
+		{
+			// the look-dev user: takes the highlighted move once the man is close
+			const tag::Ent* Th = nullptr;
+			const tag::Move Sg = P.suggestMove(U, &Th);
+			if (Sg != tag::Move::None && Th && tag::dist(Th->pos, U->pos) < 3.0 && !bMoveShotHlThisPlay && MoveShotsHl < 6)
+			{
+				bMoveShotHlThisPlay = true;
+				FScreenshotRequest::RequestScreenshot(FString::Printf(TEXT("tag_hl_%02d.png"), MoveShotsHl++), true, false);
+			}
+			if (Sg != tag::Move::None && Th && tag::dist(Th->pos, U->pos) < 1.6 && U->animT > 0.6) Want = Sg;
+		}
+		if (Want != tag::Move::None)
+		{
+			P.input.stickMove = Want;
+			P.input.stickSide = WantSide;
+		}
+		// the ball carrier's hint: his moves
+		if (bCarrier && !bCarrierHint && Overlay)
+		{
+			bCarrierHint = true;
+			Overlay->SetHint(PadUI() ? PadHint(TEXT("R-STICK  up truck   back stiff arm   left / right juke     CIRCLE spin     TRIANGLE hurdle     R2 juke"))
+				: FString(TEXT("F truck   G stiff arm   Q / E juke   R spin   V hurdle   SPACE juke")));
+		}
+	}
 	if (PC->WasInputKeyJustPressed(EKeys::Tab) || PC->WasInputKeyJustPressed(EKeys::Gamepad_LeftShoulder)) P.input.switchReq = true;
 	// auto-switch to our ball carrier after a handoff / catch
 	tag::Ent* H = P.ball.holder;
@@ -4001,7 +4138,7 @@ void AMatchDirector::Tick(float Dt)
 		if (bStuck) UE_LOG(LogTemp, Warning, TEXT("TAG presnap: men still walking after %.1f s, snapping anyway"), PresnapClock);
 		if ((Timer <= 0 && (bCpuSet || bStuck)) || (UserDef() && PresnapClock > 25.f && (bCpuSet || bStuck)) ||
 			(bRealClock && !UserOff() && PlayClockF <= 1.5f && (bCpuSet || bStuck)) || // a CPU offense beats the play clock
-			(bCallShot && PresnapClock > 4.f && bCpuSet) ||
+			((bCallShot || bMoveShot) && PresnapClock > 4.f && bCpuSet) ||
 			(UserOff() && bSpace && !bMenu && !bPreConsumed && !Sim->walking()))
 		{
 			EndPresnapUI();
@@ -4031,6 +4168,7 @@ void AMatchDirector::Tick(float Dt)
 			Sim->step(STEP);
 			Acc -= STEP;
 			Sim->input.juke = false;
+			Sim->input.stickMove = tag::Move::None; // a flick is one move, on the step it came in
 		}
 		SyncPlay(Dt, FMath::Min(1.f, Acc / STEP));
 		UpdateCamera(Dt, FocusPoint());
@@ -4100,5 +4238,6 @@ void AMatchDirector::Tick(float Dt)
 		TickCrew(Dt);
 	}
 	UpdateIcons();
+	UpdateHighlight();
 	if (PlayArt && State != EMatchState::Presnap) PlayArt->SetShown(false);
 }

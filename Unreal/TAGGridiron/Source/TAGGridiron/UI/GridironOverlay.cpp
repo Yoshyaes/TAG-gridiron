@@ -328,6 +328,34 @@ void SGridironOverlay::PaintGlyph(FSlateWindowElementList& Out, int32 Layer, con
 int32 SGridironOverlay::PaintPresnap(FSlateWindowElementList& Out, int32 Layer, const FGeometry& G) const
 {
 	const FVector2D Local = G.GetLocalSize();
+	// the highlight stick: a gold ring at the feet of the man about to make the tackle, and over the ball carrier the
+	// move that beats him
+	if (Highlight.bOn && IconViewport.X > 0 && IconViewport.Y > 0)
+	{
+		const FVector2D Scale(Local.X / IconViewport.X, Local.Y / IconViewport.Y);
+		const FVector2D T = Highlight.Threat * Scale;
+		const float Rr = Highlight.ThreatR * Scale.X;
+		const float Pulse = 0.75f + 0.25f * FMath::Sin(FPlatformTime::Seconds() * 9.0);
+		TArray<FVector2f> P;
+		for (int32 k = 0; k <= 40; ++k)
+			P.Add(FVector2f(T.X + FMath::Cos(2.f * PI * k / 40) * Rr, T.Y + FMath::Sin(2.f * PI * k / 40) * Rr * 0.38f));
+		FSlateDrawElement::MakeLines(Out, Layer, G.ToPaintGeometry(), P, ESlateDrawEffect::None, Accent * FLinearColor(1, 1, 1, Pulse), true, 3.f);
+		const FVector2D C = Highlight.Carrier * Scale;
+		const FSlateFontInfo F = Font(13, "Bold");
+		const FVector2D M = Measure(Highlight.Move, F);
+		const float Gs = 30.f;
+		const FVector2D Pill(Gs + 14 + M.X + 16, 38);
+		const FVector2D TL = C - FVector2D(Pill.X * 0.5, Pill.Y * 0.5);
+		FSlateDrawElement::MakeBox(Out, Layer + 1, G.ToPaintGeometry(FVector2f(Pill), FSlateLayoutTransform(FVector2f(TL))), White(), ESlateDrawEffect::None,
+			FLinearColor(0.02f, 0.025f, 0.035f, 0.88f));
+		FSlateDrawElement::MakeBox(Out, Layer + 2, G.ToPaintGeometry(FVector2f(Pill.X, 3.f), FSlateLayoutTransform(FVector2f(TL + FVector2D(0, Pill.Y - 3)))), White(),
+			ESlateDrawEffect::None, Accent);
+		PaintGlyph(Out, Layer + 3, G, TL + FVector2D(8 + Gs * 0.5, Pill.Y * 0.5), Gs, Highlight.Glyph, Highlight.Key,
+			Highlight.Glyph != EPadGlyph::None && bIconPad, FLinearColor::White);
+		FSlateDrawElement::MakeText(Out, Layer + 6, G.ToPaintGeometry(FVector2f(M), FSlateLayoutTransform(FVector2f(TL + FVector2D(8 + Gs + 8, (Pill.Y - M.Y) * 0.5)))),
+			Highlight.Move, F, ESlateDrawEffect::None, FLinearColor::White);
+		Layer += 8;
+	}
 	// receivers' button icons over their heads
 	if (Icons.Num() && IconViewport.X > 0 && IconViewport.Y > 0)
 	{
@@ -685,23 +713,40 @@ void SGridironOverlay::ShowPlayCall(bool bOffense, bool bFourthDown, bool bTwoPo
 	CallDone = Done;
 	CallPage = 0;
 	CallTabs.Reset();
+	const tag::Game& G = *Director->Game;
+	auto AddTab = [this](const FString& Id, const FString& Label)
+	{
+		if (!CallTabs.ContainsByPredicate([&Id](const TPair<FString, FString>& Tb) { return Tb.Key == Id; })) CallTabs.Emplace(Id, Label);
+	};
 	if (bOffense)
 	{
-		// fourth down: the kicks first (and open on them); the clock plays at the end
+		// the team's own playbook by formation family; fourth down: the kicks first (and open on them); the clock
+		// plays at the end
 		if (bFourthDown) CallTabs.Emplace(TEXT("special"), TEXT("SPECIAL TEAMS"));
-		for (const tag::Formation& F : tag::FORMATIONS()) CallTabs.Emplace(S(F.id), S(F.name).ToUpper());
+		for (const std::string& Fid : tag::offBookFor(G.offense()).formations)
+			if (const tag::Formation* F = tag::formationById(Fid))
+			{
+				const FString Fam = S(tag::formationFamily(*F));
+				AddTab(Fam, Fam.ToUpper());
+			}
 		if (!bTwoPoint) CallTabs.Emplace(TEXT("clock"), TEXT("CLOCK"));
 	}
 	else
 	{
-		CallTabs.Emplace(TEXT("base"), TEXT("BASE 4-3"));
-		CallTabs.Emplace(TEXT("nickel"), TEXT("NICKEL"));
-		CallTabs.Emplace(TEXT("dime"), TEXT("DIME"));
-		CallTabs.Emplace(TEXT("goalline"), TEXT("GOAL LINE"));
+		for (const tag::DefCall* D : tag::defBookFor(G.defense()).calls)
+		{
+			const FString Fam = S(tag::frontFamily(D->front));
+			AddTab(Fam, Fam.ToUpper());
+		}
 	}
 	const bool bKnown = CallTabs.ContainsByPredicate([this](const TPair<FString, FString>& Tb) { return Tb.Key == CallTab; });
 	if (bFourthDown && bOffense) CallTab = TEXT("special");
-	else if (!bKnown || CallTab == TEXT("special") || CallTab == TEXT("clock")) CallTab = bOffense ? CallTabs[0].Key : FString(TEXT("nickel"));
+	else if (!bKnown || CallTab == TEXT("special") || CallTab == TEXT("clock"))
+	{
+		// defense opens on its nickel (the most common call), the offense on its first family
+		CallTab = CallTabs.Num() ? CallTabs[0].Key : FString();
+		if (!bOffense && CallTabs.ContainsByPredicate([](const TPair<FString, FString>& Tb) { return Tb.Key == TEXT("Nickel"); })) CallTab = TEXT("Nickel");
+	}
 	BuildPlayCall();
 }
 
@@ -745,6 +790,7 @@ bool SGridironOverlay::CallKey(const FKey& K, bool bRepeat)
 		{
 			CallTab = CallTabs[((At < 0 ? 0 : At) + (bNextTab ? 1 : -1) + N) % N].Key;
 			CallPage = 0;
+			CallSet.Reset();
 			BuildPlayCall();
 		}
 		return true;
@@ -760,8 +806,22 @@ bool SGridironOverlay::CallKey(const FKey& K, bool bRepeat)
 		}
 		return true;
 	}
-	// the d-pad / arrows up and down do nothing here (and must not reach the game)
-	return Is({EKeys::Gamepad_DPad_Up, EKeys::Gamepad_DPad_Down, EKeys::Up, EKeys::Down, EKeys::W, EKeys::S});
+	// up and down: the formations (sets) of the family
+	const bool bPrevSet = Is({EKeys::Gamepad_DPad_Up, EKeys::Up, EKeys::W});
+	const bool bNextSet = Is({EKeys::Gamepad_DPad_Down, EKeys::Down, EKeys::S});
+	if (bPrevSet || bNextSet)
+	{
+		const int32 N = CallSets.Num();
+		if (N > 1)
+		{
+			const int32 At = FMath::Max(0, CallSets.IndexOfByKey(CallSet));
+			CallSet = CallSets[(At + (bNextSet ? 1 : -1) + N) % N];
+			CallPage = 0;
+			BuildPlayCall();
+		}
+		return true;
+	}
+	return false;
 }
 
 void SGridironOverlay::BuildPlayCall()
@@ -799,9 +859,16 @@ void SGridironOverlay::BuildPlayCall()
 	}
 	else if (bOffense)
 	{
-		for (const tag::OffPlay& P : tag::OFF_PLAYS())
+		// the family's formations in the book, the one shown, and its plays
+		const tag::OffBook& Book = tag::offBookFor(G.offense());
+		CallSets.Reset();
+		for (const std::string& Fid : Book.formations)
+			if (const tag::Formation* F = tag::formationById(Fid); F && S(tag::formationFamily(*F)) == CallTab) CallSets.Add(S(Fid));
+		if (!CallSets.Contains(CallSet)) CallSet = CallSets.Num() ? CallSets[0] : FString();
+		for (const tag::OffPlay* PP : Book.playsIn(TCHAR_TO_UTF8(*CallSet)))
 		{
-			if (S(P.formation) != CallTab || P.type == tag::PlayType::Kneel || P.type == tag::PlayType::Spike) continue;
+			const tag::OffPlay& P = *PP;
+			if (P.type == tag::PlayType::Kneel || P.type == tag::PlayType::Spike) continue;
 			FString Kind = P.type == tag::PlayType::Run ? TEXT("Run") : P.type == tag::PlayType::PlayAction ? TEXT("Play action") : P.type == tag::PlayType::Screen ? TEXT("Screen") : TEXT("Pass");
 			if (P.hasTag("quick")) Kind += TEXT("  -  quick");
 			if (P.hasTag("deep")) Kind += TEXT("  -  shot");
@@ -816,13 +883,23 @@ void SGridironOverlay::BuildPlayCall()
 		static const TMap<FString, FString> Cov = {
 			{TEXT("C0"), TEXT("Cover 0  -  all-out man, no deep help")}, {TEXT("C1"), TEXT("Cover 1  -  man, single high")},
 			{TEXT("C2"), TEXT("Cover 2  -  two deep halves")}, {TEXT("C2M"), TEXT("2-Man  -  man under, two deep")},
-			{TEXT("C3"), TEXT("Cover 3  -  three deep, four under")}, {TEXT("C3Fire"), TEXT("Fire zone  -  5-man pressure")}, {TEXT("C4"), TEXT("Quarters  -  four deep")}};
-		for (const tag::DefCall& D : tag::DEF_PLAYS())
+			{TEXT("C3"), TEXT("Cover 3  -  three deep, four under")}, {TEXT("C3Fire"), TEXT("Fire zone  -  3 deep, 3 under, pressure")}, {TEXT("C4"), TEXT("Quarters  -  four deep")},
+			{TEXT("C2T"), TEXT("Tampa 2  -  the Mike runs the middle")}, {TEXT("C6"), TEXT("Cover 6  -  quarters left, half right")}};
+		const tag::DefBook& Book = tag::defBookFor(G.defense());
+		CallSets.Reset();
+		for (const std::string& St : Book.sets)
 		{
-			if (FString(tag::frontName(D.front)).ToLower() != CallTab.ToLower()) continue;
+			const std::vector<const tag::DefCall*> In = Book.callsIn(St);
+			if (!In.empty() && S(tag::frontFamily(In[0]->front)) == CallTab) CallSets.Add(S(St));
+		}
+		if (!CallSets.Contains(CallSet)) CallSet = CallSets.Num() ? CallSets[0] : FString();
+		for (const tag::DefCall* DP : Book.callsIn(TCHAR_TO_UTF8(*CallSet)))
+		{
+			const tag::DefCall& D = *DP;
 			const FString* Desc = Cov.Find(FString(tag::coverageName(D.coverage)));
 			FCallChoice C; C.Kind = FCallChoice::Def; C.Call = &D;
-			Add(D.blitz.empty() ? TEXT("Coverage") : FString::Printf(TEXT("%d-man pressure"), 4 + static_cast<int>(D.blitz.size())), S(D.name), Desc ? *Desc : FString(), nullptr, &D, C);
+			Add(D.rushers() <= 4 ? FString::Printf(TEXT("Coverage  -  %d rush"), D.rushers()) : FString::Printf(TEXT("%d-man pressure"), D.rushers()), S(D.name),
+				Desc ? *Desc : FString(), nullptr, &D, C);
 		}
 	}
 	const int32 Pages = FMath::Max(1, FMath::DivideAndRoundUp(CallCards.Num(), 3));
@@ -838,7 +915,16 @@ void SGridironOverlay::BuildPlayCall()
 	};
 
 	// the header: what is being called, the formation, and the situation with the clocks running
-	const FString TabLabel = [&]() -> FString { for (const TPair<FString, FString>& Tb : CallTabs) if (Tb.Key == CallTab) return Tb.Value; return FString(); }();
+	FString TabLabel = [&]() -> FString { for (const TPair<FString, FString>& Tb : CallTabs) if (Tb.Key == CallTab) return Tb.Value; return FString(); }();
+	if (!CallSet.IsEmpty() && CallTab != TEXT("special") && CallTab != TEXT("clock"))
+	{
+		// the formation (set) shown, and where it sits in its family
+		const tag::Formation* F = bOffense ? tag::formationById(TCHAR_TO_UTF8(*CallSet)) : nullptr;
+		TabLabel = (F ? S(F->name) : CallSet).ToUpper();
+		if (CallSets.Num() > 1) TabLabel += FString::Printf(TEXT("   %d / %d"), CallSets.IndexOfByKey(CallSet) + 1, CallSets.Num());
+	}
+	const FString BookLine = bOffense ? FString::Printf(TEXT("%s PLAYBOOK  -  %s"), *S(tag::offBookFor(G.offense()).name).ToUpper(), *S(tag::offBookFor(G.offense()).scheme).ToUpper())
+		: FString::Printf(TEXT("%s PLAYBOOK  -  %s"), *S(tag::defBookFor(G.defense()).name).ToUpper(), *S(tag::defBookFor(G.defense()).scheme).ToUpper());
 	const FString Sit = bTwoPoint ? FString(TEXT("TWO-POINT TRY  -  FROM THE 2"))
 		: FString::Printf(TEXT("%s  -  %s"), *S(G.downText()).ToUpper(), *S(G.ydLine()));
 	TSharedRef<SHorizontalBox> Header = SNew(SHorizontalBox)
@@ -846,7 +932,7 @@ void SGridironOverlay::BuildPlayCall()
 		[
 			SNew(SVerticalBox)
 			+ SVerticalBox::Slot().AutoHeight()[ SNew(STextBlock).Font(Font(12, "Bold")).ColorAndOpacity(Accent)
-				.Text(T(bOffense ? (bTwoPoint ? TEXT("TWO-POINT TRY  -  CALL OFFENSE") : TEXT("CALL OFFENSE")) : TEXT("CALL DEFENSE"))) ]
+				.Text(T(FString(bOffense ? (bTwoPoint ? TEXT("TWO-POINT TRY  -  CALL OFFENSE") : TEXT("CALL OFFENSE")) : TEXT("CALL DEFENSE")) + TEXT("     ") + BookLine)) ]
 			+ SVerticalBox::Slot().AutoHeight()[ SNew(STextBlock).Font(Font(30, "Bold")).ColorAndOpacity(White90).Text(T(TabLabel)) ]
 		]
 		+ SHorizontalBox::Slot().FillWidth(1.f)[ SNullWidget::NullWidget ]
@@ -889,7 +975,7 @@ void SGridironOverlay::BuildPlayCall()
 		Tabs->AddSlot().AutoWidth().Padding(2, 0)
 		[
 			SNew(SButton).IsFocusable(false).ButtonColorAndOpacity(FLinearColor(1, 1, 1, bOn ? 0.06f : 0.f)).ContentPadding(FMargin(14, 6, 14, 0))
-			.OnClicked_Lambda([this, Id] { CallTab = Id; CallPage = 0; BuildPlayCall(); return FReply::Handled(); })
+			.OnClicked_Lambda([this, Id] { CallTab = Id; CallPage = 0; CallSet.Reset(); BuildPlayCall(); return FReply::Handled(); })
 			[
 				SNew(SVerticalBox)
 				+ SVerticalBox::Slot().AutoHeight()[ SNew(STextBlock).Font(Font(13, "Bold")).ColorAndOpacity(bOn ? White90 : Dim).Text(T(Tb.Value)) ]
@@ -966,7 +1052,8 @@ void SGridironOverlay::BuildPlayCall()
 	};
 	TSharedRef<SHorizontalBox> Foot = SNew(SHorizontalBox)
 		+ SHorizontalBox::Slot().AutoWidth()[ Legend({{EPadGlyph::Square, TEXT("1")}, {EPadGlyph::Cross, TEXT("2")}, {EPadGlyph::Circle, TEXT("3")}}, TEXT("CALL PLAY")) ]
-		+ SHorizontalBox::Slot().AutoWidth()[ Legend({{EPadGlyph::L1, TEXT("Q")}, {EPadGlyph::R1, TEXT("E")}}, bOffense ? TEXT("FORMATION") : TEXT("FRONT")) ]
+		+ SHorizontalBox::Slot().AutoWidth()[ Legend({{EPadGlyph::L1, TEXT("Q")}, {EPadGlyph::R1, TEXT("E")}}, bOffense ? TEXT("FAMILY") : TEXT("FRONT")) ]
+		+ SHorizontalBox::Slot().AutoWidth()[ Legend({{EPadGlyph::DUp, TEXT("\u2191")}, {EPadGlyph::DDown, TEXT("\u2193")}}, bOffense ? TEXT("FORMATION") : TEXT("SET")) ]
 		+ SHorizontalBox::Slot().AutoWidth()[ Legend({{EPadGlyph::DLeft, TEXT("←")}, {EPadGlyph::DRight, TEXT("→")}}, FString::Printf(TEXT("MORE PLAYS  %d / %d"), CallPage + 1, Pages)) ]
 		+ SHorizontalBox::Slot().AutoWidth()[ Legend({{EPadGlyph::Triangle, TEXT("H")}}, TEXT("COACH'S PICK")) ];
 
