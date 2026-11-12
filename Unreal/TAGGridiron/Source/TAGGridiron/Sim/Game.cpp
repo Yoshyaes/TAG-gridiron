@@ -237,6 +237,13 @@ bool Game::preSnap() {
   return true;
 }
 
+void Game::adjustBetweenPlays(double sec) {
+  if (sec > 0) runClock(sec);
+  else clock -= sec;
+}
+
+void Game::delayOfGame() { applyPresnap(mkPen("Delay of Game", Side::Off, 5, false, PenaltySpot::Los, true)); }
+
 void Game::endQuarter() {
   static const char* const kQ[] = {"1st", "2nd", "3rd", "4th", "OT"};
   addLog(std::string("End of ") + kQ[(std::min)(q, 5) - 1] + " quarter.", LogTag::Info);

@@ -1,6 +1,7 @@
 #include "Render/TagEditorLib.h"
 
 #include "Animation/BlendSpace.h"
+#include "Animation/AnimSequence.h"
 #include "PoseSearch/PoseSearchDatabase.h"
 #include "MetaHumanCollection.h"
 #include "MetaHumanInstance.h"
@@ -66,6 +67,33 @@ bool UTagEditorLib::DatabaseAddAnim(UPoseSearchDatabase* Database, UAnimationAss
 	return true;
 #else
 	return false;
+#endif
+}
+
+int32 UTagEditorLib::DatabaseTrimEnds(UPoseSearchDatabase* Database, const FString& NameContains, float TrimSeconds)
+{
+#if WITH_EDITOR
+	if (!Database) return 0;
+	int32 N = 0;
+	for (int32 i = 0; i < Database->GetNumAnimationAssets(); ++i)
+	{
+		FPoseSearchDatabaseAnimationAsset* E = Database->GetMutableDatabaseAnimationAsset(i);
+		const UAnimSequence* Seq = E ? Cast<UAnimSequence>(E->GetAnimationAsset()) : nullptr;
+		if (!Seq || Seq->bLoop || !Seq->GetName().Contains(NameContains)) continue;
+		const float Len = Seq->GetPlayLength();
+		const FFloatInterval Want(0.f, FMath::Max(Len * 0.5f, Len - TrimSeconds));
+		if (E->GetSamplingRange() == Want) continue;
+		E->SetSamplingRange(Want);
+		++N;
+	}
+	if (N > 0)
+	{
+		Database->Modify();
+		Database->MarkPackageDirty();
+	}
+	return N;
+#else
+	return 0;
 #endif
 }
 

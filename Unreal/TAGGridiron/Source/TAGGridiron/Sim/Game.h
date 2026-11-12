@@ -174,6 +174,11 @@ class Game {
   Tempo tempo() const;
   /** Called right before each snap (scrimmage). Applies runoff. Returns false if the period ended. */
   bool preSnap();
+  /** A human game: the offense's real seconds between the plays replace the runoff preSnap() drew. sec > 0 takes more
+   *  off a running clock (the two-minute warning still stops it), sec < 0 gives back what the snap came before. */
+  void adjustBetweenPlays(double sec);
+  /** The play clock ran out on the offense (a human that did not snap): 5 yards, the down again. */
+  void delayOfGame();
 
   // ---- CPU coordinators
   bool shouldKneel() const;

@@ -61,6 +61,12 @@ public:
 	bool bPreRun = false;
 	float PlayClockF = 40.f, PlayClockSnap = 10.f, PlayClockRate = 1.f;
 	bool bPlayClockOn = false;
+	/** A human plays: both clocks run in real seconds from the whistle (the play clock down to 0, then delay of game on
+	 *  the user's offense), and at the snap the sim's game clock is set to what the scorebug showed (SyncRealClock).
+	 *  CPU-only games keep the fast wind-down above. bClockLive: the game clock runs between these plays. */
+	bool bRealClock = false, bClockLive = false;
+	void SyncRealClock();
+	void DelayOfGame();
 	int32 PlayClockShown() const { return bPlayClockOn ? FMath::Max(0, FMath::CeilToInt(PlayClockF)) : -1; }
 	void HoldHudScore() { HudScore[0] = Game->score[tag::TeamKey::Home]; HudScore[1] = Game->score[tag::TeamKey::Away]; }
 	void ReleaseHudScore() { HudScore[0] = HudScore[1] = -1; }

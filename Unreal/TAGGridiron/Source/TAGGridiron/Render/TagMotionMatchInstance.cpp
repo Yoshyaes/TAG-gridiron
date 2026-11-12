@@ -99,20 +99,50 @@ void FTagMotionMatchProxy::PreUpdate(UAnimInstance* InAnimInstance, float DeltaS
 		I->SpeedRate += (Mul - I->SpeedRate) * FMath::Min(1.f, DeltaSeconds / 0.1f);
 		*I->RateMultiplierSetting = I->SpeedRate;
 	}
+	bool bDbChanged = false;
 	if (SeenDbSerial != I->DbSerial)
 	{
 		// a clip from a database no longer searched (a start once the player has stopped, or once he has been moving
 		// for 0.6 s and the loops take over) must not keep playing: InterruptOnDatabaseChange left a crouch start
-		// running for its full 2 s against the lineman's kick slide (-TagMMTrace), so the change forces one fresh
-		// search; the next update puts the mode back so the continuing pose counts again
+		// running for its full 2 s against the lineman's kick slide (-TagMMTrace), so such a change forces one fresh
+		// search; the next update puts the mode back so the continuing pose counts again. A change of gait band or into
+		// the pivot set does not: the playing loop carries on until the search finds better (forcing those had the
+		// pick flipping sprint <-> run every few frames while the speed hovered at a band's edge)
 		SeenDbSerial = I->DbSerial;
-		Match->SetDatabasesToSearch(I->Databases, EPoseSearchInterruptMode::ForceInterrupt);
-		ForceLeft = 0.15f; // longer than the 66 ms search throttle, so the forced search actually runs
+		bDbChanged = true;
+		if (I->bForceOnDbChange)
+		{
+			Match->SetDatabasesToSearch(I->Databases, EPoseSearchInterruptMode::ForceInterrupt);
+			ForceLeft = 0.15f; // longer than the 66 ms search throttle, so the forced search actually runs
+		}
+		else
+			Match->SetDatabasesToSearch(I->Databases, EPoseSearchInterruptMode::DoNotInterrupt);
 	}
 	else if (ForceLeft > 0.f)
 	{
 		ForceLeft -= GetDeltaSeconds();
 		if (ForceLeft <= 0.f) Match->SetDatabasesToSearch(I->Databases, EPoseSearchInterruptMode::InterruptOnDatabaseChange);
+	}
+	// the minimum dwell: a new pick holds while the move it was picked for holds (searches wait MinDwell); a change of
+	// the move lets the next search through at once and becomes the move to hold to
+	if (I->ThrottleSetting)
+	{
+		const UAnimationAsset* Cur = I->MatchedAsset.Get();
+		if (Cur != DwellAsset.Get())
+		{
+			DwellAsset = Cur;
+			DwellVel = I->SimVel;
+		}
+		const float S0 = DwellVel.Size2D(), S1 = I->SimVel.Size2D();
+		const bool bTurned = S0 > 150.f && S1 > 150.f &&
+			FVector::DotProduct(DwellVel.GetSafeNormal2D(), I->SimVel.GetSafeNormal2D()) < FMath::Cos(FMath::DegreesToRadians(I->DwellTurnDeg));
+		const bool bMoveChanged = bTurned || FMath::Abs(S1 - S0) > I->DwellBreak;
+		if (bMoveChanged) DwellVel = I->SimVel;
+		// (a soft database change - a gait band, the pivot set - holds too: freeing those let a third of all switches
+		// through, -TagMMWhy; a real cut still frees the search by the turn)
+		const bool bFree = bMoveChanged || (bDbChanged && I->bForceOnDbChange) || ForceLeft > 0.f || !I->bMatch;
+		*I->ThrottleSetting = bFree ? I->BaseThrottle : FMath::Max(I->BaseThrottle, I->MinDwell);
+		I->DiagFlags = (bMoveChanged ? 1 : 0) | (bDbChanged ? 2 : 0) | (ForceLeft > 0.f ? 4 : 0) | (bFree ? 0 : 8);
 	}
 }
 
@@ -123,6 +153,33 @@ void FTagMotionMatchProxy::PostUpdate(UAnimInstance* InAnimInstance) const
 	UTagMotionMatchInstance* I = CastChecked<UTagMotionMatchInstance>(InAnimInstance);
 	I->MatchedAsset = Switch.bMatch ? Match->GetAnimAsset() : nullptr;
 	const FPoseSearchBlueprintResult& R = Match->GetMotionMatchingState().SearchResult;
+	static const bool bWhy = FParse::Param(FCommandLine::Get(), TEXT("TagMMWhy"));
+	if (bWhy && Switch.bMatch)
+	{
+		// why the pick changed: the move, the databases, a forced window, the end of a clip that cannot run on, or a
+		// search the dwell should have held off (the continuing pose could not advance)
+		static int32 N[6] = {0, 0, 0, 0, 0, 0}, NS[6] = {0, 0, 0, 0, 0, 0}, Short = 0, Total = 0;
+		const UAnimationAsset* Cur = I->MatchedAsset.Get();
+		const UAnimationAsset* Prev = I->DiagPrev.Get();
+		if (Cur && Prev && Cur != Prev)
+		{
+			const UAnimSequence* PS = Cast<UAnimSequence>(Prev);
+			const bool bEnd = PS && !PS->bLoop && I->DiagPrevTime > PS->GetPlayLength() - 0.5f;
+			const int32 K = (I->DiagFlags & 1) ? 0 : (I->DiagFlags & 2) ? 1 : (I->DiagFlags & 4) ? 2 : bEnd ? 3 : (I->DiagFlags & 8) ? 4 : 5;
+			++N[K];
+			++Total;
+			const bool bShort = I->DiagHeld < I->MinDwell;
+			Short += bShort ? 1 : 0;
+			NS[K] += bShort ? 1 : 0;
+			if (Total % 400 == 0)
+				UE_LOG(LogTemp, Display, TEXT("TAG MM why: %d switches (%d held < dwell): move %d/%d, db %d/%d, forced %d/%d, clip end %d/%d, held-yet-searched %d/%d, other %d (all/short)"),
+					Total, Short, N[0], NS[0], N[1], NS[1], N[2], NS[2], N[3], NS[3], N[4], NS[4], N[5]);
+			I->DiagHeld = 0.f;
+		}
+		else I->DiagHeld += GetDeltaSeconds();
+		I->DiagPrev = Cur;
+		I->DiagPrevTime = R.SelectedTime;
+	}
 	I->MatchedTime = R.SelectedTime;
 	I->MatchedCost = R.SearchCost;
 	I->MatchedWantedRate = R.WantedPlayRate;
@@ -150,6 +207,16 @@ UTagMotionMatchInstance::UTagMotionMatchInstance(const FObjectInitializer& Objec
 	// few frames). Searching every frame for every player cost ~25 fps once the linemen joined.
 	static float Throttle = FParse::Value(FCommandLine::Get(), TEXT("TagMMThrottle="), Throttle) ? Throttle : 0.066f;
 	SetMatchSetting(TEXT("SearchThrottleTime"), Throttle);
+	BaseThrottle = Throttle;
+	// -TagMMDwell=<s> (0 = off): the minimum dwell of a pick
+	{
+		static float Dwell = FParse::Value(FCommandLine::Get(), TEXT("TagMMDwell="), Dwell) ? Dwell : 0.3f;
+		MinDwell = Dwell;
+		static float Brk = FParse::Value(FCommandLine::Get(), TEXT("TagMMDwellBreak="), Brk) ? Brk : 250.f;
+		DwellBreak = Brk;
+	}
+	if (const FProperty* P = FAnimNode_MotionMatching::StaticStruct()->FindPropertyByName(TEXT("SearchThrottleTime")))
+		if (P->GetElementSize() == sizeof(float)) ThrottleSetting = P->ContainerPtrToValuePtr<float>(&MatchNode);
 	// play rate: fixed, set every update from MatchPlayRate (see PreUpdate)
 	SetMatchSetting(TEXT("PlayRate"), FFloatInterval(1.f, 1.f));
 	if (const FProperty* P = FAnimNode_MotionMatching::StaticStruct()->FindPropertyByName(TEXT("PlayRate")))

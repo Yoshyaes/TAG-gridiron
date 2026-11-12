@@ -1,6 +1,7 @@
-// A play drawn on a card: the formation at the snap and the play art (the same strokes the field shows), seen from
-// behind the side calling it. Offense: the offense at the bottom running up the card. Defense: the defense at the bottom,
-// the offense across the top, the drops and rushes coming down the card.
+// A play drawn on a card: the formation at the snap and the play art (the same strokes the field shows). Both sides'
+// cards are drawn the way the broadcast and Madden's play art show the field: the offense at the bottom, the field
+// running up the card. A defensive call then reads with its deep zones across the top and its rushes coming down at
+// the quarterback.
 #pragma once
 
 #include "CoreMinimal.h"

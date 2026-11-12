@@ -55,8 +55,11 @@ def build(src, dst, drop, add, loco, always_drop=()):
             added.append(path.split("/")[-1])
         elif not anim:
             missing.append(path.split("/")[-1])
+    # the moving loops: the pack captures are not cyclic, so they are indexed only up to half a second before their end
+    # (the search kept landing near a clip's end and jumping again a few frames later)
+    trimmed = LIB.database_trim_ends(db, "A_TAG_Pack_", 0.5) if "_Loops" in dst else 0
     EAL.save_asset(dst, only_if_is_dirty=False)
-    rep["dbs"][dst.split("/")[-1]] = {"removed": removed, "added": added, "missing": missing, "anims": list(LIB.database_anim_names(db))}
+    rep["dbs"][dst.split("/")[-1]] = {"removed": removed, "added": added, "missing": missing, "trimmed": trimmed, "anims": list(LIB.database_anim_names(db))}
 
 
 try:

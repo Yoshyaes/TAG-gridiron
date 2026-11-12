@@ -562,7 +562,9 @@ void FTagRetargetProxy::ApplyFeet(FPoseContext& Output)
 	P.InitPose(Output.Pose);
 	const FCompactPoseBoneIndex Th[2] = {B.ThL, B.ThR}, Ca[2] = {B.CaL, B.CaR}, Ft[2] = {B.FtL, B.FtR}, Ba[2] = {B.BaL, B.BaR};
 	const float Low = RefFootZ + 6.f;    // the ball of the foot is on the turf
-	const float MaxDrift = 60.f;         // a pin that has to pull the foot further than this lets go
+	// a pin that has to pull the foot further than this lets go. (At 60 cm a let-go swept the foot 60 cm in 0.12 s: a leg
+	// whipping out of its clip, the "flailing" of the 12 Nov play test.)
+	const float MaxDrift = 30.f;
 	for (int32 i = 0; i < 2; ++i)
 	{
 		// the pin is on the ball of the foot: the heel rises over a planted toe through the push-off, which a pinned
@@ -604,7 +606,7 @@ void FTagRetargetProxy::ApplyFeet(FPoseContext& Output)
 		if (L.bLocked) { TargetW = L.World; A = L.Alpha; }
 		else if (L.ReleaseAlpha > 0.f)
 		{
-			L.ReleaseAlpha = FMath::Max(0.f, L.ReleaseAlpha - Dt / 0.12f);
+			L.ReleaseAlpha = FMath::Max(0.f, L.ReleaseAlpha - Dt / 0.2f);
 			TargetW = FootW + L.ReleaseOff * L.ReleaseAlpha;
 			A = 1.f;
 		}

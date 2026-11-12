@@ -803,7 +803,7 @@ void FAthleteAssets::LoadMotionMatching()
 	// foot; at -0.15 (search costs run 0.05-0.4) the sprint held its clip and the route's slide fell by a third.
 	// -TagMMCont=<bias> to try others.
 	{
-		static float Cont = FParse::Value(FCommandLine::Get(), TEXT("TagMMCont="), Cont) ? Cont : -0.15f;
+		static float Cont = FParse::Value(FCommandLine::Get(), TEXT("TagMMCont="), Cont) ? Cont : -0.3f; // (-0.15 until 12 Nov: A/B -0.3 held clips longer, hands steadier)
 		if (bOk) for (UPoseSearchDatabase* X : All) X->ContinuingPoseCostBias = Cont;
 	}
 	UE_LOG(LogTemp, Display, TEXT("TAG: motion matching %s (%d databases)"), bMotionMatch ? TEXT("enabled") : TEXT("unavailable"), All.Num());
@@ -1741,11 +1741,16 @@ bool AAthlete::DriveMotionMatching(const FVector& VelWorld, float SimYaw, float 
 	const float GaitSpeed = FMath::Max(Speed, FutSpeed);
 	if (MMGait == 0 && GaitSpeed > 320.f) MMGait = 1;
 	if (MMGait == 1 && GaitSpeed < 260.f) MMGait = 0;
-	if (MMGait == 1 && GaitSpeed > 640.f) MMGait = 2;
-	if (MMGait == 2 && GaitSpeed < 560.f) MMGait = 1;
+	if (MMGait == 1 && GaitSpeed > 680.f) MMGait = 2; // (a wider band: a man running 5.6-6.4 m/s flipped run <-> sprint)
+	if (MMGait == 2 && GaitSpeed < 520.f) MMGait = 1;
 	// the stop / idle databases only once he is really slowing to a stand: from 4.5 m/s a predicted stop searched them and
 	// an idle loop played under a man still moving 1-4 m/s (80-100 cm of slide per plant in the p3 capture)
-	const bool bMoving = FutSpeed > 50.f || Speed > 250.f;
+	// (latched: on above the old line, off only after 0.15 s well below it)
+	const bool bMovingRaw = FutSpeed > 50.f || Speed > 250.f;
+	M->StillFor = (FutSpeed < 30.f && Speed < 150.f) ? M->StillFor + Dt : 0.f;
+	if (bMovingRaw) M->bMovingLatch = true;
+	else if (M->StillFor > 0.15f) M->bMovingLatch = false;
+	const bool bMoving = M->bMovingLatch;
 	MovingTime = bMoving ? MovingTime + Dt : 0.f;
 	// pivot: the predicted path turns sharply in the next half second (cut, plant, break on the ball)
 	bool bPivot = false;
@@ -1754,6 +1759,18 @@ bool AAthlete::DriveMotionMatching(const FVector& VelWorld, float SimYaw, float 
 		const FVector VFut = (S5.Position - S4.Position) / 0.1f;
 		if (Speed > 150.f && VFut.Size2D() > 100.f)
 			bPivot = FVector::DotProduct(V.GetSafeNormal2D(), VFut.GetSafeNormal2D()) < 0.7f; // > ~45 deg
+	}
+	// a fresh pick only when the kind of set changes in a way the playing clip cannot carry over: a start running out, a
+	// stop beginning or ending, the crouch coming or going. A new gait band or the pivot set lets the loop play on until
+	// the search finds better (UTagMotionMatchInstance::bForceOnDbChange)
+	{
+		const int32 Fam = !bMoving ? 0 : MovingTime < 0.6f ? 1 : bPivot ? 2 : 3;
+		const int32 Last = M->LastDbFamily;
+		// (a standing start hands over to the loops softly; a crouched start must end, see bForceOnDbChange)
+		M->bForceOnDbChange = Last < 0 || bCrouch != M->bLastDbCrouch || (Fam != Last && (Fam == 0 || Last == 0 || (Last == 1 && bCrouch)));
+		M->LastDbFamily = Fam;
+		M->bLastDbCrouch = bCrouch;
+		M->SimVel = V;
 	}
 	if (bCrouch)
 		M->SetDatabases(!bMoving ? A.MMCrouch[3] : MovingTime < 0.6f ? A.MMCrouch[1] : bPivot ? A.MMCrouch[2] : A.MMCrouch[0]);
@@ -1811,9 +1828,10 @@ bool AAthlete::DriveMotionMatching(const FVector& VelWorld, float SimYaw, float 
 					const FVector Want2 = FVector(RI->Proc.StrideDirCS.X, RI->Proc.StrideDirCS.Y, 0.f).GetSafeNormal();
 					const FVector Clip2 = M->MatchedClipDir;
 					const float Ang = FMath::RadiansToDegrees(FMath::Atan2(Clip2.X * Want2.Y - Clip2.Y * Want2.X, Clip2.X * Want2.X + Clip2.Y * Want2.Y));
-					WarpWant = FMath::Clamp(Ang, -60.f, 60.f);
+					WarpWant = FMath::Clamp(Ang, -40.f, 40.f);
 				}
-				OrientWarpSm = FMath::FInterpTo(OrientWarpSm, WarpWant, Dt, 10.f);
+				// (eased at 5/s: at 10/s a new match swung the hips and both legs 60 degrees in a few frames)
+				OrientWarpSm = FMath::FInterpTo(OrientWarpSm, WarpWant, Dt, 5.f);
 				RI->Proc.OrientWarpDeg = OrientWarpSm;
 			}
 	}

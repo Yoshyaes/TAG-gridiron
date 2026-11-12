@@ -99,6 +99,10 @@ public:
 	void ShowBoxScore(const FString& Title, const FString& Button, std::function<void()> Done);
 
 	virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
+	/** A controller button (or keyboard key) centred at C, Size across, in G's local space (the glyph widgets use it too). */
+	void PaintGlyph(FSlateWindowElementList& Out, int32 Layer, const FGeometry& G, const FVector2D& C, float Size, EPadGlyph Gl,
+		const FString& Key, bool bPad, const FLinearColor& Tint, float Alpha = 1.f) const;
+	bool PadGlyphs() const;
 	virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect,
 		FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
 
@@ -127,9 +131,6 @@ private:
 	TArray<FArtIcon> Icons;
 	FVector2D IconViewport = FVector2D(1920, 1080);
 	bool bIconPad = false;
-	/** A controller button (or keyboard key) centred at C, Size across, in this widget's local space. */
-	void PaintGlyph(FSlateWindowElementList& Out, int32 Layer, const FGeometry& G, const FVector2D& C, float Size, EPadGlyph Gl,
-		const FString& Key, bool bPad, const FLinearColor& Tint, float Alpha = 1.f) const;
 	int32 PaintPresnap(FSlateWindowElementList& Out, int32 Layer, const FGeometry& G) const;
 	FString BannerText;
 	FString BannerSub;
@@ -145,6 +146,24 @@ private:
 	bool bSelNight = true;
 	int SelQuarter = 1;
 	FString CallTab;
+	// the play call (Madden's layout): formation tabs (L1 / R1), three plays a page called by their face buttons
+	// (square, cross, circle), the pages by the d-pad, the coach's pick on triangle
+	struct FCallCard
+	{
+		FString Kind, Name, Note;
+		const tag::OffPlay* Op = nullptr;
+		const tag::DefCall* Dc = nullptr;
+		FCallChoice Choice;
+	};
+	TArray<FCallCard> CallCards;
+	TArray<TPair<FString, FString>> CallTabs; // id, label
+	int32 CallPage = 0;
+	bool bCallOffense = false, bCallFourth = false, bCallTwo = false;
+	std::function<void(FCallChoice)> CallDone;
+	TSharedPtr<SWidget> CallRoot;
+	void BuildPlayCall();
+	bool CallKey(const FKey& K, bool bRepeat);
+	void CallPick(FCallChoice C);
 	// gamepad navigation: focus the menu's button (by its order in the menu) once the menu is laid out
 	int32 PendingFocus = -1;
 	static void Focusables(const TSharedRef<SWidget>& W, TArray<TSharedRef<SWidget>>& Out);

@@ -37,6 +37,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TAG")
 	static bool DatabaseAddAnim(UPoseSearchDatabase* Database, UAnimationAsset* Anim);
 
+	/** The pack's locomotion captures are not loops: the search kept landing near a clip's end and had to jump again a
+	 *  few frames later (-TagMMWhy: half the early switches). Index each non-looping sequence whose name contains
+	 *  NameContains only up to TrimSeconds before its end (at least half the clip stays). Returns the entries trimmed. */
+	UFUNCTION(BlueprintCallable, Category = "TAG")
+	static int32 DatabaseTrimEnds(UPoseSearchDatabase* Database, const FString& NameContains, float TrimSeconds = 0.5f);
+
 	/** MetaHuman Crowd: point a collection's crowd editor pipeline at an animation config (the clips baked for
 	 *  distant instanced crowd members). Tools/Art/crowd_rebuild.py */
 	UFUNCTION(BlueprintCallable, Category = "TAG")

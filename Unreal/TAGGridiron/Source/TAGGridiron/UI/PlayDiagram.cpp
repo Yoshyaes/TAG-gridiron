@@ -80,17 +80,18 @@ int32 SPlayDiagram::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeo
 	const double MidX = Pic.Los + (AheadYd - BackYd) * 0.5;
 	auto Map = [&](const tag::V2& V) -> FVector2f
 	{
-		// behind the offense looking up the field its right is -y; behind the defense, +y
-		const float Px = Ctr.X + static_cast<float>((V.y - Pic.BallY) * S) * (bOffense ? -1.f : 1.f);
-		const float Py = Ctr.Y + static_cast<float>((V.x - MidX) * S) * (bOffense ? -1.f : 1.f);
+		// from behind the offense looking up the field (its right is -y), for both sides' cards
+		const float Px = Ctr.X - static_cast<float>((V.y - Pic.BallY) * S);
+		const float Py = Ctr.Y - static_cast<float>((V.x - MidX) * S);
 		return FVector2f(Px, Py);
 	};
 	const float Left = Ctr.X - static_cast<float>(tag::FIELD_W * 0.5 * S), Right = Ctr.X + static_cast<float>(tag::FIELD_W * 0.5 * S);
 	const float Top = Ctr.Y - static_cast<float>(SpanYd * 0.5 * S), Bottom = Ctr.Y + static_cast<float>(SpanYd * 0.5 * S);
 
 	// the turf, its yard lines, the ball and the first-down line
-	Pt.Poly({FVector2f(Left, Top), FVector2f(Right, Top), FVector2f(Right, Bottom), FVector2f(Left, Bottom)}, FLinearColor(0.05f, 0.14f, 0.07f, 1.f));
-	const FLinearColor YardLine(1.f, 1.f, 1.f, 0.10f);
+	// (a dark board, as the broadcast play art is drawn: the routes and zones are what reads)
+	Pt.Poly({FVector2f(Left, Top), FVector2f(Right, Top), FVector2f(Right, Bottom), FVector2f(Left, Bottom)}, FLinearColor(0.025f, 0.032f, 0.045f, 1.f));
+	const FLinearColor YardLine(1.f, 1.f, 1.f, 0.07f);
 	for (int32 Y = 0; Y <= 100; Y += 5)
 	{
 		const double X = static_cast<double>(Y);
@@ -139,7 +140,7 @@ int32 SPlayDiagram::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeo
 		// the end: an arrowhead, a block bar, a dot
 		const FVector2f End = P.Last();
 		FVector2f Dir = End - P[P.Num() - 2];
-		if (Dir.IsNearlyZero()) Dir = FVector2f(0, bOffense ? -1.f : 1.f);
+		if (Dir.IsNearlyZero()) Dir = FVector2f(0, -1.f);
 		Dir.Normalize();
 		const FVector2f Side(-Dir.Y, Dir.X);
 		switch (St.End)
@@ -187,8 +188,8 @@ int32 SPlayDiagram::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeo
 		}
 		else
 		{
-			// the point faces the offense: up the card on a defensive card, down it on an offensive one
-			const float Up = bOffense ? 1.f : -1.f;
+			// the point faces the offense, down the card
+			const float Up = 1.f;
 			const TArray<FVector2f> T{C + FVector2f(0, Up * R * 1.2f), C + FVector2f(R * 1.15f, -Up * R * 0.9f), C + FVector2f(-R * 1.15f, -Up * R * 0.9f)};
 			Pt.Poly(T, M.Color, 6);
 			Pt.Lines({T[0], T[1], T[2], T[0]}, Edge, 1.f, 7);

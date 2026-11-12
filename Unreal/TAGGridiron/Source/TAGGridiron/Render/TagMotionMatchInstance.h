@@ -57,6 +57,9 @@ struct FTagMotionMatchProxy : public FAnimSingleNodeInstanceProxy
 	FTagLocoSwitchNode Switch;
 	int32 SeenDbSerial = -1;
 	float ForceLeft = 0.f; // seconds of ForceInterrupt left after a database change, then back to InterruptOnDatabaseChange
+	// the minimum dwell (see UTagMotionMatchInstance::MinDwell): the clip it holds and the move it was picked for
+	TWeakObjectPtr<const UAnimationAsset> DwellAsset;
+	FVector DwellVel = FVector::ZeroVector;
 };
 
 UCLASS(Transient, NotBlueprintable)
@@ -89,6 +92,28 @@ public:
 	float CrouchSpeedMatchMax = 1.5f;
 	bool bCrouchGait = false;
 	float* RateMultiplierSetting = nullptr; // the node's PlayRateMultiplier, found through reflection
+	/** The player's ground velocity (cm/s, world): the minimum dwell lets a search through early when it changes. */
+	FVector SimVel = FVector::ZeroVector;
+	/** A clip the search picks is held at least this long (searches wait) unless the move changes by more than
+	 *  much (a cut of DwellTurnDeg, a change of speed of DwellBreak cm/s: a burst, a stop) or the databases change. At the
+	 *  node's 66 ms throttle alone the pick changed every 6 frames (0.2 s, p13 telemetry) under a 0.3 s blend, so two to
+	 *  four clips were always mixing on the body: limbs that follow no clip. (A plain 1.5 m/s velocity difference let
+	 *  nearly every search through: a route runner's acceleration and curve cross it in a few frames.) */
+	float MinDwell = 0.3f, DwellBreak = 250.f, DwellTurnDeg = 30.f, BaseThrottle = 0.066f;
+	float* ThrottleSetting = nullptr; // the node's SearchThrottleTime, found through reflection
+	/** The next database change must pick a fresh clip (a start running out, a stop, a crouch): else the playing clip
+	 *  carries on into the new set until the search finds better (a run into the sprint loops, a cut's pivot set). */
+	bool bForceOnDbChange = true;
+	int32 LastDbFamily = -1; // the AAthlete's last set: 0 stop / idle, 1 start, 2 pivot, 3 moving loops
+	bool bLastDbCrouch = false;
+	/** The AAthlete's moving / standing call with hysteresis (a man easing along at walking pace flipped between the stop
+	 *  and start sets every few frames, each a forced fresh pick): StillFor = seconds below the stop line. */
+	bool bMovingLatch = false;
+	float StillFor = 0.f;
+	/** -TagMMWhy: why picks change (logged in totals every 400 switches): the last update's dwell state, time held. */
+	uint8 DiagFlags = 0; // 1 move changed, 2 database changed, 4 forced window, 8 held by the dwell
+	float DiagHeld = 0.f, DiagPrevTime = 0.f;
+	TWeakObjectPtr<const UAnimationAsset> DiagPrev;
 	float SpeedRate = 1.f;                  // the smoothed multiplier applied
 	/** Debug, copied after each worker thread update: where the pick is and what the search thought of it. */
 	float MatchedTime = 0.f, MatchedCost = 0.f, MatchedWantedRate = 1.f, MatchedClipSpeed = 0.f;

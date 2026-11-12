@@ -2166,8 +2166,24 @@ void AMatchDirector::Next()
 	// and the play clock runs with it (a stopped clock: the offense still takes 24-32 s of the 40)
 	HudRunoff = G.q == QBefore ? FMath::Max(0.0, ClockBefore - G.clock) : 0.0;
 	HudRunoffLeft = FMath::Max(0.0, HudRunoff - HudPreRun); // what the scorebug already took off since the whistle stays off
+	bRealClock = UserTeam.has_value() && !bAuto;
+	bClockLive = HudRunoff > 1.0 && G.clockRunning; // (a timeout, or the two-minute warning, stopped it)
+	if (bRealClock)
+	{
+		// real seconds: the play clock keeps running from the whistle, the game clock with it while it runs. What the
+		// scorebug shows stays (a timeout called after it ran; more than the drawn runoff), except at the two-minute
+		// warning, which stops it at 2:00
+		const bool bTwoMinStop = HudRunoff > 0.0 && !G.clockRunning;
+		HudRunoffLeft = bTwoMinStop ? 0.0 : FMath::Max(HudRunoff - HudPreRun, -FMath::Max(0.0, G.clock - 1.0));
+		if (!bPlayClockOn) PlayClockF = 40.f;
+		PlayClockSnap = 0.f;
+		PlayClockRate = 1.f;
+		HudRunoff = HudRunoffLeft;
+		bPlayClockOn = true;
+	}
 	HudPreRun = 0.0;
 	bPreRun = false;
+	if (!bRealClock)
 	{
 		const float Use = HudRunoff > 1.0 ? static_cast<float>(HudRunoff) : FMath::FRandRange(24.f, 32.f);
 		PlayClockSnap = FMath::Clamp(40.f - Use, 1.f, 30.f);
@@ -2235,6 +2251,7 @@ void AMatchDirector::CallPlays(bool bTwo)
 			UTF8_TO_TCHAR(G.home->abbr.c_str()), G.score.home),
 			FString::Printf(TEXT("%s  %d:%02d"), G.q >= 1 && G.q <= 4 ? QName[G.q - 1] : TEXT("OT"), Secs / 60, Secs % 60));
 	}
+	if (!bTwo) HudDown.Reset(); // (the scorebug still read KICKOFF through the first call of a drive)
 	auto Finish = [this](const tag::OffPlay* Op, const tag::DefCall* Dc) { StartPresnap(Op, Dc); };
 	if (bArtTest && !bTwo)
 	{
@@ -2292,7 +2309,9 @@ void AMatchDirector::StartPresnap(const tag::OffPlay* Op, const tag::DefCall* Dc
 	if (!bTwoPoint) HudDown.Reset();
 	if (!bTwoPoint && Op->type != tag::PlayType::Kneel && Op->type != tag::PlayType::Spike)
 	{
-		if (std::optional<tag::Penalty> Pen = G.rollPresnap())
+		std::optional<tag::Penalty> Pen = G.rollPresnap();
+		if (Pen && bRealClock && UserOff() && Pen->name == "Delay of Game") Pen.reset(); // the user's own play clock calls that
+		if (Pen)
 		{
 			G.applyPresnap(*Pen);
 			Overlay->SetFlag(true);
@@ -2361,6 +2380,32 @@ void AMatchDirector::StartPresnap(const tag::OffPlay* Op, const tag::DefCall* Dc
 			: TEXT("1/2/4 game speed   C camera   ESC pause"));
 	BeginPresnapUI();
 	SyncPlay(0.f, 1.f);
+}
+
+void AMatchDirector::SyncRealClock()
+{
+	// the scorebug showed the game clock as the real seconds took it down: the game's clock becomes that (more off if
+	// the offense took longer than the drawn runoff, some back if it snapped sooner)
+	if (!bRealClock || !Game || FMath::Abs(HudRunoffLeft) < 0.01) return;
+	Game->adjustBetweenPlays(-HudRunoffLeft);
+	HudRunoffLeft = 0.0;
+}
+
+void AMatchDirector::DelayOfGame()
+{
+	tag::Game& G = *Game;
+	SyncRealClock();
+	bPlayClockOn = false;
+	if (Overlay->HasModal()) Overlay->ClearModal();
+	if (State == EMatchState::Presnap)
+	{
+		EndPresnapUI();
+		Overlay->SetHint(TEXT(""));
+	}
+	G.delayOfGame();
+	Overlay->SetFlag(true);
+	Overlay->Banner(TEXT("FLAG"), FString(TEXT("Delay of Game  -  ")) + S(G.offense().abbr), Flag);
+	Wait(2.f);
 }
 
 void AMatchDirector::AssignLabels()
@@ -2439,6 +2484,7 @@ void AMatchDirector::OnPlayDead()
 	// the whistle: the play clock starts again at 40; a clock still running (a tackle in bounds) shows its seconds go by
 	PlayClockF = 40.f;
 	bPlayClockOn = true;
+	bRealClock = UserTeam.has_value() && !bAuto;
 	PostAge = 0.f;
 	// a big play: the broadcast's lower third with the man's game so far, this play counted (the book adds it later)
 	if ((R.td == tag::Side::Off || R.yards >= 20) && (R.receiver || R.rusher) && !Sim->isReturn() && Game)
@@ -3805,7 +3851,28 @@ void AMatchDirector::Tick(float Dt)
 		FPlatformMisc::RequestExit(false);
 	}
 	if (bArtTest) TickArtTest(Dt);
-	if (bPlayClockOn)
+	if (bPlayClockOn && bRealClock)
+	{
+		// a human game: real seconds, from the whistle to the snap (the game clock only while it runs, never under 0:01)
+		const bool bBetween = State == EMatchState::Call || State == EMatchState::Presnap || State == EMatchState::Post || State == EMatchState::Wait;
+		if (bBetween && !UGameplayStatics::IsGamePaused(this)) // (the pause menu holds both clocks)
+		{
+			PlayClockF = FMath::Max(0.f, PlayClockF - Dt);
+			if (State == EMatchState::Post || State == EMatchState::Wait) { if (bPreRun) HudPreRun += Dt; }
+			else if (bClockLive && Game) HudRunoffLeft = FMath::Max(HudRunoffLeft - Dt, -FMath::Max(0.0, Game->clock - 1.0));
+			// the user's offense let it run out: delay of game (not on a try)
+			if (PlayClockF <= 0.f && UserOff() && !bTwoPoint && (State == EMatchState::Call || State == EMatchState::Presnap)
+				&& Game && Game->phase == tag::GamePhase::Scrimmage)
+				DelayOfGame();
+		}
+		else if (bBetween) {} // paused
+		else if (State == EMatchState::Kick || State == EMatchState::Final || State == EMatchState::Menu)
+		{
+			bPlayClockOn = false;
+			HudRunoffLeft = 0.0;
+		}
+	}
+	else if (bPlayClockOn)
 	{
 		// the call and the pre-snap take ~8-12 s on screen: the clocks run fast enough to be near the snap value by then
 		// (a user offense that waits sees the play clock reach its snap value and hold)
@@ -3933,11 +4000,13 @@ void AMatchDirector::Tick(float Dt)
 		const bool bStuck = PresnapClock > 12.f && Sim->walking();
 		if (bStuck) UE_LOG(LogTemp, Warning, TEXT("TAG presnap: men still walking after %.1f s, snapping anyway"), PresnapClock);
 		if ((Timer <= 0 && (bCpuSet || bStuck)) || (UserDef() && PresnapClock > 25.f && (bCpuSet || bStuck)) ||
+			(bRealClock && !UserOff() && PlayClockF <= 1.5f && (bCpuSet || bStuck)) || // a CPU offense beats the play clock
 			(bCallShot && PresnapClock > 4.f && bCpuSet) ||
 			(UserOff() && bSpace && !bMenu && !bPreConsumed && !Sim->walking()))
 		{
 			EndPresnapUI();
 			State = EMatchState::Live;
+			SyncRealClock();
 			HudRunoffLeft = 0.0; // the snap: the scorebug clock is the game's again
 			bPlayClockOn = false;
 			Acc = 0;
