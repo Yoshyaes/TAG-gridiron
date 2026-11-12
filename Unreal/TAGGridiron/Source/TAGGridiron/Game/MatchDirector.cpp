@@ -34,6 +34,8 @@
 #include "Materials/MaterialInstanceDynamic.h"
 #include "UnrealClient.h"
 #include "AssetCompilingManager.h"
+#include "Misc/FileHelper.h"
+#include "Misc/Paths.h"
 #if WITH_EDITOR
 #include "ShaderCompiler.h"
 #endif
@@ -179,7 +181,12 @@ void AMatchDirector::BeginPlay()
 		bHighlights = true;
 		HlStart = FPlatformTime::Seconds();
 		if (Overlay) Overlay->SetBroadcastOnly(true);
-		StartMatch(3, 7, false, true, 1, true, 900);
+		bHlFull = FParse::Param(FCommandLine::Get(), TEXT("TagHlFull"));
+		double HlQLen = 900.0;
+		FParse::Value(FCommandLine::Get(), TEXT("TagQuarterLen="), HlQLen);
+		int32 HlWx = 1;
+		FParse::Value(FCommandLine::Get(), TEXT("TagWeather="), HlWx);
+		StartMatch(3, 7, false, true, HlWx, true, HlQLen);
 	}
 	else if (FParse::Param(FCommandLine::Get(), TEXT("TagArtTest")))
 	{
@@ -1677,18 +1684,36 @@ bool AMatchDirector::BeginLoadingScreen(const tag::Team& Home, const tag::Team& 
 void AMatchDirector::TickHighlights(float Dt)
 {
 	if (!bHighlights) return;
+	bool bBusy = FAssetCompilingManager::Get().GetNumRemainingAssets() > 0;
+	// (and the first pack draw, so the opening plays have the whole library)
+	if (bHlFull && HlClip == 0 && FAthleteAssets::Get().bPackLoading) bBusy = true;
 #if WITH_EDITOR
-	if (GShaderCompilingManager && GShaderCompilingManager->GetNumRemainingJobs() > 0) return;
+	bBusy = bBusy || (GShaderCompilingManager && GShaderCompilingManager->GetNumRemainingJobs() > 0);
 #endif
-	if (FAssetCompilingManager::Get().GetNumRemainingAssets() > 0) return;
+	if (bHlFull && bBusy != bHlHeld)
+	{
+		// the whole game is filmed: hold the world (engine pause, the director's Tick stops at bEnginePaused) while
+		// shaders / assets compile, so no snap happens off camera
+		bHlHeld = bBusy;
+		bEnginePaused = bBusy;
+		UGameplayStatics::SetGamePaused(this, bBusy);
+		UE_LOG(LogTemp, Display, TEXT("TAG hl %s for compiles at clip %d"), bBusy ? TEXT("hold") : TEXT("resume"), HlClip);
+	}
+	if (bBusy) return;
 	if (Overlay) Overlay->SetHint(TEXT(""));
-	const bool bRec = State == EMatchState::Live || State == EMatchState::Post || State == EMatchState::Replay;
+	const bool bRec = State == EMatchState::Live || State == EMatchState::Post || State == EMatchState::Replay ||
+		(bHlFull && (State == EMatchState::Presnap || State == EMatchState::Kick));
+	// the pose the last screenshot showed is final now (the bodies evaluate after the director): its telemetry row
+	if (bHlFull && bHlInClip && HlFrame > 0 && !bHlSkipClip) HlTelemetry(HlFrame - 1);
 	if (bRec && !bHlInClip)
 	{
 		bHlInClip = true;
 		bHlReplayLogged = false;
 		++HlClip;
 		HlFrame = 0;
+		// -TagHlFromQ=<q>: the game plays through (same plays, same clip numbers: the sim is deterministic) unfilmed until then
+		static int32 FromQ = FParse::Value(FCommandLine::Get(), TEXT("TagHlFromQ="), FromQ) ? FromQ : 0;
+		bHlSkipClip = bHlFull && Game && Game->q < FromQ;
 		CamMode = HlClip % 4 == 2 ? ECamMode::Sideline : ECamMode::Broadcast;
 		UE_LOG(LogTemp, Display, TEXT("TAG hl clip %d start cam %d"), HlClip, static_cast<int32>(CamMode));
 	}
@@ -1697,8 +1722,14 @@ void AMatchDirector::TickHighlights(float Dt)
 		bHlInClip = false;
 		const tag::PlayLog* L = Game && !Game->log.empty() ? &Game->log.back() : nullptr;
 		UE_LOG(LogTemp, Display, TEXT("TAG hl clip %d end frames %d big %d desc \"%s\""), HlClip, HlFrame, L ? static_cast<int32>(L->big) : 0, L ? *S(L->desc) : TEXT(""));
+		if (bHlFull)
+		{
+			if (!bHlSkipClip) HlFlush();
+			HlTele.Reset();
+			UE_LOG(LogTemp, Display, TEXT("TAG hl clip %d game q%d clock %.0f score %d-%d"), HlClip, Game ? Game->q : 0, Game ? Game->clock : 0.0, Game ? Game->score.away : 0, Game ? Game->score.home : 0);
+		}
 	}
-	if (bRec)
+	if (bRec && !bHlSkipClip)
 	{
 		if (State == EMatchState::Replay && !bHlReplayLogged)
 		{
@@ -1706,14 +1737,88 @@ void AMatchDirector::TickHighlights(float Dt)
 			UE_LOG(LogTemp, Display, TEXT("TAG hl clip %d replay from frame %d"), HlClip, HlFrame);
 		}
 		// (a name with a directory in it is written as given; a bare name would go under Saved/Screenshots)
-		static const FString HlDir = FPaths::ConvertRelativePathToFull(FPaths::ProjectSavedDir() / TEXT("Highlights/frames"));
-		FScreenshotRequest::RequestScreenshot(FString::Printf(TEXT("%s/c%02d_%05d.png"), *HlDir, HlClip, HlFrame++), true, false);
+		static const FString HlDir = []
+		{
+			FString D;
+			if (FParse::Value(FCommandLine::Get(), TEXT("TagHlDir="), D) && !D.IsEmpty()) return D;
+			return FPaths::ConvertRelativePathToFull(FPaths::ProjectSavedDir() / TEXT("Highlights/frames"));
+		}();
+		FScreenshotRequest::RequestScreenshot(bHlFull ? FString::Printf(TEXT("%s/c%03d_%05d.png"), *HlDir, HlClip, HlFrame++)
+			: FString::Printf(TEXT("%s/c%02d_%05d.png"), *HlDir, HlClip, HlFrame++), true, false);
 	}
 	const int32 MaxClips = 18;
-	if ((HlClip >= MaxClips && !bHlInClip) || FPlatformTime::Seconds() - HlStart > 1500.0 || (Game && Game->phase == tag::GamePhase::Final))
+	const bool bFinal = Game && Game->phase == tag::GamePhase::Final;
+	if (bHlFull ? (bFinal && !bHlInClip) : ((HlClip >= MaxClips && !bHlInClip) || FPlatformTime::Seconds() - HlStart > 1500.0 || bFinal))
 	{
-		UE_LOG(LogTemp, Display, TEXT("TAG hl done: %d clips"), HlClip);
+		if (bHlFull) HlFlush();
+		UE_LOG(LogTemp, Display, TEXT("TAG hl done: %d clips%s"), HlClip, bFinal ? TEXT(" (final)") : TEXT(""));
+		if (bHlFull && Game)
+			UE_LOG(LogTemp, Display, TEXT("TAG hl final score %d-%d after %.0f s"), Game->score.away, Game->score.home, FPlatformTime::Seconds() - HlStart);
 		FPlatformMisc::RequestExit(false);
+	}
+}
+
+void AMatchDirector::HlTelemetry(int32 Frame)
+{
+	if (!Sim || !Game) return;
+	auto Bone = [](USkeletalMeshComponent* M, const TCHAR* Name, FVector& Out)
+	{
+		if (!M || M->GetBoneIndex(Name) == INDEX_NONE) return false;
+		Out = M->GetSocketLocation(Name);
+		return true;
+	};
+	const tag::TeamKey OffK = Game->poss;
+	const FVector BallW = Ball && !Ball->IsHidden() ? Ball->GetActorLocation() : FVector(NAN, NAN, NAN);
+	const TCHAR* St = State == EMatchState::Presnap ? TEXT("presnap") : State == EMatchState::Live ? TEXT("live") : State == EMatchState::Post ? TEXT("post")
+		: State == EMatchState::Replay ? TEXT("replay") : State == EMatchState::Kick ? TEXT("kick") : TEXT("other");
+	if (HlTele.IsEmpty())
+		HlTele = TEXT("frame,state,simt,ballmode,bx,by,bz,bwx,bwy,bwz,pid,num,pos,side,role,sstate,sanim,sx,sy,svx,svy,face,eng,ball,stun,hidden,wx,wy,wz,yaw,down,")
+			TEXT("flx,fly,flz,frx,fry,frz,pz,hdz,hrx,hry,hrz,hlx,hly,hlz,anim\n");
+	for (tag::Ent* E : Sim->ents)
+	{
+		AAthlete* A = AthleteFor(E->p, E->side == tag::Side::Off ? OffK : tag::other(OffK));
+		USkeletalMeshComponent* M = A ? A->Visible() : nullptr;
+		const FVector W = A ? A->GetActorLocation() : FVector::ZeroVector;
+		FVector FL(NAN), FR(NAN), Pv(NAN), Hd(NAN), HR(NAN), HL(NAN);
+		if (!Bone(M, TEXT("ball_l"), FL)) Bone(M, TEXT("foot_l"), FL);
+		if (!Bone(M, TEXT("ball_r"), FR)) Bone(M, TEXT("foot_r"), FR);
+		Bone(M, TEXT("pelvis"), Pv);
+		Bone(M, TEXT("head"), Hd);
+		Bone(M, TEXT("hand_r"), HR);
+		Bone(M, TEXT("hand_l"), HL);
+		HlTele += FString::Printf(TEXT("%d,%s,%.3f,%s,%.2f,%.2f,%.2f,%.1f,%.1f,%.1f,%d,%d,%s,%s,%s,%s,%s,%.3f,%.3f,%.3f,%.3f,%.3f,%s,%d,%.2f,%d,%.1f,%.1f,%.1f,%.1f,%d,")
+			TEXT("%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%s\n"),
+			Frame, St, Sim->t, UTF8_TO_TCHAR(tag::ballModeName(Sim->ball.mode)), Sim->ball.pos.x, Sim->ball.pos.y, Sim->ball.pos.z, BallW.X, BallW.Y, BallW.Z,
+			E->p->id, E->p->number, UTF8_TO_TCHAR(tag::posName(E->p->pos)), UTF8_TO_TCHAR(tag::sideName(E->side)), UTF8_TO_TCHAR(E->role.c_str()),
+			UTF8_TO_TCHAR(E->stateName()), UTF8_TO_TCHAR(E->animName()), E->pos.x, E->pos.y, E->vel.x, E->vel.y, E->face,
+			E->engaged ? UTF8_TO_TCHAR(E->engaged->role.c_str()) : TEXT(""), E->hasBall ? 1 : 0, E->stun, A && A->IsHidden() ? 1 : 0,
+			W.X, W.Y, W.Z, A ? A->GetActorRotation().Yaw : 0.f, A && A->IsDown() ? 1 : 0,
+			FL.X, FL.Y, FL.Z, FR.X, FR.Y, FR.Z, Pv.Z, Hd.Z, HR.X, HR.Y, HR.Z, HL.X, HL.Y, HL.Z, A ? *A->TelemetryAnim() : TEXT(""));
+	}
+}
+
+void AMatchDirector::HlFlush()
+{
+	static const FString TeleDir = []
+	{
+		FString D;
+		if (FParse::Value(FCommandLine::Get(), TEXT("TagHlDir="), D) && !D.IsEmpty()) return FPaths::GetPath(D) / TEXT("telemetry");
+		return FPaths::ConvertRelativePathToFull(FPaths::ProjectSavedDir() / TEXT("Highlights/telemetry"));
+	}();
+	if (!HlTele.IsEmpty())
+	{
+		FFileHelper::SaveStringToFile(HlTele, *FString::Printf(TEXT("%s/c%03d.csv"), *TeleDir, HlClip));
+		HlTele.Reset();
+	}
+	if (Sim)
+	{
+		FString Ev = TEXT("t,type,a_role,a_num,b_role,b_num,x,note\n");
+		for (const tag::PlayEvent& V : Sim->events)
+			Ev += FString::Printf(TEXT("%.3f,%s,%s,%d,%s,%d,%.2f,\"%s\"\n"), V.t, UTF8_TO_TCHAR(V.type.c_str()),
+				V.a ? UTF8_TO_TCHAR(V.a->role.c_str()) : TEXT(""), V.a ? V.a->p->number : -1,
+				V.b ? UTF8_TO_TCHAR(V.b->role.c_str()) : TEXT(""), V.b ? V.b->p->number : -1, V.x, UTF8_TO_TCHAR(V.note.c_str()));
+		Ev += FString::Printf(TEXT("# end \"%s\"\n"), UTF8_TO_TCHAR(Sim->endReason.c_str()));
+		FFileHelper::SaveStringToFile(Ev, *FString::Printf(TEXT("%s/ev%03d.csv"), *TeleDir, HlClip));
 	}
 }
 
@@ -1730,6 +1835,13 @@ void AMatchDirector::Next()
 	if (G.q == 3 && LastQ == 2)
 	{
 		LastQ = 3;
+		if (bHighlights || !UserTeam.has_value())
+		{
+			// a CPU-vs-CPU game (watched or filmed) has nobody to press Start 2nd Half: show halftime and go on
+			Overlay->Banner(TEXT("HALFTIME"), FString::Printf(TEXT("%s %d  -  %s %d"), *FString(UTF8_TO_TCHAR(G.away->abbr.c_str())),
+				G.score.away, *FString(UTF8_TO_TCHAR(G.home->abbr.c_str())), G.score.home), FLinearColor::White);
+			return Wait(bHighlights ? 3.f : 6.f);
+		}
 		State = EMatchState::Paused;
 		Overlay->ShowBoxScore(TEXT("Halftime"), TEXT("Start 2nd Half"), [this] { State = EMatchState::Wait; Timer = 0; });
 		return;
@@ -1746,6 +1858,7 @@ void AMatchDirector::Next()
 		const int D = G.worldDir(KT);
 		auto KickU = Pick11(G.teamOf(KT), "K");
 		auto RecvU = Pick11(G.teamOf(tag::other(KT)), "KR");
+		HudDown = TEXT("KICKOFF");
 		const tag::SpecialResult R = G.kickoff(false, true);
 		if (G.pendingReturn) return StartLiveReturn(KickU, RecvU);
 		return StartKick(R, D, 0, KickU, RecvU, 35);
@@ -1755,6 +1868,7 @@ void AMatchDirector::Next()
 		auto Decide = [this](bool bTwo)
 		{
 			tag::Game& GG = *Game;
+			HudDown = bTwo ? TEXT("2-PT TRY") : TEXT("EXTRA POINT");
 			if (!bTwo)
 			{
 				const int D = GG.worldDir();
@@ -1892,6 +2006,7 @@ void AMatchDirector::CallPlays(bool bTwo)
 void AMatchDirector::StartPresnap(const tag::OffPlay* Op, const tag::DefCall* Dc)
 {
 	tag::Game& G = *Game;
+	if (!bTwoPoint) HudDown.Reset();
 	if (!bTwoPoint && Op->type != tag::PlayType::Kneel && Op->type != tag::PlayType::Spike)
 	{
 		if (std::optional<tag::Penalty> Pen = G.rollPresnap())
@@ -2369,6 +2484,7 @@ void AMatchDirector::DoPunt()
 {
 	tag::Game& G = *Game;
 	const int D = G.worldDir();
+	HudDown = FString(UTF8_TO_TCHAR(G.downText().c_str())) + TEXT("  ·  ") + FString(UTF8_TO_TCHAR(G.ydLine().c_str()));
 	auto KickU = Pick11(G.offense(), "P");
 	auto RecvU = Pick11(G.defense(), "KR");
 	const double Los = G.ballOn;
@@ -2382,6 +2498,7 @@ void AMatchDirector::DoFG()
 {
 	tag::Game& G = *Game;
 	const int D = G.worldDir();
+	HudDown = FString(UTF8_TO_TCHAR(G.downText().c_str())) + TEXT("  ·  ") + FString(UTF8_TO_TCHAR(G.ydLine().c_str()));
 	auto KickU = Pick11(G.offense(), "K");
 	auto DefU = Pick11(G.defense(), "D");
 	const double Los = G.ballOn;
@@ -3361,7 +3478,14 @@ void AMatchDirector::Tick(float Dt)
 		const bool bMenu = PreMode != EPre::Base;
 		if (!(UserDef() && bMenu)) Timer -= SDt;
 		PresnapClock += SDt;
-		if (Timer <= 0 || (UserDef() && PresnapClock > 25.f) || (bCallShot && PresnapClock > 4.f && !Sim->walking()) ||
+		SetClock = Sim->walking() ? 0.f : SetClock + SDt;
+		// the CPU snaps only once every man has been set for a full second (the rules; no snap teleports). A man who
+		// somehow never reaches his spot is placed after 12 s so the game cannot hang (logged).
+		const bool bCpuSet = SetClock >= 1.f;
+		const bool bStuck = PresnapClock > 12.f && Sim->walking();
+		if (bStuck) UE_LOG(LogTemp, Warning, TEXT("TAG presnap: men still walking after %.1f s, snapping anyway"), PresnapClock);
+		if ((Timer <= 0 && (bCpuSet || bStuck)) || (UserDef() && PresnapClock > 25.f && (bCpuSet || bStuck)) ||
+			(bCallShot && PresnapClock > 4.f && bCpuSet) ||
 			(UserOff() && bSpace && !bMenu && !bPreConsumed && !Sim->walking()))
 		{
 			EndPresnapUI();

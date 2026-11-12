@@ -459,6 +459,7 @@ FText SGridironOverlay::DownText() const
 {
 	if (!Director || !Director->Game) return FText();
 	const tag::Game& G = *Director->Game;
+	if (!Director->HudDown.IsEmpty() && G.phase != tag::GamePhase::Final) return T(Director->HudDown);
 	switch (G.phase)
 	{
 	case tag::GamePhase::Final: return T(TEXT("FINAL"));
@@ -471,9 +472,13 @@ FText SGridironOverlay::DownText() const
 FText SGridironOverlay::TickerText() const
 {
 	if (!Director || !Director->Game) return FText();
+	// a broadcast shows the play-by-play between plays, never over a live snap or a kick (a canned kick's result is
+	// already in the log before it is animated)
+	const EMatchState St = Director->State;
+	if (St == EMatchState::Presnap || St == EMatchState::Live || St == EMatchState::Kick || St == EMatchState::Replay) return FText();
 	const auto& Log = Director->Game->log;
 	FString Out;
-	for (int i = static_cast<int>(Log.size()) - 1, n = 0; i >= 0 && n < 4; --i, ++n)
+	for (int i = static_cast<int>(Log.size()) - 1, n = 0; i >= 0 && n < 2; --i, ++n)
 	{
 		if (n) Out += TEXT("\n");
 		Out += S(Log[i].desc);

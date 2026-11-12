@@ -3066,6 +3066,20 @@ bool AAthlete::GetBallHold(FVector& OutLoc, FRotator& OutRot) const
 	return true;
 }
 
+FString AAthlete::TelemetryAnim() const
+{
+	if (bRagdoll) return TEXT("ragdoll");
+	if (bReplaying) return TEXT("replay");
+	if (bFalling) return FString::Printf(TEXT("fall:%s@%.2f"), *GetNameSafe(FallClip), FallT);
+	if (bGettingUp) return FString::Printf(TEXT("getup:%s"), *GetNameSafe(CurrentClip));
+	if (OneShot && OneShotLeft > 0.f) return FString::Printf(TEXT("one:%s"), *GetNameSafe(OneShot));
+	if (const UTagMotionMatchInstance* M = MatchInstance())
+		return FString::Printf(TEXT("mm:%s"), *GetNameSafe(M->GetMatchedAsset()));
+	if (UAnimSingleNodeInstance* I = Body->GetSingleNodeInstance())
+		return FString::Printf(TEXT("clip:%s"), *GetNameSafe(I->GetCurrentAsset()));
+	return FString::Printf(TEXT("clip:%s"), *GetNameSafe(CurrentClip));
+}
+
 FString AAthlete::DebugAnimState() const
 {
 	const UAnimSingleNodeInstance* I = Body->GetSingleNodeInstance();

@@ -125,6 +125,7 @@ void AMatchDirector::BeginPresnapUI()
 	PreMode = EPre::Base;
 	PreEnt = nullptr;
 	PresnapClock = 0.f;
+	SetClock = 0.f;
 	AudibleSel = 0;
 	const bool bUser = UserOff() || UserDef();
 	ArtAuto = bUser ? 2.4f : 0.f;

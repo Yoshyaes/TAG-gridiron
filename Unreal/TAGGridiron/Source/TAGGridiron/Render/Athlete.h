@@ -87,6 +87,9 @@ public:
 
 	void SetSelected(bool bSel);
 	FString DebugAnimState() const;
+	/** -TagHlFull telemetry: what drives the body this frame, "mm:<matched clip>", "clip:<asset>", "one:<asset>",
+	 *  "fall:<asset>@t", "getup:<asset>", "ragdoll" or "replay" (the sim's own anim name is logged beside it). */
+	FString TelemetryAnim() const;
 
 	/** Feed the procedural football layer (throw, ball security, catch, block, tackle, stance, look). */
 	void SetFootball(const FAthleteFootball& F, float DeltaTime);

@@ -44,6 +44,9 @@ public:
 	// ---- shared state read by the HUD
 	tag::League League;
 	std::unique_ptr<tag::Game> Game;
+	/** What the scorebug's down box shows while a kick or try is on screen: the sim has already moved the game on (the next
+	 *  phase, down and spot) before the play is animated. Empty = read the game live (scrimmage presnap and play). */
+	FString HudDown;
 	std::unique_ptr<tag::PlaySim> Sim;
 	const tag::PlaySim* EventSim = nullptr;  // sim whose events were last scanned for keyed one-shots
 	size_t SeenEvents = 0;
@@ -151,6 +154,8 @@ private:
 	int32 AudibleSel = 0;
 	float ArtAuto = 0.f;         // the art shows itself for a moment as the play comes in
 	float PresnapClock = 0.f;
+	/** Seconds every man has been set (nobody walking to his spot): the CPU snaps only after a full second, as the rules require. */
+	float SetClock = 0.f;
 	bool bPreConsumed = false;   // a pre-snap control used this frame's button (it does not also snap the ball)
 	UPROPERTY()
 	TObjectPtr<class ATagPlayArt> PlayArt;
@@ -203,6 +208,15 @@ private:
 	bool bHlInClip = false, bHlReplayLogged = false;
 	double HlStart = 0.0;
 	void TickHighlights(float Dt);
+	/** -TagHighlights -TagHlFull [-TagHlDir=<dir>] [-TagQuarterLen=<s>]: the whole game to the final whistle (no clip
+	 *  or time cap), the pre-snap and kicks filmed too, and per frame a row per man (sim state + the shown body's
+	 *  bones and the clip driving it) in <dir>/../telemetry/c<clip>.csv, the play's events in ev<clip>.csv. */
+	bool bHlFull = false;
+	bool bHlHeld = false;
+	bool bHlSkipClip = false;
+	FString HlTele;
+	void HlTelemetry(int32 Frame);
+	void HlFlush();
 	/** -TagPauseTest (a -TagPlayNow user game): once the play call is up, Esc; checks the world is held (bone
 	 *  positions a second apart), Esc again; checks the play call is back. Screenshots each step, PASS / FAIL lines. */
 	/** -TagSoak=<seconds> (-TagQuarterLen=<s>): a CPU game left running that long, then exit (the pack library's
