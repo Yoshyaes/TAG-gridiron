@@ -542,7 +542,9 @@ std::unique_ptr<PlaySim> Game::makePlay(const OffPlay& offPlay, const DefCall& d
   cfg.userSide = userSide;
   cfg.down = static_cast<double>(down);
   cfg.toGo = toGo;
-  return std::make_unique<PlaySim>(cfg);
+  auto sim = std::make_unique<PlaySim>(cfg);
+  sim->onStep = onSimStep;
+  return sim;
 }
 
 PlayLog Game::finishPlay(PlaySim& sim) {
@@ -557,6 +559,7 @@ PlayLog Game::finishPlay(PlaySim& sim) {
   auto st = [this](const Player& p, const Team& tm) -> PlayerLine& { return stats.line(p, tm.abbr); };
   const int startDown = down;
   const double startToGo = toGo;
+  if (onPlayResult) onPlayResult(sim, res);
   // fatigue / injuries
   for (Ent* e : sim.ents) {
     Player* p = e->p;
@@ -564,10 +567,14 @@ PlayLog Game::finishPlay(PlaySim& sim) {
   }
   std::set<int> onField;
   for (Ent* e : sim.ents) onField.insert(e->p->id);
-  for (const auto& p : home->roster)
-    if (!onField.count(p->id)) p->fatigue = (std::max)(0.0, p->fatigue - 0.05);
-  for (const auto& p : away->roster)
-    if (!onField.count(p->id)) p->fatigue = (std::max)(0.0, p->fatigue - 0.05);
+  for (const auto& p : home->roster) {
+    p->onFieldLast = onField.count(p->id) > 0;
+    if (!p->onFieldLast) p->fatigue = (std::max)(0.0, p->fatigue - 0.05);
+  }
+  for (const auto& p : away->roster) {
+    p->onFieldLast = onField.count(p->id) > 0;
+    if (!p->onFieldLast) p->fatigue = (std::max)(0.0, p->fatigue - 0.05);
+  }
   for (Ent* e : sim.ents) {
     if (rng.chance(0.00028)) {
       static const std::vector<double> kWeeks = {0.5, 1, 2, 4, 8};

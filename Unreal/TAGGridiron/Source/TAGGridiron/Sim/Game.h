@@ -27,6 +27,7 @@
 #pragma once
 
 #include <cstdint>
+#include <functional>
 #include <memory>
 #include <optional>
 #include <string>
@@ -191,6 +192,10 @@ class Game {
                                     std::optional<bool> flip = std::nullopt);
   /** Apply finished play. Returns (a copy of) the log line. */
   PlayLog finishPlay(PlaySim& sim);
+  /** Optional observer of every finished scrimmage play (headless realism metrics). */
+  std::function<void(const PlaySim&, const PlayResult&)> onPlayResult;
+  /** Optional observer handed to every scrimmage sim (called after each step). */
+  std::function<void(const PlaySim&)> onSimStep;
   std::string describe(const PlayResult& res, const OffPlay& play, const PlaySim& sim) const;
 
   // ---- special teams

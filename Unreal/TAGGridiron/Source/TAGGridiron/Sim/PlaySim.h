@@ -19,6 +19,7 @@
 #pragma once
 
 #include <deque>
+#include <functional>
 #include <optional>
 #include <string>
 #include <unordered_map>
@@ -34,6 +35,9 @@
 namespace tag {
 
 constexpr double G = 10.72;  // gravity in yd/s^2
+// The end line (back of the end zone) and the deepest spot a pass, route or zone may aim at.
+constexpr double END_LINE = 110.0;
+constexpr double DEEP_AIM = 108.5;
 constexpr double SIM_DT = 1.0 / 60.0;
 
 enum class Precip { None, Rain, Snow };
@@ -111,6 +115,10 @@ class Ent {
   double gap = 0;  // run-fit gap y
   double getOff = 0;
   double sprintT = 0;
+  /** A velocity change (juke, catch, broken tackle) spread over a human contact time instead of one tick. */
+  V2 impulseRate{0, 0};
+  double impulseT = 0;
+  bool catchAdjust = false;  // tracking a pass thrown to him (relaxed lateral limit)
   /** deep-third / half / quarter / single-high defender: keeps last-line leverage */
   bool deepRole = false;
   bool eligible = false;
@@ -139,6 +147,8 @@ struct Ball {
   double spin = 0;
   bool lob = false;
   double t = 0;
+  V2 aimNoErr{0, 0};  // where the QB meant the ball to meet the receiver (before his error)
+  double flightT = 0;  // planned flight time
 };
 
 struct PlayEvent {
@@ -181,6 +191,9 @@ struct PlayResult {
   int airYards = 0;
   int yac = 0;
   bool deepContested = false;
+  int throwPath = -1;  // what made the QB throw: 0 read, 1 hot (rusher closing), 2 best under pressure, 3 quick game
+  double olBlockDepth = -99;  // deepest an offensive lineman was engaged in a block (yards past the LOS)
+  double catchSep = -1;  // yards from the catcher to the nearest defender at the catch (-1: no catch)
   bool thrownAway = false;
   bool pressured = false;
   double timeToThrow = 0;
@@ -319,6 +332,7 @@ class PlaySim {
   size_t readIdx = 0;
   double readT = 0;
   bool dropDone = false;
+  double dropDoneT = 0;  // sim time the QB hit the top of his drop
   double throwStart = -1;
   bool handedOff = false;
   bool runRead = false;
@@ -335,6 +349,9 @@ class PlaySim {
   bool scramble = false;
   int brokenTackles = 0;
   double catchX = 0;
+  double catchSep = -1;
+  double olBlockDepth = -99;
+  int throwPath = -1;
   bool firstContact = false;
   const PlayConfig cfg;
   const double los;
@@ -360,6 +377,8 @@ class PlaySim {
   Ent* offRole(const std::string& role) const;
   Ent* defRole(const std::string& role) const;
   bool isLive() const { return phase == SimPhase::Live; }
+  /** Optional observer called after every step (headless realism metrics). */
+  std::function<void(const PlaySim&)> onStep;
 
   // ---- main loop
   /** Advance one tick (default 1/60 s). No-op once the play is dead. */
@@ -381,6 +400,13 @@ class PlaySim {
   double releaseTime(const Ent* qbEnt) const;
   void startThrow(Ent* qbEnt, Ent* tgt, bool lob);
   double throwSpeed(const Ent* qbEnt) const;
+  /** Longest pass (yards of air from the QB) the arm can put on a receiver. */
+  double maxAir(const Ent* qbEnt) const;
+  bool trailPlay(Ent* e, Ent* c);
+  /** Change e's velocity by dv over dur seconds (no single-frame velocity jumps). */
+  void impulse(Ent* e, const V2& dv, double dur);
+  V2 steerVel(const Ent* e, const V2& vel, const V2& want, double dt) const;
+  V2 routeWant(const Ent* e, const V2& pos, const V2& vel, size_t& idx) const;
   /** Expected separation (yards) at the catch point if thrown now. */
   double openness(const Ent* r, const Ent* qbEnt) const;
   void throwBall(Ent* qbEnt, Ent* tgt, bool lob);

@@ -454,6 +454,62 @@ int main() {
     check(std::fabs(a.first + c.first) < 1e-9, "flip did not mirror X");
   });
 
+  // ---- realism plan, phase 1 regressions
+  t("realism: passes stay on the field (no ball past the end line or sidelines, sane apex)", [&] {
+    double maxX = 0, maxZ = 0, maxAirYd = 0;
+    for (int i = 0; i < 160; ++i) {
+      auto g = scrimmage(700 + i, i % 32, (i + 5) % 32);
+      g->ballOn = i % 2 ? 40 : 75;  // a long field and the red zone
+      auto sim = g->makePlay(*playById(i % 3 ? "empty_verts" : "dbl_postwheel"), *defById(i % 2 ? "nk_c3" : "base_c1"));
+      while (sim->isLive()) {
+        sim->step();
+        if (sim->ball.mode == BallMode::Air) {
+          maxX = (std::max)(maxX, sim->ball.pos.x);
+          maxZ = (std::max)(maxZ, sim->ball.pos.z);
+        }
+      }
+      maxAirYd = (std::max)(maxAirYd, static_cast<double>(sim->result->airYards));
+    }
+    check(maxX <= END_LINE + 1.6, "ball in the air reached x=" + fx(maxX, 1));
+    check(maxZ <= 33, "pass apex " + fx(maxZ, 1) + " yd (30 m = 32.8 yd)");
+    check(maxAirYd <= 85, "air yards " + fx(maxAirYd, 0));
+  });
+
+  t("realism: starters stay in (no QB change within a possession without an injury)", [&] {
+    int swaps = 0;
+    for (int gi = 0; gi < 6; ++gi) {
+      GameOptions o;
+      o.seed = 900 + gi;
+      Game g(*league[gi], *league[gi + 10], o);
+      int lastQb = -1, lastPoss = -1;
+      g.onPlayResult = [&](const PlaySim& sim, const PlayResult&) {
+        const int qid = sim.qb->p->id;
+        const bool hurt = lastQb >= 0 && sim.qb->p->id != lastQb;
+        if (hurt && lastPoss == static_cast<int>(g.poss)) {
+          bool starterHurt = false;
+          for (const auto& p : g.offense().roster)
+            if (p->id == lastQb && p->injuredWeeks > 0) starterHurt = true;
+          if (!starterHurt) swaps++;
+        }
+        lastQb = qid;
+        lastPoss = static_cast<int>(g.poss);
+      };
+      g.simToEnd();
+    }
+    check(swaps == 0, std::to_string(swaps) + " QB swaps within possessions");
+  });
+
+  t("realism: offensive linemen do not block far downfield on breakaways", [&] {
+    double deepest = -99;
+    for (int i = 0; i < 300; ++i) {
+      auto g = scrimmage(1300 + i, i % 32, (i + 9) % 32);
+      g->ballOn = 20 + (i % 5) * 10;
+      auto sim = g->makePlay(*playById(i % 2 ? "trips_draw" : "i_power"), *defById("nk_c3"));
+      deepest = (std::max)(deepest, sim->runToEnd().olBlockDepth);
+    }
+    check(deepest <= 17, "an OL was still blocking " + fx(deepest, 1) + " yd past the line");
+  });
+
   std::printf("\n%d passed, %d failed\n", passCount, failCount);
   return failCount ? 1 : 0;
 }

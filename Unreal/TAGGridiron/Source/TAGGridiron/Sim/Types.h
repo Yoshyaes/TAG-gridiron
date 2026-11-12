@@ -97,6 +97,8 @@ struct Player {
   /** 0 = fresh, 1 = exhausted. Persisted across plays within a game. */
   double fatigue = 0;
   double injuredWeeks = 0;
+  /** Was on the field for the last snap (substitution hysteresis: the man in the game stays in). */
+  bool onFieldLast = false;
 };
 
 struct TeamColors {
