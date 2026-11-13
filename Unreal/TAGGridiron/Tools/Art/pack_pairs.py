@@ -20,10 +20,15 @@ import re
 import unreal
 
 PROJ = unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_dir())
-SRC = os.path.join(PROJ, "RawArt", "Anim", "Pack", "Tackles")
-OUT = os.path.join(PROJ, "Content", "TAG", "Anim", "Pack", "pack_pairs.json")
-LIB = "/Game/TAG/Anim/Pack/Tackles/"
+# TAG_ANIM_RIG=hero: the hero-skeleton library (the captures on their own bodies: contacts measured at true size)
+HERO = os.environ.get("TAG_ANIM_RIG", "") == "hero"
+SRC = os.path.join(PROJ, "RawArt", "Anim", "PackHero" if HERO else "Pack", "Tackles")
+OUT = os.path.join(PROJ, "Content", "TAG", "AnimH" if HERO else "Anim", "Pack", "pack_pairs.json")
+LIB = "/Game/TAG/AnimH/Pack/Tackles/" if HERO else "/Game/TAG/Anim/Pack/Tackles/"
 opts = unreal.AnimPoseEvaluationOptions()
+_skel = unreal.load_asset("/Game/TAG/Hero/Rig/SKM_TAG_HeroRig_Skeleton" if HERO else "/Game/Characters/UEFN_Mannequin/Meshes/SK_UEFN_Mannequin")
+ROOT_REST_YAW = unreal.AnimPoseExtensions.get_bone_pose(unreal.AnimPoseExtensions.get_reference_pose(_skel), "root",
+                                                        unreal.AnimPoseSpaces.LOCAL).rotation.rotator().yaw
 SKIP = ("Strip", "Whiff", "Miss", "Sack", "Pile", "Gang", "Sideline", "Celeb", "Fumble", "Brkn", "Broken", "Spin", "Hurdle", "Truck",
         "StiffArm", "Assist", "3Man", "Double", "Catch", "Drop", "Jump", "INT", "Int_", "Swat", "Knock", "Pitch", "on_Ground", "Juke")
 CHECK = ("Tackle_D_Win_12_D1_HeadLeft", "Tackle_O_Win_12_D1_HeadLeft", "Tackle_Neu_12_D5_HeadLeft", "Tackle_Neu_12_D3_HeadLeft", "Tackle_Dive_Low_from_D5")
@@ -58,7 +63,9 @@ def man(anim, j):
         p = bone(anim, t, "pelvis")
         rx, ry = clip_xy(r)
         px, py = clip_xy(p)
-        yaw = -r.rotation.rotator().yaw  # Unreal's yaw turns right; the clip frame's + turns left
+        # Unreal's yaw turns right; the clip frame's + turns left. Relative to the root's rest yaw (the hero rig's root
+        # rests turned 180 deg; with the raw yaw every hero pair came out mirrored through the tackler, Ox / Oy negated)
+        yaw = -(r.rotation.rotator().yaw - ROOT_REST_YAW)
         rows.append((world_of(anc, h0, px, py), world_of(anc, h0, rx, ry), h0 + yaw))
     return rows, L
 

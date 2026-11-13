@@ -37,17 +37,38 @@ FOLDER = {"Kit": "Kits", "Rig": "Rig", "Helmet": "Helmets", "Cap": "Helmets", "H
 BOOT = {"hero": "SKM_TAG_HeroRig", "crowd": "SKM_TAG_CrowdRig", "male": "SKM_TAG_MaleRig", "female": "SKM_TAG_FemaleRig",
         "child": "SKM_TAG_ChildRig", "sideplayer": "SKM_TAG_SidePlayerRig"}
 REPORT = {"meshes": [], "errors": [], "textures": 0, "materials": 0}
+# channel layout of the pack's colour textures (Tools/Art/hero_tex_layout.py): "R" / "RB" / "RG" are packed gear maps
+_LAYOUT_FILE = os.path.join(RAW, "tex_layout.json")
+LAYOUT = json.load(open(_LAYOUT_FILE)) if os.path.exists(_LAYOUT_FILE) else {}
+
+# pack characters the game cannot show as the pack has them (found in the Story gallery, the same on both animation
+# trees): imported, but left out of the catalog
+UNUSABLE = {}
+# (repaired in the build instead: Reporter1's torn top is re-skinned, hero_full.py reskin_far; Watson's sleeveless
+# athletic outfit takes the pack's shared full arm under his own skin texture; CoachTexans, whose every texture is the
+# missing-texture rainbow, gets a donor face, skin in its tone, a close crop and a team-painted outfit)
 
 COLOR_HLSL = r"""
-float3 c = BC.rgb;
-float lum = dot(BC.rgb, float3(0.3, 0.59, 0.11));
-if (Mode < 0.5) c = BC.rgb * Tint.rgb;                                  // plain
-else if (Mode < 1.5) c = lerp(BC.rgb, BC.rgb * Tint.rgb, BC.a);        // alpha marks the team coloured cloth (fans)
+// Packed: one of the pack's gear maps the extraction wrote into the red channel (Madden's single-channel BC4 maps),
+// some with a region mask in blue (cleats: sole, heel, tongue, brand mark) or green. Madden shades them as a grey
+// overlay, mid grey = the gear colour, the mask picking the second colour (Tools/Art/hero_tex_layout.py).
+float4 B = BC;
+float reg = 0.0;
+if (Packed > 0.5)
+{
+    float g = pow(saturate(2.0 * pow(max(BC.r, 0.0), 1.0 / 2.2)), 2.2);
+    reg = saturate(BC.g + BC.b);
+    B = float4(g, g, g, BC.a);
+}
+float3 c = B.rgb;
+float lum = dot(B.rgb, float3(0.3, 0.59, 0.11));
+if (Mode < 0.5) c = B.rgb * lerp(Tint.rgb, Trim.rgb, reg);             // plain (packed: the mask takes the trim)
+else if (Mode < 1.5) c = lerp(B.rgb, B.rgb * Tint.rgb, B.a);           // alpha marks the team coloured cloth (fans)
 else if (Mode < 2.5)
 {
     // recolour a baked colour by its shading; the flat neon patches are logo placeholders -> trim
-    bool neon = BC.g > 0.7 && BC.r < 0.75 && BC.b < 0.3 && BC.g > BC.r + 0.25;
-    c = neon ? Trim.rgb : lerp(BC.rgb, Tint.rgb * saturate(lum / max(LumRef, 0.02)), AlphaTint > 0.5 ? saturate(BC.a * 1.25) : 1.0);
+    bool neon = Packed < 0.5 && BC.g > 0.7 && BC.r < 0.75 && BC.b < 0.3 && BC.g > BC.r + 0.25;
+    c = neon ? Trim.rgb : lerp(B.rgb, lerp(Tint.rgb, Trim.rgb, reg) * saturate(lum / max(LumRef, 0.02)), AlphaTint > 0.5 && Packed < 0.5 ? saturate(BC.a * 1.25) : 1.0);
 }
 else if (Mode > 3.5)
 {
@@ -116,7 +137,7 @@ if (NumOn > 0.5)
 }
 return c;
 """
-SCALARS = {"Mode": 0.0, "AlphaTint": 1.0, "LumRef": 1.0, "NumOn": 0.0, "Number": 0.0, "NeckZ": 157.0, "TorsoY": 3.0, "NumFlip": 1.0,
+SCALARS = {"Mode": 0.0, "Packed": 0.0, "TeamGlove": 0.0, "AlphaTint": 1.0, "LumRef": 1.0, "NumOn": 0.0, "Number": 0.0, "NeckZ": 157.0, "TorsoY": 3.0, "NumFlip": 1.0,
            "NumHF": 19.0, "NumTopF": 14.0, "NumHB": 25.0, "NumTopB": 12.0,
            # helmet side mark (Shell): centre a touch behind the ear line, 11 x 10 cm, on the side past |x| 7 cm
            "LogoOn": 0.0, "LogoIdx": 0.0, "LogoX": 7.0, "LogoY": -1.0, "LogoZ": 174.5, "LogoW": 11.0, "LogoH": 10.0}
@@ -193,7 +214,24 @@ def raw_tex(name, kind="mask"):
 
 
 # ------------------------------------------------------------------ masters
-def master(name, masked):
+SSS_PROFILE = MATDIR + "/SSP_TAG_Skin"
+
+
+def skin_profile():
+    """The subsurface profile the skin master uses (engine defaults are a human skin profile)."""
+    if EAL.does_asset_exist(SSS_PROFILE):
+        return unreal.load_asset(SSS_PROFILE)
+    fac = getattr(unreal, "SubsurfaceProfileFactory", None)
+    if fac is None:
+        return None
+    ensure_dir(MATDIR)
+    prof = tools.create_asset("SSP_TAG_Skin", MATDIR, unreal.SubsurfaceProfile, fac())
+    if prof:
+        EAL.save_loaded_asset(prof, only_if_is_dirty=False)
+    return prof
+
+
+def master(name, masked, skin=False):
     path = MATDIR + "/" + name
     if EAL.does_asset_exist(path) and os.environ.get("TAG_HERO_MATS") != "1":
         return unreal.load_asset(path)
@@ -208,6 +246,15 @@ def master(name, masked):
         m.set_editor_property("blend_mode", unreal.BlendMode.BLEND_MASKED)
         m.set_editor_property("two_sided", True)
         m.set_editor_property("opacity_mask_clip_value", 0.4)
+    if skin:
+        # the pack's skin maps carry subsurface (B) and translucency (A) beside roughness and specular: a scattering
+        # skin, not Default Lit plastic (faces, arms, legs)
+        prof = skin_profile()
+        if prof:
+            m.set_editor_property("shading_model", unreal.MaterialShadingModel.MSM_SUBSURFACE_PROFILE)
+            m.set_editor_property("subsurface_profile", prof)
+        else:
+            m.set_editor_property("shading_model", unreal.MaterialShadingModel.MSM_SUBSURFACE)
     y = [0]
 
     def node(cls, x=-1300):
@@ -264,12 +311,32 @@ def master(name, masked):
         MEL.connect_material_expressions(bc, "RGB", mul, "A")
         MEL.connect_material_expressions(tint, "", mul, "B")
         MEL.connect_material_property(mul, "", unreal.MaterialProperty.MP_BASE_COLOR)
-        MEL.connect_material_property(bc, "A", unreal.MaterialProperty.MP_OPACITY_MASK)
+        # strands: the pack's hair normal, and a dithered edge the temporal AA resolves into soft strands (a hard
+        # 0.4 clip aliased into a cut-out helmet of hair)
+        hn = tex("Normal", texture(os.path.join(RAW, "Textures", "T_TAG_Hero_FlatN.png"), "normal"), unreal.MaterialSamplerType.SAMPLERTYPE_NORMAL)
+        MEL.connect_material_property(hn, "RGB", unreal.MaterialProperty.MP_NORMAL)
+        dfn = unreal.load_asset("/Engine/Functions/Engine_MaterialFunctions02/Utility/DitherTemporalAA")
+        dith = MEL.create_material_expression(m, unreal.MaterialExpressionMaterialFunctionCall, -500, 300) if dfn else None
+        if dith:
+            dith.set_editor_property("material_function", dfn)
+        if dith and MEL.connect_material_expressions(bc, "A", dith, "Alpha Threshold"):
+            MEL.connect_material_property(dith, "", unreal.MaterialProperty.MP_OPACITY_MASK)
+        else:
+            MEL.connect_material_property(bc, "A", unreal.MaterialProperty.MP_OPACITY_MASK)
         MEL.connect_material_property(scalar("Roughness", 0.55), "", unreal.MaterialProperty.MP_ROUGHNESS)
         MEL.connect_material_property(scalar("Specular", 0.35), "", unreal.MaterialProperty.MP_SPECULAR)
     else:
         mask = tex("Mask", raw_tex("T_TAG_Hero_Black"), unreal.MaterialSamplerType.SAMPLERTYPE_LINEAR_COLOR)
         nrm = tex("Normal", texture(os.path.join(RAW, "Textures", "T_TAG_Hero_FlatN.png"), "normal"), unreal.MaterialSamplerType.SAMPLERTYPE_NORMAL)
+        # the normal from the mesh's second UV set when NormalUV1 (helmet shells: the pack's vent / hardware detail
+        # normal lies on its own set, kept as TexCoord 1 by hero_build.py)
+        uv1 = node(unreal.MaterialExpressionTextureCoordinate)
+        uv1.set_editor_property("coordinate_index", 1)
+        nuv = custom("return NormalUV1 > 0.5 ? UV1 : UV0;", unreal.CustomMaterialOutputType.CMOT_FLOAT2, ["UV0", "UV1", "NormalUV1"], "normal uv")
+        MEL.connect_material_expressions(cell, "", nuv, "UV0")
+        MEL.connect_material_expressions(uv1, "", nuv, "UV1")
+        MEL.connect_material_expressions(scalar("NormalUV1", 0.0), "", nuv, "NormalUV1")
+        MEL.connect_material_expressions(nuv, "", nrm, "UVs")
         rsm = tex("RSM", raw_tex("T_TAG_Hero_RSM", "linear"), unreal.MaterialSamplerType.SAMPLERTYPE_LINEAR_COLOR)
         pos = node(unreal.MaterialExpressionPreSkinnedPosition)
         vi = node(unreal.MaterialExpressionVertexInterpolator)
@@ -293,8 +360,40 @@ def master(name, masked):
             MEL.connect_material_expressions(vector(k, v), "", col, k)
         for k, v in SCALARS.items():
             MEL.connect_material_expressions(scalar(k, v), "", col, k)
-        MEL.connect_material_property(col, "", unreal.MaterialProperty.MP_BASE_COLOR)
-        MEL.connect_material_property(nrm, "RGB", unreal.MaterialProperty.MP_NORMAL)
+        # the pack's decal layer (logoOverlayTexture: the cleats' brand marks), over the colour by its alpha
+        # (an sRGB default: a linear one fails the Color sampler and the whole master falls back to the default material)
+        dec = tex("Decal", raw_tex("T_TAG_Hero_White", "color"), unreal.MaterialSamplerType.SAMPLERTYPE_COLOR)
+        over = custom("return lerp(C, D.rgb * DecalTint, saturate(D.a * DecalOn));", unreal.CustomMaterialOutputType.CMOT_FLOAT3,
+                      ["C", "D", "DecalTint", "DecalOn"], "TAG decal", -300)
+        MEL.connect_material_expressions(col, "", over, "C")
+        MEL.connect_material_expressions(dec, "RGBA", over, "D")
+        MEL.connect_material_expressions(vector("DecalTint", (1, 1, 1)), "", over, "DecalTint")
+        MEL.connect_material_expressions(scalar("DecalOn", 0.0), "", over, "DecalOn")
+        MEL.connect_material_property(over, "", unreal.MaterialProperty.MP_BASE_COLOR)
+        # a detail normal over the main one (the in-house knit / twill over the pack's jersey folds), reoriented
+        # normal mapping; DetailOn 0 leaves the main normal alone
+        det_uv = custom("return UV * DetailTile;", unreal.CustomMaterialOutputType.CMOT_FLOAT2, ["UV", "DetailTile"], "detail uv")
+        MEL.connect_material_expressions(cell, "", det_uv, "UV")
+        MEL.connect_material_expressions(scalar("DetailTile", 1.0), "", det_uv, "DetailTile")
+        dn = node(unreal.MaterialExpressionTextureSampleParameter2D, -1000)
+        dn.set_editor_property("parameter_name", "DetailN")
+        dn.set_editor_property("texture", texture(os.path.join(RAW, "Textures", "T_TAG_Hero_FlatN.png"), "normal"))
+        dn.set_editor_property("sampler_type", unreal.MaterialSamplerType.SAMPLERTYPE_NORMAL)
+        MEL.connect_material_expressions(det_uv, "", dn, "UVs")
+        blend = custom("if (DetailOn < 0.5) return N;\nfloat3 t = N + float3(0, 0, 1);\nfloat3 u = D * float3(-1, -1, 1);\n"
+                       "return normalize(t * dot(t, u) - u * t.z);", unreal.CustomMaterialOutputType.CMOT_FLOAT3,
+                       ["N", "D", "DetailOn"], "TAG detail normal", -450)
+        MEL.connect_material_expressions(nrm, "RGB", blend, "N")
+        MEL.connect_material_expressions(dn, "RGB", blend, "D")
+        MEL.connect_material_expressions(scalar("DetailOn", 0.0), "", blend, "DetailOn")
+        MEL.connect_material_property(blend, "", unreal.MaterialProperty.MP_NORMAL)
+        if skin:
+            # the skin map's B: how much light scatters under the skin (thin ears and nose, not the scalp)
+            sss = MEL.create_material_expression(m, unreal.MaterialExpressionComponentMask, -200, y[0] + 400)
+            for c in "rgba":
+                sss.set_editor_property(c, c == "b")
+            MEL.connect_material_expressions(rsm, "RGB", sss, "")
+            MEL.connect_material_property(sss, "", unreal.MaterialProperty.MP_OPACITY)
         # RSM: R roughness, G specular, B metallic (skin maps carry subsurface in B: MetalWeight 0)
         surf = custom("float r = lerp(RSM.r, RoughOver, RoughOverA);\nreturn float3(r, lerp(RSM.g, 0.5, SpecFlat), saturate(RSM.b * MetalWeight + MetalAdd));",
                       unreal.CustomMaterialOutputType.CMOT_FLOAT3, ["RSM", "RoughOver", "RoughOverA", "SpecFlat", "MetalWeight", "MetalAdd"],
@@ -332,7 +431,7 @@ def instance(kind, slot, masked, params):
         ensure_dir(MATDIR + "/Instances")
         mi = tools.create_asset(name, MATDIR + "/Instances", unreal.MaterialInstanceConstant, unreal.MaterialInstanceConstantFactoryNew())
         REPORT["materials"] += 1
-    MEL.set_material_instance_parent(mi, MASKED if masked else OPAQUE)
+    MEL.set_material_instance_parent(mi, SKINM if masked == "skin" else MASKED if masked else OPAQUE)
     for k, v in params.items():
         if v is None:
             continue
@@ -367,6 +466,18 @@ def slot_params(entry, slot, info):
     skin_rsm = t.get("R_S_SSR_T_Texture")
     lum = float(t.get("_lum", 1.0) or 1.0)
     placeholder = bool(t.get("_placeholder"))
+    tone = (LAYOUT.get(col or "") or {}).get("skin_tint") if t.get("_placeholder") == "rainbow" else None
+    if tone:
+        # arms / legs the pack leaves as the rainbow: flat in the skin tone of the character's own face
+        # (Tools/Art/hero_tex_layout.py face_tone; the legs' old fallback, the arm texture, is the rainbow too here)
+        return False, {"Tint": tuple(tone), "RoughOver": 0.55, "RoughOverA": 1.0, "MetalWeight": 0.0, "SpecFlat": 0.3}
+    cap = any("haircap" in s for s in info.get("sections", []))  # the scalp cap (some variants file it as Lashes)
+    if t.get("_placeholder") == "rainbow" and role in ("Hair", "Lashes") and not cap:
+        # hair cards with no texture (CoachTexans): no alpha to cut the cards with, so they are left out (clear)
+        return True, {"BaseColor": raw_tex("T_TAG_Hero_Clear", "color"), "MetalWeight": 0.0}
+    if t.get("_placeholder") == "rainbow" and (role == "HairCap" or cap):
+        # ... and the scalp cap under them reads as a close crop
+        return False, {"Tint": (0.022, 0.018, 0.015), "RoughOver": 0.75, "RoughOverA": 1.0, "MetalWeight": 0.0}
     if t.get("_placeholder") == "rainbow" and "_legs_" in (t.get("colorTexture") or ""):
         # bare legs whose texture the pack left as the placeholder: the character's own arm skin
         arm = (t.get("colorTexture") or "").replace("_legs_", "_arms_")
@@ -375,31 +486,45 @@ def slot_params(entry, slot, info):
     if t.get("_placeholder") == "rainbow" and role not in ("Head", "Eyes", "Hair", "HairCap", "Lashes", "Skin"):
         # the game's missing-texture strip: plain cloth, painted in a team colour where the game paints Mode 2
         return False, {"Mode": 2.0, "LumRef": 1.0, "Tint": (0.42, 0.42, 0.45), "RoughOver": 0.8, "RoughOverA": 1.0, "MetalWeight": 0.0}
-    flat = (lambda q: q is None or "flatgrey" in q or "invisible" in q)
+    # flat / unset maps: the pack's flat fills, and the engine's own placeholders (default_runtime_color: the green /
+    # magenta checker for a map the game fills at runtime; debug_texture_norm: the word NORMAL embossed)
+    flat = (lambda q: q is None or "flatgrey" in q or "invisible" in q or "debug_texture" in q or "default_runtime" in q)
     team_cloth = kind in ("Coach", "CoachFull", "Staff", "Story", "Crew")
     P = {}
     masked = False
     if role in ("Hair", "HairCap", "Lashes"):
         masked = True
-        P = {"BaseColor": texture(col)}
+        P = {"BaseColor": texture(col), "Normal": texture(nrm, "normal") if nrm and not flat(nrm) else None}
     elif role == "Head":
+        # the skin master (subsurface from the skin map's B); specular straight from the map's G
+        masked = "skin" if skin_rsm else False
         P = {"BaseColor": texture(col), "Normal": texture(nrm, "normal"), "RSM": texture(skin_rsm or rsm, "linear"),
-             "MetalWeight": 0.0, "SpecFlat": 0.3}
+             "MetalWeight": 0.0, "SpecFlat": 0.0 if skin_rsm else 0.3}
     elif role == "Eyes":
         P = {"BaseColor": texture(col if col and not flat(col) else EYE), "RoughOver": 0.08, "RoughOverA": 1.0, "MetalWeight": 0.0}
     elif role == "Skin":
+        masked = "skin"
         if kind in ("Kit", "Rig"):
+            # tone 1 here; the game swaps colour and its matching RSM per player (AAthlete::PaintHero)
             P = {"BaseColor": texture(SKIN + "arm_skintone1.png"), "Normal": texture(SKIN + "arm_normal.png", "normal"),
-                 "RSM": texture(SKIN + "arm_rsm_skintone2.png", "linear"), "MetalWeight": 0.0, "SpecFlat": 0.3}
+                 "RSM": texture(SKIN + "arm_rsm_skintone1.png", "linear"), "MetalWeight": 0.0, "SpecFlat": 0.0}
         else:
             P = {"BaseColor": texture(col), "Normal": texture(nrm, "normal"), "RSM": texture(skin_rsm or rsm, "linear"),
-                 "MetalWeight": 0.0, "SpecFlat": 0.3}
+                 "MetalWeight": 0.0, "SpecFlat": 0.0 if skin_rsm else 0.3}
+            if not skin_rsm:
+                masked = False
     elif role == "SkinLegs":
+        masked = "skin" if skin_rsm else False
         P = {"BaseColor": texture(SKIN + "genericpadless_legs_st1.png"), "Normal": texture(nrm, "normal"),
-             "RSM": texture(skin_rsm, "linear"), "MetalWeight": 0.0, "SpecFlat": 0.3}
+             "RSM": texture(skin_rsm, "linear"), "MetalWeight": 0.0, "SpecFlat": 0.0 if skin_rsm else 0.3}
     elif role == "Jersey":
-        # in-house cloth (gen_kit_cloth_maps.py): mesh knit, roughness ~0.8 (a team's licensed jersey maps read as plastic)
-        P = {"Mode": 3.0, "NumOn": 1.0, "Mask": raw_tex("T_TAG_Hero_JerseyMask"), "Normal": raw_tex("T_TAG_Hero_JerseyKnitN", "normal"),
+        # the pack's jersey folds (wrinkleNormTexture) under the in-house knit (gen_kit_cloth_maps.py) as the detail
+        # normal; roughness ~0.8 from the in-house RSM (a team's licensed jersey maps read as plastic)
+        wr = t.get("wrinkleNormTexture")
+        P = {"Mode": 3.0, "NumOn": 1.0, "Mask": raw_tex("T_TAG_Hero_JerseyMask"),
+             "Normal": texture(wr, "normal") if wr and not flat(wr) else raw_tex("T_TAG_Hero_JerseyKnitN", "normal"),
+             "DetailN": raw_tex("T_TAG_Hero_JerseyKnitN", "normal") if wr and not flat(wr) else None,
+             "DetailOn": 1.0 if wr and not flat(wr) else 0.0,
              "RSM": raw_tex("T_TAG_Hero_JerseyRSM", "linear"), "MetalWeight": 0.0}
     elif role == "Pants" and kind in ("Kit", "Rig"):
         # in-house tackle twill, a dull sheen (roughness ~0.66)
@@ -408,8 +533,9 @@ def slot_params(entry, slot, info):
     elif role == "Socks":
         P = {"Mode": 3.0, "BaseColor": texture(col), "LumRef": 0.85, "Normal": texture(nrm, "normal"), "RSM": texture(rsm, "linear"), "MetalWeight": 0.0}
     elif role == "Shell":
+        # the vent / hardware normal on the shell's own detail set (TexCoord 1, kept when the job has two sets)
         P = {"Mode": 3.0, "Mask": raw_tex("T_TAG_Hero_HelmetMask"), "Normal": texture(nrm, "normal"), "RoughOver": 0.16,
-             "RoughOverA": 1.0, "MetalWeight": 0.0, "MetalAdd": 0.15}
+             "RoughOverA": 1.0, "MetalWeight": 0.0, "MetalAdd": 0.15, "NormalUV1": 1.0 if entry.get("uv_sets") == 2 else 0.0}
     elif role == "Facemask":
         P = {"Tint": (0.2, 0.2, 0.21), "RoughOver": 0.32, "RoughOverA": 1.0, "MetalAdd": 0.55, "MetalWeight": 0.0}
     elif role == "Visor":
@@ -431,6 +557,37 @@ def slot_params(entry, slot, info):
              "RSM": texture(rsm, "linear") if not flat(rsm) else None, "MetalWeight": 1.0 if rsm and not flat(rsm) else 0.0}
         if flat(col):
             P["Tint"] = (0.5, 0.5, 0.5)
+        if role == "Shoes" and flat(col):
+            # a cleat the pack leaves for the game to colour (72 kits): a uniform packed map (mid grey, no mask), so
+            # AAthlete::PaintHero paints it black or white like the packed cleats instead of one fixed grey
+            P.update({"BaseColor": raw_tex("T_TAG_Hero_PackedMid", "color"), "Packed": 1.0, "Tint": (1.0, 1.0, 1.0), "Trim": (0.92, 0.92, 0.92)})
+        dec = t.get("logoOverlayTexture")
+        if role == "Shoes" and dec and not flat(dec) and os.path.exists(dec):
+            P.update({"Decal": texture(dec), "DecalOn": 1.0})  # the cleat's marks, on its colour set (UV0, checked per set)
+        if role == "Hands" and col and "glove" in col.lower():
+            P["TeamGlove"] = 1.0  # a glove takes the team colour in the game (taped hands and wraps stay as they are)
+    if masked == "skin":
+        # the pack's tiling skin detail (normalWrapTexture: skinnoise on bodies, face_skintile on heads), on UV0 at a
+        # pore-scale repeat (the pack's own detail UV set is not kept: hero_build.py keeps one set)
+        wrap = t.get("normalWrapTexture")
+        if wrap and not flat(wrap) and os.path.exists(wrap):
+            P.update({"DetailN": texture(wrap, "normal"), "DetailOn": 1.0, "DetailTile": 10.0 if role == "Head" else 14.0})
+    # the pack's packed gear maps (grey in the red channel, a region mask in blue or green): the grey overlay shading,
+    # white with a white second region until the game paints them (cleats, gloves)
+    lay = (LAYOUT.get(col) or {}) if col else {}
+    # (crowd swarm atlases are always baked colour: a dark one, male_hardcorefan_warm_014, reads as "red only" and
+    # its skin came out chalk white)
+    if lay.get("layout") in ("R", "RB", "RG") and P.get("BaseColor") is not None and role not in ("Head", "Eyes", "Hair", "HairCap", "Lashes", "Skin", "SkinLegs") \
+            and kind not in ("Fan", "FanProp"):
+        P["Packed"] = 1.0
+        if P.get("Mode", 0.0) < 0.5:
+            P.setdefault("Tint", (1.0, 1.0, 1.0))
+            P["Trim"] = (0.92, 0.92, 0.92)
+        elif 1.5 < P.get("Mode", 0.0) < 2.5:
+            # recolour by the overlay's shading: its mean, the reference that keeps the team colour at its own value
+            g = min(1.0, 2.0 * float(lay.get("r", 0.5))) ** 2.2
+            P["LumRef"] = max(0.02, g)
+            P["Trim"] = (0.92, 0.92, 0.92)
     return masked, {k: v for k, v in P.items() if v is not None}
 
 
@@ -514,11 +671,12 @@ def apply_materials(entry, mesh):
 
 
 def main():
-    global OPAQUE, MASKED
+    global OPAQUE, MASKED, SKINM
     unreal.AssetRegistryHelpers.get_asset_registry().search_all_assets(True)
     index = json.load(open(os.path.join(RAW, "hero_index.json")))
     OPAQUE = master("M_TAG_Hero", False)
     MASKED = master("M_TAG_HeroMasked", True)
+    SKINM = master("M_TAG_HeroSkin", False, skin=True)
     only = os.environ.get("TAG_HERO_ONLY")
     rx = re.compile(only, re.I) if only else None
     skip_mesh = os.environ.get("TAG_HERO_SKIP_MESH") == "1"
@@ -554,6 +712,14 @@ def main():
                 mesh = unreal.load_asset(path)
             else:
                 mesh = import_mesh(e, skel[e.get("rig", "hero")])
+                # a re-import replaces LOD 0 only: the reduced LODs (Tools/Art/hero_lods.py) keep their section to
+                # slot maps from the old geometry, so far away a rebuilt character drew one part with another's
+                # material (LeGuinDylan_Jacket GP_F: jacket in denim, jeans in the letterman). Rebuild them from LOD 0.
+                lsub = unreal.get_editor_subsystem(unreal.SkeletalMeshEditorSubsystem)
+                nl = lsub.get_lod_count(mesh)
+                if nl > 1 and not lsub.regenerate_lod(mesh, nl, True, False):
+                    raise RuntimeError("could not rebuild the %d reduced LODs of %s" % (nl - 1, e["name"]))
+                r["lods"] = nl
             if e["kind"] in ("Kit", "Coach", "CoachFull", "Ref", "Staff") and phys and e.get("rig", "hero") == "hero":
                 mesh.set_editor_property("physics_asset", phys)
             r["slots"] = apply_materials(e, mesh)
@@ -575,7 +741,7 @@ def main():
     cat = {"skeleton": ROOT + "/Rig/SKM_TAG_HeroRig_Skeleton", "crowd_skeleton": ROOT + "/Rig/SKM_TAG_CrowdRig_Skeleton",
            "skeletons": REPORT.get("skeletons", {}),
            "physics": ROOT + "/Rig/SKM_TAG_HeroRig_PhysicsAsset", "proxy": ROOT + "/Rig/SKM_TAG_HeroRig",
-           "skin_arm": [], "skin_legs": [], "eyes": [], "items": []}
+           "skin_arm": [], "skin_arm_rsm": [], "skin_legs": [], "eyes": [], "items": []}
     # stripe layouts from every uniform set in the pack (Tools/Art/hero_masks.py); the game gives each team one
     import glob as _g
     cat["masks"] = {}
@@ -586,6 +752,8 @@ def main():
         a = texture(SKIN + "arm_skintone%d.png" % n)
         l = texture(SKIN + "genericpadless_legs_st%d.png" % n)
         cat["skin_arm"].append(a.get_path_name() if a else "")
+        ar = texture(SKIN + "arm_rsm_skintone%d.png" % n, "linear")  # each tone's own roughness / specular / scatter
+        cat["skin_arm_rsm"].append(ar.get_path_name() if ar else "")
         cat["skin_legs"].append(l.get_path_name() if l else "")
     for f in sorted(os.listdir(PACK + "Textures/characters/common/textures/eyes")):
         if f.endswith("_color.png"):
@@ -595,6 +763,9 @@ def main():
     for e in index:
         path = ROOT + "/" + FOLDER.get(e["kind"], "Misc") + "/" + e["name"]
         if e["kind"] == "Rig" or not EAL.does_asset_exist(path):
+            continue
+        if e["name"] in UNUSABLE and os.environ.get("TAG_HERO_ALL") != "1":  # TAG_HERO_ALL=1: list them anyway (to look)
+            REPORT.setdefault("left_out", {})[e["name"]] = UNUSABLE[e["name"]]
             continue
         it = {"kind": e["kind"], "name": e["name"], "rig": e.get("rig", "hero"), "path": path + "." + e["name"]}
         b = e.get("bounds_cm")

@@ -357,6 +357,7 @@ private:
 	float PerfT = 0.f;      // automation frame-time sampling
 	int32 PerfFrames = 0;
 	float LineupT = 0.f;
+	bool bLineupFloatCheck = false; // -TagLineup: the floating-people check ran (once, at the crowd shot)
 	int32 LineupShot = 0;
 	UPROPERTY()
 	TArray<TObjectPtr<class AAthlete>> Lineup;

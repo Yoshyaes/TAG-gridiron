@@ -13,11 +13,15 @@ import unreal
 EAL = unreal.EditorAssetLibrary
 tools = unreal.AssetToolsHelpers.get_asset_tools()
 PROJ = unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_dir())
-SRC = os.path.join(PROJ, "RawArt", "Anim", "Clips")
-DEST = "/Game/TAG/Anim/Authored"
-SKEL = "/Game/Characters/UEFN_Mannequin/Meshes/SK_UEFN_Mannequin"
-PIPE = "/Game/TAG/Anim/_Pipelines/P_TAG_Anim"
-REPORT = os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_saved_dir()), "tag_anim_import.json")
+# TAG_ANIM_RIG=hero: the same clips built on the pack's own skeleton (Tools/Anim/build_mocap_all.sh -r hero ->
+# RawArt/Anim/ClipsHero) onto the model-pack bodies' skeleton, as /Game/TAG/AnimH/Authored (the tree the game plays on
+# the pack bodies: the capture itself, no retarget)
+HERO = os.environ.get("TAG_ANIM_RIG", "") == "hero"
+SRC = os.path.join(PROJ, "RawArt", "Anim", "ClipsHero" if HERO else "Clips")
+DEST = "/Game/TAG/AnimH/Authored" if HERO else "/Game/TAG/Anim/Authored"
+SKEL = "/Game/TAG/Hero/Rig/SKM_TAG_HeroRig_Skeleton" if HERO else "/Game/Characters/UEFN_Mannequin/Meshes/SK_UEFN_Mannequin"
+PIPE = "/Game/TAG/AnimH/_Pipelines/P_TAG_AnimH" if HERO else "/Game/TAG/Anim/_Pipelines/P_TAG_Anim"
+REPORT = os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_saved_dir()), "tag_anim_import_hero.json" if HERO else "tag_anim_import.json")
 
 
 def pipeline(skeleton):

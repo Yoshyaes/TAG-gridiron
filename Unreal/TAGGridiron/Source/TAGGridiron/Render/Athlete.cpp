@@ -79,19 +79,30 @@ void FAthleteAssets::Load()
 	CrowdMat = LoadAsset<UMaterialInterface>(TEXT("/Game/TAG/Materials/M_TagCrowd.M_TagCrowd"), false);
 	LEDMat = LoadAsset<UMaterialInterface>(TEXT("/Game/TAG/Materials/M_TagLED.M_TagLED"), false);
 
-	// Preferred: Epic's Game Animation Sample motion capture on the UEFN mannequin.
+	// the bodies first: the model pack characters decide which animation tree plays (bNativeAnim)
 	const FString G = TEXT("/Game/Characters/UEFN_Mannequin/");
-	USkeletalMesh* MocapMesh = LoadAsset<USkeletalMesh>(*(G + TEXT("Meshes/SKM_UEFN_Mannequin.SKM_UEFN_Mannequin")), false);
-	UBlendSpace* MocapLoco = LoadAsset<UBlendSpace>(TEXT("/Game/TAG/Anim/BS_TAG_Locomotion.BS_TAG_Locomotion"), false);
+	{
+		const bool bTryHero = !FParse::Param(FCommandLine::Get(), TEXT("TagNoHero"));
+		bNativeAnim = bTryHero && !FParse::Param(FCommandLine::Get(), TEXT("TagUEFNAnim")) &&
+			FPackageName::DoesPackageExist(TEXT("/Game/TAG/AnimH/BS_TAG_Locomotion")) && FPackageName::DoesPackageExist(TEXT("/Game/TAG/Hero/Rig/SKM_TAG_HeroRig"));
+		if (bTryHero) bHero = LoadHero();
+		if (!bHero) bNativeAnim = false;
+		AnimRoot = bNativeAnim ? TEXT("/Game/TAG/AnimH") : TEXT("/Game/TAG/Anim");
+		UE_LOG(LogTemp, Display, TEXT("TAG: animation tree %s (%s)"), *AnimRoot,
+			bNativeAnim ? TEXT("the mocap on its own skeleton, copied onto the pack bodies") : TEXT("retargeted to the UEFN mannequin"));
+	}
+	// the hidden source mesh that plays the animation: the hero rig itself, or the UEFN mannequin
+	USkeletalMesh* MocapMesh = bNativeAnim ? LoadAsset<USkeletalMesh>(TEXT("/Game/TAG/Hero/Rig/SKM_TAG_HeroRig.SKM_TAG_HeroRig"), false)
+		: LoadAsset<USkeletalMesh>(*(G + TEXT("Meshes/SKM_UEFN_Mannequin.SKM_UEFN_Mannequin")), false);
+	UBlendSpace* MocapLoco = LoadAsset<UBlendSpace>(*FString::Printf(TEXT("%s/BS_TAG_Locomotion.BS_TAG_Locomotion"), *AnimRoot), false);
 	if (MocapMesh && MocapLoco)
 	{
 		bMocap = true;
 		Mesh = MocapMesh;
 		Locomotion = MocapLoco;
-		Crouch = LoadAsset<UBlendSpace>(TEXT("/Game/TAG/Anim/BS_TAG_Crouch.BS_TAG_Crouch"), false);
-		// TAG football clips: Tools/Anim (mocap pack retargets) -> Tools/Art/import_tag_anims.py. The sample's clips are
-		// loaded only where a pack clip is missing.
-		const FString K = TEXT("/Game/TAG/Anim/Authored/");
+		Crouch = LoadAsset<UBlendSpace>(*FString::Printf(TEXT("%s/BS_TAG_Crouch.BS_TAG_Crouch"), *AnimRoot), false);
+		// TAG football clips: Tools/Anim (mocap pack builds) -> Tools/Art/import_tag_anims.py
+		const FString K = AnimRoot + TEXT("/Authored/");
 		auto Keyed = [&](const TCHAR* N) { return LoadAsset<UAnimationAsset>(*FString::Printf(TEXT("%s%s.%s"), *K, N, N), false); };
 		Shove = Keyed(TEXT("A_TAG_Block_Punch"));
 		Throw = Keyed(TEXT("A_TAG_QB_Throw"));
@@ -173,7 +184,7 @@ void FAthleteAssets::Load()
 		// the whole pack behind the one-shot and idle families (see PackFamily): the cut, placed clips above stay first in
 		// each list (their timing is measured), the library's captures stream in behind the game (SelectPack), a fresh
 		// draw every quarter (ReseedPack from the director)
-		if (FPackageName::DoesPackageExist(TEXT("/Game/TAG/Anim/Pack/Celebrations/A_TAG_Pack_PostPlay_BC_15_Celeb_FistPump_v1")) || FPackageName::DoesPackageExist(TEXT("/Game/TAG/Anim/Pack/Locomotion/A_TAG_Pack_MG_Loco_Sprint_Normal__P01")))
+		if (FPackageName::DoesPackageExist(AnimRoot + TEXT("/Pack/Celebrations/A_TAG_Pack_PostPlay_BC_15_Celeb_FistPump_v1")) || FPackageName::DoesPackageExist(AnimRoot + TEXT("/Pack/Locomotion/A_TAG_Pack_MG_Loco_Sprint_Normal__P01")))
 		{
 			PackSeed = FDateTime::Now().GetDayOfYear();
 			FParse::Value(FCommandLine::Get(), TEXT("TagPackSeed="), PackSeed);
@@ -248,8 +259,7 @@ void FAthleteAssets::Load()
 		// -TagNoMM for the blend spaces, e.g. to A/B)
 		if (!FParse::Param(FCommandLine::Get(), TEXT("TagNoMM"))) LoadMotionMatching();
 
-		// model pack characters (Tools/Art/hero_*.py), driven by runtime IK retargeting like the MetaHumans were
-		if (!FParse::Param(FCommandLine::Get(), TEXT("TagNoHero"))) bHero = LoadHero();
+		// model pack characters (Tools/Art/hero_*.py): loaded above (LoadHero), they pick the animation tree
 		UE_LOG(LogTemp, Display, TEXT("TAG: model pack characters %s (%d in the catalog)"), bHero ? TEXT("enabled") : TEXT("unavailable (Tools/Art/hero_import.py)"), HeroItems.Num());
 		// MetaHuman bodies (built by Tools/Art/mh_create.py), driven by runtime IK retargeting.
 		if (!bHero && !FParse::Param(FCommandLine::Get(), TEXT("TagNoMH")))
@@ -328,7 +338,7 @@ static const FPackAssets& PackAssets(const TCHAR* Category)
 	static TMap<FString, FPackAssets> Cache;
 	if (const FPackAssets* Hit = Cache.Find(Category)) return *Hit;
 	IAssetRegistry& AR = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry").Get();
-	const FString Path = FString::Printf(TEXT("/Game/TAG/Anim/Pack/%s"), Category);
+	const FString Path = FString::Printf(TEXT("%s/Pack/%s"), *FAthleteAssets::Get().AnimRoot, Category);
 	AR.ScanPathsSynchronous({Path}, true);
 	FPackAssets& Out = Cache.Add(Category);
 	AR.GetAssetsByPath(FName(*Path), Out.Data, FCString::Strcmp(Category, TEXT("")) == 0);
@@ -371,10 +381,18 @@ void FAthleteAssets::PackFamily(const TCHAR* Category, std::initializer_list<con
 	PendingFamilies.Add(MoveTemp(F));
 }
 
+/** A pack table (pack_index.json / pack_pairs.json) of the tree in play, the UEFN tree's when that tree has none yet
+ *  (the tables are keyed by asset name and hold capture times, the same on both skeletons). */
+static FString PackJson(const TCHAR* Name)
+{
+	const FString Mine = FPaths::ProjectContentDir() / FAthleteAssets::Get().AnimRoot.RightChop(6) / TEXT("Pack") / Name; // "/Game/" -> Content
+	return FPaths::FileExists(Mine) ? Mine : FPaths::ProjectContentDir() / TEXT("TAG/Anim/Pack") / Name;
+}
+
 void FAthleteAssets::LoadPackIndex()
 {
 	FString Text;
-	const FString File = FPaths::ProjectContentDir() / TEXT("TAG/Anim/Pack/pack_index.json");
+	const FString File = PackJson(TEXT("pack_index.json"));
 	if (!FFileHelper::LoadFileToString(Text, *File)) return;
 	TSharedPtr<FJsonObject> Root;
 	if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Text), Root) || !Root.IsValid()) return;
@@ -434,7 +452,7 @@ void FAthleteAssets::PackTimed(const TCHAR* Category, std::initializer_list<cons
 void FAthleteAssets::LoadPackPairs(int32 Seed)
 {
 	FString Text;
-	if (!FFileHelper::LoadFileToString(Text, *(FPaths::ProjectContentDir() / TEXT("TAG/Anim/Pack/pack_pairs.json")))) return;
+	if (!FFileHelper::LoadFileToString(Text, *PackJson(TEXT("pack_pairs.json")))) return;
 	TArray<TSharedPtr<FJsonValue>> Rows;
 	if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Text), Rows)) return;
 	static const TCHAR* Kinds[6] = {TEXT("Drive"), TEXT("Over"), TEXT("Behind"), TEXT("Side"), TEXT("SideL"), TEXT("Dive")};
@@ -460,8 +478,8 @@ void FAthleteAssets::LoadPackPairs(int32 Seed)
 			if (TN.Contains(TEXT("Facemask"), ESearchCase::IgnoreCase) || TN.Contains(TEXT("HorseCollar"), ESearchCase::IgnoreCase)) continue;
 			FPendingPair Q;
 			Q.Kind = k;
-			Q.TP = FSoftObjectPath(FString::Printf(TEXT("/Game/TAG/Anim/Pack/Tackles/%s.%s"), *TN, *TN));
-			Q.CP = FSoftObjectPath(FString::Printf(TEXT("/Game/TAG/Anim/Pack/Tackles/%s.%s"), *CN, *CN));
+			Q.TP = FSoftObjectPath(FString::Printf(TEXT("%s/Pack/Tackles/%s.%s"), *AnimRoot, *TN, *TN));
+			Q.CP = FSoftObjectPath(FString::Printf(TEXT("%s/Pack/Tackles/%s.%s"), *AnimRoot, *CN, *CN));
 			FPackPair& P = Q.P;
 			P.Name = TN;
 			P.Ox = O->GetNumberField(TEXT("Ox")); P.Oy = O->GetNumberField(TEXT("Oy")); P.Yaw = O->GetNumberField(TEXT("Yaw"));
@@ -781,7 +799,8 @@ void FAthleteAssets::LoadMotionMatching()
 	// pivots and idles with root motion, mocap_map.LOCO_DB), else the sample's
 	// the TAG databases only (the pack's clips, Tools/Art/mm_build_dbs.py); without them motion matching is off and the
 	// blend spaces (also the pack's) drive the body
-	auto Db = [](const FString& N) { return LoadAsset<UPoseSearchDatabase>(*FString::Printf(TEXT("/Game/TAG/Anim/MM/PSD_TAG_%s.PSD_TAG_%s"), *N, *N), false); };
+	const FString MM = AnimRoot + TEXT("/MM/");
+	auto Db = [&MM](const FString& N) { return LoadAsset<UPoseSearchDatabase>(*FString::Printf(TEXT("%sPSD_TAG_%s.PSD_TAG_%s"), *MM, *N, *N), false); };
 	UPoseSearchDatabase* Idles = Db(TEXT("Stand_Idles"));
 	UPoseSearchDatabase* Turn = Db(TEXT("Stand_TurnInPlace"));
 	static const TCHAR* Gait[3] = {TEXT("Walk"), TEXT("Run"), TEXT("Sprint")};
@@ -796,7 +815,7 @@ void FAthleteAssets::LoadMotionMatching()
 		// loops: TAG's football copies when built (Tools/Art/mm_build_dbs.py: sprint without the acceleration
 		// transitions + curve loops, run + arcs), else the sample's
 		// the TAG copies carry the football locomotion from the mocap pack (Tools/Art/mm_build_dbs.py)
-		UPoseSearchDatabase* Loops = LoadAsset<UPoseSearchDatabase>(*FString::Printf(TEXT("/Game/TAG/Anim/MM/PSD_TAG_%s_Loops.PSD_TAG_%s_Loops"), Gait[g], Gait[g]), false);
+		UPoseSearchDatabase* Loops = Db(FString::Printf(TEXT("%s_Loops"), Gait[g]));
 		if (UPoseSearchDatabase* X = Loops) { MMMove[g].Add(X); MMStart[g].Add(X); MMPivot[g].Add(X); }
 		if (UPoseSearchDatabase* X = Db(FString::Printf(TEXT("Stand_%s_Starts"), Gait[g]))) MMStart[g].Add(X);
 		for (const TCHAR* K : {TEXT("Pivots"), TEXT("SpinTransition")})
@@ -812,7 +831,7 @@ void FAthleteAssets::LoadMotionMatching()
 		for (UPoseSearchDatabase* X : MMStop[g]) All.AddUnique(X);
 		for (int32 v = 0; v < 3 && bOk; ++v)
 		{
-			UPoseSearchDatabase* LV = v == 0 ? Loops : LoadAsset<UPoseSearchDatabase>(*FString::Printf(TEXT("/Game/TAG/Anim/MM/PSD_TAG_%s_Loops_S%d.PSD_TAG_%s_Loops_S%d"), Gait[g], v, Gait[g], v), false);
+			UPoseSearchDatabase* LV = v == 0 ? Loops : Db(FString::Printf(TEXT("%s_Loops_S%d"), Gait[g], v));
 			if (!LV) LV = Loops;
 			auto Swap = [Loops, LV](const TArray<UPoseSearchDatabase*>& In) { TArray<UPoseSearchDatabase*> O = In; for (UPoseSearchDatabase*& X : O) if (X == Loops) X = LV; return O; };
 			MMMoveV[g][v] = Swap(MMMove[g]);
@@ -823,11 +842,11 @@ void FAthleteAssets::LoadMotionMatching()
 	}
 	// crouched footwork: the sample's crouch walk (~1.5-2 m/s) plus, with the TAG database, the pack's kick slides,
 	// shuffles and crouched runs (to 4.4 m/s)
-	bMMPack = bOk && FPackageName::DoesPackageExist(TEXT("/Game/TAG/Anim/MM/PSD_TAG_Crouch_Loops"));
+	bMMPack = bOk && FPackageName::DoesPackageExist(MM + TEXT("PSD_TAG_Crouch_Loops"));
 	if (bOk)
 	{
 		for (TArray<UPoseSearchDatabase*>& C : MMCrouch) C.Reset();
-		UPoseSearchDatabase* CLoops = LoadAsset<UPoseSearchDatabase>(TEXT("/Game/TAG/Anim/MM/PSD_TAG_Crouch_Loops.PSD_TAG_Crouch_Loops"), false);
+		UPoseSearchDatabase* CLoops = Db(TEXT("Crouch_Loops"));
 		UPoseSearchDatabase* CIdles = Db(TEXT("Crouch_Idles"));
 		if (CLoops && CIdles)
 		{
@@ -837,7 +856,7 @@ void FAthleteAssets::LoadMotionMatching()
 			// crouch starts: with the TAG databases the pack's own (PSD_TAG_Crouch_Starts: a lineman's first steps out of
 			// his crouch, forward, sideways and back); the sample's generic walk starts only without them (they kept
 			// playing for their full 2 s against the lineman's kick slide, -TagMMTrace)
-			if (UPoseSearchDatabase* X = LoadAsset<UPoseSearchDatabase>(TEXT("/Game/TAG/Anim/MM/PSD_TAG_Crouch_Starts.PSD_TAG_Crouch_Starts"), false))
+			if (UPoseSearchDatabase* X = Db(TEXT("Crouch_Starts")))
 				MMCrouch[1].Add(X);
 			if (UPoseSearchDatabase* X = Db(TEXT("Crouch_Walk_Pivots"))) MMCrouch[2].Add(X);
 			if (UPoseSearchDatabase* X = Db(TEXT("Crouch_Walk_Stops"))) MMCrouch[3].Add(X);
@@ -847,6 +866,23 @@ void FAthleteAssets::LoadMotionMatching()
 	}
 	MMAll = All;
 	bMotionMatch = bOk;
+#if WITH_EDITOR
+	// every entry must be on the source mesh's skeleton: a clip of the other tree plays through skeleton remapping
+	// (bent, sunk bodies at a third of the frame rate: the first hero databases still held the UEFN clips, 12 Nov)
+	if (bOk && Mesh)
+	{
+		int32 Foreign = 0;
+		FString First;
+		for (UPoseSearchDatabase* X : All)
+			for (int32 i = 0; i < X->GetNumAnimationAssets(); ++i)
+				if (const UAnimationAsset* An = Cast<UAnimationAsset>(X->GetAnimationAsset(i)))
+					if (An->GetSkeleton() != Mesh->GetSkeleton())
+					{
+						if (!Foreign++) First = FString::Printf(TEXT("%s in %s"), *An->GetPathName(), *X->GetName());
+					}
+		if (Foreign) UE_LOG(LogTemp, Error, TEXT("TAG: %d motion matching entries are on another skeleton than %s (first: %s)"), Foreign, *GetNameSafe(Mesh->GetSkeleton()), *First);
+	}
+#endif
 	// the continuing pose's cost bias (a runtime value, not part of the search index): the pack has several clips of
 	// each gait from different men, and at the sample's -0.01 the search hopped between them every few tenths of a
 	// second (-TagMoveTest: 17 clip changes in 27 samples of a sprint route), each 0.3 s blend dragging the planted
@@ -930,6 +966,7 @@ bool FAthleteAssets::LoadHero()
 				Out.Add(LoadAsset<UTexture>(*V->AsString(), false));
 	};
 	Textures(TEXT("skin_arm"), HeroSkinArm);
+	Textures(TEXT("skin_arm_rsm"), HeroSkinArmRSM);
 	Textures(TEXT("skin_legs"), HeroSkinLegs);
 	Textures(TEXT("eyes"), HeroEyes);
 	const TSharedPtr<FJsonObject>* Masks = nullptr;
@@ -942,9 +979,13 @@ bool FAthleteAssets::LoadHero()
 				for (const TSharedPtr<FJsonValue>& V : *L)
 					if (UTexture* T = LoadAsset<UTexture>(*V->AsString(), false)) M.Value->Add(T);
 		}
-	HeroRetargeter = LoadAsset<UIKRetargeter>(TEXT("/Game/TAG/Hero/Rig/RTG_TAG_UEFN_to_Hero.RTG_TAG_UEFN_to_Hero"), false);
-	CrowdRetargeter = LoadAsset<UIKRetargeter>(TEXT("/Game/TAG/Hero/Rig/RTG_TAG_UEFN_to_Crowd.RTG_TAG_UEFN_to_Crowd"), false);
-	const bool bOk = HeroRetargeter && HeroOf(TEXT("Kit")).Num() && HeroOf(TEXT("Head")).Num() && HeroOf(TEXT("Helmet")).Num();
+	// the UEFN tree reaches the pack bodies through these; the native tree (bNativeAnim) copies the hero rig's pose
+	if (!bNativeAnim)
+	{
+		HeroRetargeter = LoadAsset<UIKRetargeter>(TEXT("/Game/TAG/Hero/Rig/RTG_TAG_UEFN_to_Hero.RTG_TAG_UEFN_to_Hero"), false);
+		CrowdRetargeter = LoadAsset<UIKRetargeter>(TEXT("/Game/TAG/Hero/Rig/RTG_TAG_UEFN_to_Crowd.RTG_TAG_UEFN_to_Crowd"), false);
+	}
+	const bool bOk = (bNativeAnim || HeroRetargeter) && HeroOf(TEXT("Kit")).Num() && HeroOf(TEXT("Head")).Num() && HeroOf(TEXT("Helmet")).Num();
 	if (const UPhysicsAsset* PA = LoadObject<UPhysicsAsset>(nullptr, TEXT("/Game/TAG/Hero/Rig/SKM_TAG_HeroRig_PhysicsAsset.SKM_TAG_HeroRig_PhysicsAsset"), nullptr, LOAD_NoWarn | LOAD_Quiet))
 	{
 		FString Bones;
@@ -960,6 +1001,19 @@ bool FAthleteAssets::LoadHero()
 
 UIKRetargeter* FAthleteAssets::RetargeterFor(const FString& Rig)
 {
+	if (bNativeAnim)
+	{
+		// the rigs on the hero rig's bind pose (hero, male, side player; the crowd rig is a 30-bone subset of it) copy
+		// its pose bone for bone (nullptr); the female and child rigs are built differently (up to 14 cm) and retarget
+		// from it (Tools/Art/hero_retarget.py, TAG_HERO_SOURCE=hero)
+		static const TMap<FString, FString> Own = {{TEXT("female"), TEXT("Female")}, {TEXT("child"), TEXT("Child")}};
+		const FString* T = Own.Find(Rig);
+		if (!T) return nullptr;
+		if (const TObjectPtr<UIKRetargeter>* R = HeroRetargeters.Find(Rig)) return *R;
+		UIKRetargeter* R = LoadAsset<UIKRetargeter>(*FString::Printf(TEXT("/Game/TAG/Hero/Rig/RTG_TAG_Hero_to_%s.RTG_TAG_Hero_to_%s"), **T, **T), false);
+		HeroRetargeters.Add(Rig, R);
+		return R;
+	}
 	if (Rig == TEXT("hero") || Rig.IsEmpty()) return HeroRetargeter;
 	if (Rig == TEXT("crowd")) return CrowdRetargeter;
 	if (const TObjectPtr<UIKRetargeter>* R = HeroRetargeters.Find(Rig)) return *R;
@@ -1530,6 +1584,14 @@ static bool TeamPainted(USkeletalMeshComponent* C, const FName& Slot)
 	return M && M->GetScalarParameterValue(FHashedMaterialParameterInfo(TEXT("Mode")), Mode) && Mode > 1.5f && Mode < 2.5f;
 }
 
+/** A scalar of the material a mesh slot carries (the import's flags: Packed, TeamGlove); 0 when absent. */
+static float SlotScalar(USkeletalMeshComponent* C, const FName& Slot, const TCHAR* Param)
+{
+	UMaterialInterface* M = C ? C->GetMaterialByName(Slot) : nullptr;
+	float V = 0.f;
+	return M && M->GetScalarParameterValue(FHashedMaterialParameterInfo(FName(Param)), V) ? V : 0.f;
+}
+
 void AAthlete::PaintHero(const FUniform& U)
 {
 	FAthleteAssets& A = FAthleteAssets::Get();
@@ -1543,6 +1605,7 @@ void AAthlete::PaintHero(const FUniform& U)
 	};
 	const int32 Tone = FMath::Clamp(HeroTone, 1, 8) - 1;
 	UTexture* Arm = A.HeroSkinArm.IsValidIndex(Tone) ? A.HeroSkinArm[Tone].Get() : nullptr;
+	UTexture* ArmRSM = A.HeroSkinArmRSM.IsValidIndex(Tone) ? A.HeroSkinArmRSM[Tone].Get() : nullptr;
 	UTexture* Legs = A.HeroSkinLegs.IsValidIndex(Tone) ? A.HeroSkinLegs[Tone].Get() : nullptr;
 	const bool bKit = MHBody && MHBody->GetSkeletalMeshAsset() && MHBody->GetSkeletalMeshAsset()->GetName().StartsWith(TEXT("Kit_"));
 	// numbers are placed from this body's bind pose (neck height, the torso's front / back divide)
@@ -1569,7 +1632,13 @@ void AAthlete::PaintHero(const FUniform& U)
 	const bool bDarkGloves = P == tag::Pos::OT || P == tag::Pos::OG || P == tag::Pos::C || P == tag::Pos::DE || P == tag::Pos::DT || P == tag::Pos::TE;
 	Each(MHBody, [&](const FName& Slot, TFunctionRef<UMaterialInstanceDynamic*()> Mid)
 	{
-		if (Slot == TEXT("Skin") && Arm && (bKit || MHFace->GetSkeletalMeshAsset())) Mid()->SetTextureParameterValue(TEXT("BaseColor"), Arm);
+		if (Slot == TEXT("Skin") && Arm && (bKit || MHFace->GetSkeletalMeshAsset()))
+		{
+			// the tone's colour with its own roughness / specular / scatter (the pack ships one RSM per tone)
+			UMaterialInstanceDynamic* M = Mid();
+			M->SetTextureParameterValue(TEXT("BaseColor"), Arm);
+			if (ArmRSM) M->SetTextureParameterValue(TEXT("RSM"), ArmRSM);
+		}
 		else if (Slot == TEXT("SkinLegs") && Legs) Mid()->SetTextureParameterValue(TEXT("BaseColor"), Legs);
 		else if (Slot == TEXT("Jersey"))
 		{
@@ -1600,7 +1669,23 @@ void AAthlete::PaintHero(const FUniform& U)
 			if (PantsMask) M->SetTextureParameterValue(TEXT("Mask"), PantsMask);
 		}
 		else if (Slot == TEXT("Socks")) Mid()->SetVectorParameterValue(TEXT("Tint"), U.Jersey);
-		else if (Slot == TEXT("Hands") && bKit && !bDarkGloves) Mid()->SetVectorParameterValue(TEXT("Tint"), U.Jersey * 0.85f);
+		else if (Slot == TEXT("Hands") && bKit && SlotScalar(MHBody, Slot, TEXT("TeamGlove")) > 0.5f)
+		{
+			// gloves: the team colour for the skill players, black for the line; taped hands and wraps keep their white
+			Mid()->SetVectorParameterValue(TEXT("Tint"), bDarkGloves ? FLinearColor(0.03f, 0.03f, 0.035f) : U.Jersey * 0.85f);
+		}
+		else if (Slot == TEXT("Shoes") && SlotScalar(MHBody, Slot, TEXT("Packed")) > 0.5f)
+		{
+			// the pack's cleat maps are grey with the sole / heel / brand mark masked: black or white cleats, the
+			// marked parts white or in the team colour, per player
+			const uint32 Hc = (Player ? static_cast<uint32>(Player->id) : 3u) * 2246822519u;
+			const bool bWhite = (Hc >> 7) % 3 == 0;
+			UMaterialInstanceDynamic* M = Mid();
+			M->SetVectorParameterValue(TEXT("Tint"), bWhite ? FLinearColor(0.85f, 0.85f, 0.85f) : FLinearColor(0.02f, 0.02f, 0.022f));
+			M->SetVectorParameterValue(TEXT("Trim"), (Hc >> 11) % 2 ? U.Jersey : (bWhite ? FLinearColor(0.02f, 0.02f, 0.022f) : FLinearColor(0.85f, 0.85f, 0.85f)));
+			// the pack's brand marks (white in the decal) read dark on a white cleat
+			M->SetVectorParameterValue(TEXT("DecalTint"), bWhite ? FLinearColor(0.03f, 0.03f, 0.035f) : FLinearColor(1.f, 1.f, 1.f));
+		}
 		else if (!bKit && TeamPainted(MHBody, Slot))
 		{
 			// coach / staff clothing the pack leaves in placeholder colours: tops and caps in the team colour, the
@@ -2340,7 +2425,11 @@ void AAthlete::TickFall(const FVector& SimLoc, float DeltaTime)
 		if (const UAnimSequence* Seq = Cast<UAnimSequence>(FallClip.Get()))
 		{
 			const double End = FMath::Min(static_cast<double>(FallStart + FallT), Seq->GetPlayLength());
-			const FVector R = Seq->ExtractRootMotionFromRange(FallStart, End, FAnimExtractContext(0.0, true)).GetTranslation();
+			// the extracted travel is in the root bone's own frame: back into the clip's (the hero rig's root rests turned
+			// 180 deg about up, the UEFN root not at all; without this the library falls slid backwards on the pack bodies)
+			const FQuat RootRest = Seq->GetSkeleton() && Seq->GetSkeleton()->GetReferenceSkeleton().GetNum()
+				? Seq->GetSkeleton()->GetReferenceSkeleton().GetRefBonePose()[0].GetRotation() : FQuat::Identity;
+			const FVector R = RootRest.RotateVector(Seq->ExtractRootMotionFromRange(FallStart, End, FAnimExtractContext(0.0, true)).GetTranslation());
 			At += FRotator(0, FallYaw, 0).RotateVector(FVector(R.Y, -R.X, 0.f)); // clip x left, +Y forward -> actor forward, right
 		}
 	if (bFallEase && FallT < FallEaseT)
@@ -2575,6 +2664,17 @@ static double GSlideRaw = 0.0, GSlideShown = 0.0;
 static double GFastSec = 0.0, GFastM = 0.0;
 static int32 GFastSteps = 0;
 static double GFastHips = 0.0, GFastHead = 0.0;
+
+static double GGazeSum = 0.0, GGazeMin = 90.0;
+static int32 GGazeN = 0;
+
+void AAthlete::GazeStats(double& OutMeanDeg, double& OutMinDeg, int32& OutSamples, bool bReset)
+{
+	OutSamples = GGazeN;
+	OutMeanDeg = GGazeN ? GGazeSum / GGazeN : 0.0;
+	OutMinDeg = GGazeN ? GGazeMin : 0.0;
+	if (bReset) { GGazeSum = 0.0; GGazeMin = 90.0; GGazeN = 0; }
+}
 
 void AAthlete::HeightStats(double& OutHipsM, double& OutHeadM, bool bReset)
 {
@@ -3193,6 +3293,28 @@ void AAthlete::SetFootball(const FAthleteFootball& InF, float Dt)
 	if (InF.bPreSnap || InF.GetOffKind) GetOffKind = InF.GetOffKind;
 	bEngaged = InF.bReach;
 	if (!MHBody) return;
+	// pre-snap gaze of a set lineman (GazeStats): the head's bind forward (+Y in component space) as shown now
+	GazeSetT = InF.bPreSnap && SmoothedSpeed < 40.f ? GazeSetT + Dt : 0.f;
+	if (InF.bPreSnap && Player && GazeSetT > 0.5f && MHBody->GetSkeletalMeshAsset())
+	{
+		const tag::Pos Pp = Player->pos;
+		const int32 Hi = MHBody->GetBoneIndex(TEXT("head"));
+		if ((Pp == tag::Pos::OT || Pp == tag::Pos::OG || Pp == tag::Pos::C || Pp == tag::Pos::DE || Pp == tag::Pos::DT) && Hi != INDEX_NONE &&
+			MHBody->GetComponentSpaceTransforms().IsValidIndex(Hi))
+		{
+			const FReferenceSkeleton& R = MHBody->GetSkeletalMeshAsset()->GetRefSkeleton();
+			FTransform Ref = FTransform::Identity;
+			for (int32 I = Hi; I != INDEX_NONE; I = R.GetParentIndex(I)) Ref = Ref * R.GetRefBonePose()[I];
+			const FVector G = MHBody->GetComponentSpaceTransforms()[Hi].GetRotation().RotateVector(Ref.GetRotation().UnrotateVector(FVector(0, 1, 0)));
+			const double Pitch = FMath::RadiansToDegrees(FMath::Atan2(G.Z, G.Size2D()));
+			if (Pitch < -30.0 && FParse::Param(FCommandLine::Get(), TEXT("TagGazeDebug")))
+				UE_LOG(LogTemp, Display, TEXT("TAG gaze low %s pitch %.1f set %.2f s look %.2f oneshot %d left %.2f speed %.0f"), *GetName(), Pitch, GazeSetT, LookA,
+					OneShot ? 1 : 0, OneShotLeft, SmoothedSpeed);
+			GGazeSum += Pitch;
+			GGazeMin = FMath::Min(GGazeMin, Pitch);
+			++GGazeN;
+		}
+	}
 	UTagRetargetAnimInstance* I = Cast<UTagRetargetAnimInstance>(MHBody->GetAnimInstance());
 	if (!I) return;
 	auto Ease = [Dt](float& V, float Target, float Rate) { V = FMath::FInterpTo(V, Target, Dt, Rate); };
@@ -3202,7 +3324,11 @@ void AAthlete::SetFootball(const FAthleteFootball& InF, float Dt)
 	if (AA.ThrowKeyed) F.ThrowT = -1.f;
 	// the keyed stance owns the body; the down hand is planted on the turf over it (the rig's arm is too short to
 	// reach from a flat back), both hands in a four point
-	const bool bHandDown = F.bStance && F.bPreSnap && AA.Stance3pt && !(OneShot && OneShotLeft > 0.f);
+	// On the mocap's own skeleton (bNativeAnim) the captured stance plants its hand on the turf by itself, and the
+	// captured blocks, tackles and carries lean as the men who played them leaned: no planted-hand IK, no added drive
+	// lean or carrier pad level over them (those made up for the UEFN rig's shorter arm and straighter spine).
+	const bool bHandDown = !AA.bNativeAnim && F.bStance && F.bPreSnap && AA.Stance3pt && !(OneShot && OneShotLeft > 0.f);
+	if (AA.bNativeAnim) F.Lean = 0.f;
 	if (F.bPreSnap && AA.Stance3pt) F.bStance = false;
 	const bool bThrow = F.ThrowT >= 0.f;
 	// a hand keyed one-shot (catch, handoff, pitch, rush move, ...), a keyed fall or get-up authors its own arms: keep
@@ -3229,6 +3355,7 @@ void AAthlete::SetFootball(const FAthleteFootball& InF, float Dt)
 	P.StanceAlpha = StanceA;
 	P.StanceHandAlpha = StanceHandA;
 	P.bStanceBothHands = Player && Player->pos == tag::Pos::DT && AA.Stance4pt && (Player->id % 2);
+	P.CarryLeanDeg = AA.bNativeAnim ? 0.f : 7.f;
 	P.LookAlpha = LookA;
 	P.LookTarget = C.InverseTransformPosition(LookSmoothed);
 	P.ArmSlot = ArmSlot;
@@ -3321,6 +3448,18 @@ FString AAthlete::DebugAnimState() const
 			{
 				const FTransform& T = MHBody->GetComponentSpaceTransforms()[Bi];
 				Fb += FString::Printf(TEXT(" %s=%.0f/%.2f"), Bn, T.GetLocation().Z, T.GetScale3D().GetMax());
+			}
+		}
+		// the hidden source mesh's own heights (what the shown body copies or retargets from)
+		Fb += TEXT(" | src");
+		for (const TCHAR* Bn : {TEXT("root"), TEXT("pelvis"), TEXT("spine_05"), TEXT("head")})
+		{
+			const int32 Bi = Body->GetBoneIndex(Bn);
+			if (Bi != INDEX_NONE && Body->GetComponentSpaceTransforms().IsValidIndex(Bi))
+			{
+				const FTransform& T = Body->GetComponentSpaceTransforms()[Bi];
+				const FRotator R = T.Rotator();
+				Fb += FString::Printf(TEXT(" %s=%.0f(%.0f,%.0f,%.0f)"), Bn, T.GetLocation().Z, R.Pitch, R.Yaw, R.Roll);
 			}
 		}
 	}

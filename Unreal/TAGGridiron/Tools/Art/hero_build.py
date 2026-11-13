@@ -72,7 +72,15 @@ def build(job):
                         d.uv = (d.uv[0] / n, d.uv[1] / n + 1.0 - 1.0 / n)
             # one UV set everywhere (Unreal merges sections by UV count; the pack's extra sets tile detail maps). A
             # part can name the set its colour texture uses (helmet shells: set 1, the stripe / decal layout)
+            # A job with "uv_sets": 2 keeps a second set (Unreal TexCoord 1) on every part: the part's "uv2" set (helmet
+            # shells: set 3, where the pack's vent / hardware detail normal lies), else a copy of the first, so every
+            # section has the same count.
             k = part.get("uv", 0)
+            k2 = part.get("uv2", k)
+            second = None
+            if job.get("uv_sets") == 2:
+                srcl = o.data.uv_layers[k2] if 0 <= k2 < len(o.data.uv_layers) else o.data.uv_layers[0]
+                second = [tuple(d.uv) for d in srcl.data]
             if 0 < k < len(o.data.uv_layers):
                 src, dst = o.data.uv_layers[k], o.data.uv_layers[0]
                 for i in range(len(dst.data)):
@@ -80,6 +88,10 @@ def build(job):
             while len(o.data.uv_layers) > 1:
                 o.data.uv_layers.remove(o.data.uv_layers[-1])
             o.data.uv_layers[0].name = "UVMap"
+            if second is not None:
+                l2 = o.data.uv_layers.new(name="UVDetail")
+                for i, uv in enumerate(second):
+                    l2.data[i].uv = uv
             meshes.append(o)
             if root_arm is not None and arm is not None:
                 o.parent = root_arm
@@ -150,6 +162,53 @@ def build(job):
                 bpy.data.objects.remove(o, do_unlink=True)
             except ReferenceError:
                 pass
+
+    # torn sleeves with no intact twin to copy from (Reporter1's casual top, both variants: 649 of 719 sleeve vertices
+    # weighted to the spine, 1,180 chest vertices on bones > 30 cm away): vertices of the named slots whose strongest
+    # bone lies > 30 cm away are re-skinned to the two nearest upper-body bones (distance to the bone segments,
+    # inverse-square blend)
+    rs = job.get("reskin_far")
+    if rs:
+        import re
+        Mw = root_arm.matrix_world
+        # targets: the whole upper body (a torn top hangs chest vertices on the forearms too, not only the sleeves)
+        pat = re.compile(rs.get("bones", r"^(Hips|Spine\d?|Neck1?|(Left|Right)(Shoulder|Arm|ForeArm|Hand))$|^RM_(Left|Right)(Arm|ForeArm)Twist\d$"))
+        segs = {b.name: (Mw @ b.head_local, Mw @ b.tail_local) for b in root_arm.data.bones if pat.match(b.name)}
+        ends = {b.name: (Mw @ b.head_local, Mw @ b.tail_local) for b in root_arm.data.bones}
+        mids = {i for i, m in enumerate(mesh.data.materials) if m and m.name.split(".")[0] in rs["slots"]}
+        verts = set()
+        for p in mesh.data.polygons:
+            if p.material_index in mids:
+                verts.update(p.vertices)
+        gname = {g.index: g.name for g in mesh.vertex_groups}
+
+        def seg_dist(pt, a, b):
+            ab = b - a
+            t = max(0.0, min(1.0, (pt - a).dot(ab) / max(ab.length_squared, 1e-12)))
+            return (pt - (a + ab * t)).length
+
+        fixed = 0
+        for vi in verts:
+            v = mesh.data.vertices[vi]
+            if not v.groups:
+                continue
+            g = max(v.groups, key=lambda x: x.weight)
+            hb = ends.get(gname.get(g.group))
+            pw = mesh.matrix_world @ v.co
+            if hb is None or min((pw - hb[0]).length, (pw - hb[1]).length) <= rs.get("far", 0.3):
+                continue
+            near = sorted((seg_dist(pw, a, b), n) for n, (a, b) in segs.items())[:2]
+            # only where an arm bone is nearer than the bone it hangs on now (the chest stays on the spine)
+            if near[0][0] >= seg_dist(pw, hb[0], hb[1]):
+                continue
+            w = [1.0 / max(d, 0.005) ** 2 for d, _ in near]
+            for old in [x.group for x in v.groups]:
+                mesh.vertex_groups[old].remove([vi])
+            for (d, n), wi in zip(near, w):
+                vg = mesh.vertex_groups.get(n) or mesh.vertex_groups.new(name=n)
+                vg.add([vi], wi / sum(w), "REPLACE")
+            fixed += 1
+        print("HERO_RESKIN %s %d vertices" % (job["name"], fixed), flush=True)
 
     # bind pose measurements (Blender space: metres, character faces -Y) before the renames
     arm = root_arm

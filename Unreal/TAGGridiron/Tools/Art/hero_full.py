@@ -260,13 +260,16 @@ def plan_helmets(job):
             for mi, m in enumerate(masks):
                 mname = os.path.basename(m)[len("helmet_facemask_"):-9]
                 vis = bool(visor) and mi % 4 == 2
-                parts = [dict(build_part(shell, force_role="Shell"), uv=1)]  # the shell's colour layout is UV set 1
+                # the shell's colour layout is UV set 1; its detail normal (venthole_norm: snap rings, screw heads, vent
+                # bevels) lies on set 3 (rendered per set, Tools/Art/hero_build.py notes): kept as the mesh's second set
+                parts = [dict(build_part(shell, force_role="Shell"), uv=1, uv2=3)]
                 if acc:
                     parts.append(build_part(acc[0], force_role="HelmetAcc"))
                 parts.append(build_part(m, force_role="Facemask"))
                 if vis:
                     parts.append(build_part(visor[0], force_role="Visor"))
                 jobs.append(job("Helmet_%s_%s%s" % (sname, mname, "_visor" if vis else ""), "Helmet", parts, style=mask_style(mname), shell=sname))
+                jobs[-1]["uv_sets"] = 2
     for f in sorted(glob.glob(ap(G + "Helmets/hats/*_mesh.fbx"))):
         jobs.append(job("Cap_" + os.path.basename(f)[:-9], "Cap", [build_part(f, force_role="Hat")]))
     return jobs
@@ -313,9 +316,19 @@ def plan_recipes(job, rig_of):
             fbxs.append(ap("Models/StoryCharacters/Actors/jamisonhank/jamisonhank_legs_%s_mesh.fbx" % v))
         if name == "revisdarrelle_head":
             fbxs.append(ap("Models/Coaches/Named/3_b_n_01/3_b_n_01_head_mesh.fbx"))
-        # the pack's torn right arm in two GP_F outfits: the same character's intact NGP_D arm part
-        if name in ("CruiseColt_Casual_Outfit_GP_F", "LeGuinDylan_Casual_Outfit_GP_F"):
+        # the pack's torn arm in three GP_F outfits: the same character's intact NGP_D arm part (Jacket: the hands
+        # weighted to the pec bones, one arm stood out in the Story gallery)
+        if name in ("CruiseColt_Casual_Outfit_GP_F", "LeGuinDylan_Casual_Outfit_GP_F", "LeGuinDylan_Jacket_Outfit_GP_F"):
             fbxs = [f.replace("_arms_gp_f_mesh", "_arms_ngp_d_mesh").replace("_hands_gp_f_mesh", "_hands_ngp_d_mesh") for f in fbxs]
+        # ... and the two Casual outfits' own sleeves are torn the same way (far share 0.07-0.09, the NGP_D twin 0.0)
+        if name in ("CruiseColt_Casual_Outfit_GP_F", "LeGuinDylan_Casual_Outfit_GP_F"):
+            fbxs = [f.replace("_casual_outfit_gp_f_mesh", "_casual_outfit_ngp_d_mesh") for f in fbxs]
+        # Watson's athletic top is sleeveless but his arms part is the forearm-only cut: the pack's shared full arm
+        # (scmyzniakmike's: same UV layout and section names; Watson's own skin texture goes back on below)
+        full_arm = name.startswith("WatsonDeshaun_Athletic_Outfit_")
+        if full_arm:
+            fbxs = [os.path.join(os.path.dirname(os.path.dirname(f)), "scmyzniakmike", os.path.basename(f).replace("watsondeshaun", "scmyzniakmike"))
+                    if os.path.basename(f).startswith("watsondeshaun_arms_") else f for f in fbxs]
         fbxs = [f for f in fbxs if os.path.exists(f)]
         rig = RIGS.get(rig_of(fbxs[0]), "hero")
         parts = []
@@ -323,6 +336,10 @@ def plan_recipes(job, rig_of):
             p = build_part(f)
             if g in ("Crowd", "CrowdProps") or (g == "Sidelines" and rig in ("crowd", "sideplayer")):
                 p["slots"] = {k: "Body" for k in p["slots"]}
+            if full_arm and "scmyzniakmike_arms_" in f:
+                for t in p["textures"].values():
+                    if t.get("colorTexture"):
+                        t["colorTexture"] = t["colorTexture"].replace("scmyzniakmike", "watsondeshaun")
             parts.append(p)
         parts = unique_slots(parts)
         donor = None
@@ -330,8 +347,11 @@ def plan_recipes(job, rig_of):
             for sec, slot in p["slots"].items():
                 t = p["textures"].get(sec, {})
                 col = t.get("colorTexture")
-                if slot == "Head" and (not col or "flatgrey" in col or white_fraction(col) > 0.35):
-                    donor = donor_face(name)
+                # (or the missing-texture rainbow: CoachTexans ships no face at all; every pack head shares one UV layout)
+                faceless = bool(col) and rainbow(ap(col))
+                if slot == "Head" and (not col or "flatgrey" in col or white_fraction(col) > 0.35 or faceless):
+                    # (a faceless character's GP_F / NGP_D or cold / warm variants are one man: the same donor for all)
+                    donor = donor_face(re.sub(r"_(GP_F|NGP_D|cold|warm)$", "", name) if faceless else name)
                     if donor:
                         t["colorTexture"], t["normalClampTexture"] = donor
                         t["_donor"] = True
@@ -368,6 +388,9 @@ def plan_recipes(job, rig_of):
             meta["top"] = top.group(1)
         meta["hat"] = any(re.search(r"_hat|visor|cap", os.path.basename(f).lower()) for f in fbxs)
         j = dict(job(nm, kind, parts, rig=rig, **meta))
+        # torn sleeves with no intact sibling: re-skinned to the arm bones in hero_build (reskin_far)
+        if name.startswith("Reporter1_casual_outfit_"):
+            j["reskin_far"] = {"slots": ["Top"]}
         # torn skins (weights on the wrong bones, measured by hero_build's "far" share): weights from an intact sibling
         if name in REPAIR:
             donor = next((x for x in recipes if x["name"].split("/")[-1] == REPAIR[name]), None)

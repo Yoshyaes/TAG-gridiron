@@ -9,8 +9,10 @@ import os
 
 import unreal
 
-A = "/Game/TAG/Anim/Authored/"
-OUT_DIR = "/Game/TAG/Anim"
+# TAG_ANIM_RIG=hero: the same blend spaces from the hero-skeleton clips (/Game/TAG/AnimH, the pack bodies' own rig)
+HERO = os.environ.get("TAG_ANIM_RIG", "") == "hero"
+A = "/Game/TAG/AnimH/Authored/" if HERO else "/Game/TAG/Anim/Authored/"
+OUT_DIR = "/Game/TAG/AnimH" if HERO else "/Game/TAG/Anim"
 tools = unreal.AssetToolsHelpers.get_asset_tools()
 EAL = unreal.EditorAssetLibrary
 opts = unreal.AnimPoseEvaluationOptions()
@@ -110,6 +112,6 @@ crouch = make(OUT_DIR + "/BS_TAG_Crouch", "BS_TAG_Crouch", load("Loco_Line_Idle_
               ["Loco_Line_Block_Walk", "Loco_Line_Shuffle_Walk", "Loco_Line_Shuffle_Walk_M", "Loco_Line_BackDiag_Walk", "Loco_Line_BackDiag_Walk_M",
                "Loco_Line_Back_Jog", "Loco_Line_Crouch_Run", "Loco_Line_Crouch_Run_Diag", "Loco_Line_Crouch_Run_Diag_M",
                "Loco_Line_Shuffle_Run", "Loco_Line_Shuffle_Run_M", "Loco_Line_Crouch_Back"], 2)
-with open(os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_saved_dir()), "tag_anim_build.txt"), "w") as f:
+with open(os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_saved_dir()), "tag_anim_build_hero.txt" if HERO else "tag_anim_build.txt"), "w") as f:
     f.write("TAG locomotion top=%.1f crouch=%.1f\n" % (stand, crouch))
 unreal.log("TAG anims built OK")

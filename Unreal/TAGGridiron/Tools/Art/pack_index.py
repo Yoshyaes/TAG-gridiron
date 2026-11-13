@@ -21,8 +21,10 @@ import unreal
 
 EAL = unreal.EditorAssetLibrary
 PROJ = unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_dir())
-SRC = os.path.join(PROJ, "RawArt", "Anim", "Pack")
-OUT = os.path.join(PROJ, "Content", "TAG", "Anim", "Pack", "pack_index.json")
+# TAG_ANIM_RIG=hero: the hero-skeleton library (RawArt/Anim/PackHero sidecars, /Game/TAG/AnimH/Pack assets)
+HERO = os.environ.get("TAG_ANIM_RIG", "") == "hero"
+SRC = os.path.join(PROJ, "RawArt", "Anim", "PackHero" if HERO else "Pack")
+OUT = os.path.join(PROJ, "Content", "TAG", "AnimH" if HERO else "Anim", "Pack", "pack_index.json")
 SAMPLED = ("Tackles", "BrokenTackles", "BallCarrier", "Catching", "Blocking")
 opts = unreal.AnimPoseEvaluationOptions()
 
@@ -83,7 +85,7 @@ for jpath in sorted(glob.glob(os.path.join(SRC, "*", "A_TAG_Pack_*.json"))):
     if rec["travel"] and rec["moving"]:
         rec["speed"] = round(100.0 * rec["travel"] / (rec["moving"] / 30.0), 1)
     if cat in SAMPLED:
-        asset = "/Game/TAG/Anim/Pack/%s/%s" % (cat, name)
+        asset = "/Game/TAG/%s/Pack/%s/%s" % ("AnimH" if HERO else "Anim", cat, name)
         if EAL.does_asset_exist(asset):
             anim = unreal.load_asset(asset)
             try:

@@ -62,8 +62,24 @@ for S, s in (("Left", "l"), ("Right", "r")):
             ("%s_02_%s" % (f, s), "%sHand%s2" % (S, F), "%sHand%s3" % (S, F), "%s_03_%s" % (f, s)),
             ("%s_03_%s" % (f, s), "%sHand%s3" % (S, F), None, None),
         ]
+# The hero rig (RawArt/Hero/Rig/SKM_TAG_HeroRig.fbx, the model pack's MaddenFB_Hero_Skeleton with Unreal names) IS the
+# skeleton the pack was captured on: same bones, same bind pose (0.0 mm / 0.0 deg on every mapped bone,
+# Tools/Anim/mocap_fidelity.py). Its clips are the capture itself, renamed: no calibration, no hip scale, no torso fix.
+HERO_RENAME = {"Hips": "pelvis", "Spine": "spine_01", "Spine1": "spine_03", "Spine2": "spine_04", "Spine3": "spine_05",
+               "Neck": "neck_01", "Neck1": "neck_02", "Head": "head"}
+for S, s in (("Left", "l"), ("Right", "r")):
+    HERO_RENAME.update({S + "Shoulder": "clavicle_" + s, S + "Arm": "upperarm_" + s, S + "ForeArm": "lowerarm_" + s,
+                        S + "Hand": "hand_" + s, S + "UpLeg": "thigh_" + s, S + "Leg": "calf_" + s, S + "Foot": "foot_" + s,
+                        S + "ToeBase": "ball_" + s, S + "HandThumb1": "thumb_01_" + s, S + "HandThumb2": "thumb_02_" + s,
+                        S + "HandThumb3": "thumb_03_" + s, S + "Football": S + "Football"})
+    for F, f in (("Index", "index"), ("Middle", "middle"), ("Ring", "ring"), ("Pinky", "pinky")):
+        HERO_RENAME[S + "InHand" + F] = "%s_metacarpal_%s" % (f, s)
+        for k in (1, 2, 3):
+            HERO_RENAME["%sHand%s%d" % (S, F, k)] = "%s_%02d_%s" % (f, k, s)
+HERO_MAP = [(t, s, None, None) for s, t in HERO_RENAME.items()]
+
 # ik helper bones copy a body bone
-IK_COPY = {"ik_foot_l": "foot_l", "ik_foot_r": "foot_r", "ik_hand_l": "hand_l", "ik_hand_r": "hand_r", "ik_hand_gun": "hand_r"}
+IK_COPY ={"ik_foot_l": "foot_l", "ik_foot_r": "foot_r", "ik_hand_l": "hand_l", "ik_hand_r": "hand_r", "ik_hand_gun": "hand_r"}
 
 # trajectory local (X forward, Y up, Z right; measured on the clips - the rest-pose file's trajectory is identity and
 # says nothing) -> actor (X left, Y back, Z up)
@@ -157,6 +173,17 @@ class Target:
         bpy.context.view_layer.update()
         self.W = a.matrix_world.copy()
         self.Winv = self.W.inverted()
+        names = {b.name for b in a.data.bones}
+        if "root" in names and "pelvis" in names and "spine_02" not in names:
+            # the hero rig: keep the capture's 64 bones and the root (a closed hierarchy on this rig). Clips then carry
+            # those tracks only; the face, twist, pad and helmet helpers stay at their bind pose (ApplyTwist drives
+            # the twists at runtime), and a library clip is the size of a UEFN one instead of 4x
+            keep = set(HERO_RENAME.values()) | {"root"}
+            bpy.ops.object.mode_set(mode="EDIT")
+            eb = a.data.edit_bones
+            for b in [b for b in eb if b.name not in keep]:
+                eb.remove(b)
+            bpy.ops.object.mode_set(mode="OBJECT")
         self.rest_arm = {b.name: b.matrix_local.copy() for b in a.data.bones}       # armature space (cm)
         self.rest_world = {n: self.W @ m for n, m in self.rest_arm.items()}          # metres
         self.parent = {b.name: (b.parent.name if b.parent else None) for b in a.data.bones}
@@ -171,6 +198,11 @@ class Target:
             if not b.parent:
                 walk(b)
         self.names = set(self.order)
+        # the hero rig carries a real `root` bone under an "Armature" null (root motion goes on that bone); the UEFN
+        # rig's root is the armature object itself
+        self.root_bone = "root" if "root" in self.names and self.parent.get("root") is None else None
+        self.hero = self.root_bone is not None and "pelvis" in self.names and self.parent.get("pelvis") == "root" \
+            and "spine_02" not in self.names
 
     def basis_from_world(self, world_by_bone):
         """world_by_bone: desired world matrices (metres) for a subset of bones. Returns {bone: basis} for every
@@ -244,7 +276,11 @@ class Retargeter:
         for n, p in self.src_parent.items():
             if p:
                 self.children.setdefault(p, []).append(n)
-        self.pairs = [(tb, sb, sc, tc) for tb, sb, sc, tc in BONE_MAP if tb in target.names and sb in self.src_rest]
+        self.identity = getattr(target, "hero", False)
+        bone_map = HERO_MAP if self.identity else BONE_MAP
+        self.hip_scale = 1.0 if self.identity else HIP_SCALE
+        self.TORSO_FIX = not self.identity
+        self.pairs = [(tb, sb, sc, tc) for tb, sb, sc, tc in bone_map if tb in target.names and sb in self.src_rest]
         self.mirror_fix = mirror_fixes(self.src_rest)
         self.calibrate()
 
@@ -290,7 +326,7 @@ class Retargeter:
                 continue
             Rs = Ms.to_3x3().normalized().to_4x4()
             Rt = (Rs @ self.cal_rot_inv[sb] @ tgt_rest[tb].to_3x3().normalized().to_4x4()).to_3x3()
-            out[tb] = (Rt, Ms.to_translation() * HIP_SCALE if tb == "pelvis" else None)
+            out[tb] = (Rt, Ms.to_translation() * self.hip_scale if tb == "pelvis" else None)
         return out
 
     TORSO_FIX = True
@@ -500,10 +536,13 @@ def build(target, rt, spec, fps_out=FPS_OUT):
                 Rt = Ryaw @ Rt @ Ryaw.inverted()
             if spec.get("mirror"):
                 Rt = MIRROR @ Rt @ MIRROR
-            a.location = Rt.to_translation()
-            a.rotation_euler = (0.0, 0.0, Rt.to_euler("XYZ").z)
-            a.keyframe_insert("location", frame=i)
-            a.keyframe_insert("rotation_euler", frame=i)
+            if target.root_bone:
+                root_rm = Matrix.Translation(Rt.to_translation()) @ Matrix.Rotation(Rt.to_euler("XYZ").z, 4, "Z")
+            else:
+                a.location = Rt.to_translation()
+                a.rotation_euler = (0.0, 0.0, Rt.to_euler("XYZ").z)
+                a.keyframe_insert("location", frame=i)
+                a.keyframe_insert("rotation_euler", frame=i)
         if yaw:
             actor = {n: Ryaw @ m for n, m in actor.items()}
         if spec.get("mirror"):
@@ -513,13 +552,18 @@ def build(target, rt, spec, fps_out=FPS_OUT):
             for m in actor.values():
                 m.translation = m.translation + Vector((0, 0, lift))
         basis, P = rt.apply(actor)
+        if target.root_bone:
+            # root motion on the root bone (world metres -> armature space), the body posed relative to it
+            R0 = target.rest_arm[target.root_bone]
+            rm = target.Winv @ root_rm @ target.W if root_motion else Matrix.Identity(4)
+            basis[target.root_bone] = R0.inverted() @ rm @ R0
         for n in keyed:
             pb = a.pose.bones[n]
             b = basis[n]
             loc, rot, _ = b.decompose()
             pb.rotation_quaternion = rot
             pb.keyframe_insert("rotation_quaternion", frame=i)
-            if n == "pelvis":
+            if n == "pelvis" or n == target.root_bone:
                 pb.location = loc
                 pb.keyframe_insert("location", frame=i)
         W = target.W
@@ -563,8 +607,8 @@ def blend_loop(arm, bones, n_out, k):
                 for cb in strip.channelbags:
                     fcurves.extend(cb.fcurves)
     for fc in fcurves:
-        if not fc.data_path.startswith("pose.bones"):
-            continue  # the object's root motion is not a loop
+        if not fc.data_path.startswith("pose.bones") or fc.data_path.startswith('pose.bones["root"]'):
+            continue  # the root motion (object or root bone) is not a loop
         kps = fc.keyframe_points
         if len(kps) < 2:
             continue

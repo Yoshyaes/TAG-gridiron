@@ -370,6 +370,8 @@ def cmd_index():
         if os.path.exists(side):
             d = json.load(open(side))
             d["fbx"] = j["out"]
+            if j.get("uv_sets"):
+                d["uv_sets"] = j["uv_sets"]  # the importer's materials read it (helmet shells: detail normal on TexCoord 1)
             out.append(d)
     json.dump(out, open(os.path.join(OUT, "hero_index.json"), "w"), indent=1)
     print("indexed", len(out), "of", len(jobs))

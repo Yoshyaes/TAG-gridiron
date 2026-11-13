@@ -1,6 +1,6 @@
-// Runtime IK retargeting without an Anim Blueprint: copies the pose of a (hidden) source mesh
-// that plays the mocap onto this mesh through an IK Retargeter asset (e.g. UEFN mannequin -> MetaHuman),
-// then layers procedural football motion on top (throw, ball security, catch reach, block hands,
+// Runtime pose transfer without an Anim Blueprint: copies the pose of a (hidden) source mesh that plays the mocap onto
+// this mesh, bone for bone when both are on the mocap's own skeleton (the model pack bodies under the hero rig: the
+// capture as captured), else through an IK Retargeter asset (e.g. UEFN mannequin -> MetaHuman); then layers procedural football motion on top (throw, ball security, catch reach, block hands,
 // tackle wrap, 3-point stance) using component-space IK driven by the simulation.
 #pragma once
 
@@ -22,6 +22,7 @@ struct FTagProcInput
 	FVector ReachTarget = FVector::ZeroVector;
 	float ReachSpread = 8.f;   // lateral half-gap between the hands
 	float LeanAlpha = 0.f;     // forward drive lean (blocking / tackling), 0..1
+	float CarryLeanDeg = 7.f;  // a ball carrier's pad level added over the capture (0 on the mocap's own skeleton)
 	float StanceAlpha = 0.f;   // lineman 3-point stance (torso and hand, the procedural fallback)
 	float StanceHandAlpha = 0.f; // the down hand planted on the turf over the keyed stance (the rig's arm is short)
 	bool bStanceBothHands = false; // a four point stance
@@ -68,6 +69,10 @@ struct FTagRetargetProxy : public FAnimInstanceProxy
 	virtual bool Evaluate(FPoseContext& Output) override;
 
 	FAnimNode_RetargetPoseFromMesh* Node = nullptr;
+	/** Copy mode (no retargeter): the source's component-space pose, in this mesh's bone order (game thread copy). */
+	bool bCopy = false;
+	TArray<FTransform> CopyCS;
+	TArray<uint8> CopyHave;
 	FTagProcInput In;
 	/** Planted-foot travel this evaluation (cm): in the animation as retargeted, and as shown after the foot lock. */
 	float SlideRawFrame = 0.f, SlideShownFrame = 0.f;
@@ -80,6 +85,10 @@ private:
 	void ApplyLean(FPoseContext& Output) const;
 	void ApplyFeet(FPoseContext& Output);
 	void ApplyCrossfade(FPoseContext& Output);
+	void EvaluateCopy(FPoseContext& Output);
+	TArray<int32> CopyMap;              // this mesh's bone -> the source mesh's bone (by name), INDEX_NONE where it has none
+	const void* CopySrcMesh = nullptr;
+	const void* CopyDstMesh = nullptr;
 	/** Model pack bodies: the forearm / calf twist helpers take their share of the hand / foot turn and the upper arm /
 	 *  thigh helpers hold back the limb's own turn near the shoulder / hip (the pack rig's skinning expects it). */
 	void ApplyTwist(FPoseContext& Output);
@@ -119,8 +128,11 @@ class TAGGRIDIRON_API UTagRetargetAnimInstance : public UAnimInstance
 	GENERATED_BODY()
 
 public:
-	/** Retarget from Source (must tick before this mesh) using Asset. */
+	/** Retarget from Source (must tick before this mesh) using Asset; with no Asset the pose is copied bone for bone by
+	 *  name (in component space, so a rig with fewer bones in between still lands every bone where the source has it). */
 	void Configure(UIKRetargeter* Asset, USkeletalMeshComponent* Source);
+	TWeakObjectPtr<USkeletalMeshComponent> CopySource;
+	bool bCopy = false;
 
 	/** Football layer inputs; copied to the worker-thread proxy each update. */
 	FTagProcInput Proc;

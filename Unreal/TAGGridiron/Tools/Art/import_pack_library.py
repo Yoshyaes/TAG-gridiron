@@ -14,8 +14,13 @@ import unreal
 
 EAL = unreal.EditorAssetLibrary
 tools = unreal.AssetToolsHelpers.get_asset_tools()
-SKEL = "/Game/Characters/UEFN_Mannequin/Meshes/SK_UEFN_Mannequin"
-PIPE = "/Game/TAG/Anim/_Pipelines/P_TAG_Anim"  # the saved Interchange pipeline import_tag_anims.py builds
+# TAG_ANIM_RIG=hero: the library built on the pack's own skeleton (build_pack_library.sh -r hero -> RawArt/Anim/PackHero)
+# onto the model-pack bodies' skeleton as /Game/TAG/AnimH/Pack. TAG_PACK_DELETE_SRC=1 deletes each source FBX once its
+# asset is saved (the json sidecar stays: pack_index.py reads it), for a disk that cannot hold both copies.
+HERO = os.environ.get("TAG_ANIM_RIG", "") == "hero"
+SKEL = "/Game/TAG/Hero/Rig/SKM_TAG_HeroRig_Skeleton" if HERO else "/Game/Characters/UEFN_Mannequin/Meshes/SK_UEFN_Mannequin"
+PIPE = "/Game/TAG/AnimH/_Pipelines/P_TAG_AnimH" if HERO else "/Game/TAG/Anim/_Pipelines/P_TAG_Anim"  # saved Interchange pipeline
+DELETE_SRC = os.environ.get("TAG_PACK_DELETE_SRC", "") == "1"
 
 
 def pipeline(skeleton):
@@ -40,9 +45,9 @@ def pipeline(skeleton):
     return PIPE + "." + PIPE.rsplit("/", 1)[1]
 
 PROJ = unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_dir())
-SRC = os.path.join(PROJ, "RawArt", "Anim", "Pack")
-DEST = "/Game/TAG/Anim/Pack"
-REPORT = os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_saved_dir()), "pack_import.json")
+SRC = os.environ.get("TAG_PACK_SRC") or os.path.join(PROJ, "RawArt", "Anim", "PackHero" if HERO else "Pack")
+DEST = "/Game/TAG/AnimH/Pack" if HERO else "/Game/TAG/Anim/Pack"
+REPORT = os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_saved_dir()), "pack_import_hero.json" if HERO else "pack_import.json")
 cats = [c for c in os.environ.get("TAG_PACK_CATEGORIES", "").split(",") if c]
 limit = int(os.environ.get("TAG_PACK_LIMIT", "0") or 0)
 
@@ -100,6 +105,8 @@ def main():
                 if not EAL.save_asset(path, only_if_is_dirty=False):
                     raise RuntimeError("save failed")
                 os.remove(tmp)
+                if DELETE_SRC:
+                    os.remove(fbx)
                 out["imported"] += 1
                 if out["imported"] % 200 == 0:
                     unreal.log("TAG_PACK_IMPORT %d imported, %d skipped, %d errors, %.0f s" % (out["imported"], out["skipped"], len(out["errors"]), time.time() - t0))

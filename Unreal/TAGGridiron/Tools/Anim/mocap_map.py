@@ -129,8 +129,10 @@ MAP = {
     # the pass rusher's spin: the pack has no DL spin, the ball carriers' spins are the same body turn (no ball held)
     "Rush_Spin_L": dict(src="BC_Agile_Spin_Left_Sloppy__P01", start=0.3, end=1.2, mode="inplace_pos"),
     "Rush_Spin_R": dict(src="BC_Big_Spin_Right__P01", end=1.0, mode="inplace_pos"),
-    # the spectators' cheer (Tools/Art/crowd_retarget.py): a jumping fist pump, the jump then the arms held up
-    "Fan_Cheer_Loop": dict(src="PostPlay_16_OTF_Celeb_Jumping_Fist_Pump_D1_V1__P01", start=0.6, end=3.0, loop=8),
+    # the spectators' cheer (Tools/Art/crowd_retarget.py, hero_retarget.py fan clips): a man pumping up the crowd on his
+    # feet, arms up to 1.9 m, hips within 2 cm. (The jumping fist pump it replaced lifted a front-row fan's pelvis 52 cm
+    # off his seat: from the field, fans hung in the air above the wall, the 12 Nov lineup "float check".)
+    "Fan_Cheer_Loop": dict(src="NonBC_pump_up_the_crowd_stand__P01", loop=8),
     "Idle_HandsKnees_Loop": dict(src="Pre_Play_LB_Idle_Hands_on_Knee__P01", loop=8),
     "Def_Breakdown_Loop": dict(src="NonBC_DefenderBreakdown_Idle__P01", loop=4),
     # ---------------------------------------------------------------- paired tackles to the ground (anchor mode from

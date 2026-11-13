@@ -168,6 +168,10 @@ public:
 	static void GaitStats(double& OutSeconds, double& OutMetres, int32& OutSteps, bool bReset);
 	/** Sprinting body height, summed over the same frames as GaitStats: hips and head above the turf (m). */
 	static void HeightStats(double& OutHipsM, double& OutHeadM, bool bReset);
+	/** Where set linemen look before the snap: the head's forward axis below (-) or above the horizon, degrees, over
+	 *  every pre-snap frame of a lineman standing still once he has been set half a second (the look has eased in;
+	 *  mean, the lowest, sample count). */
+	static void GazeStats(double& OutMeanDeg, double& OutMinDeg, int32& OutSamples, bool bReset);
 
 	const tag::Player* Player = nullptr;
 
@@ -331,6 +335,7 @@ private:
 	// smoothed football-layer weights
 	float CarryA = 0.f, SecureA = 0.f, ReachA = 0.f, LeanA = 0.f, StanceA = 0.f, StanceHandA = 0.f, LookA = 0.f;
 	FVector ReachSmoothed = FVector::ZeroVector, LookSmoothed = FVector::ZeroVector;
+	float GazeSetT = 0.f; // seconds this lineman has stood set before the snap (GazeStats)
 	float ArmSlot = 0.f, StyleJitter = 0.f;
 	// body physics inputs (TagRetargetAnimInstance): the lean from the measured acceleration, planted feet pinned
 	void MeasureMotion(float Dt);
@@ -385,16 +390,26 @@ struct FAthleteAssets
 	/** Model pack characters (players, coaches, officials, crew, fans) replace the MetaHumans when the catalog is there
 	 *  (-TagNoHero for the MetaHumans). */
 	bool bHero = false;
+	/** The mocap on its own skeleton: the pack was captured on the model pack's MaddenFB_Hero_Skeleton (same bones, same
+	 *  bind pose to the micron), so with the pack bodies every clip, blend space and motion matching database comes from
+	 *  /Game/TAG/AnimH (Tools/Anim/build_*.sh -r hero, Tools/Art/*.py with TAG_ANIM_RIG=hero), the hidden source mesh is
+	 *  the hero rig, and the bodies copy its pose bone for bone: the capture as captured. Without it (MetaHumans,
+	 *  -TagUEFNAnim for an A/B) the tree is /Game/TAG/Anim on the UEFN mannequin, retargeted twice on the way to a pack
+	 *  body (pack -> UEFN in Blender, UEFN -> pack at runtime: 114 mm mean joint error, Tools/Anim/mocap_fidelity.py). */
+	bool bNativeAnim = false;
+	FString AnimRoot = TEXT("/Game/TAG/Anim");
 	TArray<FHeroItem> HeroItems;
 	TObjectPtr<class UIKRetargeter> HeroRetargeter;
 	TObjectPtr<class UIKRetargeter> CrowdRetargeter;
-	/** The runtime retargeter for a skeleton family (hero, crowd, male, female, child, sideplayer). */
+	/** The runtime retargeter for a skeleton family (hero, crowd, male, female, child, sideplayer). With bNativeAnim,
+	 *  nullptr for the rigs that share the hero rig's bind pose (hero, male, side player, crowd): those copy the pose. */
 	class UIKRetargeter* RetargeterFor(const FString& Rig);
 	/** A clip baked for the people that stand around (Idle, Cheer, Clap, Kneel) on a skeleton family. */
 	UAnimationAsset* HeroClip(const FString& Rig, const TCHAR* Clip);
 	TMap<FString, TObjectPtr<class UIKRetargeter>> HeroRetargeters;
 	TMap<FString, TObjectPtr<UAnimationAsset>> HeroClips;
 	TArray<TObjectPtr<class UTexture>> HeroSkinArm, HeroSkinLegs, HeroEyes;
+	TArray<TObjectPtr<class UTexture>> HeroSkinArmRSM; // each skin tone's own roughness / specular / scatter map
 	TArray<TObjectPtr<class UTexture>> HeroJerseyMasks, HeroPantsMasks, HeroHelmetMasks; // stripe layouts, one per team
 	float HeroHeightCm = 187.f;   // the pack rig's standing height (bind pose, head included)
 	int32 HeroWeather = 0;        // 0 warm, 1 cold, 2 rain (coach tops, officials); set by the director per game

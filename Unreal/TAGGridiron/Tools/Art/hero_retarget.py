@@ -7,6 +7,10 @@
 # auto aligned to the source rest pose, like RTG_TAG_UEFN_to_MH.
 #   UnrealEditor-Cmd.exe TAGGridiron.uproject -run=pythonscript -script="<this file>" -unattended -nosplash -nullrhi
 # Log: Saved/tag_hero_retarget.txt
+# TAG_HERO_SOURCE=hero: the source is the hero rig itself (the pack's skeleton, the game's animation tree /Game/TAG/AnimH):
+# RTG_TAG_Hero_to_<Rig> for the other rigs (the female and child rigs differ from it by up to 14 cm; the male,
+# side player and crowd rigs share its bind pose and copy its pose at runtime, see UTagRetargetAnimInstance), and the
+# standing-around clips re-baked from the hero clips. Log: Saved/tag_hero_retarget_hero.txt
 import os
 import traceback
 
@@ -15,7 +19,11 @@ import unreal
 EAL = unreal.EditorAssetLibrary
 tools = unreal.AssetToolsHelpers.get_asset_tools()
 OUT = "/Game/TAG/Hero/Rig"
-LOG = os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_saved_dir()), "tag_hero_retarget.txt")
+FROM_HERO = os.environ.get("TAG_HERO_SOURCE", "") == "hero"
+LOG = os.path.join(unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_saved_dir()), "tag_hero_retarget_hero.txt" if FROM_HERO else "tag_hero_retarget.txt")
+SRC_MESH = OUT + "/SKM_TAG_HeroRig" if FROM_HERO else "/Game/Characters/UEFN_Mannequin/Meshes/SKM_UEFN_Mannequin"
+SRC_RIG = OUT + "/IK_TAG_Hero" if FROM_HERO else "/Game/Characters/UEFN_Mannequin/Rigs/IK_UEFN_Mannequin"
+RTG_PREFIX = "RTG_TAG_Hero_to_" if FROM_HERO else "RTG_TAG_UEFN_to_"
 SRC = unreal.RetargetSourceOrTarget.SOURCE
 TGT = unreal.RetargetSourceOrTarget.TARGET
 lines = []
@@ -56,8 +64,8 @@ def parent_chain(mesh, bone):
 
 
 def build(tag, mesh_path, rtg_name):
-    src_mesh = unreal.load_asset("/Game/Characters/UEFN_Mannequin/Meshes/SKM_UEFN_Mannequin")
-    src_rig = unreal.load_asset("/Game/Characters/UEFN_Mannequin/Rigs/IK_UEFN_Mannequin")
+    src_mesh = unreal.load_asset(SRC_MESH)
+    src_rig = unreal.load_asset(SRC_RIG)
     tgt_mesh = unreal.load_asset(mesh_path)
     w("==", tag, "loaded", bool(src_mesh), bool(src_rig), bool(tgt_mesh))
     have = set(bones_of(tgt_mesh))
@@ -66,7 +74,12 @@ def build(tag, mesh_path, rtg_name):
                    str(c.get_editor_property("end_bone").get_editor_property("bone_name"))) for c in src_c.get_retarget_chains()]
     w("source chains", src_chains, "root", src_c.get_retarget_root())
 
+    existed = EAL.does_asset_exist(OUT + "/IK_TAG_" + tag)
     rig = fresh("IK_TAG_" + tag, unreal.IKRigDefinition, unreal.IKRigDefinitionFactory())
+    if FROM_HERO and existed:
+        # the target IK rigs exist (built from the UEFN chains, same names on every pack rig): reuse them as they are
+        w("target rig kept", rig.get_path_name())
+        return finish_rtg(tag, rtg_name, src_mesh, src_rig, tgt_mesh, rig)
     rc = unreal.IKRigController.get_controller(rig)
     rc.set_skeletal_mesh(tgt_mesh)
     for c in list(rc.get_retarget_chains()):
@@ -89,7 +102,10 @@ def build(tag, mesh_path, rtg_name):
         made.append((name, s, e))
     w("target chains", made)
     EAL.save_loaded_asset(rig)
+    finish_rtg(tag, rtg_name, src_mesh, src_rig, tgt_mesh, rig)
 
+
+def finish_rtg(tag, rtg_name, src_mesh, src_rig, tgt_mesh, rig):
     rtg = fresh(rtg_name, unreal.IKRetargeter, unreal.IKRetargetFactory())
     c = unreal.IKRetargeterController.get_controller(rtg)
     try:
@@ -118,10 +134,11 @@ def build(tag, mesh_path, rtg_name):
     w("saved", rtg.get_path_name())
 
 
-FAN_CLIPS = {"Idle": "/Game/TAG/Anim/Authored/A_TAG_Idle_Stand_Loop",
-             "Cheer": "/Game/TAG/Anim/Authored/A_TAG_Fan_Cheer_Loop",
-             "Clap": "/Game/TAG/Anim/Pack/Celebrations/A_TAG_Pack_Celeb_TD_BC_SlowClap_1Man0_v1__P01",
-             "Kneel": "/Game/TAG/Anim/Authored/A_TAG_QB_Kneel"}
+_T = "/Game/TAG/AnimH/" if FROM_HERO else "/Game/TAG/Anim/"
+FAN_CLIPS = {"Idle": _T + "Authored/A_TAG_Idle_Stand_Loop",
+             "Cheer": _T + "Authored/A_TAG_Fan_Cheer_Loop",
+             "Clap": _T + "Pack/Celebrations/A_TAG_Pack_Celeb_TD_BC_SlowClap_1Man0_v1__P01",
+             "Kneel": _T + "Authored/A_TAG_QB_Kneel"}
 FAN_DIR = "/Game/TAG/Hero/Crowd/Anims"
 # every skeleton family: its retargeter, its bootstrap mesh and the clips baked for the people that stand around
 # (spectators, sideline staff and media); A_<Prefix>_<Clip> in FAN_DIR. The crowd rig keeps the names A_Fan_*.
@@ -131,9 +148,24 @@ RIGS = [("Hero", "SKM_TAG_HeroRig", "Hero"), ("Crowd", "SKM_TAG_CrowdRig", "Fan"
 
 def fan_clips(tag, boot, prefix):
     """Idle / cheer / clap / kneel baked on one skeleton (played by the stadium's spectators, staff and media)."""
-    src_mesh = unreal.load_asset("/Game/Characters/UEFN_Mannequin/Meshes/SKM_UEFN_Mannequin")
+    src_mesh = unreal.load_asset(SRC_MESH)
     tgt_mesh = unreal.load_asset(OUT + "/" + boot)
-    rtg = unreal.load_asset(OUT + "/RTG_TAG_UEFN_to_" + tag)
+    if FROM_HERO and tag == "Hero":
+        # the hero rig's own clips: copies of the hero tree's, nothing to retarget
+        for clip, src in FAN_CLIPS.items():
+            dst = FAN_DIR + "/A_%s_%s" % (prefix, clip)
+            if not EAL.does_asset_exist(src):
+                w("fan clip source missing", src)
+                continue
+            if EAL.does_asset_exist(dst):
+                EAL.delete_asset(dst)
+            EAL.duplicate_asset(src, dst)
+            a = unreal.load_asset(dst)
+            a.set_editor_property("enable_root_motion", False)
+            EAL.save_asset(dst, only_if_is_dirty=False)
+            w("fan clip (copy)", dst, round(a.get_play_length(), 2))
+        return
+    rtg = unreal.load_asset(OUT + "/" + RTG_PREFIX + tag)
     if not (tgt_mesh and rtg):
         w("no mesh / retargeter for", tag)
         return
@@ -176,7 +208,8 @@ try:
     for tag, boot, prefix in RIGS:
         if os.environ.get("TAG_HERO_RIGS") and tag not in os.environ["TAG_HERO_RIGS"].split(","):
             continue
-        build(tag, OUT + "/" + boot, "RTG_TAG_UEFN_to_" + tag)
+        if not (FROM_HERO and tag == "Hero"):
+            build(tag, OUT + "/" + boot, RTG_PREFIX + tag)
         fan_clips(tag, boot, prefix)
 except Exception:
     w("FAIL", traceback.format_exc())

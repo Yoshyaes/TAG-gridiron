@@ -18,10 +18,12 @@ FAnimInstanceProxy* UTagRetargetAnimInstance::CreateAnimInstanceProxy()
 
 void UTagRetargetAnimInstance::Configure(UIKRetargeter* Asset, USkeletalMeshComponent* Source)
 {
+	CopySource = Source;
+	bCopy = Asset == nullptr && Source != nullptr;
 	RetargetNode.IKRetargeterAsset = Asset;
 	RetargetNode.RetargetFrom = ERetargetSourceMode::CustomSkeletalMeshComponent;
 	RetargetNode.SourceMeshComponent = Source;
-	RetargetNode.bSuppressWarnings = false;
+	RetargetNode.bSuppressWarnings = bCopy;
 	if (FIKRetargetProcessor* P = RetargetNode.GetRetargetProcessor())
 	{
 		P->SetNeedsInitialized();
@@ -36,6 +38,41 @@ void FTagRetargetProxy::PreUpdate(UAnimInstance* InAnimInstance, float DeltaSeco
 		In = I->Proc; // game thread -> worker copy
 		bReplay = I->bReplay && I->ReplayMesh.Num() > 0;
 		if (bReplay) ReplayMesh = I->ReplayMesh;
+		// copy mode: the source mesh has finished its pose (it is this mesh's tick prerequisite); take its component
+		// space transforms here on the game thread, like the retarget node does, in this mesh's bone order
+		bCopy = I->bCopy;
+		const USkeletalMeshComponent* Src = I->CopySource.Get();
+		const USkeletalMeshComponent* Dst = I->GetSkelMeshComponent();
+		const USkeletalMesh* SM = Src ? Src->GetSkeletalMeshAsset() : nullptr;
+		const USkeletalMesh* DM = Dst ? Dst->GetSkeletalMeshAsset() : nullptr;
+		if (bCopy && SM && DM)
+		{
+			if (SM != CopySrcMesh || DM != CopyDstMesh)
+			{
+				CopySrcMesh = SM;
+				CopyDstMesh = DM;
+				const FReferenceSkeleton& SR = SM->GetRefSkeleton();
+				const FReferenceSkeleton& DR = DM->GetRefSkeleton();
+				CopyMap.SetNum(DR.GetNum());
+				for (int32 i = 0; i < DR.GetNum(); ++i) CopyMap[i] = SR.FindBoneIndex(DR.GetBoneName(i));
+			}
+			const bool bCached = (Src->IsUsingExternalInterpolation() || (Src->ShouldUseUpdateRateOptimizations() && Src->AnimUpdateRateParams != nullptr))
+				&& Src->GetCachedComponentSpaceTransforms().Num() == Src->GetComponentSpaceTransforms().Num();
+			const TArray<FTransform>& CS = bCached ? Src->GetCachedComponentSpaceTransforms() : Src->GetComponentSpaceTransforms();
+			CopyCS.SetNum(CopyMap.Num(), EAllowShrinking::No);
+			CopyHave.SetNumZeroed(CopyMap.Num(), EAllowShrinking::No);
+			for (int32 i = 0; i < CopyMap.Num(); ++i)
+			{
+				const int32 S = CopyMap[i];
+				CopyHave[i] = CS.IsValidIndex(S) ? 1 : 0;
+				if (CopyHave[i])
+				{
+					CopyCS[i] = CS[S];
+					CopyCS[i].SetScale3D(FVector::OneVector); // component-space translations already carry any scale
+				}
+			}
+		}
+		else bCopy = false;
 	}
 	BlendElapsed += DeltaSeconds;
 	Dt = DeltaSeconds;
@@ -78,7 +115,8 @@ bool FTagRetargetProxy::Evaluate(FPoseContext& Output)
 		BlendElapsed = 1e3f;
 		return true;
 	}
-	Node->Evaluate_AnyThread(Output); // mocap / keyed clip retargeted onto this body
+	if (bCopy) EvaluateCopy(Output); // the mocap on its own skeleton: the source's pose, bone for bone
+	else Node->Evaluate_AnyThread(Output); // mocap retargeted onto this body
 	ApplyFootballLayer(Output);
 	ApplyOrient(Output);
 	ApplyStride(Output);
@@ -167,6 +205,33 @@ void FTagRetargetProxy::ApplyTwist(FPoseContext& Output)
 			const FQuat Delta = Output.Pose.GetRefPose(P).GetRotation().Inverse() * Output.Pose[P].GetRotation();
 			Delta.ToSwingTwist(Axis, Swing, Twist);
 			Output.Pose[B].SetRotation((FQuat::Slerp(FQuat::Identity, Twist.Inverse(), 1.f - T.Along) * Output.Pose.GetRefPose(B).GetRotation()).GetNormalized());
+		}
+	}
+}
+
+void FTagRetargetProxy::EvaluateCopy(FPoseContext& Output)
+{
+	// every bone the source has takes the source's component-space transform; the others (face, pads, helpers the
+	// source rig lacks) keep their reference pose under their parent. Local = CS relative to the parent's CS, so a rig
+	// whose hierarchy skips bones (the 30-bone crowd rig) still puts each bone where the source has it.
+	Output.ResetToRefPose();
+	const FBoneContainer& BC = Output.Pose.GetBoneContainer();
+	const int32 N = Output.Pose.GetNumBones();
+	TArray<FTransform, TInlineAllocator<300>> CS;
+	CS.SetNum(N);
+	for (FCompactPoseBoneIndex I(0); I < N; ++I)
+	{
+		const int32 M = BC.MakeMeshPoseIndex(I).GetInt();
+		const FCompactPoseBoneIndex P = BC.GetParentBoneIndex(I);
+		if (CopyHave.IsValidIndex(M) && CopyHave[M])
+		{
+			CS[I.GetInt()] = CopyCS[M];
+			Output.Pose[I] = P.GetInt() != INDEX_NONE ? CS[I.GetInt()].GetRelativeTransform(CS[P.GetInt()]) : CS[I.GetInt()];
+			Output.Pose[I].NormalizeRotation();
+		}
+		else
+		{
+			CS[I.GetInt()] = P.GetInt() != INDEX_NONE ? Output.Pose[I] * CS[P.GetInt()] : Output.Pose[I];
 		}
 	}
 }
@@ -366,7 +431,7 @@ void FTagRetargetProxy::ApplyFootballLayer(FPoseContext& Output) const
 
 	// --- torso: drive lean (blocks/tackles) and 3-point stance flatten the back (rotate about +X = lateral); a ball
 	// carrier runs with his pad level down a little (the capture's upright sprint against a back in traffic)
-	const float LeanDeg = 16.f * In.LeanAlpha + 34.f * In.StanceAlpha + 7.f * In.CarryAlpha;
+	const float LeanDeg = 16.f * In.LeanAlpha + 34.f * In.StanceAlpha + In.CarryLeanDeg * In.CarryAlpha;
 	if (LeanDeg > 0.1f)
 	{
 		RotateCS(P, B.Spine1, FQuat(FVector(1, 0, 0), -FMath::DegreesToRadians(LeanDeg * 0.55f)), 1.f);

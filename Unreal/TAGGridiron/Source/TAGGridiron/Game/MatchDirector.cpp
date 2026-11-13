@@ -4,6 +4,8 @@
 #include "Render/Stadium.h"
 #include "Render/Coords.h"
 #include "Render/PlayArt.h"
+#include "UObject/UObjectIterator.h"
+#include "Animation/AnimSingleNodeInstance.h"
 #include "Game/PlayArtStrokes.h"
 #include "TimerManager.h"
 #include "UI/GridironOverlay.h"
@@ -450,6 +452,13 @@ void AMatchDirector::TickLineup(float Dt)
 		const FVector L = Center + FVector(0, (i - (Lineup.Num() - 1) * 0.5) * 115.0, 0);
 		FAthleteFootball F;
 		F.bPreSnap = !bCelebrate && !bAction;
+		if (F.bPreSnap)
+		{
+			// the match's pre-snap gaze (see the play feed's default look): eyes downfield at head height, so the stance
+			// shots show what a game shows (without it a set lineman kept the capture's head as it was, bowed)
+			F.bLook = true;
+			F.LookWorld = Lineup[i]->GetActorLocation() + Lineup[i]->GetActorForwardVector() * 1500.f + FVector(0, 0, 160);
+		}
 		Lineup[i]->SetFootball(F, Dt);
 		const TCHAR* LineState = bCelebrate ? TEXT("celebrate") : TEXT("idle");
 		FVector Vel = FVector::ZeroVector;
@@ -460,6 +469,28 @@ void AMatchDirector::TickLineup(float Dt)
 			if (i >= 2 && i < Lineup.Num() - 1) Vel = FVector(-300.f, (i % 2) ? 250.f : -250.f, 0.f);
 		}
 		Lineup[i]->Drive(L, bBack ? 0.f : 180.f, Vel, 9.f, LineState, LineupT, Dt, false);
+	}
+	if (LineupT > 17.5f && !bLineupFloatCheck)
+	{
+		// a check for floating people: every skinned body whose pelvis stands far above (or below) its own feet origin
+		bLineupFloatCheck = true;
+		int32 Checked = 0, Odd = 0;
+		for (TObjectIterator<USkeletalMeshComponent> It; It; ++It)
+		{
+			USkeletalMeshComponent* C = *It;
+			if (!C || C->GetWorld() != GetWorld() || !C->IsVisible() || !C->GetSkeletalMeshAsset() || C->GetBoneIndex(TEXT("pelvis")) == INDEX_NONE) continue;
+			if (C->LeaderPoseComponent.IsValid() || !C->WasRecentlyRendered(0.25f)) continue; // on screen (off-screen fans hold no pose)
+			++Checked;
+			const float Up = (C->GetSocketLocation(TEXT("pelvis")).Z - C->GetComponentLocation().Z) / FMath::Max(0.01f, static_cast<float>(C->GetComponentScale().Z));
+			if (Up > 135.f || Up < 20.f)
+			{
+				++Odd;
+				const UAnimSingleNodeInstance* SI = C->GetSingleNodeInstance();
+				UE_LOG(LogTemp, Display, TEXT("TAG float check: %s %s pelvis %.0f cm above its origin (anim %s, owner %s, at %s)"), *C->GetName(), *GetNameSafe(C->GetSkeletalMeshAsset()), Up,
+					SI && SI->GetAnimationAsset() ? *SI->GetAnimationAsset()->GetName() : C->GetAnimInstance() ? *C->GetAnimInstance()->GetClass()->GetName() : TEXT("-"), *GetNameSafe(C->GetOwner()), *C->GetComponentLocation().ToCompactString());
+			}
+		}
+		UE_LOG(LogTemp, Display, TEXT("TAG float check: %d bodies, %d odd"), Checked, Odd);
 	}
 	if (LineupT > 16.8f)
 	{
@@ -528,6 +559,12 @@ void AMatchDirector::TickLineup(float Dt)
 	if (LineupT > 18.f)
 	{
 		UE_LOG(LogTemp, Display, TEXT("TAG perf avg %.1f fps over %d frames"), PerfFrames / FMath::Max(PerfT, 0.001f), PerfFrames);
+		{
+			double GazeMean, GazeMin;
+			int32 GazeN;
+			AAthlete::GazeStats(GazeMean, GazeMin, GazeN, true);
+			UE_LOG(LogTemp, Display, TEXT("TAG presnap gaze: set linemen look %.1f deg (lowest %.1f) over %d samples (0 = level, - = down)"), GazeMean, GazeMin, GazeN);
+		}
 		FPlatformMisc::RequestExit(false);
 	}
 }
@@ -643,6 +680,12 @@ void AMatchDirector::TickMoveTest(float Dt)
 		AAthlete::HeightStats(HipsM, HeadM, true);
 		if (Sec > 0.5) UE_LOG(LogTemp, Display, TEXT("TAG gait r%d: %.2f steps/s, %.2f m per step at %.1f m/s over %.1f s, hips %.2f m head %.2f m (sprint reference ~4.7 steps/s, 2.1 m at 10 m/s; hips 0.90-0.99, head 1.32-1.54)"), MoveRunner, Steps / Sec, Steps > 0 ? Metres / Steps : 0.0, Metres / Sec, Sec, HipsM / Sec, HeadM / Sec);
 		UE_LOG(LogTemp, Display, TEXT("TAG perf avg %.1f fps over %d frames"), PerfFrames / FMath::Max(PerfT, 0.001f), PerfFrames);
+		{
+			double GazeMean, GazeMin;
+			int32 GazeN;
+			AAthlete::GazeStats(GazeMean, GazeMin, GazeN, true);
+			UE_LOG(LogTemp, Display, TEXT("TAG presnap gaze: set linemen look %.1f deg (lowest %.1f) over %d samples (0 = level, - = down)"), GazeMean, GazeMin, GazeN);
+		}
 		FPlatformMisc::RequestExit(false);
 	}
 }
@@ -1231,6 +1274,10 @@ void AMatchDirector::TickLineTest(float Dt)
 	static const TCHAR* Moves[] = {TEXT("longarm"), TEXT(""), TEXT("diprip"), TEXT("swim"), TEXT("spin"), TEXT("club"), TEXT("rip")};
 	if (Rep > 6)
 	{
+		double GazeMean, GazeMin;
+		int32 GazeN;
+		AAthlete::GazeStats(GazeMean, GazeMin, GazeN, true);
+		UE_LOG(LogTemp, Display, TEXT("TAG presnap gaze: set linemen look %.1f deg (lowest %.1f) over %d samples (0 = level, - = down)"), GazeMean, GazeMin, GazeN);
 		FPlatformMisc::RequestExit(false);
 		return;
 	}
@@ -1316,6 +1363,13 @@ void AMatchDirector::TickLineTest(float Dt)
 	{
 		FAthleteFootball F;
 		F.bPreSnap = R < Snap;
+		static const bool bNoLook = FParse::Param(FCommandLine::Get(), TEXT("TagNoPresnapLook")); // the stance as captured
+		if (F.bPreSnap && !bNoLook)
+		{
+			// set in the stance: eyes up the field, as the match feeds every set lineman
+			F.bLook = true;
+			F.LookWorld = Me->GetActorLocation() + Me->GetActorForwardVector() * 1500.f + FVector(0, 0, 160);
+		}
 		if (bEngaged)
 		{
 			const FVector Chest = Him->BoneWorld(TEXT("spine_04"));
@@ -1532,6 +1586,12 @@ void AMatchDirector::TickGapTest(float Dt)
 	if (T > 61.f)
 	{
 		UE_LOG(LogTemp, Display, TEXT("TAG perf avg %.1f fps over %d frames"), PerfFrames / FMath::Max(PerfT, 0.001f), PerfFrames);
+		{
+			double GazeMean, GazeMin;
+			int32 GazeN;
+			AAthlete::GazeStats(GazeMean, GazeMin, GazeN, true);
+			UE_LOG(LogTemp, Display, TEXT("TAG presnap gaze: set linemen look %.1f deg (lowest %.1f) over %d samples (0 = level, - = down)"), GazeMean, GazeMin, GazeN);
+		}
 		FPlatformMisc::RequestExit(false);
 	}
 }
@@ -1645,6 +1705,12 @@ void AMatchDirector::TickAutomation(float Dt)
 	if (AutoT > (bLineCamAuto ? 240.f : 63.5f))
 	{
 		UE_LOG(LogTemp, Display, TEXT("TAG perf avg %.1f fps over %d frames"), PerfFrames / FMath::Max(PerfT, 0.001f), PerfFrames);
+		{
+			double GazeMean, GazeMin;
+			int32 GazeN;
+			AAthlete::GazeStats(GazeMean, GazeMin, GazeN, true);
+			UE_LOG(LogTemp, Display, TEXT("TAG presnap gaze: set linemen look %.1f deg (lowest %.1f) over %d samples (0 = level, - = down)"), GazeMean, GazeMin, GazeN);
+		}
 		FPlatformMisc::RequestExit(false);
 	}
 }
