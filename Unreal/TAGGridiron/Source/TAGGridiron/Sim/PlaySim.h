@@ -508,6 +508,10 @@ class PlaySim {
   void throwAway(Ent* qbEnt);
   /** Where the airborne ball reaches catch height (~1.3 yd) on descent. */
   V2 ballLanding() const;
+  /** A pile on the move (stepWrap): where the carrier goes down if nothing stops it (his yards still to drive plus the
+   *  fall), and the seconds the drive takes. False when no pile is moving. Read only (the presentation starts the paired
+   *  tackle at the wrap, not at its end). */
+  bool wrapEnd(V2& outSpot, double& outSecs) const;
 
  private:
   const Formation* form_ = nullptr;

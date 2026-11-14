@@ -155,6 +155,17 @@ public:
 	FVector FallAnchorEnd() const { return AnchorB; }
 	FVector GetLastVel() const { return LastVelW; }
 	FVector PileBodyEnd = FVector::ZeroVector; // the carrier's body at the end of a paired fall
+	/** Move where a running paired fall's drive ends (the sim's pile stopped somewhere else). */
+	void ShiftFallTarget(const FVector& Delta);
+	/** The running fall's clip time (its start plus the time fallen, held a frame short of the end). */
+	float FallClipTime() const;
+	/** The velocity a fall's glide starts at (cm/s; set after BeginPairedFall: a pile shares one, the momentum of the men
+	 *  in it, so neither drives into the other while the closing speed is spent in the hit). */
+	void SetFallCarry(const FVector& V) { FallV0 = FVector(V.X, V.Y, 0.f).GetClampedToMaxSize(1000.f); }
+	/** Tackled with nobody to pair him with (the tackler already on his way down): he goes down on his own, now. */
+	void FallAlone(const FVector& SimLoc) { if (!bFalling && !bGettingUp) { FallHoldLeft = 0.f; TackledLeft = 0.f; BeginSoloFall(SimLoc, LastVelW); } }
+	/** Body mass (kg) from the player's weight (100 without one). */
+	float MassKg() const;
 	/** Pancaked: the next fall goes over backward along PushDirW (away from the blocker), about a metre, instead of
 	 *  travelling with a tackle pile. */
 	void SetPancaked(const FVector& PushDirW) { PancakeDir = PushDirW.GetSafeNormal2D(); bPancakePending = true; }
@@ -273,6 +284,7 @@ private:
 	bool bFallRoot = false;       // the clip's root motion carries the body through the fall (library captures)
 	float FallT = 0.f, FallLen = 0.f, FallLie = 0.f, FallDrive = 0.4f, FallFromYaw = 0.f, FallYaw = 0.f;
 	FVector FallFrom = FVector::ZeroVector, AnchorA = FVector::ZeroVector, AnchorB = FVector::ZeroVector;
+	FVector FallV0 = FVector::ZeroVector; // his velocity going into the fall (the glide onto it starts at it)
 	bool bFallEase = false;
 	float FallHoldLeft = 0.f; // down, waiting for the director to pair the fall; a solo fall after this
 	void TickFall(const FVector& SimLoc, float DeltaTime);
@@ -530,9 +542,16 @@ struct FAthleteAssets
 	/** The pack library's two-man tackles (Tools/Art/pack_pairs.py: pack_pairs.json): both men's captures, their
 	 *  relation at the contact and where the carrier ends, the fall root-driven from the contact. By kind: Drive, Over,
 	 *  Behind, Side (from his right), SideL (from his left), Dive. The placed pair is one entry among them. */
-	struct FPackPair { TObjectPtr<UAnimationAsset> T, C; float Ox = 0, Oy = 0, Yaw = 0, EndX = 0, EndY = 0, TLie = 0.45f, CLie = 1.05f, Start = 0; FString Name; };
+	struct FPackPair { TObjectPtr<UAnimationAsset> T, C; float Ox = 0, Oy = 0, Yaw = 0, EndX = 0, EndY = 0, TLie = 0.45f, CLie = 1.05f, Start = 0, Sep = 0; FString Name; };
 	TArray<FPackPair> PackPairs[6];
 	void LoadPackPairs(int32 Seed);
+	/** The pack's three-man gang tackles (Tools/Art/pack_gangs.py: pack_gangs.json): the carrier, the first tackler and
+	 *  the man who joins him, from the first contact (Start). Tx/Ty/TYaw and Ax/Ay/AYaw: the two tacklers' roots in the
+	 *  carrier's frame then (m; x left, y back; deg, + turns left); AHit: when the second reaches him; EndX/Y: where
+	 *  the carrier's pelvis ends. */
+	struct FPackGang { TObjectPtr<UAnimationAsset> C, T, A; float Start = 0, AHit = 0, Tx = 0, Ty = 0, TYaw = 0, Ax = 0, Ay = 0, AYaw = 0, EndX = 0, EndY = 0; FString Name; };
+	TArray<FPackGang> PackGangs;
+	void LoadPackGangs();
 	/** The library streams in behind the game. SelectPack picks every family's captures for a seed from the asset
 	 *  registry (no loading), the batch loads asynchronously (PackStreamer) and OnPackBatchLoaded fills the families,
 	 *  each replacing its previous draw. The director reseeds every quarter (ReseedPack), so a game runs through
@@ -553,6 +572,8 @@ struct FAthleteAssets
 	struct FPendingFamily { FFamilySink Sink; int32 Max = 0; bool bLoop = false; TArray<FSoftObjectPath> Paths; };
 	struct FPendingTimed { TArray<FPackClip>* Sink = nullptr; TArray<FPackClip> Clips; };
 	struct FPendingPair { int32 Kind = 0; FPackPair P; FSoftObjectPath TP, CP; };
+	struct FPendingGang { FPackGang G; FSoftObjectPath CP, TP, AP; };
+	TArray<FPendingGang> PendingGangs;
 	TArray<FPendingFamily> PendingFamilies;
 	TArray<FPendingTimed> PendingTimed;
 	TArray<FPendingPair> PendingPairs;

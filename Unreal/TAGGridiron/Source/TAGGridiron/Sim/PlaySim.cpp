@@ -3299,6 +3299,15 @@ bool PlaySim::tryTackle(Ent* d, Ent* c, int gang, bool arm, bool dive) {
   return false;
 }
 
+bool PlaySim::wrapEnd(V2& outSpot, double& outSecs) const {
+  if (!wrap_ || !wrap_->c) return false;
+  const Wrap& w = *wrap_;
+  const double gd = goalDir(w.c);
+  outSpot = V2{w.c->pos.x + (w.left + w.natFall) * gd, w.c->pos.y + w.latY};
+  outSecs = w.left / (2.2 + (w.c->r().strength - 60) * 0.015);  // stepWrap's pile speed
+  return true;
+}
+
 void PlaySim::stepWrap(double dt) {
   Wrap& w = *wrap_;
   Ent* c = w.c;

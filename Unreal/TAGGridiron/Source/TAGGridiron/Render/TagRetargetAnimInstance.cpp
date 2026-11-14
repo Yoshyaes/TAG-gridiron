@@ -256,6 +256,36 @@ void FTagRetargetProxy::ApplyCrossfade(FPoseContext& Output)
 	{
 		float A = FMath::Clamp(BlendElapsed / BlendTime, 0.f, 1.f);
 		A = A * A * (3.f - 2.f * A); // ease in / out
+		if (CurBlendTime > 0.f)
+		{
+			// out of a pose snapshot (the lying body into its get-up): blended in component space, each part on a straight
+			// line from where it lies to where the get-up starts it. Both poses lie on the turf, so the blend stays on it;
+			// the parent-relative blend swung the legs through arcs into the ground (feet 30-60 cm under the turf in the
+			// first 0.2 s of a get-up, -TagTackleCam).
+			const FBoneContainer& BC = Output.Pose.GetBoneContainer();
+			CsFrom.SetNum(N, EAllowShrinking::No);
+			CsTo.SetNum(N, EAllowShrinking::No);
+			for (FCompactPoseBoneIndex I(0); I < N; ++I)
+			{
+				const FCompactPoseBoneIndex P = BC.GetParentBoneIndex(I);
+				const FTransform F = FromPose[I.GetInt()], T = Output.Pose[I];
+				CsFrom[I.GetInt()] = P.IsValid() ? F * CsFrom[P.GetInt()] : F;
+				CsTo[I.GetInt()] = P.IsValid() ? T * CsTo[P.GetInt()] : T;
+			}
+			for (int32 i = 0; i < N; ++i)
+			{
+				FTransform& B = CsFrom[i];
+				B.SetRotation(FQuat::Slerp(B.GetRotation(), CsTo[i].GetRotation(), A).GetNormalized());
+				B.SetTranslation(FMath::Lerp(B.GetTranslation(), CsTo[i].GetTranslation(), A));
+				B.SetScale3D(FMath::Lerp(B.GetScale3D(), CsTo[i].GetScale3D(), A));
+			}
+			for (FCompactPoseBoneIndex I(0); I < N; ++I)
+			{
+				const FCompactPoseBoneIndex P = BC.GetParentBoneIndex(I);
+				Output.Pose[I] = P.IsValid() ? CsFrom[I.GetInt()].GetRelativeTransform(CsFrom[P.GetInt()]) : CsFrom[I.GetInt()];
+			}
+		}
+		else
 		for (FCompactPoseBoneIndex I(0); I < N; ++I)
 		{
 			FTransform& T = Output.Pose[I];

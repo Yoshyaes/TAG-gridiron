@@ -343,9 +343,34 @@ private:
 	/** -TagTackleTest: every paired tackle in turn, filmed side on. */
 	bool bTackleTest = false;
 	void TickTackleTest(float Dt);
+	/** -TagTackleCam [-TagTcDir=<dir>] [-TagTcClips=<n>] [-TagQuarterLen=<s>]: a CPU game where every defender closing
+	 *  on the ball carrier starts a close, low side-on clip (frames t<clip>_<frame>.png) that runs to 3 s past the
+	 *  tackle, and per frame the bones of every man near the ball (<dir>/../tcdata/t<clip>.csv) and the sim's events
+	 *  (tev<clip>.csv), for Tools/Anim/tackle_check.py (body overlap, hands on the carrier, pops, limbs through the turf). */
+	bool bTackleCam = false;
+	int32 TcClip = 0, TcFrame = 0, TcMaxClips = 16;
+	float TcT = 0.f, TcAfter = -1.f;
+	size_t TcEv0 = 0;
+	TWeakObjectPtr<AAthlete> TcCarrier;
+	FVector TcSide = FVector::ZeroVector, TcFocus = FVector::ZeroVector;
+	FString TcTele;
+	void TickTackleCam(float Dt);
+	void TcRecord();
+	void TcFlush();
 	/** Pair a tackle: Tk tackles Cr, the sim put the carrier down at SimSpot (world). Pair -1 picks from the hit
 	 *  (angle, yards after contact); both men fall together, anchored in the pair's authored relation. */
-	void StartPairedTackle(AAthlete* Tk, AAthlete* Cr, const FVector& SimSpot, int32 Pair, bool bDive);
+	void StartPairedTackle(AAthlete* Tk, AAthlete* Cr, const FVector& SimSpot, int32 Pair, bool bDive, float PileSecs = 0.f, bool bBigHit = false);
+	/** The last paired tackle (a pile started at the sim's wrap is retargeted when the sim ends it). */
+	TWeakObjectPtr<AAthlete> PileCarrier, PileTackler;
+	FVector PileSpot = FVector::ZeroVector;
+	/** A gang tackle from the pack's three-man captures (pack_gangs.json): Tk and As on Cr at once. False when none
+	 *  fits where the two are (the caller pairs Tk and Cr and As piles on). */
+	bool StartGangTackle(AAthlete* Tk, AAthlete* Cr, AAthlete* As, const FVector& SimSpot);
+	TWeakObjectPtr<AAthlete> GangAssist;
+	TWeakObjectPtr<AAthlete> LastPileCarrier;
+	FVector LastPileDir = FVector::ForwardVector;
+	double LastPileT = -10.0;
+	FVector LastPileSpot = FVector::ZeroVector;
 	/** A second man arriving on the pile. */
 	void StartPileOn(AAthlete* As, AAthlete* Cr);
 	int32 GapShot = 0;

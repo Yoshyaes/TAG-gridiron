@@ -132,7 +132,11 @@ for g, parts in sorted(groups.items()):
         else:
             kind = "SideL"
         tl, cl = (0.70, 0.90) if kind == "Dive" else (1.05, 0.45) if kind == "Over" else (0.45, 1.05)
-        row = {"T": nt, "C": nc, "Kind": kind, "Ox": round(ox, 2), "Oy": round(oy, 2), "Yaw": round(yaw, 1),
+        # how far apart the two stay over the 1.2 s after the contact (pelvises, m): a tackle keeps them together;
+        # a hit stick blows them apart, a shoestring trip leaves the tackler at the carrier's feet, a jam is no tackle
+        sep = sum(dist[contact:min(n, contact + 36)]) / max(1, len(dist[contact:min(n, contact + 36)]))
+        # CMinZ: the carrier's lowest pelvis (m); a stand-up capture (held up, never goes down) is no tackle to the ground
+        row = {"T": nt, "C": nc, "Kind": kind, "Sep": round(sep, 2), "CMinZ": round(jc["pelvis_z"]["min"], 3), "Ox": round(ox, 2), "Oy": round(oy, 2), "Yaw": round(yaw, 1),
                "EndX": round(ex, 2), "EndY": round(ey, 2), "TLie": tl, "CLie": cl, "Start": round(t0, 2),
                "LenT": round(LT, 2), "LenC": round(LC, 2), "TravelC": [round(trc[0], 2), round(trc[1], 2)], "TravelT": [round(trt[0], 2), round(trt[1], 2)]}
         pairs.append(row)

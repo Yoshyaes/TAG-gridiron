@@ -476,6 +476,14 @@ void FAthleteAssets::LoadPackPairs(int32 Seed)
 			const FString TN = O->GetStringField(TEXT("T")), CN = O->GetStringField(TEXT("C"));
 			// fouls (facemask, horse collar) are not clean tackles
 			if (TN.Contains(TEXT("Facemask"), ESearchCase::IgnoreCase) || TN.Contains(TEXT("HorseCollar"), ESearchCase::IgnoreCase)) continue;
+			// a jam (LB chuck) parts the two at once: no tackle
+			if (TN.Contains(TEXT("Chuck"), ESearchCase::IgnoreCase)) continue;
+			// a stand-up capture (the carrier held up, forward progress stopped, never on the ground: his pelvis stays
+			// over 45 cm): the sim's tackle puts him down, so a carrier who stayed on his feet read as a tackle that missed
+			{
+				double CMinZ = 0.0;
+				if (O->TryGetNumberField(TEXT("CMinZ"), CMinZ) && CMinZ > 0.45) continue;
+			}
 			FPendingPair Q;
 			Q.Kind = k;
 			Q.TP = FSoftObjectPath(FString::Printf(TEXT("%s/Pack/Tackles/%s.%s"), *AnimRoot, *TN, *TN));
@@ -485,9 +493,42 @@ void FAthleteAssets::LoadPackPairs(int32 Seed)
 			P.Ox = O->GetNumberField(TEXT("Ox")); P.Oy = O->GetNumberField(TEXT("Oy")); P.Yaw = O->GetNumberField(TEXT("Yaw"));
 			P.EndX = O->GetNumberField(TEXT("EndX")); P.EndY = O->GetNumberField(TEXT("EndY"));
 			P.TLie = O->GetNumberField(TEXT("TLie")); P.CLie = O->GetNumberField(TEXT("CLie")); P.Start = O->GetNumberField(TEXT("Start"));
+			double Sep = 0.0;
+			if (O->TryGetNumberField(TEXT("Sep"), Sep)) P.Sep = static_cast<float>(Sep);
 			PendingPairs.Add(MoveTemp(Q));
 			++Taken;
 		}
+	}
+}
+
+void FAthleteAssets::LoadPackGangs()
+{
+	FString Text;
+	if (!FFileHelper::LoadFileToString(Text, *PackJson(TEXT("pack_gangs.json")))) return;
+	TArray<TSharedPtr<FJsonValue>> Rows;
+	if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Text), Rows)) return;
+	for (const TSharedPtr<FJsonValue>& V : Rows)
+	{
+		const TSharedPtr<FJsonObject>* O = nullptr;
+		if (!V.IsValid() || !V->TryGetObject(O) || !O) continue;
+		auto Path = [this](const FString& N) { return FSoftObjectPath(FString::Printf(TEXT("%s/Pack/Tackles/%s.%s"), *AnimRoot, *N, *N)); };
+		// (a carrier who is held up and never goes down: not a tackle to the ground, see LoadPackPairs)
+		{
+			double CMinZ = 0.0;
+			if ((*O)->TryGetNumberField(TEXT("CMinZ"), CMinZ) && CMinZ > 0.45) continue;
+		}
+		FPendingGang Q;
+		Q.CP = Path((*O)->GetStringField(TEXT("C")));
+		Q.TP = Path((*O)->GetStringField(TEXT("T")));
+		Q.AP = Path((*O)->GetStringField(TEXT("A")));
+		FPackGang& G = Q.G;
+		G.Name = (*O)->GetStringField(TEXT("C"));
+		auto F = [&](const TCHAR* K) { return static_cast<float>((*O)->GetNumberField(K)); };
+		G.Start = F(TEXT("Start")); G.AHit = F(TEXT("AHit"));
+		G.Tx = F(TEXT("Tx")); G.Ty = F(TEXT("Ty")); G.TYaw = F(TEXT("TYaw"));
+		G.Ax = F(TEXT("Ax")); G.Ay = F(TEXT("Ay")); G.AYaw = F(TEXT("AYaw"));
+		G.EndX = F(TEXT("EndX")); G.EndY = F(TEXT("EndY"));
+		PendingGangs.Add(MoveTemp(Q));
 	}
 }
 
@@ -520,6 +561,7 @@ void FAthleteAssets::SelectPack(int32 Seed)
 	PackFamily(TEXT("PrePlay"), {TEXT("DL_4pt"), TEXT("DL_3pt"), TEXT("Def_4pt")}, {}, StanceNone, 6, Seed + 41, true, [this]() -> TArray<TObjectPtr<UAnimationAsset>>& { return PackStances.FindOrAdd(1001); });
 	// the timed families (PackTimed): started at the capture's own moment less a lead
 	LoadPackPairs(Seed);
+	LoadPackGangs();
 	if (PackIndex.Num())
 	{
 		const std::initializer_list<const TCHAR*> ThrowNone = {TEXT("Fake"), TEXT("Pump"), TEXT("Drop_"), TEXT("Handoff"), TEXT("Pitch"), TEXT("Scramble"), TEXT("Sack"), TEXT("Fumble"), TEXT("Kneel"), TEXT("Spike"), TEXT("Celeb"), TEXT("Idle"), TEXT("Walk"), TEXT("Jog"), TEXT("2man"), TEXT("Snap"), TEXT("Option"), TEXT("Toss"), TEXT("Lateral"), TEXT("UBRig")};
@@ -588,6 +630,7 @@ void FAthleteAssets::ReseedPack(int32 Seed)
 	PendingFamilies.Reset();
 	PendingTimed.Reset();
 	PendingPairs.Reset();
+	PendingGangs.Reset();
 	const double SelectT0 = FPlatformTime::Seconds();
 	SelectPack(Seed);
 	UE_LOG(LogTemp, Display, TEXT("TAG: pack draw selected in %.0f ms"), (FPlatformTime::Seconds() - SelectT0) * 1000.0);
@@ -605,6 +648,7 @@ void FAthleteAssets::ReseedPack(int32 Seed)
 	}
 	for (FPendingTimed& T : PendingTimed) T.Sink->Reset();
 	for (TArray<FPackPair>& L : PackPairs) L.Reset();
+	PackGangs.Reset();
 	PackPlaced.Reset();
 	// the queue: families interleaved, so a budget cut still leaves every family part of its draw
 	PackQueue.Reset();
@@ -625,6 +669,7 @@ void FAthleteAssets::ReseedPack(int32 Seed)
 				for (const FPendingPair& Q : PendingPairs)
 					if (Q.Kind == k && n++ == i) { Push(Q.TP); Push(Q.CP); bMore = true; break; }
 			}
+		if (PendingGangs.IsValidIndex(i)) { Push(PendingGangs[i].CP); Push(PendingGangs[i].TP); Push(PendingGangs[i].AP); bMore = true; }
 	}
 	if (PackBudgetMB <= 0.0)
 	{
@@ -755,6 +800,21 @@ void FAthleteAssets::FillPackLoaded()
 		Q.P.C = C;
 		PackPairs[Q.Kind].Add(Q.P);
 	}
+	for (FPendingGang& Q : PendingGangs)
+	{
+		if (Q.G.C) continue;
+		UAnimSequence* C = Cast<UAnimSequence>(Q.CP.ResolveObject());
+		UAnimSequence* T = Cast<UAnimSequence>(Q.TP.ResolveObject());
+		UAnimSequence* G = Cast<UAnimSequence>(Q.AP.ResolveObject());
+		if (!C || !T || !G || !C->HasAnyFlags(RF_LoadCompleted) || !T->HasAnyFlags(RF_LoadCompleted) || !G->HasAnyFlags(RF_LoadCompleted)) continue;
+		Keep(C);
+		Keep(T);
+		Keep(G);
+		Q.G.C = C;
+		Q.G.T = T;
+		Q.G.A = G;
+		PackGangs.Add(Q.G);
+	}
 	++PackChunk;
 }
 
@@ -772,14 +832,15 @@ void FAthleteAssets::OnPackBatchLoaded()
 	PendingFamilies.Reset();
 	PendingTimed.Reset();
 	PendingPairs.Reset();
+	PendingGangs.Reset();
 	PackHandle.Reset();
 	PackQueue.Reset();
 	bPackLoading = false;
 	PackLoadBudget(false);
 	PackLibraryCount = PackCelebrations.Num() + PackPostPlayIdles.Num() + PackGetUpsFaceDown.Num() + PackGetUpsFaceUp.Num() + PackInjuries.Num();
 	for (const auto& KV : PackStances) PackLibraryCount += KV.Value.Num();
-	UE_LOG(LogTemp, Display, TEXT("TAG: pack library tackle pairs: drive %d over %d behind %d side %d / %d dive %d"),
-		PackPairs[0].Num(), PackPairs[1].Num(), PackPairs[2].Num(), PackPairs[3].Num(), PackPairs[4].Num(), PackPairs[5].Num());
+	UE_LOG(LogTemp, Display, TEXT("TAG: pack library tackle pairs: drive %d over %d behind %d side %d / %d dive %d, gang tackles %d"),
+		PackPairs[0].Num(), PackPairs[1].Num(), PackPairs[2].Num(), PackPairs[3].Num(), PackPairs[4].Num(), PackPairs[5].Num(), PackGangs.Num());
 	UE_LOG(LogTemp, Display, TEXT("TAG: pack library timed families: %d captures (throws %d/%d/%d/%d/%d, kicks %d/%d/%d, drops %d/%d, catches %d/%d/%d/%d/%d/%d/%d/%d, tackled %d/%d/%d, tacklers %d, whiffs %d, stumbles %d, jukes %d/%d, spins %d/%d, trucks %d, hurdles %d, stiff arms %d/%d, rush wins %d/%d, beaten %d/%d, pancakes %d, get-offs %d; index %d)"),
 		PackTimedCount, PackThrowsSet.Num(), PackThrowsQuick.Num(), PackThrowsDeep.Num(), PackThrowsRollR.Num(), PackThrowsRollL.Num(), PackKickoffs.Num(), PackFieldGoals.Num(), PackPunts.Num(),
 		PackDropsSG.Num(), PackDropsUC.Num(), PackCatchStride.Num(), PackCatchHigh.Num(), PackCatchLow.Num(), PackCatchOverShoulder.Num(), PackCatchSideline.Num(), PackCatchStand.Num(), PackCatchComeback.Num(), PackCatchDive.Num(),
@@ -2398,6 +2459,10 @@ void AAthlete::BeginPairedFall(UAnimationAsset* Clip, const FVector& From, const
 	FallLie = LieTime;
 	FallDrive = FMath::Max(0.05f, DriveTime);
 	FallFrom = GetActorLocation();
+	// his run carries into the hit: the glide onto the capture starts at his speed (the smoothstep from a standing
+	// start stopped a man at full speed dead in a frame, a 6 m/s jump at the contact) and the speed bleeds off like a
+	// hit's (about 0.12 s), handing over to the capture's own motion
+	FallV0 = bEaseIn ? FVector(LastVelW.X, LastVelW.Y, 0.f).GetClampedToMaxSize(1000.f) : FVector::ZeroVector;
 	FallFromYaw = GetActorRotation().Yaw;
 	AnchorA = FVector(From.X, From.Y, FallFrom.Z);
 	AnchorB = FVector(To.X, To.Y, FallFrom.Z);
@@ -2405,12 +2470,45 @@ void AAthlete::BeginPairedFall(UAnimationAsset* Clip, const FVector& From, const
 	bFallEase = bEaseIn;
 	FallEaseT = 0.2f;
 	VisOffset = FVector::ZeroVector;
+	// restart the clip even if it is already playing, and crossfade out of the pose shown now (the run, the tackle,
+	// the hit). Clearing CurrentClip alone skipped the blend (StartBodyAsset only blends from a playing clip): the body
+	// snapped into the fall's first frame, a 60-140 cm jump of the head in one frame.
 	CurrentClip = nullptr;
-	PlayClip(Clip, false, 1.f, Start); // crossfades out of the run / tackle pose
+	PlayClip(Clip, false, 1.f, Start);
+	if (MHBody)
+		if (UTagRetargetAnimInstance* RI = Cast<UTagRetargetAnimInstance>(MHBody->GetAnimInstance())) ++RI->Proc.ClipSerial;
 	if (!bEaseIn) SetActorLocationAndRotation(AnchorA, FRotator(0, YawW, 0));
 	SmoothedYaw = YawW;
 	UE_LOG(LogTemp, Verbose, TEXT("TAG fall #%d: %s, drive %.0f cm, lie %.2f s"), Player ? Player->number : -1, *Clip->GetName(),
 		FVector::Dist2D(AnchorA, AnchorB), LieTime);
+}
+
+void AAthlete::ShiftFallTarget(const FVector& Delta)
+{
+	// the pile ends somewhere else than first thought (help stopped it): where the drive is still going, it goes there
+	if (!bFalling || FallT >= FallDrive) return;
+	// from where the drive has him now: moving only the end point jumped him by the shift times the progress (a 35 cm
+	// pop of the pelvis); the start moves back by as much so this frame's spot stays put and the rest of the drive carries it
+	// (and no more than the rest of the drive carries at a pile's walking pace: a shift arriving with 0.07 s of drive
+	// left went by in two frames, the whole pile jumping 30 cm; what is left over only moves the umpire's spot)
+	const float D = FMath::Clamp(FallT / FallDrive, 0.f, 1.f);
+	const float P = 1.f - FMath::Square(1.f - D);
+	if (1.f - P < 1e-3f) return;
+	const FVector Dl = FVector(Delta.X, Delta.Y, 0.f).GetClampedToMaxSize(150.f * (FallDrive - FallT));
+	AnchorB += Dl;
+	AnchorA -= Dl * (P / (1.f - P));
+	PileBodyEnd += Dl;
+}
+
+float AAthlete::MassKg() const
+{
+	return Player ? static_cast<float>(Player->weightLb) * 0.4536f : 100.f;
+}
+
+float AAthlete::FallClipTime() const
+{
+	const float Len = FallClip ? FallClip->GetPlayLength() : 0.f;
+	return FMath::Clamp(FallStart + FallT, 0.f, FMath::Max(FallStart, Len - 1.f / 30.f));
 }
 
 void AAthlete::TickFall(const FVector& SimLoc, float DeltaTime)
@@ -2420,27 +2518,42 @@ void AAthlete::TickFall(const FVector& SimLoc, float DeltaTime)
 	const float D = FMath::Clamp(FallT / FallDrive, 0.f, 1.f);
 	FVector At = FMath::Lerp(AnchorA, AnchorB, 1.f - FMath::Square(1.f - D));
 	float Yaw = FallYaw;
-	// a library capture: its root carries the body through the fall (the placed cuts travel within the pose)
+	// a library capture: its root carries the body through the fall, its travel and its turn (the placed cuts travel
+	// within the pose). The captures are root locked, so the body is drawn as Pc(t) Q(t)^-1 Rest Crel Actor(t) (Pc the
+	// capture's pose, Q its root track, Rest the root's rest, Crel the mesh in the actor); for the capture's world to stay
+	// put, Actor(t) = Crel^-1 Rest^-1 Q(t) Q(s)^-1 Rest Crel Actor(s), and ExtractRootMotionFromRange(s, t) is exactly
+	// Rest^-1 Q(t) Q(s)^-1 Rest. The old code took only the translation (turned by the root's rest) and kept the heading
+	// fixed: each man travelled along a direction that depended on his own root heading (the hero root rests turned
+	// 180, and the pack's tackles turn a median 155 deg), so the two men of a pair drifted apart at ~1 m/s against the
+	// capture's own pelvis-to-pelvis distances (Tools/Art/pair_truth.py, -TagPairLog).
 	if (bFallRoot)
 		if (const UAnimSequence* Seq = Cast<UAnimSequence>(FallClip.Get()))
 		{
-			const double End = FMath::Min(static_cast<double>(FallStart + FallT), Seq->GetPlayLength());
-			// the extracted travel is in the root bone's own frame: back into the clip's (the hero rig's root rests turned
-			// 180 deg about up, the UEFN root not at all; without this the library falls slid backwards on the pack bodies)
-			const FQuat RootRest = Seq->GetSkeleton() && Seq->GetSkeleton()->GetReferenceSkeleton().GetNum()
-				? Seq->GetSkeleton()->GetReferenceSkeleton().GetRefBonePose()[0].GetRotation() : FQuat::Identity;
-			const FVector R = RootRest.RotateVector(Seq->ExtractRootMotionFromRange(FallStart, End, FAnimExtractContext(0.0, true)).GetTranslation());
-			At += FRotator(0, FallYaw, 0).RotateVector(FVector(R.Y, -R.X, 0.f)); // clip x left, +Y forward -> actor forward, right
+			const double End = FallClipTime();
+			const FTransform RM = Seq->ExtractRootMotionFromRange(FallStart, End, FAnimExtractContext(0.0, true));
+			const USkeletalMeshComponent* V = Visible();
+			FTransform Crel = V ? V->GetComponentTransform().GetRelativeTransform(GetActorTransform()) : FTransform::Identity;
+			// the capture's own distances, not scaled with this man's body (0.93-1.08): two men of a pair scaled apart
+			// travelled their shared root paths by different amounts and the pair drifted into each other (13 cm)
+			Crel.SetScale3D(FVector::OneVector);
+			const FTransform Now = Crel.Inverse() * RM * Crel * FTransform(FRotator(0, FallYaw, 0), At);
+			At = FVector(Now.GetLocation().X, Now.GetLocation().Y, At.Z);
+			Yaw = Now.Rotator().Yaw;
 		}
 	if (bFallEase && FallT < FallEaseT)
 	{
 		const float E = FMath::SmoothStep(0.f, 1.f, FallT / FallEaseT);
-		At = FMath::Lerp(FallFrom, At, E);
-		Yaw = FallFromYaw + FMath::FindDeltaAngleDegrees(FallFromYaw, FallYaw) * E;
+		constexpr float Tau = 0.12f;
+		At = FMath::Lerp(FallFrom, At, E) + FallV0 * (Tau * (1.f - FMath::Exp(-FallT / Tau)) * (1.f - E));
+		Yaw = FallFromYaw + FMath::FindDeltaAngleDegrees(FallFromYaw, Yaw) * E;
 	}
 	SetActorLocationAndRotation(At, FRotator(0, Yaw, 0));
 	SmoothedYaw = Yaw;
-	PlayClip(FallClip, false, 1.f, FallStart);
+	// the clip's time is set here, the time the root motion above was taken at: left to play on its own the pose ran a
+	// frame ahead of the root, and where a capture's root steps (the pose making up for it) that frame showed as a
+	// 20-30 cm jump of the head mid-fall. Held one frame short of the end (several captures' last frame snaps 1-4 m).
+	PlayClip(FallClip, false, 0.f, FallStart);
+	if (UAnimSingleNodeInstance* SI = Body->GetSingleNodeInstance()) SI->SetPosition(FallClipTime(), true);
 	if (FallT >= FallLen + FallLie)
 	{
 		bFalling = false;

@@ -115,6 +115,7 @@ private:
 	int32 SeenSerial = 0;
 	float BlendElapsed = 1e3f;
 	float CurBlendTime = 0.f;      // > 0 overrides In.BlendTime for the current blend (pose snapshots)
+	TArray<FTransform> CsFrom, CsTo; // component-space scratch for a snapshot blend
 	TArray<FTransform> PendingMesh; // snapshot in mesh bone order, converted to compact order in Evaluate
 	bool bPendingSnap = false;
 	TArray<FTransform> ReplayMesh;  // instant replay: shown as is (mesh bone order)
