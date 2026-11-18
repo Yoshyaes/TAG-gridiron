@@ -165,6 +165,19 @@ public:
 	 *  to whatever opened it. The saved loadouts are laid over the coach's picks at startup (LoadAbilityLoadouts). */
 	void ShowAbilities(int32 TeamIdx, std::function<void()> Back);
 	static void LoadAbilityLoadouts(AMatchDirector* D);
+	/** The depth chart (UI/DepthChart.cpp): every slot a team fills (the eleven a side by their spots, the specialists,
+	 *  the situational subs) and who is listed there, in order; the user's order is what the game plays. FocusSlot /
+	 *  FocusPlayerId (a DSlot, a Player::id; -1 none) open it on that slot and that man. Back returns to the opener. */
+	void ShowDepthChart(int32 TeamIdx, std::function<void()> Back, int32 FocusSlot = -1, int32 FocusPlayerId = -1);
+	/** Create-a-Player (UI/CreatePlayer.cpp): the created players, a new one (any position, any team), edits; the
+	 *  men released to make room. Back returns to the opener. */
+	void ShowCreatePlayer(int32 TeamIdx, std::function<void()> Back);
+	/** The saved roster edits laid onto the league at startup: the created men, the cuts, the depth charts. */
+	static void LoadRosterEdits(AMatchDirector* D);
+	/** -TagRosterShots: the scripted pictures of the depth chart and Create-a-Player (nothing saved), then exit. */
+	void StartRosterShots();
+	/** -TagChartTest: at the end of a soak, who played (the passers, the runners, the returner) against the chart. */
+	static void LogChartTest(AMatchDirector* D);
 
 	virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
 	/** A controller button (or keyboard key) centred at C, Size across, in G's local space (the glyph widgets use it too). */

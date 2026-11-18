@@ -1778,10 +1778,13 @@ void AAthlete::SetupHero(const FUniform& U)
 	TArray<int32> Helmets = A.HeroOf(TEXT("Helmet"), [&](const FHeroItem& I) { return I.Style == Mask; });
 	if (!Helmets.Num()) Helmets = A.HeroOf(TEXT("Helmet"));
 	const TArray<int32> Heads = A.HeroOf(TEXT("Head"));
-	const int32 Head = Heads.Num() ? Heads[(H >> 5) % Heads.Num()] : INDEX_NONE;
+	// (a created player's look: his face and helmet as picked on the Create-a-Player screen; everybody else's from his id)
+	const uint32 FacePick = Player && Player->face >= 0 ? static_cast<uint32>(Player->face) : (H >> 5);
+	const uint32 HelmetPick = Player && Player->helmet >= 0 ? static_cast<uint32>(Player->helmet) : (H >> 13);
+	const int32 Head = Heads.Num() ? Heads[FacePick % Heads.Num()] : INDEX_NONE;
 	HeroTone = Head != INDEX_NONE ? A.HeroItems[Head].Tone : 4;
 	DressHero(Kits.Num() ? A.HeroMesh(Kits[(H >> 9) % Kits.Num()]) : nullptr, A.HeroMesh(Head),
-		Helmets.Num() ? A.HeroMesh(Helmets[(H >> 13) % Helmets.Num()]) : nullptr, TEXT("hero"));
+		Helmets.Num() ? A.HeroMesh(Helmets[HelmetPick % Helmets.Num()]) : nullptr, TEXT("hero"));
 	SetHelmetOn(true);
 	PaintHero(U);
 }

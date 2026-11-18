@@ -1,6 +1,7 @@
 // Port of src/sim/play.ts -- per-play physical simulation at 60 Hz.
 // Control flow, constants and RNG call order follow the TS line by line.
 #include "PlaySim.h"
+#include "Roster.h"
 
 #include <algorithm>
 #include <cmath>
@@ -587,22 +588,54 @@ Ent* PlaySim::defRole(const std::string& role) const {
 }
 
 // ------------------------------------------------------------------ setup
-Player* PlaySim::pickFrom(Team& team, const std::vector<Pos>& posList, std::vector<int>& used) {
+/** NFL snap shares: quarterbacks, specialists and the offensive line play every snap; linebackers and defensive
+ *  backs nearly all; receivers and tight ends rotate some; backs and the defensive line rotate a lot. */
+static double rotationWeight(Pos ps) {
+  switch (ps) {
+    case Pos::QB: case Pos::K: case Pos::P: return 0;
+    case Pos::OT: case Pos::OG: case Pos::C: return 0.1;
+    case Pos::LB: case Pos::CB: case Pos::S: return 0.25;
+    case Pos::WR: case Pos::TE: case Pos::FB: return 0.4;
+    default: return 0.6;
+  }
+}
+
+Player* PlaySim::pickFrom(Team& team, const std::vector<Pos>& posList, std::vector<int>& used, const std::vector<DSlot>& slots) {
+  // the depth chart (Roster.h), where the user has set the role's slot: its order, most specific slot first. The k-th
+  // man on the list plays at the k-th best OVR of the list, so the rotation spells a worn starter as it always has,
+  // and the user's order is the order they come in.
+  for (DSlot s : slots) {
+    std::vector<Player*> list;
+    for (Player* p : chartOrder(team, s))
+      if (p->injuredWeeks <= 0 && !contains(used, p->id)) list.push_back(p);
+    if (list.empty()) continue;
+    std::vector<int> ovrs;
+    for (const Player* p : list) ovrs.push_back(p->ovr);
+    std::sort(ovrs.begin(), ovrs.end(), [](int a, int b) { return a > b; });
+    const Pos nat = dslotInfo(s).natural;
+    const double w = rotationWeight(nat);
+    const bool sit = team.pullStarters && (nat == Pos::QB || nat == Pos::RB || nat == Pos::WR || nat == Pos::TE);
+    size_t best = 0;
+    double bestS = -1e9;
+    for (size_t i = 0; i < list.size(); i++) {
+      const Player* p = list[i];
+      const double keep = p->onFieldLast ? 4.0 : 0.0;
+      const double sc = (sit ? -static_cast<double>(ovrs[i]) : ovrs[i] * (1 - w * p->fatigue)) + keep;
+      if (sc > bestS) {
+        bestS = sc;
+        best = i;
+      }
+    }
+    used.push_back(list[best]->id);
+    return list[best];
+  }
   for (Pos ps : posList) {
     std::vector<Player*> cands;
     for (const auto& p : team.roster)
       if (p->pos == ps && p->injuredWeeks <= 0 && !contains(used, p->id)) cands.push_back(p.get());
-    // NFL snap shares: quarterbacks, specialists and the offensive line play every snap; linebackers and
-    // defensive backs nearly all; receivers and tight ends rotate some; backs and the defensive line rotate a lot.
-    // The man already in the game keeps his spot unless he is clearly worn down (no swapping every play).
-    double w = 0.6;
-    switch (ps) {
-      case Pos::QB: case Pos::K: case Pos::P: w = 0; break;
-      case Pos::OT: case Pos::OG: case Pos::C: w = 0.1; break;
-      case Pos::LB: case Pos::CB: case Pos::S: w = 0.25; break;
-      case Pos::WR: case Pos::TE: case Pos::FB: w = 0.4; break;
-      default: w = 0.6; break;
-    }
+    // (rotationWeight: the snap shares.) The man already in the game keeps his spot unless he is clearly worn down
+    // (no swapping every play).
+    const double w = rotationWeight(ps);
     const bool sit = team.pullStarters && (ps == Pos::QB || ps == Pos::RB || ps == Pos::WR || ps == Pos::TE);
     auto score = [w, sit](const Player* p) {
       const double keep = p->onFieldLast ? 4.0 : 0.0;  // the man in the game stays in
@@ -653,10 +686,33 @@ V2 PlaySim::alignPos(const FormationSlot& slot, bool flip) const {
   return V2{L, by};
 }
 
+/** The order a side's roles are filled in: the formation's, except that a role whose depth chart starter is out of
+ *  his position (a corner the user put at free safety) goes first, so the man plays where he was put rather than
+ *  where his own position's list would take him first. No chart set: the formation's order. */
+static std::vector<size_t> fillOrder(const std::vector<std::vector<DSlot>>& slots, const Team& t) {
+  std::vector<size_t> order(slots.size());
+  for (size_t i = 0; i < order.size(); i++) order[i] = i;
+  if (t.chart.empty()) return order;
+  auto moved = [&](size_t i) {
+    if (slots[i].empty()) return false;
+    for (const Player* p : chartOrder(t, slots[i][0]))
+      if (p->injuredWeeks <= 0) return p->pos != dslotInfo(slots[i][0]).natural;
+    return false;
+  };
+  std::stable_partition(order.begin(), order.end(), moved);
+  return order;
+}
+
 void PlaySim::setupOffense() {
   std::vector<int> used;
-  for (const FormationSlot& slot : form_->slots) {
-    Player* p = pickFrom(*cfg.off, slot.pos, used);
+  const auto& fs = form_->slots;
+  std::vector<std::vector<DSlot>> slots(fs.size());
+  for (size_t i = 0; i < fs.size(); i++) slots[i] = roleSlots(*cfg.off, fs[i].role, -1, cfg.down.value_or(1), cfg.toGo.value_or(10), cfg.los);
+  std::vector<Player*> picks(fs.size(), nullptr);
+  for (size_t i : fillOrder(slots, *cfg.off)) picks[i] = pickFrom(*cfg.off, fs[i].pos, used, slots[i]);
+  for (size_t i = 0; i < fs.size(); i++) {
+    const FormationSlot& slot = fs[i];
+    Player* p = picks[i];
     storage.push_back(std::make_unique<Ent>(p, Side::Off, slot.role, alignPos(slot, cfg.flip)));
     Ent* e = storage.back().get();
     e->eligible = !e->isOL && slot.role != "QB";
@@ -668,8 +724,15 @@ void PlaySim::setupOffense() {
 
 void PlaySim::setupDefense() {
   std::vector<int> used;
-  for (const FrontSlot& s : FRONT_PERSONNEL(cfg.defCall->front)) {
-    Player* p = pickFrom(*cfg.def, s.pos, used);
+  const std::vector<FrontSlot>& fp = FRONT_PERSONNEL(cfg.defCall->front);
+  std::vector<std::vector<DSlot>> slots(fp.size());
+  for (size_t i = 0; i < fp.size(); i++)
+    slots[i] = roleSlots(*cfg.def, fp[i].role, static_cast<int>(cfg.defCall->front), cfg.down.value_or(1), cfg.toGo.value_or(10), cfg.los);
+  std::vector<Player*> picks(fp.size(), nullptr);
+  for (size_t i : fillOrder(slots, *cfg.def)) picks[i] = pickFrom(*cfg.def, fp[i].pos, used, slots[i]);
+  for (size_t i = 0; i < fp.size(); i++) {
+    const FrontSlot& s = fp[i];
+    Player* p = picks[i];
     storage.push_back(std::make_unique<Ent>(p, Side::Def, s.role, V2{los + 5, by}));
     Ent* e = storage.back().get();
     def.push_back(e);

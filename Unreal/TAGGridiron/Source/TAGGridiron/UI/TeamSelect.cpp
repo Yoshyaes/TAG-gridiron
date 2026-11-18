@@ -1181,6 +1181,7 @@ void SGridironOverlay::ShowTeamSelect(bool bUserPlays)
 		+ SHorizontalBox::Slot().AutoWidth()[ Hint(EPadGlyph::R1, TEXT("E"), TEXT("Change team")) ]
 		+ SHorizontalBox::Slot().AutoWidth()[ Hint(EPadGlyph::Square, TEXT("R"), TEXT("Random team")) ]
 		+ SHorizontalBox::Slot().AutoWidth()[ Hint(EPadGlyph::Triangle, TEXT("T"), TEXT("Swap home / away")) ]
+		+ SHorizontalBox::Slot().AutoWidth()[ Hint(EPadGlyph::L2, TEXT("G"), TEXT("Depth chart")) ]
 		+ SHorizontalBox::Slot().AutoWidth()[ Hint(EPadGlyph::R2, TEXT("F"), TEXT("Abilities")) ]
 		+ SHorizontalBox::Slot().AutoWidth()[ Hint(EPadGlyph::Cross, TEXT("Enter"), TEXT("Kick off")) ]
 		+ SHorizontalBox::Slot().AutoWidth()[ Hint(EPadGlyph::Circle, TEXT("Esc"), TEXT("Back")) ];
@@ -1249,6 +1250,15 @@ void SGridironOverlay::ShowTeamSelect(bool bUserPlays)
 			return true;
 		}
 		if (K == EKeys::Gamepad_FaceButton_Right || K == EKeys::Escape || K == EKeys::BackSpace) { ATagAudio::Ui(TEXT("UiBack")); ShowMainMenu(); return true; }
+		if (K == EKeys::Gamepad_LeftTrigger || K == EKeys::G)
+		{
+			// the depth chart of the team under the pad
+			ATagAudio::Ui(TEXT("UiTab"));
+			const bool bHomeT = SelCol == 2 || (SelCol == 1 && (!bSelUserPlays || bSelUserHome));
+			const bool bUserGame = bSelUserPlays;
+			ShowDepthChart(bHomeT ? SelHome : SelAway, [this, bUserGame] { ShowTeamSelect(bUserGame); });
+			return true;
+		}
 		if (K == EKeys::Gamepad_FaceButton_Left || K == EKeys::R)
 		{
 			ATagAudio::Ui(TEXT("UiTab"));

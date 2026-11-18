@@ -594,6 +594,8 @@ void SGridironOverlay::ShowMainMenu()
 	Menu->AddSlot().AutoHeight().HAlign(HAlign_Center)[ MakeButton(TEXT("Play Now"), TEXT("You vs CPU. Call plays, control the QB, ball carrier or any defender."), [this] { ShowTeamSelect(true); }) ];
 	Menu->AddSlot().AutoHeight().HAlign(HAlign_Center)[ MakeButton(TEXT("Watch a Game"), TEXT("CPU vs CPU broadcast. Speed up with 1/2/4."), [this] { ShowTeamSelect(false); }) ];
 	Menu->AddSlot().AutoHeight().HAlign(HAlign_Center)[ MakeButton(TEXT("Superstars & X-Factors"), TEXT("Pick the abilities your stars carry into the game."), [this] { ShowAbilities(SelHome, [this] { ShowMainMenu(); }); }) ];
+	Menu->AddSlot().AutoHeight().HAlign(HAlign_Center)[ MakeButton(TEXT("Depth Chart"), TEXT("Every slot on every team: starters, specialists, situational subs. Your order is the one the game plays."), [this] { ShowDepthChart(SelHome, [this] { ShowMainMenu(); }); }) ];
+	Menu->AddSlot().AutoHeight().HAlign(HAlign_Center)[ MakeButton(TEXT("Create a Player"), TEXT("Build a player at any position, from archetype to every rating, and sign him to any team."), [this] { ShowCreatePlayer(SelHome, [this] { ShowMainMenu(); }); }) ];
 	Menu->AddSlot().AutoHeight().HAlign(HAlign_Center)[ MakeButton(TEXT("Settings"), TEXT("Commentary captions."), [this] { ShowSettings([this] { ShowMainMenu(); }); }) ];
 	Menu->AddSlot().AutoHeight().HAlign(HAlign_Center)[ MakeButton(TEXT("Quit"), TEXT(""), [] { FPlatformMisc::RequestExit(false); }) ];
 	Menu->AddSlot().AutoHeight().HAlign(HAlign_Center).Padding(0, 30, 0, 0)[ SNew(STextBlock).Font(Font(10)).ColorAndOpacity(Dim).Text(T(TEXT("An original football game. All teams, players and names are fictional."))) ];
@@ -604,6 +606,13 @@ void SGridironOverlay::ShowMainMenu()
 	{
 		bTeamSelectShot = false;
 		ShowTeamSelect(true);
+	}
+	// -TagRosterShots: the depth chart and Create-a-Player, scripted (pictures, nothing saved), then the game exits
+	static bool bRosterShot = FParse::Param(FCommandLine::Get(), TEXT("TagRosterShots"));
+	if (bRosterShot)
+	{
+		bRosterShot = false;
+		StartRosterShots();
 	}
 	// -TagAbilityShots: straight on to the Superstars & X-Factors screen (its own scripted shots, then the game exits)
 	static bool bAbilityShot = FParse::Param(FCommandLine::Get(), TEXT("TagAbilityShots"));
@@ -1128,6 +1137,22 @@ void SGridironOverlay::ShowPause(std::function<void()> Resume, std::function<voi
 		ShowSettings([this, Resume, SimToEnd, Quit]
 		{
 			// back to the pause menu, over the same suspended screen
+			const TSharedPtr<SWidget> Keep = Suspended;
+			const int32 KeepFocus = SuspendedFocus;
+			ShowPause(Resume, SimToEnd, Quit);
+			Suspended = Keep;
+			SuspendedFocus = KeepFocus;
+		});
+	}) ];
+	V->AddSlot().AutoHeight()[ MakeButton(TEXT("Depth Chart"), TEXT(""), [this, Resume, SimToEnd, Quit]
+	{
+		// the user's team (a change takes the field from the next snap); back to the pause menu
+		int32 Ti = bSelUserHome ? SelHome : SelAway;
+		if (Director && Director->Game)
+			for (int32 i = 0; i < static_cast<int32>(Director->League.size()); ++i)
+				if (Director->League[i].get() == (bSelUserHome ? Director->Game->home : Director->Game->away)) Ti = i;
+		ShowDepthChart(Ti, [this, Resume, SimToEnd, Quit]
+		{
 			const TSharedPtr<SWidget> Keep = Suspended;
 			const int32 KeepFocus = SuspendedFocus;
 			ShowPause(Resume, SimToEnd, Quit);

@@ -30,6 +30,7 @@
 #include "GameFramework/PlayerController.h"
 #include "InputCoreTypes.h"
 #include "Sim/Playbook.h"
+#include "Sim/Roster.h"
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
 #include "Kismet/GameplayStatics.h"
@@ -142,6 +143,8 @@ void AMatchDirector::BeginPlay()
 		}
 	}
 	League = tag::createLeague(2027);
+	// the user's rosters: the created players on their teams, the men cut, the depth charts (UI/CreatePlayer.cpp)
+	SGridironOverlay::LoadRosterEdits(this);
 	// the user's Superstar / X-Factor loadouts over the coach's picks (-TagCoachPicks: the coach's picks only)
 	if (!FParse::Param(FCommandLine::Get(), TEXT("TagCoachPicks"))) SGridironOverlay::LoadAbilityLoadouts(this);
 	FAthleteAssets::Get().Load();
@@ -3954,15 +3957,47 @@ std::vector<tag::Player*> AMatchDirector::Pick11(tag::Team& T, const char* RoleN
 	const FString R(RoleName);
 	if (R == TEXT("K") || R == TEXT("P"))
 	{
-		auto L = By({R == TEXT("K") ? tag::Pos::K : tag::Pos::P});
-		if (!L.empty()) Out.push_back(L[0]);
-		if (R == TEXT("P") || Game->phase != tag::GamePhase::Kickoff)
-			for (tag::Player* P : By({tag::Pos::OT, tag::Pos::OG, tag::Pos::C, tag::Pos::TE})) if (Out.size() < 9) Out.push_back(P);
+		// the man the game kicks with (the depth chart's kicker, punter or kickoff specialist where it is set)
+		const bool bKickoff = R == TEXT("K") && Game->phase == tag::GamePhase::Kickoff;
+		tag::Player* Spec = nullptr;
+		if (Game && (Game->home == &T || Game->away == &T))
+		{
+			const tag::TeamKey Key = Game->home == &T ? tag::TeamKey::Home : tag::TeamKey::Away;
+			Spec = R == TEXT("P") ? Game->punter(Key) : bKickoff ? tag::chartSpecialist(T, tag::DSlot::KOS) : Game->kicker(Key);
+			if (!Spec && bKickoff) Spec = Game->kicker(Key);
+			if (Spec && Spec->injuredWeeks > 0) Spec = nullptr;
+		}
+		if (Spec) Out.push_back(Spec);
+		else
+		{
+			auto L = By({R == TEXT("K") ? tag::Pos::K : tag::Pos::P});
+			if (!L.empty()) Out.push_back(L[0]);
+		}
+		if (R == TEXT("P") || !bKickoff)
+		{
+			for (tag::Player* P : By({tag::Pos::OT, tag::Pos::OG, tag::Pos::C, tag::Pos::TE}))
+				if (Out.size() < 9 && std::find(Out.begin(), Out.end(), P) == Out.end()) Out.push_back(P);
+			// the long snapper in the snapper's spot (the punt's man 4, the kick's man 5)
+			const size_t SnapI = R == TEXT("P") ? 4 : 5;
+			if (tag::Player* LS = tag::chartSpecialist(T, tag::DSlot::LS))
+				if (SnapI < Out.size() && LS != Out[0])
+				{
+					auto It = std::find(Out.begin(), Out.end(), LS);
+					if (It != Out.end()) std::iter_swap(It, Out.begin() + SnapI);
+					else Out[SnapI] = LS;
+				}
+		}
 	}
-	if (R == TEXT("KR"))
+	if (R == TEXT("KR") || R == TEXT("PR"))
 	{
-		auto L = By({tag::Pos::WR, tag::Pos::CB, tag::Pos::RB});
-		if (!L.empty()) Out.push_back(L[0]);
+		// the depth chart's returner, else the fastest of the receivers, corners and backs
+		tag::Player* Ret = tag::chartSpecialist(T, R == TEXT("PR") ? tag::DSlot::PR : tag::DSlot::KR);
+		if (Ret) Out.push_back(Ret);
+		else
+		{
+			auto L = By({tag::Pos::WR, tag::Pos::CB, tag::Pos::RB});
+			if (!L.empty()) Out.push_back(L[0]);
+		}
 	}
 	auto Rest = R == TEXT("D") ? By({tag::Pos::DE, tag::Pos::DT, tag::Pos::LB}) : By({tag::Pos::LB, tag::Pos::S, tag::Pos::CB, tag::Pos::TE, tag::Pos::WR, tag::Pos::RB, tag::Pos::FB, tag::Pos::DE});
 	for (tag::Player* P : Rest)
@@ -3976,7 +4011,7 @@ void AMatchDirector::DoPunt()
 	const int D = G.worldDir();
 	HudDown = FString(UTF8_TO_TCHAR(G.downText().c_str())) + TEXT("  ·  ") + FString(UTF8_TO_TCHAR(G.ydLine().c_str()));
 	auto KickU = Pick11(G.offense(), "P");
-	auto RecvU = Pick11(G.defense(), "KR");
+	auto RecvU = Pick11(G.defense(), "PR");
 	const double Los = G.ballOn;
 	HoldHudScore();
 	auto Go = [this, D, KickU, RecvU, Los]()
@@ -6280,6 +6315,7 @@ void AMatchDirector::Tick(float Dt)
 	if (SoakSecs > 0.f && Game && FPlatformTime::Seconds() - SoakStart > SoakSecs)
 	{
 		UE_LOG(LogTemp, Display, TEXT("TAG soak done: %.0f s, Q%d %d-%d, pack batches %d"), SoakSecs, Game->q, Game->score.away, Game->score.home, FAthleteAssets::Get().PackBatch);
+		SGridironOverlay::LogChartTest(this);
 		SoakSecs = 0.f;
 		FPlatformMisc::RequestExit(false);
 	}

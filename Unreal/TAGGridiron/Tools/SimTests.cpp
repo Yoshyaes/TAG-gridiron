@@ -13,6 +13,7 @@
 #include "PlaySim.h"
 #include "Playbook.h"
 #include "Rng.h"
+#include "Roster.h"
 
 using namespace tag;
 
@@ -863,6 +864,112 @@ int main() {
     check(in >= 12, "only " + std::to_string(in) + " zone entries in 12 games");
     check(out >= 3, "only " + std::to_string(out) + " zone exits in 12 games");
     check(kinds.size() >= 5, "only " + std::to_string(kinds.size()) + " different X-Factors reached the zone");
+  });
+
+
+  t("depth chart: the user's order starts, a moved man plays where he was put, subs come in on their downs", [&] {
+    League L = createLeague(2027);
+    Team& o = *L[4];
+    Team& d = *L[9];
+    const OffPlay* op = nullptr;
+    for (const OffPlay& x : OFF_PLAYS()) {
+      const Formation* f = formationById(x.formation);
+      bool rb = false, slot = false;
+      for (const FormationSlot& fs : f->slots) {
+        rb = rb || fs.role == "RB";
+        slot = slot || fs.role == "SLOT";
+      }
+      if (rb && slot && x.type != PlayType::Run) { op = &x; break; }
+    }
+    auto callOf = [](Front fr) {
+      for (const DefCall& x : DEF_PLAYS())
+        if (x.front == fr) return &x;
+      return static_cast<const DefCall*>(nullptr);
+    };
+    check(op && callOf(Front::Base) && callOf(Front::Nickel), "no test play");
+    if (!op) return;
+    auto sim = [&](double down, double toGo, Front fr) {
+      PlayConfig cfg;
+      cfg.off = &o;
+      cfg.def = &d;
+      cfg.offPlay = op;
+      cfg.defCall = callOf(fr);
+      cfg.los = 40;
+      cfg.down = down;
+      cfg.toGo = toGo;
+      cfg.rng = Rng(11);
+      return std::unique_ptr<PlaySim>(new PlaySim(cfg));
+    };
+    const std::vector<Player*> qbs = depth(o, Pos::QB), rbs = depth(o, Pos::RB), cbs = depth(d, Pos::CB), ss = depth(d, Pos::S);
+    {
+      auto s0 = sim(1, 10, Front::Base);
+      check(s0->offRole("QB")->p == qbs[0], "no chart: the best QB starts");
+      check(s0->defRole("FS")->p->pos == Pos::S, "no chart: a safety at FS");
+    }
+    // the backup quarterback named the starter
+    setChart(o, DSlot::QB, {qbs[1], qbs[0], qbs[2]});
+    // the best corner moved to free safety
+    std::vector<Player*> fsList = {cbs[0]};
+    for (Player* p : chartOrder(d, DSlot::FS)) fsList.push_back(p);
+    setChart(d, DSlot::FS, fsList);
+    // a third down back
+    setChart(o, DSlot::TDRB, {rbs[2]});
+    {
+      auto s1 = sim(1, 10, Front::Base);
+      check(s1->offRole("QB")->p == qbs[1], "the QB the chart starts");
+      check(s1->defRole("FS")->p == cbs[0], "the corner put at FS plays FS");
+      check(s1->defRole("LCB")->p != cbs[0] && s1->defRole("RCB")->p != cbs[0], "and not at corner too");
+      check(s1->offRole("RB")->p == rbs[0], "1st down: the halfback");
+      auto s3 = sim(3, 6, Front::Nickel);
+      check(s3->offRole("RB")->p == rbs[2], "3rd down: the third down back");
+    }
+    // the specialists: the punter named the kicker
+    Player* pun = depth(o, Pos::P)[0];
+    setChart(o, DSlot::K, {pun});
+    GameOptions go;
+    go.seed = 3;
+    Game g(o, d, go);
+    check(g.kicker(TeamKey::Home) == pun, "the chart's kicker kicks");
+    // a set slot keeps a new man on it; a cleared chart is the coach's again
+    clearAllCharts(o);
+    clearAllCharts(d);
+    check(sim(1, 10, Front::Base)->offRole("QB")->p == qbs[0], "cleared: the best QB again");
+    check(g.kicker(TeamKey::Home)->pos == Pos::K, "cleared: the kicker kicks");
+    // the coach's order mirrors the old pick: LT the best tackle, RT the second
+    const std::vector<Player*> ots = depth(o, Pos::OT);
+    check(autoChart(o, DSlot::LT)[0] == ots[0] && autoChart(o, DSlot::RT)[0] == ots[1], "coach's LT / RT");
+  });
+
+  t("create-a-player: archetype ratings, a free number, a full slot on the chart", [&] {
+    for (int pi = 0; pi <= static_cast<int>(Pos::P); pi++) {
+      const Pos pos = static_cast<Pos>(pi);
+      const auto& arches = capArchetypes(pos);
+      check(arches.size() >= 2, std::string("archetypes for ") + posName(pos));
+      for (size_t a = 0; a < arches.size(); a++) {
+        const int lo = computeOvr(pos, capRatings(pos, static_cast<int>(a), -8));
+        const int mid = computeOvr(pos, capRatings(pos, static_cast<int>(a), 0));
+        const int hi = computeOvr(pos, capRatings(pos, static_cast<int>(a), 14));
+        check(lo < mid && mid < hi, std::string(posName(pos)) + " " + arches[a].name + " talent order");
+        check(mid >= 60 && mid <= 90, std::string(posName(pos)) + " " + arches[a].name + " starter OVR " + std::to_string(mid));
+      }
+    }
+    check(capRatings(Pos::QB, 3, 0).speed > capRatings(Pos::QB, 0, 0).speed + 10, "the scrambler is faster");
+    League L = createLeague(2027);
+    Team& t0 = *L[0];
+    const int n = freeNumber(t0, Pos::QB, -1);
+    check(n >= 0 && numberFree(t0, n), "a free number");
+    std::vector<Player*> wr = chartOrder(t0, DSlot::WR);
+    setChart(t0, DSlot::WR, wr);
+    auto p = std::make_unique<Player>();
+    p->id = 700001;
+    p->pos = Pos::WR;
+    p->number = freeNumber(t0, Pos::WR, -1);
+    p->r = capRatings(Pos::WR, 0, 10);
+    p->ovr = computeOvr(Pos::WR, p->r);
+    chartAddPlayer(t0, *p);
+    t0.roster.push_back(std::move(p));
+    check(chartOrder(t0, DSlot::WR).back()->id == 700001, "the new man at the bottom of the set slot");
+    check(depth(t0, Pos::WR).size() == wr.size() + 1, "and in the position's depth");
   });
 
   std::printf("\n%d passed, %d failed\n", passCount, failCount);

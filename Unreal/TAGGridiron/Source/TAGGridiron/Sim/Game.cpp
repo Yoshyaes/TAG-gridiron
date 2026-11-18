@@ -2,6 +2,7 @@
 // Game rules engine: clock, downs, scoring, penalties, special teams, CPU coordinators.
 // RNG call order and all decision thresholds follow the TS exactly.
 #include "Game.h"
+#include "Roster.h"
 
 #include <cmath>
 #include <map>
@@ -1044,12 +1045,15 @@ Ratings Game::kickR(const Player& k, TeamKey kt, bool punt) const {
 }
 
 Player* Game::kicker(TeamKey k) const {
+  // the depth chart's kicker / punter where the user set one (Roster.h), else the best at the spot
+  if (Player* c = chartSpecialist(teamOf(k), DSlot::K)) return c;
   Player* best = nullptr;
   for (const auto& p : teamOf(k).roster)
     if (p->pos == Pos::K && (!best || p->ovr > best->ovr)) best = p.get();
   return best;
 }
 Player* Game::punter(TeamKey k) const {
+  if (Player* c = chartSpecialist(teamOf(k), DSlot::P)) return c;
   Player* best = nullptr;
   for (const auto& p : teamOf(k).roster)
     if (p->pos == Pos::P && (!best || p->ovr > best->ovr)) best = p.get();
@@ -1070,7 +1074,9 @@ double Game::fgProb(double dist, const Player& k, TeamKey kt) const {
 SpecialResult Game::kickoff(bool onside, bool liveReturn) {
   const TeamKey kt = kicking;
   const TeamKey rt = other(kt);
-  const Player* k = kicker(kt);
+  // (the kickoff specialist where the depth chart has one, else the kicker)
+  const Player* kos = chartSpecialist(teamOf(kt), DSlot::KOS);
+  const Player* k = kos ? kos : kicker(kt);
   const Ratings kickRt = kickR(*k, kt, false);
   const double fromX = safetyKick ? 20 : 35;
   safetyKick = false;

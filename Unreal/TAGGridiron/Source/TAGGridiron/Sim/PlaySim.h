@@ -30,6 +30,7 @@
 #include "Abilities.h"
 #include "Playbook.h"
 #include "Rng.h"
+#include "Roster.h"
 #include "Types.h"
 #include "Vec.h"
 
@@ -657,7 +658,8 @@ class PlaySim {
   mutable V3 landingVel_;
   mutable V2 landingOut_;
 
-  Player* pickFrom(Team& team, const std::vector<Pos>& pos, std::vector<int>& used);
+  /** slots: the depth chart slots the role reads, set ones only (Roster.h roleSlots); empty: the old pick. */
+  Player* pickFrom(Team& team, const std::vector<Pos>& pos, std::vector<int>& used, const std::vector<DSlot>& slots = {});
   V2 alignPos(const FormationSlot& slot, bool flip) const;
   void setupOffense();
   void setupDefense();
