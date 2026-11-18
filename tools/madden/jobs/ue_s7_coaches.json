@@ -1,0 +1,678 @@
+[
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/coaches/meshes/4_m_g_01_hat_mesh.fbx",
+  "dest": "/Game/MaddenRef/Skeleton",
+  "name": "MaddenFB_Hero",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/coaches/meshes/4_m_g_01_hat_mesh.fbx",
+  "dest": "/Game/MaddenRef/Coaches/Sample",
+  "name": "SK_4_m_g_01_hat",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/coaches/meshes/4_m_g_01_head_mesh.fbx",
+  "dest": "/Game/MaddenRef/Coaches/Sample",
+  "name": "SK_4_m_g_01_head",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/coaches/meshes/4_m_g_01_headset_mesh.fbx",
+  "dest": "/Game/MaddenRef/Coaches/Sample",
+  "name": "SK_4_m_g_01_headset",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/coaches/meshes/coachhead_1_h_n_20_head_mesh.fbx",
+  "dest": "/Game/MaddenRef/Coaches/Sample",
+  "name": "SK_coachhead_1_h_n_20_head",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/coaches/meshes/coachhead_3_h_b_20_hair_mesh.fbx",
+  "dest": "/Game/MaddenRef/Coaches/Sample",
+  "name": "SK_coachhead_3_h_b_20_hair",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/coaches/meshes/coachhead_3_h_b_20_haircap_mesh.fbx",
+  "dest": "/Game/MaddenRef/Coaches/Sample",
+  "name": "SK_coachhead_3_h_b_20_haircap",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/coaches/meshes/coachhead_3_h_b_20_hat_mesh.fbx",
+  "dest": "/Game/MaddenRef/Coaches/Sample",
+  "name": "SK_coachhead_3_h_b_20_hat",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/coaches/meshes/coachhead_3_h_b_20_head_mesh.fbx",
+  "dest": "/Game/MaddenRef/Coaches/Sample",
+  "name": "SK_coachhead_3_h_b_20_head",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/coaches/meshes/coachhead_3_h_b_20_headset_mesh.fbx",
+  "dest": "/Game/MaddenRef/Coaches/Sample",
+  "name": "SK_coachhead_3_h_b_20_headset",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/coaches/meshes/coachhead_3_h_bd_01_head_mesh.fbx",
+  "dest": "/Game/MaddenRef/Coaches/Sample",
+  "name": "SK_coachhead_3_h_bd_01_head",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/coaches/meshes/coachhead_7_h_n_30_head_mesh.fbx",
+  "dest": "/Game/MaddenRef/Coaches/Sample",
+  "name": "SK_coachhead_7_h_n_30_head",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/coaches/meshes/fisherjeff_body_cold_mesh.fbx",
+  "dest": "/Game/MaddenRef/Coaches/Sample",
+  "name": "SK_fisherjeff_body_cold",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/coaches/meshes/fisherjeff_body_warm_mesh.fbx",
+  "dest": "/Game/MaddenRef/Coaches/Sample",
+  "name": "SK_fisherjeff_body_warm",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/coaches/meshes/fisherjeff_hair_mesh.fbx",
+  "dest": "/Game/MaddenRef/Coaches/Sample",
+  "name": "SK_fisherjeff_hair",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/coaches/meshes/fisherjeff_haircap_mesh.fbx",
+  "dest": "/Game/MaddenRef/Coaches/Sample",
+  "name": "SK_fisherjeff_haircap",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/coaches/meshes/fisherjeff_hat_mesh.fbx",
+  "dest": "/Game/MaddenRef/Coaches/Sample",
+  "name": "SK_fisherjeff_hat",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/coaches/meshes/fisherjeff_head_mesh.fbx",
+  "dest": "/Game/MaddenRef/Coaches/Sample",
+  "name": "SK_fisherjeff_head",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/coaches/meshes/fisherjeff_headset_mesh.fbx",
+  "dest": "/Game/MaddenRef/Coaches/Sample",
+  "name": "SK_fisherjeff_headset",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/coaches/meshes/mutscottcole_body_cold_mesh.fbx",
+  "dest": "/Game/MaddenRef/Coaches/Sample",
+  "name": "SK_mutscottcole_body_cold",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/coaches/meshes/mutscottcole_body_warm_mesh.fbx",
+  "dest": "/Game/MaddenRef/Coaches/Sample",
+  "name": "SK_mutscottcole_body_warm",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/coaches/meshes/mutscottcole_head_mesh.fbx",
+  "dest": "/Game/MaddenRef/Coaches/Sample",
+  "name": "SK_mutscottcole_head",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/coaches/meshes/mutscottcole_headset_mesh.fbx",
+  "dest": "/Game/MaddenRef/Coaches/Sample",
+  "name": "SK_mutscottcole_headset",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/coaches/meshes/vrabelmike_c_pro_body_cold_mesh.fbx",
+  "dest": "/Game/MaddenRef/Coaches/Sample",
+  "name": "SK_vrabelmike_c_pro_body_cold",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/coaches/meshes/vrabelmike_c_pro_body_warm_mesh.fbx",
+  "dest": "/Game/MaddenRef/Coaches/Sample",
+  "name": "SK_vrabelmike_c_pro_body_warm",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/coaches/meshes/vrabelmike_c_pro_hair_mesh.fbx",
+  "dest": "/Game/MaddenRef/Coaches/Sample",
+  "name": "SK_vrabelmike_c_pro_hair",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/coaches/meshes/vrabelmike_c_pro_haircap_mesh.fbx",
+  "dest": "/Game/MaddenRef/Coaches/Sample",
+  "name": "SK_vrabelmike_c_pro_haircap",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/coaches/meshes/vrabelmike_c_pro_head_mesh.fbx",
+  "dest": "/Game/MaddenRef/Coaches/Sample",
+  "name": "SK_vrabelmike_c_pro_head",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/coaches/meshes/vrabelmike_c_pro_headset_mesh.fbx",
+  "dest": "/Game/MaddenRef/Coaches/Sample",
+  "name": "SK_vrabelmike_c_pro_headset",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures/coachhead_3_h_b_20_hair_color.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_coachhead_3_h_b_20_hair_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures/fisherjeff_hair_color.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_fisherjeff_hair_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures/staff2_pants_khakiblack_b_rsm.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_staff2_pants_khakiblack_b_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures/staff2_pants_khakiblack_b_color.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_staff2_pants_khakiblack_b_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures_ue/staff2_pants_khakiblack_b_normal_ue.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_staff2_pants_khakiblack_b_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures/staff2_polo_elite_b_rsm.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_staff2_polo_elite_b_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures/staff2_polo_elite_b_color.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_staff2_polo_elite_b_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures_ue/staff2_polo_elite_b_normal_ue.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_staff2_polo_elite_b_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures/staff2_sweatshirt_basic_b_rsm.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_staff2_sweatshirt_basic_b_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures/staff2_sweatshirt_basic_b_color.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_staff2_sweatshirt_basic_b_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures_ue/staff2_sweatshirt_basic_b_normal_ue.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_staff2_sweatshirt_basic_b_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures/4_m_g_01_head_color.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_4_m_g_01_head_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures_ue/4_m_g_01_head_normal_ue.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_4_m_g_01_head_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures/coachhead_1_h_n_20_head_color.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_coachhead_1_h_n_20_head_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures_ue/coachhead_1_h_n_20_head_normal_ue.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_coachhead_1_h_n_20_head_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures/coachhead_3_h_bd_01_head_color.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_coachhead_3_h_bd_01_head_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures_ue/coachhead_3_h_bd_01_head_normal_ue.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_coachhead_3_h_bd_01_head_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures/coachhead_3_h_b_20_head_color.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_coachhead_3_h_b_20_head_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures_ue/coachhead_3_h_b_20_head_normal_ue.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_coachhead_3_h_b_20_head_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures/coachhead_7_h_n_30_head_color.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_coachhead_7_h_n_30_head_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures_ue/coachhead_7_h_n_30_head_normal_ue.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_coachhead_7_h_n_30_head_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures/fisherjeff_cold_lowerbody_rsm.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_fisherjeff_cold_lowerbody_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures/fisherjeff_cold_lowerbody_color.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_fisherjeff_cold_lowerbody_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures_ue/fisherjeff_cold_lowerbody_normal_ue.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_fisherjeff_cold_lowerbody_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures/fisherjeff_cold_upperbody_rsm.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_fisherjeff_cold_upperbody_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures/fisherjeff_cold_upperbody_color.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_fisherjeff_cold_upperbody_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures_ue/fisherjeff_cold_upperbody_normal_ue.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_fisherjeff_cold_upperbody_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures/fisherjeff_head_color.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_fisherjeff_head_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures_ue/fisherjeff_head_normal_ue.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_fisherjeff_head_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures/fisherjeff_warm_lowerbody_rsm.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_fisherjeff_warm_lowerbody_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures/fisherjeff_warm_lowerbody_color.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_fisherjeff_warm_lowerbody_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures_ue/fisherjeff_warm_lowerbody_normal_ue.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_fisherjeff_warm_lowerbody_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures/fisherjeff_warm_upperbody_rsm.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_fisherjeff_warm_upperbody_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures/fisherjeff_warm_upperbody_color.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_fisherjeff_warm_upperbody_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures_ue/fisherjeff_warm_upperbody_normal_ue.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_fisherjeff_warm_upperbody_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures/mutscottcole_head_color.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_mutscottcole_head_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures_ue/mutscottcole_head_normal_ue.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_mutscottcole_head_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures/vrabelmike_c_pro_cold_lowerbody_rsm.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_vrabelmike_c_pro_cold_lowerbody_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures/vrabelmike_c_pro_cold_lowerbody_color.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_vrabelmike_c_pro_cold_lowerbody_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures_ue/vrabelmike_c_pro_cold_lowerbody_normal_ue.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_vrabelmike_c_pro_cold_lowerbody_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures/vrabelmike_c_pro_cold_upperbody_rsm.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_vrabelmike_c_pro_cold_upperbody_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures/vrabelmike_c_pro_cold_upperbody_color.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_vrabelmike_c_pro_cold_upperbody_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures_ue/vrabelmike_c_pro_cold_upperbody_normal_ue.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_vrabelmike_c_pro_cold_upperbody_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures/vrabelmike_c_pro_hair_color.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_vrabelmike_c_pro_hair_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures/vrabelmike_c_pro_head_color.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_vrabelmike_c_pro_head_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures_ue/vrabelmike_c_pro_head_normal_ue.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_vrabelmike_c_pro_head_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures/vrabelmike_c_pro_warm_lowerbody_rsm.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_vrabelmike_c_pro_warm_lowerbody_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures/vrabelmike_c_pro_warm_lowerbody_color.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_vrabelmike_c_pro_warm_lowerbody_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures_ue/vrabelmike_c_pro_warm_lowerbody_normal_ue.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_vrabelmike_c_pro_warm_lowerbody_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures/vrabelmike_c_pro_warm_upperbody_rsm.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_vrabelmike_c_pro_warm_upperbody_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures/vrabelmike_c_pro_warm_upperbody_color.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_vrabelmike_c_pro_warm_upperbody_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures_ue/vrabelmike_c_pro_warm_upperbody_normal_ue.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_vrabelmike_c_pro_warm_upperbody_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures/coachballcap_rsm.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_coachballcap_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures/coachballcap_color.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_coachballcap_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures_ue/coachballcap_normal_ue.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_coachballcap_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures/coachheadset_rsm.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_coachheadset_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures/coachheadset_color.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_coachheadset_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures_ue/coachheadset_normal_ue.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_coachheadset_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures/coachheadset_port_rsm.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_coachheadset_port_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures/coachheadset_port_color.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_coachheadset_port_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures_ue/coachheadset_port_normal_ue.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_coachheadset_port_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures/eye_10_1_color.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_eye_10_1_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures/eye_6_1_color.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_eye_6_1_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures/eyelashes_m19.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_eyelashes_m19"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures/arm_rsm_skintone2.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_arm_rsm_skintone2",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures_ue/arm_normal_ue.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_arm_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures/arm_skintone1.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_arm_skintone1"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures/arm_skintone2.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_arm_skintone2"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures/commonrsm.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_commonrsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures_ue/shoe_low_nikefreetrainershoes5v6_norm_ue.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_shoe_low_nikefreetrainershoes5v6_norm",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures/shoe_low_nikefreetrainershoes5v6_rsm.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_shoe_low_nikefreetrainershoes5v6_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/coaches/textures/shoe_low_nikefreetrainershoes5v6_white_col.png",
+  "dest": "/Game/MaddenRef/Coaches/Sample/Textures",
+  "name": "T_shoe_low_nikefreetrainershoes5v6_white_col"
+ }
+]

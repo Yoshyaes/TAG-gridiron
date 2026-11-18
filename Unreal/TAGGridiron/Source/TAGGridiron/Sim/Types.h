@@ -10,11 +10,16 @@
 #pragma once
 
 #include <algorithm>
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <vector>
 
 namespace tag {
+
+// (Abilities.h: the Superstar / X-Factor catalog and grades; declared here so a Player can carry them)
+enum class AbilityId : uint8_t;
+enum class StarGrade : uint8_t;
 
 enum class Pos { QB, RB, FB, WR, TE, OT, OG, C, DE, DT, LB, CB, S, K, P };
 
@@ -97,6 +102,13 @@ struct Player {
   /** 0 = fresh, 1 = exhausted. Persisted across plays within a game. */
   double fatigue = 0;
   double injuredWeeks = 0;
+  /** Was on the field for the last snap (substitution hysteresis: the man in the game stays in). */
+  bool onFieldLast = false;
+  /** His grade against the league at his position (Abilities.h: Star / Superstar / X-Factor), and his loadout: the
+   *  Superstar abilities he has equipped and his X-Factor (AbilityId::None = none). */
+  StarGrade grade{};
+  std::vector<AbilityId> abilities;
+  AbilityId xFactor{};
 };
 
 struct TeamColors {
@@ -115,12 +127,18 @@ struct Team {
   std::string division;
   /** Owning storage; Player addresses are stable for the Team's lifetime. */
   std::vector<std::unique_ptr<Player>> roster;
+  /** Garbage time: well ahead late, the starters at QB/RB/WR/TE sit (set by Game before each play). */
+  bool pullStarters = false;
   /** Offensive identity 0..1 (0 = run heavy, 1 = air raid). Drives CPU play calling. */
   double passLean = 0.5;
   /** Aggressiveness on 4th downs 0..1. */
   double aggression = 0.5;
   /** Defensive blitz tendency 0..1 */
   double blitzLean = 0.28;
+  /** The playbooks: an offensive scheme ("West Coast", "Spread", ...) and a defensive one ("4-3 Cover 3", "3-4
+   *  Multiple", ...), from Playbook.h OFF_SCHEMES / DEF_SCHEMES; the team's own book is built from them (offBookFor). */
+  std::string offScheme;
+  std::string defScheme;
 
   bool hasPlayer(const Player* p) const {
     for (const auto& q : roster)

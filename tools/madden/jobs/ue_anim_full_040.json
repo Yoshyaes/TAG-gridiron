@@ -1,0 +1,674 @@
+[
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Brkn_Sack_from_90_D7_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Brkn_Sack_from_90_D7_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Brkn_Sack_from_90_D7_v1__P03.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Brkn_Sack_from_90_D7_v1__P03",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Brkn_Sack_from_90_D7_v2__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Brkn_Sack_from_90_D7_v2__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Brkn_Sack_from_90_D7_v2__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Brkn_Sack_from_90_D7_v2__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Brkn_Sack_from_90_D7_v2__P03.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Brkn_Sack_from_90_D7_v2__P03",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Brkn_Sack_from_90_D8_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Brkn_Sack_from_90_D8_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Brkn_Sack_from_90_D8_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Brkn_Sack_from_90_D8_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Brkn_Sack_from_90_D8_v1__P03.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Brkn_Sack_from_90_D8_v1__P03",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Brkn_Sack_from_90_D8_v2__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Brkn_Sack_from_90_D8_v2__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Brkn_Sack_from_90_D8_v2__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Brkn_Sack_from_90_D8_v2__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Brkn_Sack_from_90_D8_v2__P03.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Brkn_Sack_from_90_D8_v2__P03",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Brkn_Sack_from_HeadsUp_D1_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Brkn_Sack_from_HeadsUp_D1_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Brkn_Sack_from_HeadsUp_D1_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Brkn_Sack_from_HeadsUp_D1_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Brkn_Sack_from_HeadsUp_D1_v1__P03.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Brkn_Sack_from_HeadsUp_D1_v1__P03",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Brkn_Sack_from_HeadsUp_D1_v2__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Brkn_Sack_from_HeadsUp_D1_v2__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Brkn_Sack_from_HeadsUp_D1_v2__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Brkn_Sack_from_HeadsUp_D1_v2__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Brkn_Sack_from_HeadsUp_D1_v2__P03.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Brkn_Sack_from_HeadsUp_D1_v2__P03",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Brkn_Sack_from_HeadsUp_D1_v3__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Brkn_Sack_from_HeadsUp_D1_v3__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Brkn_Sack_from_HeadsUp_D1_v3__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Brkn_Sack_from_HeadsUp_D1_v3__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Brkn_Sack_from_HeadsUp_D1_v3__P03.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Brkn_Sack_from_HeadsUp_D1_v3__P03",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Brkn_Sack_from_HeadsUp_D1_v4__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Brkn_Sack_from_HeadsUp_D1_v4__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Brkn_Sack_from_HeadsUp_D1_v4__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Brkn_Sack_from_HeadsUp_D1_v4__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Brkn_Sack_from_HeadsUp_D1_v4__P03.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Brkn_Sack_from_HeadsUp_D1_v4__P03",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Brkn_Sack_from_HeadsUp_D5_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Brkn_Sack_from_HeadsUp_D5_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Brkn_Sack_from_HeadsUp_D5_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Brkn_Sack_from_HeadsUp_D5_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Brkn_Sack_from_HeadsUp_D5_v1__P03.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Brkn_Sack_from_HeadsUp_D5_v1__P03",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Brkn_Sack_from_HeadsUp_D5_v2__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Brkn_Sack_from_HeadsUp_D5_v2__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Brkn_Sack_from_HeadsUp_D5_v2__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Brkn_Sack_from_HeadsUp_D5_v2__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Brkn_Sack_from_HeadsUp_D5_v2__P03.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Brkn_Sack_from_HeadsUp_D5_v2__P03",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Brkn_Sack_from_HeadsUp_D5_v3__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Brkn_Sack_from_HeadsUp_D5_v3__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Brkn_Sack_from_HeadsUp_D5_v3__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Brkn_Sack_from_HeadsUp_D5_v3__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Brkn_Sack_from_HeadsUp_D5_v3__P03.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Brkn_Sack_from_HeadsUp_D5_v3__P03",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Brkn_Sack_from_HeadsUp_D6_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Brkn_Sack_from_HeadsUp_D6_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Brkn_Sack_from_HeadsUp_D6_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Brkn_Sack_from_HeadsUp_D6_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Brkn_Sack_from_HeadsUp_D6_v1__P03.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Brkn_Sack_from_HeadsUp_D6_v1__P03",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Brkn_Sack_from_HeadsUp_D6_v2__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Brkn_Sack_from_HeadsUp_D6_v2__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Brkn_Sack_from_HeadsUp_D6_v2__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Brkn_Sack_from_HeadsUp_D6_v2__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Brkn_Sack_from_HeadsUp_D6_v2__P03.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Brkn_Sack_from_HeadsUp_D6_v2__P03",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Brkn_Sack_from_HeadsUp_D6_v3__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Brkn_Sack_from_HeadsUp_D6_v3__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Brkn_Sack_from_HeadsUp_D6_v3__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Brkn_Sack_from_HeadsUp_D6_v3__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Brkn_Sack_from_HeadsUp_D6_v3__P03.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Brkn_Sack_from_HeadsUp_D6_v3__P03",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Brkn_Sack_from_HeadsUp_D7_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Brkn_Sack_from_HeadsUp_D7_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Brkn_Sack_from_HeadsUp_D7_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Brkn_Sack_from_HeadsUp_D7_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Brkn_Sack_from_HeadsUp_D7_v1__P03.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Brkn_Sack_from_HeadsUp_D7_v1__P03",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Brkn_Sack_from_HeadsUp_D7_v2__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Brkn_Sack_from_HeadsUp_D7_v2__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Brkn_Sack_from_HeadsUp_D7_v2__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Brkn_Sack_from_HeadsUp_D7_v2__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Brkn_Sack_from_HeadsUp_D7_v2__P03.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Brkn_Sack_from_HeadsUp_D7_v2__P03",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Brkn_Sack_from_HeadsUp_D8_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Brkn_Sack_from_HeadsUp_D8_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Brkn_Sack_from_HeadsUp_D8_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Brkn_Sack_from_HeadsUp_D8_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Brkn_Sack_from_HeadsUp_D8_v1__P03.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Brkn_Sack_from_HeadsUp_D8_v1__P03",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Sack_from_90_D1_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Sack_from_90_D1_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Sack_from_90_D1_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Sack_from_90_D1_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Sack_from_90_D1_v1__P03.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Sack_from_90_D1_v1__P03",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Sack_from_90_D1_v2__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Sack_from_90_D1_v2__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Sack_from_90_D1_v2__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Sack_from_90_D1_v2__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Sack_from_90_D1_v2__P03.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Sack_from_90_D1_v2__P03",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Sack_from_90_D5_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Sack_from_90_D5_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Sack_from_90_D5_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Sack_from_90_D5_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Sack_from_90_D5_v1__P03.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Sack_from_90_D5_v1__P03",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Sack_from_90_D5_v2__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Sack_from_90_D5_v2__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Sack_from_90_D5_v2__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Sack_from_90_D5_v2__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Sack_from_90_D5_v2__P03.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Sack_from_90_D5_v2__P03",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Sack_from_90_D6_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Sack_from_90_D6_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Sack_from_90_D6_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Sack_from_90_D6_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Sack_from_90_D6_v1__P03.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Sack_from_90_D6_v1__P03",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Sack_from_90_D6_v2__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Sack_from_90_D6_v2__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Sack_from_90_D6_v2__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Sack_from_90_D6_v2__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Sack_from_90_D6_v2__P03.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Sack_from_90_D6_v2__P03",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Sack_from_90_D7_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Sack_from_90_D7_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Sack_from_90_D7_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Sack_from_90_D7_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Sack_from_90_D7_v1__P03.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Sack_from_90_D7_v1__P03",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Sack_from_90_D7_v2__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Sack_from_90_D7_v2__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Sack_from_90_D7_v2__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Sack_from_90_D7_v2__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Sack_from_90_D7_v2__P03.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Sack_from_90_D7_v2__P03",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Sack_from_90_D8_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Sack_from_90_D8_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Sack_from_90_D8_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Sack_from_90_D8_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Sack_from_90_D8_v1__P03.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Sack_from_90_D8_v1__P03",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Sack_from_90_D8_v2__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Sack_from_90_D8_v2__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Sack_from_90_D8_v2__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Sack_from_90_D8_v2__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Sack_from_90_D8_v2__P03.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Sack_from_90_D8_v2__P03",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Sack_from_90_WhistleBlow_D5_v1__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Sack_from_90_WhistleBlow_D5_v1__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Sack_from_90_WhistleBlow_D5_v1__P02.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Sack_from_90_WhistleBlow_D5_v1__P02",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Sack_from_90_WhistleBlow_D5_v1__P03.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Sack_from_90_WhistleBlow_D5_v1__P03",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ },
+ {
+  "kind": "anim",
+  "file": "{REPO}/extracted/animation/full/c040/PassBlock_Reach_Sack_from_90_WhistleBlow_D8_v2__P01.fbx",
+  "dest": "/Game/MaddenRef/Animations/Full/C040",
+  "name": "A_PassBlock_Reach_Sack_from_90_WhistleBlow_D8_v2__P01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+  "fps": 60.0
+ }
+]

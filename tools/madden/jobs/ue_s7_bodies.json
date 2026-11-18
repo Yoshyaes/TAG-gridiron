@@ -1,0 +1,174 @@
+[
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/bodies/meshes/fullarms_d_mesh.fbx",
+  "dest": "/Game/MaddenRef/Skeleton",
+  "name": "MaddenFB_Hero",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/bodies/meshes/fullarms_d_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Bodies",
+  "name": "SK_fullarms_d",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/bodies/meshes/fullarms_h_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Bodies",
+  "name": "SK_fullarms_h",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/bodies/meshes/fullarms_m_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Bodies",
+  "name": "SK_fullarms_m",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/bodies/meshes/fullarms_t_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Bodies",
+  "name": "SK_fullarms_t",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/bodies/meshes/legs_d_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Bodies",
+  "name": "SK_legs_d",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/bodies/meshes/legs_h_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Bodies",
+  "name": "SK_legs_h",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/bodies/meshes/legs_m_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Bodies",
+  "name": "SK_legs_m",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/bodies/meshes/legs_t_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Bodies",
+  "name": "SK_legs_t",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/bodies/meshes/nohands_d_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Bodies",
+  "name": "SK_nohands_d",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/bodies/meshes/nohands_h_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Bodies",
+  "name": "SK_nohands_h",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/bodies/meshes/nohands_m_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Bodies",
+  "name": "SK_nohands_m",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/bodies/meshes/nohands_t_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Bodies",
+  "name": "SK_nohands_t",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/bodies/meshes/oldfallback_fullarms_d_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Bodies",
+  "name": "SK_oldfallback_fullarms_d",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/bodies/meshes/oldfallback_fullarms_h_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Bodies",
+  "name": "SK_oldfallback_fullarms_h",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/bodies/meshes/oldfallback_fullarms_m_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Bodies",
+  "name": "SK_oldfallback_fullarms_m",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/bodies/meshes/oldfallback_fullarms_t_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Bodies",
+  "name": "SK_oldfallback_fullarms_t",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/bodies/textures/ls_common_legs_rsm.png",
+  "dest": "/Game/MaddenRef/Players/Bodies/Textures",
+  "name": "T_ls_common_legs_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/bodies/textures_ue/ls_common_legs_normal_ue.png",
+  "dest": "/Game/MaddenRef/Players/Bodies/Textures",
+  "name": "T_ls_common_legs_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/bodies/textures/genericpadless_legs_st1.png",
+  "dest": "/Game/MaddenRef/Players/Bodies/Textures",
+  "name": "T_genericpadless_legs_st1"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/bodies/textures/arm_rsm_skintone2.png",
+  "dest": "/Game/MaddenRef/Players/Bodies/Textures",
+  "name": "T_arm_rsm_skintone2",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/bodies/textures/arm_rsm_skintone6.png",
+  "dest": "/Game/MaddenRef/Players/Bodies/Textures",
+  "name": "T_arm_rsm_skintone6",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/bodies/textures_ue/arm_normal_ue.png",
+  "dest": "/Game/MaddenRef/Players/Bodies/Textures",
+  "name": "T_arm_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/bodies/textures/arm_skintone1.png",
+  "dest": "/Game/MaddenRef/Players/Bodies/Textures",
+  "name": "T_arm_skintone1"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/bodies/textures/arm_skintone6.png",
+  "dest": "/Game/MaddenRef/Players/Bodies/Textures",
+  "name": "T_arm_skintone6"
+ }
+]

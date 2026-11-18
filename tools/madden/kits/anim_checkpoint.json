@@ -1,0 +1,19 @@
+{
+ "name": "anim_checkpoint",
+ "kind": "anim",
+ "skip_main": true,
+ "out": "animation/checkpoint_c",
+ "ue_dir": "/Game/MaddenRef/Animations/Checkpoint",
+ "ue_skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+ "clips": [
+  "HB_Blocking_Idle_Loop__P01",
+  "MG_Loco_Run_Average__P01",
+  "2man_Catch_Def_In_Over_ShoveTackle__P01"
+ ],
+ "preview": {
+  "dressed": "/Game/MaddenRef/Players/Stage2",
+  "spacing": 300.0,
+  "per_row": 3,
+  "level": "AnimCheckpoint"
+ }
+}

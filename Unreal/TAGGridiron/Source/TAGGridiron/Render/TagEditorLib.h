@@ -6,6 +6,10 @@
 #include "TagEditorLib.generated.h"
 
 class UBlendSpace;
+class UPoseSearchDatabase;
+class UAnimationAsset;
+class UMetaHumanCollection;
+class UMetaHumanInstance;
 
 UCLASS()
 class TAGGRIDIRON_API UTagEditorLib : public UBlueprintFunctionLibrary
@@ -20,4 +24,36 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "TAG")
 	static bool ResampleBlendSpace(UBlendSpace* BlendSpace);
+
+	/** Names of the animations a PoseSearch database indexes (Tools/Art/mm_build_dbs.py). */
+	UFUNCTION(BlueprintCallable, Category = "TAG")
+	static TArray<FString> DatabaseAnimNames(UPoseSearchDatabase* Database);
+
+	/** Remove every database entry whose animation name contains Substring; returns how many were removed. */
+	UFUNCTION(BlueprintCallable, Category = "TAG")
+	static int32 DatabaseRemoveAnimsContaining(UPoseSearchDatabase* Database, const FString& Substring);
+
+	/** Append an animation (sequence or blend space) to a database with default sampling; false if already present. */
+	UFUNCTION(BlueprintCallable, Category = "TAG")
+	static bool DatabaseAddAnim(UPoseSearchDatabase* Database, UAnimationAsset* Anim);
+
+	/** The pack's locomotion captures are not loops: the search kept landing near a clip's end and had to jump again a
+	 *  few frames later (-TagMMWhy: half the early switches). Index each non-looping sequence whose name contains
+	 *  NameContains only up to TrimSeconds before its end (at least half the clip stays). Returns the entries trimmed. */
+	UFUNCTION(BlueprintCallable, Category = "TAG")
+	static int32 DatabaseTrimEnds(UPoseSearchDatabase* Database, const FString& NameContains, float TrimSeconds = 0.5f);
+
+	/** MetaHuman Crowd: point a collection's crowd editor pipeline at an animation config (the clips baked for
+	 *  distant instanced crowd members). Tools/Art/crowd_rebuild.py */
+	UFUNCTION(BlueprintCallable, Category = "TAG")
+	static bool CrowdSetAnimationConfig(UMetaHumanCollection* Collection, UObject* AnimationConfig);
+
+	/** Build a MetaHuman collection and wait for it (headless commandlets pump the engine until it completes or
+	 *  TimeoutSeconds passes). Returns true on success. */
+	UFUNCTION(BlueprintCallable, Category = "TAG")
+	static bool CrowdBuildCollection(UMetaHumanCollection* Collection, float TimeoutSeconds = 7200.f);
+
+	/** Point a MetaHuman instance at another collection (e.g. a TAG rebuild of the crowd sample's). */
+	UFUNCTION(BlueprintCallable, Category = "TAG")
+	static bool CrowdSetInstanceCollection(UMetaHumanInstance* Instance, UMetaHumanCollection* Collection);
 };

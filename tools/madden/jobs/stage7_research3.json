@@ -1,0 +1,20 @@
+[
+ {
+  "id": "p1",
+  "op": "ebx",
+  "asset": "content/worlds/materials/concrete/concrete_lightClean_2mx2m",
+  "out": "{REPO}/extracted/stage7/research/preset_concrete.ebx.json"
+ },
+ {
+  "id": "p2",
+  "op": "ebx",
+  "asset": "content/worlds/materials/teamSpecific/niners/nin_suites_Glass",
+  "out": "{REPO}/extracted/stage7/research/preset_glass.ebx.json"
+ },
+ {
+  "id": "p3",
+  "op": "ebx",
+  "asset": "content/common/materialPresets/worlds_default_NSM_preset",
+  "out": "{REPO}/extracted/stage7/research/preset_nsm.ebx.json"
+ }
+]

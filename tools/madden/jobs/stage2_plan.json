@@ -1,0 +1,197 @@
+[
+ {
+  "id": "mvdb_fullarms_d_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/bodies/fullarms_d_launch_playerarms_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage2/mvdb/content__characters__player__bodies__fullarms_d_launch_playerarms_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/bodies/fullarms_d_mesh"
+  }
+ },
+ {
+  "id": "mi_fullarms_d_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/bodies/fullarms_d_mesh",
+  "out": "{REPO}/extracted/stage2/meshinfo/fullarms_d_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_legs_d_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/bodies/legs_d_launch_playerarms_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage2/mvdb/content__characters__player__bodies__legs_d_launch_playerarms_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/bodies/legs_d_mesh"
+  }
+ },
+ {
+  "id": "mi_legs_d_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/bodies/legs_d_mesh",
+  "out": "{REPO}/extracted/stage2/meshinfo/legs_d_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_jersey_d_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/torsoapparel/jersey/jersey_d_launch_playergear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage2/mvdb/content__characters__player__parts__torsoapparel__jersey__jersey_d_launch_playergear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/torsoapparel/jersey/jersey_d_mesh"
+  }
+ },
+ {
+  "id": "mi_jersey_d_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/torsoapparel/jersey/jersey_d_mesh",
+  "out": "{REPO}/extracted/stage2/meshinfo/jersey_d_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_pants_d_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/legsapparel/pants/pants_d_launch_playergear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage2/mvdb/content__characters__player__parts__legsapparel__pants__pants_d_launch_playergear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/legsapparel/pants/pants_d_mesh"
+  }
+ },
+ {
+  "id": "mi_pants_d_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/legsapparel/pants/pants_d_mesh",
+  "out": "{REPO}/extracted/stage2/meshinfo/pants_d_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_socks_mid_d_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/legsapparel/socks_mid/socks_mid_d_launch_playergear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage2/mvdb/content__characters__player__parts__legsapparel__socks_mid__socks_mid_d_launch_playergear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/legsapparel/socks_mid/socks_mid_d_mesh"
+  }
+ },
+ {
+  "id": "mi_socks_mid_d_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/legsapparel/socks_mid/socks_mid_d_mesh",
+  "out": "{REPO}/extracted/stage2/meshinfo/socks_mid_d_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_sleeve_tight_d_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/torsoapparel/sleeve_tight/sleeve_tight_d_launch_playergear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage2/mvdb/content__characters__player__parts__torsoapparel__sleeve_tight__sleeve_tight_d_launch_playergear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/torsoapparel/sleeve_tight/sleeve_tight_d_mesh"
+  }
+ },
+ {
+  "id": "mi_sleeve_tight_d_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/torsoapparel/sleeve_tight/sleeve_tight_d_mesh",
+  "out": "{REPO}/extracted/stage2/meshinfo/sleeve_tight_d_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_shoe_low_nikealphamenaceelite99clubr_d_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/footwear/shoe_low_nikealphamenaceelite99club/shoe_low_nikealphamenaceelite99clubr_d_playergear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage2/mvdb/content__characters__player__parts__footwear__shoe_low_nikealphamenaceelite99club__shoe_low_nikealphamenaceelite99clubr_d_playergear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/footwear/shoe_low_nikealphamenaceelite99club/shoe_low_nikealphamenaceelite99clubr_d_mesh"
+  }
+ },
+ {
+  "id": "mi_shoe_low_nikealphamenaceelite99clubr_d_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/footwear/shoe_low_nikealphamenaceelite99club/shoe_low_nikealphamenaceelite99clubr_d_mesh",
+  "out": "{REPO}/extracted/stage2/meshinfo/shoe_low_nikealphamenaceelite99clubr_d_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_shoe_low_nikealphamenaceelite99clubl_d_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/footwear/shoe_low_nikealphamenaceelite99club/shoe_low_nikealphamenaceelite99clubl_d_playergear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage2/mvdb/content__characters__player__parts__footwear__shoe_low_nikealphamenaceelite99club__shoe_low_nikealphamenaceelite99clubl_d_playergear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/footwear/shoe_low_nikealphamenaceelite99club/shoe_low_nikealphamenaceelite99clubl_d_mesh"
+  }
+ },
+ {
+  "id": "mi_shoe_low_nikealphamenaceelite99clubl_d_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/footwear/shoe_low_nikealphamenaceelite99club/shoe_low_nikealphamenaceelite99clubl_d_mesh",
+  "out": "{REPO}/extracted/stage2/meshinfo/shoe_low_nikealphamenaceelite99clubl_d_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_glover_d_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/armgear/glover/glover_d_launch_playerarms_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage2/mvdb/content__characters__player__parts__armgear__glover__glover_d_launch_playerarms_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/armgear/glover/glover_d_mesh"
+  }
+ },
+ {
+  "id": "mi_glover_d_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/armgear/glover/glover_d_mesh",
+  "out": "{REPO}/extracted/stage2/meshinfo/glover_d_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_glovel_d_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/armgear/glovel/glovel_d_launch_playerarms_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage2/mvdb/content__characters__player__parts__armgear__glovel__glovel_d_launch_playerarms_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/armgear/glovel/glovel_d_mesh"
+  }
+ },
+ {
+  "id": "mi_glovel_d_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/armgear/glovel/glovel_d_mesh",
+  "out": "{REPO}/extracted/stage2/meshinfo/glovel_d_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_faulkmarshall_11413_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/players/f/faulkmarshall_11413/faulkmarshall_11413_playerhead_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage2/mvdb/content__characters__player__players__f__faulkmarshall_11413__faulkmarshall_11413_playerhead_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/players/f/faulkmarshall_11413/faulkmarshall_11413_mesh"
+  }
+ },
+ {
+  "id": "mi_faulkmarshall_11413_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/players/f/faulkmarshall_11413/faulkmarshall_11413_mesh",
+  "out": "{REPO}/extracted/stage2/meshinfo/faulkmarshall_11413_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_shell_xenith_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/xenith/helmet_shell_xenith_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage2/mvdb/content__characters__player__parts__helmets__xenith__helmet_shell_xenith_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/xenith/helmet_shell_xenith_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_shell_xenith_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/xenith/helmet_shell_xenith_mesh",
+  "out": "{REPO}/extracted/stage2/meshinfo/helmet_shell_xenith_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_helmet_facemask_xenithprism_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/parts/helmets/xenith/facemasks/helmet_facemask_xenithprism_launch_playerheadgear_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage2/mvdb/content__characters__player__parts__helmets__xenith__facemasks__helmet_facemask_xenithprism_launch_playerheadgear_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/player/parts/helmets/xenith/facemasks/helmet_facemask_xenithprism_mesh"
+  }
+ },
+ {
+  "id": "mi_helmet_facemask_xenithprism_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/player/parts/helmets/xenith/facemasks/helmet_facemask_xenithprism_mesh",
+  "out": "{REPO}/extracted/stage2/meshinfo/helmet_facemask_xenithprism_mesh.meshinfo.json"
+ }
+]

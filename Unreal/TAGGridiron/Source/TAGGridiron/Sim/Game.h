@@ -27,6 +27,7 @@
 #pragma once
 
 #include <cstdint>
+#include <functional>
 #include <memory>
 #include <optional>
 #include <string>
@@ -78,6 +79,9 @@ struct KickFlight {
   double hang = 2;
   double height = 10;
   std::optional<bool> good;
+  // a played place kick: the launch (yd/s) the ball is flown with, and where it is across the field at toX
+  double vx = 0, vz = 0;
+  std::optional<double> endY;
 };
 
 struct SpecialResult {
@@ -90,6 +94,8 @@ struct GameOptions {
   std::optional<double> quarterLen;
   std::optional<Weather> weather;
   std::optional<TeamKey> userTeam;
+  /** Superstar / X-Factor abilities in this game (unset: on; Tune::abilities = 0 turns them off everywhere). */
+  std::optional<bool> abilities;
 };
 
 enum class PenaltySpot { Los, End, Spot };
@@ -154,6 +160,15 @@ class Game {
   /** extra-time flag for untimed down */
   bool untimed = false;
   bool safetyKick = false;
+  /** Superstar / X-Factor abilities: on for this game, and every X-Factor man's zone (Abilities.h). The zone events
+   *  (in / knocked out) pile up in abil.events for the presentation to take (the last 32 are kept). */
+  bool abilitiesOn = true;
+  AbilityState abil;
+  bool abilOn() const;
+  /** What the play's sim needs to know about abilities (PlayConfig::abil). */
+  AbilityCtx abilCtx() const;
+  /** A kicker / punter's ratings for this kick, his abilities in (kickRatings). */
+  Ratings kickR(const Player& k, TeamKey kt, bool punt) const;
 
   Team& teamOf(TeamKey k) const { return k == TeamKey::Home ? *home : *away; }
   Team& offense() const { return teamOf(poss); }
@@ -173,6 +188,11 @@ class Game {
   Tempo tempo() const;
   /** Called right before each snap (scrimmage). Applies runoff. Returns false if the period ended. */
   bool preSnap();
+  /** A human game: the offense's real seconds between the plays replace the runoff preSnap() drew. sec > 0 takes more
+   *  off a running clock (the two-minute warning still stops it), sec < 0 gives back what the snap came before. */
+  void adjustBetweenPlays(double sec);
+  /** The play clock ran out on the offense (a human that did not snap): 5 yards, the down again. */
+  void delayOfGame();
 
   // ---- CPU coordinators
   bool shouldKneel() const;
@@ -186,9 +206,17 @@ class Game {
   void applyPresnap(const Penalty& pen);
 
   // ---- scrimmage
-  std::unique_ptr<PlaySim> makePlay(const OffPlay& offPlay, const DefCall& defCall, std::optional<Side> userSide = std::nullopt);
+  /** flip: the formation's strength (an audible keeps it, flip play changes it); unset = to the field side. */
+  std::unique_ptr<PlaySim> makePlay(const OffPlay& offPlay, const DefCall& defCall, std::optional<Side> userSide = std::nullopt,
+                                    std::optional<bool> flip = std::nullopt);
   /** Apply finished play. Returns (a copy of) the log line. */
   PlayLog finishPlay(PlaySim& sim);
+  /** Optional observer of every finished scrimmage play (headless realism metrics). */
+  std::function<void(const PlaySim&, const PlayResult&)> onPlayResult;
+  /** Optional observer handed to every scrimmage sim (called after each step). */
+  std::function<void(const PlaySim&)> onSimStep;
+  bool pullDecided_ = false;  // garbage-time substitutions, decided per possession
+  TeamKey pullPoss_ = TeamKey::Home;
   std::string describe(const PlayResult& res, const OffPlay& play, const PlaySim& sim) const;
 
   // ---- special teams
@@ -196,15 +224,46 @@ class Game {
   Player* punter(TeamKey k) const;
   /** Probability a kick of `dist` yards is good. Fit to 2020s NFL by distance. */
   double fgProb(double dist, const Player& k, TeamKey kt) const;
-  SpecialResult kickoff(bool onside = false);
-  SpecialResult punt();
+  struct PlaceKick {
+    KickFlight flight;
+    bool good = false, blocked = false, isShort = false;
+    double miss = 0;  // across the posts' plane, yd left (+) of centre
+  };
+  /** A place kick played out: leg and line drawn, the ball flown, good if it crosses over the bar between the uprights. */
+  PlaceKick placeKick(double fromX, double p, const Player& k, TeamKey kt, double blockP);
+  /** liveReturn: a returnable kick is not resolved here; it is left in pendingReturn for a live return play
+   *  (kickReturnSim / finishKickReturn). Touchbacks, fair catches, downed and onside kicks resolve as before. */
+  SpecialResult kickoff(bool onside = false, bool liveReturn = false);
+  SpecialResult punt(bool liveReturn = false);
+  struct PendingReturn {
+    KickReturnSpec spec;
+    std::string kickDesc;
+    bool punt = false;
+  };
+  std::optional<PendingReturn> pendingReturn;
+  /** A kick the user swung on the meter: power 0..1.15 (past 1 is the red: no farther, only wilder), aim in degrees
+   *  off straight down the field (+ = the kicking team's left), accuracy -1..1 off the meter's centre. Read and
+   *  cleared by the next kickoff / punt / field goal / extra point, which then play it instead of rolling one. */
+  struct UserKick {
+    double power = 1;
+    double aimDeg = 0;
+    double acc = 0;
+  };
+  std::optional<UserKick> userKick;
+  /** The live return play: recv / kick are the units on the field (recv[0] the returner, kick[0] the kicker). */
+  std::unique_ptr<PlaySim> kickReturnSim(const std::vector<Player*>& recv, const std::vector<Player*>& kick,
+                                         std::optional<Side> userSide = std::nullopt);
+  PlayLog finishKickReturn(PlaySim& sim);
   SpecialResult fieldGoal();
   /** Decide 2-point try per a standard chart (CPU). */
   bool goForTwo();
+  /** A flag on the return team during a return (block in the back, holding): 10 yd back from where it ended. */
+  bool returnFoul(TeamKey rt, double& spot, std::string& desc);
   /** PAT kick (33 yards). */
   SpecialResult extraPoint();
   /** Two-point try: a real scrimmage play from the 2. */
-  std::unique_ptr<PlaySim> twoPointSim(const OffPlay& offPlay, const DefCall& defCall, std::optional<Side> userSide = std::nullopt);
+  std::unique_ptr<PlaySim> twoPointSim(const OffPlay& offPlay, const DefCall& defCall, std::optional<Side> userSide = std::nullopt,
+                                       std::optional<bool> flip = std::nullopt);
   void finishTwoPoint(PlaySim& sim);
   const OffPlay* cpuTwoPointPlay();
 

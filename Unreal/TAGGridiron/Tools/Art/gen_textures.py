@@ -132,42 +132,104 @@ def field_lines(px_per_yd=48):
 
 
 def crowd(w=2048, h=1024):
-    """Rows of seated/standing fans. RGB = people, A = team-shirt mask (tinted in-engine)."""
-    img = Image.new("RGBA", (w, h), (18, 18, 22, 0))
+    """Rows of seated/standing fans. RGB = people, A = team-shirt mask (tinted in-engine).
+
+    Drawn as a crowd reads from across a stadium: mostly clothing (team shirts, jackets, hoodies), small heads with
+    hair or caps over them, shoulders and arms, dark seat gaps between people, standing fans overlapping the row
+    behind. (The first version gave every fan a big bare skin-tone head a quarter of a seat wide: from the field the
+    stands read as rows of orange discs behind every touchdown close-up, 16 Nov.)"""
+    img = Image.new("RGBA", (w, h), (14, 14, 17, 0))
     d = ImageDraw.Draw(img)
-    skins = [(141, 85, 36), (198, 134, 66), (224, 172, 105), (241, 194, 125), (92, 58, 30), (160, 102, 47)]
-    neutral = [(30, 30, 35), (210, 210, 210), (60, 70, 90), (120, 30, 30), (40, 40, 40), (150, 150, 150)]
+    skins = [(92, 60, 42), (120, 80, 56), (150, 104, 76), (176, 128, 98), (198, 152, 120), (70, 46, 34), (134, 92, 66)]
+    hair = [(18, 14, 12), (34, 24, 18), (52, 38, 26), (90, 70, 48), (24, 22, 22), (120, 100, 70)]
+    neutral = [(28, 28, 32), (196, 196, 198), (54, 62, 82), (110, 34, 36), (44, 44, 46), (138, 138, 142), (70, 84, 60),
+               (22, 30, 52), (160, 150, 130), (90, 60, 40)]
+    caps = [(20, 20, 24), (200, 200, 200), (30, 40, 80), (120, 30, 30)]
     rows = 16
     rh = h / rows
     for r in range(rows):
         y = (r + 1) * rh
+        # the seat row: a dark band the people sit in front of
+        d.rectangle([0, y - rh * 0.35, w, y + 2], fill=(20, 20, 24, 0))
         x = rng.uniform(0, 8)
         while x < w:
-            sw = rng.uniform(24, 36)
-            if rng.random() > 0.06:
-                team = rng.random() < 0.6
+            sw = rng.uniform(26, 34)
+            if rng.random() > 0.05:
+                team = rng.random() < 0.55
                 shirt = (255, 255, 255) if team else tuple(int(c) for c in neutral[rng.integers(0, len(neutral))])
                 a = 255 if team else 0
-                stand = rng.random() < 0.25
-                top = y - rh * (1.05 if stand else 0.85)
-                d.rounded_rectangle([x + 3, top + sw * 0.55, x + sw - 3, y + 2], radius=8, fill=shirt + (a,))
-                hr = sw * 0.24
+                stand = rng.random() < 0.3
+                top = y - rh * (1.25 if stand else 0.92)   # head top
                 cx = x + sw / 2 + rng.uniform(-2, 2)
+                hr = sw * rng.uniform(0.15, 0.18)          # head radius: a sixth of the seat, not a quarter
+                sh = top + hr * 2.3                        # shoulders
                 skin = tuple(int(c) for c in skins[rng.integers(0, len(skins))])
-                d.ellipse([cx - hr, top + sw * 0.1, cx + hr, top + sw * 0.1 + hr * 2.1], fill=skin + (0,))
-                if rng.random() < 0.3:
-                    d.ellipse([cx - hr * 1.05, top + sw * 0.05, cx + hr * 1.05, top + sw * 0.05 + hr], fill=(25, 20, 18, 0))
-                if rng.random() < 0.08:  # raised arms
-                    d.line([x + 4, top + sw * 0.6, x - 2, top - sw * 0.2], fill=skin + (0,), width=5)
-            x += sw + rng.uniform(-2, 4)
-        d.rectangle([0, y, w, y + 3], fill=(10, 10, 12, 0))
-    img = img.filter(ImageFilter.GaussianBlur(0.5))
+                # torso and shoulders (team shirt / own clothes), a touch darker at the bottom
+                d.rounded_rectangle([x + 2, sh, x + sw - 2, y + 2], radius=int(sw * 0.3), fill=shirt + (a,))
+                shade = tuple(int(c * 0.72) for c in shirt)
+                d.rectangle([x + 2, sh + (y - sh) * 0.6, x + sw - 2, y + 2], fill=shade + (a,))
+                # arms: down at the side, a few up (cheering) or across
+                if rng.random() < 0.1:
+                    side = -1 if rng.random() < 0.5 else 1
+                    ax = cx + side * sw * 0.42
+                    d.line([ax, sh + 3, ax + side * 3, top - hr * 1.2], fill=shirt + (a,), width=5)
+                    d.ellipse([ax + side * 3 - 3, top - hr * 1.2 - 3, ax + side * 3 + 3, top - hr * 1.2 + 3], fill=skin + (0,))
+                # neck and head
+                d.rectangle([cx - hr * 0.45, top + hr * 1.6, cx + hr * 0.45, sh + 2], fill=skin + (0,))
+                d.ellipse([cx - hr, top, cx + hr, top + hr * 2.1], fill=skin + (0,))
+                # hair or a cap over most heads
+                u = rng.random()
+                if u < 0.6:
+                    hc = tuple(int(c) for c in hair[rng.integers(0, len(hair))])
+                    d.chord([cx - hr * 1.05, top - hr * 0.1, cx + hr * 1.05, top + hr * 1.5], 180, 360, fill=hc + (0,))
+                elif u < 0.8:
+                    cc = (255, 255, 255) if rng.random() < 0.4 else tuple(int(c) for c in caps[rng.integers(0, len(caps))])
+                    ca = 255 if cc == (255, 255, 255) else 0
+                    d.chord([cx - hr * 1.1, top - hr * 0.15, cx + hr * 1.1, top + hr * 1.3], 180, 360, fill=cc + (ca,))
+                    d.rectangle([cx - hr * 0.2, top + hr * 0.55, cx + hr * 1.5, top + hr * 0.75], fill=cc + (ca,))
+            x += sw + rng.uniform(-1, 3)
+    img = img.filter(ImageFilter.GaussianBlur(0.6))
     # rows run along V so they follow the length of the stand mesh's top face
     img = img.transpose(Image.Transpose.ROTATE_90)
     img.save(os.path.join(OUT, "T_Crowd.png"))
 
 
+def turf_wear(px_per_yd=16):
+    """Wear mask over the full 120 x 53.33 yd field, same layout as T_FieldLines (x = length, y = width).
+    Natural grass in season: a beaten strip between the hashes where the lines set up (heaviest between the 20s),
+    scuffed patches at the snap spots, the goal-line stands inside the 5s and the kickoff spots, broken up by noise."""
+    W, H = int(120 * px_per_yd), int(160 / 3 * px_per_yd)
+    xs = (np.arange(W) + 0.5) / px_per_yd - 10.0          # field yards, 0 = goal line
+    ys = (np.arange(H) + 0.5) / px_per_yd                  # yards from one sideline
+    X, Y = np.meshgrid(xs, ys)
+    mid = 80.0 / 3                                          # center of the field's width
+    smooth = lambda a, b, v: np.clip((v - a) / (b - a), 0, 1) ** 2 * (3 - 2 * np.clip((v - a) / (b - a), 0, 1))
+    along = smooth(-2, 12, X) * smooth(-2, 12, 100 - X)
+    heavy = smooth(12, 30, X) * smooth(12, 30, 100 - X)
+    band = np.exp(-((Y - mid) / 4.2) ** 2)
+    m = band * (0.45 * along + 0.35 * heavy)
+    r = np.random.default_rng(77)
+    for _ in range(46):                                     # snap spots: the line of scrimmage moves up and down the field
+        cx, cy = r.uniform(4, 96), mid + r.normal(0, 1.3)
+        m += 0.55 * np.exp(-(((X - cx) / r.uniform(1.6, 3.2)) ** 2 + ((Y - cy) / r.uniform(1.8, 3.0)) ** 2))
+    for gx in (2.5, 97.5):                                  # goal-line stands
+        m += 0.6 * np.exp(-(((X - gx) / 3.0) ** 2 + ((Y - mid) / 5.0) ** 2))
+    for kx in (35.0, 65.0):                                 # kickoff tees
+        m += 0.5 * np.exp(-(((X - kx) / 0.9) ** 2 + ((Y - mid) / 0.9) ** 2))
+    # break it into turf and bare patches
+    n = tileable_noise(1024, 18, octaves=4, seed=5)
+    n = np.array(Image.fromarray((n * 255).astype(np.uint8)).resize((W, H), Image.BILINEAR), np.float32) / 255.0
+    n2 = tileable_noise(1024, 40, octaves=3, seed=9)
+    n2 = np.array(Image.fromarray((n2 * 255).astype(np.uint8)).resize((W, H), Image.BILINEAR), np.float32) / 255.0
+    w = np.clip(m * (0.15 + 1.2 * n ** 1.5) - 0.12 + (n2 - 0.5) * 0.45 * np.clip(m * 2, 0, 1), 0, 0.85) ** 1.3
+    Image.fromarray((w * 255).astype(np.uint8), "L").filter(ImageFilter.GaussianBlur(0.8)).save(os.path.join(OUT, "T_TurfWear.png"))
+
+
 if __name__ == "__main__":
+    if len(sys.argv) > 2 and sys.argv[2] == "wear":
+        turf_wear()
+        sys.exit(0)
+    turf_wear()
     grass()
     print("grass done")
     field_lines()

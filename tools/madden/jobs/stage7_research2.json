@@ -1,0 +1,14 @@
+[
+ {
+  "id": "e_st1",
+  "op": "ebx",
+  "asset": "content/worlds/components/stadiums/niners/background/niners_bgfacility_mesh",
+  "out": "{REPO}/extracted/stage7/research/stadium_mesh0.ebx.json"
+ },
+ {
+  "id": "e_st2",
+  "op": "ebx",
+  "asset": "content/worlds/components/stadiums/niners/background/niners_bgnis_cars_mesh",
+  "out": "{REPO}/extracted/stage7/research/stadium_mesh5.ebx.json"
+ }
+]

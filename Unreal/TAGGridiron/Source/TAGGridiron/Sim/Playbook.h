@@ -48,6 +48,9 @@ struct Formation {
   std::string personnel;
   double qbDepth = 0;  // yards behind LOS at snap (shotgun 5, pistol 4, under center 1)
   std::vector<FormationSlot> slots;
+  /** The play-call screen's group ("Shotgun", "Pistol", "Singleback", "I-Form", "Strong I", "Weak I", "Split Backs",
+   *  "Goal Line"); empty = derived from the id. */
+  std::string family;
 };
 
 // ---------------- Routes ----------------
@@ -83,6 +86,10 @@ struct OffPlay {
   std::optional<RunScheme> run;
   std::optional<double> dropDepth;  // extra drop yards for QB
   std::vector<std::string> tags;     // 'short', 'deep', 'quick', 'goalline', 'shortyard'
+  /** Generated from a concept (playbook.cpp): the schemes that run it, as two-letter codes ("WC SP AR ..."); empty =
+   *  every scheme. The hand-written plays are "stock" and in every book that has their formation. */
+  std::string styles;
+  bool stock = false;
 
   bool hasTag(const char* t) const {
     for (const auto& s : tags)
@@ -97,8 +104,13 @@ struct OffPlay {
 };
 
 // ---------------- Defense ----------------
-enum class Front { Base, Nickel, Dime, Goalline };
-enum class Coverage { C0, C1, C2, C3, C4, C2M, C3Fire };
+/** Base = 4-3 (four down linemen, three backers); Base34 = 3-4 (three down, two outside backers on the edge). */
+enum class Front { Base, Nickel, Dime, Goalline, Base34 };
+/** C2T = Tampa 2 (the Mike runs the middle hole); C6 = quarter-quarter-half (quarters to the left, cloud half right). */
+enum class Coverage { C0, C1, C2, C3, C4, C2M, C3Fire, C2T, C6 };
+/** How the front lines up inside its set: Over / Under shift the line a gap toward / away from the strength, Wide 9
+ *  splits the ends, Bear covers the guards and center. */
+enum class FrontAlign { Normal, Over, Under, Wide9, Bear };
 
 struct DefCall {
   std::string id;
@@ -108,12 +120,17 @@ struct DefCall {
   /** defenders (by role) sent on the rush in addition to the 4 DL */
   std::vector<std::string> blitz;
   std::vector<std::string> tags;
+  /** The set it is called from on the play-call screen ("4-3 Over", "Nickel Normal"); empty = the front's name. */
+  std::string set;
+  FrontAlign align = FrontAlign::Normal;
 
   bool hasTag(const char* t) const {
     for (const auto& s : tags)
       if (s == t) return true;
     return false;
   }
+  /** Men rushing at the snap: the down linemen and the blitz. */
+  int rushers() const;
 };
 
 struct FrontSlot {
@@ -136,5 +153,46 @@ const RouteDef* routeByName(const std::string& name);
 const char* playTypeName(PlayType t);
 const char* frontName(Front f);
 const char* coverageName(Coverage c);
+/** The formation's play-call group (Formation::family, or one derived from its id). */
+std::string formationFamily(const Formation& f);
+/** The play-call group of a front: "4-3", "3-4", "Nickel", "Dime", "Goal Line". */
+const char* frontFamily(Front f);
+std::string defSet(const DefCall& d);
+
+// ---------------- Playbooks ----------------
+/** A team's offensive playbook: its formations in screen order and every play in them (pointers into OFF_PLAYS),
+ *  plus the scheme it is built on. */
+struct OffBook {
+  std::string id;      // team abbreviation, or the scheme id for a generic book
+  std::string name;    // "Austin Outlaws"
+  std::string scheme;  // "West Coast", "Spread", "Air Raid", ...
+  std::vector<std::string> formations;
+  std::vector<const OffPlay*> plays;
+  std::vector<const OffPlay*> playsIn(const std::string& formation) const;
+  bool has(const OffPlay* p) const;
+};
+struct DefBook {
+  std::string id;
+  std::string name;
+  std::string scheme;  // "4-3 Cover 3", "Tampa 2", "3-4 Multiple", ...
+  std::vector<std::string> sets;  // in screen order
+  std::vector<const DefCall*> calls;
+  std::vector<const DefCall*> callsIn(const std::string& set) const;
+  bool has(const DefCall* d) const;
+  /** The book's base front: Base (4-3) or Base34. */
+  Front base = Front::Base;
+};
+struct Team;
+const std::vector<std::string>& OFF_SCHEMES();
+const std::vector<std::string>& DEF_SCHEMES();
+/** The team's books (built once per team from its Team::offScheme / defScheme and id; stable addresses). A team with
+ *  no scheme gets the first scheme. */
+const OffBook& offBookFor(const Team& t);
+const DefBook& defBookFor(const Team& t);
+/** A scheme's whole book (every formation and play the scheme runs), for tools and tests. */
+const OffBook& offSchemeBook(const std::string& scheme);
+const DefBook& defSchemeBook(const std::string& scheme);
+/** How much a defensive scheme leans on a call (a multiplier on the CPU caller's situational weight). */
+double defSchemeLean(const std::string& scheme, const DefCall& d);
 
 }  // namespace tag

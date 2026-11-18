@@ -37,6 +37,14 @@
 			"Enabled": true
 		},
 		{
+			"Name": "GameInput",
+			"Enabled": true
+		},
+		{
+			"Name": "GameInputWindows",
+			"Enabled": true
+		},
+		{
 			"Name": "PythonScriptPlugin",
 			"Enabled": true
 		},
@@ -61,6 +69,18 @@
 		},
 		{
 			"Name": "IKRig",
+			"Enabled": true
+		},
+		{
+			"Name": "MetaHumanCrowd",
+			"Enabled": true
+		},
+		{
+			"Name": "MetaHumanCrowdContent",
+			"Enabled": true
+		},
+		{
+			"Name": "MassGameplay",
 			"Enabled": true
 		}
 	],

@@ -1,0 +1,856 @@
+[
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/heads/meshes/bouyeaj_14134_mesh.fbx",
+  "dest": "/Game/MaddenRef/Skeleton",
+  "name": "MaddenFB_Hero",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/heads/meshes/bouyeaj_14134_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Heads",
+  "name": "SK_bouyeaj_14134",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/heads/meshes/greentj_17754_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Heads",
+  "name": "SK_greentj_17754",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/heads/meshes/gonzaleztony_11395_hair_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Heads",
+  "name": "SK_gonzaleztony_11395_hair",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/heads/meshes/mcdonaldjrtj_11904_hair_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Heads",
+  "name": "SK_mcdonaldjrtj_11904_hair",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/heads/meshes/gen_7_h_n_02_haircap_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Heads",
+  "name": "SK_gen_7_h_n_02_haircap",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/heads/meshes/gen_7_t_n_001_haircap_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Heads",
+  "name": "SK_gen_7_t_n_001_haircap",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/heads/meshes/gen_7_btm_n_007_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Heads",
+  "name": "SK_gen_7_btm_n_007",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/heads/meshes/gen_6_bmh_g_010_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Heads",
+  "name": "SK_gen_6_bmh_g_010",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/heads/meshes/mooredj_13184_haircap_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Heads",
+  "name": "SK_mooredj_13184_haircap",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/heads/meshes/largentsteve_11965_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Heads",
+  "name": "SK_largentsteve_11965",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/heads/meshes/maclinjeremy_20088_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Heads",
+  "name": "SK_maclinjeremy_20088",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/heads/meshes/samuelsjaylen_13173_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Heads",
+  "name": "SK_samuelsjaylen_13173",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/heads/meshes/asiatamatt_11155_haircap_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Heads",
+  "name": "SK_asiatamatt_11155_haircap",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/heads/meshes/gen_2_t_ea_sc_haircap_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Heads",
+  "name": "SK_gen_2_t_ea_sc_haircap",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/heads/meshes/fitzpatrickminkah_13084_hair_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Heads",
+  "name": "SK_fitzpatrickminkah_13084_hair",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/heads/meshes/locketttyler_2448_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Heads",
+  "name": "SK_locketttyler_2448",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/heads/meshes/johnsonlane_927_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Heads",
+  "name": "SK_johnsonlane_927",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/heads/meshes/gen_7_bmh_s_008_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Heads",
+  "name": "SK_gen_7_bmh_s_008",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/heads/meshes/thielenadam_2280_hair_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Heads",
+  "name": "SK_thielenadam_2280_hair",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/heads/meshes/hitchensanthony_2033_haircap_helmet_on_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Heads",
+  "name": "SK_hitchensanthony_2033_haircap_helmet_on",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/heads/meshes/stantondrew_27939_hair_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Heads",
+  "name": "SK_stantondrew_27939_hair",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/heads/meshes/abdullahameer_2402_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Heads",
+  "name": "SK_abdullahameer_2402",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/heads/meshes/colemantevin_2401_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Heads",
+  "name": "SK_colemantevin_2401",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/heads/meshes/addaejahleel_9919_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Heads",
+  "name": "SK_addaejahleel_9919",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/heads/meshes/ebroneric_10855_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Heads",
+  "name": "SK_ebroneric_10855",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/heads/meshes/jenkinsjanoris_11437_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Heads",
+  "name": "SK_jenkinsjanoris_11437",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/heads/meshes/gen_4_h_n_002_haircap_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Heads",
+  "name": "SK_gen_4_h_n_002_haircap",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/heads/meshes/veldheerjared_9805_haircap_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Heads",
+  "name": "SK_veldheerjared_9805_haircap",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/heads/meshes/richardsonsheldon_1042_haircap_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Heads",
+  "name": "SK_richardsonsheldon_1042_haircap",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/heads/meshes/harvinpercy_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Heads",
+  "name": "SK_harvinpercy",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/heads/meshes/novaknick_19965_haircap_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Heads",
+  "name": "SK_novaknick_19965_haircap",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/heads/meshes/mccourtyjason_28829_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Heads",
+  "name": "SK_mccourtyjason_28829",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/heads/meshes/wilforkvince_17417_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Heads",
+  "name": "SK_wilforkvince_17417",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/heads/meshes/gen_6_t_g_005_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Heads",
+  "name": "SK_gen_6_t_g_005",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/heads/meshes/gen_2_t_s_007_hair_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Heads",
+  "name": "SK_gen_2_t_s_007_hair",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/heads/meshes/lafellbrandon_9759_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Heads",
+  "name": "SK_lafellbrandon_9759",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/heads/meshes/johnsonstevie_28561_haircap_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Heads",
+  "name": "SK_johnsonstevie_28561_haircap",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/heads/meshes/adamsjamal_12524_hair_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Heads",
+  "name": "SK_adamsjamal_12524_hair",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/heads/meshes/babineauxjonathan_26832_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Heads",
+  "name": "SK_babineauxjonathan_26832",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/heads/meshes/keiselbrett_hair_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Heads",
+  "name": "SK_keiselbrett_hair",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/heads/meshes/gen_2_h_g_01_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Heads",
+  "name": "SK_gen_2_h_g_01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/heads/meshes/gen_2_b_s_005_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Heads",
+  "name": "SK_gen_2_b_s_005",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/heads/meshes/falkluke_13329_haircap_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Heads",
+  "name": "SK_falkluke_13329_haircap",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/heads/meshes/gen_7_btm_mb_023_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Heads",
+  "name": "SK_gen_7_btm_mb_023",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/heads/meshes/garrettmyles_12520_haircap_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Heads",
+  "name": "SK_garrettmyles_12520_haircap",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/heads/meshes/gen_2_b_ea_jd_haircap_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Heads",
+  "name": "SK_gen_2_b_ea_jd_haircap",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/heads/meshes/gen_7_b_g_005_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Heads",
+  "name": "SK_gen_7_b_g_005",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/heads/meshes/taborteez_12534_haircap_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Heads",
+  "name": "SK_taborteez_12534_haircap",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/heads/meshes/williamskarlos_2410_hair_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Heads",
+  "name": "SK_williamskarlos_2410_hair",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "mesh",
+  "file": "{REPO}/extracted/stage7/heads/meshes/gen_4_m_n_01_mesh.fbx",
+  "dest": "/Game/MaddenRef/Players/Heads",
+  "name": "SK_gen_4_m_n_01",
+  "skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures/gen_2_b_ea_jd_hair_color.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_gen_2_b_ea_jd_hair_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures/gen_2_t_ea_sc_hair_color.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_gen_2_t_ea_sc_hair_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures/gen_2_t_s_007_hair_color.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_gen_2_t_s_007_hair_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures/gen_7_h_n_02_hair_color.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_gen_7_h_n_02_hair_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures/eyelashes_m19.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_eyelashes_m19"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures/commonrsm.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_commonrsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures/wilforkvince_17417_color.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_wilforkvince_17417_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures_ue/wilforkvince_17417_normal_ue.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_wilforkvince_17417_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures/williamskarlos_2410_hair_color.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_williamskarlos_2410_hair_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures/falkluke_13329_hair_color.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_falkluke_13329_hair_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures/fitzpatrickminkah_13084_hair_color.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_fitzpatrickminkah_13084_hair_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures/keiselbrett_hair_color.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_keiselbrett_hair_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures/mooredj_13184_hair_color.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_mooredj_13184_hair_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures/samuelsjaylen_13173_color.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_samuelsjaylen_13173_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures_ue/samuelsjaylen_13173_normal_ue.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_samuelsjaylen_13173_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures/dorag_rsm.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_dorag_rsm",
+  "srgb": false
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures/dorag_color.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_dorag_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures_ue/dorag_normal_ue.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_dorag_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures/garrettmyles_12520_hair_color.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_garrettmyles_12520_hair_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures/gonzaleztony_11395_hair_color.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_gonzaleztony_11395_hair_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures/greentj_17754_color.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_greentj_17754_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures_ue/greentj_17754_normal_ue.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_greentj_17754_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures/lafellbrandon_9759_color.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_lafellbrandon_9759_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures_ue/lafellbrandon_9759_normal_ue.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_lafellbrandon_9759_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures/largentsteve_11965_color.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_largentsteve_11965_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures_ue/largentsteve_11965_normal_ue.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_largentsteve_11965_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures/locketttyler_2448_color.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_locketttyler_2448_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures_ue/locketttyler_2448_normal_ue.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_locketttyler_2448_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures/maclinjeremy_20088_color.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_maclinjeremy_20088_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures_ue/maclinjeremy_20088_normal_ue.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_maclinjeremy_20088_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures/mccourtyjason_28829_color.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_mccourtyjason_28829_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures_ue/mccourtyjason_28829_normal_ue.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_mccourtyjason_28829_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures/mcdonaldjrtj_11904_hair_color.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_mcdonaldjrtj_11904_hair_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures/taborteez_12534_hair_color.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_taborteez_12534_hair_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures/thielenadam_2280_hair_color.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_thielenadam_2280_hair_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures/veldheerjared_9805_hair_color.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_veldheerjared_9805_hair_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures/abdullahameer_2402_color.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_abdullahameer_2402_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures_ue/abdullahameer_2402_normal_ue.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_abdullahameer_2402_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures/adamsjamal_12524_hair_color.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_adamsjamal_12524_hair_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures/addaejahleel_9919_color.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_addaejahleel_9919_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures_ue/addaejahleel_9919_normal_ue.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_addaejahleel_9919_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures/asiatamatt_11155_hair_color.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_asiatamatt_11155_hair_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures/babineauxjonathan_26832_color.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_babineauxjonathan_26832_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures_ue/babineauxjonathan_26832_normal_ue.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_babineauxjonathan_26832_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures/bouyeaj_14134_color.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_bouyeaj_14134_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures_ue/bouyeaj_14134_normal_ue.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_bouyeaj_14134_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures/colemantevin_2401_color.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_colemantevin_2401_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures_ue/colemantevin_2401_normal_ue.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_colemantevin_2401_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures/ebroneric_10855_color.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_ebroneric_10855_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures_ue/ebroneric_10855_normal_ue.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_ebroneric_10855_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures/gen_2_b_s_005_color.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_gen_2_b_s_005_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures_ue/gen_2_b_s_005_normal_ue.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_gen_2_b_s_005_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures/gen_2_h_g_01_color.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_gen_2_h_g_01_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures_ue/gen_2_h_g_01_normal_ue.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_gen_2_h_g_01_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures/gen_4_m_n_01_color.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_gen_4_m_n_01_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures_ue/gen_4_m_n_01_normal_ue.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_gen_4_m_n_01_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures/gen_6_bmh_g_010_color.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_gen_6_bmh_g_010_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures_ue/gen_6_bmh_g_010_normal_ue.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_gen_6_bmh_g_010_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures/gen_6_t_g_005_color.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_gen_6_t_g_005_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures_ue/gen_6_t_g_005_normal_ue.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_gen_6_t_g_005_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures/gen_7_bmh_s_008_color.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_gen_7_bmh_s_008_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures_ue/gen_7_bmh_s_008_normal_ue.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_gen_7_bmh_s_008_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures/gen_7_btm_mb_023_color.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_gen_7_btm_mb_023_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures_ue/gen_7_btm_mb_023_normal_ue.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_gen_7_btm_mb_023_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures/gen_7_btm_n_007_color.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_gen_7_btm_n_007_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures_ue/gen_7_btm_n_007_normal_ue.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_gen_7_btm_n_007_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures/gen_7_b_g_005_color.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_gen_7_b_g_005_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures_ue/gen_7_b_g_005_normal_ue.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_gen_7_b_g_005_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures/harvinpercy_color.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_harvinpercy_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures_ue/harvinpercy_normal_ue.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_harvinpercy_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures/jenkinsjanoris_11437_color.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_jenkinsjanoris_11437_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures_ue/jenkinsjanoris_11437_normal_ue.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_jenkinsjanoris_11437_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures/johnsonlane_927_color.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_johnsonlane_927_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures_ue/johnsonlane_927_normal_ue.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_johnsonlane_927_normal",
+  "normal": true
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures/novaknick_19965_hair_color.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_novaknick_19965_hair_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures/richardsonsheldon_1042_hair_color.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_richardsonsheldon_1042_hair_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures/stantondrew_27939_hair_color.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_stantondrew_27939_hair_color"
+ },
+ {
+  "kind": "texture",
+  "file": "{REPO}/extracted/stage7/heads/textures/flatblack_color.png",
+  "dest": "/Game/MaddenRef/Players/Heads/Textures",
+  "name": "T_flatblack_color"
+ }
+]

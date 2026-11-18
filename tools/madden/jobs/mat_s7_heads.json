@@ -1,0 +1,967 @@
+{
+ "bindings": [
+  {
+   "mesh": "/Game/MaddenRef/Players/Heads/SK_bouyeaj_14134",
+   "mi": "/Game/MaddenRef/Players/Heads/Materials/MI_bouyeaj_14134_head_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": true,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Heads/Textures/T_bouyeaj_14134_color",
+    "Normal": "/Game/MaddenRef/Players/Heads/Textures/T_bouyeaj_14134_normal",
+    "RSM": "/Game/MaddenRef/Players/Heads/Textures/T_commonrsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Heads/SK_greentj_17754",
+   "mi": "/Game/MaddenRef/Players/Heads/Materials/MI_greentj_17754_head_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": true,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Heads/Textures/T_greentj_17754_color",
+    "Normal": "/Game/MaddenRef/Players/Heads/Textures/T_greentj_17754_normal",
+    "RSM": "/Game/MaddenRef/Players/Heads/Textures/T_commonrsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Heads/SK_gonzaleztony_11395_hair",
+   "mi": "/Game/MaddenRef/Players/Heads/Materials/MI_gonzaleztony_11395_hair_hair_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Heads/Textures/T_gonzaleztony_11395_hair_color"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Heads/SK_mcdonaldjrtj_11904_hair",
+   "mi": "/Game/MaddenRef/Players/Heads/Materials/MI_mcdonaldjrtj_11904_hair_hair_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Heads/Textures/T_mcdonaldjrtj_11904_hair_color"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Heads/SK_gen_7_h_n_02_haircap",
+   "mi": "/Game/MaddenRef/Players/Heads/Materials/MI_gen_7_h_n_02_haircap_haircap_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Heads/Textures/T_gen_7_h_n_02_hair_color"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Heads/SK_gen_7_t_n_001_haircap",
+   "mi": "/Game/MaddenRef/Players/Heads/Materials/MI_gen_7_t_n_001_haircap_haircap_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Heads/Textures/T_dorag_color",
+    "Normal": "/Game/MaddenRef/Players/Heads/Textures/T_dorag_normal",
+    "RSM": "/Game/MaddenRef/Players/Heads/Textures/T_dorag_rsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Heads/SK_gen_7_btm_n_007",
+   "mi": "/Game/MaddenRef/Players/Heads/Materials/MI_gen_7_btm_n_007_head_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": true,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Heads/Textures/T_gen_7_btm_n_007_color",
+    "Normal": "/Game/MaddenRef/Players/Heads/Textures/T_gen_7_btm_n_007_normal",
+    "RSM": "/Game/MaddenRef/Players/Heads/Textures/T_commonrsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Heads/SK_gen_6_bmh_g_010",
+   "mi": "/Game/MaddenRef/Players/Heads/Materials/MI_gen_6_bmh_g_010_head_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": true,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Heads/Textures/T_gen_6_bmh_g_010_color",
+    "Normal": "/Game/MaddenRef/Players/Heads/Textures/T_gen_6_bmh_g_010_normal",
+    "RSM": "/Game/MaddenRef/Players/Heads/Textures/T_commonrsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Heads/SK_mooredj_13184_haircap",
+   "mi": "/Game/MaddenRef/Players/Heads/Materials/MI_mooredj_13184_haircap_haircap_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Heads/Textures/T_mooredj_13184_hair_color"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Heads/SK_largentsteve_11965",
+   "mi": "/Game/MaddenRef/Players/Heads/Materials/MI_largentsteve_11965_head_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": true,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Heads/Textures/T_largentsteve_11965_color",
+    "Normal": "/Game/MaddenRef/Players/Heads/Textures/T_largentsteve_11965_normal",
+    "RSM": "/Game/MaddenRef/Players/Heads/Textures/T_commonrsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Heads/SK_maclinjeremy_20088",
+   "mi": "/Game/MaddenRef/Players/Heads/Materials/MI_maclinjeremy_20088_head_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": true,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Heads/Textures/T_maclinjeremy_20088_color",
+    "Normal": "/Game/MaddenRef/Players/Heads/Textures/T_maclinjeremy_20088_normal",
+    "RSM": "/Game/MaddenRef/Players/Heads/Textures/T_commonrsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Heads/SK_samuelsjaylen_13173",
+   "mi": "/Game/MaddenRef/Players/Heads/Materials/MI_samuelsjaylen_13173_head_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": true,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Heads/Textures/T_samuelsjaylen_13173_color",
+    "Normal": "/Game/MaddenRef/Players/Heads/Textures/T_samuelsjaylen_13173_normal",
+    "RSM": "/Game/MaddenRef/Players/Heads/Textures/T_commonrsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Heads/SK_asiatamatt_11155_haircap",
+   "mi": "/Game/MaddenRef/Players/Heads/Materials/MI_asiatamatt_11155_haircap_haircap_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Heads/Textures/T_asiatamatt_11155_hair_color"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Heads/SK_gen_2_t_ea_sc_haircap",
+   "mi": "/Game/MaddenRef/Players/Heads/Materials/MI_gen_2_t_ea_sc_haircap_haircap_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Heads/Textures/T_gen_2_t_ea_sc_hair_color"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Heads/SK_fitzpatrickminkah_13084_hair",
+   "mi": "/Game/MaddenRef/Players/Heads/Materials/MI_fitzpatrickminkah_13084_hair_hair_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Heads/Textures/T_fitzpatrickminkah_13084_hair_color"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Heads/SK_locketttyler_2448",
+   "mi": "/Game/MaddenRef/Players/Heads/Materials/MI_locketttyler_2448_head_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": true,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Heads/Textures/T_locketttyler_2448_color",
+    "Normal": "/Game/MaddenRef/Players/Heads/Textures/T_locketttyler_2448_normal",
+    "RSM": "/Game/MaddenRef/Players/Heads/Textures/T_commonrsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Heads/SK_johnsonlane_927",
+   "mi": "/Game/MaddenRef/Players/Heads/Materials/MI_johnsonlane_927_head_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": true,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Heads/Textures/T_johnsonlane_927_color",
+    "Normal": "/Game/MaddenRef/Players/Heads/Textures/T_johnsonlane_927_normal",
+    "RSM": "/Game/MaddenRef/Players/Heads/Textures/T_commonrsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Heads/SK_gen_7_bmh_s_008",
+   "mi": "/Game/MaddenRef/Players/Heads/Materials/MI_gen_7_bmh_s_008_head_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": true,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Heads/Textures/T_gen_7_bmh_s_008_color",
+    "Normal": "/Game/MaddenRef/Players/Heads/Textures/T_gen_7_bmh_s_008_normal",
+    "RSM": "/Game/MaddenRef/Players/Heads/Textures/T_commonrsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Heads/SK_thielenadam_2280_hair",
+   "mi": "/Game/MaddenRef/Players/Heads/Materials/MI_thielenadam_2280_hair_hair_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Heads/Textures/T_thielenadam_2280_hair_color"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Heads/SK_hitchensanthony_2033_haircap_helmet_on",
+   "mi": "/Game/MaddenRef/Players/Heads/Materials/MI_hitchensanthony_2033_haircap_helmet_on_haircap_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Heads/Textures/T_flatblack_color"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Heads/SK_stantondrew_27939_hair",
+   "mi": "/Game/MaddenRef/Players/Heads/Materials/MI_stantondrew_27939_hair_hair_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Heads/Textures/T_stantondrew_27939_hair_color"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Heads/SK_abdullahameer_2402",
+   "mi": "/Game/MaddenRef/Players/Heads/Materials/MI_abdullahameer_2402_head_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": true,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Heads/Textures/T_abdullahameer_2402_color",
+    "Normal": "/Game/MaddenRef/Players/Heads/Textures/T_abdullahameer_2402_normal",
+    "RSM": "/Game/MaddenRef/Players/Heads/Textures/T_commonrsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Heads/SK_colemantevin_2401",
+   "mi": "/Game/MaddenRef/Players/Heads/Materials/MI_colemantevin_2401_head_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": true,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Heads/Textures/T_colemantevin_2401_color",
+    "Normal": "/Game/MaddenRef/Players/Heads/Textures/T_colemantevin_2401_normal",
+    "RSM": "/Game/MaddenRef/Players/Heads/Textures/T_commonrsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Heads/SK_addaejahleel_9919",
+   "mi": "/Game/MaddenRef/Players/Heads/Materials/MI_addaejahleel_9919_head_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": true,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Heads/Textures/T_addaejahleel_9919_color",
+    "Normal": "/Game/MaddenRef/Players/Heads/Textures/T_addaejahleel_9919_normal",
+    "RSM": "/Game/MaddenRef/Players/Heads/Textures/T_commonrsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Heads/SK_ebroneric_10855",
+   "mi": "/Game/MaddenRef/Players/Heads/Materials/MI_ebroneric_10855_head_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": true,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Heads/Textures/T_ebroneric_10855_color",
+    "Normal": "/Game/MaddenRef/Players/Heads/Textures/T_ebroneric_10855_normal",
+    "RSM": "/Game/MaddenRef/Players/Heads/Textures/T_commonrsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Heads/SK_jenkinsjanoris_11437",
+   "mi": "/Game/MaddenRef/Players/Heads/Materials/MI_jenkinsjanoris_11437_head_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": true,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Heads/Textures/T_jenkinsjanoris_11437_color",
+    "Normal": "/Game/MaddenRef/Players/Heads/Textures/T_jenkinsjanoris_11437_normal",
+    "RSM": "/Game/MaddenRef/Players/Heads/Textures/T_commonrsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Heads/SK_gen_4_h_n_002_haircap",
+   "mi": "/Game/MaddenRef/Players/Heads/Materials/MI_gen_4_h_n_002_haircap_haircap_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Heads/Textures/T_dorag_color",
+    "Normal": "/Game/MaddenRef/Players/Heads/Textures/T_dorag_normal",
+    "RSM": "/Game/MaddenRef/Players/Heads/Textures/T_dorag_rsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Heads/SK_veldheerjared_9805_haircap",
+   "mi": "/Game/MaddenRef/Players/Heads/Materials/MI_veldheerjared_9805_haircap_haircap_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Heads/Textures/T_veldheerjared_9805_hair_color"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Heads/SK_richardsonsheldon_1042_haircap",
+   "mi": "/Game/MaddenRef/Players/Heads/Materials/MI_richardsonsheldon_1042_haircap_haircap_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Heads/Textures/T_richardsonsheldon_1042_hair_color"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Heads/SK_harvinpercy",
+   "mi": "/Game/MaddenRef/Players/Heads/Materials/MI_harvinpercy_head_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": true,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Heads/Textures/T_harvinpercy_color",
+    "Normal": "/Game/MaddenRef/Players/Heads/Textures/T_harvinpercy_normal",
+    "RSM": "/Game/MaddenRef/Players/Heads/Textures/T_commonrsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Heads/SK_novaknick_19965_haircap",
+   "mi": "/Game/MaddenRef/Players/Heads/Materials/MI_novaknick_19965_haircap_haircap_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Heads/Textures/T_novaknick_19965_hair_color"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Heads/SK_mccourtyjason_28829",
+   "mi": "/Game/MaddenRef/Players/Heads/Materials/MI_mccourtyjason_28829_head_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": true,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Heads/Textures/T_mccourtyjason_28829_color",
+    "Normal": "/Game/MaddenRef/Players/Heads/Textures/T_mccourtyjason_28829_normal",
+    "RSM": "/Game/MaddenRef/Players/Heads/Textures/T_commonrsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Heads/SK_wilforkvince_17417",
+   "mi": "/Game/MaddenRef/Players/Heads/Materials/MI_wilforkvince_17417_head_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": true,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Heads/Textures/T_wilforkvince_17417_color",
+    "Normal": "/Game/MaddenRef/Players/Heads/Textures/T_wilforkvince_17417_normal",
+    "RSM": "/Game/MaddenRef/Players/Heads/Textures/T_commonrsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Heads/SK_gen_6_t_g_005",
+   "mi": "/Game/MaddenRef/Players/Heads/Materials/MI_gen_6_t_g_005_head_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": true,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Heads/Textures/T_gen_6_t_g_005_color",
+    "Normal": "/Game/MaddenRef/Players/Heads/Textures/T_gen_6_t_g_005_normal",
+    "RSM": "/Game/MaddenRef/Players/Heads/Textures/T_commonrsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Heads/SK_gen_2_t_s_007_hair",
+   "mi": "/Game/MaddenRef/Players/Heads/Materials/MI_gen_2_t_s_007_hair_hair_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Heads/Textures/T_gen_2_t_s_007_hair_color"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Heads/SK_lafellbrandon_9759",
+   "mi": "/Game/MaddenRef/Players/Heads/Materials/MI_lafellbrandon_9759_head_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": true,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Heads/Textures/T_lafellbrandon_9759_color",
+    "Normal": "/Game/MaddenRef/Players/Heads/Textures/T_lafellbrandon_9759_normal",
+    "RSM": "/Game/MaddenRef/Players/Heads/Textures/T_commonrsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Heads/SK_johnsonstevie_28561_haircap",
+   "mi": "/Game/MaddenRef/Players/Heads/Materials/MI_johnsonstevie_28561_haircap_haircap_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Heads/Textures/T_dorag_color",
+    "Normal": "/Game/MaddenRef/Players/Heads/Textures/T_dorag_normal",
+    "RSM": "/Game/MaddenRef/Players/Heads/Textures/T_dorag_rsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Heads/SK_adamsjamal_12524_hair",
+   "mi": "/Game/MaddenRef/Players/Heads/Materials/MI_adamsjamal_12524_hair_hair_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Heads/Textures/T_adamsjamal_12524_hair_color"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Heads/SK_babineauxjonathan_26832",
+   "mi": "/Game/MaddenRef/Players/Heads/Materials/MI_babineauxjonathan_26832_head_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": true,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Heads/Textures/T_babineauxjonathan_26832_color",
+    "Normal": "/Game/MaddenRef/Players/Heads/Textures/T_babineauxjonathan_26832_normal",
+    "RSM": "/Game/MaddenRef/Players/Heads/Textures/T_commonrsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Heads/SK_keiselbrett_hair",
+   "mi": "/Game/MaddenRef/Players/Heads/Materials/MI_keiselbrett_hair_hair_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Heads/Textures/T_keiselbrett_hair_color"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Heads/SK_gen_2_h_g_01",
+   "mi": "/Game/MaddenRef/Players/Heads/Materials/MI_gen_2_h_g_01_head_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": true,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Heads/Textures/T_gen_2_h_g_01_color",
+    "Normal": "/Game/MaddenRef/Players/Heads/Textures/T_gen_2_h_g_01_normal",
+    "RSM": "/Game/MaddenRef/Players/Heads/Textures/T_commonrsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Heads/SK_gen_2_b_s_005",
+   "mi": "/Game/MaddenRef/Players/Heads/Materials/MI_gen_2_b_s_005_head_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": true,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Heads/Textures/T_gen_2_b_s_005_color",
+    "Normal": "/Game/MaddenRef/Players/Heads/Textures/T_gen_2_b_s_005_normal",
+    "RSM": "/Game/MaddenRef/Players/Heads/Textures/T_commonrsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Heads/SK_falkluke_13329_haircap",
+   "mi": "/Game/MaddenRef/Players/Heads/Materials/MI_falkluke_13329_haircap_haircap_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Heads/Textures/T_falkluke_13329_hair_color"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Heads/SK_gen_7_btm_mb_023",
+   "mi": "/Game/MaddenRef/Players/Heads/Materials/MI_gen_7_btm_mb_023_head_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": true,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Heads/Textures/T_gen_7_btm_mb_023_color",
+    "Normal": "/Game/MaddenRef/Players/Heads/Textures/T_gen_7_btm_mb_023_normal",
+    "RSM": "/Game/MaddenRef/Players/Heads/Textures/T_commonrsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Heads/SK_garrettmyles_12520_haircap",
+   "mi": "/Game/MaddenRef/Players/Heads/Materials/MI_garrettmyles_12520_haircap_haircap_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Heads/Textures/T_garrettmyles_12520_hair_color"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Heads/SK_gen_2_b_ea_jd_haircap",
+   "mi": "/Game/MaddenRef/Players/Heads/Materials/MI_gen_2_b_ea_jd_haircap_haircap_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Heads/Textures/T_gen_2_b_ea_jd_hair_color"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Heads/SK_gen_7_b_g_005",
+   "mi": "/Game/MaddenRef/Players/Heads/Materials/MI_gen_7_b_g_005_head_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": true,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Heads/Textures/T_gen_7_b_g_005_color",
+    "Normal": "/Game/MaddenRef/Players/Heads/Textures/T_gen_7_b_g_005_normal",
+    "RSM": "/Game/MaddenRef/Players/Heads/Textures/T_commonrsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Heads/SK_taborteez_12534_haircap",
+   "mi": "/Game/MaddenRef/Players/Heads/Materials/MI_taborteez_12534_haircap_haircap_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Heads/Textures/T_taborteez_12534_hair_color"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Heads/SK_williamskarlos_2410_hair",
+   "mi": "/Game/MaddenRef/Players/Heads/Materials/MI_williamskarlos_2410_hair_hair_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Heads/Textures/T_williamskarlos_2410_hair_color"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Heads/SK_gen_4_m_n_01",
+   "mi": "/Game/MaddenRef/Players/Heads/Materials/MI_gen_4_m_n_01_head_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": true,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Heads/Textures/T_gen_4_m_n_01_color",
+    "Normal": "/Game/MaddenRef/Players/Heads/Textures/T_gen_4_m_n_01_normal",
+    "RSM": "/Game/MaddenRef/Players/Heads/Textures/T_commonrsm"
+   }
+  }
+ ],
+ "preview_level": {
+  "path": "/Game/MaddenRef/Maps/L_MaddenRef_Stage7Heads",
+  "meshes": [
+   {
+    "mesh": "/Game/MaddenRef/Players/Heads/SK_bouyeaj_14134",
+    "x": 0.0,
+    "y": 0.0,
+    "label": "000"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Heads/SK_greentj_17754",
+    "x": 40.0,
+    "y": 0.0,
+    "label": "001"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Heads/SK_gonzaleztony_11395_hair",
+    "x": 80.0,
+    "y": 0.0,
+    "label": "002"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Heads/SK_mcdonaldjrtj_11904_hair",
+    "x": 120.0,
+    "y": 0.0,
+    "label": "003"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Heads/SK_gen_7_h_n_02_haircap",
+    "x": 160.0,
+    "y": 0.0,
+    "label": "004"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Heads/SK_gen_7_t_n_001_haircap",
+    "x": 200.0,
+    "y": 0.0,
+    "label": "005"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Heads/SK_gen_7_btm_n_007",
+    "x": 240.0,
+    "y": 0.0,
+    "label": "006"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Heads/SK_gen_6_bmh_g_010",
+    "x": 280.0,
+    "y": 0.0,
+    "label": "007"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Heads/SK_mooredj_13184_haircap",
+    "x": 320.0,
+    "y": 0.0,
+    "label": "008"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Heads/SK_largentsteve_11965",
+    "x": 360.0,
+    "y": 0.0,
+    "label": "009"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Heads/SK_maclinjeremy_20088",
+    "x": 0.0,
+    "y": 40.0,
+    "label": "010"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Heads/SK_samuelsjaylen_13173",
+    "x": 40.0,
+    "y": 40.0,
+    "label": "011"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Heads/SK_asiatamatt_11155_haircap",
+    "x": 80.0,
+    "y": 40.0,
+    "label": "012"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Heads/SK_gen_2_t_ea_sc_haircap",
+    "x": 120.0,
+    "y": 40.0,
+    "label": "013"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Heads/SK_fitzpatrickminkah_13084_hair",
+    "x": 160.0,
+    "y": 40.0,
+    "label": "014"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Heads/SK_locketttyler_2448",
+    "x": 200.0,
+    "y": 40.0,
+    "label": "015"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Heads/SK_johnsonlane_927",
+    "x": 240.0,
+    "y": 40.0,
+    "label": "016"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Heads/SK_gen_7_bmh_s_008",
+    "x": 280.0,
+    "y": 40.0,
+    "label": "017"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Heads/SK_thielenadam_2280_hair",
+    "x": 320.0,
+    "y": 40.0,
+    "label": "018"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Heads/SK_hitchensanthony_2033_haircap_helmet_on",
+    "x": 360.0,
+    "y": 40.0,
+    "label": "019"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Heads/SK_stantondrew_27939_hair",
+    "x": 0.0,
+    "y": 80.0,
+    "label": "020"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Heads/SK_abdullahameer_2402",
+    "x": 40.0,
+    "y": 80.0,
+    "label": "021"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Heads/SK_colemantevin_2401",
+    "x": 80.0,
+    "y": 80.0,
+    "label": "022"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Heads/SK_addaejahleel_9919",
+    "x": 120.0,
+    "y": 80.0,
+    "label": "023"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Heads/SK_ebroneric_10855",
+    "x": 160.0,
+    "y": 80.0,
+    "label": "024"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Heads/SK_jenkinsjanoris_11437",
+    "x": 200.0,
+    "y": 80.0,
+    "label": "025"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Heads/SK_gen_4_h_n_002_haircap",
+    "x": 240.0,
+    "y": 80.0,
+    "label": "026"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Heads/SK_veldheerjared_9805_haircap",
+    "x": 280.0,
+    "y": 80.0,
+    "label": "027"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Heads/SK_richardsonsheldon_1042_haircap",
+    "x": 320.0,
+    "y": 80.0,
+    "label": "028"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Heads/SK_harvinpercy",
+    "x": 360.0,
+    "y": 80.0,
+    "label": "029"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Heads/SK_novaknick_19965_haircap",
+    "x": 0.0,
+    "y": 120.0,
+    "label": "030"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Heads/SK_mccourtyjason_28829",
+    "x": 40.0,
+    "y": 120.0,
+    "label": "031"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Heads/SK_wilforkvince_17417",
+    "x": 80.0,
+    "y": 120.0,
+    "label": "032"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Heads/SK_gen_6_t_g_005",
+    "x": 120.0,
+    "y": 120.0,
+    "label": "033"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Heads/SK_gen_2_t_s_007_hair",
+    "x": 160.0,
+    "y": 120.0,
+    "label": "034"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Heads/SK_lafellbrandon_9759",
+    "x": 200.0,
+    "y": 120.0,
+    "label": "035"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Heads/SK_johnsonstevie_28561_haircap",
+    "x": 240.0,
+    "y": 120.0,
+    "label": "036"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Heads/SK_adamsjamal_12524_hair",
+    "x": 280.0,
+    "y": 120.0,
+    "label": "037"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Heads/SK_babineauxjonathan_26832",
+    "x": 320.0,
+    "y": 120.0,
+    "label": "038"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Heads/SK_keiselbrett_hair",
+    "x": 360.0,
+    "y": 120.0,
+    "label": "039"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Heads/SK_gen_2_h_g_01",
+    "x": 0.0,
+    "y": 160.0,
+    "label": "040"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Heads/SK_gen_2_b_s_005",
+    "x": 40.0,
+    "y": 160.0,
+    "label": "041"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Heads/SK_falkluke_13329_haircap",
+    "x": 80.0,
+    "y": 160.0,
+    "label": "042"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Heads/SK_gen_7_btm_mb_023",
+    "x": 120.0,
+    "y": 160.0,
+    "label": "043"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Heads/SK_garrettmyles_12520_haircap",
+    "x": 160.0,
+    "y": 160.0,
+    "label": "044"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Heads/SK_gen_2_b_ea_jd_haircap",
+    "x": 200.0,
+    "y": 160.0,
+    "label": "045"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Heads/SK_gen_7_b_g_005",
+    "x": 240.0,
+    "y": 160.0,
+    "label": "046"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Heads/SK_taborteez_12534_haircap",
+    "x": 280.0,
+    "y": 160.0,
+    "label": "047"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Heads/SK_williamskarlos_2410_hair",
+    "x": 320.0,
+    "y": 160.0,
+    "label": "048"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Heads/SK_gen_4_m_n_01",
+    "x": 360.0,
+    "y": 160.0,
+    "label": "049"
+   }
+  ]
+ }
+}

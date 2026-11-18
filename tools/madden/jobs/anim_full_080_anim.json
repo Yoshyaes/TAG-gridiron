@@ -1,0 +1,1397 @@
+[
+ {
+  "name": "Stewart TD Frontsplay",
+  "file": "Stewart_TD_Frontsplay",
+  "clip_key": "05b9c9cd7bfd506f",
+  "layer_key": "bc9389b5e50597e6",
+  "fps": 60.0,
+  "frames": 304,
+  "additive": false
+ },
+ {
+  "name": "StiffArm_D8_FBNOV07_0013_2__P01",
+  "file": "StiffArm_D8_FBNOV07_0013_2__P01",
+  "clip_key": "b057f4d74fd1f5e5",
+  "layer_key": "e66a6230d187270f",
+  "fps": 30.0,
+  "frames": 53,
+  "additive": false
+ },
+ {
+  "name": "StiffArm_D8_FBNOV07_0013_2__P02",
+  "file": "StiffArm_D8_FBNOV07_0013_2__P02",
+  "clip_key": "94f7c76b8dbde01f",
+  "layer_key": "86b9a096924f4e03",
+  "fps": 30.0,
+  "frames": 53,
+  "additive": false
+ },
+ {
+  "name": "StiffArm_Prep__P01",
+  "file": "StiffArm_Prep__P01",
+  "clip_key": "06a27e4fa2636d14",
+  "layer_key": "d8e8d1bd53df92a2",
+  "fps": 30.0,
+  "frames": 55,
+  "additive": false
+ },
+ {
+  "name": "StiffArm_Tackle_D1_v1__P01",
+  "file": "StiffArm_Tackle_D1_v1__P01",
+  "clip_key": "068139fd75deb801",
+  "layer_key": "544206206155326a",
+  "fps": 60.0,
+  "frames": 342,
+  "additive": false
+ },
+ {
+  "name": "StiffArm_Tackle_D1_v1__P02",
+  "file": "StiffArm_Tackle_D1_v1__P02",
+  "clip_key": "cd55767a8c39457c",
+  "layer_key": "380b666f00068db2",
+  "fps": 60.0,
+  "frames": 342,
+  "additive": false
+ },
+ {
+  "name": "StiffArm_Tackle_D6_v1__P01",
+  "file": "StiffArm_Tackle_D6_v1__P01",
+  "clip_key": "a53541c8fc21e47d",
+  "layer_key": "0bc946e6f0ba5a91",
+  "fps": 60.0,
+  "frames": 391,
+  "additive": false
+ },
+ {
+  "name": "StiffArm_Tackle_D6_v1__P02",
+  "file": "StiffArm_Tackle_D6_v1__P02",
+  "clip_key": "9767f9d5d6f2c0b6",
+  "layer_key": "718368539c85975c",
+  "fps": 60.0,
+  "frames": 391,
+  "additive": false
+ },
+ {
+  "name": "StiffArm_Tackle_D7_v1__P01",
+  "file": "StiffArm_Tackle_D7_v1__P01",
+  "clip_key": "2aae9784e0f4ec08",
+  "layer_key": "8860808da4e763c8",
+  "fps": 60.0,
+  "frames": 309,
+  "additive": false
+ },
+ {
+  "name": "StiffArm_Tackle_D7_v1__P02",
+  "file": "StiffArm_Tackle_D7_v1__P02",
+  "clip_key": "7b9c793a08f346bb",
+  "layer_key": "2b1f89531dd6356a",
+  "fps": 60.0,
+  "frames": 309,
+  "additive": false
+ },
+ {
+  "name": "StiffArm_Tackle_D7_v2__P01",
+  "file": "StiffArm_Tackle_D7_v2__P01",
+  "clip_key": "25ed96c26f75c0ed",
+  "layer_key": "1ade4da72eaa569b",
+  "fps": 60.0,
+  "frames": 317,
+  "additive": false
+ },
+ {
+  "name": "StiffArm_Tackle_D7_v2__P02",
+  "file": "StiffArm_Tackle_D7_v2__P02",
+  "clip_key": "8bdf000878814126",
+  "layer_key": "01c7e5dedba87096",
+  "fps": 60.0,
+  "frames": 317,
+  "additive": false
+ },
+ {
+  "name": "Stiffarm_Precision_Tackle_D1_v1__P01",
+  "file": "Stiffarm_Precision_Tackle_D1_v1__P01",
+  "clip_key": "73a6cc73307406cc",
+  "layer_key": "4ca001d8ec9c83f3",
+  "fps": 60.0,
+  "frames": 127,
+  "additive": false
+ },
+ {
+  "name": "Stiffarm_Precision_Tackle_D1_v1__P02",
+  "file": "Stiffarm_Precision_Tackle_D1_v1__P02",
+  "clip_key": "2da3ddf8f54d1ee5",
+  "layer_key": "70fa6d95da32544a",
+  "fps": 60.0,
+  "frames": 127,
+  "additive": false
+ },
+ {
+  "name": "Stiffarm_Precision_Tackle_D7_v1__P01",
+  "file": "Stiffarm_Precision_Tackle_D7_v1__P01",
+  "clip_key": "b3933652be0f5783",
+  "layer_key": "74145fb737474f67",
+  "fps": 60.0,
+  "frames": 301,
+  "additive": false
+ },
+ {
+  "name": "Stiffarm_Precision_Tackle_D7_v1__P02",
+  "file": "Stiffarm_Precision_Tackle_D7_v1__P02",
+  "clip_key": "6b884bc6a04cff90",
+  "layer_key": "ce569891a2c46c7b",
+  "fps": 60.0,
+  "frames": 301,
+  "additive": false
+ },
+ {
+  "name": "Stiffarm_Precision_Tackle_D8_v1__P01",
+  "file": "Stiffarm_Precision_Tackle_D8_v1__P01",
+  "clip_key": "53d1d6da9c7f8cc9",
+  "layer_key": "bd5a71001fd332cc",
+  "fps": 60.0,
+  "frames": 123,
+  "additive": false
+ },
+ {
+  "name": "Stiffarm_Precision_Tackle_D8_v1__P02",
+  "file": "Stiffarm_Precision_Tackle_D8_v1__P02",
+  "clip_key": "349ece12d95bd1e0",
+  "layer_key": "be89a86821969d90",
+  "fps": 60.0,
+  "frames": 123,
+  "additive": false
+ },
+ {
+  "name": "Stills TD Hand to Head__P01",
+  "file": "Stills_TD_Hand_to_Head__P01",
+  "clip_key": "b9fef5838774a4e3",
+  "layer_key": "ffdf022a33b6f18f",
+  "fps": 60.0,
+  "frames": 318,
+  "additive": false
+ },
+ {
+  "name": "Swat_2hands_Running_Athl_Jump_D1__P01",
+  "file": "Swat_2hands_Running_Athl_Jump_D1__P01",
+  "clip_key": "c831d73a8f52ee22",
+  "layer_key": "d4d8da9cc080001f",
+  "fps": 60.0,
+  "frames": 82,
+  "additive": false
+ },
+ {
+  "name": "Swat_2hands_Running_Hev_Jump_D1__P01",
+  "file": "Swat_2hands_Running_Hev_Jump_D1__P01",
+  "clip_key": "a2b37afed935410f",
+  "layer_key": "c503c71e8e15946f",
+  "fps": 30.0,
+  "frames": 60,
+  "additive": false
+ },
+ {
+  "name": "Swat_Backpedal_0_AboveHead_ReachSide__P01",
+  "file": "Swat_Backpedal_0_AboveHead_ReachSide__P01",
+  "clip_key": "8cde28126350037e",
+  "layer_key": "993413c695bfa250",
+  "fps": 30.0,
+  "frames": 50,
+  "additive": false
+ },
+ {
+  "name": "Swat_Backpedal_0_Jump_ReachSide__P01",
+  "file": "Swat_Backpedal_0_Jump_ReachSide__P01",
+  "clip_key": "926f36ba7735de09",
+  "layer_key": "2fda8c2913c39e9d",
+  "fps": 30.0,
+  "frames": 55,
+  "additive": false
+ },
+ {
+  "name": "Swat_Backpedal_45_AboveHead_ReachSide__P01",
+  "file": "Swat_Backpedal_45_AboveHead_ReachSide__P01",
+  "clip_key": "55fbc886354b6307",
+  "layer_key": "65f2145f0ff09e6e",
+  "fps": 30.0,
+  "frames": 41,
+  "additive": false
+ },
+ {
+  "name": "Swat_Backpedal_45_AboveHead__P01",
+  "file": "Swat_Backpedal_45_AboveHead__P01",
+  "clip_key": "095934259ed6fe07",
+  "layer_key": "8023cb9d1199febc",
+  "fps": 30.0,
+  "frames": 50,
+  "additive": false
+ },
+ {
+  "name": "Swat_Backpedal_45_Jump_ReachSide__P01",
+  "file": "Swat_Backpedal_45_Jump_ReachSide__P01",
+  "clip_key": "5e118fa6b10a2079",
+  "layer_key": "0fabdeb9ca72e5d0",
+  "fps": 30.0,
+  "frames": 67,
+  "additive": false
+ },
+ {
+  "name": "Swat_Backpedal_45_Jump__P01",
+  "file": "Swat_Backpedal_45_Jump__P01",
+  "clip_key": "7dd396c44d9a2b9e",
+  "layer_key": "da63af5dfaedae1e",
+  "fps": 30.0,
+  "frames": 69,
+  "additive": false
+ },
+ {
+  "name": "Swat_Dive_90_AboveHead_v2__P01",
+  "file": "Swat_Dive_90_AboveHead_v2__P01",
+  "clip_key": "3b904d72b629f5ec",
+  "layer_key": "3906093a1b7d5516",
+  "fps": 60.0,
+  "frames": 109,
+  "additive": false
+ },
+ {
+  "name": "Swat_Dive_90_Chest_v2__P01",
+  "file": "Swat_Dive_90_Chest_v2__P01",
+  "clip_key": "d776715c43cb05e8",
+  "layer_key": "1d26e1b6d87b2ef7",
+  "fps": 60.0,
+  "frames": 100,
+  "additive": false
+ },
+ {
+  "name": "Swat_Dive_90_Helmet_v1__P01",
+  "file": "Swat_Dive_90_Helmet_v1__P01",
+  "clip_key": "75f8ff82e3021e58",
+  "layer_key": "ba3948c6f6464d45",
+  "fps": 60.0,
+  "frames": 122,
+  "additive": false
+ },
+ {
+  "name": "Swat_Dive_90_Helmet_v3__P01",
+  "file": "Swat_Dive_90_Helmet_v3__P01",
+  "clip_key": "850e6c0cbac5e13c",
+  "layer_key": "823e39a4d3635039",
+  "fps": 60.0,
+  "frames": 84,
+  "additive": false
+ },
+ {
+  "name": "Swat_Dive_90_Helmet_v4__P01",
+  "file": "Swat_Dive_90_Helmet_v4__P01",
+  "clip_key": "90e9b6985a393789",
+  "layer_key": "629eec70ac380c84",
+  "fps": 60.0,
+  "frames": 107,
+  "additive": false
+ },
+ {
+  "name": "Swat_NonSwat_Run_180_Med_RSW146W2__P01",
+  "file": "Swat_NonSwat_Run_180_Med_RSW146W2__P01",
+  "clip_key": "e15beb4a8f757729",
+  "layer_key": "900c29371688287f",
+  "fps": 30.0,
+  "frames": 28,
+  "additive": false
+ },
+ {
+  "name": "Swat_Run_0_AboveHead_Reach2Side__P01",
+  "file": "Swat_Run_0_AboveHead_Reach2Side__P01",
+  "clip_key": "6330b29963a4050c",
+  "layer_key": "43a7d3a2f69546a4",
+  "fps": 60.0,
+  "frames": 92,
+  "additive": false
+ },
+ {
+  "name": "Swat_Run_0_Above_Head_Side_v02__P01",
+  "file": "Swat_Run_0_Above_Head_Side_v02__P01",
+  "clip_key": "46906c9abb4d8976",
+  "layer_key": "dcb0ad80710b02eb",
+  "fps": 30.0,
+  "frames": 42,
+  "additive": false
+ },
+ {
+  "name": "Swat_Run_0_Above_Head_v01__P01",
+  "file": "Swat_Run_0_Above_Head_v01__P01",
+  "clip_key": "c5b5a981ae28b4fb",
+  "layer_key": "ced3fb87980155a6",
+  "fps": 30.0,
+  "frames": 36,
+  "additive": false
+ },
+ {
+  "name": "Swat_Run_0_Above_Head_v02__P01",
+  "file": "Swat_Run_0_Above_Head_v02__P01",
+  "clip_key": "4021453f4cbd97e1",
+  "layer_key": "24418d8ae1e9beaa",
+  "fps": 30.0,
+  "frames": 33,
+  "additive": false
+ },
+ {
+  "name": "Swat_Run_0_Jump_v1__P01",
+  "file": "Swat_Run_0_Jump_v1__P01",
+  "clip_key": "07df1e32bb3035b6",
+  "layer_key": "867089f39680a39d",
+  "fps": 60.0,
+  "frames": 104,
+  "additive": false
+ },
+ {
+  "name": "Swat_Run_135_Above_Head_Over_Shoulder_v01__P01",
+  "file": "Swat_Run_135_Above_Head_Over_Shoulder_v01__P01",
+  "clip_key": "d2a36d6dde220dac",
+  "layer_key": "62b40f7edbec19e0",
+  "fps": 30.0,
+  "frames": 32,
+  "additive": false
+ },
+ {
+  "name": "Swat_Run_135_Above_Head_Over_Shoulder_v02__P01",
+  "file": "Swat_Run_135_Above_Head_Over_Shoulder_v02__P01",
+  "clip_key": "685b085fe7b3a4a0",
+  "layer_key": "f3b4070c0db38fb1",
+  "fps": 30.0,
+  "frames": 30,
+  "additive": false
+ },
+ {
+  "name": "Swat_Run_135_Above_Head_v01__P01",
+  "file": "Swat_Run_135_Above_Head_v01__P01",
+  "clip_key": "fb351471eda6aae6",
+  "layer_key": "d48fbfd2f945e629",
+  "fps": 30.0,
+  "frames": 45,
+  "additive": false
+ },
+ {
+  "name": "Swat_Run_135_Chest_Behind_v01__P01",
+  "file": "Swat_Run_135_Chest_Behind_v01__P01",
+  "clip_key": "1861bfe5ab66d0a7",
+  "layer_key": "ed3103e9bede5be9",
+  "fps": 30.0,
+  "frames": 56,
+  "additive": false
+ },
+ {
+  "name": "Swat_Run_135_Chest_v01__P01",
+  "file": "Swat_Run_135_Chest_v01__P01",
+  "clip_key": "8091c02f956a9f85",
+  "layer_key": "306d7eba454a5fd6",
+  "fps": 30.0,
+  "frames": 33,
+  "additive": false
+ },
+ {
+  "name": "Swat_Run_135_Helmet_Behind_v2__P01",
+  "file": "Swat_Run_135_Helmet_Behind_v2__P01",
+  "clip_key": "6d5a49c43e466455",
+  "layer_key": "bdac3162929dcdc4",
+  "fps": 60.0,
+  "frames": 94,
+  "additive": false
+ },
+ {
+  "name": "Swat_Run_135_Helmet_v01__P01",
+  "file": "Swat_Run_135_Helmet_v01__P01",
+  "clip_key": "8c0a16e648c72755",
+  "layer_key": "8e3a6fe0c44f1f47",
+  "fps": 30.0,
+  "frames": 38,
+  "additive": false
+ },
+ {
+  "name": "Swat_Run_135_Jump_Behind_v01__P01",
+  "file": "Swat_Run_135_Jump_Behind_v01__P01",
+  "clip_key": "989cfa1f38782bbe",
+  "layer_key": "5db789d908adbe2f",
+  "fps": 30.0,
+  "frames": 75,
+  "additive": false
+ },
+ {
+  "name": "Swat_Run_135_Jump_Desperation__P01",
+  "file": "Swat_Run_135_Jump_Desperation__P01",
+  "clip_key": "e66071c215bfa8e9",
+  "layer_key": "604092a2e55ee726",
+  "fps": 60.0,
+  "frames": 96,
+  "additive": false
+ },
+ {
+  "name": "Swat_Run_135_Jump_Fall__P01",
+  "file": "Swat_Run_135_Jump_Fall__P01",
+  "clip_key": "4028493d1e947c94",
+  "layer_key": "690dd7311972b254",
+  "fps": 60.0,
+  "frames": 130,
+  "additive": false
+ },
+ {
+  "name": "Swat_Run_135_Jump_WayBehind__P01",
+  "file": "Swat_Run_135_Jump_WayBehind__P01",
+  "clip_key": "73d860b9617fe21b",
+  "layer_key": "6414983d5c708a15",
+  "fps": 60.0,
+  "frames": 79,
+  "additive": false
+ },
+ {
+  "name": "Swat_Run_135_Jump_v01__P01",
+  "file": "Swat_Run_135_Jump_v01__P01",
+  "clip_key": "6d891006f612d93d",
+  "layer_key": "71add7d404bcfd14",
+  "fps": 30.0,
+  "frames": 44,
+  "additive": false
+ },
+ {
+  "name": "Swat_Run_135_Jump_v1__P01",
+  "file": "Swat_Run_135_Jump_v1__P01",
+  "clip_key": "68e0017751946875",
+  "layer_key": "91dc09fa2941a137",
+  "fps": 60.0,
+  "frames": 104,
+  "additive": false
+ },
+ {
+  "name": "Swat_Run_135_Jump_v2__P01",
+  "file": "Swat_Run_135_Jump_v2__P01",
+  "clip_key": "293da4b7d35a3831",
+  "layer_key": "2f636a0f7b1e522b",
+  "fps": 60.0,
+  "frames": 71,
+  "additive": false
+ },
+ {
+  "name": "Swat_Run_135_Waist_v01__P01",
+  "file": "Swat_Run_135_Waist_v01__P01",
+  "clip_key": "f7c760e03bbe1680",
+  "layer_key": "35d476aa10dbc3d6",
+  "fps": 30.0,
+  "frames": 38,
+  "additive": false
+ },
+ {
+  "name": "Swat_Run_180_AboveHead_Turn2Hand__P01",
+  "file": "Swat_Run_180_AboveHead_Turn2Hand__P01",
+  "clip_key": "62513061aadf8d7d",
+  "layer_key": "fc6ebdfd67171521",
+  "fps": 60.0,
+  "frames": 101,
+  "additive": false
+ },
+ {
+  "name": "Swat_Run_180_Above_Head_v01__P01",
+  "file": "Swat_Run_180_Above_Head_v01__P01",
+  "clip_key": "7abad9477a2edfda",
+  "layer_key": "50ccea4491af9635",
+  "fps": 30.0,
+  "frames": 38,
+  "additive": false
+ },
+ {
+  "name": "Swat_Run_180_Above_Head_v02__P01",
+  "file": "Swat_Run_180_Above_Head_v02__P01",
+  "clip_key": "e546e24ee627e4ec",
+  "layer_key": "a45e1599e1e0b300",
+  "fps": 30.0,
+  "frames": 65,
+  "additive": false
+ },
+ {
+  "name": "Swat_Run_180_Chest_v02__P01",
+  "file": "Swat_Run_180_Chest_v02__P01",
+  "clip_key": "b79db5daf01b5492",
+  "layer_key": "1b6562777a5a8408",
+  "fps": 30.0,
+  "frames": 70,
+  "additive": false
+ },
+ {
+  "name": "Swat_Run_180_Helmet_FBOCT_0260_2__P01",
+  "file": "Swat_Run_180_Helmet_FBOCT_0260_2__P01",
+  "clip_key": "1f33316b58b03b79",
+  "layer_key": "04a9e3b8a6115d23",
+  "fps": 30.0,
+  "frames": 59,
+  "additive": false
+ },
+ {
+  "name": "Swat_Run_180_Helmet_FBOCT_0260_3__P01",
+  "file": "Swat_Run_180_Helmet_FBOCT_0260_3__P01",
+  "clip_key": "31f4c6c4bcfe2c32",
+  "layer_key": "7b1c60f9dd50cbd5",
+  "fps": 30.0,
+  "frames": 30,
+  "additive": false
+ },
+ {
+  "name": "Swat_Run_180_Helmet_Over_Shoulder_v01__P01",
+  "file": "Swat_Run_180_Helmet_Over_Shoulder_v01__P01",
+  "clip_key": "0919223882ddc7b2",
+  "layer_key": "aa3d542b42ce6e1e",
+  "fps": 30.0,
+  "frames": 43,
+  "additive": false
+ },
+ {
+  "name": "Swat_Run_180_Helmet_v01__P01",
+  "file": "Swat_Run_180_Helmet_v01__P01",
+  "clip_key": "36b1b743622c2ca0",
+  "layer_key": "91ff2d6f7b79dd4d",
+  "fps": 30.0,
+  "frames": 42,
+  "additive": false
+ },
+ {
+  "name": "Swat_Run_180_OverShoulderFall_FBOCT_0264_6__P01",
+  "file": "Swat_Run_180_OverShoulderFall_FBOCT_0264_6__P01",
+  "clip_key": "edfa2f5888c35081",
+  "layer_key": "dfcef08e475f7c51",
+  "fps": 30.0,
+  "frames": 72,
+  "additive": false
+ },
+ {
+  "name": "Swat_Run_180_OverShoulderStretch_FBOCT_0264_7__P01",
+  "file": "Swat_Run_180_OverShoulderStretch_FBOCT_0264_7__P01",
+  "clip_key": "57d82fd7ba849f76",
+  "layer_key": "370bad9efb1cff91",
+  "fps": 30.0,
+  "frames": 38,
+  "additive": false
+ },
+ {
+  "name": "Swat_Run_45_Jump_v1__P01",
+  "file": "Swat_Run_45_Jump_v1__P01",
+  "clip_key": "d025dce86ececa06",
+  "layer_key": "8635745a158b8868",
+  "fps": 60.0,
+  "frames": 83,
+  "additive": false
+ },
+ {
+  "name": "Swat_Run_90_AboveHead_InStride__P01",
+  "file": "Swat_Run_90_AboveHead_InStride__P01",
+  "clip_key": "755808a373adf409",
+  "layer_key": "e55cbc23a96b6e5b",
+  "fps": 60.0,
+  "frames": 66,
+  "additive": false
+ },
+ {
+  "name": "Swat_Run_90_AboveHead_WayBehind__P01",
+  "file": "Swat_Run_90_AboveHead_WayBehind__P01",
+  "clip_key": "33f1f0877132d137",
+  "layer_key": "414c1b88d62c09db",
+  "fps": 60.0,
+  "frames": 67,
+  "additive": false
+ },
+ {
+  "name": "Swat_Run_90_Chest_Dive_v01__P01",
+  "file": "Swat_Run_90_Chest_Dive_v01__P01",
+  "clip_key": "624c3ac6e1d0c98a",
+  "layer_key": "b14fcf767e1018c4",
+  "fps": 30.0,
+  "frames": 56,
+  "additive": false
+ },
+ {
+  "name": "Swat_Run_90_Chest_InFront__P01",
+  "file": "Swat_Run_90_Chest_InFront__P01",
+  "clip_key": "660333e3e06191ec",
+  "layer_key": "105f98b1d2470b68",
+  "fps": 60.0,
+  "frames": 92,
+  "additive": false
+ },
+ {
+  "name": "Swat_Run_90_Chest_v2__P01",
+  "file": "Swat_Run_90_Chest_v2__P01",
+  "clip_key": "431bf2111a15759b",
+  "layer_key": "bc6a3a73a84463ea",
+  "fps": 60.0,
+  "frames": 74,
+  "additive": false
+ },
+ {
+  "name": "Swat_Run_90_Helmet_Behind_v01__P01",
+  "file": "Swat_Run_90_Helmet_Behind_v01__P01",
+  "clip_key": "a8eada1f56b66195",
+  "layer_key": "8bbea2c6803077ea",
+  "fps": 30.0,
+  "frames": 45,
+  "additive": false
+ },
+ {
+  "name": "Swat_Run_90_Helmet_Behind_v3__P01",
+  "file": "Swat_Run_90_Helmet_Behind_v3__P01",
+  "clip_key": "d642170598101081",
+  "layer_key": "d2c8b96c2b58c75c",
+  "fps": 60.0,
+  "frames": 89,
+  "additive": false
+ },
+ {
+  "name": "Swat_Run_90_Helmet_Dive_v01__P01",
+  "file": "Swat_Run_90_Helmet_Dive_v01__P01",
+  "clip_key": "060ceefec1af1beb",
+  "layer_key": "8af836ab2bcf714a",
+  "fps": 30.0,
+  "frames": 109,
+  "additive": false
+ },
+ {
+  "name": "Swat_Run_90_Helmet_Dive_v02__P01",
+  "file": "Swat_Run_90_Helmet_Dive_v02__P01",
+  "clip_key": "3b1b68e93ecc8a2a",
+  "layer_key": "673b0f6fa41e18ca",
+  "fps": 30.0,
+  "frames": 65,
+  "additive": false
+ },
+ {
+  "name": "Swat_Run_90_Helmet_FBOCT_0255_2__P01",
+  "file": "Swat_Run_90_Helmet_FBOCT_0255_2__P01",
+  "clip_key": "8c50bff35ff83e84",
+  "layer_key": "11e2f998019a1059",
+  "fps": 30.0,
+  "frames": 31,
+  "additive": false
+ },
+ {
+  "name": "Swat_Run_90_Helmet_InFront__P01",
+  "file": "Swat_Run_90_Helmet_InFront__P01",
+  "clip_key": "9386a0f0b544b0c7",
+  "layer_key": "2f492c7549a3b007",
+  "fps": 60.0,
+  "frames": 85,
+  "additive": false
+ },
+ {
+  "name": "Swat_Run_90_Helmet_InFront_v3__P01",
+  "file": "Swat_Run_90_Helmet_InFront_v3__P01",
+  "clip_key": "1bf056e1cfe1612e",
+  "layer_key": "743c9e46b7b246cf",
+  "fps": 60.0,
+  "frames": 81,
+  "additive": false
+ },
+ {
+  "name": "Swat_Run_90_Helmet_InFront_v4__P01",
+  "file": "Swat_Run_90_Helmet_InFront_v4__P01",
+  "clip_key": "6e930d2eee26b230",
+  "layer_key": "a3ce10e99727d8c0",
+  "fps": 60.0,
+  "frames": 96,
+  "additive": false
+ },
+ {
+  "name": "Swat_Run_90_Helmet_InFront_v5__P01",
+  "file": "Swat_Run_90_Helmet_InFront_v5__P01",
+  "clip_key": "ef975c16a32d589a",
+  "layer_key": "dbc2036e96481043",
+  "fps": 60.0,
+  "frames": 98,
+  "additive": false
+ },
+ {
+  "name": "Swat_Run_90_Helmet_WayBehind_v1__P01",
+  "file": "Swat_Run_90_Helmet_WayBehind_v1__P01",
+  "clip_key": "c35ac5a86983387c",
+  "layer_key": "cdfa53d8d9a91139",
+  "fps": 60.0,
+  "frames": 110,
+  "additive": false
+ },
+ {
+  "name": "Swat_Run_90_Helmet_WayInFront_v2__P01",
+  "file": "Swat_Run_90_Helmet_WayInFront_v2__P01",
+  "clip_key": "158bbdcf6bf31d2b",
+  "layer_key": "6c5b84ee9e26f1e3",
+  "fps": 60.0,
+  "frames": 74,
+  "additive": false
+ },
+ {
+  "name": "Swat_Run_90_JumpHigh_v1__P01",
+  "file": "Swat_Run_90_JumpHigh_v1__P01",
+  "clip_key": "fe4c2500d6157119",
+  "layer_key": "50e7fff80380f5e5",
+  "fps": 60.0,
+  "frames": 85,
+  "additive": false
+ },
+ {
+  "name": "Swat_Run_90_Waist_Behind_v01__P01",
+  "file": "Swat_Run_90_Waist_Behind_v01__P01",
+  "clip_key": "663542891d673945",
+  "layer_key": "56893d43dd07d3f2",
+  "fps": 30.0,
+  "frames": 105,
+  "additive": false
+ },
+ {
+  "name": "Swat_Run_90_Waist_Dive_v01__P01",
+  "file": "Swat_Run_90_Waist_Dive_v01__P01",
+  "clip_key": "1197ce7d59d8c90d",
+  "layer_key": "eb3212eb30f40b77",
+  "fps": 30.0,
+  "frames": 69,
+  "additive": false
+ },
+ {
+  "name": "Swat_Run_90_Waist_FBOCT_0256_1__P01",
+  "file": "Swat_Run_90_Waist_FBOCT_0256_1__P01",
+  "clip_key": "abcca531ee24a271",
+  "layer_key": "e80770fb7b16b4bf",
+  "fps": 30.0,
+  "frames": 35,
+  "additive": false
+ },
+ {
+  "name": "Swat_Running_Athl_Jump_D1__P01",
+  "file": "Swat_Running_Athl_Jump_D1__P01",
+  "clip_key": "8a3712a7db705a5e",
+  "layer_key": "7646d5d978034b9d",
+  "fps": 30.0,
+  "frames": 46,
+  "additive": false
+ },
+ {
+  "name": "Swat_Running_Hev_Jump_D1__P01",
+  "file": "Swat_Running_Hev_Jump_D1__P01",
+  "clip_key": "fc9393aca30b37c2",
+  "layer_key": "822bb577b317b190",
+  "fps": 30.0,
+  "frames": 42,
+  "additive": false
+ },
+ {
+  "name": "Swat_Stand_0_Above_Head_Side_Far_v01__P01",
+  "file": "Swat_Stand_0_Above_Head_Side_Far_v01__P01",
+  "clip_key": "68a608b12035c041",
+  "layer_key": "8971296d31ee414f",
+  "fps": 30.0,
+  "frames": 67,
+  "additive": false
+ },
+ {
+  "name": "Swat_Stand_0_Above_Head_Side_Turn_v01__P01",
+  "file": "Swat_Stand_0_Above_Head_Side_Turn_v01__P01",
+  "clip_key": "62747581e2813cac",
+  "layer_key": "5e5a1cbfefe07708",
+  "fps": 30.0,
+  "frames": 52,
+  "additive": false
+ },
+ {
+  "name": "Swat_Stand_0_Above_Head_Side_v01__P01",
+  "file": "Swat_Stand_0_Above_Head_Side_v01__P01",
+  "clip_key": "4432a892750cfab0",
+  "layer_key": "6650eb6a10172438",
+  "fps": 30.0,
+  "frames": 43,
+  "additive": false
+ },
+ {
+  "name": "Swat_Stand_0_Above_Head_v01__P01",
+  "file": "Swat_Stand_0_Above_Head_v01__P01",
+  "clip_key": "976f85135f919b84",
+  "layer_key": "3e9ceaa7fcca7fe9",
+  "fps": 30.0,
+  "frames": 37,
+  "additive": false
+ },
+ {
+  "name": "Swat_Stand_0_Jump_High_Side_Turn_v01__P01",
+  "file": "Swat_Stand_0_Jump_High_Side_Turn_v01__P01",
+  "clip_key": "610f117539f603fc",
+  "layer_key": "4dcc4949c03c7378",
+  "fps": 30.0,
+  "frames": 67,
+  "additive": false
+ },
+ {
+  "name": "Swat_Stand_0_Jump_High_Side_v01__P01",
+  "file": "Swat_Stand_0_Jump_High_Side_v01__P01",
+  "clip_key": "0acf9a52664594c4",
+  "layer_key": "aa83787a8f1da676",
+  "fps": 30.0,
+  "frames": 50,
+  "additive": false
+ },
+ {
+  "name": "Swat_Stand_0_Jump_High_v01__P01",
+  "file": "Swat_Stand_0_Jump_High_v01__P01",
+  "clip_key": "d3ecbfb214c38fa4",
+  "layer_key": "24233cb6b00fc7c0",
+  "fps": 30.0,
+  "frames": 57,
+  "additive": false
+ },
+ {
+  "name": "Swat_Stand_0_Jump_Side_Turn_v01__P01",
+  "file": "Swat_Stand_0_Jump_Side_Turn_v01__P01",
+  "clip_key": "dcd1244ad2826ccf",
+  "layer_key": "a1838f0b16349da0",
+  "fps": 30.0,
+  "frames": 54,
+  "additive": false
+ },
+ {
+  "name": "Swat_Stand_0_Jump_Side_v01__P01",
+  "file": "Swat_Stand_0_Jump_Side_v01__P01",
+  "clip_key": "1813e8b028956b31",
+  "layer_key": "0ce4836cf1124fd1",
+  "fps": 30.0,
+  "frames": 41,
+  "additive": false
+ },
+ {
+  "name": "Swat_Strafe_135_AboveHead_Behind__P01",
+  "file": "Swat_Strafe_135_AboveHead_Behind__P01",
+  "clip_key": "3582f5b9d7cbc504",
+  "layer_key": "d3d5eff5efd82e71",
+  "fps": 60.0,
+  "frames": 87,
+  "additive": false
+ },
+ {
+  "name": "Swat_Strafe_135_AboveHead_v2__P01",
+  "file": "Swat_Strafe_135_AboveHead_v2__P01",
+  "clip_key": "23df772b11c64f7f",
+  "layer_key": "80726b4ec6870425",
+  "fps": 30.0,
+  "frames": 39,
+  "additive": false
+ },
+ {
+  "name": "Swat_Strafe_135_AboveHead_v3__P01",
+  "file": "Swat_Strafe_135_AboveHead_v3__P01",
+  "clip_key": "3a85c482a9197409",
+  "layer_key": "4f9bac662b71977a",
+  "fps": 30.0,
+  "frames": 45,
+  "additive": false
+ },
+ {
+  "name": "Swat_Strafe_135_Chest_v1__P01",
+  "file": "Swat_Strafe_135_Chest_v1__P01",
+  "clip_key": "a0cfb711dabd1c09",
+  "layer_key": "ed721945204ce3a3",
+  "fps": 30.0,
+  "frames": 44,
+  "additive": false
+ },
+ {
+  "name": "Swat_Strafe_135_Chest_v2__P01",
+  "file": "Swat_Strafe_135_Chest_v2__P01",
+  "clip_key": "09b16bd862c47ea0",
+  "layer_key": "a0b8f6dd10d67606",
+  "fps": 30.0,
+  "frames": 35,
+  "additive": false
+ },
+ {
+  "name": "Swat_Strafe_135_Helmet_Behind_v1__P01",
+  "file": "Swat_Strafe_135_Helmet_Behind_v1__P01",
+  "clip_key": "0e8d2c8bc58efac1",
+  "layer_key": "bd26bdc9e26c9f1b",
+  "fps": 30.0,
+  "frames": 45,
+  "additive": false
+ },
+ {
+  "name": "Swat_Strafe_135_Helmet_Behind_v2__P01",
+  "file": "Swat_Strafe_135_Helmet_Behind_v2__P01",
+  "clip_key": "57f05a41b7031c3c",
+  "layer_key": "04d819204605d3a2",
+  "fps": 60.0,
+  "frames": 75,
+  "additive": false
+ },
+ {
+  "name": "Swat_Strafe_135_Helmet_v1__P01",
+  "file": "Swat_Strafe_135_Helmet_v1__P01",
+  "clip_key": "76124d9622b0ccac",
+  "layer_key": "7718480e77643f7c",
+  "fps": 30.0,
+  "frames": 41,
+  "additive": false
+ },
+ {
+  "name": "Swat_Strafe_135_JumpHigh_InFront_v1__P01",
+  "file": "Swat_Strafe_135_JumpHigh_InFront_v1__P01",
+  "clip_key": "f9a2eb4f371b0ae4",
+  "layer_key": "63b30dba8ca1cc93",
+  "fps": 30.0,
+  "frames": 43,
+  "additive": false
+ },
+ {
+  "name": "Swat_Strafe_135_JumpHigh_v1__P01",
+  "file": "Swat_Strafe_135_JumpHigh_v1__P01",
+  "clip_key": "4c4edeaffd5a7f2d",
+  "layer_key": "6d4571cf546cb26c",
+  "fps": 30.0,
+  "frames": 39,
+  "additive": false
+ },
+ {
+  "name": "Swat_Strafe_135_Jump_v1__P01",
+  "file": "Swat_Strafe_135_Jump_v1__P01",
+  "clip_key": "0a0a18189ac4bae9",
+  "layer_key": "fd9d6709f5b70ea6",
+  "fps": 30.0,
+  "frames": 73,
+  "additive": false
+ },
+ {
+  "name": "Swat_Strafe_135_Jump_v2__P01",
+  "file": "Swat_Strafe_135_Jump_v2__P01",
+  "clip_key": "8fe57eb1a3a5547d",
+  "layer_key": "40c7ac063ee10ee4",
+  "fps": 30.0,
+  "frames": 71,
+  "additive": false
+ },
+ {
+  "name": "Swat_Strafe_135_Waist_Behind_v1__P01",
+  "file": "Swat_Strafe_135_Waist_Behind_v1__P01",
+  "clip_key": "8f37c3a2d025883a",
+  "layer_key": "71e8f2759eb757eb",
+  "fps": 30.0,
+  "frames": 43,
+  "additive": false
+ },
+ {
+  "name": "Swat_Strafe_135_Waist_v1__P01",
+  "file": "Swat_Strafe_135_Waist_v1__P01",
+  "clip_key": "c5ce01c89c94f787",
+  "layer_key": "00c982dd1b5614b2",
+  "fps": 30.0,
+  "frames": 59,
+  "additive": false
+ },
+ {
+  "name": "Swat_Strafe_180_Above_Head_v01__P01",
+  "file": "Swat_Strafe_180_Above_Head_v01__P01",
+  "clip_key": "360f52ba690d5596",
+  "layer_key": "17fe751b1e6d1bdc",
+  "fps": 30.0,
+  "frames": 41,
+  "additive": false
+ },
+ {
+  "name": "Swat_Strafe_180_Above_Head_v02__P01",
+  "file": "Swat_Strafe_180_Above_Head_v02__P01",
+  "clip_key": "9e64be2d65aff9d9",
+  "layer_key": "71443683fa99a5c2",
+  "fps": 30.0,
+  "frames": 50,
+  "additive": false
+ },
+ {
+  "name": "Swat_Strafe_45_AboveHead_Behind__P01",
+  "file": "Swat_Strafe_45_AboveHead_Behind__P01",
+  "clip_key": "cda9aa063b0124e4",
+  "layer_key": "bc509e7a41139f31",
+  "fps": 30.0,
+  "frames": 53,
+  "additive": false
+ },
+ {
+  "name": "Swat_Strafe_45_AboveHead_v1__P01",
+  "file": "Swat_Strafe_45_AboveHead_v1__P01",
+  "clip_key": "5c8cfd1afa440992",
+  "layer_key": "ed690fffd59dc1e2",
+  "fps": 30.0,
+  "frames": 47,
+  "additive": false
+ },
+ {
+  "name": "Swat_Strafe_45_Chest_Behind__P01",
+  "file": "Swat_Strafe_45_Chest_Behind__P01",
+  "clip_key": "9a605111fd1c35b5",
+  "layer_key": "9e28c04d050281bd",
+  "fps": 30.0,
+  "frames": 50,
+  "additive": false
+ },
+ {
+  "name": "Swat_Strafe_45_Chest_v1__P01",
+  "file": "Swat_Strafe_45_Chest_v1__P01",
+  "clip_key": "a491be5f0de96da2",
+  "layer_key": "b859ab1e941dc225",
+  "fps": 30.0,
+  "frames": 39,
+  "additive": false
+ },
+ {
+  "name": "Swat_Strafe_45_Helmet_Behind_v1__P01",
+  "file": "Swat_Strafe_45_Helmet_Behind_v1__P01",
+  "clip_key": "7654ddca310b2d9f",
+  "layer_key": "a17e303f88cbb5fc",
+  "fps": 30.0,
+  "frames": 50,
+  "additive": false
+ },
+ {
+  "name": "Swat_Strafe_45_Helmet_v1__P01",
+  "file": "Swat_Strafe_45_Helmet_v1__P01",
+  "clip_key": "254624649fbd2595",
+  "layer_key": "8164548f4721542a",
+  "fps": 30.0,
+  "frames": 42,
+  "additive": false
+ },
+ {
+  "name": "Swat_Strafe_45_JumpHigh_InFront_v1__P01",
+  "file": "Swat_Strafe_45_JumpHigh_InFront_v1__P01",
+  "clip_key": "1517bce3a155e53e",
+  "layer_key": "1aa38855ab7173dc",
+  "fps": 30.0,
+  "frames": 42,
+  "additive": false
+ },
+ {
+  "name": "Swat_Strafe_45_JumpHigh_v1__P01",
+  "file": "Swat_Strafe_45_JumpHigh_v1__P01",
+  "clip_key": "f3cce35087ccdf2b",
+  "layer_key": "6a3ca39b0ee2d04e",
+  "fps": 30.0,
+  "frames": 34,
+  "additive": false
+ },
+ {
+  "name": "Swat_Strafe_45_Jump_Behind_v1__P01",
+  "file": "Swat_Strafe_45_Jump_Behind_v1__P01",
+  "clip_key": "4074844b5a27cc37",
+  "layer_key": "be5dc4ea2014cd18",
+  "fps": 30.0,
+  "frames": 55,
+  "additive": false
+ },
+ {
+  "name": "Swat_Strafe_45_Jump_v1__P01",
+  "file": "Swat_Strafe_45_Jump_v1__P01",
+  "clip_key": "4effe69d8d352b74",
+  "layer_key": "2e48b3438168f60f",
+  "fps": 30.0,
+  "frames": 60,
+  "additive": false
+ },
+ {
+  "name": "Swat_Strafe_45_Waist_Behind_v1__P01",
+  "file": "Swat_Strafe_45_Waist_Behind_v1__P01",
+  "clip_key": "3904150029b17797",
+  "layer_key": "ff83f682b5a926f0",
+  "fps": 30.0,
+  "frames": 44,
+  "additive": false
+ },
+ {
+  "name": "Swat_Strafe_45_Waist_v1__P01",
+  "file": "Swat_Strafe_45_Waist_v1__P01",
+  "clip_key": "f6d07e38275caf5a",
+  "layer_key": "166eca9cfa6a567f",
+  "fps": 30.0,
+  "frames": 41,
+  "additive": false
+ },
+ {
+  "name": "Swat_Strafe_90_AboveHead_Behind_v1__P01",
+  "file": "Swat_Strafe_90_AboveHead_Behind_v1__P01",
+  "clip_key": "b08fb17c70354564",
+  "layer_key": "8ab13eba64a2046b",
+  "fps": 30.0,
+  "frames": 67,
+  "additive": false
+ },
+ {
+  "name": "Swat_Strafe_90_AboveHead_v1__P01",
+  "file": "Swat_Strafe_90_AboveHead_v1__P01",
+  "clip_key": "fe7e2793f0fb4366",
+  "layer_key": "4632ba3c98a7e9df",
+  "fps": 30.0,
+  "frames": 41,
+  "additive": false
+ },
+ {
+  "name": "Swat_Strafe_90_Chest_Behind_v1__P01",
+  "file": "Swat_Strafe_90_Chest_Behind_v1__P01",
+  "clip_key": "f8ea7a5468052f61",
+  "layer_key": "53983c36d96fc79a",
+  "fps": 30.0,
+  "frames": 47,
+  "additive": false
+ },
+ {
+  "name": "Swat_Strafe_90_Chest_v1__P01",
+  "file": "Swat_Strafe_90_Chest_v1__P01",
+  "clip_key": "9ce7b48a2f4eabe3",
+  "layer_key": "cf38dbfcb992d874",
+  "fps": 30.0,
+  "frames": 49,
+  "additive": false
+ },
+ {
+  "name": "Swat_Strafe_90_Helmet_Behind_v1__P01",
+  "file": "Swat_Strafe_90_Helmet_Behind_v1__P01",
+  "clip_key": "9dc49457cc6f0cfa",
+  "layer_key": "5cd15e02f892374c",
+  "fps": 30.0,
+  "frames": 46,
+  "additive": false
+ },
+ {
+  "name": "Swat_Strafe_90_Helmet_Behind_v2__P01",
+  "file": "Swat_Strafe_90_Helmet_Behind_v2__P01",
+  "clip_key": "753623a03ef9fb1b",
+  "layer_key": "753413b926a08aee",
+  "fps": 60.0,
+  "frames": 91,
+  "additive": false
+ },
+ {
+  "name": "Swat_Strafe_90_Helmet_Behind_v3__P01",
+  "file": "Swat_Strafe_90_Helmet_Behind_v3__P01",
+  "clip_key": "f4e481ed45189808",
+  "layer_key": "1b2cdb31375afdf3",
+  "fps": 60.0,
+  "frames": 91,
+  "additive": false
+ },
+ {
+  "name": "Swat_Strafe_90_Helmet_InFront_v3__P01",
+  "file": "Swat_Strafe_90_Helmet_InFront_v3__P01",
+  "clip_key": "5a5543a1ae42f919",
+  "layer_key": "cfef7a86c2817751",
+  "fps": 60.0,
+  "frames": 81,
+  "additive": false
+ },
+ {
+  "name": "Swat_Strafe_90_Helmet_InFront_v4__P01",
+  "file": "Swat_Strafe_90_Helmet_InFront_v4__P01",
+  "clip_key": "b32b0a9c68968c61",
+  "layer_key": "dc4479bcff43ef77",
+  "fps": 60.0,
+  "frames": 90,
+  "additive": false
+ },
+ {
+  "name": "Swat_Strafe_90_Helmet_WayBehind_v1__P01",
+  "file": "Swat_Strafe_90_Helmet_WayBehind_v1__P01",
+  "clip_key": "a72661ff4c005fd9",
+  "layer_key": "17a6034c9af181f0",
+  "fps": 60.0,
+  "frames": 93,
+  "additive": false
+ },
+ {
+  "name": "Swat_Strafe_90_Helmet_v1__P01",
+  "file": "Swat_Strafe_90_Helmet_v1__P01",
+  "clip_key": "cc94c0096187adce",
+  "layer_key": "819849fe862079ef",
+  "fps": 30.0,
+  "frames": 39,
+  "additive": false
+ },
+ {
+  "name": "Swat_Strafe_90_JumpHigh_v1__P01",
+  "file": "Swat_Strafe_90_JumpHigh_v1__P01",
+  "clip_key": "5ca90b94b9b3026d",
+  "layer_key": "eee38fe5ed710ad3",
+  "fps": 30.0,
+  "frames": 38,
+  "additive": false
+ },
+ {
+  "name": "Swat_Strafe_90_Jump_Behind_v1__P01",
+  "file": "Swat_Strafe_90_Jump_Behind_v1__P01",
+  "clip_key": "4879d7bc545abe80",
+  "layer_key": "d35f2faf09fa0a59",
+  "fps": 30.0,
+  "frames": 61,
+  "additive": false
+ },
+ {
+  "name": "Swat_Strafe_90_Jump_v1__P01",
+  "file": "Swat_Strafe_90_Jump_v1__P01",
+  "clip_key": "10f3128af6119509",
+  "layer_key": "c91b2ab516111a81",
+  "fps": 30.0,
+  "frames": 51,
+  "additive": false
+ },
+ {
+  "name": "Swat_Strafe_90_Waist_Behind_v1__P01",
+  "file": "Swat_Strafe_90_Waist_Behind_v1__P01",
+  "clip_key": "01bafc89279df405",
+  "layer_key": "3dcdea9104db6098",
+  "fps": 30.0,
+  "frames": 51,
+  "additive": false
+ },
+ {
+  "name": "Swat_Strafe_90_Waist_v1__P01",
+  "file": "Swat_Strafe_90_Waist_v1__P01",
+  "clip_key": "848ac45d2def8787",
+  "layer_key": "b2d852312dc44679",
+  "fps": 30.0,
+  "frames": 43,
+  "additive": false
+ },
+ {
+  "name": "Swat_WrapSwat_Run_D1_FBOCT_0321_1__P01",
+  "file": "Swat_WrapSwat_Run_D1_FBOCT_0321_1__P01",
+  "clip_key": "737497e6d1a3a93c",
+  "layer_key": "ae6d1bf35d91b28e",
+  "fps": 30.0,
+  "frames": 76,
+  "additive": false
+ },
+ {
+  "name": "Swat_WrapSwat_Run_D1_FBOCT_0321_1__P02",
+  "file": "Swat_WrapSwat_Run_D1_FBOCT_0321_1__P02",
+  "clip_key": "8523310dcdde0eb2",
+  "layer_key": "a61a281ad61c2363",
+  "fps": 30.0,
+  "frames": 160,
+  "additive": false
+ },
+ {
+  "name": "Swat_WrapSwat_Run_D3_FBOCT_0322_2__P01",
+  "file": "Swat_WrapSwat_Run_D3_FBOCT_0322_2__P01",
+  "clip_key": "1dc600ee3b1c7da0",
+  "layer_key": "e9f77668108e9a40",
+  "fps": 30.0,
+  "frames": 91,
+  "additive": false
+ },
+ {
+  "name": "Swat_WrapSwat_Run_D3_FBOCT_0322_2__P02",
+  "file": "Swat_WrapSwat_Run_D3_FBOCT_0322_2__P02",
+  "clip_key": "a03cc6ddbfd4521d",
+  "layer_key": "ecdfe0f9591dc79a",
+  "fps": 30.0,
+  "frames": 145,
+  "additive": false
+ },
+ {
+  "name": "Swat_WrapSwat_Run_D3_FBOCT_0322_3__P01",
+  "file": "Swat_WrapSwat_Run_D3_FBOCT_0322_3__P01",
+  "clip_key": "85164966f108c90e",
+  "layer_key": "35af4a8db2e6af21",
+  "fps": 30.0,
+  "frames": 121,
+  "additive": false
+ },
+ {
+  "name": "Swat_WrapSwat_Run_D3_FBOCT_0322_4__P01",
+  "file": "Swat_WrapSwat_Run_D3_FBOCT_0322_4__P01",
+  "clip_key": "09cfb32362754ee7",
+  "layer_key": "6b6ed6399f4a25e1",
+  "fps": 30.0,
+  "frames": 74,
+  "additive": false
+ },
+ {
+  "name": "Swat_WrapSwat_Run_D3_FBOCT_0322_4__P02",
+  "file": "Swat_WrapSwat_Run_D3_FBOCT_0322_4__P02",
+  "clip_key": "88b66f920a3b8bae",
+  "layer_key": "22fbc85e59ba8655",
+  "fps": 30.0,
+  "frames": 156,
+  "additive": false
+ },
+ {
+  "name": "Swat_WrapSwat_Run_D5_FBOCT_0323_2__P01",
+  "file": "Swat_WrapSwat_Run_D5_FBOCT_0323_2__P01",
+  "clip_key": "2797b96f8d95259f",
+  "layer_key": "8b3c302e9729b668",
+  "fps": 30.0,
+  "frames": 34,
+  "additive": false
+ },
+ {
+  "name": "Swat_WrapSwat_Run_D5_FBOCT_0323_2__P02",
+  "file": "Swat_WrapSwat_Run_D5_FBOCT_0323_2__P02",
+  "clip_key": "2c392b67b68c6095",
+  "layer_key": "feb34d0cbe1f288d",
+  "fps": 30.0,
+  "frames": 67,
+  "additive": false
+ },
+ {
+  "name": "Swat_WrapSwat_Stand_D3_FBOCT_0320_1__P01",
+  "file": "Swat_WrapSwat_Stand_D3_FBOCT_0320_1__P01",
+  "clip_key": "68ccd0494fa4824d",
+  "layer_key": "1ee6da3ecfd465ee",
+  "fps": 30.0,
+  "frames": 61,
+  "additive": false
+ },
+ {
+  "name": "Swat_WrapSwat_Stand_D3_FBOCT_0320_1__P02",
+  "file": "Swat_WrapSwat_Stand_D3_FBOCT_0320_1__P02",
+  "clip_key": "05d04ca14934e24a",
+  "layer_key": "260f906f26fd3e0f",
+  "fps": 30.0,
+  "frames": 36,
+  "additive": false
+ },
+ {
+  "name": "Swat_WrapSwat_Stand_D5_FBOCT_0319_1__P01",
+  "file": "Swat_WrapSwat_Stand_D5_FBOCT_0319_1__P01",
+  "clip_key": "a940329d270dec03",
+  "layer_key": "4137f816b635a3a0",
+  "fps": 30.0,
+  "frames": 86,
+  "additive": false
+ },
+ {
+  "name": "Swat_WrapSwat_Stand_D5_FBOCT_0319_1__P02",
+  "file": "Swat_WrapSwat_Stand_D5_FBOCT_0319_1__P02",
+  "clip_key": "ba251f70aac5dea6",
+  "layer_key": "8e8676ae608bf011",
+  "fps": 30.0,
+  "frames": 66,
+  "additive": false
+ },
+ {
+  "name": "TURNS_180_from_trot_OSF_plant__P01",
+  "file": "TURNS_180_from_trot_OSF_plant__P01",
+  "clip_key": "f2647241dd475ff0",
+  "layer_key": "a28799630477fedc",
+  "fps": 30.0,
+  "frames": 46,
+  "additive": false
+ },
+ {
+  "name": "TURNS_90_from_trot_OSF_plant__P01",
+  "file": "TURNS_90_from_trot_OSF_plant__P01",
+  "clip_key": "efa020f31257ce00",
+  "layer_key": "d4a82c67978cdeeb",
+  "fps": 30.0,
+  "frames": 34,
+  "additive": false
+ },
+ {
+  "name": "TURNS_backpedal_to_forward_slow__P01",
+  "file": "TURNS_backpedal_to_forward_slow__P01",
+  "clip_key": "261eacca932f0728",
+  "layer_key": "022a94187a9f9ad1",
+  "fps": 30.0,
+  "frames": 44,
+  "additive": false
+ }
+]
