@@ -1,6 +1,7 @@
 #include "UI/GridironOverlay.h"
 
 #include "Game/MatchDirector.h"
+#include "Audio/TagAudio.h"
 #include "Game/PlayArtStrokes.h"
 #include "UI/PlayDiagram.h"
 #include "Render/Coords.h"
@@ -448,12 +449,14 @@ void SGridironOverlay::Banner(const FString& Text, const FString& Sub, const FLi
 	BannerSub = Sub;
 	BannerColor = Color;
 	BannerT = 0.f;
+	ATagAudio::Ui(TEXT("UiWhoosh"), 0.55f);
 }
 
 void SGridironOverlay::Toast(const FString& Text)
 {
 	ToastText = Text;
 	ToastT = 0.f;
+	ATagAudio::Ui(TEXT("UiToast"), 0.7f);
 }
 
 TSharedRef<SWidget> SGridironOverlay::MakeButton(const FString& Label, const FString& Sub, std::function<void()> OnClick, float Width)
@@ -463,7 +466,8 @@ TSharedRef<SWidget> SGridironOverlay::MakeButton(const FString& Label, const FSt
 		SNew(SButton)
 		.ButtonColorAndOpacity(PanelLight)
 		.ContentPadding(FMargin(16, 10))
-		.OnClicked_Lambda([OnClick] { OnClick(); return FReply::Handled(); })
+		.OnClicked_Lambda([OnClick] { ATagAudio::Ui(TEXT("UiSelect")); OnClick(); return FReply::Handled(); })
+		.OnHovered_Lambda([] { ATagAudio::Ui(TEXT("UiMove"), 0.7f); })
 		[
 			SNew(SVerticalBox)
 			+ SVerticalBox::Slot().AutoHeight()[ SNew(STextBlock).Font(Font(16, "Bold")).ColorAndOpacity(FLinearColor::White).Text(T(Label)) ]
@@ -730,6 +734,7 @@ void SGridironOverlay::CallPick(FCallChoice C)
 {
 	std::function<void(FCallChoice)> Done = CallDone;
 	CallDone = nullptr;
+	ATagAudio::Ui(TEXT("UiSelect"));
 	CallRoot.Reset();
 	ClearModal();
 	if (Done) Done(C);
@@ -768,6 +773,7 @@ bool SGridironOverlay::CallKey(const FKey& K, bool bRepeat)
 			CallTab = CallTabs[((At < 0 ? 0 : At) + (bNextTab ? 1 : -1) + N) % N].Key;
 			CallPage = 0;
 			CallSet.Reset();
+			ATagAudio::Ui(TEXT("UiTab"));
 			BuildPlayCall();
 		}
 		return true;
@@ -780,6 +786,7 @@ bool SGridironOverlay::CallKey(const FKey& K, bool bRepeat)
 		if (Pages > 1)
 		{
 			CallPage = (CallPage + (bNextPage ? 1 : -1) + Pages) % Pages;
+			ATagAudio::Ui(TEXT("UiMove"));
 			BuildPlayCall();
 		}
 		return true;
@@ -795,6 +802,7 @@ bool SGridironOverlay::CallKey(const FKey& K, bool bRepeat)
 		{
 			const int32 At = FMath::Max(0, CallSets.IndexOfByKey(CallSet));
 			CallSet = CallSets[(At + (bNextSet ? 1 : -1) + N) % N];
+			ATagAudio::Ui(TEXT("UiMove"));
 			CallPage = 0;
 			BuildPlayCall();
 		}
@@ -1138,6 +1146,11 @@ void SGridironOverlay::ShowSettings(std::function<void()> Back)
 	const bool bInv = Director && Director->InvertRightY();
 	V->AddSlot().AutoHeight()[ MakeButton(FString::Printf(TEXT("Right stick up / down: %s"), bInv ? TEXT("Inverted") : TEXT("Standard")),
 		TEXT("If the hit stick, truck and kick swing go the wrong way on your controller, flip this."), [this, Back, bInv] { if (Director) Director->SetInvertRightY(!bInv); ShowSettings(Back); }) ];
+	static const TCHAR* const VolName[3] = {TEXT("Volume"), TEXT("Music volume"), TEXT("Stadium volume")};
+	static const TCHAR* const VolSub[3] = {TEXT("Everything."), TEXT("The broadcast theme and the menu music."), TEXT("The crowd, the field, the stadium announcer.")};
+	for (int32 W = 0; W < 3; ++W)
+		V->AddSlot().AutoHeight()[ MakeButton(FString::Printf(TEXT("%s: %d%%"), VolName[W], ATagAudio::Level(W) * 25), VolSub[W],
+			[this, Back, W] { ATagAudio::StepLevel(W); ShowSettings(Back); }) ];
 	V->AddSlot().AutoHeight()[ MakeButton(TEXT("Back"), TEXT(""), [Back] { Back(); }) ];
 	ShowModal(Centered(SNew(SBorder).BorderImage(White()).BorderBackgroundColor(Panel).Padding(20)[V], 0.6f));
 }

@@ -12,6 +12,7 @@
 #include "UI/GridironOverlay.h"
 #include "UI/LoadingScreen.h"
 #include "Booth/TagBooth.h"
+#include "Audio/TagAudio.h"
 #include "MoviePlayer.h"
 #include "CineCameraActor.h"
 #include "CineCameraComponent.h"
@@ -106,6 +107,7 @@ void AMatchDirector::BeginPlay()
 {
 	Super::BeginPlay();
 	ATagBooth::WarmService(); // the booth's voices load while the menus are up
+	if (!FParse::Param(FCommandLine::Get(), TEXT("TagNoAudio"))) Audio = GetWorld()->SpawnActor<ATagAudio>();
 	// controllers: GameInput (GameInputWindows plugin) reads PS5 DualSense pads as standard gamepads, XInput pads too;
 	// all of them drive the one player (Config/Windows/WindowsInput.ini). Note whether a Sony pad is plugged in so the
 	// hints can name its buttons.
@@ -2369,11 +2371,13 @@ void AMatchDirector::ShowTeamSelect(bool bUserPlays)
 void AMatchDirector::QuitToMenu()
 {
 	if (Booth) { Booth->Destroy(); Booth = nullptr; }
+	if (Audio) Audio->MatchEnd();
 	ShowMainMenu();
 }
 
 void AMatchDirector::StartMatch(int HomeIdx, int AwayIdx, bool bUserPlays, bool bUserHome, int WeatherKind, bool bNight, double QuarterLen)
 {
+	if (Audio) Audio->Hush(); // (the loading reel has its own sound; the menu's music must not play over it)
 	// -TagWeatherSeed=<n>: the same weather every run (like-for-like performance comparisons)
 	int32 WeatherSeed = -1;
 	FParse::Value(FCommandLine::Get(), TEXT("TagWeatherSeed="), WeatherSeed);
@@ -2421,6 +2425,7 @@ void AMatchDirector::StartMatch(int HomeIdx, int AwayIdx, bool bUserPlays, bool 
 	// the offense. C / the pad's view button steps through the cameras either way.
 	CamMode = bWatch ? ECamMode::Sideline : ECamMode::Broadcast;
 	CamStationX = -1.f;
+	if (Audio) Audio->MatchStart(*Game);
 	// with the booth, the game starts in a short wait: the kickoff holds while the crew opens the broadcast (BoothHold)
 	if (Booth) Wait(0.5f);
 	else Next();
@@ -3189,6 +3194,7 @@ void AMatchDirector::DelayOfGame()
 	}
 	G.delayOfGame();
 	Overlay->SetFlag(true);
+	if (Audio) Audio->Cue(TEXT("flag"), Ball ? Ball->GetActorLocation() : FVector::ZeroVector);
 	Overlay->Banner(TEXT("FLAG"), FString(TEXT("Delay of Game  -  ")) + S(G.offense().abbr), Flag);
 	Wait(2.f);
 }
@@ -3236,6 +3242,7 @@ void AMatchDirector::CallPresnapFlag()
 	Overlay->SetHint(TEXT(""));
 	G.applyPresnap(Pen);
 	Overlay->SetFlag(true);
+	if (Audio) Audio->Cue(TEXT("flag"), Ball ? Ball->GetActorLocation() : FVector::ZeroVector);
 	Overlay->Banner(TEXT("FLAG"), S(Pen.name) + TEXT("  -  ") + S((Pen.on == tag::Side::Off ? G.offense() : G.defense()).abbr), Flag);
 	Wait(2.5f);
 }
@@ -6170,6 +6177,7 @@ void AMatchDirector::Tick(float Dt)
 	const bool bEsc = PC && (PC->WasInputKeyJustPressed(EKeys::Escape) || PC->WasInputKeyJustPressed(EKeys::Gamepad_Special_Right));
 	if (bEnginePaused)
 	{
+		FeedAudio(Dt); // (the menu's own sounds and music)
 		// the world is held: only the pause menu's own key does anything (the menu's buttons are Slate's)
 		if (bEsc) Unpause();
 		return;
@@ -6359,6 +6367,7 @@ void AMatchDirector::Tick(float Dt)
 		break;
 	}
 	FeedBooth(Dt);
+	FeedAudio(Dt);
 	if (State != EMatchState::Menu && State != EMatchState::Final && !bLineup)
 	{
 		TickUmpire(Dt);
@@ -6410,4 +6419,53 @@ void AMatchDirector::FeedBooth(float Dt)
 	// a watched game lets the booth finish its breakdown before the next snap (a user's own pace is his)
 	V.canHold = !UserTeam.has_value() || bWatch;
 	Booth->Feed(Dt, *Game, V);
+}
+
+void AMatchDirector::FeedAudio(float Dt)
+{
+	if (!Audio) return;
+	FTagAudioView V;
+	using St = FTagAudioView::EStage;
+	switch (State)
+	{
+	case EMatchState::Menu: V.Stage = St::Menu; break;
+	case EMatchState::Call: V.Stage = St::Call; break;
+	case EMatchState::Presnap: V.Stage = St::Presnap; break;
+	case EMatchState::Live: V.Stage = St::Live; break;
+	case EMatchState::Post: V.Stage = St::Post; break;
+	case EMatchState::Kick: V.Stage = St::Kick; break;
+	case EMatchState::Wait: V.Stage = St::Wait; break;
+	case EMatchState::Final: V.Stage = St::Final; break;
+	case EMatchState::Paused: V.Stage = Game && Game->isFinal() ? St::Final : St::Halftime; break;
+	case EMatchState::Replay: V.Stage = St::Replay; break;
+	}
+	V.bPaused = bEnginePaused;
+	V.G = State == EMatchState::Menu ? nullptr : Game.get();
+	V.Sim = Sim.get();
+	V.Dir = Dir;
+	V.Ball = Ball ? Ball->GetActorLocation() : FVector::ZeroVector;
+	V.bBoothTalking = Booth && Booth->Talking();
+	V.bQuiet = bHighlights;
+	if (State == EMatchState::Replay) V.ReplayT = ReplayT;
+	if (State == EMatchState::Kick && Kick)
+	{
+		V.Sim = nullptr;
+		V.KickKind = Kick->Kind;
+		V.KickT = Kick->T;
+		V.KickLead = Kick->Lead;
+		V.KickHang = Kick->Res.flight ? static_cast<float>(Kick->Res.flight->hang) : 2.5f;
+		V.KickDir = Kick->Dir;
+		V.bKickBounce = Kick->bBounce;
+		V.KickHops = Kick->Hops;
+		V.bKickBlocked = Kick->bBlocked;
+		V.KickDesc = Kick->Res.desc;
+		if (Kick->Res.flight) V.KickGood = Kick->Res.flight->good;
+		if (Kick->SceneT0 >= 0.f && Kick->Kind != 0)
+		{
+			// the long snap and the holder's (the punter's) catch
+			V.KickSnapAt = Kick->SceneT0 + (Kick->Kind == 1 ? PuntSnapAt : FgSnapAt);
+			V.KickCatchAt = Kick->SceneT0 + (Kick->Kind == 1 ? PuntCatchAt : FgCatchAt);
+		}
+	}
+	Audio->Feed(Dt, V);
 }

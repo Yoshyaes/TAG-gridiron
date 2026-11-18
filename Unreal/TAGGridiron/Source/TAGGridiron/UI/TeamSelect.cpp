@@ -9,6 +9,7 @@
 #include "UI/GridironOverlay.h"
 
 #include "Game/MatchDirector.h"
+#include "Audio/TagAudio.h"
 #include "Game/PlayArtStrokes.h"
 #include "UI/PlayDiagram.h"
 #include "Render/Coords.h"
@@ -1202,6 +1203,7 @@ void SGridironOverlay::ShowTeamSelect(bool bUserPlays)
 		const bool bDown = K == EKeys::Gamepad_DPad_Down || K == EKeys::Gamepad_LeftStick_Down || K == EKeys::Down || K == EKeys::S;
 		const bool bPrev = K == EKeys::Gamepad_LeftShoulder || K == EKeys::Q;
 		const bool bNext = K == EKeys::Gamepad_RightShoulder || K == EKeys::E;
+		if (bLeft || bRight || bUp || bDown || bPrev || bNext) ATagAudio::Ui(TEXT("UiMove"));
 		if (bLeft || bRight) { SelCol = FMath::Clamp(SelCol + (bRight ? 1 : -1), 0, 2); Rebuild(); return true; }
 		if (SelCol == 1)
 		{
@@ -1216,14 +1218,16 @@ void SGridironOverlay::ShowTeamSelect(bool bUserPlays)
 		}
 		if (K == EKeys::Gamepad_FaceButton_Bottom || K == EKeys::Enter || K == EKeys::SpaceBar)
 		{
+			ATagAudio::Ui(SelCol == 1 && SelRow < NOpts ? TEXT("UiTab") : TEXT("UiSelect"));
 			if (SelCol == 1 && SelRow < NOpts) { OptSteps[SelRow](1); Rebuild(); }
 			else Kick();
 			return true;
 		}
-		if (K == EKeys::Gamepad_Special_Right) { Kick(); return true; }
-		if (K == EKeys::Gamepad_FaceButton_Right || K == EKeys::Escape || K == EKeys::BackSpace) { ShowMainMenu(); return true; }
+		if (K == EKeys::Gamepad_Special_Right) { ATagAudio::Ui(TEXT("UiSelect")); Kick(); return true; }
+		if (K == EKeys::Gamepad_FaceButton_Right || K == EKeys::Escape || K == EKeys::BackSpace) { ATagAudio::Ui(TEXT("UiBack")); ShowMainMenu(); return true; }
 		if (K == EKeys::Gamepad_FaceButton_Left || K == EKeys::R)
 		{
+			ATagAudio::Ui(TEXT("UiTab"));
 			if (SelCol != 2) Random(false);
 			if (SelCol != 0) Random(true);
 			Rebuild();
@@ -1232,6 +1236,7 @@ void SGridironOverlay::ShowTeamSelect(bool bUserPlays)
 		if (K == EKeys::Gamepad_FaceButton_Top || K == EKeys::T)
 		{
 			// the teams change ends; the user stays with their team and the pad with the team it was on
+			ATagAudio::Ui(TEXT("UiTab"));
 			Swap(SelHome, SelAway);
 			bSelUserHome = !bSelUserHome;
 			if (SelCol != 1) SelCol = 2 - SelCol;

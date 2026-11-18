@@ -19,6 +19,7 @@ class AStadium;
 class ACineCameraActor;
 class SGridironOverlay;
 class ATagBooth;
+class ATagAudio;
 class AStaticMeshActor;
 
 UENUM()
@@ -554,6 +555,10 @@ private:
 	TObjectPtr<ATagBooth> Booth;
 	bool bBoothNight = false;
 	void FeedBooth(float Dt);
+	/** The game's sound (Audio/TagAudio): the crowd, the field, the stadium, the music. It watches the game like the booth. */
+	UPROPERTY()
+	TObjectPtr<ATagAudio> Audio;
+	void FeedAudio(float Dt);
 	bool BoothHold() const;
 
 	friend class SGridironOverlay;

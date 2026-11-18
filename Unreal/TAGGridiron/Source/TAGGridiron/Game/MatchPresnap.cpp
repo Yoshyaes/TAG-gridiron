@@ -8,6 +8,7 @@
 #include "Render/PlayArt.h"
 #include "Game/PlayArtStrokes.h"
 #include "UI/GridironOverlay.h"
+#include "Audio/TagAudio.h"
 #include "Engine/World.h"
 #include "Engine/GameViewportClient.h"
 #include "Engine/Engine.h"
@@ -185,6 +186,7 @@ void AMatchDirector::PlayAudibleCue(bool bOffense, bool bSignal)
 				const bool bGun = Sim->qb->pos.x < Sim->los - 2.5;
 				UAnimSequence* C = bSignal && AA.QBSignal.IsValid() && bGun ? AA.QBSignal.Get() : bGun ? AA.QBAudibleGun.Get() : AA.QBAudibleUnder.Get();
 				if (C) Q->PlayOneShot(C);
+				if (Audio && !bSignal) Audio->Cue(TEXT("audible"), Q->GetActorLocation());
 			}
 		if (bSignal) return; // (a hot route is between the quarterback and his receiver)
 		// the men who hear it look up and settle again: the back beside him, and across the line the linebackers
@@ -203,6 +205,7 @@ void AMatchDirector::PlayAudibleCue(bool bOffense, bool bSignal)
 			if (E->p->pos == tag::Pos::LB && (!Mike || FMath::Abs(E->pos.y - Sim->by) < FMath::Abs(Mike->pos.y - Sim->by))) Mike = E;
 		if (Mike && AA.LBDefAudible.IsValid())
 			if (AAthlete* A = Ath(Mike)) A->PlayOneShot(AA.LBDefAudible.Get());
+		if (Mike && Audio) Audio->Cue(TEXT("defcall"), TagCoords::ToWorld(Mike->pos.x, Mike->pos.y, Dir, 1.0));
 	}
 }
 
@@ -1282,6 +1285,7 @@ void AMatchDirector::PlayFakeSnap()
 	if (!Sim || !Sim->qb || !Game) return;
 	AAthlete* Q = AthleteFor(Sim->qb->p, Game->poss);
 	if (!Q) return;
+	if (Audio) Audio->Cue(TEXT("hardcount"), Q->GetActorLocation());
 	// the pack's fake snaps (a dozen quarterbacks' own, shotgun and under center)
 	const bool bGun = Sim->qb->pos.x < Sim->los - 2.5;
 	static const TCHAR* Gun[] = {TEXT("FakeSnap_Shotgun_Brady"), TEXT("FakeSnap_Shotgun_PManning"), TEXT("FakeSnap_Shotgun_Brees"), TEXT("FakeSnap_Shotgun_ARodgers"), TEXT("FakeSnap_Shotgun_Romo")};

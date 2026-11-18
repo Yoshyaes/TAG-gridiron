@@ -8,6 +8,7 @@
 #include "Render/Athlete.h"
 #include "Render/Coords.h"
 #include "UI/GridironOverlay.h"
+#include "Audio/TagAudio.h"
 #include "Engine/World.h"
 #include "Engine/GameViewportClient.h"
 #include "Engine/Engine.h"
@@ -107,8 +108,8 @@ void AMatchDirector::TickUserKick(float Dt)
 	case 0:
 		// the stick pulled back (down): the swing starts. (Pads report the right stick's y either way round - a DualSense
 		// through GameInput came in reversed - so "back" is whichever way it was pulled, and the kick the flick the other way.)
-		if (FMath::Abs(RY) > 0.6f) { UK.Stage = 1; UK.bPadSwing = true; UK.MeterT = 0.f; UK.NeutralT = 0.f; UK.BackSign = RY > 0.f ? 1.f : -1.f; }
-		else if (bHit) { UK.Stage = 1; UK.bPadSwing = false; UK.MeterT = 0.f; }
+		if (FMath::Abs(RY) > 0.6f) { UK.Stage = 1; UK.bPadSwing = true; UK.MeterT = 0.f; UK.NeutralT = 0.f; UK.BackSign = RY > 0.f ? 1.f : -1.f; ATagAudio::Ui(TEXT("UiTick")); }
+		else if (bHit) { UK.Stage = 1; UK.bPadSwing = false; UK.MeterT = 0.f; ATagAudio::Ui(TEXT("UiTick")); }
 		break;
 	case 1:
 		UK.MeterT += Dt;
@@ -134,7 +135,7 @@ void AMatchDirector::TickUserKick(float Dt)
 			}
 			else UK.NeutralT = 0.f;
 		}
-		else if (!bDown) { UK.Stage = 2; UK.MeterT = 0.f; UK.Acc = -1.f; }
+		else if (!bDown) { UK.Stage = 2; UK.MeterT = 0.f; UK.Acc = -1.f; ATagAudio::Ui(TEXT("UiTick")); }
 		break;
 	case 2:
 		UK.MeterT += Dt;
@@ -144,6 +145,7 @@ void AMatchDirector::TickUserKick(float Dt)
 	default:
 		break;
 	}
+	if (bFire) ATagAudio::Ui(TEXT("UiLock"));
 	// the meter and the arrow
 	const tag::TeamKey KT = UK.Kind == 0 ? Game->kicking : Game->poss;
 	const tag::Player* Kicker = UK.Kind == 1 ? Game->punter(KT) : Game->kicker(KT);

@@ -38,6 +38,8 @@ public:
 	void Feed(float Dt, const tag::Game& G, const tag::booth::View& V);
 	/** The booth would like the snap (or the next play) held a moment: a break or a breakdown is still going. */
 	bool WantsHold() const { return Core && Core->wantsHold(); }
+	/** A voice is on the air right now (the sound mix makes room for it). */
+	bool Talking() const { return bPlaying; }
 	/** Hide the captions (the reel, a cut-in); the voices go on. */
 	void SetCaptionsShown(bool b) { bCaptions = b; }
 	/** Stop talking at once (quit to menu). */

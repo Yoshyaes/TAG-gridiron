@@ -283,6 +283,8 @@ def main():
                            "-c:a", "aac", "-b:a", "128k", "-movflags", "+faststart", "-shortest", OUT])
     json.dump({"clips": [{"seed": k[0], "n": k[1], "desc": clips[k].get("desc"), "score": score(clips[k])} for k in pick], "seconds": total},
               open(os.path.join(WORK, "reel.json"), "w"), indent=1)
+    # the game's own music and stadium under it, when the sound has been built (Tools/Audio)
+    subprocess.call([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "Audio", "score_reel.py"), OUT])
     print("TAG_HIGHLIGHTS wrote %s: %d clips, %.1f s, %d KB" % (OUT, len(parts), total, os.path.getsize(OUT) // 1024))
 
 
