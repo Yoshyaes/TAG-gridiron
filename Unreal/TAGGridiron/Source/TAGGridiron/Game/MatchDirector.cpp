@@ -6150,6 +6150,15 @@ void AMatchDirector::Tick(float Dt)
 		if (bMenuShot && MenuT > 8.f) FPlatformMisc::RequestExit(false);
 	}
 	APlayerController* PC = GetWorld()->GetFirstPlayerController();
+	if (PC && InputPrereq.Get() != PC)
+	{
+		// tick after the controller, so "just pressed" is this frame's input in paused and running ticks alike (the
+		// order otherwise differed between the two: the Esc that resumed in a paused tick was read again in the first
+		// running tick, before the controller had moved on, and paused the game again)
+		if (APlayerController* Old = InputPrereq.Get()) RemoveTickPrerequisiteActor(Old);
+		AddTickPrerequisiteActor(PC);
+		InputPrereq = PC;
+	}
 	TrackInputDevice(PC);
 	if (bPlayNowPending && !(IsMoviePlayerEnabled() && GetMoviePlayer()->IsMovieCurrentlyPlaying()))
 	{

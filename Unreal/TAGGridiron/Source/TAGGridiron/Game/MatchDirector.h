@@ -354,6 +354,8 @@ private:
 	bool bKickCatchLogged = false;
 	/** The pause menu holds the whole world (engine pause); Esc / OPTIONS again, or Resume, lets it go. */
 	bool bEnginePaused = false;
+	/** the player controller this director ticks after (its input is read fresh every frame, paused or not) */
+	TWeakObjectPtr<APlayerController> InputPrereq;
 	void Unpause();
 	std::map<tag::Ent*, FVector2D> Prev;
 	std::map<tag::Ent*, FString> Labels;
