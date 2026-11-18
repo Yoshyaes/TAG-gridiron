@@ -75,7 +75,7 @@ struct Tune {
   double contested = 0.45;  // catch difficulty of any contested ball (0.6978 before non-target teammates stopped catching passes thrown past them)
   double breakdownBase = 1.32;  // pursuit breakdown: speed over the carrier's
   double breakdownK = 1.98;  // ... per yard away
-  double catchKeep = 0.55;  // speed kept through an uncontested catch
+  double catchKeep = 0.45;  // speed kept through an uncontested catch (0.55: 7.3-7.5 yd an attempt, too much run after the catch)
   double penScale = 1.0324;  // penalty rate multiplier
   double assistRange = 3;  // a closing pursuer this near joins the tackle (yd)
   double tackleReach = 0.44;  // contact reach beyond the two bodies (yd)
@@ -85,8 +85,8 @@ struct Tune {
   double behindDepthK = 0.3;  // ... and per yard past the first that the catch is behind the line (not on a screen)
   double screenT = 1.9;       // a screen is thrown once the line has let the rush by (s)
   double behindHotK = 0.3;    // ... the same on a hot throw
-  double softZone = 0.0;      // how far the underneath zones sink on 2nd/3rd and long (x up to 4 yd)
-  double secondLong = 0.0;    // QB read bonus for a throw short of the sticks on 2nd and 10+
+  double softZone = 0.5;      // how far the underneath zones sink on 2nd/3rd and long (x up to 4 yd) (0: 3rd & 10+ converted 21-23%, NFL 20%)
+  double secondLong = 1.0;    // QB read bonus for a throw short of the sticks on 2nd and 10+ (he takes the underneath throw)
   double wrapBreak = 0.05;    // a wrapped carrier's chance to tear free mid-drive (before ratings and the stick)
   double scrambleK = 1.0;     // how readily a quarterback with a lane runs (x; raised to film scrambles)
   double behindRoom = 3.0; // ... the yards to spare he needs on the nearest defender
