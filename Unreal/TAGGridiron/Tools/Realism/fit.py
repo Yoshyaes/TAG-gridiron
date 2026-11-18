@@ -17,53 +17,67 @@ ap.add_argument("--rounds", type=int, default=12)
 ap.add_argument("--jobs", type=int, default=6)
 ap.add_argument("--out", default=os.path.join(HERE, "fit_result.json"))
 ap.add_argument("--start", help="a previous fit_result.json to start from")
+ap.add_argument("--seeds", help="several seeds, comma separated: the loss is the mean over them (one seed fits its own noise: a fit at 100 games on seed 11 took the loss from 6.5 to 0.5 there and from 6.9 to 7.1 on seed 29)")
+ap.add_argument("--only", help="fit these parameters only (comma separated); the rest stay at their defaults")
 ap.add_argument("--exe", default=EXE, help="SimCalibrate build to run (a copy, so the tools can be rebuilt during a fit)")
 a = ap.parse_args()
 EXE = a.exe
 
 # name: (default, lo, hi, first step)
 P = {
-    "tackleBase": (3.14, 2.4, 4.2, 0.25),
-    "accBase": (0.30, 0.18, 0.50, 0.05),
-    "accSlope": (0.017648, 0.008, 0.03, 0.003),
+    "tackleBase": (3.24, 2.4, 4.2, 0.25),
+    "behindK": (0.25, 0.0, 1.5, 0.15),
+    "accBase": (0.2944, 0.18, 0.50, 0.04),
+    "accSlope": (0.0157, 0.008, 0.03, 0.003),
     "deepErr": (0.01138, 0.0, 0.04, 0.006),
-    "deepReadK": (1.9267, 0.5, 3.0, 0.3),
-    "deepReadSlope": (0.16121, 0.04, 0.35, 0.04),
-    "hotDeepK": (0.90043, 0.0, 2.5, 0.3),
-    "hotDeepSlope": (0.1374, 0.0, 0.3, 0.04),
-    "manCushion": (2.1, 0.8, 3.0, 0.3),
+    "deepReadK": (1.5, 0.5, 3.0, 0.3),
+    "deepReadSlope": (0.16873, 0.04, 0.35, 0.04),
+    "hotDeepK": (0.73598, 0.0, 2.5, 0.3),
+    "hotDeepSlope": (0.13441, 0.0, 0.3, 0.04),
+    "manCushion": (1.1, 0.4, 3.0, 0.3),
+    "manLagK": (0.6, 0.3, 1.0, 0.15),
+    "zoneEyes": (4.0, 0.0, 8.0, 1.5),
+    "reachA": (14, 6.0, 30.0, 3.0),
+    "midContest": (1.0, 0.0, 1.0, 0.25),
+    "shortPen": (0.0, 0.0, 2.0, 0.4),
+    "passProHold": (3.8, 2.5, 5.0, 0.4),
+    "zoneReactK": (0.3, 0.2, 1.0, 0.15),
+    "zoneUnder": (1.2, 0.3, 2.0, 0.3),
     "zoneCushion": (3.0, 1.5, 5.0, 0.4),
     "zoneCushionV": (0.55, 0.2, 0.9, 0.08),
     "routeRead": (0.75, 0.0, 1.0, 0.15),
     "passProShed": (0.045, 0.02, 0.12, 0.012),
-    "qbThresh": (2.6324, 1.6, 3.6, 0.25),
-    "qbDecay": (0.21, 0.1, 0.45, 0.05),
+    "qbThresh": (3.15, 1.6, 3.6, 0.25),
+    "qbDecay": (0.26, 0.1, 0.45, 0.05),
     "qbLate": (0.7, 0.2, 1.4, 0.15),
-    "tightDeep": (1.7727, 1.0, 3.5, 0.3),
-    "tightShort": (1.7234, 0.6, 2.8, 0.25),
-    "contested": (0.7324, 0.3, 1.4, 0.15),
-    "breakdownBase": (1.5, 0.5, 3.0, 0.3),
+    "tightDeep": (1.9527, 1.0, 3.5, 0.3),
+    "tightShort": (2.51944, 0.6, 2.8, 0.25),
+    "contested": (0.6978, 0.3, 1.4, 0.15),
+    "breakdownBase": (1.32, 0.5, 3.0, 0.3),
     "breakdownK": (1.98, 0.8, 3.0, 0.3),
-    "catchKeep": (0.32, 0.25, 0.7, 0.06),
+    "catchKeep": (0.55, 0.25, 0.7, 0.06),
     "penScale": (1.0324, 0.8, 2.0, 0.15),
     "assistRange": (3, 1.4, 4.0, 0.4),
     "tackleReach": (0.44, 0.3, 0.9, 0.08),
-    "pursuitK": (0.69, 0.4, 1.1, 0.1),
+    "pursuitK": (0.97, 0.4, 1.1, 0.1),
     "deepKeep": (1.25, 0.0, 1.5, 0.25),
     "yacNoise": (2.5, 1.0, 4.0, 0.4),
     "runNoise": (1.0, 0.5, 2.0, 0.2),
-    "releaseRate": (8.0, 1.0, 20.0, 3.0),
-    "intBias": (1.344, -0.5, 2.5, 0.4),
-    "runShed": (0.065, 0.03, 0.2, 0.02),
-    "hotRate": (1.0, 0.3, 2.0, 0.25),
-    "outletPen": (0.3, 0.0, 1.5, 0.25),
+    "releaseRate": (5, 1.0, 20.0, 3.0),
+    "intBias": (0.86, -0.5, 2.5, 0.4),
+    "runShed": (0.0991, 0.03, 0.2, 0.02),
+    "hotRate": (0.5, 0.3, 2.0, 0.25),
+    "outletPen": (0.4303, 0.0, 1.5, 0.25),
 }
+SEEDS = [int(x) for x in a.seeds.split(",")] if a.seeds else []
+if a.only:
+    P = {k: v for k, v in P.items() if k in a.only.split(",")}
 rub = json.load(open(os.path.join(HERE, "rubric.json"), encoding="utf-8"))
 SIM_METRICS = [m for m in rub["metrics"] if m["src"].startswith("sim:") and not m["src"].startswith("sim:accel.")
                and m["src"] != "sim:box.offTolerance"]
 
 
-def run(params, seed, games):
+def run1(params, seed, games):
     fd, path = tempfile.mkstemp(suffix=".json")
     os.close(fd)
     cmd = [EXE, str(games), str(seed), "--json", path]
@@ -75,7 +89,21 @@ def run(params, seed, games):
     return J
 
 
+def run(params, seed, games):
+    """One seed's result, or (fitting over several seeds) the list of every seed's."""
+    if SEEDS and seed == a.seed:
+        return [run1(params, s, games) for s in SEEDS]
+    return run1(params, seed, games)
+
+
 def loss(J):
+    if isinstance(J, list):
+        ls = [loss(j) for j in J]
+        parts = {}
+        for _, p in ls:
+            for k, v in p.items():
+                parts[k] = round(parts.get(k, 0) + v / len(ls), 3)
+        return sum(l for l, _ in ls) / len(ls), parts
     L = 0.0
     parts = {}
     for m in SIM_METRICS:
@@ -107,7 +135,7 @@ step = {k: v[3] for k, v in P.items()}
 pool = ThreadPoolExecutor(a.jobs)
 base = run(cur, a.seed, a.games)
 best, parts = loss(base)
-print(f"start loss {best:.3f}  off-tolerance {base['box.offTolerance']:.0f}", flush=True)
+print(f"start loss {best:.3f}  off-tolerance {(base[0] if isinstance(base, list) else base)['box.offTolerance']:.0f}", flush=True)
 hist = [dict(round=0, loss=best, params=dict(cur))]
 for rnd in range(1, a.rounds + 1):
     cands = []

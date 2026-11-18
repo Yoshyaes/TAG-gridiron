@@ -239,9 +239,14 @@ def plan_staff():
         jobs.append(job("CoachHead_" + who, "CoachHead", parts, source=who, tone=skin_tone(col, {}) if col else 1,
                         hat=any("_hat" in os.path.basename(p["fbx"]).lower() for p in parts)))
     R = "Models/Referees/"
-    common = [part(R + "common/referee_lowerbody_mesh", "Pants"), part(R + "common/referee_accessories_mesh", "ArmGear")]
-    jobs.append(job("Ref_warm", "Ref", common + [part(R + "warm/referee_upperbody_warm_mesh", "Top"), part(R + "warm/referee_arms_warm_mesh", "Skin")]))
-    jobs.append(job("Ref_cold", "Ref", common + [part(R + "cold/referee_upperbody_cold_mesh", "Top")]))
+    # (the flags in the pocket, the whistle and the watch are drawn from the accessories map, not from the map of the
+    # garment they hang on: one slot per mesh put the trousers and shoes on the accessories map - a yellow shoe, a blue
+    # shin - all game long)
+    def ref_slot(own):
+        return lambda sec: "RefGear" if re.search("flags|whistle|watch", sec, re.I) else own
+    common = [part(R + "common/referee_lowerbody_mesh", ref_slot("Pants")), part(R + "common/referee_accessories_mesh", ref_slot("ArmGear"))]
+    jobs.append(job("Ref_warm", "Ref", common + [part(R + "warm/referee_upperbody_warm_mesh", ref_slot("Top")), part(R + "warm/referee_arms_warm_mesh", "Skin")]))
+    jobs.append(job("Ref_cold", "Ref", common + [part(R + "cold/referee_upperbody_cold_mesh", ref_slot("Top"))]))
     rh = part(R + "common/ref_1_b_n_01_mesh", head_slot)
     col = next((t.get("colorTexture") for s, t in rh["textures"].items() if s.startswith("head_lod0")), None)
     jobs.append(job("RefHead_1", "RefHead", [rh, part(R + "common/referee_hat_mesh", "Hat")], tone=skin_tone(col, {}) if col else 1))

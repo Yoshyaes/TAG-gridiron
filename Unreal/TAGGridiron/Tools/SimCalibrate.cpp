@@ -57,7 +57,7 @@ int main(int argc, char** argv) {
       {"rushAtt", {27, 2}},      {"ypc", {4.3, 0.2}},        {"sacks", {2.5, 0.4}},       {"sackRate", {6.8, 1}},
       {"ints", {0.8, 0.2}},      {"fumblesLost", {0.45, 0.15}}, {"firstDowns", {19.5, 1.2}}, {"thirdPct", {39, 3}},
       {"fgPct", {85, 4}},        {"punts", {4.0, 0.5}},      {"penalties", {6.0, 1}},     {"tds", {2.5, 0.3}},
-      {"explosive", {7.0, 1.5}},
+      {"explosive", {6.2, 1.5}},  // runs of 10+ (~3.1 a team game) and passes of 20+ (~3.1)
   };
 
   std::map<std::string, std::vector<double>> acc;
@@ -74,9 +74,14 @@ int main(int argc, char** argv) {
   double airSum = 0, airN = 0, dropbacksX = 0, pressured = 0, tackles = 0, tacklerSum = 0;
   int maxAirSeen = 0;
   std::map<std::string, int> deepOutcome, shortOutcome;
-  std::vector<double> sepAt[4];
+  std::vector<double> sepAt[4], sepTgt[4], sepThrow, sepFly;
+  double mGap[6] = {0, 0, 0, 0, 0, 0}, mGapN[6] = {0, 0, 0, 0, 0, 0}, mSpd[6] = {0, 0, 0, 0, 0, 0}, rSpd[6] = {0, 0, 0, 0, 0, 0};
+  double nearN[4] = {0, 0, 0, 0}, nearSep[4] = {0, 0, 0, 0};
   std::vector<double> ttt;
   std::vector<double> olDeep;
+  long dblPlays = 0, dblAny = 0;
+  double dblSecs = 0;
+  std::vector<double> dblFirst;
   // free-running acceleration over 0.2 s windows (the full-game telemetry's measure); TAG_ACCEL=1 turns it on
   const bool accelOn = std::getenv("TAG_ACCEL") != nullptr;
   const PlaySim* accSim = nullptr;
@@ -97,19 +102,25 @@ int main(int argc, char** argv) {
   std::map<const Ent*, std::vector<std::pair<V2, bool>>> hist;
   std::vector<double> tanA, latA;
   double accN = 0, accOver1g = 0;
-  std::map<std::string, int> sackHow, unblockedPos;
+  double accKind[4] = {0, 0, 0, 0};
+  std::map<std::string, int> sackHow, unblockedPos, pressWhy;
+  std::vector<double> pressTs;
   std::vector<double> sackT;
   double pathN[4] = {0, 0, 0, 0}, pathBehind[4] = {0, 0, 0, 0}, pathAir[4] = {0, 0, 0, 0};
   int lastQb = -1, lastQbPoss = -1;
-  double kickoffs = 0, koReturned = 0, fourthGo = 0;
+  double kickoffs = 0, koReturned = 0, fourthGo = 0, fourthWhy[5] = {0, 0, 0, 0, 0};
   std::map<std::string, double> J;  // --json
   double qbSwaps = 0, qbSnaps = 0;
   double yacSum = 0, compAirSum = 0, compN = 0;
   double fHold[2] = {0, 0}, fN[2] = {0, 0}, fDpi = 0, fDpiN = 0, fDhold = 0, fRough = 0, fOpi = 0, fOpiN = 0, fMask = 0;
   double dN[5] = {0, 0, 0, 0, 0}, dYds[5] = {0, 0, 0, 0, 0}, dPass[5] = {0, 0, 0, 0, 0}, dTg[5] = {0, 0, 0, 0, 0}, dSucc[5] = {0, 0, 0, 0, 0};
-  std::vector<double> runYds, passYdsEarly;
+  std::vector<double> runYds, passYdsEarly, run2L, pass2L, run1, pass1, pen1;
   double edN = 0, edSucc = 0, edRun = 0, edRunSucc = 0;
   double tdN[4] = {0, 0, 0, 0}, tdConv[4] = {0, 0, 0, 0}, tdPass[4] = {0, 0, 0, 0};
+  double tlWhy[4] = {0, 0, 0, 0}, serG = 0;
+  int serSack = 0, serLoss = 0;
+  std::map<std::string, int> penBy; double bhN[4][3] = {{0}}, bhNeg[4][3] = {{0}}, bhAir[4] = {0}, bhYac[4] = {0}; double cgN[4] = {0}, cgNeg[4] = {0}, cgZero[4] = {0}, cgSm[4] = {0}, cgAir[4] = {0}; std::vector<double> cgYacV[2], cgAirV[2], cgSepV[2];
+  double lastTg1 = 10, lastY1 = 0; int lastK1 = 0;
   double mtBroken = 0, mtMade = 0, yac0 = 0, yac0N = 0, yacMt = 0, yacMtN = 0;
   double yacSep[5] = {0, 0, 0, 0, 0}, yacSepN[5] = {0, 0, 0, 0, 0};
   double yacB[4] = {0, 0, 0, 0}, yacBN[4] = {0, 0, 0, 0}, yacBig[4] = {0, 0, 0, 0};
@@ -141,6 +152,8 @@ int main(int argc, char** argv) {
         std::printf("YAC %.0f air %.0f sep %.1f play %s missed %d\n%s", static_cast<double>(r.yac), static_cast<double>(r.airYards), r.catchSep, sim.cfg.offPlay->id.c_str(), r.brokenTackles, yacTrace.c_str());
       }
       if (r.olBlockDepth > -99) olDeep.push_back(r.olBlockDepth);
+      if (r.kind == PlayKind::Pass || r.kind == PlayKind::Sack) { dblPlays++; if (r.dblTeamT > 0) dblAny++; dblSecs += r.dblTeamT; if (r.dblFirstT >= 0) dblFirst.push_back(r.dblFirstT); }
+      for (int k = 0; k < 6; k++) mGap[k] += r.manGap[k], mGapN[k] += r.manGapN[k], mSpd[k] += r.manSpd[k], rSpd[k] += r.recSpd[k];
       if (r.kind == PlayKind::Sack) {
         std::string how = "?";
         double at = 0;
@@ -167,7 +180,7 @@ int main(int argc, char** argv) {
           pathBehind[r.throwPath] += r.airYards < 0 ? 1 : 0;
           pathAir[r.throwPath] += r.airYards;
         }
-        if (r.complete) depthComp[b]++;
+        if (r.complete) depthComp[b]++; if (r.complete && b == 0 && r.throwPath >= 0 && r.throwPath < 4) { const int sb = r.catchSep < 3 ? 0 : r.catchSep < 6 ? 1 : 2; bhN[r.throwPath][sb]++; bhNeg[r.throwPath][sb] += r.yards < -0.5; bhAir[r.throwPath] += r.airYards; bhYac[r.throwPath] += r.yac; } if (r.complete && b < 2) { cgYacV[b].push_back(r.yac); cgAirV[b].push_back(r.airYards); cgSepV[b].push_back(r.catchSep); } if (r.complete) { cgN[b]++; cgNeg[b] += r.yards < -0.5; cgZero[b] += r.yards >= -0.5 && r.yards < 0.5; cgSm[b] += r.yards >= 0.5 && r.yards < 3.5; cgAir[b] += r.airYards; }
         if (b == 3 || b == 1) {
           std::string o = "ground";
           for (const PlayEvent& e : r.events)
@@ -177,6 +190,8 @@ int main(int argc, char** argv) {
           (b == 3 ? deepOutcome : shortOutcome)[o]++;
         }
         if (r.complete && r.catchSep >= 0) sepAt[b].push_back(r.catchSep);
+        if (r.arriveSep >= 0) sepTgt[b].push_back(r.arriveSep);
+        if (r.complete && r.catchSep >= 0 && b == 2) { sepThrow.push_back(r.throwSep); sepFly.push_back(r.flightT); if (r.catchNear >= 0 && r.catchNear < 4) { nearN[r.catchNear]++; nearSep[r.catchNear] += r.catchSep; } }
         airSum += r.airYards;
         if (r.complete) {
           yacSum += r.yac;
@@ -195,6 +210,10 @@ int main(int argc, char** argv) {
       if (r.kind == PlayKind::Pass || r.kind == PlayKind::Sack) {
         dropbacksX++;
         if (r.pressured || r.kind == PlayKind::Sack) pressured++;
+        if (r.pressured) {
+          pressWhy[r.pressWhy]++;
+          pressTs.push_back(r.pressT);
+        }
         if (r.kind == PlayKind::Pass && r.timeToThrow > 0) ttt.push_back(r.timeToThrow);
       }
       mtBroken += r.brokenTackles;
@@ -205,6 +224,17 @@ int main(int argc, char** argv) {
         dPass[dn] += r.kind != PlayKind::Run;
         dTg[dn] += *sim.cfg.toGo;
         dSucc[dn] += r.yards >= *sim.cfg.toGo || r.td == Side::Off;
+        // how a third and long came about: what the series' first two downs were
+        if (dn == 1) { serG = 0; serSack = serLoss = 0; }
+        if (dn == 2 && *sim.cfg.toGo >= 10) (r.kind == PlayKind::Run ? run2L : pass2L).push_back(r.yards);
+        if (dn == 1) (r.kind == PlayKind::Run ? run1 : pass1).push_back(r.yards);
+        if (dn == 2) pen1.push_back(*sim.cfg.toGo - (lastTg1 - lastY1)); if (dn == 2 && std::getenv("TAG_DBGPEN") && *sim.cfg.toGo - (lastTg1 - lastY1) > 2.5) std::printf("PUSH tg1 %.1f y1 %.1f tg2 %.1f kind1 %d\n", lastTg1, lastY1, *sim.cfg.toGo, lastK1);
+        if (dn == 1) { lastTg1 = *sim.cfg.toGo; lastY1 = r.yards; lastK1 = (int)r.kind; }
+        if (dn <= 2) {
+          serG += r.yards;
+          serSack += r.kind == PlayKind::Sack;
+          serLoss += r.kind != PlayKind::Sack && r.yards < 0;
+        }
       }
       if (!sim.isReturn() && sim.cfg.down && *sim.cfg.down <= 2 && sim.cfg.toGo && r.kind != PlayKind::Kneel && r.kind != PlayKind::Spike) {
         const double need = (*sim.cfg.down == 1 ? 0.4 : 0.6) * *sim.cfg.toGo;
@@ -216,8 +246,9 @@ int main(int argc, char** argv) {
       }
       if (!sim.isReturn() && sim.cfg.down && *sim.cfg.down == 3 && sim.cfg.toGo && r.kind != PlayKind::Kneel && r.kind != PlayKind::Spike) {
         const double tg = *sim.cfg.toGo;
-        const int tb = tg <= 2 ? 0 : tg <= 5 ? 1 : tg <= 9 ? 2 : 3;
+        const int tb = tg < 2.5 ? 0 : tg < 5.5 ? 1 : tg < 9.5 ? 2 : 3;  // as the down box shows it (rounded): 9.3 to go is 3rd & 9
         tdN[tb]++;
+        if (tb == 3) tlWhy[tg - (10 - serG) > 2.5 ? 0 : serSack ? 1 : serLoss ? 2 : 3]++;
         if (r.yards >= tg || r.td == Side::Off) tdConv[tb]++;
         if (r.kind != PlayKind::Run) tdPass[tb]++;
       }
@@ -320,6 +351,12 @@ int main(int argc, char** argv) {
           const double sp = len(va);
           accN++;
           if (len(a) > 9.81) accOver1g++;
+          if (len(a) > 9.81) {  // what kind of move: a start (under 3 m/s), speeding up, braking or a cut at speed
+            const V2 u1 = sp > 0.1 ? scale(va, 1 / sp) : V2{1, 0};
+            const double t1 = dot(a, u1);
+            const double l1 = len(sub(a, scale(u1, t1)));
+            accKind[sp < 3 ? 0 : std::fabs(t1) < l1 ? 3 : t1 > 0 ? 1 : 2]++;
+          }
           if (sp > 1) {
             const V2 u = scale(va, 1 / sp);
             const double tan = dot(a, u);
@@ -334,6 +371,19 @@ int main(int argc, char** argv) {
                   game.score.home, game.log.size());
     if (game.score.home == game.score.away) ties++;
     if (game.score.home > game.score.away) homeWins++;
+    for (const PlayLog& l : game.log) {
+      // accepted penalties by foul ("PENALTY on XXX: <foul>[ (#nn)], ...")
+      const size_t at = l.desc.find("PENALTY on ");
+      if (at == std::string::npos) continue;
+      size_t a = l.desc.find(": ", at), b = l.desc.find(',', at);
+      if (a == std::string::npos || b == std::string::npos || b < a) continue;
+      std::string nm = l.desc.substr(a + 2, b - a - 2);
+      const size_t on = nm.find(" on ");
+      if (on != std::string::npos) nm = nm.substr(0, on);
+      const size_t par = nm.find(" (");
+      if (par != std::string::npos) nm = nm.substr(0, par);
+      penBy[nm]++;
+    }
     for (const PlayLog& l : game.log)
       if (l.desc.rfind("Overtime", 0) == 0) {
         ots++;
@@ -352,7 +402,15 @@ int main(int argc, char** argv) {
           if (s.find(k) != std::string::npos) return false;
         return true;
       };
-      if (li > 0 && game.log[li - 1].down == 4 && game.log[li - 1].poss == l.poss && scrimmage(d)) fourthGo++;
+      if (li > 0 && game.log[li - 1].down == 4 && game.log[li - 1].poss == l.poss && scrimmage(d))
+      {
+        fourthGo++;
+        // why: trailing late, short yardage, or the chart's longer ones
+        const PlayLog& b = game.log[li - 1];
+        const int mg = b.score[b.poss] - b.score[other(b.poss)];
+        const int why = (b.q >= 4 && mg < 0) ? 0 : b.toGo <= 1 ? 1 : b.toGo <= 2 ? 2 : b.ballOn >= 95 ? 3 : 4;
+        fourthWhy[why]++;
+      }
     }
     for (TeamKey k : {TeamKey::Home, TeamKey::Away}) {
       const TeamLine& T = game.team[k];
@@ -429,6 +487,8 @@ int main(int argc, char** argv) {
   J["fourth_down_go_per_team_game"] = fourthGo / (2.0 * N);
   std::printf("kickoffs returned %.1f%% (2025 NFL 74.5%%), 4th-down attempts %.2f per team-game (2024 ~1.4)\n",
               100 * J["ko_return_rate"], J["fourth_down_go_per_team_game"]);
+  std::printf("4th-down attempts per team-game by reason: trailing in Q4 %.2f, 4th & 1 %.2f, 4th & 2 %.2f, goal line %.2f, other %.2f\n",
+              fourthWhy[0] / (2.0 * N), fourthWhy[1] / (2.0 * N), fourthWhy[2] / (2.0 * N), fourthWhy[3] / (2.0 * N), fourthWhy[4] / (2.0 * N));
   // Realism extras. NFL 2023-24 approximations until Phase 0 re-sources them:
   // attempt share / completion % by air yards: behind LOS ~18% / 80%, 0-9 ~45% / 74%, 10-19 ~25% / 57%, 20+ ~12% / 37%;
   // aDOT ~7.9; NGS time to throw ~2.8 s; pressure ~33% of dropbacks; ~1.35 tacklers per tackle.
@@ -454,6 +514,13 @@ int main(int argc, char** argv) {
     J["max_air_yd"] = maxAirSeen;
     J["ttt_median_s"] = ttt.empty() ? 0.0 : ttt[ttt.size() / 2];
     J["pressured_pct"] = 100 * pressured / (std::max)(1.0, dropbacksX);
+    {
+      std::printf("first pressure by:");
+      for (const auto& kv : pressWhy) std::printf("  %s %d", kv.first.c_str(), kv.second);
+      std::sort(pressTs.begin(), pressTs.end());
+      if (!pressTs.empty()) std::printf("  | at t: p10 %.2f p50 %.2f p90 %.2f s", pressTs[pressTs.size() / 10], pressTs[pressTs.size() / 2], pressTs[pressTs.size() * 9 / 10]);
+      std::printf("\n");
+    }
     J["tacklers_per_tackle"] = tacklerSum / (std::max)(1.0, tackles);
     J["yac_per_completion"] = yacSum / (std::max)(1.0, compN);
     J["air_per_completion"] = compAirSum / (std::max)(1.0, compN);
@@ -475,9 +542,35 @@ int main(int argc, char** argv) {
       auto pc = [](std::vector<double> v, double q) { if (v.empty()) return 0.0; std::sort(v.begin(), v.end()); return v[static_cast<size_t>(q * (v.size() - 1))]; };
       double neg = 0, zero = 0;
       for (double y : runYds) { neg += y < 0; zero += y <= 0; }
+      {
+        auto hist = [](const std::vector<double>& v, const char* nm) {
+          double h[7] = {0};
+          for (double y : v) h[y < -0.5 ? 0 : y < 0.5 ? 1 : y < 3.5 ? 2 : y < 6.5 ? 3 : y < 9.5 ? 4 : y < 19.5 ? 5 : 6]++;
+          std::printf("  %s gains (<0, 0, 1-3, 4-6, 7-9, 10-19, 20+):", nm);
+          for (double x : h) std::printf(" %.1f%%", 100 * x / (std::max)(1.0, (double)v.size()));
+          std::printf("\n");
+        };
+        hist(runYds, "early run");
+        hist(passYdsEarly, "early pass play");
+        hist(run1, "1st down run");
+        hist(pass1, "1st down pass play");
+        hist(run2L, "2nd & 10+ run");
+        hist(pass2L, "2nd & 10+ pass play");
+        std::printf("  2nd & 10+: %.0f%% of 2nd downs, pass %.0f%%\n", 100.0 * (run2L.size() + pass2L.size()) / (std::max)(1.0, dN[2]), 100.0 * pass2L.size() / (std::max)(1.0, (double)(run2L.size() + pass2L.size())));
+        double pb = 0, pf = 0;
+        for (double x : pen1) { pb += x > 2.5; pf += x < -2.5; }
+        std::printf("  between 1st and 2nd down: pushed back by a penalty %.1f%%, moved up %.1f%%\n", 100 * pb / (std::max)(1.0, (double)pen1.size()), 100 * pf / (std::max)(1.0, (double)pen1.size()));
+      }
       std::printf("early downs: success %.0f%% (NFL ~47%%), runs %.0f%% (NFL ~42%%); run yards p10 %.0f p25 %.0f p50 %.0f p75 %.0f p90 %.0f, lost yards %.0f%%, <=0 %.0f%% (NFL ~ p50 3, <=0 ~22%%); early pass plays p25 %.0f p50 %.0f p75 %.0f\n",
                   100 * edSucc / (std::max)(1.0, edN), 100 * edRunSucc / (std::max)(1.0, edRun), pc(runYds, 0.1), pc(runYds, 0.25), pc(runYds, 0.5), pc(runYds, 0.75), pc(runYds, 0.9),
                   100 * neg / (std::max)(1.0, (double)runYds.size()), 100 * zero / (std::max)(1.0, (double)runYds.size()), pc(passYdsEarly, 0.25), pc(passYdsEarly, 0.5), pc(passYdsEarly, 0.75));
+      J["early_success_pct"] = 100 * edSucc / (std::max)(1.0, edN);
+      J["run_lost_pct"] = 100 * neg / (std::max)(1.0, (double)runYds.size());
+      J["run_p75_yd"] = pc(runYds, 0.75);
+      J["early_pass_p50_yd"] = pc(passYdsEarly, 0.5);
+      J["second_down_to_go"] = dTg[2] / (std::max)(1.0, dN[2]);
+      J["third_long_share_pct"] = 100 * tdN[3] / (std::max)(1.0, tdN[0] + tdN[1] + tdN[2] + tdN[3]);
+      J["third_short_share_pct"] = 100 * tdN[0] / (std::max)(1.0, tdN[0] + tdN[1] + tdN[2] + tdN[3]);
     }
     for (int dn = 1; dn <= 3; dn++)
       std::printf("down %d: %.0f%% of plays, to go %.1f, pass %.0f%%, avg gain %.2f, converted %.0f%%   (NFL ~ 1st: 41%%, 10.0, 49%%, 5.5; 2nd: 32%%, 7.6, 56%%, 5.2, 30%%; 3rd: 23%%, 7.3, 75%%, 5.4, 39%%)\n",
@@ -486,6 +579,23 @@ int main(int argc, char** argv) {
     std::printf("3rd downs (share of 3rd downs / converted / pass rate) NFL ~ 1-2: 22%% 62%%, 3-5: 25%% 48%%, 6-9: 26%% 36%%, 10+: 27%% 20%%\n");
     {
       const double tot = (std::max)(1.0, tdN[0] + tdN[1] + tdN[2] + tdN[3]);
+      for (int b = 0; b < 2; b++) std::printf("completions %s: lost yards %.1f%%, no gain %.1f%%, 1-3 yd %.1f%%, mean air %.1f (of %.0f)   ", b ? "0-9" : "behind LOS", 100 * cgNeg[b] / (std::max)(1.0, cgN[b]), 100 * cgZero[b] / (std::max)(1.0, cgN[b]), 100 * cgSm[b] / (std::max)(1.0, cgN[b]), cgAir[b] / (std::max)(1.0, cgN[b]), cgN[b]);
+      std::puts("");
+      for (int k = 0; k < 2; k++) {
+        // (NFL 2023 for comparison, nflverse pbp: behind LOS air p25/50/75 -4/-3/-2, yac p10/25/50/75 2/4/8/11, yac < 1 6%;
+        //  0-9 air 2/4/6, yac 0/0/2/6, yac < 1 28%)
+        auto q = [](std::vector<double> v, double f) { if (v.empty()) return 0.0; std::sort(v.begin(), v.end()); return v[(size_t)(f * (v.size() - 1))]; };
+        const auto& Y = cgYacV[k]; const auto& A = cgAirV[k];
+        const double lt1 = Y.empty() ? 0 : 100.0 * std::count_if(Y.begin(), Y.end(), [](double y) { return y < 1; }) / Y.size();
+        std::printf("completions %s: air p25/50/75 %.1f/%.1f/%.1f  yac p10/25/50/75 %.1f/%.1f/%.1f/%.1f  yac < 1 %.0f%%  sep p50 %.1f\n", k ? "0-9" : "behind LOS",
+          q(A, 0.25), q(A, 0.5), q(A, 0.75), q(Y, 0.1), q(Y, 0.25), q(Y, 0.5), q(Y, 0.75), lt1, q(cgSepV[k], 0.5));
+      }
+      for (int k = 0; k < 4; k++) { const double n = bhN[k][0] + bhN[k][1] + bhN[k][2]; std::printf("behind-LOS completions path %d: n %.0f air %.1f yac %.1f; lost yards by separation (<3, 3-6, 6+): %.0f%% (%.0f) %.0f%% (%.0f) %.0f%% (%.0f)", k, n, bhAir[k] / (std::max)(1.0, n), bhYac[k] / (std::max)(1.0, n), 100 * bhNeg[k][0] / (std::max)(1.0, bhN[k][0]), bhN[k][0], 100 * bhNeg[k][1] / (std::max)(1.0, bhN[k][1]), bhN[k][1], 100 * bhNeg[k][2] / (std::max)(1.0, bhN[k][2]), bhN[k][2]); std::puts(""); }
+      std::printf("accepted penalties per team game:");
+      for (const auto& kv : penBy) std::printf("  %s %.2f", kv.first.c_str(), kv.second / (2.0 * N));
+      std::puts("");
+      std::printf("3rd & 10+ came from (%% of all 3rd downs): a penalty in the series %.1f, a sack %.1f, a play for a loss %.1f, two plays for nothing %.1f\n",
+                  100 * tlWhy[0] / tot, 100 * tlWhy[1] / tot, 100 * tlWhy[2] / tot, 100 * tlWhy[3] / tot);
       const char* nm3[4] = {"1-2", "3-5", "6-9", "10+"};
       for (int k = 0; k < 4; k++)
         std::printf("   3rd & %s: %4.0f%% of 3rd downs, converted %4.0f%%, passed %4.0f%%\n", nm3[k], 100 * tdN[k] / tot, 100 * tdConv[k] / (std::max)(1.0, tdN[k]), 100 * tdPass[k] / (std::max)(1.0, tdN[k]));
@@ -541,11 +651,19 @@ int main(int argc, char** argv) {
                   "lateral p95 at >6 m/s %.1f   (telemetry baseline 17.3%% / 11.9 / -17.4 / 10.4)\n",
                   100 * accOver1g / accN, tanA[tanA.size() * 99 / 100], tanA[tanA.size() / 100], latA[latA.size() * 95 / 100]);
       J["accel.over_1g_pct"] = 100 * accOver1g / accN;
+      std::printf("  over 1 g by move (%% of all samples): under 3 m/s %.1f | speeding up %.1f | braking %.1f | cutting %.1f\n",
+                  100 * accKind[0] / accN, 100 * accKind[1] / accN, 100 * accKind[2] / accN, 100 * accKind[3] / accN);
       J["accel.speedup_p99"] = tanA[tanA.size() * 99 / 100];
       J["accel.braking_p1"] = tanA[tanA.size() / 100];
       J["accel.lateral_p95_at_6ms"] = latA[latA.size() * 95 / 100];
     }
     std::sort(olDeep.begin(), olDeep.end());
+    std::printf("pass-pro double teams: on %.1f%% of dropbacks, %.2f s a dropback\n", dblPlays ? 100.0 * dblAny / dblPlays : 0.0, dblPlays ? dblSecs / dblPlays : 0.0);
+    if (!dblFirst.empty())
+    {
+      std::sort(dblFirst.begin(), dblFirst.end());
+      std::printf("  first double team formed at: p10 %.2f p50 %.2f p90 %.2f s\n", dblFirst[dblFirst.size() / 10], dblFirst[dblFirst.size() / 2], dblFirst[dblFirst.size() * 9 / 10]);
+    }
     if (!olDeep.empty())
       std::printf("deepest engaged OL block past the LOS: p50 %.1f p99 %.1f max %.1f yd (real: rarely past ~12)\n",
                   olDeep[olDeep.size() / 2], olDeep[olDeep.size() * 99 / 100], olDeep.back());
@@ -558,6 +676,30 @@ int main(int argc, char** argv) {
       J[std::string("separation.") + key[i]] = sepAt[i].empty() ? 0.0 : sepAt[i][sepAt[i].size() / 2];
     }
     std::printf("\n");
+    std::printf("separation when the ball arrives, every target (mean yd, NGS 2.9 overall):");
+    {
+      double all = 0, alln = 0;
+      for (int i = 0; i < 4; i++) {
+        double s = 0;
+        for (double v : sepTgt[i]) s += v;
+        all += s, alln += static_cast<double>(sepTgt[i].size());
+        std::sort(sepTgt[i].begin(), sepTgt[i].end());
+        std::printf("  %s %.2f (p50 %.2f, n %zu)", nm[i], sepTgt[i].empty() ? 0.0 : s / sepTgt[i].size(), sepTgt[i].empty() ? 0.0 : sepTgt[i][sepTgt[i].size() / 2], sepTgt[i].size());
+        J[std::string("separation_tgt.") + key[i]] = sepTgt[i].empty() ? 0.0 : s / sepTgt[i].size();
+      }
+      std::printf("  all %.2f\n", alln ? all / alln : 0.0);
+      J["separation_tgt.all"] = alln ? all / alln : 0.0;
+    }
+    std::printf("man defender to his receiver (yd / his speed / the receiver's), at 0.5 s steps:");
+    for (int k = 0; k < 6; k++) std::printf("  %.1fs %.2f/%.1f/%.1f", 0.5 * (k + 1), mGap[k] / (std::max)(mGapN[k], 1.0), mSpd[k] / (std::max)(mGapN[k], 1.0), rSpd[k] / (std::max)(mGapN[k], 1.0));
+    std::printf("\n");
+    if (!sepThrow.empty()) {
+      std::sort(sepThrow.begin(), sepThrow.end());
+      std::sort(sepFly.begin(), sepFly.end());
+      std::printf("10-19 yd completions: separation at the throw p50 %.2f, flight p50 %.2f s; nearest at the catch: own man %.0f (%.2f yd)  other man %.0f (%.2f)  zone %.0f (%.2f)  other %.0f (%.2f)\n",
+                  sepThrow[sepThrow.size() / 2], sepFly[sepFly.size() / 2], nearN[0], nearSep[0] / (std::max)(nearN[0], 1.0), nearN[1], nearSep[1] / (std::max)(nearN[1], 1.0),
+                  nearN[2], nearSep[2] / (std::max)(nearN[2], 1.0), nearN[3], nearSep[3] / (std::max)(nearN[3], 1.0));
+    }
     std::printf("20+ yd outcomes:");
     for (const auto& kv : deepOutcome) std::printf("  %s %d", kv.first.c_str(), kv.second);
     std::printf("\n0-9 yd outcomes:");

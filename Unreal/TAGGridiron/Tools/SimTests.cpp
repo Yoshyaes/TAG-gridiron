@@ -393,7 +393,7 @@ int main() {
         if (e->isOL) out += e->role + ">" + (e->blockTarget ? e->blockTarget->role : std::string("-")) + " ";
       return out;
     };
-    check(pick(1) != pick(-1), "a slide left and right block the same men: " + pick(1));
+    check(pick(1) != pick(-1), "a slide left and right block the same men: " + pick(1) + " / " + pick(-1));
   });
 
   t("presnap: defensive assignments (blitz, spy, zones, man) play out", [&] {

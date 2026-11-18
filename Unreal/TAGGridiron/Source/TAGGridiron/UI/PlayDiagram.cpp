@@ -110,7 +110,7 @@ int32 SPlayDiagram::OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeo
 	}
 
 	// the art: zones under the lines, glows under their strokes
-	auto Thick = [&](float WidthCm) { return FMath::Clamp(WidthCm / 11.f, 1.6f, 4.f); };
+	auto Thick = [&](float WidthCm) { return FMath::Clamp(WidthCm / 7.f, 1.6f, 3.2f); };
 	for (const FArtStroke& St : Pic.Strokes)
 	{
 		if (St.Kind != FArtStroke::Zone || St.Pts.IsEmpty()) continue;

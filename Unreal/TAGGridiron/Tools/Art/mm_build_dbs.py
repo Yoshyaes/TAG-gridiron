@@ -90,18 +90,22 @@ try:
         groups = {}
         for n in names:
             m = _re.search(r"_D(\d)", n.rsplit("/", 1)[-1])
-            groups.setdefault(m.group(1) if m else "?", []).append(n)
+            # (the constant-pace walk loops are named FWD: straight ahead, direction 1)
+            groups.setdefault(m.group(1) if m else "1" if "_FWD_" in n else "?", []).append(n)
         keep = []
         for k, g in groups.items():
             g = sorted(g)
+            # (2026-11-14: the three sets share nothing where a direction has three captures or more - each takes every
+            # third. Before, set 0 was the whole list and S1 / S2 each two thirds of it, so two men on different sets
+            # still landed on the same capture two times in three: 4 or more men on one loop in a quarter of all frames.)
             if len(g) >= 3:
-                keep += [n for i, n in enumerate(g) if i % 3 != v]
+                keep += [n for i, n in enumerate(g) if i % 3 == v - 1]
             elif len(g) == 2:
-                keep += [g[1 - (v - 1)]]
+                keep += g if v == 3 else [g[v - 1]]
             else:
                 keep += g
         return keep
-    for v in (1, 2):
+    for v in (1, 2, 3):
         build(SRC + "PSD_Dense_Stand_Sprint_Loops", DST + "PSD_TAG_Sprint_Loops_S%d" % v, ["Transition"],
               ["Sprint/M_Neutral_Sprint_Loop_F_L_20", "Sprint/M_Neutral_Sprint_Loop_F_R_20"], style_subset(L["Sprint"], v), PACK_ONLY)
         build(SRC + "PSD_Dense_Stand_Run_Loops", DST + "PSD_TAG_Run_Loops_S%d" % v, [],

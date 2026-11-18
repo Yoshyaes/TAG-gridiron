@@ -35,6 +35,20 @@ struct FTagLocoSwitchNode : public FAnimNode_Base
 	virtual void Evaluate_AnyThread(FPoseContext& Output) override;
 };
 
+/** Sits between motion matching and the root offset node and reads the root motion the blend stack hands up: how far
+ *  the matched body's root travels this evaluation, all playing clips blended, at the rate they play (root space). */
+struct FTagRootTapNode : public FAnimNode_Base
+{
+	FPoseLink Source;
+	FTransform Delta = FTransform::Identity;
+	bool bHave = false;
+
+	virtual void Initialize_AnyThread(const FAnimationInitializeContext& Context) override { Source.Initialize(Context); }
+	virtual void CacheBones_AnyThread(const FAnimationCacheBonesContext& Context) override { Source.CacheBones(Context); }
+	virtual void Update_AnyThread(const FAnimationUpdateContext& Context) override { Source.Update(Context); }
+	virtual void Evaluate_AnyThread(FPoseContext& Output) override;
+};
+
 USTRUCT()
 struct FTagMotionMatchProxy : public FAnimSingleNodeInstanceProxy
 {
@@ -55,7 +69,9 @@ struct FTagMotionMatchProxy : public FAnimSingleNodeInstanceProxy
 	FAnimNode_OffsetRootBone* Offset = nullptr;
 	FAnimNode_MotionMatching* Match = nullptr;
 	FTagLocoSwitchNode Switch;
+	FTagRootTapNode Tap;
 	int32 SeenDbSerial = -1;
+	int32 SeenForceSerial = 0;
 	float ForceLeft = 0.f; // seconds of ForceInterrupt left after a database change, then back to InterruptOnDatabaseChange
 	// the minimum dwell (see UTagMotionMatchInstance::MinDwell): the clip it holds and the move it was picked for
 	TWeakObjectPtr<const UAnimationAsset> DwellAsset;
@@ -106,6 +122,7 @@ public:
 	bool bForceOnDbChange = true;
 	int32 LastDbFamily = -1; // the AAthlete's last set: 0 stop / idle, 1 start, 2 pivot, 3 moving loops
 	bool bLastDbCrouch = false;
+	bool bLastDbBall = false; // the last pick was for a man with the ball
 	/** The AAthlete's moving / standing call with hysteresis (a man easing along at walking pace flipped between the stop
 	 *  and start sets every few frames, each a forced fresh pick): StillFor = seconds below the stop line. */
 	bool bMovingLatch = false;
@@ -115,10 +132,25 @@ public:
 	float DiagHeld = 0.f, DiagPrevTime = 0.f;
 	TWeakObjectPtr<const UAnimationAsset> DiagPrev;
 	float SpeedRate = 1.f;                  // the smoothed multiplier applied
+	/** Bumped by the AAthlete when the playing clip cannot cover what the man is doing (its feet cover far less or far
+	 *  more ground than he does, or travel another way, beyond what the play rate, the stride and the orientation warp
+	 *  make up): the next search is a fresh pick, without the continuing pose's bonus. */
+	int32 ForceSerial = 0;
+	float ForceHoldSecs = 0.f; // how long a forced search keeps the continuing pose out (0: the default 0.15 s)
+	float BallForceCool = 0.f; // (AAthlete) a carrier still on an empty-handed clip: the next fresh pick's wait
 	/** Debug, copied after each worker thread update: where the pick is and what the search thought of it. */
 	float MatchedTime = 0.f, MatchedCost = 0.f, MatchedWantedRate = 1.f, MatchedClipSpeed = 0.f;
 	/** Which way the playing clip's root travels around its play position (component space of the source mesh, unit, 2D). */
 	FVector MatchedClipDir = FVector::ZeroVector;
+	/** The matched body's root as shown (world rotation): the OffsetRootBone node lets the clip's own turning carry the
+	 *  body up to 60 degrees off the component's facing, so the clip's travel in the world is this rotation applied to
+	 *  MatchedClipDir, not the component's. Valid while motion matching runs through the offset node. */
+	FQuat RootRotW = FQuat::Identity;
+	bool bRootRotValid = false;
+	/** The root motion of the last evaluation (FTagRootTapNode): translation in the root's space over RootDeltaDt seconds. */
+	FVector RootDelta = FVector::ZeroVector;
+	float RootDeltaDt = 0.f;
+	bool bRootDeltaValid = false;
 	bool bMatchedContinuing = false, bMatchedLoop = false;
 	/** Databases to search (changes take effect next update; the continuing pose is kept when it is still valid). */
 	void SetDatabases(TConstArrayView<UPoseSearchDatabase*> InDatabases);

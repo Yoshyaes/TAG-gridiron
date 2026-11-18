@@ -28,6 +28,7 @@ struct FTagProcInput
 	bool bStanceBothHands = false; // a four point stance
 	float LookAlpha = 0.f;     // head tracks LookTarget (ball / carrier / receiver)
 	FVector LookTarget = FVector::ZeroVector;
+	float LookUpMaxDeg = 20.f; // how far over the horizon his face may turn (a clip's head tipped up at the stands is brought down to it)
 	// per-player style ("signature") - stable per player, see AAthlete::Setup
 	float ArmSlot = 0.f;       // -1 sidearm .. +1 over the top
 	float StyleJitter = 0.f;   // -1..1 small timing / height variation
@@ -49,6 +50,19 @@ struct FTagProcInput
 	// actually travels (a back-right jog under a man drifting straight back skated its planted foot sideways); the
 	// spine turns back by the same angle, so the chest and the eyes keep their facing
 	float OrientWarpDeg = 0.f;
+	// the playing clip's root velocity in this mesh's component space (cm/s; zero for a clip played in place), and
+	// whether it is known this frame. With it the layer can tell a foot the capture holds on the turf (its motion in
+	// the clip plus the root's travel is ~0) from one that is merely low: a walking swing foot clears the ground by
+	// 4-6 cm, and by height alone it was "planted" - pinned in mid swing and counted as a sliding plant.
+	FVector RootVelCS = FVector::ZeroVector;
+	bool bRootVelValid = false;
+	// bodies in a pile: the heads, chests and hips of the men he is down with (world space, w = radius, cm). His hands
+	// and forearms are kept out of them (the captures were of two men; a third man's arm went through a helmet)
+	FVector4f KeepOut[12];
+	int32 KeepOutN = 0;
+	// the pose being blended out of sits a travelling capture's distance from the actor, and the actor has since been
+	// moved there: the blend takes the new clip's root and hips position at once (the limbs still blend)
+	bool bDropFromTravel = false;
 };
 
 USTRUCT()
@@ -77,6 +91,11 @@ struct FTagRetargetProxy : public FAnimInstanceProxy
 	/** Planted-foot travel this evaluation (cm): in the animation as retargeted, and as shown after the foot lock. */
 	float SlideRawFrame = 0.f, SlideShownFrame = 0.f;
 	int32 TouchdownsFrame = 0;
+	int32 PlantFeetFrame = 0; // feet the capture holds planted this evaluation (0-2)
+	/** How far the shown pose is from the capture as played (cm, mean over the eleven joints a pose reads by, component
+	 *  space): [0] in all, then what each layer moved: football layer, orientation, stride, lean, crossfade, foot lock.
+	 *  Measured only in telemetry runs (-TagHlFull / -TagDev). */
+	float DevFrame[7] = {0, 0, 0, 0, 0, 0, 0};
 
 private:
 	void ApplyFootballLayer(FPoseContext& Output) const;
@@ -84,6 +103,9 @@ private:
 	void ApplyOrient(FPoseContext& Output) const;
 	void ApplyLean(FPoseContext& Output) const;
 	void ApplyFeet(FPoseContext& Output);
+	void ApplyKeepOut(FPoseContext& Output);
+	FVector KeepOff[2] = {FVector::ZeroVector, FVector::ZeroVector}; // each hand's push, eased
+	FVector KeepOffLeg[2] = {FVector::ZeroVector, FVector::ZeroVector}; // each foot's push, eased
 	void ApplyCrossfade(FPoseContext& Output);
 	void EvaluateCopy(FPoseContext& Output);
 	TArray<int32> CopyMap;              // this mesh's bone -> the source mesh's bone (by name), INDEX_NONE where it has none
@@ -105,6 +127,13 @@ private:
 		FVector PrevRawW = FVector::ZeroVector, PrevShownW = FVector::ZeroVector;
 	};
 	FFootLock Feet[2];
+	/** The capture's own verdict on each foot (MeasurePlants, on the pose as copied, before any layer). */
+	void MeasurePlants(FPoseContext& Output);
+	bool bTruthPlant[2] = {false, false};
+	bool bTruthValid = false;
+	FVector PrevRawFootCS[2] = {FVector::ZeroVector, FVector::ZeroVector};
+	bool bHavePrevRaw = false;
+	int32 PlantSerial = 0; // the clip the verdict was last taken on
 	FVector PrevCompLoc = FVector::ZeroVector;
 	bool bHaveComp = false;
 	float Dt = 0.f;
@@ -151,6 +180,8 @@ public:
 
 	/** Foot slide accumulated since the game thread last cleared it (cm): the animation's and the shown body's. */
 	float SlideRaw = 0.f, SlideShown = 0.f;
+	int32 PlantFeet = 0; // feet the capture held planted in the last evaluation
+	float Dev[7] = {0, 0, 0, 0, 0, 0, 0}; // the last evaluation's distance from the capture (FTagRetargetProxy::DevFrame)
 	int32 Touchdowns = 0; // feet that came down on the turf since the game thread last cleared it (gait cadence)
 
 protected:

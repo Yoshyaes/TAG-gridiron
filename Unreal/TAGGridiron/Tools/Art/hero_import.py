@@ -134,11 +134,60 @@ if (NumOn > 0.5)
             }
         }
     }
+    // (see below for the officials' patch)
+    // TV numbers: the same digits on top of each shoulder (NFL jerseys carry them on the shoulders or the sleeves so the
+    // high cameras can read a man from above), projected down from the bind pose, their tops toward the back
+    if (TvOn > 0.5 && P.z > NeckZ - TvZ)
+    {
+        float H = TvH;
+        float w = H * 0.667, gap = H * 0.05;
+        float n = round(Number);
+        float tens = floor(n / 10.0), ones = n - tens * 10.0;
+        bool two = n >= 10.0;
+        float total = two ? (2.0 * w + gap) : w;
+        float sx = P.x > 0.0 ? 1.0 : -1.0;
+        float lx = (P.x - sx * TvX) * NumFlip + total * 0.5;
+        float v = (P.y - TorsoY - TvY) / H + 0.5;
+        if (v > 0.0 && v < 1.0 && lx > 0.0 && lx < total)
+        {
+            float digit = -1.0, du = 0.0;
+            if (!two) { digit = ones; du = lx / w; }
+            else if (lx < w) { digit = tens; du = lx / w; }
+            else if (lx > w + gap) { digit = ones; du = (lx - w - gap) / w; }
+            if (digit >= 0.0)
+            {
+                float2 m = Texture2DSampleLevel(Numbers, NumbersSampler, float2((digit + du) / 10.0, v), 0).rg;
+                c = lerp(c, Trim.rgb, m.g);
+                c = lerp(c, NumColor.rgb, m.r);
+            }
+        }
+    }
+}
+if (PatchOn > 0.5)
+{
+    // an official's back: his position letters over his number, the pack's own patch (a strip of eight cells, seven
+    // used: DJ LJ R U BJ SJ FJ), placed in the bind pose like the players' numbers
+    float side = P.y - TorsoY;
+    if (side < -4.0)
+    {
+        float u = (-P.x * NumFlip) / PatchW + 0.5;
+        float v = (NeckZ - PatchTop - P.z) / PatchH;
+        if (u > 0.0 && u < 1.0 && v > 0.0 && v < 1.0)
+        {
+            float m = Texture2DSampleLevel(Patch, PatchSampler, float2((PatchIdx + u) / 8.0, v), 0).r;
+            c = lerp(c, float3(0.02, 0.02, 0.025), m);
+        }
+    }
 }
 return c;
 """
 SCALARS = {"Mode": 0.0, "Packed": 0.0, "TeamGlove": 0.0, "AlphaTint": 1.0, "LumRef": 1.0, "NumOn": 0.0, "Number": 0.0, "NeckZ": 157.0, "TorsoY": 3.0, "NumFlip": 1.0,
            "NumHF": 19.0, "NumTopF": 14.0, "NumHB": 25.0, "NumTopB": 12.0,
+           # TV numbers on the shoulder tops: off (the game turns them on for the kits), digit height, centre |x|, y offset
+           # from the torso divide, and how far under the neck the top surface still takes them
+           "TvOn": 0.0, "TvH": 9.0, "TvX": 15.5, "TvY": 0.0, "TvZ": 11.0,
+           # an official's back patch: off, which of the strip's cells, its top under the neck, its size (cm)
+           "PatchOn": 0.0, "PatchIdx": 0.0, "PatchTop": 7.0, "PatchH": 22.0, "PatchW": 22.0,
            # helmet side mark (Shell): centre a touch behind the ear line, 11 x 10 cm, on the side past |x| 7 cm
            "LogoOn": 0.0, "LogoIdx": 0.0, "LogoX": 7.0, "LogoY": -1.0, "LogoZ": 174.5, "LogoW": 11.0, "LogoH": 10.0}
 VECTORS = {"Tint": (1, 1, 1), "Trim": (0.8, 0.1, 0.1), "Trim2": (0.05, 0.05, 0.05), "NumColor": (1, 1, 1),
@@ -342,7 +391,7 @@ def master(name, masked, skin=False):
         vi = node(unreal.MaterialExpressionVertexInterpolator)
         MEL.connect_material_expressions(pos, "", vi, "")
         col = custom(COLOR_HLSL, unreal.CustomMaterialOutputType.CMOT_FLOAT3,
-                     ["BC", "M", "P", "Numbers", "Logos"] + list(VECTORS) + list(SCALARS), "TAG hero colour", -450)
+                     ["BC", "M", "P", "Numbers", "Logos", "Patch"] + list(VECTORS) + list(SCALARS), "TAG hero colour", -450)
         MEL.connect_material_expressions(bc, "RGBA", col, "BC")
         MEL.connect_material_expressions(mask, "RGB", col, "M")
         MEL.connect_material_expressions(vi, "", col, "P")
@@ -356,6 +405,11 @@ def master(name, masked, skin=False):
         logo.set_editor_property("texture", raw_tex("T_TAG_TeamLogos", "linear"))
         logo.set_editor_property("sampler_type", unreal.MaterialSamplerType.SAMPLERTYPE_LINEAR_COLOR)
         MEL.connect_material_expressions(logo, "", col, "Logos")
+        patch = node(unreal.MaterialExpressionTextureObjectParameter)
+        patch.set_editor_property("parameter_name", "Patch")
+        patch.set_editor_property("texture", raw_tex("T_TAG_Hero_RefPatches", "linear"))
+        patch.set_editor_property("sampler_type", unreal.MaterialSamplerType.SAMPLERTYPE_LINEAR_COLOR)
+        MEL.connect_material_expressions(patch, "", col, "Patch")
         for k, v in VECTORS.items():
             MEL.connect_material_expressions(vector(k, v), "", col, k)
         for k, v in SCALARS.items():

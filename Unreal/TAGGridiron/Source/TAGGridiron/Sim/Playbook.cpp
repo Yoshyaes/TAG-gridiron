@@ -159,7 +159,7 @@ const std::vector<Formation>& FORMATIONS() {
        })},
       {"singleback", "Singleback Ace", "12", 1,
        withOL({
-           {"QB", {Pos::QB}, alBack(-1, 0)},
+           {"QB", {Pos::QB}, alBack(-1.2, 0)},
            {"RB", {Pos::RB}, alBack(-7, 0)},
            {"X", {Pos::WR}, alWide('L')},
            {"Z", {Pos::WR}, alWide('R', true)},
@@ -168,7 +168,7 @@ const std::vector<Formation>& FORMATIONS() {
        })},
       {"iform", "I-Form Pro", "21", 1,
        withOL({
-           {"QB", {Pos::QB}, alBack(-1, 0)},
+           {"QB", {Pos::QB}, alBack(-1.2, 0)},
            {"FB", {Pos::FB}, alBack(-4.5, 0)},
            {"RB", {Pos::RB}, alBack(-7, 0)},
            {"X", {Pos::WR}, alWide('L')},
@@ -177,7 +177,7 @@ const std::vector<Formation>& FORMATIONS() {
        })},
       {"heavy", "Goal Line Heavy", "22", 1,
        withOL({
-           {"QB", {Pos::QB}, alBack(-1, 0)},
+           {"QB", {Pos::QB}, alBack(-1.2, 0)},
            {"FB", {Pos::FB}, alBack(-4, 0)},
            {"RB", {Pos::RB}, alBack(-6.5, 0)},
            {"TE", {Pos::TE}, alInline('R')},
@@ -262,7 +262,7 @@ const std::vector<Formation>& FORMATIONS() {
       // singleback
       {"sb_doubles", "Singleback Doubles", "11", 1,
        withOL({
-           {"QB", {Pos::QB}, alBack(-1, 0)},
+           {"QB", {Pos::QB}, alBack(-1.2, 0)},
            {"RB", {Pos::RB}, alBack(-7, 0)},
            {"X", {Pos::WR}, alWide('L')},
            {"SLOT", {Pos::WR}, alSlot('L')},
@@ -271,7 +271,7 @@ const std::vector<Formation>& FORMATIONS() {
        }), "Singleback"},
       {"sb_trips", "Singleback Trey Open", "11", 1,
        withOL({
-           {"QB", {Pos::QB}, alBack(-1, 0)},
+           {"QB", {Pos::QB}, alBack(-1.2, 0)},
            {"RB", {Pos::RB}, alBack(-7, 0)},
            {"X", {Pos::WR}, alWide('L')},
            {"Z", {Pos::WR}, alWide('R', true)},
@@ -280,7 +280,7 @@ const std::vector<Formation>& FORMATIONS() {
        }), "Singleback"},
       {"sb_bunch", "Singleback Bunch", "11", 1,
        withOL({
-           {"QB", {Pos::QB}, alBack(-1, 0)},
+           {"QB", {Pos::QB}, alBack(-1.2, 0)},
            {"RB", {Pos::RB}, alBack(-7, 0)},
            {"X", {Pos::WR}, alWide('L')},
            {"Z", {Pos::WR}, alBack(-1.5, -9.2)},
@@ -289,7 +289,7 @@ const std::vector<Formation>& FORMATIONS() {
        }), "Singleback"},
       {"sb_wing", "Singleback Wing Trio", "12", 1,
        withOL({
-           {"QB", {Pos::QB}, alBack(-1, 0)},
+           {"QB", {Pos::QB}, alBack(-1.2, 0)},
            {"RB", {Pos::RB}, alBack(-7, 0)},
            {"X", {Pos::WR}, alWide('L')},
            {"TE", {Pos::TE}, alInline('R')},
@@ -299,7 +299,7 @@ const std::vector<Formation>& FORMATIONS() {
       // I-formation
       {"i_twin", "I-Form Twin WR", "21", 1,
        withOL({
-           {"QB", {Pos::QB}, alBack(-1, 0)},
+           {"QB", {Pos::QB}, alBack(-1.2, 0)},
            {"FB", {Pos::FB}, alBack(-4.5, 0)},
            {"RB", {Pos::RB}, alBack(-7, 0)},
            {"X", {Pos::WR}, alSlot('R')},
@@ -308,7 +308,7 @@ const std::vector<Formation>& FORMATIONS() {
        }), "I-Form"},
       {"i_tight", "I-Form Tight Pair", "22", 1,
        withOL({
-           {"QB", {Pos::QB}, alBack(-1, 0)},
+           {"QB", {Pos::QB}, alBack(-1.2, 0)},
            {"FB", {Pos::FB}, alBack(-4.5, 0)},
            {"RB", {Pos::RB}, alBack(-7, 0)},
            {"X", {Pos::WR}, alWide('L')},
@@ -317,7 +317,7 @@ const std::vector<Formation>& FORMATIONS() {
        }), "I-Form"},
       {"i_slot", "I-Form Slot", "20", 1,
        withOL({
-           {"QB", {Pos::QB}, alBack(-1, 0)},
+           {"QB", {Pos::QB}, alBack(-1.2, 0)},
            {"FB", {Pos::FB}, alBack(-4.5, 0)},
            {"RB", {Pos::RB}, alBack(-7, 0)},
            {"X", {Pos::WR}, alWide('L')},
@@ -326,7 +326,7 @@ const std::vector<Formation>& FORMATIONS() {
        }), "I-Form"},
       {"strong_i", "Strong I", "21", 1,
        withOL({
-           {"QB", {Pos::QB}, alBack(-1, 0)},
+           {"QB", {Pos::QB}, alBack(-1.2, 0)},
            {"FB", {Pos::FB}, alBack(-4.5, -1.8)},
            {"RB", {Pos::RB}, alBack(-7, 0)},
            {"X", {Pos::WR}, alWide('L')},
@@ -335,7 +335,7 @@ const std::vector<Formation>& FORMATIONS() {
        }), "Strong I"},
       {"weak_i", "Weak I", "21", 1,
        withOL({
-           {"QB", {Pos::QB}, alBack(-1, 0)},
+           {"QB", {Pos::QB}, alBack(-1.2, 0)},
            {"FB", {Pos::FB}, alBack(-4.5, 1.8)},
            {"RB", {Pos::RB}, alBack(-7, 0)},
            {"X", {Pos::WR}, alWide('L')},
@@ -344,7 +344,7 @@ const std::vector<Formation>& FORMATIONS() {
        }), "Weak I"},
       {"splitback", "Split Backs", "21", 1,
        withOL({
-           {"QB", {Pos::QB}, alBack(-1, 0)},
+           {"QB", {Pos::QB}, alBack(-1.2, 0)},
            {"FB", {Pos::FB, Pos::RB}, alBack(-5, 1.6)},
            {"RB", {Pos::RB}, alBack(-5, -1.6)},
            {"X", {Pos::WR}, alWide('L')},
@@ -378,10 +378,10 @@ const std::map<std::string, RouteDef>& ROUTES() {
       {"cross", {{{10, -2}, {16, -24}}, false, false}},
       {"sail", {{{10, 0}, {18, 10}}, false, false}},
       {"stick", {{{6, 0}, {5.5, -0.5}}, true, false}},
-      {"swing", {{{-1, 4}, {1, 10}}, false, false}},
+      {"swing", {{{0, 4}, {2, 10}}, false, false}},  // (bowed out level with his alignment, not back: caught at -7 a quarter of the time, NFL -4)
       {"angle", {{{3, 3}, {6, -3}}, false, false}},
       {"checkdown", {{{2, 2}, {5, 3}}, true, false}},
-      {"screen", {{{-2, 3}, {-2.5, 4}}, true, false}},
+      {"screen", {{{-0.5, 3}, {0, 4.5}}, true, false}},  // (slips out level, not 2.5 yd deeper: see swing)
       {"block", {{}, false, true}},
       // the expanded tree
       {"snag", {{{5, 0}, {6, -2.5}}, true, false}},                  // spot: six yards, turn in and sit

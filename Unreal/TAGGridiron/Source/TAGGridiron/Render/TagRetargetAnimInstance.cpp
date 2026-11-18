@@ -97,8 +97,38 @@ void FTagRetargetProxy::PreUpdate(UAnimInstance* InAnimInstance, float DeltaSeco
 	}
 }
 
+namespace
+{
+	// the joints a viewer reads a pose by, in component space (for the distance of the shown pose from the capture)
+	constexpr int32 kDevN = 11;
+	void DevJoints(const FPoseContext& Ctx, FVector Out[kDevN])
+	{
+		static const FName Names[kDevN] = {TEXT("pelvis"), TEXT("spine_05"), TEXT("head"), TEXT("lowerarm_l"), TEXT("lowerarm_r"), TEXT("hand_l"),
+			TEXT("hand_r"), TEXT("calf_l"), TEXT("calf_r"), TEXT("foot_l"), TEXT("foot_r")};
+		const FBoneContainer& BC = Ctx.Pose.GetBoneContainer();
+		for (int32 k = 0; k < kDevN; ++k)
+		{
+			Out[k] = FVector::ZeroVector;
+			const int32 Mesh = BC.GetPoseBoneIndexForBoneName(Names[k]);
+			if (Mesh == INDEX_NONE) continue;
+			FCompactPoseBoneIndex I = BC.MakeCompactPoseIndex(FMeshPoseBoneIndex(Mesh));
+			if (!I.IsValid()) continue;
+			FTransform T = Ctx.Pose[I];
+			for (FCompactPoseBoneIndex P = BC.GetParentBoneIndex(I); P.IsValid(); P = BC.GetParentBoneIndex(P)) T = T * Ctx.Pose[P];
+			Out[k] = T.GetLocation();
+		}
+	}
+	float DevMean(const FVector A[kDevN], const FVector B[kDevN])
+	{
+		double S = 0.0;
+		for (int32 k = 0; k < kDevN; ++k) S += FVector::Dist(A[k], B[k]);
+		return static_cast<float>(S / kDevN);
+	}
+}
+
 bool FTagRetargetProxy::Evaluate(FPoseContext& Output)
 {
+	static const bool bMeasure = FParse::Param(FCommandLine::Get(), TEXT("TagHlFull")) || FParse::Param(FCommandLine::Get(), TEXT("TagDev"));
 	if (bReplay)
 	{
 		// instant replay: the recorded pose as it was shown, nothing layered on top
@@ -113,16 +143,39 @@ bool FTagRetargetProxy::Evaluate(FPoseContext& Output)
 			LastPose[I.GetInt()] = Output.Pose[I];
 		}
 		BlendElapsed = 1e3f;
+		for (float& D : DevFrame) D = 0.f;
 		return true;
 	}
 	if (bCopy) EvaluateCopy(Output); // the mocap on its own skeleton: the source's pose, bone for bone
 	else Node->Evaluate_AnyThread(Output); // mocap retargeted onto this body
+	MeasurePlants(Output);
+	FVector J0[kDevN], Ja[kDevN], Jb[kDevN];
+	if (bMeasure)
+	{
+		DevJoints(Output, J0);
+		for (int32 k = 0; k < kDevN; ++k) Ja[k] = J0[k];
+	}
+	auto Step = [&](int32 Layer)
+	{
+		if (!bMeasure) return;
+		DevJoints(Output, Jb);
+		DevFrame[Layer] = DevMean(Ja, Jb);
+		for (int32 k = 0; k < kDevN; ++k) Ja[k] = Jb[k];
+	};
 	ApplyFootballLayer(Output);
+	Step(1);
 	ApplyOrient(Output);
+	Step(2);
 	ApplyStride(Output);
+	Step(3);
 	ApplyLean(Output);
+	Step(4);
 	ApplyCrossfade(Output);
+	Step(5);
 	ApplyFeet(Output); // on the shown pose, after the blend (a blended foot would slide through every transition)
+	Step(6);
+	ApplyKeepOut(Output);
+	if (bMeasure) DevFrame[0] = DevMean(J0, Ja);
 	ApplyTwist(Output);
 	const int32 N = Output.Pose.GetNumBones();
 	LastPose.SetNum(N, EAllowShrinking::No);
@@ -139,6 +192,8 @@ void FTagRetargetProxy::PostUpdate(UAnimInstance* InAnimInstance) const
 		I->SlideRaw += SlideRawFrame;
 		I->SlideShown += SlideShownFrame;
 		I->Touchdowns += TouchdownsFrame;
+		for (int32 k = 0; k < 7; ++k) I->Dev[k] = DevFrame[k];
+		I->PlantFeet = PlantFeetFrame;
 	}
 }
 
@@ -286,6 +341,21 @@ void FTagRetargetProxy::ApplyCrossfade(FPoseContext& Output)
 			}
 		}
 		else
+		{
+		if (In.bDropFromTravel)
+		{
+			// the root, and the hips under it, wherever the capture carried its travel
+			const FBoneContainer& BC = Output.Pose.GetBoneContainer();
+			const int32 PelMesh = BC.GetPoseBoneIndexForBoneName(TEXT("pelvis"));
+			const FCompactPoseBoneIndex Pel = PelMesh != INDEX_NONE ? BC.MakeCompactPoseIndex(FMeshPoseBoneIndex(PelMesh)) : FCompactPoseBoneIndex(INDEX_NONE);
+			for (const FCompactPoseBoneIndex I : {FCompactPoseBoneIndex(0), Pel})
+			{
+				if (!I.IsValid() || I.GetInt() >= N) continue;
+				FVector Ft = FromPose[I.GetInt()].GetTranslation();
+				const FVector Tt = Output.Pose[I].GetTranslation();
+				if (FVector::DistSquared2D(Ft, Tt) > 60.f * 60.f) FromPose[I.GetInt()].SetTranslation(FVector(Tt.X, Tt.Y, Ft.Z)); // (his height still blends)
+			}
+		}
 		for (FCompactPoseBoneIndex I(0); I < N; ++I)
 		{
 			FTransform& T = Output.Pose[I];
@@ -293,6 +363,7 @@ void FTagRetargetProxy::ApplyCrossfade(FPoseContext& Output)
 			T.SetRotation(FQuat::Slerp(F.GetRotation(), T.GetRotation(), A).GetNormalized());
 			T.SetTranslation(FMath::Lerp(F.GetTranslation(), T.GetTranslation(), A));
 			T.SetScale3D(FMath::Lerp(F.GetScale3D(), T.GetScale3D(), A));
+		}
 		}
 	}
 }
@@ -519,8 +590,12 @@ void FTagRetargetProxy::ApplyFootballLayer(FPoseContext& Output) const
 			const bool bLow = C.Z < Pos(P, B.Pelvis).Z + 10.f;
 			const FVector PoleL = (Side * 0.7f + FVector(0, 0, bLow ? 0.3f : -0.7f)).GetSafeNormal();
 			const FVector PoleR = (-Side * 0.7f + FVector(0, 0, bLow ? 0.3f : -0.7f)).GetSafeNormal();
-			ArmIK(P, B.UL, B.LL, B.HL, C + Side * Spread, PoleL, In.ReachAlpha);
-			ArmIK(P, B.UR, B.LR, B.HR, C - Side * Spread, PoleR, In.ReachAlpha * (1.f - In.CarryAlpha));
+			// only what the arms can reach: within 60 cm of the chest the hands go all the way, by 100 cm not at all. (Pulled
+			// toward a ball still three metres off, both arms locked out straight at it from the shoulders - arms that
+			// looked bolted on - and stayed there through the catch.)
+			const float Near = 1.f - FMath::Clamp((static_cast<float>(FVector::Dist(C, Chest)) - 60.f) / 40.f, 0.f, 1.f);
+			ArmIK(P, B.UL, B.LL, B.HL, C + Side * Spread, PoleL, In.ReachAlpha * Near);
+			ArmIK(P, B.UR, B.LR, B.HR, C - Side * Spread, PoleR, In.ReachAlpha * Near * (1.f - In.CarryAlpha));
 		}
 		// --- 3-point stance: down hand on the turf in front of the right foot
 		if (In.StanceAlpha > 0.01f)
@@ -546,7 +621,8 @@ void FTagRetargetProxy::ApplyFootballLayer(FPoseContext& Output) const
 		FVector Want = In.LookTarget - TH.GetLocation();
 		// neck range: don't bury the chin (max ~30 deg down) or look straight behind
 		const float Horiz = FMath::Max(Want.Size2D(), 1.f);
-		Want.Z = FMath::Clamp(static_cast<float>(Want.Z), -Horiz * 0.58f, Horiz * 1.0f);
+		const float UpTan = FMath::Tan(FMath::DegreesToRadians(FMath::Clamp(In.LookUpMaxDeg, 5.f, 45.f)));
+		Want.Z = FMath::Clamp(static_cast<float>(Want.Z), -Horiz * 0.58f, Horiz * UpTan);
 		Want = Want.GetSafeNormal();
 		const float Ang = FMath::Acos(FMath::Clamp(FVector::DotProduct(Fwd, Want), -1.f, 1.f));
 		const float MaxAng = FMath::DegreesToRadians(55.f);
@@ -559,6 +635,28 @@ void FTagRetargetProxy::ApplyFootballLayer(FPoseContext& Output) const
 		const float Ang2 = FMath::Acos(FMath::Clamp(FVector::DotProduct(Fwd2, Want), -1.f, 1.f));
 		if (Ang2 > MaxAng * 0.6f) D2 = FQuat::Slerp(FQuat::Identity, D2, MaxAng * 0.6f / Ang2);
 		RotateCS(P, B.Head, D2, In.LookAlpha);
+		// a man on his feet does not stare at the upper deck: several of the pack's post-play idles and jogs tip the head
+		// back 50-60 deg (scoreboard glances), more than the look above takes off at its weight. Whatever is left over
+		// the limit comes off here, split over the neck and head. (Lying on his back, his pelvis-to-head line is flat and
+		// the face up is right: only an upright body.)
+		const FVector Up = (P.GetComponentSpaceTransform(B.Head).GetLocation() - P.GetComponentSpaceTransform(B.Pelvis).GetLocation()).GetSafeNormal();
+		if (Up.Z > 0.75f)
+		{
+			const FTransform TH3 = P.GetComponentSpaceTransform(B.Head);
+			const FVector Fwd3 = TH3.GetRotation().RotateVector(LocalFwd).GetSafeNormal();
+			const float Pitch = FMath::RadiansToDegrees(FMath::Atan2(Fwd3.Z, FMath::Max(static_cast<float>(Fwd3.Size2D()), 1e-3f)));
+			const float Over = Pitch - FMath::Clamp(In.LookUpMaxDeg, 5.f, 45.f) - 4.f;
+			if (Over > 0.f)
+			{
+				const FVector Axis = FVector::CrossProduct(FVector::UpVector, Fwd3).GetSafeNormal(); // (a positive turn about it tips the face down)
+				if (!Axis.IsNearlyZero())
+				{
+					const float W = FMath::Clamp(In.LookAlpha / 0.85f, 0.f, 1.f);
+					RotateCS(P, B.Neck, FQuat(Axis, FMath::DegreesToRadians(Over * 0.45f)), W);
+					RotateCS(P, B.Head, FQuat(Axis, FMath::DegreesToRadians(Over * 0.55f)), W);
+				}
+			}
+		}
 	}
 
 	FCSPose<FCompactPose>::ConvertComponentPosesToLocalPoses(MoveTemp(P), Output.Pose);
@@ -634,6 +732,65 @@ void FTagRetargetProxy::ApplyLean(FPoseContext& Output) const
 	FCSPose<FCompactPose>::ConvertComponentPosesToLocalPoses(MoveTemp(P), Output.Pose);
 }
 
+void FTagRetargetProxy::MeasurePlants(FPoseContext& Output)
+{
+	// on the capture's pose, before any layer: a foot is planted when it is on the turf and the capture holds it still
+	// over the ground - its motion within the clip plus the clip's root travel comes to under 45 cm/s (it lets go above
+	// 90, or when it lifts). The feet of a clip played in place are judged against the body (root velocity zero).
+	PlantFeetFrame = 0;
+	bTruthValid = false;
+	static const bool bOff = FParse::Param(FCommandLine::Get(), TEXT("TagNoTruthPlant"));
+	if (bOff || !In.bRootVelValid || Dt <= 1e-4f) { bHavePrevRaw = false; bTruthPlant[0] = bTruthPlant[1] = false; return; }
+	const FBoneContainer& BC = Output.Pose.GetBoneContainer();
+	const FBones B = Resolve(BC);
+	if (!B.bLegs) { bHavePrevRaw = false; return; }
+	if (RefFootZ < 0.f) RefFootZ = BindPos(Output, B.BaL).Z;
+	const FCompactPoseBoneIndex Ba[2] = {B.BaL, B.BaR};
+	FVector Now[2];
+	for (int32 i = 0; i < 2; ++i)
+	{
+		FTransform T = Output.Pose[Ba[i]];
+		for (FCompactPoseBoneIndex P = BC.GetParentBoneIndex(Ba[i]); P.IsValid(); P = BC.GetParentBoneIndex(P)) T = T * Output.Pose[P];
+		Now[i] = T.GetLocation();
+	}
+	// a new clip: its first pose against the last clip's is no velocity. The verdict carries over for that frame (read
+	// as a foot flying off, every clip change let go of both pins and eased the feet out over 0.2 s: four fifths of the
+	// live skating sat in the 3-12 frames after a change of clip, p30)
+	if (In.ClipSerial != PlantSerial)
+	{
+		PlantSerial = In.ClipSerial;
+		if (bHavePrevRaw)
+		{
+			for (int32 i = 0; i < 2; ++i)
+			{
+				bTruthPlant[i] = bTruthPlant[i] && Now[i].Z < RefFootZ + 9.f;
+				PlantFeetFrame += bTruthPlant[i] ? 1 : 0;
+			}
+			bTruthValid = true;
+		}
+		PrevRawFootCS[0] = Now[0];
+		PrevRawFootCS[1] = Now[1];
+		bHavePrevRaw = true;
+		return;
+	}
+	if (bHavePrevRaw)
+	{
+		for (int32 i = 0; i < 2; ++i)
+		{
+			FVector Vel = (Now[i] - PrevRawFootCS[i]) / Dt + In.RootVelCS;
+			Vel.Z = 0.f;
+			const float Sp = static_cast<float>(Vel.Size());
+			const bool bOnTurf = Now[i].Z < RefFootZ + 7.f;
+			bTruthPlant[i] = bOnTurf && Sp < (bTruthPlant[i] ? 90.f : 45.f);
+			PlantFeetFrame += bTruthPlant[i] ? 1 : 0;
+		}
+		bTruthValid = true;
+	}
+	PrevRawFootCS[0] = Now[0];
+	PrevRawFootCS[1] = Now[1];
+	bHavePrevRaw = true;
+}
+
 void FTagRetargetProxy::ApplyFeet(FPoseContext& Output)
 {
 	// planted feet stay where they landed: a foot that comes down low is pinned to that spot of turf (leg IK) until
@@ -667,11 +824,15 @@ void FTagRetargetProxy::ApplyFeet(FPoseContext& Output)
 		FFootLock& L = Feet[i];
 		const FVector FootCS = Pos(P, Ba[i]);
 		const FVector FootW = CT.TransformPosition(FootCS);
-		const bool bLow = FootCS.Z < Low;
+		// planted: by the capture's own verdict where it is known (MeasurePlants), by height alone otherwise
+		// (-TagHeightLock: the lock by height as before, the slide still measured on the capture's verdict - the A/B)
+		static const bool bHeightLock = FParse::Param(FCommandLine::Get(), TEXT("TagHeightLock"));
+		const bool bTruth = bTruthValid ? (bTruthPlant[i] && FootCS.Z < Low + 4.f) : FootCS.Z < Low;
+		const bool bLow = bHeightLock ? FootCS.Z < Low : bTruth;
 		if (bLow && !L.bWasLow) ++TouchdownsFrame;
-		if (bLow && L.bHadRaw) SlideRawFrame += FVector::Dist2D(FootW, L.PrevRawW);
+		if (bTruth && L.bHadRaw) SlideRawFrame += FVector::Dist2D(FootW, L.PrevRawW);
 		L.PrevRawW = FootW;
-		L.bHadRaw = bLow;
+		L.bHadRaw = bTruth;
 		if (!In.bFootLock)
 		{
 			if (L.bLocked) { L.bLocked = false; L.ReleaseOff = (L.World - FootW) * L.Alpha; L.ReleaseAlpha = 1.f; }
@@ -698,28 +859,102 @@ void FTagRetargetProxy::ApplyFeet(FPoseContext& Output)
 		}
 		FVector TargetW = FootW;
 		float A = 0.f;
+		float Lift = 0.f;
 		if (L.bLocked) { TargetW = L.World; A = L.Alpha; }
 		else if (L.ReleaseAlpha > 0.f)
 		{
 			L.ReleaseAlpha = FMath::Max(0.f, L.ReleaseAlpha - Dt / 0.2f);
 			TargetW = FootW + L.ReleaseOff * L.ReleaseAlpha;
 			A = 1.f;
+			// a pin let go with the foot well off where the clip now has it (a new clip planted it elsewhere, the body
+			// outran the pin): the foot is picked up and set down there, a short step, not dragged over the turf. (Dragged,
+			// that was four fifths of the live skating: the 3-12 frames after a change of clip, p30 / p31.)
+			if (L.ReleaseOff.SizeSquared2D() > 8.f * 8.f)
+				Lift = FMath::Min(8.f, static_cast<float>(L.ReleaseOff.Size2D()) * 0.35f) * FMath::Sin(PI * (1.f - L.ReleaseAlpha));
 		}
 		// the ground: a ball of the foot pushed under the turf (a crouched clip on a shorter body, the stride's lowered hips)
 		// is lifted back onto it
 		const float ZFix = FMath::Max(0.f, 0.5f - FootCS.Z);
-		if (A > 0.001f || ZFix > 0.f)
+		if (A > 0.001f || ZFix > 0.f || Lift > 0.f)
 		{
 			FVector TargetCS = A > 0.001f ? CT.InverseTransformPosition(TargetW) : FootCS;
 			FVector NewCS = FMath::Lerp(FootCS, TargetCS, A > 0.001f ? A : 0.f);
-			NewCS.Z = FootCS.Z + ZFix; // the clip owns the foot's height, above the ground
+			NewCS.Z = FootCS.Z + ZFix + Lift; // the clip owns the foot's height, above the ground (and a step's arc over it)
 			const FVector AnkleCS = Pos(P, Ft[i]);
 			LegIK(P, Th[i], Ca[i], Ft[i], AnkleCS + (NewCS - FootCS), 1.f); // move the ankle by the toe's correction
 		}
 		const FVector ShownW = CT.TransformPosition(Pos(P, Ba[i]));
-		if (bLow && L.bHadShown) SlideShownFrame += FVector::Dist2D(ShownW, L.PrevShownW);
+		// (travel over the turf: a foot in the air on such a step is not sliding)
+		const bool bOnTurf = bTruth && Lift < 2.f;
+		if (bOnTurf && L.bHadShown) SlideShownFrame += FVector::Dist2D(ShownW, L.PrevShownW);
 		L.PrevShownW = ShownW;
-		L.bHadShown = bLow;
+		L.bHadShown = bOnTurf;
 	}
 	FCSPose<FCompactPose>::ConvertComponentPosesToLocalPoses(MoveTemp(P), Output.Pose);
+}
+
+void FTagRetargetProxy::ApplyKeepOut(FPoseContext& Output)
+{
+	// a hand or a forearm inside another man's head, chest or hips is pushed out to the surface and the arm solved to
+	// it (eased, so an arm does not snap as bodies settle)
+	if (In.KeepOutN <= 0 && KeepOff[0].IsNearlyZero(0.5) && KeepOff[1].IsNearlyZero(0.5) && KeepOffLeg[0].IsNearlyZero(0.5) && KeepOffLeg[1].IsNearlyZero(0.5)) return;
+	const FBoneContainer& BC = Output.Pose.GetBoneContainer();
+	const FBones B = Resolve(BC);
+	if (!B.bValid) return;
+	const FTransform& CT = GetComponentTransform();
+	FCSPose<FCompactPose> P;
+	P.InitPose(Output.Pose);
+	const FCompactPoseBoneIndex U[2] = {B.UL, B.UR}, L[2] = {B.LL, B.LR}, H[2] = {B.HL, B.HR};
+	bool bAny = false;
+	for (int32 i = 0; i < 2; ++i)
+	{
+		const FVector Sh = Pos(P, U[i]), El = Pos(P, L[i]), Hd = Pos(P, H[i]);
+		FVector Push = FVector::ZeroVector;
+		for (int32 k = 0; k < In.KeepOutN; ++k)
+		{
+			const FVector C = CT.InverseTransformPosition(FVector(In.KeepOut[k].X, In.KeepOut[k].Y, In.KeepOut[k].Z));
+			const float Rr = In.KeepOut[k].W + 5.f; // the hand's own thickness
+			for (const FVector& Pt : {Hd + Push, FMath::Lerp(El, Hd, 0.5f) + Push * 0.5f})
+			{
+				const FVector D = Pt - C;
+				const float Dist = static_cast<float>(D.Size());
+				if (Dist < Rr) Push += (Dist > 1.f ? D / Dist : FVector::UpVector) * (Rr - Dist);
+			}
+		}
+		Push = Push.GetClampedToMaxSize(32.f);
+		KeepOff[i] = FMath::Lerp(KeepOff[i], Push, FMath::Min(1.f, Dt * 14.f));
+		if (KeepOff[i].SizeSquared() < 0.25f) continue;
+		const FVector Pole = (El - 0.5f * (Sh + Hd)).GetSafeNormal();
+		ArmIK(P, U[i], L[i], H[i], Hd + KeepOff[i], Pole.IsNearlyZero() ? FVector(0, -1, 0) : Pole, 1.f);
+		bAny = true;
+	}
+	// the legs the same way: a foot or a shin inside another man in the pile (a boot through a helmet, a shin through
+	// a back) is pushed out and the leg solved to it. Only for a man on the ground - a standing man's feet are the foot
+	// lock's, and the bodies he is near are standing too
+	if (B.bLegs)
+	{
+		const FCompactPoseBoneIndex Th[2] = {B.ThL, B.ThR}, Ca[2] = {B.CaL, B.CaR}, Ft[2] = {B.FtL, B.FtR};
+		for (int32 i = 0; i < 2; ++i)
+		{
+			const FVector Kn = Pos(P, Ca[i]), Fo = Pos(P, Ft[i]);
+			FVector Push = FVector::ZeroVector;
+			for (int32 k = 0; k < In.KeepOutN; ++k)
+			{
+				const FVector C = CT.InverseTransformPosition(FVector(In.KeepOut[k].X, In.KeepOut[k].Y, In.KeepOut[k].Z));
+				const float Rr = In.KeepOut[k].W + 6.f; // the boot's / shin's own thickness
+				for (const FVector& Pt : {Fo + Push, FMath::Lerp(Kn, Fo, 0.5f) + Push * 0.5f})
+				{
+					const FVector D = Pt - C;
+					const float Dist = static_cast<float>(D.Size());
+					if (Dist < Rr) Push += (Dist > 1.f ? D / Dist : FVector::UpVector) * (Rr - Dist);
+				}
+			}
+			Push = Push.GetClampedToMaxSize(30.f);
+			KeepOffLeg[i] = FMath::Lerp(KeepOffLeg[i], Push, FMath::Min(1.f, Dt * 12.f));
+			if (KeepOffLeg[i].SizeSquared() < 0.25f) continue;
+			LegIK(P, Th[i], Ca[i], Ft[i], Fo + KeepOffLeg[i], 1.f);
+			bAny = true;
+		}
+	}
+	if (bAny) FCSPose<FCompactPose>::ConvertComponentPosesToLocalPoses(MoveTemp(P), Output.Pose);
 }

@@ -388,6 +388,10 @@ def plan_recipes(job, rig_of):
             meta["top"] = top.group(1)
         meta["hat"] = any(re.search(r"_hat|visor|cap", os.path.basename(f).lower()) for f in fbxs)
         j = dict(job(nm, kind, parts, rig=rig, **meta))
+        # the chain crew's rods: skinned to one finger and modelled lying across the body, they swing with the hand and
+        # render as a slanted 2.4 m bar; the stadium plants its own sticks and down box beside the crew (hero_build strip_prop)
+        if "chaingang" in name.lower():
+            j["strip_prop"] = {"bones": r"(?i)middle|^RightHand$", "far": 0.16}
         # torn sleeves with no intact sibling: re-skinned to the arm bones in hero_build (reskin_far)
         if name.startswith("Reporter1_casual_outfit_"):
             j["reskin_far"] = {"slots": ["Top"]}

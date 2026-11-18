@@ -17,12 +17,15 @@
 #include "Widgets/Layout/SWrapBox.h"
 #include "Widgets/Layout/SScrollBox.h"
 #include "Widgets/Layout/SGridPanel.h"
+#include "Widgets/Layout/SBackgroundBlur.h"
 #include "Widgets/Input/SButton.h"
 #include "Widgets/Text/STextBlock.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Fonts/FontMeasure.h"
 #include "Rendering/SlateRenderer.h"
+#include "Misc/App.h"
+#include "Misc/CommandLine.h"
 
 using namespace TagCoords;
 
@@ -49,7 +52,7 @@ void SGridironOverlay::Construct(const FArguments& InArgs)
 		+ SOverlay::Slot().HAlign(HAlign_Left).VAlign(VAlign_Top).Padding(24)
 		[
 			SNew(SBorder).BorderImage(White()).BorderBackgroundColor(Panel).Padding(FMargin(14, 10))
-			.Visibility_Lambda([this] { return bHud && !bBroadcastOnly ? EVisibility::HitTestInvisible : EVisibility::Collapsed; })
+			.Visibility_Lambda([this] { return bHud && !bBroadcastOnly && !bModal ? EVisibility::HitTestInvisible : EVisibility::Collapsed; })
 			[
 				SNew(SBox).WidthOverride(560)
 				[ SNew(STextBlock).Font(Font(12)).ColorAndOpacity(FLinearColor(0.92f, 0.94f, 0.97f)).AutoWrapText(true).Text_Lambda([this] { return TickerText(); }) ]
@@ -59,7 +62,7 @@ void SGridironOverlay::Construct(const FArguments& InArgs)
 		+ SOverlay::Slot().HAlign(HAlign_Right).VAlign(VAlign_Top).Padding(24)
 		[
 			SNew(SBorder).BorderImage(White()).BorderBackgroundColor(Panel).Padding(FMargin(14, 8))
-			.Visibility_Lambda([this] { return bHud && !bBroadcastOnly ? EVisibility::HitTestInvisible : EVisibility::Collapsed; })
+			.Visibility_Lambda([this] { return bHud && !bBroadcastOnly && !bModal ? EVisibility::HitTestInvisible : EVisibility::Collapsed; })
 			[ SNew(STextBlock).Font(Font(12)).ColorAndOpacity(Dim).Text_Lambda([this] { return WeatherText(); }) ]
 		]
 		// banner
@@ -84,8 +87,25 @@ void SGridironOverlay::Construct(const FArguments& InArgs)
 			+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(0, 24, 0, 0)
 			[
 				SNew(SBorder).BorderImage(White()).BorderBackgroundColor(FLinearColor(0.07f, 0.09f, 0.13f, 0.9f)).Padding(FMargin(18, 8))
-				.Visibility_Lambda([this] { return ToastT < (ToastText.Len() > 14 ? 3.2f : 1.3f) ? EVisibility::HitTestInvisible : EVisibility::Collapsed; }) // a stat line stays long enough to read
+				.Visibility_Lambda([this] { return !IsStatLine() && ToastT < (ToastText.Len() > 14 ? 3.2f : 1.3f) ? EVisibility::HitTestInvisible : EVisibility::Collapsed; })
 				[ SNew(STextBlock).Font(Font(16, "Bold")).ColorAndOpacity(Accent).Text_Lambda([this] { return T(ToastText); }) ]
+			]
+		]
+		// a big play's stat line: the broadcast's lower third, above the score bar (over the field it sat on the
+		// player's helmet in the close-up that follows a score)
+		+ SOverlay::Slot().HAlign(HAlign_Center).VAlign(VAlign_Bottom).Padding(FMargin(0, 0, 0, 74))
+		[
+			SNew(SHorizontalBox)
+			.Visibility_Lambda([this] { return IsStatLine() && ToastT < 4.f ? EVisibility::HitTestInvisible : EVisibility::Collapsed; })
+			+ SHorizontalBox::Slot().AutoWidth()
+			[
+				SNew(SBorder).BorderImage(White()).BorderBackgroundColor(FLinearColor(0.96f, 0.96f, 0.97f, 0.97f)).Padding(FMargin(16, 7))
+				[ SNew(STextBlock).Font(Font(17, "Bold")).ColorAndOpacity(FLinearColor(0.06f, 0.07f, 0.1f)).Text_Lambda([this] { FString N, St; ToastText.Split(TEXT("   "), &N, &St); return T(N); }) ]
+			]
+			+ SHorizontalBox::Slot().AutoWidth()
+			[
+				SNew(SBorder).BorderImage(White()).BorderBackgroundColor(FLinearColor(0.07f, 0.09f, 0.13f, 0.95f)).Padding(FMargin(16, 7))
+				[ SNew(STextBlock).Font(Font(17, "Bold")).ColorAndOpacity(Accent).Text_Lambda([this] { FString N, St; ToastText.Split(TEXT("   "), &N, &St); return T(St.ToUpper()); }) ]
 			]
 		]
 		// hint
@@ -107,8 +127,14 @@ void SGridironOverlay::Construct(const FArguments& InArgs)
 void SGridironOverlay::Tick(const FGeometry& G, const double Now, const float Dt)
 {
 	SCompoundWidget::Tick(G, Now, Dt);
-	BannerT += Dt;
-	ToastT += Dt;
+	// on the game's clock, not the wall's: a fixed-step film (rendered slower than real time) showed a 3.2 s stat line
+	// for half a second; in play the two are the same
+	// (once per engine frame: the widget can be ticked more than once a frame, and the stat line left at 2 s)
+	static uint64 LastFrame = 0;
+	const float GameDt = LastFrame == GFrameCounter ? 0.f : FMath::Min(static_cast<float>(FApp::GetDeltaTime()), 0.1f);
+	LastFrame = GFrameCounter;
+	BannerT += GameDt;
+	ToastT += GameDt;
 	// a menu just opened (laid out by now): give its button focus so the gamepad can drive it
 	if (PendingFocus >= 0 && bModal && ModalBox.IsValid() && FSlateApplication::IsInitialized())
 	{
@@ -171,6 +197,8 @@ int32 SGridironOverlay::OnPaint(const FPaintArgs& Args, const FGeometry& Allotte
 	int32 Layer = SCompoundWidget::OnPaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
 	// pre-snap: the receivers' icons and the adjustments panel
 	if (bHud && !bModal) Layer = PaintPresnap(OutDrawElements, Layer + 1, AllottedGeometry);
+	if (bHud && !bModal) Layer = PaintLineBars(OutDrawElements, Layer + 1, AllottedGeometry);
+	if (!bModal) Layer = PaintKickMeter(OutDrawElements, Layer + 1, AllottedGeometry);
 	// the focused menu button (gamepad / keyboard navigation) gets a gold frame
 	if (bModal && FSlateApplication::IsInitialized())
 	{
@@ -279,6 +307,11 @@ void SGridironOverlay::PaintGlyph(FSlateWindowElementList& Out, int32 Layer, con
 	const float Th = FMath::Max(2.f, Size * 0.085f);
 	const float S = R * 0.46f;
 	auto P2 = [&](float X, float Y) { return FVector2f(C.X + X, C.Y + Y); };
+	// the face buttons in their own colours (an untinted glyph: a receiver's icon keeps his route colour): an Xbox pad's
+	// green A, red B, blue X, yellow Y; a PlayStation pad's blue cross, red circle, pink square, green triangle
+	const FLinearColor FaceInk = !Tint.Equals(FLinearColor::White, 0.01f) ? Tint : bSonyPad
+		? (Gl == EPadGlyph::Cross ? FLinearColor(0.45f, 0.62f, 1.f) : Gl == EPadGlyph::Circle ? FLinearColor(1.f, 0.38f, 0.38f) : Gl == EPadGlyph::Square ? FLinearColor(1.f, 0.55f, 0.85f) : FLinearColor(0.3f, 0.9f, 0.7f))
+		: (Gl == EPadGlyph::Cross ? FLinearColor(0.35f, 0.85f, 0.3f) : Gl == EPadGlyph::Circle ? FLinearColor(1.f, 0.3f, 0.28f) : Gl == EPadGlyph::Square ? FLinearColor(0.3f, 0.6f, 1.f) : FLinearColor(1.f, 0.85f, 0.2f));
 	switch (Gl)
 	{
 	case EPadGlyph::Cross:
@@ -286,21 +319,21 @@ void SGridironOverlay::PaintGlyph(FSlateWindowElementList& Out, int32 Layer, con
 	case EPadGlyph::Square:
 	case EPadGlyph::Triangle:
 		Lines(Poly(R * 0.5f, 28, 0.f), Dark, R, 0);  // the button (a ring as thick as its radius is a disc)
-		Lines(Poly(R - 0.8f, 28, 0.f), Tint * FLinearColor(1, 1, 1, 0.45f), 1.4f);
+		Lines(Poly(R - 0.8f, 28, 0.f), FaceInk * FLinearColor(1, 1, 1, 0.45f), 1.4f);
 		if (!bSonyPad)
 		{
 			// an Xbox-style pad: the face buttons by their letters
-			Text(Gl == EPadGlyph::Cross ? TEXT("A") : Gl == EPadGlyph::Circle ? TEXT("B") : Gl == EPadGlyph::Square ? TEXT("X") : TEXT("Y"), FMath::RoundToInt(Size * 0.46f), Tint);
+			Text(Gl == EPadGlyph::Cross ? TEXT("A") : Gl == EPadGlyph::Circle ? TEXT("B") : Gl == EPadGlyph::Square ? TEXT("X") : TEXT("Y"), FMath::RoundToInt(Size * 0.46f), FaceInk);
 			break;
 		}
 		if (Gl == EPadGlyph::Cross)
 		{
-			Lines({P2(-S, -S), P2(S, S)}, Tint, Th);
-			Lines({P2(-S, S), P2(S, -S)}, Tint, Th);
+			Lines({P2(-S, -S), P2(S, S)}, FaceInk, Th);
+			Lines({P2(-S, S), P2(S, -S)}, FaceInk, Th);
 		}
-		else if (Gl == EPadGlyph::Circle) Lines(Poly(S * 1.02f, 24, 0.f), Tint, Th);
-		else if (Gl == EPadGlyph::Square) Lines({P2(-S * 0.92f, -S * 0.92f), P2(S * 0.92f, -S * 0.92f), P2(S * 0.92f, S * 0.92f), P2(-S * 0.92f, S * 0.92f), P2(-S * 0.92f, -S * 0.92f)}, Tint, Th);
-		else Lines(Poly(S * 1.12f, 3, -PI * 0.5f), Tint, Th);  // apex up
+		else if (Gl == EPadGlyph::Circle) Lines(Poly(S * 1.02f, 24, 0.f), FaceInk, Th);
+		else if (Gl == EPadGlyph::Square) Lines({P2(-S * 0.92f, -S * 0.92f), P2(S * 0.92f, -S * 0.92f), P2(S * 0.92f, S * 0.92f), P2(-S * 0.92f, S * 0.92f), P2(-S * 0.92f, -S * 0.92f)}, FaceInk, Th);
+		else Lines(Poly(S * 1.12f, 3, -PI * 0.5f), FaceInk, Th);  // apex up
 		break;
 	case EPadGlyph::R1:
 	case EPadGlyph::L1:
@@ -454,7 +487,7 @@ TSharedRef<SWidget> SGridironOverlay::MakeScoreBug()
 					+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(8, 0)
 					[ SNew(STextBlock).Font(Font(12, "Bold")).ColorAndOpacity(Accent).Text_Lambda([this, K] { return Director && Director->Game && Director->Game->poss == K && !Director->Game->isFinal() ? T(TEXT("●")) : FText(); }) ]
 					+ SHorizontalBox::Slot().FillWidth(1).HAlign(HAlign_Right).VAlign(VAlign_Center)
-					[ SNew(STextBlock).Font(Font(28, "Bold")).ShadowOffset(FVector2D(1, 1)).Text_Lambda([this, K] { return Director && Director->Game ? FText::AsNumber(Director->HudScore[K == tag::TeamKey::Home ? 0 : 1] >= 0 ? Director->HudScore[K == tag::TeamKey::Home ? 0 : 1] : Director->Game->score[K]) : FText(); }) ]
+					[ SNew(STextBlock).Font(Font(28, "Bold")).ShadowOffset(FVector2D(1, 1)).Text_Lambda([this, K] { return Director && Director->Game ? FText::AsNumber(Director->ScoreShown(K)) : FText(); }) ]
 				]
 			];
 	};
@@ -505,6 +538,9 @@ FText SGridironOverlay::DownText() const
 	if (!Director || !Director->Game) return FText();
 	const tag::Game& G = *Director->Game;
 	if (!Director->HudDown.IsEmpty() && G.phase != tag::GamePhase::Final) return T(Director->HudDown);
+	FString Word;
+	Director->ScoreShown(tag::TeamKey::Home, &Word);
+	if (!Word.IsEmpty()) return T(Word);
 	switch (G.phase)
 	{
 	case tag::GamePhase::Final: return T(TEXT("FINAL"));
@@ -551,80 +587,20 @@ void SGridironOverlay::ShowMainMenu()
 		+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(0, 0, 0, 36)[ SNew(STextBlock).Font(Font(14)).ColorAndOpacity(Dim).Text(T(TEXT("SIMULATION-FIRST PRO FOOTBALL"))) ];
 	Menu->AddSlot().AutoHeight().HAlign(HAlign_Center)[ MakeButton(TEXT("Play Now"), TEXT("You vs CPU. Call plays, control the QB, ball carrier or any defender."), [this] { ShowTeamSelect(true); }) ];
 	Menu->AddSlot().AutoHeight().HAlign(HAlign_Center)[ MakeButton(TEXT("Watch a Game"), TEXT("CPU vs CPU broadcast. Speed up with 1/2/4."), [this] { ShowTeamSelect(false); }) ];
+	Menu->AddSlot().AutoHeight().HAlign(HAlign_Center)[ MakeButton(TEXT("Settings"), TEXT("Commentary captions."), [this] { ShowSettings([this] { ShowMainMenu(); }); }) ];
 	Menu->AddSlot().AutoHeight().HAlign(HAlign_Center)[ MakeButton(TEXT("Quit"), TEXT(""), [] { FPlatformMisc::RequestExit(false); }) ];
 	Menu->AddSlot().AutoHeight().HAlign(HAlign_Center).Padding(0, 30, 0, 0)[ SNew(STextBlock).Font(Font(10)).ColorAndOpacity(Dim).Text(T(TEXT("An original football game. All teams, players and names are fictional."))) ];
 	ShowModal(Centered(Menu, 0.35f));
+	// -TagTeamSelect: straight on to the Play Now team select, once (screen checks)
+	static bool bTeamSelectShot = FParse::Param(FCommandLine::Get(), TEXT("TagTeamSelect"));
+	if (bTeamSelectShot)
+	{
+		bTeamSelectShot = false;
+		ShowTeamSelect(true);
+	}
 }
 
-void SGridironOverlay::ShowTeamSelect(bool bUserPlays)
-{
-	static const TCHAR* WxNames[] = {TEXT("Random (realistic)"), TEXT("Clear"), TEXT("Windy"), TEXT("Rain"), TEXT("Snow")};
-	static const double Quarters[] = {900, 300, 480};
-	static const TCHAR* QNames[] = {TEXT("15 min (authentic clock)"), TEXT("5 min"), TEXT("8 min")};
-	TSharedRef<SVerticalBox> Root = SNew(SVerticalBox);
-	Root->AddSlot().AutoHeight().HAlign(HAlign_Center).Padding(0, 0, 0, 12)[ SNew(STextBlock).Font(Font(34, "Bold")).Text(T(bUserPlays ? TEXT("PLAY NOW") : TEXT("WATCH A GAME"))) ];
-	auto Grid = [this, bUserPlays](bool bHome) -> TSharedRef<SWidget>
-	{
-		TSharedRef<SWrapBox> W = SNew(SWrapBox).PreferredSize(720);
-		for (int i = 0; i < static_cast<int>(Director->League.size()); ++i)
-		{
-			const tag::Team& Tm = *Director->League[i];
-			const tag::TeamOvr O = tag::teamOvr(Tm);
-			const bool bSel = bHome ? i == SelHome : i == SelAway;
-			W->AddSlot().Padding(3)
-			[
-				SNew(SBox).WidthOverride(172)
-				[
-					SNew(SButton).ButtonColorAndOpacity(bSel ? FLinearColor(0.35f, 0.3f, 0.05f) : PanelLight).ContentPadding(FMargin(8, 5))
-					.OnClicked_Lambda([this, i, bHome, bUserPlays] { if (bHome) { if (i != SelAway) SelHome = i; } else if (i != SelHome) SelAway = i; ShowTeamSelect(bUserPlays); return FReply::Handled(); })
-					[
-						SNew(SHorizontalBox)
-						+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(0, 0, 8, 0)
-						[ SNew(SBox).WidthOverride(18).HeightOverride(18)[ SNew(SBorder).BorderImage(White()).BorderBackgroundColor(Hex(Tm.colors.primary)) ] ]
-						+ SHorizontalBox::Slot().FillWidth(1)
-						[
-							SNew(SVerticalBox)
-							+ SVerticalBox::Slot().AutoHeight()[ SNew(STextBlock).Font(Font(10, "Bold")).Text(T(S(Tm.city) + TEXT(" ") + S(Tm.name))) ]
-							+ SVerticalBox::Slot().AutoHeight()[ SNew(STextBlock).Font(Font(8)).ColorAndOpacity(Dim).Text(T(FString::Printf(TEXT("OVR %d  OFF %d  DEF %d"), O.ovr, O.off, O.def))) ]
-						]
-					]
-				]
-			];
-		}
-		return SNew(SBorder).BorderImage(White()).BorderBackgroundColor(Panel).Padding(10)
-		[
-			SNew(SVerticalBox)
-			+ SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 6)[ SNew(STextBlock).Font(Font(11, "Bold")).ColorAndOpacity(Dim).Text(T(bHome ? TEXT("HOME TEAM") : TEXT("AWAY TEAM"))) ]
-			+ SVerticalBox::Slot().AutoHeight()[ SNew(SBox).MaxDesiredHeight(560)[ SNew(SScrollBox) + SScrollBox::Slot()[ W ] ] ]
-		];
-	};
-	Root->AddSlot().AutoHeight().HAlign(HAlign_Center)
-	[
-		SNew(SHorizontalBox)
-		+ SHorizontalBox::Slot().AutoWidth().Padding(6)[ Grid(false) ]
-		+ SHorizontalBox::Slot().AutoWidth().Padding(6)[ Grid(true) ]
-	];
-	auto Opt = [this](const FString& Label, const FString& Value, std::function<void()> Cycle) -> TSharedRef<SWidget>
-	{
-		return SNew(SHorizontalBox)
-			+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(0, 0, 10, 0)[ SNew(SBox).WidthOverride(140)[ SNew(STextBlock).Font(Font(12)).ColorAndOpacity(Dim).Text(T(Label)) ] ]
-			+ SHorizontalBox::Slot().AutoWidth()[ SNew(SButton).ButtonColorAndOpacity(PanelLight).ContentPadding(FMargin(12, 4)).OnClicked_Lambda([Cycle] { Cycle(); return FReply::Handled(); })[ SNew(STextBlock).Font(Font(12, "Bold")).Text(T(Value)) ] ];
-	};
-	TSharedRef<SVerticalBox> Opts = SNew(SVerticalBox);
-	if (bUserPlays)
-		Opts->AddSlot().AutoHeight().Padding(2)[ Opt(TEXT("You control"), bSelUserHome ? TEXT("Home team") : TEXT("Away team"), [this, bUserPlays] { bSelUserHome = !bSelUserHome; ShowTeamSelect(bUserPlays); }) ];
-	Opts->AddSlot().AutoHeight().Padding(2)[ Opt(TEXT("Weather"), WxNames[SelWeather], [this, bUserPlays] { SelWeather = (SelWeather + 1) % 5; ShowTeamSelect(bUserPlays); }) ];
-	Opts->AddSlot().AutoHeight().Padding(2)[ Opt(TEXT("Kickoff"), bSelNight ? TEXT("Night (lights)") : TEXT("Day"), [this, bUserPlays] { bSelNight = !bSelNight; ShowTeamSelect(bUserPlays); }) ];
-	Opts->AddSlot().AutoHeight().Padding(2)[ Opt(TEXT("Quarter length"), QNames[SelQuarter], [this, bUserPlays] { SelQuarter = (SelQuarter + 1) % 3; ShowTeamSelect(bUserPlays); }) ];
-	Root->AddSlot().AutoHeight().HAlign(HAlign_Center).Padding(0, 10)[ SNew(SBorder).BorderImage(White()).BorderBackgroundColor(Panel).Padding(12)[ Opts ] ];
-	Root->AddSlot().AutoHeight().HAlign(HAlign_Center)
-	[
-		SNew(SHorizontalBox)
-		+ SHorizontalBox::Slot().AutoWidth().Padding(6)[ MakeButton(TEXT("Back"), TEXT(""), [this] { ShowMainMenu(); }, 160) ]
-		+ SHorizontalBox::Slot().AutoWidth().Padding(6)[ MakeButton(TEXT("Kick Off"), TEXT(""), [this, bUserPlays] { Director->StartMatch(SelHome, SelAway, bUserPlays, bSelUserHome, SelWeather, bSelNight, Quarters[SelQuarter]); }, 200) ]
-	];
-	ShowModal(Centered(Root, 0.7f), true);
-}
+// ShowTeamSelect: UI/TeamSelect.cpp
 
 namespace
 {
@@ -784,6 +760,7 @@ bool SGridironOverlay::CallKey(const FKey& K, bool bRepeat)
 	const bool bNextTab = Is({EKeys::Gamepad_RightShoulder, EKeys::E});
 	if (bPrevTab || bNextTab)
 	{
+		if (bRepeat) return true; // one formation family a press: a held shoulder button repeats after 0.2 s (it skipped one)
 		const int32 At = CallTabs.IndexOfByPredicate([this](const TPair<FString, FString>& Tb) { return Tb.Key == CallTab; });
 		const int32 N = CallTabs.Num();
 		if (N > 0)
@@ -799,6 +776,7 @@ bool SGridironOverlay::CallKey(const FKey& K, bool bRepeat)
 	const bool bNextPage = Is({EKeys::Gamepad_DPad_Right, EKeys::Right, EKeys::D});
 	if (bPrevPage || bNextPage)
 	{
+		if (bRepeat) return true;
 		if (Pages > 1)
 		{
 			CallPage = (CallPage + (bNextPage ? 1 : -1) + Pages) % Pages;
@@ -811,6 +789,7 @@ bool SGridironOverlay::CallKey(const FKey& K, bool bRepeat)
 	const bool bNextSet = Is({EKeys::Gamepad_DPad_Down, EKeys::Down, EKeys::S});
 	if (bPrevSet || bNextSet)
 	{
+		if (bRepeat) return true;
 		const int32 N = CallSets.Num();
 		if (N > 1)
 		{
@@ -1102,12 +1081,64 @@ void SGridironOverlay::ShowPause(std::function<void()> Resume, std::function<voi
 	// the screen the pause comes over (the play call, the try choice) waits underneath and comes back with Resume
 	Suspended = bModal ? ModalContent : nullptr;
 	SuspendedFocus = bModal ? FocusedIndex() : -1;
+	// the game as it stands: the score, the quarter and clock, the down
+	FString Score, Situation;
+	if (Director && Director->Game)
+	{
+		const tag::Game& G = *Director->Game;
+		Score = FString::Printf(TEXT("%s  %d   -   %s  %d"), *S(G.away->abbr), Director->ScoreShown(tag::TeamKey::Away), *S(G.home->abbr), Director->ScoreShown(tag::TeamKey::Home));
+		const int32 Sec = FMath::Max(0, static_cast<int32>(G.clock));
+		const FString Qt = G.q >= 5 ? FString(TEXT("OVERTIME")) : FString::Printf(TEXT("%s QUARTER"), G.q == 1 ? TEXT("1ST") : G.q == 2 ? TEXT("2ND") : G.q == 3 ? TEXT("3RD") : TEXT("4TH"));
+		Situation = FString::Printf(TEXT("%s   %d:%02d   -   %s  %s"), *Qt, Sec / 60, Sec % 60, UTF8_TO_TCHAR(G.downText().c_str()), UTF8_TO_TCHAR(G.ydLine().c_str()));
+	}
 	TSharedRef<SVerticalBox> V = SNew(SVerticalBox)
-		+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(0, 0, 0, 10)[ SNew(STextBlock).Font(Font(26, "Bold")).Text(T(TEXT("PAUSED"))) ];
+		+ SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 2)[ SNew(STextBlock).Font(Font(12, "Bold")).ColorAndOpacity(Accent).Text(T(TEXT("GAME PAUSED"))) ]
+		+ SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 2)[ SNew(STextBlock).Font(Font(30, "Bold")).ColorAndOpacity(FLinearColor::White).Text(T(Score)) ]
+		+ SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 14)[ SNew(STextBlock).Font(Font(12)).ColorAndOpacity(Dim).Text(T(Situation)) ]
+		+ SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 14)[ SNew(SBox).HeightOverride(3).WidthOverride(400)[ SNew(SBorder).BorderImage(White()).BorderBackgroundColor(Accent) ] ];
 	V->AddSlot().AutoHeight()[ MakeButton(TEXT("Resume"), TEXT(""), [this, Resume] { ClearModal(); Resume(); }) ]; // the director restores the suspended screen
 	V->AddSlot().AutoHeight()[ MakeButton(TEXT("Box Score"), TEXT(""), [this, Resume] { ShowBoxScore(TEXT("Box Score"), TEXT("Resume"), [Resume] { Resume(); }); }) ];
+	V->AddSlot().AutoHeight()[ MakeButton(TEXT("Settings"), TEXT(""), [this, Resume, SimToEnd, Quit]
+	{
+		ShowSettings([this, Resume, SimToEnd, Quit]
+		{
+			// back to the pause menu, over the same suspended screen
+			const TSharedPtr<SWidget> Keep = Suspended;
+			const int32 KeepFocus = SuspendedFocus;
+			ShowPause(Resume, SimToEnd, Quit);
+			Suspended = Keep;
+			SuspendedFocus = KeepFocus;
+		});
+	}) ];
 	V->AddSlot().AutoHeight()[ MakeButton(TEXT("Sim to End of Game"), TEXT(""), [this, SimToEnd] { ClearModal(); SimToEnd(); }) ];
 	V->AddSlot().AutoHeight()[ MakeButton(TEXT("Quit to Main Menu"), TEXT(""), [this, Quit] { ClearModal(); Quit(); }) ];
+	V->AddSlot().AutoHeight().Padding(0, 14, 0, 0)[ SNew(STextBlock).Font(Font(11)).ColorAndOpacity(Dim)
+		.Text(T(bSonyPad ? TEXT("OPTIONS  resume") : TEXT("MENU / ESC  resume"))) ];
+	// the frozen picture behind it, blurred and darkened (the field stays readable as a backdrop, the menu card on
+	// the left, as a broadcast game's pause is laid out)
+	ShowModal(SNew(SOverlay)
+		+ SOverlay::Slot()[ SNew(SBackgroundBlur).BlurStrength(14.f) ]
+		+ SOverlay::Slot()[ SNew(SBorder).BorderImage(White()).BorderBackgroundColor(FLinearColor(0.01f, 0.015f, 0.03f, 0.55f)) ]
+		+ SOverlay::Slot().HAlign(HAlign_Left).VAlign(VAlign_Center).Padding(FMargin(96, 0, 0, 0))
+		[
+			SNew(SHorizontalBox)
+			+ SHorizontalBox::Slot().AutoWidth()[ SNew(SBox).WidthOverride(5)[ SNew(SBorder).BorderImage(White()).BorderBackgroundColor(Accent) ] ]
+			+ SHorizontalBox::Slot().AutoWidth()
+			[ SNew(SBorder).BorderImage(White()).BorderBackgroundColor(FLinearColor(0.025f, 0.03f, 0.05f, 0.92f)).Padding(FMargin(28, 24))[V] ]
+		]);
+}
+
+void SGridironOverlay::ShowSettings(std::function<void()> Back)
+{
+	TSharedRef<SVerticalBox> V = SNew(SVerticalBox)
+		+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(0, 0, 0, 10)[ SNew(STextBlock).Font(Font(26, "Bold")).Text(T(TEXT("SETTINGS"))) ];
+	const bool bCc = Director && Director->CaptionsOn();
+	V->AddSlot().AutoHeight()[ MakeButton(FString::Printf(TEXT("Commentary captions: %s"), bCc ? TEXT("On") : TEXT("Off")),
+		TEXT("The booth's words as text at the bottom of the screen."), [this, Back, bCc] { if (Director) Director->SetCaptionsOn(!bCc); ShowSettings(Back); }) ];
+	const bool bInv = Director && Director->InvertRightY();
+	V->AddSlot().AutoHeight()[ MakeButton(FString::Printf(TEXT("Right stick up / down: %s"), bInv ? TEXT("Inverted") : TEXT("Standard")),
+		TEXT("If the hit stick, truck and kick swing go the wrong way on your controller, flip this."), [this, Back, bInv] { if (Director) Director->SetInvertRightY(!bInv); ShowSettings(Back); }) ];
+	V->AddSlot().AutoHeight()[ MakeButton(TEXT("Back"), TEXT(""), [Back] { Back(); }) ];
 	ShowModal(Centered(SNew(SBorder).BorderImage(White()).BorderBackgroundColor(Panel).Padding(20)[V], 0.6f));
 }
 
@@ -1171,4 +1202,150 @@ void SGridironOverlay::ShowBoxScore(const FString& Title, const FString& Button,
 		]
 		+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(0, 16, 0, 0)[ MakeButton(Button, TEXT(""), [this, Done] { ClearModal(); Done(); }, 220) ];
 	ShowModal(Centered(SNew(SBox).WidthOverride(900)[ SNew(SBorder).BorderImage(White()).BorderBackgroundColor(Panel).Padding(24)[V] ], 0.75f));
+}
+
+int32 SGridironOverlay::PaintKickMeter(FSlateWindowElementList& Out, int32 Layer, const FGeometry& G) const
+{
+	const FKickMeterUI& K = KickMeter;
+	if (!K.bOn) return Layer;
+	const FVector2D Local = G.GetLocalSize();
+	const FVector2D Sc(Local.X / FMath::Max(1.0, K.Viewport.X), Local.Y / FMath::Max(1.0, K.Viewport.Y));
+	auto Box = [&](const FVector2D& TL, const FVector2D& Sz, const FLinearColor& C, int32 L)
+	{
+		FSlateDrawElement::MakeBox(Out, L, G.ToPaintGeometry(FVector2f(Sz), FSlateLayoutTransform(FVector2f(TL))), White(), ESlateDrawEffect::None, C);
+	};
+	// the aim arrow: the flight the kick is lined up on, gold, with a head where it comes down / reaches the posts
+	if (K.Arc.Num() > 1 && K.Stage < 3)
+	{
+		TArray<FVector2f> P;
+		for (const FVector2D& A : K.Arc) P.Add(FVector2f(A * Sc));
+		FSlateDrawElement::MakeLines(Out, Layer, G.ToPaintGeometry(), P, ESlateDrawEffect::None, FLinearColor(0, 0, 0, 0.45f), true, 7.f);
+		FSlateDrawElement::MakeLines(Out, Layer + 1, G.ToPaintGeometry(), P, ESlateDrawEffect::None, Accent, true, 3.5f);
+		const FVector2f E = P.Last(), B = P[FMath::Max(0, P.Num() - 3)];
+		const FVector2f D = (E - B).GetSafeNormal(), N(-D.Y, D.X);
+		FSlateDrawElement::MakeLines(Out, Layer + 1, G.ToPaintGeometry(), {E - D * 18.f + N * 10.f, E, E - D * 18.f - N * 10.f}, ESlateDrawEffect::None, Accent, true, 3.5f);
+	}
+	// the meter: bottom centre
+	const float W = 460.f, H = 118.f;
+	const FVector2D TL((Local.X - W) * 0.5f, Local.Y - H - 150.f); // (above the score bug and the hint line)
+	Box(TL, FVector2D(W, H), FLinearColor(0.02f, 0.025f, 0.035f, 0.88f), Layer + 2);
+	Box(TL + FVector2D(0, H - 3), FVector2D(W, 3), Accent, Layer + 3);
+	const FSlateFontInfo Ft = Font(14, "Bold"), Fs = Font(10);
+	FSlateDrawElement::MakeText(Out, Layer + 3, G.ToPaintGeometry(FVector2f(W - 28, 20), FSlateLayoutTransform(FVector2f(TL + FVector2D(14, 8)))), K.Title, Ft, ESlateDrawEffect::None, FLinearColor::White);
+	if (!K.Sub.IsEmpty())
+	{
+		const FVector2D M = Measure(K.Sub, Fs);
+		FSlateDrawElement::MakeText(Out, Layer + 3, G.ToPaintGeometry(FVector2f(M), FSlateLayoutTransform(FVector2f(TL + FVector2D(W - 14 - M.X, 12)))), K.Sub, Fs, ESlateDrawEffect::None, Dim);
+	}
+	// power: 0..1.15 across, the last 13% red
+	const FVector2D PB = TL + FVector2D(14, 40);
+	const float PW = W - 28, Red = PW * (1.f / 1.15f);
+	Box(PB, FVector2D(PW, 20), FLinearColor(0.12f, 0.13f, 0.16f, 1.f), Layer + 3);
+	Box(PB + FVector2D(Red, 0), FVector2D(PW - Red, 20), FLinearColor(0.45f, 0.06f, 0.05f, 1.f), Layer + 3);
+	Box(PB + FVector2D(Red * 0.9f, 0), FVector2D(Red * 0.1f, 20), FLinearColor(0.07f, 0.3f, 0.12f, 1.f), Layer + 3);
+	const float Fill = FMath::Clamp(K.Power / 1.15f, 0.f, 1.f) * PW;
+	const FLinearColor FillC = K.Power > 1.f ? FLinearColor(1.f, 0.22f, 0.15f) : K.Power > 0.9f ? FLinearColor(0.3f, 1.f, 0.45f) : FLinearColor(1.f, 1.f, 1.f, 0.92f);
+	Box(PB + FVector2D(0, 4), FVector2D(Fill, 12), FillC, Layer + 4);
+	FSlateDrawElement::MakeText(Out, Layer + 4, G.ToPaintGeometry(FVector2f(60, 14), FSlateLayoutTransform(FVector2f(PB + FVector2D(0, -15)))), FString(TEXT("POWER")), Fs, ESlateDrawEffect::None, Dim);
+	// accuracy: the needle across, the centre band green
+	const FVector2D AB = TL + FVector2D(14, 84);
+	Box(AB, FVector2D(PW, 12), FLinearColor(0.12f, 0.13f, 0.16f, 1.f), Layer + 3);
+	Box(AB + FVector2D(PW * 0.5f - PW * 0.075f, 0), FVector2D(PW * 0.15f, 12), FLinearColor(0.07f, 0.35f, 0.14f, 1.f), Layer + 3);
+	FSlateDrawElement::MakeText(Out, Layer + 4, G.ToPaintGeometry(FVector2f(90, 14), FSlateLayoutTransform(FVector2f(AB + FVector2D(0, -15)))), FString(TEXT("ACCURACY")), Fs, ESlateDrawEffect::None, Dim);
+	if (K.bAccShown || K.Stage >= 2)
+	{
+		const float X = AB.X + (FMath::Clamp(K.Acc, -1.f, 1.f) * 0.5f + 0.5f) * PW;
+		Box(FVector2D(X - 2, AB.Y - 5), FVector2D(4, 22), FMath::Abs(K.Acc) < 0.15f ? FLinearColor(0.3f, 1.f, 0.45f) : FLinearColor::White, Layer + 5);
+		if (K.Stage >= 3)
+		{
+			const float A = FMath::Abs(K.Acc);
+			const FString R = A < 0.15f ? TEXT("PERFECT") : A < 0.4f ? (K.Acc < 0 ? TEXT("SLIGHTLY LEFT") : TEXT("SLIGHTLY RIGHT"))
+				: (K.Acc < 0 ? TEXT("PULLED LEFT") : TEXT("PUSHED RIGHT"));
+			const FVector2D M = Measure(R, Fs);
+			FSlateDrawElement::MakeText(Out, Layer + 5, G.ToPaintGeometry(FVector2f(M), FSlateLayoutTransform(FVector2f(AB + FVector2D(PW - M.X, -15)))), R, Fs,
+				ESlateDrawEffect::None, A < 0.15f ? FLinearColor(0.3f, 1.f, 0.45f) : A < 0.4f ? FLinearColor::White : FLinearColor(1.f, 0.45f, 0.35f));
+		}
+	}
+	return Layer + 6;
+}
+
+int32 SGridironOverlay::PaintLineBars(FSlateWindowElementList& Out, int32 Layer, const FGeometry& G) const
+{
+	// the user's man: a glowing ring at his feet with a notch the way he faces, and a chevron with his number over him
+	if (UserMarker.bOn && UserMarker.Ring.Num() > 2)
+	{
+		const FVector2D Local = G.GetLocalSize();
+		const FVector2D Sc(Local.X / FMath::Max(1.0, UserMarker.Viewport.X), Local.Y / FMath::Max(1.0, UserMarker.Viewport.Y));
+		const float Pulse = 0.8f + 0.2f * FMath::Sin(FPlatformTime::Seconds() * 5.0);
+		const FLinearColor Glow(0.25f, 0.85f, 1.f, 0.35f * Pulse), Core(0.45f, 0.95f, 1.f, 0.95f);
+		TArray<FVector2f> R, N;
+		for (const FVector2D& P : UserMarker.Ring) R.Add(FVector2f(P * Sc));
+		for (const FVector2D& P : UserMarker.Notch) N.Add(FVector2f(P * Sc));
+		FSlateDrawElement::MakeLines(Out, Layer, G.ToPaintGeometry(), R, ESlateDrawEffect::None, Glow, true, 9.f);
+		FSlateDrawElement::MakeLines(Out, Layer + 1, G.ToPaintGeometry(), R, ESlateDrawEffect::None, Core, true, 3.f);
+		if (N.Num() == 3)
+		{
+			const FVector2f First = N[0]; // (copied: adding an element of the array to itself asserts)
+			N.Add(First);
+			FSlateDrawElement::MakeLines(Out, Layer + 1, G.ToPaintGeometry(), N, ESlateDrawEffect::None, Core, true, 3.f);
+		}
+		const FVector2f H = FVector2f(UserMarker.Head * Sc);
+		const float W = 11.f, Hh = 12.f;
+		FSlateDrawElement::MakeLines(Out, Layer + 1, G.ToPaintGeometry(), {H + FVector2f(-W, -Hh), H, H + FVector2f(W, -Hh), H + FVector2f(-W, -Hh)}, ESlateDrawEffect::None, Core, true, 3.f);
+		if (!UserMarker.Number.IsEmpty())
+		{
+			const FSlateFontInfo F = Font(12, "Bold");
+			const FVector2D M = Measure(UserMarker.Number, F);
+			FSlateDrawElement::MakeText(Out, Layer + 2, G.ToPaintGeometry(FVector2f(M), FSlateLayoutTransform(H + FVector2f(-M.X * 0.5f, -Hh - 4.f - M.Y))), UserMarker.Number, F, ESlateDrawEffect::None, Core);
+		}
+		Layer += 3;
+	}
+	// the user's sprint stamina: a short bar under his man (green, amber when low, red run dry), brighter while he sprints
+	if (StaminaV >= 0.f)
+	{
+		const FVector2D Local = G.GetLocalSize();
+		const FVector2D C = StaminaAt * FVector2D(Local.X / FMath::Max(1.0, StaminaVp.X), Local.Y / FMath::Max(1.0, StaminaVp.Y));
+		const float W = 64.f, H = 6.f;
+		const FVector2D TL(C.X - W * 0.5f, C.Y + 6.f);
+		auto Bx = [&](const FVector2D& P, const FVector2D& Sz, const FLinearColor& Cl, int32 L)
+		{
+			FSlateDrawElement::MakeBox(Out, L, G.ToPaintGeometry(FVector2f(Sz), FSlateLayoutTransform(FVector2f(P))), White(), ESlateDrawEffect::None, Cl);
+		};
+		const FLinearColor Fill = StaminaV < 0.2f ? FLinearColor(1.f, 0.25f, 0.2f) : StaminaV < 0.45f ? FLinearColor(1.f, 0.72f, 0.15f) : FLinearColor(0.35f, 0.95f, 0.45f);
+		Bx(TL - FVector2D(2, 2), FVector2D(W + 4, H + 4), FLinearColor(0, 0, 0, 0.6f), Layer);
+		Bx(TL, FVector2D(W, H), FLinearColor(0.12f, 0.13f, 0.16f, 0.9f), Layer + 1);
+		Bx(TL, FVector2D(W * FMath::Clamp(StaminaV, 0.f, 1.f), H), Fill * FLinearColor(1, 1, 1, bStaminaSprint ? 1.f : 0.75f), Layer + 2);
+		Layer += 3;
+	}
+	if (!LineBars.Num()) return Layer;
+	const FVector2D Local = G.GetLocalSize();
+	const FVector2D Sc(Local.X / FMath::Max(1.0, LineViewport.X), Local.Y / FMath::Max(1.0, LineViewport.Y));
+	auto Box = [&](const FVector2D& TL, const FVector2D& Sz, const FLinearColor& C, int32 L)
+	{
+		FSlateDrawElement::MakeBox(Out, L, G.ToPaintGeometry(FVector2f(Sz), FSlateLayoutTransform(FVector2f(TL))), White(), ESlateDrawEffect::None, C);
+	};
+	const FSlateFontInfo Fm = Font(10, "Bold");
+	for (const FLineBarUI& B : LineBars)
+	{
+		const FVector2D C = B.Screen * Sc;
+		const float W = B.bUser ? 92.f : 56.f, H = B.bUser ? 7.f : 5.f;
+		// the rusher's energy (blue, top) and the blocker's power (orange, below), a tick between for who is winning
+		const FVector2D T0(C.X - W * 0.5f, C.Y - H * 2.f - 4.f);
+		Box(T0 - FVector2D(2, 2), FVector2D(W + 4, H * 2.f + 7.f), FLinearColor(0, 0, 0, 0.55f), Layer);
+		Box(T0, FVector2D(W, H), FLinearColor(0.1f, 0.12f, 0.18f, 0.9f), Layer + 1);
+		Box(T0, FVector2D(W * FMath::Clamp(B.Energy, 0.f, 1.f), H), FLinearColor(0.25f, 0.65f, 1.f), Layer + 2);
+		const FVector2D T1 = T0 + FVector2D(0, H + 3.f);
+		Box(T1, FVector2D(W, H), FLinearColor(0.18f, 0.12f, 0.08f, 0.9f), Layer + 1);
+		Box(T1, FVector2D(W * FMath::Clamp(B.Power, 0.f, 1.f), H), FLinearColor(1.f, 0.55f, 0.15f), Layer + 2);
+		const float Ex = T0.X + (FMath::Clamp(B.Edge, -1.f, 1.f) * 0.5f + 0.5f) * W;
+		Box(FVector2D(Ex - 1.5f, T0.Y - 3.f), FVector2D(3.f, H * 2.f + 9.f), FLinearColor::White, Layer + 3);
+		if (!B.Move.IsEmpty())
+		{
+			const FVector2D M = Measure(B.Move, Fm);
+			const FVector2D Mt(C.X - M.X * 0.5f, T0.Y - M.Y - 6.f);
+			Box(Mt - FVector2D(5, 2), FVector2D(M.X + 10, M.Y + 4), B.bMoveWon ? FLinearColor(0.1f, 0.45f, 0.18f, 0.9f) : FLinearColor(0.45f, 0.08f, 0.06f, 0.9f), Layer + 1);
+			FSlateDrawElement::MakeText(Out, Layer + 2, G.ToPaintGeometry(FVector2f(M), FSlateLayoutTransform(FVector2f(Mt))), B.Move, Fm, ESlateDrawEffect::None, FLinearColor::White);
+		}
+	}
+	return Layer + 4;
 }

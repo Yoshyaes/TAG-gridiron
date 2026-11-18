@@ -6,6 +6,8 @@
 # name bones the two rigs share: pelvis, foot_l/r, ball_l/r ...). Run mm_build_dbs.py first when the UEFN lists change.
 #   UnrealEditor-Cmd.exe TAGGridiron.uproject -run=pythonscript -script="<this file>" -unattended -nosplash -nullrhi
 # Report: Saved/mm_build_dbs_hero.json
+# THEN run mm_walk_sets_hero.py: the walk style sets S1-S6 (with the constant-pace walk loops) are written there,
+# and this mirror puts S1-S3 back to the UEFN sets.
 import json
 import os
 

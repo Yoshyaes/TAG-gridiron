@@ -119,7 +119,121 @@ void FAthleteAssets::Load()
 		JukeR = Keyed(TEXT("A_TAG_Juke_R"));
 		Kneel = Keyed(TEXT("A_TAG_QB_Kneel"));
 		BlockEngaged = Keyed(TEXT("A_TAG_Block_Engaged_Loop"));
+		if (bNativeAnim)
+		{
+			auto Rep = [&](TArray<FLineRep>& Sink, const TCHAR* N)
+			{
+				FLineRep R;
+				R.D.Reset(LoadObject<UAnimSequence>(nullptr, *FString::Printf(TEXT("%s/Pack/Blocking/A_TAG_Pack_%s__P01.A_TAG_Pack_%s__P01"), *AnimRoot, N, N), nullptr, LOAD_NoWarn | LOAD_Quiet));
+				R.O.Reset(LoadObject<UAnimSequence>(nullptr, *FString::Printf(TEXT("%s/Pack/Blocking/A_TAG_Pack_%s__P02.A_TAG_Pack_%s__P02"), *AnimRoot, N, N), nullptr, LOAD_NoWarn | LOAD_Quiet));
+				if (R.D.IsValid() && R.O.IsValid()) Sink.Add(MoveTemp(R));
+				else UE_LOG(LogTemp, Warning, TEXT("TAG: line rep %s not found"), N);
+			};
+			static const bool bNoReps = FParse::Param(FCommandLine::Get(), TEXT("TagNoLineReps"));
+			if (!bNoReps)
+			{
+				Rep(RepLoops, TEXT("Dline_PassBlock_HeadsUp_Base_Loop_v01"));
+				Rep(RepWins, TEXT("Dline_PassBlock_Stationary_to_Left_Win_v01"));
+				Rep(RepWins, TEXT("Dline_PassBlock_Stationary_to_Left_Win_v03"));
+				Rep(RepWins, TEXT("Dline_PassBlock_Stationary_to_Left_Win_v04"));
+				Rep(RepWins, TEXT("Dline_PassBlock_Disengage_Left_from_Stationary_v01"));
+				Rep(RepBigWins, TEXT("Dline_PassBlock_Stationary_to_Left_Win_Aggressive_v01"));
+				Rep(RepBigWins, TEXT("Dline_PassBlock_Stationary_to_Left_Win_Aggressive_v02"));
+				Rep(RepHolds, TEXT("Dline_PassBlock_Stationary_to_Right_Loss_v01"));
+				Rep(RepHolds, TEXT("Dline_PassBlock_Stationary_to_Right_Loss_v02"));
+				Rep(RepPowerHolds, TEXT("DL_Move_BullRush_Loss_v1"));
+				// (the pack walks forward, back, right and back-right; the two left-hand walks are their mirrors, built with
+				// the placed clips: mocap_map Block_Walk_L / Block_Walk_BackL)
+				for (const TCHAR* N : {TEXT("Pack/Blocking/A_TAG_Pack_MG_PASSBLOCK_WALK_0__P01"), TEXT("Pack/Blocking/A_TAG_Pack_MG_PASSBLOCK_WALK_90__P01"),
+					TEXT("Pack/Blocking/A_TAG_Pack_MG_PASSBLOCK_WALK_135__P01"), TEXT("Pack/Blocking/A_TAG_Pack_MG_PASSBLOCK_WALK_180__P01"),
+					TEXT("Authored/A_TAG_Block_Walk_L"), TEXT("Authored/A_TAG_Block_Walk_BackL")})
+				{
+					const FString Leaf = FPaths::GetCleanFilename(N);
+					UAnimSequence* Sq = LoadObject<UAnimSequence>(nullptr, *FString::Printf(TEXT("%s/%s.%s"), *AnimRoot, N, *Leaf), nullptr, LOAD_NoWarn | LOAD_Quiet);
+					if (!Sq || !Sq->HasRootMotion()) continue;
+					FVector T = Sq->ExtractRootMotionFromRange(0.0, Sq->GetPlayLength(), FAnimExtractContext(0.0, true)).GetTranslation();
+					T.Z = 0.f;
+					if (T.Size() < 20.f) continue; // stays put
+					BlockWalks.Emplace(Sq);
+					BlockWalkDir.Add(T.GetSafeNormal());
+					BlockWalkSpeed.Add(static_cast<float>(T.Size() / Sq->GetPlayLength()));
+					UE_LOG(LogTemp, Display, TEXT("TAG block walk %s: %.0f cm/s toward %s"), N, T.Size() / Sq->GetPlayLength(), *T.GetSafeNormal().ToCompactString());
+				}
+				UE_LOG(LogTemp, Display, TEXT("TAG line reps: %d loops, %d wins, %d big wins, %d holds, %d walks"), RepLoops.Num(), RepWins.Num(), RepBigWins.Num(), RepHolds.Num(), BlockWalks.Num());
+				auto Walks = [&](FWalkSet& Set, const TCHAR* Gait)
+				{
+					for (const TCHAR* D : {TEXT("D1"), TEXT("D2"), TEXT("D3"), TEXT("D4"), TEXT("D5"), TEXT("D6"), TEXT("D7"), TEXT("D8")})
+					{
+						const FString N = FString::Printf(TEXT("A_TAG_Pack_MG_QB_InPocket_%s_%s__P01"), Gait, D);
+						UAnimSequence* Sq = LoadObject<UAnimSequence>(nullptr, *FString::Printf(TEXT("%s/Pack/Quarterback/%s.%s"), *AnimRoot, *N, *N), nullptr, LOAD_NoWarn | LOAD_Quiet);
+						if (!Sq || !Sq->HasRootMotion()) continue;
+						FVector T = Sq->ExtractRootMotionFromRange(0.0, Sq->GetPlayLength(), FAnimExtractContext(0.0, true)).GetTranslation();
+						T.Z = 0.f;
+						if (T.Size() < 20.f) continue;
+						Set.Clips.Emplace(Sq);
+						Set.Dir.Add(T.GetSafeNormal());
+						Set.Speed.Add(static_cast<float>(T.Size() / Sq->GetPlayLength()));
+					}
+				};
+				Walks(QBWalks, TEXT("Walk"));
+				Walks(QBJogs, TEXT("Jog"));
+				auto QbRun = [&](const TCHAR* N, TStrongObjectPtr<UAnimSequence>& Out, float& Speed)
+				{
+					UAnimSequence* Sq = LoadObject<UAnimSequence>(nullptr, *FString::Printf(TEXT("%s/Pack/Quarterback/A_TAG_Pack_%s.A_TAG_Pack_%s"), *AnimRoot, N, N), nullptr, LOAD_NoWarn | LOAD_Quiet);
+					if (!Sq) return;
+					Out.Reset(Sq);
+					FVector T = Sq->ExtractRootMotionFromRange(0.0, Sq->GetPlayLength(), FAnimExtractContext(0.0, true)).GetTranslation();
+					T.Z = 0.f;
+					if (T.Size() > 50.f) Speed = static_cast<float>(T.Size() / Sq->GetPlayLength());
+				};
+				QbRun(TEXT("MG_Loco_QB_Scramble_Jog__P01"), QBScramble, QBScrambleSpeed);
+				QbRun(TEXT("MG_Loco_QB_Run_ShortStride__P01"), QBRun, QBRunSpeed);
+				UE_LOG(LogTemp, Display, TEXT("TAG qb scramble: jog %d (%.0f cm/s), run %d (%.0f cm/s)"), QBScramble.IsValid(), QBScrambleSpeed, QBRun.IsValid(), QBRunSpeed);
+				UE_LOG(LogTemp, Display, TEXT("TAG qb pocket set: %d walks, %d jogs"), QBWalks.Clips.Num(), QBJogs.Clips.Num());
+				auto KickClip = [&](const TCHAR* N) -> UAnimSequence*
+				{
+					return LoadObject<UAnimSequence>(nullptr, *FString::Printf(TEXT("%s/Pack/Kicking/A_TAG_Pack_%s.A_TAG_Pack_%s"), *AnimRoot, N, N), nullptr, LOAD_NoWarn | LOAD_Quiet);
+				};
+				FgScene.Snap.Reset(KickClip(TEXT("FG_Normal_Kick_v1__P03")));
+				FgScene.Hold.Reset(KickClip(TEXT("FG_Normal_Kick_v1__P01")));
+				FgScene.Kick.Reset(KickClip(TEXT("FG_Normal_Kick_v1__P02")));
+				FgScene.SnapWait.Reset(KickClip(TEXT("MADNOCT04_1059_1_5_Long_Snapper_Presnap_Cycle__P01")));
+				FgScene.HoldWait.Reset(KickClip(TEXT("P_Holder_PreSnap_Loop__P01")));
+				FgScene.KickWait.Reset(KickClip(TEXT("Kicker_FG_loop_Default__P01")));
+				UE_LOG(LogTemp, Display, TEXT("TAG field goal capture: %s (waits %d %d %d)"), FgScene.Ok() ? TEXT("snap, hold and kick") : TEXT("missing"),
+					FgScene.SnapWait.IsValid(), FgScene.HoldWait.IsValid(), FgScene.KickWait.IsValid());
+				PuntScene.Snap.Reset(KickClip(TEXT("Punt_Normal_Kick_v1__P02")));
+				PuntScene.Kick.Reset(KickClip(TEXT("Punt_Normal_Kick_v1__P01")));
+				PuntScene.SnapWait = FgScene.SnapWait;
+				PuntScene.KickWait.Reset(KickClip(TEXT("Punt_Normal_Idle_v1__P01")));
+				FairCatch.Reset(KickClip(TEXT("cfairabx_FairKickCatch__P01")));
+				FgBlockRush.Reset(LoadObject<UAnimSequence>(nullptr, *FString::Printf(TEXT("%s/Pack/Blocking/A_TAG_Pack_FGBlock_Left_Edge_Block_v2__P03.A_TAG_Pack_FGBlock_Left_Edge_Block_v2__P03"), *AnimRoot), nullptr, LOAD_NoWarn | LOAD_Quiet));
+				UE_LOG(LogTemp, Display, TEXT("TAG kick block capture: %d"), FgBlockRush.IsValid());
+				auto UpClip = [&](const TCHAR* N) -> UAnimSequence*
+				{
+					return LoadObject<UAnimSequence>(nullptr, *FString::Printf(TEXT("%s/Pack/GetUps/A_TAG_Pack_%s.A_TAG_Pack_%s"), *AnimRoot, N, N), nullptr, LOAD_NoWarn | LOAD_Quiet);
+				};
+				HelpUpDown.Reset(UpClip(TEXT("Getup_NonBC_15_HelpUp_Knees_D7_Dejected_Var4__P02")));
+				HelpUpBy.Reset(UpClip(TEXT("Getup_NonBC_15_HelpUp_Knees_D7_Dejected_Var4__P01")));
+				UE_LOG(LogTemp, Display, TEXT("TAG help-up capture: %s"), HelpUpDown.IsValid() && HelpUpBy.IsValid() ? TEXT("loaded") : TEXT("missing"));
+				auto PreClip = [&](const TCHAR* N) -> UAnimSequence*
+				{
+					return LoadObject<UAnimSequence>(nullptr, *FString::Printf(TEXT("%s/Pack/PrePlay/A_TAG_Pack_%s.A_TAG_Pack_%s"), *AnimRoot, N, N), nullptr, LOAD_NoWarn | LOAD_Quiet);
+				};
+				QBAudibleGun.Reset(PreClip(TEXT("MADNMAY04_0973_1_QB_Stance_Shotgun_Hands_Up_Quick_Audible_Point_to_Side__P01")));
+				QBAudibleUnder.Reset(PreClip(TEXT("MADNMAY04_0971_1_QB_Stance_Under_Center_Quick_Audible_Point_to_Side__P01")));
+				QBSignal.Reset(PreClip(TEXT("MADNMAY04_0986_1_QB_Stance_Shotgun_Hands_Up_Hand_Signal_Variation_1__P01")));
+				HBAudible.Reset(PreClip(TEXT("MADNMAY04_1586_1_HB_Stance_2_Point_Audible_look_around_and_re_settle__P01")));
+				LBHearsAudible.Reset(PreClip(TEXT("MADNAUG04_0341_1_Pre_Play_Stance_LB_Stance_2_point_Offensive_audible_look_up_and_re_settle__P01")));
+				LBDefAudible.Reset(PreClip(TEXT("MADNAUG04_0329_1_4_LB_HandSignals_Def_Audible__P01")));
+				UE_LOG(LogTemp, Display, TEXT("TAG audible captures: qb %d %d %d, back %d, linebackers %d %d"), QBAudibleGun.IsValid(), QBAudibleUnder.IsValid(), QBSignal.IsValid(),
+					HBAudible.IsValid(), LBHearsAudible.IsValid(), LBDefAudible.IsValid());
+				UE_LOG(LogTemp, Display, TEXT("TAG punt capture: %s, fair catch %d"), PuntScene.Snap.IsValid() && PuntScene.Kick.IsValid() ? TEXT("snap and punt") : TEXT("missing"), FairCatch.IsValid());
+			}
+		}
 		BlockPassSet = Keyed(TEXT("A_TAG_Block_PassSet_Loop"));
+		BlockReadyOL = LoadAsset<UAnimationAsset>(*FString::Printf(TEXT("%s/Pack/Blocking/A_TAG_Pack_MG_PASSBLOCK_STAND__P01.A_TAG_Pack_MG_PASSBLOCK_STAND__P01"), *AnimRoot), false);
+		BlockReadyBack = LoadAsset<UAnimationAsset>(*FString::Printf(TEXT("%s/Pack/Blocking/A_TAG_Pack_HB_Blocking_Idle_Loop__P01.A_TAG_Pack_HB_Blocking_Idle_Loop__P01"), *AnimRoot), false);
 		SnapCatch = Keyed(TEXT("A_TAG_QB_SnapCatch"));
 		Handoff = Keyed(TEXT("A_TAG_QB_Handoff"));
 		GetUpDown = Keyed(TEXT("A_TAG_GetUp_FaceDown"));
@@ -449,6 +563,58 @@ void FAthleteAssets::PackTimed(const TCHAR* Category, std::initializer_list<cons
 	PendingTimed.Add(MoveTemp(T));
 }
 
+void FAthleteAssets::LoadPackDoubles()
+{
+	if (bDoublesLoaded) return;
+	bDoublesLoaded = true;
+	FString Text;
+	if (!FFileHelper::LoadFileToString(Text, *PackJson(TEXT("pack_dbl.json")))) return;
+	TArray<TSharedPtr<FJsonValue>> Rows;
+	if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Text), Rows)) return;
+	auto Load = [](const FString& N)
+	{
+		return LoadObject<UAnimSequence>(nullptr, *FString::Printf(TEXT("/Game/TAG/AnimH/Pack/Blocking/%s.%s"), *N, *N), nullptr, LOAD_NoWarn | LOAD_Quiet);
+	};
+	for (const TSharedPtr<FJsonValue>& V : Rows)
+	{
+		const TSharedPtr<FJsonObject>* O = nullptr;
+		if (!V.IsValid() || !V->TryGetObject(O) || !O) continue;
+		// (the holds only, a second or more of them: the sheds are the sim's call and play the two-man wins)
+		const float T0 = static_cast<float>((*O)->GetNumberField(TEXT("T0"))), T1 = static_cast<float>((*O)->GetNumberField(TEXT("T1")));
+		if ((*O)->GetStringField(TEXT("Kind")) != TEXT("hold") || T1 - T0 < 1.0f) continue;
+		FDoubleRep R;
+		R.D.Reset(Load((*O)->GetStringField(TEXT("D"))));
+		R.A.Reset(Load((*O)->GetStringField(TEXT("A"))));
+		R.B.Reset(Load((*O)->GetStringField(TEXT("B"))));
+		R.T0 = T0;
+		R.T1 = T1;
+		if (R.D.IsValid() && R.A.IsValid() && R.B.IsValid()) RepDoubles.Add(MoveTemp(R));
+	}
+	UE_LOG(LogTemp, Display, TEXT("TAG double teams: %d captures"), RepDoubles.Num());
+	// and the handoffs
+	FString HText;
+	TArray<TSharedPtr<FJsonValue>> HRows;
+	if (FFileHelper::LoadFileToString(HText, *PackJson(TEXT("pack_handoffs.json"))) && FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(HText), HRows))
+		for (const TSharedPtr<FJsonValue>& V : HRows)
+		{
+			const TSharedPtr<FJsonObject>* O = nullptr;
+			if (!V.IsValid() || !V->TryGetObject(O) || !O) continue;
+			const FString Cat = (*O)->GetStringField(TEXT("Cat"));
+			auto LoadH = [&Cat](const FString& N)
+			{
+				return LoadObject<UAnimSequence>(nullptr, *FString::Printf(TEXT("/Game/TAG/AnimH/Pack/%s/%s.%s"), *Cat, *N, *N), nullptr, LOAD_NoWarn | LOAD_Quiet);
+			};
+			FHandoffRep R;
+			R.Q.Reset(LoadH((*O)->GetStringField(TEXT("Q"))));
+			R.B.Reset(LoadH((*O)->GetStringField(TEXT("B"))));
+			R.T = static_cast<float>((*O)->GetNumberField(TEXT("T")));
+			R.bGun = (*O)->GetBoolField(TEXT("Gun"));
+			R.Bx = static_cast<float>((*O)->GetNumberField(TEXT("Bx")));
+			if (R.Q.IsValid() && R.B.IsValid()) RepHandoffs.Add(MoveTemp(R));
+		}
+	UE_LOG(LogTemp, Display, TEXT("TAG handoffs: %d captures"), RepHandoffs.Num());
+}
+
 void FAthleteAssets::LoadPackPairs(int32 Seed)
 {
 	FString Text;
@@ -536,7 +702,12 @@ void FAthleteAssets::SelectPack(int32 Seed)
 {
 	const std::initializer_list<const TCHAR*> Many = {TEXT("2Man"), TEXT("2man"), TEXT("3Man"), TEXT("4Man"), TEXT("Nman"), TEXT("NMan"), TEXT("Group"), TEXT("Mascot"), TEXT("Interaction"), TEXT("Avoid"), TEXT("Bump"), TEXT("Man0"), TEXT("Man1"), TEXT("Man2"), TEXT("Man3")};
 	PackFamily(TEXT("Celebrations"), {TEXT("Celeb")}, {}, {TEXT("2Man"), TEXT("2man"), TEXT("3Man"), TEXT("4Man"), TEXT("Nman"), TEXT("NMan"), TEXT("Group"), TEXT("Mascot"), TEXT("Interaction"), TEXT("Avoid"), TEXT("Bump"), TEXT("Man0"), TEXT("Man1"), TEXT("Man2"), TEXT("Man3"), TEXT("Loco"), TEXT("Walk"), TEXT("Jog"), TEXT("Run"), TEXT("on_Ground"), TEXT("Toss_Ball"), TEXT("Fan")}, 24, Seed + 1, false, [this]() -> TArray<TObjectPtr<UAnimationAsset>>& { return PackCelebrations; });
-	PackFamily(TEXT("PostPlay"), {TEXT("Idle"), TEXT("Fidget"), TEXT("Stand")}, {}, {TEXT("2Man"), TEXT("Man_"), TEXT("Interaction"), TEXT("Jog"), TEXT("Walk"), TEXT("Run"), TEXT("Avoid"), TEXT("Turn"), TEXT("Tackle"), TEXT("Getup"), TEXT("Injured"), TEXT("To_"), TEXT("Trans")}, 12, Seed + 2, true, [this]() -> TArray<TObjectPtr<UAnimationAsset>>& { return PackPostPlayIdles; });
+	PackFamily(TEXT("PostPlay"), {TEXT("Idle"), TEXT("Fidget"), TEXT("Stand")}, {}, {TEXT("2Man"), TEXT("Man_"), TEXT("Interaction"), TEXT("Jog"), TEXT("Walk"), TEXT("Run"), TEXT("Avoid"), TEXT("Turn"), TEXT("Tackle"), TEXT("Getup"), TEXT("Injured"), TEXT("To_"), TEXT("Trans"),
+		// (a man standing in the huddle loops this for ten seconds: only the quiet stands. The family also held the rally wave
+		// - an arm thrown up to call teammates over - big-play and safety reactions, a sideline catch, coaches, a home-run
+		// swing and a clap; looped by half a huddle they were the arms going every which way a user saw between plays)
+		TEXT("WaveOver"), TEXT("Rally"), TEXT("Big_Play"), TEXT("Reactions"), TEXT("Saftey"), TEXT("Safety"), TEXT("Small_Moment"), TEXT("Upset"), TEXT("HandClap"), TEXT("HomeRun"),
+		TEXT("Low_Crouch"), TEXT("Coach"), TEXT("Catch"), TEXT("Frustrated")}, 12, Seed + 2, true, [this]() -> TArray<TObjectPtr<UAnimationAsset>>& { return PackPostPlayIdles; });
 	PackFamily(TEXT("GetUps"), {TEXT("Splat"), TEXT("Knees")}, {TEXT("InPlace"), TEXT("LowIntensity"), TEXT("Low_Intensity")}, {TEXT("BackSplat"), TEXT("Backsplat"), TEXT("Back_Splat"), TEXT("TwoMan"), TEXT("2Man"), TEXT("Man_"), TEXT("PTM_"), TEXT("Idle"), TEXT("BC_")}, 8, Seed + 3, false, [this]() -> TArray<TObjectPtr<UAnimationAsset>>& { return PackGetUpsFaceDown; });
 	PackFamily(TEXT("GetUps"), {TEXT("BackSplat"), TEXT("Backsplat"), TEXT("Back_Splat"), TEXT("Sitting"), TEXT("Sit_")}, {TEXT("InPlace"), TEXT("LowIntensity"), TEXT("Low_Intensity")}, {TEXT("TwoMan"), TEXT("2Man"), TEXT("Man_"), TEXT("PTM_"), TEXT("Idle"), TEXT("BC_")}, 8, Seed + 4, false, [this]() -> TArray<TObjectPtr<UAnimationAsset>>& { return PackGetUpsFaceUp; });
 	PackFamily(TEXT("Injuries"), {TEXT("FLD_PLYR_Injury")}, {}, {TEXT("2man"), TEXT("Reaction"), TEXT("Bench"), TEXT("Trainer"), TEXT("Cart")}, 6, Seed + 5, false, [this]() -> TArray<TObjectPtr<UAnimationAsset>>& { return PackInjuries; });
@@ -561,6 +732,7 @@ void FAthleteAssets::SelectPack(int32 Seed)
 	PackFamily(TEXT("PrePlay"), {TEXT("DL_4pt"), TEXT("DL_3pt"), TEXT("Def_4pt")}, {}, StanceNone, 6, Seed + 41, true, [this]() -> TArray<TObjectPtr<UAnimationAsset>>& { return PackStances.FindOrAdd(1001); });
 	// the timed families (PackTimed): started at the capture's own moment less a lead
 	LoadPackPairs(Seed);
+	LoadPackDoubles();
 	LoadPackGangs();
 	if (PackIndex.Num())
 	{
@@ -580,7 +752,11 @@ void FAthleteAssets::SelectPack(int32 Seed)
 		const std::initializer_list<const TCHAR*> CatchNone = {TEXT("2man"), TEXT("Drop"), TEXT("Def_"), TEXT("INT"), TEXT("Int_"), TEXT("Swat"), TEXT("Knock"), TEXT("Tip"), TEXT("Bobble"), TEXT("Miss"), TEXT("Fumble"), TEXT("Kick"), TEXT("Punt"), TEXT("Pump"), TEXT("Handoff"), TEXT("Pitch"), TEXT("Almost"), TEXT("Out_of_Bounds"), TEXT("Celeb"), TEXT("Jump_Ball"), TEXT("Juggl")};
 		// a diving / layout capture carries the body forward on its own; it plays only when the catch is a dive (the sim ends the
 		// play there): on any other catch the body dived ahead while the runner turned upfield, then snapped back
-		const std::initializer_list<const TCHAR*> CatchNoDive = {TEXT("2man"), TEXT("Drop"), TEXT("Def_"), TEXT("INT"), TEXT("Int_"), TEXT("Swat"), TEXT("Knock"), TEXT("Tip"), TEXT("Bobble"), TEXT("Miss"), TEXT("Fumble"), TEXT("Kick"), TEXT("Punt"), TEXT("Pump"), TEXT("Handoff"), TEXT("Pitch"), TEXT("Almost"), TEXT("Out_of_Bounds"), TEXT("Celeb"), TEXT("Jump_Ball"), TEXT("Juggl"), TEXT("Dive"), TEXT("Layout"), TEXT("Slide"), TEXT("Fall")};
+		const std::initializer_list<const TCHAR*> CatchNoDive = {TEXT("2man"), TEXT("Drop"), TEXT("Def_"), TEXT("INT"), TEXT("Int_"), TEXT("Swat"), TEXT("Knock"), TEXT("Tip"), TEXT("Bobble"), TEXT("Miss"), TEXT("Fumble"), TEXT("Kick"), TEXT("Punt"), TEXT("Pump"), TEXT("Handoff"), TEXT("Pitch"), TEXT("Almost"), TEXT("Out_of_Bounds"), TEXT("Celeb"), TEXT("Jump_Ball"), TEXT("Juggl"), TEXT("Dive"), TEXT("Layout"), TEXT("Slide"), TEXT("Fall"),
+			// (captures that end with the catcher on the turf: played on a catch the sim runs on from, he went to the ground,
+			// got up and ran on - "SecureBall_InFront_GoToGround", p73 c035)
+			// ("Knees" in a name is the ball's height, a low catch on the run: kept)
+			TEXT("Ground")};
 		PackTimed(TEXT("Catching"), {TEXT("Catch_Run"), TEXT("InStride"), TEXT("In_Stride")}, {}, CatchNoDive, 16, Seed + 70, TEXT("release"), 4, 0.7f, 0.f, PackCatchStride);
 		PackTimed(TEXT("Catching"), {TEXT("Jump"), TEXT("AboveHead"), TEXT("HighPoint"), TEXT("High_Point")}, {TEXT("Catch")}, CatchNoDive, 12, Seed + 71, TEXT("release"), 4, 0.7f, 0.f, PackCatchHigh);
 		PackTimed(TEXT("Catching"), {TEXT("Low"), TEXT("Shoestring"), TEXT("Scoop"), TEXT("Shoe")}, {TEXT("Catch")}, CatchNoDive, 8, Seed + 72, TEXT("release"), 4, 0.7f, 0.f, PackCatchLow);
@@ -589,6 +765,29 @@ void FAthleteAssets::SelectPack(int32 Seed)
 		PackTimed(TEXT("Catching"), {TEXT("Catch_Stand"), TEXT("Stand_"), TEXT("Strafe"), TEXT("Chest")}, {TEXT("Catch")}, CatchNoDive, 12, Seed + 75, TEXT("release"), 4, 0.7f, 0.f, PackCatchStand);
 		PackTimed(TEXT("Catching"), {TEXT("Bkpd"), TEXT("Comeback"), TEXT("Curl")}, {TEXT("Catch")}, CatchNoDive, 8, Seed + 76, TEXT("release"), 4, 0.7f, 0.f, PackCatchComeback);
 		PackTimed(TEXT("Catching"), {TEXT("Dive"), TEXT("Layout")}, {TEXT("Catch")}, CatchNone, 8, Seed + 77, TEXT("release"), 6, 0.9f, 0.f, PackCatchDive);
+		// (its own exclusions: CatchNoDive's "Tip" took every FingerTip; and these captures end a beat after the ball is
+		// in, 0.15-0.3 s, where the everyday catches run on 0.7 s: shorter ones only blend back into the run sooner)
+		{
+			const std::initializer_list<const TCHAR*> SwatNone = {TEXT("2man"), TEXT("MPCI"), TEXT("Dive"), TEXT("Diving"), TEXT("Fall"), TEXT("Ground"), TEXT("Def_")};
+			PackTimed(TEXT("Catching"), {TEXT("Swat_Run")}, {}, SwatNone, 10, Seed + 120, TEXT("release"), 4, 0.3f, 0.f, PackSwatRun);
+			PackTimed(TEXT("Quarterback"), {TEXT("Pass_Shovel_Set")}, {TEXT("RightHand")}, {}, 4, Seed + 132, TEXT("release"), 7, 0.3f, 0.f, PackShovelSet);
+			PackTimed(TEXT("Quarterback"), {TEXT("Pass_Shovel_Rollout"), TEXT("Pass_Shovel_Scramble")}, {TEXT("RightHand")}, {}, 8, Seed + 133, TEXT("release"), 7, 0.3f, 0.f, PackShovelMove);
+			PackTimed(TEXT(""), {TEXT("PumpFake")}, {}, {TEXT("Celeb")}, 8, Seed + 134, nullptr, 0, 0.3f, 0.f, PackPumpFakes);
+			const std::initializer_list<const TCHAR*> KcNone = {TEXT("Idle"), TEXT("Fake"), TEXT("Fair"), TEXT("Celeb"), TEXT("Muff"), TEXT("Drop")};
+			PackTimed(TEXT("Kicking"), {TEXT("KickCatch"), TEXT("KickReturn_Catch"), TEXT("from_punt")}, {TEXT("Stand"), TEXT("Catch_Var"), TEXT("D3_catch")}, KcNone, 8, Seed + 130,
+				TEXT("release"), 6, 0.4f, 0.f, PackKickCatchStand);
+			PackTimed(TEXT("Kicking"), {TEXT("KickCatch_Run"), TEXT("KickCatch_Chest_Run"), TEXT("KickCatch_Helmet_Run"), TEXT("Returner_run")}, {}, KcNone, 8, Seed + 131,
+				TEXT("release"), 6, 0.4f, 0.f, PackKickCatchRun);
+			PackTimed(TEXT("Catching"), {TEXT("Swat_Strafe")}, {}, SwatNone, 10, Seed + 121, TEXT("release"), 4, 0.3f, 0.f, PackSwatStrafe);
+			PackTimed(TEXT("Catching"), {TEXT("Swat_Backpedal"), TEXT("Swat_Stand")}, {}, SwatNone, 8, Seed + 122, TEXT("release"), 4, 0.3f, 0.f, PackSwatBack);
+			PackTimed(TEXT("Catching"), {TEXT("_INT"), TEXT("Interception"), TEXT("INT_")}, {},
+				{TEXT("2man"), TEXT("MPCI"), TEXT("Dive"), TEXT("Diving"), TEXT("Fall"), TEXT("Ground"), TEXT("Def_"), TEXT("Swat"), TEXT("Drop"), TEXT("2014_")}, 10, Seed + 123,
+				TEXT("release"), 4, 0.3f, 0.f, PackIntCatch);
+		}
+		PackTimed(TEXT("Catching"), {TEXT("OneHand"), TEXT("One_Hand"), TEXT("one_hand"), TEXT("FingerTip"), TEXT("Fingertip"), TEXT("Leap")}, {TEXT("Catch")},
+			{TEXT("2man"), TEXT("Drop"), TEXT("Def_"), TEXT("INT"), TEXT("Int_"), TEXT("Swat"), TEXT("Knock"), TEXT("Bobble"), TEXT("Miss"), TEXT("Fumble"), TEXT("Juggl"),
+			 TEXT("Dive"), TEXT("Layout"), TEXT("Slide"), TEXT("Fall"), TEXT("Ground"), TEXT("Celeb"), TEXT("Kick"), TEXT("Punt")}, 16, Seed + 78,
+			TEXT("release"), 4, 0.15f, 0.f, PackCatchSpectacular);
 		const std::initializer_list<const TCHAR*> TackleNone = {TEXT("Dive"), TEXT("Strip"), TEXT("Whiff"), TEXT("Miss"), TEXT("Sack"), TEXT("Pile"), TEXT("Gang"), TEXT("Sideline"), TEXT("Spin"), TEXT("Brkn"), TEXT("Broken"), TEXT("Hurdle"), TEXT("Truck"), TEXT("StiffArm"), TEXT("Celeb"), TEXT("Fumble"),
 			// a facemask tackle is a 15-yard foul, not a clean tackle: kept out until the penalty that calls for it exists
 			TEXT("FaceMask"), TEXT("Facemask"), TEXT("Horsecollar"), TEXT("HorseCollar")};
@@ -788,12 +987,35 @@ void FAthleteAssets::FillPackLoaded()
 		}
 		PackTimedCount += T.Sink->Num();
 	}
+	// a capture whose root jumps (a tracking glitch: the root of eight of the pack's 381 tackle pairs steps 1-2 m in a
+	// frame, hands at 30-60 m/s in the capture's own data) or runs on for tens of metres carries the falling body
+	// with it: a tackled back on the turf gliding 10 yd upfield at 7 m/s (p16, clip 5). The fall follows the root
+	// (AAthlete::TickFall), so such a capture cannot play a fall.
+	auto RootSane = [](const UAnimSequence* Seq, float Start)
+	{
+		const double Len = Seq->GetPlayLength();
+		const FAnimExtractContext Ctx(0.0, true);
+		double Total = 0.0;
+		for (double S = FMath::Max(0.0, static_cast<double>(Start)); S + 1e-3 < Len; S += 1.0 / 30.0)
+		{
+			const double Step = Seq->ExtractRootMotionFromRange(S, FMath::Min(Len, S + 1.0 / 30.0), Ctx).GetTranslation().Size2D();
+			if (Step > 50.0) return false; // 15 m/s
+			Total += Step;
+		}
+		return Total < 1200.0;
+	};
 	for (FPendingPair& Q : PendingPairs)
 	{
-		if (Q.P.T) continue;
+		if (Q.P.T || Q.bBad) continue;
 		UAnimSequence* T = Cast<UAnimSequence>(Q.TP.ResolveObject());
 		UAnimSequence* C = Cast<UAnimSequence>(Q.CP.ResolveObject());
 		if (!T || !C || !T->HasAnyFlags(RF_LoadCompleted) || !C->HasAnyFlags(RF_LoadCompleted)) continue;
+		if (!RootSane(T, Q.P.Start) || !RootSane(C, Q.P.Start))
+		{
+			Q.bBad = true;
+			UE_LOG(LogTemp, Display, TEXT("TAG: tackle pair %s left out: its root jumps or runs on"), *C->GetName());
+			continue;
+		}
 		Keep(T);
 		Keep(C);
 		Q.P.T = T;
@@ -802,11 +1024,17 @@ void FAthleteAssets::FillPackLoaded()
 	}
 	for (FPendingGang& Q : PendingGangs)
 	{
-		if (Q.G.C) continue;
+		if (Q.G.C || Q.bBad) continue;
 		UAnimSequence* C = Cast<UAnimSequence>(Q.CP.ResolveObject());
 		UAnimSequence* T = Cast<UAnimSequence>(Q.TP.ResolveObject());
 		UAnimSequence* G = Cast<UAnimSequence>(Q.AP.ResolveObject());
 		if (!C || !T || !G || !C->HasAnyFlags(RF_LoadCompleted) || !T->HasAnyFlags(RF_LoadCompleted) || !G->HasAnyFlags(RF_LoadCompleted)) continue;
+		if (!RootSane(C, Q.G.Start) || !RootSane(T, Q.G.Start) || !RootSane(G, Q.G.Start))
+		{
+			Q.bBad = true;
+			UE_LOG(LogTemp, Display, TEXT("TAG: gang tackle %s left out: its root jumps or runs on"), *C->GetName());
+			continue;
+		}
 		Keep(C);
 		Keep(T);
 		Keep(G);
@@ -843,7 +1071,7 @@ void FAthleteAssets::OnPackBatchLoaded()
 		PackPairs[0].Num(), PackPairs[1].Num(), PackPairs[2].Num(), PackPairs[3].Num(), PackPairs[4].Num(), PackPairs[5].Num(), PackGangs.Num());
 	UE_LOG(LogTemp, Display, TEXT("TAG: pack library timed families: %d captures (throws %d/%d/%d/%d/%d, kicks %d/%d/%d, drops %d/%d, catches %d/%d/%d/%d/%d/%d/%d/%d, tackled %d/%d/%d, tacklers %d, whiffs %d, stumbles %d, jukes %d/%d, spins %d/%d, trucks %d, hurdles %d, stiff arms %d/%d, rush wins %d/%d, beaten %d/%d, pancakes %d, get-offs %d; index %d)"),
 		PackTimedCount, PackThrowsSet.Num(), PackThrowsQuick.Num(), PackThrowsDeep.Num(), PackThrowsRollR.Num(), PackThrowsRollL.Num(), PackKickoffs.Num(), PackFieldGoals.Num(), PackPunts.Num(),
-		PackDropsSG.Num(), PackDropsUC.Num(), PackCatchStride.Num(), PackCatchHigh.Num(), PackCatchLow.Num(), PackCatchOverShoulder.Num(), PackCatchSideline.Num(), PackCatchStand.Num(), PackCatchComeback.Num(), PackCatchDive.Num(),
+		PackDropsSG.Num(), PackDropsUC.Num(), PackCatchStride.Num(), PackCatchHigh.Num(), PackCatchLow.Num(), PackCatchOverShoulder.Num(), PackCatchSideline.Num(), PackCatchStand.Num(), PackCatchComeback.Num(), PackCatchDive.Num() * 100 + PackCatchSpectacular.Num(),
 		PackTackledFront.Num(), PackTackledBehind.Num(), PackTackledSide.Num(), PackTacklers.Num(), PackWhiffs.Num(), PackStumbles.Num(), PackJukesL.Num(), PackJukesR.Num(), PackSpinsL.Num(), PackSpinsR.Num(),
 		PackTrucks.Num(), PackHurdles.Num(), PackStiffArmsL.Num(), PackStiffArmsR.Num(), PackRushWinsL.Num(), PackRushWinsR.Num(), PackBeatenL.Num(), PackBeatenR.Num(), PackPancakes.Num(), PackGetOffs.Num(), PackIndex.Num());
 	const FPlatformMemoryStats Mem = FPlatformMemory::GetStats();
@@ -886,13 +1114,32 @@ void FAthleteAssets::LoadMotionMatching()
 		// (no turn-in-place: standing players re-face through the actor's rotation; with the root offset, turn clips
 		// fed back on themselves and the search flipped between left and right turns)
 		(void)Turn;
+		// the ball carrier's own loops (Madden's MG_BC_* captures): a man with the ball ran on the empty-handed loops with a
+		// procedural tuck over them, and the ball read as fused to his hand (Fred, 16 Nov)
+		MMBallMove[g].Reset();
+		MMBallPivot[g].Reset();
+		MMBallStart[g].Reset();
+		if (UPoseSearchDatabase* BL = Db(FString::Printf(TEXT("BC_%s_Loops"), Gait[g])))
+		{
+			MMBallMove[g] = {BL};
+			MMBallPivot[g] = MMPivot[g];
+			for (UPoseSearchDatabase*& X : MMBallPivot[g]) if (X == Loops) X = BL;
+			MMBallStart[g] = MMStart[g];
+			for (UPoseSearchDatabase*& X : MMBallStart[g]) if (X == Loops) X = BL;
+			All.AddUnique(BL);
+		}
 		bOk = MMMove[g].Num() >= 1 && MMStart[g].Num() >= 2 && MMPivot[g].Num() >= 2 && MMStop[g].Num() >= 2;
 		for (UPoseSearchDatabase* X : MMStart[g]) All.AddUnique(X);
 		for (UPoseSearchDatabase* X : MMPivot[g]) All.AddUnique(X);
 		for (UPoseSearchDatabase* X : MMStop[g]) All.AddUnique(X);
-		for (int32 v = 0; v < 3 && bOk; ++v)
+		for (int32 v = 0; v < 6 && bOk; ++v)
 		{
-			UPoseSearchDatabase* LV = v == 0 ? Loops : Db(FString::Printf(TEXT("%s_Loops_S%d"), Gait[g], v));
+			// (three sets that share no capture where a direction has three or more: S1, S2, S3; the whole list only
+			// where a set is missing)
+			// (the walk has six: a man walking back to the huddle searched one of three sets and a third of the walkers
+			// fell on the same best capture - 4+ men in step on one loop, wk1; S4-S6 missing: S1-S3 again)
+			UPoseSearchDatabase* LV = Db(FString::Printf(TEXT("%s_Loops_S%d"), Gait[g], v + 1));
+			if (!LV && v >= 3) LV = Db(FString::Printf(TEXT("%s_Loops_S%d"), Gait[g], v - 2));
 			if (!LV) LV = Loops;
 			auto Swap = [Loops, LV](const TArray<UPoseSearchDatabase*>& In) { TArray<UPoseSearchDatabase*> O = In; for (UPoseSearchDatabase*& X : O) if (X == Loops) X = LV; return O; };
 			MMMoveV[g][v] = Swap(MMMove[g]);
@@ -1716,6 +1963,24 @@ void AAthlete::PaintHero(const FUniform& U)
 			// front numbers 9 in tall (NFL 8-10 in), their top 13 cm under the neck: at 19 cm they did not read on the field
 			M->SetScalarParameterValue(TEXT("NumHF"), 23.f);
 			M->SetScalarParameterValue(TEXT("NumTopF"), 13.f);
+			// TV numbers on the shoulder tops (the kits only: the pads give them a top to sit on)
+			if (bKit)
+			{
+				static float TvH = 9.f, TvX = 15.5f, TvY = 0.f, TvZ = 11.f;
+				static const bool bTvOnce = [&]()
+				{
+					FParse::Value(FCommandLine::Get(), TEXT("TagTvNumH="), TvH);
+					FParse::Value(FCommandLine::Get(), TEXT("TagTvNumX="), TvX);
+					FParse::Value(FCommandLine::Get(), TEXT("TagTvNumY="), TvY);
+					FParse::Value(FCommandLine::Get(), TEXT("TagTvNumZ="), TvZ);
+					return true;
+				}();
+				M->SetScalarParameterValue(TEXT("TvOn"), Player && Player->number > 0 ? 1.f : 0.f);
+				M->SetScalarParameterValue(TEXT("TvH"), TvH);
+				M->SetScalarParameterValue(TEXT("TvX"), TvX);
+				M->SetScalarParameterValue(TEXT("TvY"), TvY);
+				M->SetScalarParameterValue(TEXT("TvZ"), TvZ);
+			}
 			bMaterialNumbers = true;
 		}
 		else if (Slot == TEXT("Pants") && bKit)
@@ -1746,6 +2011,25 @@ void AAthlete::PaintHero(const FUniform& U)
 			M->SetVectorParameterValue(TEXT("Trim"), (Hc >> 11) % 2 ? U.Jersey : (bWhite ? FLinearColor(0.02f, 0.02f, 0.022f) : FLinearColor(0.85f, 0.85f, 0.85f)));
 			// the pack's brand marks (white in the decal) read dark on a white cleat
 			M->SetVectorParameterValue(TEXT("DecalTint"), bWhite ? FLinearColor(0.03f, 0.03f, 0.035f) : FLinearColor(1.f, 1.f, 1.f));
+		}
+		else if (!bKit && OfficialPatch >= 0 && Slot == TEXT("Top"))
+		{
+			static float PatchTop = 7.f, PatchH = 22.f, PatchW = 22.f;
+			static const bool bPatchOnce = [&]()
+			{
+				FParse::Value(FCommandLine::Get(), TEXT("TagPatchTop="), PatchTop);
+				FParse::Value(FCommandLine::Get(), TEXT("TagPatchH="), PatchH);
+				FParse::Value(FCommandLine::Get(), TEXT("TagPatchW="), PatchW);
+				return true;
+			}();
+			UMaterialInstanceDynamic* M = Mid();
+			M->SetScalarParameterValue(TEXT("PatchOn"), 1.f);
+			M->SetScalarParameterValue(TEXT("PatchIdx"), static_cast<float>(OfficialPatch));
+			M->SetScalarParameterValue(TEXT("NeckZ"), NeckZ);
+			M->SetScalarParameterValue(TEXT("TorsoY"), TorsoY);
+			M->SetScalarParameterValue(TEXT("PatchTop"), PatchTop);
+			M->SetScalarParameterValue(TEXT("PatchH"), PatchH);
+			M->SetScalarParameterValue(TEXT("PatchW"), PatchW);
 		}
 		else if (!bKit && TeamPainted(MHBody, Slot))
 		{
@@ -1789,6 +2073,18 @@ void AAthlete::PaintHero(const FUniform& U)
 	});
 	Each(MHFace, [&](const FName& Slot, TFunctionRef<UMaterialInstanceDynamic*()> Mid)
 	{
+		if (bCapTint && Slot == TEXT("Hat"))
+		{
+			// (the master's recolour mode: the cap's own shading under the new colour; its map is near black, so the
+			// shading is read against that)
+			UMaterialInstanceDynamic* M = Mid();
+			M->SetScalarParameterValue(TEXT("Mode"), 2.f);
+			M->SetScalarParameterValue(TEXT("AlphaTint"), 0.f);
+			M->SetScalarParameterValue(TEXT("LumRef"), 0.016f); // (the map's median, linear)
+			M->SetVectorParameterValue(TEXT("Tint"), CapTint);
+			M->SetVectorParameterValue(TEXT("Trim"), CapTint);
+			return;
+		}
 		if (TeamPainted(MHFace, Slot))
 		{
 			UMaterialInstanceDynamic* M = Mid();
@@ -1811,7 +2107,9 @@ void AAthlete::PlayOneShotFrom(UAnimationAsset* Clip, float Start)
 	OneShotAge = 0.f;
 	OneShotStart = Start;
 	OneShotRate = 1.f + StyleJitter * 0.07f; // each player's own timing, within 7 %
-	OneShotLeft = FMath::Max(0.05f, Clip->GetPlayLength() - Start) / OneShotRate;
+	// (two frames short of the end: several captures' last frame snaps back - the falls already stop a frame short -
+	// and a one-shot played to its very end showed it, a 65 cm jump of a rusher's feet on a win's last frame, p36)
+	OneShotLeft = FMath::Max(0.05f, Clip->GetPlayLength() - Start - 0.07f) / OneShotRate;
 	UE_LOG(LogTemp, Verbose, TEXT("TAG one-shot %s #%d"), *Clip->GetName(), Player ? Player->number : -1);
 	CurrentClip = CurrentClip == Clip ? nullptr : CurrentClip; // restart if the same clip is already playing
 }
@@ -1876,7 +2174,29 @@ bool AAthlete::DriveMotionMatching(const FVector& VelWorld, float SimYaw, float 
 	// positions freeze, the velocity keeps its last value, which read to the search as "standing, about to sprint")
 	static const bool bNoAccel = FParse::Param(FCommandLine::Get(), TEXT("TagMMNoAccel"));
 	if (bNoAccel) SmoothedAccel = FVector::ZeroVector;
-	const FVector V = PrevVel;
+	// what he is asked to do: the sim's velocity, plus making up the body's lag behind its spot (3/s of all but the last
+	// 8 cm, at most 2 m/s): the search then picks, and the stride stretches, for the body to arrive where the sim is
+	static const bool bFollowOn = !FParse::Param(FCommandLine::Get(), TEXT("TagNoFollow"));
+	// the matched body's root velocity in the world, as the blend stack played it last evaluation (zero: not known)
+	FVector RootVelW = FVector::ZeroVector;
+	if (M->bRootDeltaValid && bInMatch && MHBody)
+	{
+		RootVelW = (M->bRootRotValid ? M->RootRotW : MHBody->GetComponentQuat()).RotateVector(M->RootDelta) / M->RootDeltaDt;
+		RootVelW.Z = 0.f;
+	}
+	if (MHBody)
+		if (UTagRetargetAnimInstance* RI = Cast<UTagRetargetAnimInstance>(MHBody->GetAnimInstance()))
+		{
+			// (the capture's root velocity, unwarped: the verdict is taken on the capture's pose before the layers)
+			RI->Proc.bRootVelValid = M->bRootDeltaValid && bInMatch;
+			RI->Proc.RootVelCS = MHBody->GetComponentTransform().InverseTransformVectorNoScale(RootVelW);
+		}
+	FVector V = PrevVel;
+	if (bFollowOn)
+	{
+		const float L = VisOffset.Size2D();
+		if (L > 8.f) V -= VisOffset.GetSafeNormal2D() * FMath::Min((L - 8.f) * 2.5f, 200.f);
+	}
 	(void)VelWorld;
 
 	// trajectory of the source body component: recorded history, now, and 1.6 s of prediction
@@ -1911,11 +2231,24 @@ bool AAthlete::DriveMotionMatching(const FVector& VelWorld, float SimYaw, float 
 	bool bStopped = false;
 	float FutSpeed = Speed;
 	const float H = 0.05f;
+	static const bool bNoIntent = FParse::Param(FCommandLine::Get(), TEXT("TagMMNoIntent"));
+	// (only for a start from rest - a release off the line, a back taking the handoff: there the measured acceleration is
+	// still nothing. Used all through the play it asked for more than the sim then did, the search picked faster clips
+	// than the men ran, and the planted feet of matched runs travelled 19 cm/s against 7 without it - p19 / p20n.)
+	const bool bIntent = !bNoIntent && IntentFrame == GFrameCounter && Speed < 150.f && IntentVelW.SizeSquared2D() > 300.f * 300.f;
 	for (int32 k = 1; k <= 32; ++k)
 	{
 		const float t = k * H;
 		const FVector Acc = (t <= 0.5f && !bStopped) ? SmoothedAccel : FVector::ZeroVector;
 		FVector Vn = Vel + Acc * H;
+		// with the sim's intent: toward the velocity it is steering for, as fast as a man changes his (6 m/s2 speeding
+		// up or turning, 9 braking)
+		if (bIntent)
+		{
+			const FVector To = IntentVelW - Vel;
+			const bool bBraking = IntentVelW.SizeSquared2D() < Vel.SizeSquared2D();
+			Vn = t <= 0.6f ? Vel + To.GetClampedToMaxSize((bBraking ? 900.f : 450.f) * H) : Vel;
+		}
 		if (Speed > 30.f && FVector::DotProduct(Vn, Vel) <= 0.f) { Vn = FVector::ZeroVector; bStopped = true; }
 		Vn = Vn.GetClampedToMaxSize(1050.f);
 		P += (Vel + Vn) * 0.5f * H;
@@ -1965,9 +2298,32 @@ bool AAthlete::DriveMotionMatching(const FVector& VelWorld, float SimYaw, float 
 		const int32 Fam = !bMoving ? 0 : MovingTime < 0.6f ? 1 : bPivot ? 2 : 3;
 		const int32 Last = M->LastDbFamily;
 		// (a standing start hands over to the loops softly; a crouched start must end, see bForceOnDbChange)
-		M->bForceOnDbChange = Last < 0 || bCrouch != M->bLastDbCrouch || (Fam != Last && (Fam == 0 || Last == 0 || (Last == 1 && bCrouch)));
+		// (and the moment he gets the ball or gives it up: a back taking the handoff at a run kept his empty-handed sprint,
+		// a soft change letting the playing clip run on)
+		const bool bBallNow = bHasBallF && A.MMBallMove[MMGait].Num() > 0;
+		M->bForceOnDbChange = Last < 0 || bCrouch != M->bLastDbCrouch || bBallNow != M->bLastDbBall || (Fam != Last && (Fam == 0 || Last == 0 || (Last == 1 && bCrouch)));
 		M->LastDbFamily = Fam;
 		M->bLastDbCrouch = bCrouch;
+		// (a man who has just got the ball: half a second without the continuing pose, so the search lands on a ball-carrier
+		// loop - at the default 0.15 s a back taking a handoff at full speed kept his empty-handed sprint for 1.2 s, bc4 c003)
+		if (bBallNow && !M->bLastDbBall) { M->ForceHoldSecs = 0.5f; ++M->ForceSerial; }
+		if (bBallNow != M->bLastDbBall)
+			UE_LOG(LogTemp, Display, TEXT("TAG carrier loops %s: #%d gait %d moving %d t %.2f pivot %d crouch %d fam %d force %d"), bBallNow ? TEXT("on") : TEXT("off"),
+				Player ? Player->number : -1, MMGait, bMoving ? 1 : 0, MovingTime, bPivot ? 1 : 0, bCrouch ? 1 : 0, Fam, M->bForceOnDbChange ? 1 : 0);
+		M->bLastDbBall = bBallNow;
+		// a carrier past his start still on an empty-handed clip: a fresh pick (twice a second at most). The change of set
+		// alone let the continuing pose win: a kick returner ran his whole return on a 3 s sprint start, a back taking the
+		// handoff kept his empty-handed sprint 1.2 s (bc5 c001 / c003)
+		M->BallForceCool -= Dt;
+		if (bBallNow && Fam >= 2 && !bCrouch && M->bMatch && M->BallForceCool <= 0.f)
+			if (const UAnimationAsset* Ma = M->GetMatchedAsset())
+				if (!Ma->GetName().Contains(TEXT("_BC_")))
+				{
+					M->ForceHoldSecs = 0.3f;
+					++M->ForceSerial;
+					M->BallForceCool = 0.5f;
+					UE_LOG(LogTemp, Display, TEXT("TAG carrier refresh: #%d off %s t %.2f"), Player ? Player->number : -1, *Ma->GetName(), MovingTime);
+				}
 		M->SimVel = V;
 	}
 	if (bCrouch)
@@ -1975,8 +2331,11 @@ bool AAthlete::DriveMotionMatching(const FVector& VelWorld, float SimYaw, float 
 	else
 	{
 		// his style's sets (a third of the men on each: the same gait does not mean the same capture)
-		const int32 Sv = Player ? FMath::Abs(Player->id) % 3 : 0;
-		M->SetDatabases(!bMoving ? A.MMStop[MMGait] : MovingTime < 0.6f ? A.MMStartV[MMGait][Sv] : bPivot ? A.MMPivotV[MMGait][Sv] : A.MMMoveV[MMGait][Sv]);
+		const int32 Sv = Player ? FMath::Abs(Player->id) % 6 : 0;
+		// with the ball: the ball carrier's loops, the ball tucked as Madden captured it
+		const bool bBall = bHasBallF && A.MMBallMove[MMGait].Num() > 0;
+		M->SetDatabases(!bMoving ? A.MMStop[MMGait] : MovingTime < 0.6f ? (bBall ? A.MMBallStart[MMGait] : A.MMStartV[MMGait][Sv])
+			: bPivot ? (bBall ? A.MMBallPivot[MMGait] : A.MMPivotV[MMGait][Sv]) : (bBall ? A.MMBallMove[MMGait] : A.MMMoveV[MMGait][Sv]));
 	}
 	// what the databases cover: with the mocap pack's locomotion (mm_build_dbs.py) 10-11 m/s forward (sprint loops),
 	// 4.9 m/s sideways and 6 m/s backwards; crouched 4.4 m/s forward, 3.2 sideways, 3.9 backwards. Without the TAG
@@ -2007,7 +2366,10 @@ bool AAthlete::DriveMotionMatching(const FVector& VelWorld, float SimYaw, float 
 				// plays at) against the ground the sim covers: the speed match's clamp leaves a remainder that skated
 				// the planted foot (sideways, backpedal and crouched gaits most). Each step is stretched or shortened
 				// along the direction of travel by that remainder.
-				const float Eff = M->MatchedClipSpeed * M->MatchedWantedRate * M->SpeedRate;
+				// (the blend stack's own root motion where it reports one: every playing clip, blended, at the rate played.
+				// The estimate from the picked clip alone misses the clip being blended out for the first 0.3 s of a pick.)
+				const float Eff = RootVelW.IsNearlyZero() ? M->MatchedClipSpeed * M->MatchedWantedRate * M->SpeedRate : static_cast<float>(RootVelW.Size());
+				FVector ClipW = FVector::ZeroVector;
 				float S = 1.f;
 				if (M->bMatch && Eff > 60.f && Speed > 60.f) S = FMath::Clamp(Speed / Eff, 0.7f, bCrouch ? 1.3f : 1.35f);
 				else if (!bCrouch)
@@ -2016,24 +2378,82 @@ bool AAthlete::DriveMotionMatching(const FVector& VelWorld, float SimYaw, float 
 					S = GaitSpeed > Covered ? FMath::Min(GaitSpeed / Covered, 1.25f) : 1.f;
 				}
 				RI->Proc.StrideScale = S;
-				RI->Proc.StrideDirCS = MHBody->GetComponentTransform().InverseTransformVectorNoScale(V.GetSafeNormal2D());
-				// orientation warping: the angle from where the clip's root travels to where he travels (both in the
-				// shared component frame: the source and the shown body sit at the same -90 yaw), at most 60 degrees
+				TelEff = M->bMatch ? Eff : 0.f;
+				TelStride = S;
+				// where the playing clip's root travels in the world: its own direction turned by the root's rotation as
+				// shown. (Not the component's: the offset node lets a clip's own turn carry the body up to 60 degrees off the
+				// sim's facing and eases it back over a quarter second, so through every turn the two differ. Read in the
+				// component's frame the clip seemed to travel 25-60 degrees off the man's path - the p14 / p15 captures, a
+				// fifth of all matched frames over 40 - and the warp below then turned the legs away from a path they were on.)
+				ClipW = RootVelW.IsNearlyZero() ? (M->bRootRotValid ? M->RootRotW : MHBody->GetComponentQuat()).RotateVector(M->MatchedClipDir) : RootVelW;
+				ClipW.Z = 0.f;
+				ClipW = ClipW.GetSafeNormal();
+				if (M->bRootRotValid) TelRootOff = FMath::FindDeltaAngleDegrees(MHBody->GetComponentQuat().Rotator().Yaw, M->RootRotW.Rotator().Yaw);
+				// orientation warping: the angle from where the clip's root travels to where he travels, at most 40 degrees
 				// (past that the search should have found a different clip), eased so a new match does not snap the hips
 				float WarpWant = 0.f;
-				if (M->bMatch && !M->MatchedClipDir.IsNearlyZero() && M->MatchedClipSpeed > 80.f && Speed > 80.f)
+				float Ang = 0.f;
+				if (M->bMatch && !ClipW.IsNearlyZero() && Eff > 80.f && Speed > 80.f)
 				{
-					const FVector Want2 = FVector(RI->Proc.StrideDirCS.X, RI->Proc.StrideDirCS.Y, 0.f).GetSafeNormal();
-					const FVector Clip2 = M->MatchedClipDir;
-					const float Ang = FMath::RadiansToDegrees(FMath::Atan2(Clip2.X * Want2.Y - Clip2.Y * Want2.X, Clip2.X * Want2.X + Clip2.Y * Want2.Y));
+					const FVector Want2 = V.GetSafeNormal2D();
+					Ang = FMath::RadiansToDegrees(FMath::Atan2(ClipW.X * Want2.Y - ClipW.Y * Want2.X, ClipW.X * Want2.X + ClipW.Y * Want2.Y));
 					WarpWant = FMath::Clamp(Ang, -40.f, 40.f);
+					TelAng = Ang;
+				}
+				// a clip that cannot cover the move: the play rate (0.75-1.25, crouched 1.5) and the stride (0.7-1.35) make up
+				// a clip whose feet cover between 0.6 and 1.6 times the ground he covers, the orientation warp 40 degrees.
+				// Outside that the planted foot skates by the difference (the p14 capture: a 0.65 m/s walk loop held under a
+				// man jogging 3 m/s by the dwell and the continuing pose's bonus; a sideways sprint under a man who had turned
+				// upfield; 36 % of matched frames skated over 1 m/s). After 0.15 s of that the next search is a fresh pick.
+				{
+					static const bool bNoMisfit = FParse::Param(FCommandLine::Get(), TEXT("TagMMNoMisfit"));
+					bool bMisfit = false;
+					if (M->bMatch && Speed > 120.f)
+					{
+						const float ClipSp = M->MatchedClipSpeed * FMath::Max(M->MatchedWantedRate, 0.1f);
+						const float Ratio = Speed / FMath::Max(ClipSp, 1.f);
+						bMisfit = Ratio > (bCrouch ? 1.85f : 1.6f) || Ratio < 0.6f || FMath::Abs(Ang) > 50.f;
+					}
+					MMMisfitT = bMisfit ? MMMisfitT + Dt : 0.f;
+					MMForceCool -= Dt;
+					if (!bNoMisfit && MMMisfitT > 0.15f && MMForceCool <= 0.f)
+					{
+						++M->ForceSerial;
+						MMForceCool = 0.6f; // (if the databases hold nothing better, not a forced pick every search)
+						MMMisfitT = 0.f;
+						static int32 GForced = 0;
+						if (++GForced % 500 == 0) UE_LOG(LogTemp, Display, TEXT("TAG MM misfit: %d forced picks"), GForced);
+					}
 				}
 				// (eased at 5/s: at 10/s a new match swung the hips and both legs 60 degrees in a few frames)
 				OrientWarpSm = FMath::FInterpTo(OrientWarpSm, WarpWant, Dt, 5.f);
 				RI->Proc.OrientWarpDeg = OrientWarpSm;
+				TelOrient = OrientWarpSm;
+				// the stride is stretched along the way the feet actually travel: the clip's direction as warped (the
+				// man's own path only where there is no clip direction to go by)
+				const FVector FeetW = ClipW.IsNearlyZero() ? V.GetSafeNormal2D() : ClipW.RotateAngleAxis(OrientWarpSm, FVector::UpVector);
+				RI->Proc.StrideDirCS = MHBody->GetComponentTransform().InverseTransformVectorNoScale(FeetW);
 			}
 	}
 
+	// the body's own velocity for the next frame: where the playing clip's root travels (turned by the orientation warp
+	// the legs get), at the speed its feet cover as played times the stride scale they get
+	// (motion matched running: only with -TagFollowMM. Its speed match and warps already keep the planted foot on its
+	// spot - 7 cm/s of travel on the feet the capture holds planted, p17o - and following there only added lag.)
+	static const bool bFollowMM = FParse::Param(FCommandLine::Get(), TEXT("TagFollowMM"));
+	if (bFollowOn && bFollowMM && M->bMatch && bInMatch && MHBody && (!RootVelW.IsNearlyZero() || !M->MatchedClipDir.IsNearlyZero() || M->bRootDeltaValid))
+		if (const UTagRetargetAnimInstance* RI = Cast<UTagRetargetAnimInstance>(MHBody->GetAnimInstance()))
+		{
+			FVector VelW = RootVelW;
+			if (!M->bRootDeltaValid)
+			{
+				VelW = (M->bRootRotValid ? M->RootRotW : MHBody->GetComponentQuat()).RotateVector(M->MatchedClipDir);
+				VelW.Z = 0.f;
+				VelW = VelW.GetSafeNormal() * (M->MatchedClipSpeed * M->MatchedWantedRate * M->SpeedRate);
+			}
+			FollowVel = VelW.RotateAngleAxis(RI->Proc.OrientWarpDeg, FVector::UpVector) * RI->Proc.StrideScale;
+			bFollowActive = true;
+		}
 	if (!bInMatch)
 	{
 		// ease the visible body out of the clip into the matched move
@@ -2112,7 +2532,7 @@ void AAthlete::StartRagdoll(const FVector& VelWorld)
 }
 
 void AAthlete::PlayCatch(float BallZCm, float SpeedCm, const FVector& BallVelW, const FVector& SidelineDirW,
-	const FVector& BallPosW, bool bContested)
+	const FVector& BallPosW, bool bContested, bool bAggressive)
 {
 	const FAthleteAssets& A = FAthleteAssets::Get();
 	const FVector Fwd = GetActorForwardVector(), Right = GetActorRightVector();
@@ -2124,6 +2544,22 @@ void AAthlete::PlayCatch(float BallZCm, float SpeedCm, const FVector& BallVelW, 
 	const int32 Seq = GCatchSeq++;
 	UAnimationAsset* C = nullptr;
 	bool bMirror = bHanded;
+	// a hard catch made: a defender on him, the ball over his reach or wide of his body - the pack's one-handers,
+	// fingertip grabs and leaps (the aggressive catch, TRIANGLE held with the ball in the air, goes up for them more)
+	{
+		const int32 Hard = (bContested ? 1 : 0) + (BallZCm > 205.f ? 1 : 0) + (FMath::Abs(Lateral) > 50.f ? 1 : 0) + (FMath::Abs(Lateral) > 75.f ? 1 : 0);
+		static const bool bAllSpec = FParse::Param(FCommandLine::Get(), TEXT("TagSpectacularAll")); // look-dev: every catch
+		const float Rate = bAllSpec ? 1.f : (Hard >= 2 ? 0.75f : Hard == 1 ? 0.3f : 0.f) + (bAggressive ? (Hard ? 0.35f : 0.15f) : 0.f);
+		UE_LOG(LogTemp, Verbose, TEXT("TAG catch #%d hard %d (contested %d, ball %.0f cm, lateral %.0f cm)"), Player ? Player->number : -1, Hard, bContested ? 1 : 0, BallZCm, Lateral);
+		if (SidelineDirW.IsNearlyZero() && A.PackCatchSpectacular.Num() && FMath::Frac(Seq * 0.6180339f + 0.13f) < Rate)
+			if (const FAthleteAssets::FPackClip* P = FAthleteAssets::PickOr(A.PackCatchSpectacular, Seq * 5 + 1))
+			{
+				UE_LOG(LogTemp, Display, TEXT("TAG spectacular catch #%d: %s (hard %d%s)"), Player ? Player->number : -1, *GetNameSafe(P->Anim), Hard, bAggressive ? TEXT(", aggressive") : TEXT(""));
+				PlayOneShotFrom(P->Anim, P->Start);
+				bOneShotCatch = true;
+				return;
+			}
+	}
 	if (!SidelineDirW.IsNearlyZero() && A.CatchSidelineL && A.CatchSidelineR)
 	{
 		C = FVector::DotProduct(SidelineDirW, Right) > 0.f ? A.CatchSidelineR.Get() : A.CatchSidelineL.Get(); // reach to the boundary, drag the toes
@@ -2184,6 +2620,76 @@ void AAthlete::PlayThrow(int32 Kind)
 	}
 	PlayClip(A.Throws[Kind], false, 1.f, A.ThrowStart[Kind]);
 }
+
+void AAthlete::PlayThrowTimed(int32 Kind, float ReleaseIn)
+{
+	const FAthleteAssets& A = FAthleteAssets::Get();
+	if (Kind < 0 || Kind >= FAthleteAssets::ThrowCount || !A.Throws[Kind]) return;
+	static int32 GThrowSeq = 0;
+	const int32 Seq = GThrowSeq++;
+	const TArray<FAthleteAssets::FPackClip>* Lib = Kind == 1 ? &A.PackThrowsQuick : Kind == 2 ? &A.PackThrowsDeep : Kind == 6 ? &A.PackThrowsRollR : Kind == 7 ? &A.PackThrowsRollL : &A.PackThrowsSet;
+	if (!Lib->Num()) Lib = &A.PackThrowsSet;
+	// (the families start 7 frames before the capture's release: its release is there + 7/30 s)
+	UAnimationAsset* Clip = A.Throws[Kind];
+	float ReleaseAt = A.ThrowStart[Kind] + 7.f / 30.f;
+	if (const FAthleteAssets::FPackClip* P = FAthleteAssets::PickOr(*Lib, Seq)) { Clip = P->Anim; ReleaseAt = P->Start + 7.f / 30.f; }
+	PlayOneShotFrom(Clip, FMath::Max(0.f, ReleaseAt - FMath::Max(0.f, ReleaseIn)));
+	bThrowTimed = true;
+	ThrowTimedClip = Clip;
+	UE_LOG(LogTemp, Verbose, TEXT("TAG throw timed: %s, release in %.2f s (clip from %.2f)"), *GetNameSafe(Clip), ReleaseIn, FMath::Max(0.f, ReleaseAt - ReleaseIn));
+}
+
+bool AAthlete::PlayBallDefense(int32 Gait, bool bInt)
+{
+	const FAthleteAssets& A = FAthleteAssets::Get();
+	const TArray<FAthleteAssets::FPackClip>& L = bInt ? A.PackIntCatch : Gait == 0 ? A.PackSwatRun : Gait == 1 ? A.PackSwatStrafe : A.PackSwatBack;
+	if (!L.Num()) return false;
+	static int32 GSeq = 0;
+	const FAthleteAssets::FPackClip& P = L[(GSeq++) % L.Num()];
+	PlayOneShotFrom(P.Anim, P.Start);
+	bOneShotCatch = bInt;
+	UE_LOG(LogTemp, Display, TEXT("TAG ball defense #%d: %s"), Player ? Player->number : -1, *GetNameSafe(P.Anim));
+	return true;
+}
+
+bool AAthlete::PlayKickCatch(bool bRunning)
+{
+	const FAthleteAssets& A = FAthleteAssets::Get();
+	const TArray<FAthleteAssets::FPackClip>& L = bRunning && A.PackKickCatchRun.Num() ? A.PackKickCatchRun : A.PackKickCatchStand.Num() ? A.PackKickCatchStand : A.PackKickCatchRun;
+	if (!L.Num()) return false;
+	static int32 GSeq = 0;
+	const FAthleteAssets::FPackClip& P = L[(GSeq++) % L.Num()];
+	PlayOneShotFrom(P.Anim, P.Start);
+	bOneShotCatch = true;
+	UE_LOG(LogTemp, Display, TEXT("TAG kick catch #%d: %s"), Player ? Player->number : -1, *GetNameSafe(P.Anim));
+	return true;
+}
+
+void AAthlete::PlayShovelTimed(bool bMoving, float ReleaseIn)
+{
+	const FAthleteAssets& A = FAthleteAssets::Get();
+	const TArray<FAthleteAssets::FPackClip>& L = bMoving && A.PackShovelMove.Num() ? A.PackShovelMove : A.PackShovelSet.Num() ? A.PackShovelSet : A.PackShovelMove;
+	if (!L.Num()) { PlayThrowTimed(FAthleteAssets::ThrowQuickK, ReleaseIn); return; }
+	static int32 GSeq = 0;
+	const FAthleteAssets::FPackClip& P = L[(GSeq++) % L.Num()];
+	const float ReleaseAt = P.Start + 7.f / 30.f;
+	PlayOneShotFrom(P.Anim, FMath::Max(0.f, ReleaseAt - FMath::Max(0.f, ReleaseIn)));
+	bThrowTimed = true;
+	ThrowTimedClip = P.Anim;
+	UE_LOG(LogTemp, Display, TEXT("TAG shovel pass: %s"), *GetNameSafe(P.Anim));
+}
+
+void AAthlete::PlayPumpFake()
+{
+	const FAthleteAssets& A = FAthleteAssets::Get();
+	if (!A.PackPumpFakes.Num()) return;
+	static int32 GSeq = 0;
+	const FAthleteAssets::FPackClip& P = A.PackPumpFakes[(GSeq++) % A.PackPumpFakes.Num()];
+	PlayOneShotFrom(P.Anim, 0.f);
+	UE_LOG(LogTemp, Display, TEXT("TAG pump fake: %s"), *GetNameSafe(P.Anim));
+}
+
+bool AAthlete::IsThrowing() const { return bThrowTimed && ThrowTimedClip && OneShot == ThrowTimedClip && OneShotLeft > 0.f; }
 
 void AAthlete::ApplyHit(const FVector& TacklerVelW, float TacklerKg, const FVector& TacklerLoc)
 {
@@ -2413,6 +2919,92 @@ void AAthlete::PlayRushMove(const FString& Move, const AAthlete* Blocker)
 	if (C) PlayOneShot(C);
 }
 
+bool AAthlete::PlayRepWin(AAthlete* Rusher, AAthlete* Blocker, int32 Which, bool bBig)
+{
+	const FAthleteAssets& A = FAthleteAssets::Get();
+	const TArray<FAthleteAssets::FLineRep>& Pool = bBig && A.RepBigWins.Num() ? A.RepBigWins : A.RepWins;
+	if (!Rusher || !Blocker || !Pool.Num()) return false;
+	const FAthleteAssets::FLineRep& R = Pool[FMath::Abs(Which) % Pool.Num()];
+	// both from the capture's first frame: the two start it squared up at arm's length, as the stand-off leaves them
+	Rusher->PlayOneShotFrom(R.D.Get(), 0.f);
+	Rusher->OneShotRate = 1.f;
+	Rusher->OneShotLeft = R.D->GetPlayLength() - 0.07f;
+	Rusher->bOneShotRep = true;
+	Blocker->PlayOneShotFrom(R.O.Get(), 0.f);
+	Blocker->OneShotRate = 1.f;
+	Blocker->OneShotLeft = R.O->GetPlayLength() - 0.07f;
+	Blocker->bOneShotRep = true;
+	UE_LOG(LogTemp, Display, TEXT("TAG rush win #%d past #%d: %s"), Rusher->Player ? Rusher->Player->number : -1, Blocker->Player ? Blocker->Player->number : -1, *R.D->GetName());
+	return true;
+}
+
+bool AAthlete::PlayRepHold(AAthlete* Rusher, AAthlete* Blocker, int32 Which, bool bPower)
+{
+	const FAthleteAssets& A = FAthleteAssets::Get();
+	const TArray<FAthleteAssets::FLineRep>& Pool = bPower && A.RepPowerHolds.Num() ? A.RepPowerHolds : A.RepHolds;
+	if (!Rusher || !Blocker || !Pool.Num()) return false;
+	const FAthleteAssets::FLineRep& R = Pool[FMath::Abs(Which) % Pool.Num()];
+	// from the capture's first frame, both men, as a win is played; it runs out back into the stand-off
+	Rusher->PlayOneShotFrom(R.D.Get(), 0.f);
+	Rusher->OneShotRate = 1.f;
+	Rusher->OneShotLeft = R.D->GetPlayLength() - 0.07f;
+	Rusher->bOneShotRep = true;
+	Blocker->PlayOneShotFrom(R.O.Get(), 0.f);
+	Blocker->OneShotRate = 1.f;
+	Blocker->OneShotLeft = R.O->GetPlayLength() - 0.07f;
+	Blocker->bOneShotRep = true;
+	UE_LOG(LogTemp, Display, TEXT("TAG rush stoned #%d by #%d: %s"), Rusher->Player ? Rusher->Player->number : -1, Blocker->Player ? Blocker->Player->number : -1, *R.D->GetName());
+	return true;
+}
+
+float AAthlete::PlayRepDouble(AAthlete* Rusher, AAthlete* B1, AAthlete* B2, int32 Which)
+{
+	const FAthleteAssets& A = FAthleteAssets::Get();
+	if (!Rusher || !B1 || !B2 || !A.RepDoubles.Num()) return 0.f;
+	const FAthleteAssets::FDoubleRep& R = A.RepDoubles[FMath::Abs(Which) % A.RepDoubles.Num()];
+	// the blocker more to the rusher's left takes the capture's left man
+	const FVector Rt = Rusher->GetActorRightVector();
+	const bool bB1Left = FVector::DotProduct(B1->GetActorLocation() - Rusher->GetActorLocation(), Rt) < FVector::DotProduct(B2->GetActorLocation() - Rusher->GetActorLocation(), Rt);
+	AAthlete* L = bB1Left ? B1 : B2;
+	AAthlete* Rr = bB1Left ? B2 : B1;
+	const float Len = R.T1 - R.T0;
+	auto Go = [&](AAthlete* Who, UAnimSequence* Part)
+	{
+		Who->PlayOneShotFrom(Part, R.T0);
+		Who->OneShotRate = 1.f;
+		Who->OneShotLeft = Len - 0.05f;
+		Who->bOneShotRep = true;
+	};
+	Go(Rusher, R.D.Get());
+	Go(L, R.A.Get());
+	Go(Rr, R.B.Get());
+	UE_LOG(LogTemp, Display, TEXT("TAG double team on #%d by #%d and #%d: %s (%.1f s)"), Rusher->Player ? Rusher->Player->number : -1, L->Player ? L->Player->number : -1,
+		Rr->Player ? Rr->Player->number : -1, *R.D->GetName(), Len);
+	return Len;
+}
+
+bool AAthlete::PlayRepHandoff(AAthlete* QB, AAthlete* Back, bool bGun, float ExchangeIn, int32 Which)
+{
+	const FAthleteAssets& A = FAthleteAssets::Get();
+	if (!QB || !Back || !A.RepHandoffs.Num()) return false;
+	// (the captures cannot be mirrored: one with the back on the same side of the quarterback as ours, from the same
+	// alignment if there is one)
+	const bool bBackLeft = FVector::DotProduct(Back->GetActorLocation() - QB->GetActorLocation(), QB->GetActorRightVector()) < 0.f;
+	TArray<const FAthleteAssets::FHandoffRep*> Fit;
+	for (const FAthleteAssets::FHandoffRep& R : A.RepHandoffs) if (R.bGun == bGun && (R.Bx > 0.f) == bBackLeft) Fit.Add(&R);
+	if (!Fit.Num()) for (const FAthleteAssets::FHandoffRep& R : A.RepHandoffs) if ((R.Bx > 0.f) == bBackLeft) Fit.Add(&R);
+	if (!Fit.Num()) for (const FAthleteAssets::FHandoffRep& R : A.RepHandoffs) if (R.bGun == bGun) Fit.Add(&R);
+	if (!Fit.Num()) for (const FAthleteAssets::FHandoffRep& R : A.RepHandoffs) Fit.Add(&R);
+	const FAthleteAssets::FHandoffRep& R = *Fit[FMath::Abs(Which) % Fit.Num()];
+	const float From = FMath::Max(0.f, R.T - FMath::Max(0.f, ExchangeIn));
+	QB->PlayOneShotFrom(R.Q.Get(), From);
+	QB->OneShotLeft = FMath::Min(QB->OneShotLeft, R.T - From + 0.9f);  // the exchange and the carry-out, then his own motion
+	Back->PlayOneShotFrom(R.B.Get(), From);
+	Back->OneShotLeft = FMath::Min(Back->OneShotLeft, R.T - From + 0.6f); // the mesh and the first steps with it, then the run
+	UE_LOG(LogTemp, Display, TEXT("TAG handoff mesh: %s (exchange in %.2f s)"), *R.Q->GetName(), ExchangeIn);
+	return true;
+}
+
 void AAthlete::PlayBeaten(const AAthlete* Rusher)
 {
 	const FAthleteAssets& A = FAthleteAssets::Get();
@@ -2505,10 +3097,111 @@ float AAthlete::MassKg() const
 	return Player ? static_cast<float>(Player->weightLb) * 0.4536f : 100.f;
 }
 
+void AAthlete::BeginScene(UAnimSequence* Clip, const FVector& AnchorW, float YawW, float Start, bool bLoop)
+{
+	if (!Clip || bRagdoll) return;
+	ClearReplayHold();
+	OneShot = nullptr;
+	OneShotLeft = 0.f;
+	TackledLeft = 0.f;
+	FallHoldLeft = 0.f;
+	bFalling = false;
+	bGettingUp = false;
+	bMissing = false;
+	bScene = true;
+	bSceneLoop = bLoop;
+	SceneClip = Clip;
+	SceneStart = Start;
+	SceneT = 0.f;
+	SceneYaw = YawW;
+	SceneAnchor = FVector(AnchorW.X, AnchorW.Y, GetActorLocation().Z);
+	// a man a step from the capture's start is eased onto it, not put there in a frame (the helper of a help-up began
+	// 43 cm short of his mark and jumped, p64 c026); a placement from far off (a kick's set-up) is still a cut
+	SceneEaseOff = GetActorLocation() - SceneAnchor;
+	SceneEaseOff.Z = 0.f;
+	// (and his facing: turned to the capture's in a frame, the crossfaded pose swung his feet 60+ cm, p71 c004)
+	SceneEaseYaw = FMath::FindDeltaAngleDegrees(YawW, GetActorRotation().Yaw);
+	if (bLoop || SceneEaseOff.SizeSquared2D() > 80.f * 80.f) { SceneEaseOff = FVector::ZeroVector; SceneEaseYaw = 0.f; }
+	VisOffset = FVector::ZeroVector;
+	CurrentClip = nullptr; // (restart and crossfade out of the pose shown now)
+	PlayClip(Clip, bLoop, 1.f, Start);
+	if (MHBody)
+		if (UTagRetargetAnimInstance* RI = Cast<UTagRetargetAnimInstance>(MHBody->GetAnimInstance())) ++RI->Proc.ClipSerial;
+	SetActorLocationAndRotation(SceneAnchor + SceneEaseOff, FRotator(0, YawW + SceneEaseYaw, 0)); // (from where he stands: the ease starts there)
+	SmoothedYaw = YawW + SceneEaseYaw;
+}
+
+void AAthlete::TickScene(float DeltaTime)
+{
+	UAnimSequence* Seq = SceneClip.Get();
+	if (!Seq) { bScene = false; return; }
+	SceneT += DeltaTime;
+	if (bSceneLoop)
+	{
+		// a wait in place: the loop runs on its own clock, the body on its anchor
+		SetActorLocationAndRotation(SceneAnchor, FRotator(0, SceneYaw, 0));
+		PlayClip(Seq, true, 1.f, SceneStart);
+		return;
+	}
+	// the capture's root carries the body (the same transform a library fall uses: TickFall), the pose set at the time
+	// the root was taken at, held a frame short of the end
+	const float Tc = FMath::Clamp(SceneStart + SceneT, 0.f, FMath::Max(SceneStart, Seq->GetPlayLength() - 1.f / 30.f));
+	const FTransform RM = Seq->ExtractRootMotionFromRange(SceneStart, Tc, FAnimExtractContext(0.0, true));
+	const USkeletalMeshComponent* V = Visible();
+	FTransform Crel = V ? V->GetComponentTransform().GetRelativeTransform(GetActorTransform()) : FTransform::Identity;
+	Crel.SetScale3D(FVector::OneVector);
+	const FTransform Now = Crel.Inverse() * RM * Crel * FTransform(FRotator(0, SceneYaw, 0), SceneAnchor);
+	const float Yaw = Now.Rotator().Yaw;
+	const float EaseA = 1.f - FMath::SmoothStep(0.f, 0.3f, SceneT);
+	const FVector Ease = SceneEaseOff * EaseA;
+	SetActorLocationAndRotation(FVector(Now.GetLocation().X + Ease.X, Now.GetLocation().Y + Ease.Y, SceneAnchor.Z), FRotator(0, Yaw + SceneEaseYaw * EaseA, 0));
+	SmoothedYaw = Yaw + SceneEaseYaw * EaseA;
+	PlayClip(Seq, false, 0.f, SceneStart);
+	if (UAnimSingleNodeInstance* SI = Body->GetSingleNodeInstance()) SI->SetPosition(Tc, true);
+}
+
 float AAthlete::FallClipTime() const
 {
 	const float Len = FallClip ? FallClip->GetPlayLength() : 0.f;
 	return FMath::Clamp(FallStart + FallT, 0.f, FMath::Max(FallStart, Len - 1.f / 30.f));
+}
+
+FVector AAthlete::SceneTravel(const UAnimSequence* Seq, float From, float To, float Yaw) const
+{
+	if (!Seq) return FVector::ZeroVector;
+	const FTransform RM = Seq->ExtractRootMotionFromRange(From, To, FAnimExtractContext(0.0, true));
+	const USkeletalMeshComponent* V = Visible();
+	FTransform Crel = V ? V->GetComponentTransform().GetRelativeTransform(GetActorTransform()) : FTransform::Identity;
+	Crel.SetScale3D(FVector::OneVector);
+	const FVector T = (Crel.Inverse() * RM * Crel).GetLocation();
+	return FRotator(0, Yaw, 0).RotateVector(FVector(T.X, T.Y, 0.f));
+}
+
+FVector AAthlete::FallRootTravel(const UAnimationAsset* Clip, float Start, float Yaw) const
+{
+	const UAnimSequence* Seq = Cast<UAnimSequence>(Clip);
+	if (!Seq) return FVector::ZeroVector;
+	// to where he comes to rest on the turf, not to the clip's end: some captures lie still and then get up and walk on
+	// (the momentum tackle lies from 1.6 s and walks 2.5 m from 3.5 s), and the ball is spotted where he went down
+	static TMap<TPair<const UAnimSequence*, int32>, double> RestAt;
+	const double Len = FMath::Max<double>(Start, Seq->GetPlayLength() - 1.0 / 30.0);
+	const TPair<const UAnimSequence*, int32> Key(Seq, FMath::RoundToInt(Start * 100.f));
+	double End = Len;
+	if (const double* Found = RestAt.Find(Key)) End = *Found;
+	else
+	{
+		constexpr double Step = 1.0 / 15.0, Hold = 0.5;
+		auto RootAt = [&](double T) { return Seq->ExtractRootMotionFromRange(Start, T, FAnimExtractContext(0.0, true)).GetLocation(); };
+		for (double T = Start + 0.4; T + Hold <= Len; T += Step)
+			if (FVector::Dist2D(RootAt(T), RootAt(T + Hold)) < 10.0) { End = T; break; }
+		RestAt.Add(Key, End);
+	}
+	const FTransform RM = Seq->ExtractRootMotionFromRange(Start, End, FAnimExtractContext(0.0, true));
+	const USkeletalMeshComponent* V = Visible();
+	FTransform Crel = V ? V->GetComponentTransform().GetRelativeTransform(GetActorTransform()) : FTransform::Identity;
+	Crel.SetScale3D(FVector::OneVector);
+	const FVector T = (Crel.Inverse() * RM * Crel).GetLocation();
+	return FRotator(0, Yaw, 0).RotateVector(FVector(T.X, T.Y, 0.f));
 }
 
 void AAthlete::TickFall(const FVector& SimLoc, float DeltaTime)
@@ -2632,6 +3325,13 @@ void AAthlete::SetCivilian(ECivilian Who, int32 Index)
 			// arms in the head's skin tone (coaches' and officials' arms use the players' tone textures)
 			HeroTone = HeadI != INDEX_NONE ? A.HeroItems[HeadI].Tone : BodyI != INDEX_NONE ? A.HeroItems[BodyI].Tone : 4;
 			DressHero(BodyM, A.HeroMesh(HeadI), nullptr, Rig);
+			// the referee's white cap: the pack's official's cap (black, on the head mesh) repainted for the crew chief
+			bCapTint = Who == ECivilian::Official && Index == 0;
+			// his patch: the referee, the umpire, the down and line judges, the side, field and back judges (the crew in
+			// the director's order) on the pack's strip
+			static const int32 PatchOf[7] = {2, 3, 0, 1, 5, 6, 4};
+			OfficialPatch = Who == ECivilian::Official && Index >= 0 && Index < 7 ? PatchOf[Index] : -1;
+			CapTint = FLinearColor(0.8f, 0.8f, 0.8f);
 			PaintHero(CurUniform);
 		}
 	}
@@ -2811,10 +3511,11 @@ void AAthlete::SlideStats(double& OutRaw, double& OutShown, bool bReset)
 	if (bReset) GSlideRaw = GSlideShown = 0.0;
 }
 
-void AAthlete::MeasureMotion(float Dt)
+void AAthlete::MeasureMotion(const FVector& SimPos, float Dt)
 {
-	// velocity and acceleration from how the body actually moves (smoothed): the lean, and motion matching's query
-	const FVector Pos = Body->GetComponentLocation();
+	// velocity and acceleration of the man's spot in the sim (smoothed): the lean, and motion matching's query. (Not of
+	// the body: the body follows the sim on its own feet, and its lag must not feed back into what it is asked to do.)
+	const FVector Pos = SimPos;
 	if (bHavePrevVel && Dt > 1e-4f)
 	{
 		FVector Raw = (Pos - PrevPos) / Dt;
@@ -2837,12 +3538,32 @@ void AAthlete::MeasureMotion(float Dt)
 void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld, float VMaxYds, const FString& Anim, float AnimT, float DeltaTime, bool bLineman)
 {
 	FAthleteAssets& A = FAthleteAssets::Get();
+	if (!PendingCarry.IsNearlyZero(1.f))
+	{
+		// a capture's travel handed to the actor last frame (the layout dive): his body is there, the offset to the sim
+		// spot eases out as after any capture
+		SetActorLocation(GetActorLocation() + FVector(PendingCarry.X, PendingCarry.Y, 0.f));
+		VisOffset += FVector(PendingCarry.X, PendingCarry.Y, 0.f);
+		PendingCarry = FVector::ZeroVector;
+	}
 	const FVector PrevActorLoc = GetActorLocation();
+	const FVector SimDelta = Location - LastSimLoc;
+	const bool bFollowed = bFollowActive && SimDelta.SizeSquared2D() < 150.f * 150.f; // (a teleport is not followed)
+	bFollowActive = false;
+	LastSimLoc = Location;
+	if (!bFollowed) ClipStrideSm = 1.f; // (a newly followed clip starts from its own stride)
 	UTagRetargetAnimInstance* RI = MHBody ? Cast<UTagRetargetAnimInstance>(MHBody->GetAnimInstance()) : nullptr;
 	if (RI)
 	{
 		LastSlideRaw = RI->SlideRaw;
 		LastSlideShown = RI->SlideShown;
+		for (int32 k = 0; k < 7; ++k) LastDev[k] = RI->Dev[k];
+		LastPlantFeet = RI->PlantFeet;
+		// the clip's root travel for the layer's planted-foot verdict: zero (a clip played in place) unless motion matching
+		// reports its own below; unknown while the body is driven some other way (falls, get-ups)
+		RI->Proc.RootVelCS = FVector::ZeroVector;
+		RI->Proc.bRootVelValid = false;
+		TelEff = 0.f; TelStride = 1.f; TelAng = 0.f; TelOrient = 0.f; TelRootOff = 0.f;
 		GSlideRaw += RI->SlideRaw; // foot slide over all athletes (SlideStats)
 		GSlideShown += RI->SlideShown;
 		RI->SlideRaw = RI->SlideShown = 0.f;
@@ -2863,7 +3584,16 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 		OrientWarpSm = FMath::FInterpTo(OrientWarpSm, 0.f, DeltaTime, 4.f); // and the orientation warp while he moves
 		RI->Proc.OrientWarpDeg = OrientWarpSm;
 	}
-	if (bPreSnap) { bDropped = false; DropLeft = 0.f; } // a new play: the quarterback has his drop again
+	if (bPreSnap)
+	{
+		bDropped = false; DropLeft = 0.f; // a new play: the quarterback has his drop again
+		// and nothing left over from the last one: a one-shot started as the whistle blew (a receiver laying out for an
+		// incompletion) never got to play, waited through the huddle and the stance and went off at the next snap - a
+		// wide receiver diving out of his stance on a run play, then a 3.3 m jump back (p14-p19, clip 3)
+		OneShot = nullptr;
+		OneShotLeft = 0.f;
+		bMissing = false;
+	}
 	if (Anim != TEXT("down") && FVector(VelWorld.X, VelWorld.Y, 0.f).SizeSquared() > 100.f) LastVelW = FVector(VelWorld.X, VelWorld.Y, 0.f);
 	if (bRagdoll)
 	{
@@ -2876,6 +3606,19 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 	{
 		TickFall(Location, DeltaTime);
 		return;
+	}
+	if (bScene)
+	{
+		if (Anim == TEXT("scene"))
+		{
+			TickScene(DeltaTime);
+			return;
+		}
+		// someone else drives him again: from where the capture left his body (the offset eases out below)
+		bScene = false;
+		VisOffset = (GetActorLocation() - Location).GetClampedToMaxSize2D(300.f);
+		VisOffset.Z = 0.f;
+		CurrentAnim.Reset();
 	}
 	if (FallHoldLeft > 0.f)
 	{
@@ -2910,14 +3653,43 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 		bGettingUp = false;
 		CurrentAnim.Reset();
 	}
+	else if (bFollowed)
+	{
+		// on his own feet: the body moved by what the clip's feet covered, the sim by what it did; the difference is the
+		// lag (or lead) he carries. Past FollowMax the sim pulls him along (and only then a foot slides).
+		static float FollowMax = FParse::Value(FCommandLine::Get(), TEXT("TagFollowMax="), FollowMax) ? FollowMax : 60.f;
+		const float Was = static_cast<float>(VisOffset.Size2D());
+		VisOffset += FollowVel * DeltaTime - FVector(SimDelta.X, SimDelta.Y, 0.f);
+		VisOffset.Z = 0.f;
+		// (an offset already past the limit when the following starts - a dive's travel, a get-up - comes in at 1.5 m/s,
+		// not in one frame)
+		const float Max = FMath::Max(FollowMax, Was - 150.f * DeltaTime);
+		if (VisOffset.SizeSquared2D() > Max * Max) VisOffset = VisOffset.GetClampedToMaxSize2D(Max);
+	}
 	else
 	{
-		VisOffset *= FMath::Exp(-2.5f * DeltaTime); // drift back onto the sim position after a get-up
+		// drift back onto the sim position (after a get-up, a dive's travel): all but the last few centimetres (a man
+		// standing 8 cm off his spot is nobody's concern; easing it out slid his planted feet)
+		// (a man standing still keeps up to 25 cm: nobody lines up on a grid, and the walk-in ends where his feet do)
+		const float L = VisOffset.Size2D();
+		const float Keep = DeltaTime > 1e-4f && SimDelta.Size2D() / DeltaTime < 40.f ? 25.f : 8.f;
+		if (L > Keep) VisOffset *= FMath::Max(Keep / L, FMath::Exp(-2.5f * DeltaTime));
+	}
+	// two locked-up men keep their bodies apart whatever each one's lag behind the sim: with both up to 60 cm off their
+	// spots toward each other, pairs the sim holds 90 cm apart stood inside one another (pelvises under 30 cm in 1.8 %
+	// of live frames, p23, against 0.3 % before the follower). Each gives back half of what is missing to 95 cm.
+	if (const AAthlete* Bp = BlockPartner.Get())
+	{
+		FVector Apart = Location + VisOffset - Bp->GetActorLocation();
+		Apart.Z = 0.f;
+		const float Gap = static_cast<float>(Apart.Size());
+		if (Gap > 1.f && Gap < 95.f) VisOffset += Apart / Gap * FMath::Min((95.f - Gap) * 0.5f, 400.f * DeltaTime);
 	}
 	const bool bFall = Anim == TEXT("down") || Anim == TEXT("tackle") || Anim == TEXT("dive");
+	bRepClip = false; // (set again below while his part of a two-man capture plays)
 	SetActorLocation(Location + VisOffset);
 	RecordTrajectory();
-	MeasureMotion(DeltaTime);
+	MeasureMotion(Location, DeltaTime);
 	if (RI)
 	{
 		// body physics: the lean from the ankles into the measured acceleration (tan a = a / g: a 5 m/s2 start is
@@ -2940,18 +3712,97 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 		LeanSmoothed = FMath::VInterpTo(LeanSmoothed, Want, DeltaTime, 7.f);
 		RI->Proc.LeanCS = LeanSmoothed;
 		RI->Proc.bFootLock = !bNoFootLock;
+		// a plain clip: in place (root velocity zero) unless it is a travelling capture played with its root locked (a
+		// drop, a locomotion loop): then its own root travel at the play position; a blend space: unknown
+		RI->Proc.bRootVelValid = true;
+		if (!bInMatch)
+			if (const UAnimSingleNodeInstance* SN = Body->GetSingleNodeInstance())
+			{
+				const UAnimationAsset* Cur = const_cast<UAnimSingleNodeInstance*>(SN)->GetCurrentAsset();
+				if (const UAnimSequence* Seq = Cast<UAnimSequence>(Cur))
+				{
+					if (Seq->HasRootMotion())
+					{
+						const double Len = Seq->GetPlayLength(), T = const_cast<UAnimSingleNodeInstance*>(SN)->GetCurrentTime();
+						const double S = FMath::Clamp(T - 0.05, 0.0, Len), E = FMath::Clamp(T + 0.05, 0.0, Len);
+						if (E > S + 1e-3)
+							RI->Proc.RootVelCS = Seq->ExtractRootMotionFromRange(S, E, FAnimExtractContext(0.0, true)).GetTranslation() / (E - S) *
+								const_cast<UAnimSingleNodeInstance*>(SN)->GetPlayRate();
+						// and the body travels with it (the follower): a lineman's set, a first step off the ball, a drop, a
+						// juke are captures of men covering ground; played in place under the sim's own path their planted feet
+						// skated 1-2.7 m/s (p17: one-shots 109 cm/s on the feet the capture holds planted, against 7 for
+						// motion matched running). The body now takes the capture's steps; where that leaves it off the sim's
+						// spot (at most FollowMax) the locomotion that follows makes up.
+						static const bool bFollowClips = !FParse::Param(FCommandLine::Get(), TEXT("TagNoFollow"));
+						if (bFollowClips && !bPreSnap)
+						{
+							FVector ClipVelW = MHBody->GetComponentTransform().TransformVectorNoScale(RI->Proc.RootVelCS);
+							ClipVelW.Z = 0.f;
+							ClipVelW = ClipVelW.GetClampedToMaxSize(1100.f);
+							// steered at the sim like a matched run: the capture's steps stretched or shortened (0.55-1.4) and turned
+							// (up to 40 degrees) toward what the sim does, plus making up the lag. (Unsteered, a guard's angled set
+							// travelled back-right at the capture's 45 degrees while the sim took him straight back: 60 cm off in
+							// a third of a second, then dragged - p18, a twentieth of all frames at the limit.)
+							FVector Ask = PrevVel;
+							const float Lag = VisOffset.Size2D();
+							if (Lag > 8.f) Ask -= VisOffset.GetSafeNormal2D() * FMath::Min((Lag - 8.f) * 2.5f, 200.f);
+							// a locked-up man also steps to hand-fighting distance of his man (the steps keep the spacing; the
+							// alignment offset below would slide him there under his planted feet)
+							if (const AAthlete* Bp = BlockPartner.Get())
+							{
+								FVector ToHim = Bp->GetActorLocation() - GetActorLocation();
+								ToHim.Z = 0.f;
+								const float Dh = static_cast<float>(ToHim.Size());
+								if (Dh > 1.f && Dh < 260.f && FMath::Abs(Dh - 110.f) > 10.f) Ask += ToHim / Dh * FMath::Clamp((Dh - 110.f) * 2.5f, -120.f, 120.f);
+							}
+							const float Eff = static_cast<float>(ClipVelW.Size()), WantSp = static_cast<float>(Ask.Size2D());
+							float Sc = 1.f, WarpWant = 0.f;
+							if (Eff > 60.f)
+							{
+								Sc = FMath::Clamp(WantSp / Eff, 0.55f, 1.4f);
+								if (WantSp > 60.f)
+								{
+									const FVector C2 = ClipVelW / Eff, W2 = Ask.GetSafeNormal2D();
+									WarpWant = FMath::Clamp(FMath::RadiansToDegrees(FMath::Atan2(C2.X * W2.Y - C2.Y * W2.X, C2.X * W2.X + C2.Y * W2.Y)), -40.f, 40.f);
+								}
+							}
+							OrientWarpSm = FMath::FInterpTo(OrientWarpSm, WarpWant, DeltaTime, 6.f);
+							RI->Proc.OrientWarpDeg = OrientWarpSm;
+							// (eased: a capture's root speed steps with its feet, and the raw ratio flipped between the limits
+							// from one frame to the next - the feet of a centre's first step jumped 65 cm, p19 clip 34)
+							ClipStrideSm = FMath::FInterpTo(ClipStrideSm, Sc, DeltaTime, 6.f);
+							Sc = ClipStrideSm;
+							RI->Proc.StrideScale = Sc;
+							const FVector FeetW = ClipVelW.RotateAngleAxis(OrientWarpSm, FVector::UpVector);
+							if (Eff > 1.f) RI->Proc.StrideDirCS = MHBody->GetComponentTransform().InverseTransformVectorNoScale(FeetW / Eff);
+							TelEff = Eff; TelStride = Sc; TelOrient = OrientWarpSm;
+							FollowVel = FeetW * Sc;
+							bFollowActive = true;
+						}
+					}
+				}
+				else if (Cur) RI->Proc.bRootVelValid = false;
+			}
 	}
 	if (!bYawInit)
 	{
 		SmoothedYaw = Yaw;
 		bYawInit = true;
 	}
-	SmoothedYaw += FMath::FindDeltaAngleDegrees(SmoothedYaw, Yaw) * FMath::Clamp(DeltaTime * 10.f, 0.f, 1.f);
+	// (and no faster than a man can turn: 600 deg/s. A blocker meeting his man on the run was swung 60 degrees in one
+	// frame, his feet 63 cm across the turf - the one body pop left in a filmed game)
+	SmoothedYaw += FMath::Clamp(FMath::FindDeltaAngleDegrees(SmoothedYaw, Yaw) * FMath::Clamp(DeltaTime * 10.f, 0.f, 1.f), -600.f * DeltaTime, 600.f * DeltaTime);
 	SetActorRotation(FRotator(0, SmoothedYaw, 0));
 
 	const float SpeedCm = FVector(VelWorld.X, VelWorld.Y, 0).Size();
 	const bool bChanged = Anim != CurrentAnim;
-	StillTime = SpeedCm < 20.f ? StillTime + DeltaTime : 0.f;
+	// still: told to stand, or not actually moving (a man held off his post-play spot by a body in the way was given a
+	// small velocity every frame he never moved on, and stood on the one matched idle instead of his own stand - p69 c005)
+	const float MovedCm = DeltaTime > 1e-4f ? static_cast<float>(FVector::Dist2D(PrevActorLoc, StillRef)) / DeltaTime : 0.f;
+	StillRef = PrevActorLoc;
+	// (only a nudge counts: a man told to run who has not moved yet is starting, and held in a stand that does not move
+	// the body he never did - the planted feet slid 1.1 cm/s against 0.7, p70)
+	StillTime = (SpeedCm < 20.f || (SpeedCm < 70.f && MovedCm < 20.f)) ? StillTime + DeltaTime : 0.f;
 	CurrentAnim = Anim;
 
 	if (A.bMocap && Anim == TEXT("down"))
@@ -3105,6 +3956,7 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 		else if (bChanged) PlayClip(Player && (Player->id % 2) ? A.FallFront : A.FallFront2, false, 1.3f);
 		return;
 	}
+	if (Anim == TEXT("throw") && IsThrowing()) return; // (the throw timed to the sim's release is playing: no restart over it)
 	if (Anim == TEXT("throw"))
 	{
 		// the set throw from 7 frames before its release: plant, hip-shoulder separation, release ~0.23 s after the sim's
@@ -3115,17 +3967,46 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 	const bool bLine = Player && (Player->pos == tag::Pos::OT || Player->pos == tag::Pos::OG || Player->pos == tag::Pos::C ||
 		Player->pos == tag::Pos::DE || Player->pos == tag::Pos::DT);
 	// the snap: linemen explode out of the stance (get-off), the shotgun QB catches the snap; both are one-shots
-	if (bWasPreSnap && !bPreSnap)
+	// a lineman's first step: the capture that goes his way. The pools hold sets and steps to every side (a vertical set,
+	// angled sets left and right, steps down the line); taken in turn, a guard the sim sends straight back played a set
+	// angled 45 degrees to his right. The pick waits up to three frames (a lineman's reaction to the snap is longer) for
+	// the sim to steer him, then takes, of eight candidates in turn, the one whose first 0.7 s travels nearest that way.
+	if (bWasPreSnap && !bPreSnap && bLine && A.GetOff) GetOffPending = 3;
+	if (bPreSnap) GetOffPending = 0;
+	if (GetOffPending > 0 && !bPreSnap)
 	{
-		if (bLine && A.GetOff)
+		const bool bSteered = IntentFrame == GFrameCounter && IntentVelW.SizeSquared2D() > 50.f * 50.f;
+		if (bSteered || --GetOffPending == 0)
 		{
+			GetOffPending = 0;
 			static int32 GGetOffSeq = 0;
 			// the pool for this man's job at the snap; the shared pool only when the job's pool is empty
 			const TArray<FAthleteAssets::FPackClip>& Pool = GetOffKind == 1 && A.PackGetOffsPass.Num() ? A.PackGetOffsPass
 				: GetOffKind == 2 && A.PackGetOffsRun.Num() ? A.PackGetOffsRun : GetOffKind == 3 && A.PackGetOffsDL.Num() ? A.PackGetOffsDL : A.PackGetOffs;
-			if (const FAthleteAssets::FPackClip* P = FAthleteAssets::PickOr(Pool, GGetOffSeq++)) PlayOneShot(P->Anim);
+			const int32 Seq = GGetOffSeq++;
+			const FAthleteAssets::FPackClip* P = FAthleteAssets::PickOr(Pool, Seq);
+			if (bSteered && MHBody && Pool.Num() > 1)
+			{
+				const FVector WantCS = MHBody->GetComponentTransform().InverseTransformVectorNoScale(IntentVelW.GetSafeNormal2D());
+				float BestDot = -2.f;
+				for (int32 k = 0; k < 8; ++k)
+				{
+					const FAthleteAssets::FPackClip* C = FAthleteAssets::Pick(Pool, Seq + k);
+					const UAnimSequence* Sq = C ? Cast<UAnimSequence>(C->Anim) : nullptr;
+					if (!Sq || !Sq->HasRootMotion()) continue;
+					FVector T = Sq->ExtractRootMotionFromRange(C->Start, FMath::Min(C->Start + 0.7f, Sq->GetPlayLength()), FAnimExtractContext(0.0, true)).GetTranslation();
+					T.Z = 0.f;
+					const float Dot = T.Size() > 12.f ? static_cast<float>(FVector::DotProduct(T.GetSafeNormal(), WantCS)) : 0.f; // (a set that stays put fits any way a little)
+					if (Dot > BestDot) { BestDot = Dot; P = C; }
+				}
+			}
+			if (P) PlayOneShotFrom(P->Anim, P->Start);
 			else PlayOneShot(A.GetOff);
 		}
+	}
+	if (bWasPreSnap && !bPreSnap)
+	{
+		if (bLine && A.GetOff) {}
 		else if (Player && Player->pos == tag::Pos::QB && bUnderCenter && A.UnderCenterSnap) PlayOneShot(A.UnderCenterSnap);
 		else if (Player && Player->pos == tag::Pos::QB && A.SnapCatch) PlayOneShot(A.SnapCatch);
 	}
@@ -3138,13 +4019,51 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 		// catch pose for the clip's full length (the run crossfades in from where the catch is)
 		const bool bDiveClip = OneShot == A.CatchDive || OneShot == A.Side(A.CatchDive, true);
 		if (bOneShotCatch && !bDiveClip && OneShotAge > 0.3f && SpeedCm > 450.f) OneShotLeft = 0.f; // a layout dive plays out
+		// (and once he has scored: a three-second catch capture played on through the celebration it should have given way to)
+		if (bOneShotCatch && !bDiveClip && OneShotAge > 0.45f && Anim == TEXT("celebrate")) OneShotLeft = 0.f;
+		// and a move made on the spot is over once the sim has him running: a beaten blocker turning to chase played his
+		// lunge for a second while covering 4 m/s (a capture that travels is followed instead and keeps its feet)
+		if (!bOneShotCatch && !bOneShotRep && !bDiveClip && OneShotAge > 0.35f && SpeedCm > 320.f)
+			if (const UAnimSequence* OSq = Cast<UAnimSequence>(OneShot); OSq && !OSq->HasRootMotion()) OneShotLeft = 0.f;
+		// and a capture that travels gives way once it cannot keep the body with the sim: at the follow limit for a
+		// quarter second the man is being dragged (a rush win curling left while the sim sends him straight at the
+		// quarterback, a set angled away from where the pocket goes); what follows (the run, the pass-block walk) is
+		// steered at where he should be
+		LagTime = VisOffset.SizeSquared2D() > 52.f * 52.f ? LagTime + DeltaTime : 0.f;
+		// (never a man the capture has put on the turf: cut there he stood up out of his back in one crossfade - a
+		// blocker run over by a bull rush snapping into a shuffle, p37)
+		const bool bOnTurf = MHBody && MHBody->GetSocketLocation(TEXT("pelvis")).Z - GetActorLocation().Z < 58.f;
+		if (!bOneShotCatch && !bDiveClip && !bOnTurf && OneShotAge > 0.4f && LagTime > 0.25f) OneShotLeft = 0.f;
 		PlayClip(OneShot, false, OneShotRate, OneShotStart);
+		bRepClip = bOneShotRep;
 		if (!BlockAlign.IsNearlyZero(0.5f)) SetActorLocation(Location + VisOffset + BlockAlign);
 		if (OneShotLeft <= 0.f)
 		{
+			bOneShotRep = false;
+			// a capture that leaves him on the turf (a pancake, the blocker of a bull rush): he gets up from there
+			if (bOnTurf && !bDiveClip && A.GetUpDown && A.GetUpUp)
+			{
+				OneShot = nullptr;
+				bMissing = false;
+				StartGetUp(Location);
+				return;
+			}
 			// the layout dive ends ~1 m ahead of where it started: hand that travel to the actor so the next pose
 			// starts where the body is (VisOffset then eases back onto the sim position)
-			if (OneShot == A.CatchDive || OneShot == A.Side(A.CatchDive, true)) VisOffset += GetActorForwardVector() * FAthleteAssets::CatchDiveTravel;
+			// (by where the body actually is: a dive cut short had carried it 1.9 m, and the full 3.3 m put on top threw
+			// the man 3 m in a frame - the one pop left in the p33 and p36 games)
+			if (OneShot == A.CatchDive || OneShot == A.Side(A.CatchDive, true))
+			{
+				FVector Carried = MHBody ? MHBody->GetSocketLocation(TEXT("pelvis")) - GetActorLocation() : GetActorForwardVector() * FAthleteAssets::CatchDiveTravel;
+				Carried.Z = 0.f;
+				// the actor itself goes there, from the next frame (this frame still shows the dive's last pose): an offset
+				// alone was thrown away after the whistle, where a man 1.5 m off his sim spot is left where he stands, and the
+				// body snapped back 3 m once the sim spotted the catch at the landing
+				PendingCarry = Carried.GetClampedToMaxSize(FAthleteAssets::CatchDiveTravel + 60.f);
+				// (and the crossfade into the next clip must not carry that travel a second time: it blended out of the
+				// dive's pose, 3.3 m ahead of the actor, on top of the actor having moved there - the one pop of p58 / p59)
+				if (GetWorld()) DropTravelUntil = GetWorld()->GetTimeSeconds() + 0.4;
+			}
 			bMissing = false;
 			OneShot = nullptr;
 			CurrentAnim.Reset(); // one-shot done: let whatever state follows (re)start next frame (crossfaded)
@@ -3152,7 +4071,7 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 		return;
 	}
 	// pre-snap: hand keyed stance loops (three point for the line, shotgun for the QB, two point for the rest)
-	if (bPreSnap && SpeedCm < 40.f && Player)
+	if ((bPreSnap || GetOffPending > 0) && SpeedCm < 40.f && Player) // (a lineman holds his stance the beat before his first step)
 	{
 		const tag::Pos P = Player->pos;
 		UAnimationAsset* S = bLine ? A.Stance3pt.Get() : P == tag::Pos::QB ? (bUnderCenter && A.StanceUnderCenter ? A.StanceUnderCenter.Get() : A.StanceShotgun.Get()) : A.Stance2pt.Get();
@@ -3205,7 +4124,49 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 			PlayClip(D, false, Rate);
 			return;
 		}
-		if (!bDropping && SpeedCm < 90.f && (Anim == TEXT("idle") || Anim == TEXT("run")))
+		// (only while he stands: the loop is a quarterback on one spot, and under a man sliding or stepping up at
+		// 0.4-0.9 m/s its planted feet travelled 78 cm/s - a tenth of all the skating in the p24 game. Moving, he is on
+		// the matched locomotion with both hands on the ball.)
+		bPocketLoop = !bDropping && (bPocketLoop ? SpeedCm < 55.f : SpeedCm < 30.f) && (Anim == TEXT("idle") || Anim == TEXT("run"));
+		// moving in the pocket (a slide, a step up, drifting from the rush): the pack's quarterback walks and jogs to
+		// that side, ball held ready as captured, their steps steered at the sim by the follower. (The matched
+		// locomotion there was a field player's run with the hands pulled to the ball by IK.)
+		if (!bPocketLoop && !bDropping && SpeedCm < 300.f && (Anim == TEXT("idle") || Anim == TEXT("run")) && A.QBWalks.Clips.Num() && MHBody)
+		{
+			const bool bJog = A.QBJogs.Clips.Num() && (QBWalk >= 100 ? SpeedCm > 170.f : SpeedCm > 230.f);
+			const FAthleteAssets::FWalkSet& Set = bJog ? A.QBJogs : A.QBWalks;
+			const FVector VelCS = MHBody->GetComponentTransform().InverseTransformVectorNoScale(FVector(VelWorld.X, VelWorld.Y, 0.f).GetSafeNormal());
+			const int32 Cur = QBWalk >= 100 ? QBWalk - 100 : QBWalk;
+			const bool bSameSet = QBWalk >= 0 && (QBWalk >= 100) == bJog && Set.Clips.IsValidIndex(Cur);
+			QBWalkT += DeltaTime;
+			int32 Best = bSameSet ? Cur : -1;
+			float BestDot = bSameSet ? static_cast<float>(FVector::DotProduct(Set.Dir[Cur], VelCS)) + (QBWalkT < 0.5f ? 2.f : 0.25f) : -2.f; // (half a second on a pick, then a real change of way)
+			for (int32 i = 0; i < Set.Clips.Num(); ++i)
+			{
+				const float Dot = static_cast<float>(FVector::DotProduct(Set.Dir[i], VelCS));
+				if (Dot > BestDot) { BestDot = Dot; Best = i; }
+			}
+			if (Best >= 0)
+			{
+				if (Best != Cur || !bSameSet) QBWalkT = 0.f;
+				QBWalk = Best + (bJog ? 100 : 0);
+				bRepClip = true; // the capture holds the ball: no hands pulled to it
+				PlayClip(Set.Clips[Best].Get(), true, FMath::Clamp(SpeedCm / FMath::Max(Set.Speed[Best], 1.f), 0.5f, 1.2f));
+				return;
+			}
+		}
+		QBWalk = -1;
+		// out of the pocket at a run: the pack's quarterback scramble (ball in one hand, eyes up) and, flat out, his run.
+		// (He kept the pocket's sideways jog up to 4.8 m/s - a man shuffling while the user held the stick to run.)
+		if (!bDropping && SpeedCm >= 300.f && Anim == TEXT("run") && A.QBScramble.IsValid())
+		{
+			const bool bFlat = SpeedCm > 600.f && A.QBRun.IsValid();
+			UAnimSequence* Rn = bFlat ? A.QBRun.Get() : A.QBScramble.Get();
+			bRepClip = true; // the capture carries the ball itself
+			PlayClip(Rn, true, FMath::Clamp(SpeedCm / FMath::Max(bFlat ? A.QBRunSpeed : A.QBScrambleSpeed, 1.f), 0.75f, 1.45f));
+			return;
+		}
+		if (bPocketLoop)
 		{
 			PlayClip(A.QBPocket, true, 1.f + StyleJitter * 0.08f, FMath::Frac(Player->id * 0.37f) * 1.2f);
 			return;
@@ -3224,7 +4185,10 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 	{
 		// each player has his own celebration (keyed loops), phase offset so nobody moves in unison
 		UAnimationAsset* C = A.Celebrations.Num() && Player ? A.Side(A.Celebrations[Player->id % A.Celebrations.Num()], (Player->id / 7) % 2 == 1) : A.Celebrate.Get();
-		if (bChanged) PlayClip(C, true, A.bCelebrateKeyed || A.Celebrations.Num() ? 1.f : 1.2f, Player ? FMath::Frac(Player->id * 0.29f) : 0.f);
+		// (a pack capture is a celebration played once, from its start, and held: looped from a point inside it, a man who
+		// dived to the turf to pose was back on his feet in one frame when it wrapped)
+		const bool bCapture = C && C->GetName().StartsWith(TEXT("A_TAG_Pack_"));
+		if (bChanged) PlayClip(C, !bCapture, A.bCelebrateKeyed || A.Celebrations.Num() ? 1.f : 1.2f, bCapture ? 0.f : Player ? FMath::Frac(Player->id * 0.29f) : 0.f);
 		return;
 	}
 	// locomotion: direction of travel relative to facing, speed-matched so feet don't slide
@@ -3240,12 +4204,19 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 		FVector Want = FVector::ZeroVector;
 		if (AAthlete* O = BlockPartner.Get(); O && Anim == TEXT("block"))
 		{
-			FVector To = O->GetActorLocation() - Location;
+			FVector To = O->GetActorLocation() - (Location + VisOffset); // (from where his body is, not his sim spot)
 			To.Z = 0.f;
 			const float D = To.Size();
 			if (D > 1.f && D < 260.f)
 			{
 				Want = (To / D * (D - 110.f) * 0.5f).GetClampedToMaxSize(80.f); // hip to hip: both lean in, arms on the chest plate
+				// (within 20 cm of that the pair is left as it stands: corrected to the centimetre every frame, two men on
+				// their own captures were slid under their planted feet all rep - 27-35 cm/s on locked-up pairs, p27)
+				if (FMath::Abs(static_cast<float>(FVector::Dist2D(O->GetActorLocation(), GetActorLocation())) - 110.f) < 20.f) Want = BlockAlign;
+				// (and while he is on a capture that travels: his steps are steered to the spacing, and the offset working
+				// against them halved his ground speed under full-length strides - a cornerback on the pass-block walk
+				// covering 51 cm/s on steps of 100, p28)
+				if (bFollowActive) Want = BlockAlign;
 				// squaring up at a human turn rate (a fifth of the angle a frame turned a man 36 degrees in one frame)
 				const float DYaw = FMath::FindDeltaAngleDegrees(SmoothedYaw, To.Rotation().Yaw) * FMath::Clamp(DeltaTime * 6.f, 0.f, 1.f);
 				SmoothedYaw += FMath::Clamp(DYaw, -240.f * DeltaTime, 240.f * DeltaTime);
@@ -3253,7 +4224,7 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 			}
 		}
 		// closing to hand-fighting range at a shuffle's pace (1.2 m/s): the old ease covered 80 cm at up to 6 m/s, a glide
-		BlockAlign = FMath::VInterpConstantTo(BlockAlign, Want, DeltaTime, 120.f);
+		BlockAlign = FMath::VInterpConstantTo(BlockAlign, Want, DeltaTime, 60.f);
 		if (!BlockAlign.IsNearlyZero(0.5f)) SetActorLocation(Location + VisOffset + BlockAlign);
 		// the strike: both men's hands shoot to the chest plate the moment they meet (once per engagement)
 		SincePunch += DeltaTime;
@@ -3283,7 +4254,12 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 	}
 	if (Anim == TEXT("block") && SpeedCm < 220.f && A.BlockEngaged && A.BlockPassSet)
 	{
-		UAnimationAsset* Loop = bEngaged || BlockPartner.IsValid() ? A.BlockEngaged.Get() : A.BlockPassSet.Get();
+		// locked up only with somebody to be locked up with: a blocker with nobody on him (a lineman uncovered, a back
+		// or tight end kept in) stands in the pack's pass-block ready stance, hands up and feet live, not in an
+		// engaged clinch with the air
+		const bool bBackOrEnd = Player && (Player->pos == tag::Pos::RB || Player->pos == tag::Pos::FB || Player->pos == tag::Pos::TE);
+		UAnimationAsset* Ready = bBackOrEnd && A.BlockReadyBack ? A.BlockReadyBack.Get() : A.BlockReadyOL ? A.BlockReadyOL.Get() : A.BlockPassSet.Get();
+		UAnimationAsset* Loop = BlockPartner.IsValid() ? A.BlockEngaged.Get() : Ready;
 		float Rate = 1.f;
 		if (BlockPartner.IsValid())
 		{
@@ -3311,19 +4287,105 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 				Rate = FMath::Clamp(SpeedCm / Authored, 0.6f, 1.4f);
 			}
 		}
-		PlayClip(Loop, true, Rate, Player ? FMath::Frac(Player->id * 0.41f) : 0.f);
+		float StartAt = Player ? FMath::Frac(Player->id * 0.41f) : 0.f;
+		// a pass rush locked up and even: the pack's two-man stand-off, each man his own part, both on the pair's clock
+		// (the defender's id sets the pair's phase, so the pairs along a line are not in step)
+		const AAthlete* Him = BlockPartner.Get();
+		if (Him && LineLoop == 0 && bLinePassPro && A.RepLoops.Num() && Player && Him->Player)
+		{
+			const int32 DefId = bLineDefender ? Player->id : Him->Player->id;
+			const FAthleteAssets::FLineRep& R = A.RepLoops[FMath::Abs(DefId) % A.RepLoops.Num()];
+			UAnimSequence* Part = bLineDefender ? R.D.Get() : R.O.Get();
+			const float Len = FMath::Max(0.1f, static_cast<float>(FMath::Min(R.D->GetPlayLength(), R.O->GetPlayLength())));
+			Loop = Part;
+			Rate = 1.f;
+			StartAt = FMath::Fmod(static_cast<float>(GetWorld()->GetTimeSeconds()) + FMath::Frac(DefId * 0.37f) * Len, Len);
+			bRepClip = true;
+		}
+		// the pile on the move (a pocket giving ground, a bull rush walking his man back): the pass-block walk that goes
+		// that way, its steps steered at the sim by the follower; back to the stand-off once it settles
+		// (what he has to cover: the pile's motion and whatever his body is behind his spot)
+		FVector AskW(VelWorld.X, VelWorld.Y, 0.f);
+		if (const float Lag = static_cast<float>(VisOffset.Size2D()); Lag > 8.f) AskW -= VisOffset.GetSafeNormal2D() * FMath::Min((Lag - 8.f) * 2.5f, 200.f);
+		if (Him)
+		{
+			FVector ToHim = Him->GetActorLocation() - GetActorLocation();
+			ToHim.Z = 0.f;
+			const float Dh = static_cast<float>(ToHim.Size());
+			if (Dh > 1.f && Dh < 260.f && FMath::Abs(Dh - 110.f) > 10.f) AskW += ToHim / Dh * FMath::Clamp((Dh - 110.f) * 2.5f, -120.f, 120.f);
+		}
+		const float AskSp = static_cast<float>(AskW.Size());
+		// (on the walk he stays on it until there has been nothing to cover for 0.4 s: slow steps at 0.4 of the capture's
+		// pace stand in for a shuffle, and the pick no longer alternates with the stand-off every half second)
+		LineStillT = AskSp < 22.f ? LineStillT + DeltaTime : 0.f;
+		// (with nobody on him too: an uncovered man sliding with the pocket walks it in his set, he does not skate in the stance)
+		const bool bWalk = A.BlockWalks.Num() && MHBody && (LineWalk >= 0 ? LineStillT < 0.4f : AskSp > 60.f);
+		if (bWalk)
+		{
+			const FVector VelCS = MHBody->GetComponentTransform().InverseTransformVectorNoScale(AskW.GetSafeNormal());
+			int32 Best = LineWalk;
+			float BestDot = A.BlockWalkDir.IsValidIndex(LineWalk) ? static_cast<float>(FVector::DotProduct(A.BlockWalkDir[LineWalk], VelCS)) + 0.25f : -2.f; // (hold the walk he is on)
+			for (int32 i = 0; i < A.BlockWalks.Num(); ++i)
+			{
+				const float Dot = static_cast<float>(FVector::DotProduct(A.BlockWalkDir[i], VelCS));
+				if (Dot > BestDot) { BestDot = Dot; Best = i; }
+			}
+			LineWalk = Best;
+			Loop = A.BlockWalks[Best].Get();
+			// (slower steps for a slower pile: the walks cover 1.3-1.7 m/s, a pocket gives ground at a third of that)
+			Rate = FMath::Clamp(AskSp / FMath::Max(A.BlockWalkSpeed[Best], 1.f), 0.4f, 1.15f);
+			StartAt = Player ? FMath::Frac(Player->id * 0.41f) : 0.f;
+			bRepClip = true; // (the walks are captured with the hands up in the block: no reach over them either)
+		}
+		else LineWalk = -1;
+		// a line clip gets half a second before another replaces it: the pick flipped with every wobble of the pile (a
+		// pass-block walk lasted a median 7 frames, 957 of them in 40 plays), and nearly all of the line's skating was
+		// in the 3-12 frames after a change - the crossfade and the released foot pins (p29: 2.1 cm a planted foot a frame
+		// there, 0.09 once a clip had run 12 frames)
+		LineHeldT += DeltaTime;
+		if (UAnimationAsset* Held = LineHeld.Get(); Held && Held != Loop && Held == CurrentClip && LineHeldT < 0.5f)
+		{
+			Loop = Held;
+			Rate = LineHeldRate;
+		}
+		else if (LineHeld.Get() != Loop)
+		{
+			LineHeld = Loop;
+			LineHeldT = 0.f;
+		}
+		LineHeldRate = Rate;
+		PlayClip(Loop, true, Rate, StartAt);
 		return;
 	}
-	const bool bCrouched = A.bMocap && A.Crouch && (Anim == TEXT("block") || (bLineman && SpeedCm < 260.f));
+	const bool bCrouched = A.bMocap && A.Crouch && (Anim == TEXT("block") || (bLineman && SpeedCm < 260.f && !bPreSnap)); // (walking to his spot he walks upright)
 	// after the whistle, standing around: hands on the hips (winded players bend over, hands on the knees)
-	if (!bPreSnap && StillTime > 2.5f && Anim == TEXT("idle") && A.IdleHandsHips && A.IdleHandsKnees && Player)
+	// (half a second: the whistle stops a dozen men at once, and for the first second they all stood on the one matched
+	// idle - 4 or more men on it in 10-12 % of post-play frames, p65 / p66)
+	// (and a man the sim still has on "run" but who stands still: most of those clones were that, p67)
+	if (!bPreSnap && !bLiveF && StillTime > 0.5f && (Anim == TEXT("idle") || Anim == TEXT("run")) && A.IdleHandsHips && A.IdleHandsKnees && Player) // (after the whistle only: a zone defender waiting on the play is not resting; and a second, not 2.5: until then every man stood on the one matched idle)
 	{
-		UAnimationAsset* I = Player->r.stamina < 70 ? A.IdleHandsKnees.Get() : A.IdleHandsHips.Get();
+		// (bent over with his hands on his knees while he gets his wind: eight seconds of it, not the whole huddle)
+		UAnimationAsset* I = Player->r.stamina < 70 && StillTime < 8.f ? A.IdleHandsKnees.Get() : A.IdleHandsHips.Get();
 		if (Player->r.stamina >= 70 && A.PackPostPlayIdles.Num()) // the pack's post-play stands, the player's own
 			if (const int32 i = Player->id % (A.PackPostPlayIdles.Num() + 1)) I = A.PackPostPlayIdles[i - 1].Get();
 		PlayClip(I, true, 1.f, FMath::Frac(Player->id * 0.53f) * 2.f);
 		return;
 	}
+	// standing through a live play (a deep safety, a corner on the far side, a back who stayed in): his own ready stance
+	// from the pack's set for his position, not the one matched idle every standing man shared (4 or more men on it in
+	// 6 % of all frames of the p33 game)
+	if (bLiveF && !bPreSnap && !bHasBallF && !bLine && Anim == TEXT("idle") && StillTime > 0.6f && Player)
+		if (const TArray<TObjectPtr<UAnimationAsset>>* Lib = A.PackStances.Find(static_cast<int32>(Player->pos)); Lib && Lib->Num())
+		{
+			// (a held stance, not one of the set's pre-snap fidgets: nobody resets his feet or taps his helmet mid play)
+			for (int32 k = 0; k < Lib->Num(); ++k)
+			{
+				UAnimationAsset* St = (*Lib)[(FMath::Abs(Player->id) + k) % Lib->Num()].Get();
+				if (!St || St->GetName().Contains(TEXT("Fidget")) || St->GetName().Contains(TEXT("Adjust")) || St->GetName().Contains(TEXT("Tap"))) continue;
+				PlayClip(St, true, 1.f, FMath::Frac(Player->id * 0.37f) * 2.5f);
+				return;
+			}
+		}
 	// open field locomotion and standing: motion matching (crouched line footwork keeps its blend space)
 	if (DriveMotionMatching(VelWorld, Yaw, DeltaTime, bCrouched)) return;
 	// standing still: play the idle clip itself (the blend space's zero-speed row leaves the rig in its bind pose)
@@ -3428,6 +4490,33 @@ void AAthlete::SetFootball(const FAthleteFootball& InF, float Dt)
 			++GGazeN;
 		}
 	}
+	// -TagHeadLog: a head turned up at the stands (the face's bind forward 25 deg or more over the horizon for 0.3 s),
+	// with what he is playing and what the look layer is aiming at
+	static const bool bHeadLog = FParse::Param(FCommandLine::Get(), TEXT("TagHeadLog"));
+	if (bHeadLog && Player && MHBody->GetSkeletalMeshAsset() && !IsHidden())
+	{
+		const int32 Hi = MHBody->GetBoneIndex(TEXT("head"));
+		if (Hi != INDEX_NONE && MHBody->GetComponentSpaceTransforms().IsValidIndex(Hi))
+		{
+			const FReferenceSkeleton& R = MHBody->GetSkeletalMeshAsset()->GetRefSkeleton();
+			FTransform Ref = FTransform::Identity;
+			for (int32 K = Hi; K != INDEX_NONE; K = R.GetParentIndex(K)) Ref = Ref * R.GetRefBonePose()[K];
+			const FVector G = MHBody->GetComponentTransform().TransformVectorNoScale(
+				MHBody->GetComponentSpaceTransforms()[Hi].GetRotation().RotateVector(Ref.GetRotation().UnrotateVector(FVector(0, 1, 0))));
+			const float Pitch = FMath::RadiansToDegrees(FMath::Atan2(G.Z, G.Size2D()));
+			HeadUpT = Pitch > 25.f ? HeadUpT + Dt : 0.f;
+			HeadUpMax = HeadUpT > 0.f ? FMath::Max(HeadUpMax, Pitch) : 0.f;
+			if (HeadUpT > 0.3f && HeadUpT - Dt <= 0.3f)
+			{
+				const FVector Hd = MHBody->GetSocketLocation(TEXT("head"));
+				const FVector To = LookSmoothed - Hd;
+				UE_LOG(LogTemp, Display, TEXT("TAG head up: #%d %s pitch %.0f anim %s look %.2f(%d) aim %.0f deg %.0f cm presnap %d live %d ball %d | want z %.0f d %.0f, me z %.0f, head z %.0f"),
+					Player->number, ANSI_TO_TCHAR(tag::posName(Player->pos)), Pitch, *TelemetryAnim(), LookA, InF.bLook ? 1 : 0,
+					FMath::RadiansToDegrees(FMath::Atan2(To.Z, FMath::Max(To.Size2D(), 1.0))), To.Size(), InF.bPreSnap ? 1 : 0, InF.bLive ? 1 : 0, InF.bHasBall ? 1 : 0,
+					InF.LookWorld.Z, FVector::Dist2D(InF.LookWorld, Hd), GetActorLocation().Z, Hd.Z);
+			}
+		}
+	}
 	UTagRetargetAnimInstance* I = Cast<UTagRetargetAnimInstance>(MHBody->GetAnimInstance());
 	if (!I) return;
 	auto Ease = [Dt](float& V, float Target, float Rate) { V = FMath::FInterpTo(V, Target, Dt, Rate); };
@@ -3447,9 +4536,18 @@ void AAthlete::SetFootball(const FAthleteFootball& InF, float Dt)
 	// a hand keyed one-shot (catch, handoff, pitch, rush move, ...), a keyed fall or get-up authors its own arms: keep
 	// the procedural tuck / secure / reach off it (they would pull the hands off the catch), ease them back after
 	const bool bKeyedArms = (OneShot && OneShotLeft > 0.f) || bFalling || bGettingUp;
-	Ease(CarryA, F.bHasBall && !F.bSecure && !bThrow && !bKeyedArms ? 1.f : 0.f, bKeyedArms ? 14.f : 6.f);
-	Ease(SecureA, F.bSecure && !bThrow && !bKeyedArms ? 1.f : 0.f, 9.f);
-	Ease(ReachA, F.bReach && !bKeyedArms ? 1.f : 0.f, F.bReach && !bKeyedArms ? 7.f : 10.f);
+	// (and a ball-carrier capture already carries the ball: no procedural tuck over Madden's own)
+	bool bCarryClip = false;
+	if (const UTagMotionMatchInstance* MI = MatchInstance())
+		if (const UAnimationAsset* Ma = MI->bMatch ? MI->GetMatchedAsset() : CurrentClip.Get())
+		{
+			const FString Nm = Ma->GetName();
+			bCarryClip = Nm.Contains(TEXT("_BC_")) && !Nm.Contains(TEXT("NonBC"));
+		}
+	Ease(CarryA, F.bHasBall && !F.bSecure && !bThrow && !bKeyedArms && !bCarryClip ? 1.f : 0.f, bKeyedArms || bCarryClip ? 14.f : 6.f);
+	Ease(SecureA, F.bSecure && !bThrow && !bKeyedArms && !bRepClip ? 1.f : 0.f, 9.f);
+	// (his part of a two-man capture has its hands where the two men put them: no reach over it)
+	Ease(ReachA, F.bReach && !bKeyedArms && !bRepClip ? 1.f : 0.f, F.bReach && !bKeyedArms && !bRepClip ? 7.f : 10.f);
 	Ease(LeanA, F.Lean, 5.f);
 	Ease(StanceA, F.bStance ? 1.f : 0.f, 6.f);
 	Ease(StanceHandA, bHandDown ? 1.f : 0.f, bHandDown ? 6.f : 12.f);
@@ -3463,6 +4561,10 @@ void AAthlete::SetFootball(const FAthleteFootball& InF, float Dt)
 	P.SecureAlpha = SecureA;
 	P.ReachAlpha = ReachA;
 	P.ReachTarget = C.InverseTransformPosition(ReachSmoothed);
+	static const bool bNoKeepOut = FParse::Param(FCommandLine::Get(), TEXT("TagNoKeepOut"));
+	P.KeepOutN = bNoKeepOut ? 0 : KeepOutN;
+	P.bDropFromTravel = GetWorld() && GetWorld()->GetTimeSeconds() < DropTravelUntil;
+	for (int32 k = 0; k < P.KeepOutN; ++k) P.KeepOut[k] = KeepOut[k];
 	P.ReachSpread = F.ReachSpread;
 	P.LeanAlpha = LeanA;
 	P.StanceAlpha = StanceA;
@@ -3471,6 +4573,8 @@ void AAthlete::SetFootball(const FAthleteFootball& InF, float Dt)
 	P.CarryLeanDeg = AA.bNativeAnim ? 0.f : 7.f;
 	P.LookAlpha = LookA;
 	P.LookTarget = C.InverseTransformPosition(LookSmoothed);
+	Ease(LookUpMax, F.bLookHigh ? 45.f : 20.f, 3.f);
+	P.LookUpMaxDeg = LookUpMax;
 	P.ArmSlot = ArmSlot;
 	P.StyleJitter = StyleJitter;
 }
@@ -3489,6 +4593,41 @@ bool AAthlete::GetBallHold(FVector& OutLoc, FRotator& OutRot) const
 	}
 	else
 	{
+		// Madden's own ball socket: the pack rig's RightFootball / LeftFootball joints, a fixed 14 cm off the wrist,
+		// where the captures put the ball in the hand. Tucked, the carrying hand's joint lies along the inside of the
+		// forearm with its Y axis along the arm (probe: Y . forearm 0.92-0.98 on the MG_BC loops). The carrying hand is
+		// the one whose socket is nearer the chest. (The ball sat on our own palm point before, 4-5 cm short of the
+		// socket and off the palm: from outside it read as fused to the hand, Fred 16 Nov.)
+		static const bool bNoSocket = FParse::Param(FCommandLine::Get(), TEXT("TagNoBallSocket"));
+		const int32 RS = MHBody->GetBoneIndex(TEXT("RightFootball")), LS = MHBody->GetBoneIndex(TEXT("LeftFootball"));
+		if (!bNoSocket && RS != INDEX_NONE && LS != INDEX_NONE && MHBody->GetBoneIndex(TEXT("spine_05")) != INDEX_NONE)
+		{
+			const FVector Chest = MHBody->GetSocketLocation(TEXT("spine_05"));
+			const FTransform TR = MHBody->GetBoneTransform(RS), TL = MHBody->GetBoneTransform(LS);
+			// the carrying arm stays tucked while the free one swings: the hands' distances from the chest smoothed over
+			// ~0.4 s, the hand latched until the other is clearly the tucked one (a fresh carry starts from this frame)
+			const float Side = FVector::Dist(TR.GetLocation(), Chest) - FVector::Dist(TL.GetLocation(), Chest); // > 0: the left nearer
+			const uint64 Fr = GFrameCounter;
+			if (BallSideFrame + 1 < Fr) { BallSideEma = Side; bBallLeft = Side > 0.f; }
+			else if (BallSideFrame != Fr)
+			{
+				const float Dt = GetWorld() ? FMath::Clamp(GetWorld()->GetDeltaSeconds(), 0.f, 0.1f) : 1.f / 30.f;
+				BallSideEma += (Side - BallSideEma) * FMath::Min(1.f, Dt / 0.4f);
+				if (bBallLeft ? BallSideEma < -10.f : BallSideEma > 10.f) bBallLeft = !bBallLeft;
+			}
+			BallSideFrame = Fr;
+			// (in the throw the ball is in the throwing hand's grip, fingers on the laces: cocking the arm back put that
+			// hand further from the chest, and the latch handed the ball to the other one)
+			const bool bLeft = IsThrowing() ? false : bBallLeft;
+			const FTransform& T = bLeft ? TL : TR;
+			const FVector Hand = MHBody->GetSocketLocation(bLeft ? TEXT("hand_l") : TEXT("hand_r"));
+			const FVector Elbow = MHBody->GetSocketLocation(bLeft ? TEXT("lowerarm_l") : TEXT("lowerarm_r"));
+			FVector Long = T.GetUnitAxis(EAxis::Y);
+			if (FVector::DotProduct(Long, Hand - Elbow) < 0.f) Long = -Long; // the nose toward the hand
+			OutLoc = T.GetLocation();
+			OutRot = FRotationMatrix::MakeFromXZ(Long, T.GetUnitAxis(EAxis::Z)).Rotator();
+			return true;
+		}
 		// in the right hand: the ball sits on the palm, held between the fingers and the thumb (its centre half a ball
 		// off the palm, toward the thumb's side), long axis along the forearm (tucked: nose up and forward)
 		const FVector Along = (HR - LR).GetSafeNormal();
@@ -3594,4 +4733,74 @@ void AAthlete::SetLabel(const FString& Text)
 {
 	Label->SetVisibility(!Text.IsEmpty());
 	Label->SetText(FText::FromString(Text));
+}
+
+int32 AAthlete::BodySpheres(FVector4f* Out) const
+{
+	USkeletalMeshComponent* M = Visible();
+	if (!M) return 0;
+	int32 N = 0;
+	auto Add = [&](const TCHAR* Bone, const FVector& Off, float R)
+	{
+		if (M->GetBoneIndex(Bone) == INDEX_NONE) return;
+		const FVector W = M->GetBoneTransform(M->GetBoneIndex(Bone)).TransformPosition(Off);
+		Out[N++] = FVector4f(static_cast<float>(W.X), static_cast<float>(W.Y), static_cast<float>(W.Z), R);
+	};
+	Add(TEXT("head"), FVector::ZeroVector, 15.f);   // the helmet
+	Add(TEXT("spine_04"), FVector::ZeroVector, 19.f); // the pads
+	Add(TEXT("pelvis"), FVector::ZeroVector, 16.f);
+	return N;
+}
+
+bool AAthlete::Hands(FVector& L, FVector& R) const
+{
+	USkeletalMeshComponent* M = Visible();
+	if (!M || M->GetBoneIndex(TEXT("hand_l")) == INDEX_NONE || M->GetBoneIndex(TEXT("hand_r")) == INDEX_NONE) return false;
+	L = M->GetBoneLocation(TEXT("hand_l"));
+	R = M->GetBoneLocation(TEXT("hand_r"));
+	return true;
+}
+
+bool AAthlete::BonePair(const TCHAR* Ln, const TCHAR* Rn, FVector& L, FVector& R) const
+{
+	USkeletalMeshComponent* M = Visible();
+	if (!M || M->GetBoneIndex(Ln) == INDEX_NONE || M->GetBoneIndex(Rn) == INDEX_NONE) return false;
+	L = M->GetBoneLocation(Ln);
+	R = M->GetBoneLocation(Rn);
+	return true;
+}
+
+bool AAthlete::Feet(FVector& L, FVector& R) const
+{
+	USkeletalMeshComponent* M = Visible();
+	if (!M || M->GetBoneIndex(TEXT("foot_l")) == INDEX_NONE || M->GetBoneIndex(TEXT("foot_r")) == INDEX_NONE) return false;
+	L = M->GetBoneLocation(TEXT("foot_l"));
+	R = M->GetBoneLocation(TEXT("foot_r"));
+	return true;
+}
+
+float AAthlete::PelvisZ() const
+{
+	USkeletalMeshComponent* M = Visible();
+	return M && M->GetBoneIndex(TEXT("pelvis")) != INDEX_NONE ? static_cast<float>(M->GetBoneLocation(TEXT("pelvis")).Z) : 95.f;
+}
+
+FVector AAthlete::PelvisAt() const
+{
+	USkeletalMeshComponent* M = Visible();
+	return M && M->GetBoneIndex(TEXT("pelvis")) != INDEX_NONE ? M->GetBoneLocation(TEXT("pelvis")) : GetActorLocation();
+}
+
+void AAthlete::BreakFree()
+{
+	if (!bFalling) return;
+	bFalling = false;
+	bGettingUp = false;
+	FallHoldLeft = 0.f;
+	TackledLeft = 0.f;
+	// he goes on from where the capture had him: the gap to the sim's spot is eased off as after any capture
+	VisOffset = (GetActorLocation() - LastSimLoc).GetClampedToMaxSize2D(300.f);
+	VisOffset.Z = 0.f;
+	CurrentClip = nullptr;
+	CurrentAnim.Reset();
 }

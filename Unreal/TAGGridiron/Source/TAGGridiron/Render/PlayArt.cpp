@@ -10,7 +10,7 @@ namespace
 	constexpr float ZGlow = 3.0f;
 	constexpr float ZOutline = 3.3f;
 	constexpr float ZColor = 3.6f;
-	constexpr float OutlineGrow = 9.f;  // cm of dark edge each side of a stroke
+	constexpr float OutlineGrow = 4.f;  // cm of dark edge each side of a stroke
 	const FLinearColor OutlineCol(0.01f, 0.012f, 0.02f, 0.82f);
 
 	FVector2D Perp(const FVector2D& D) { return FVector2D(-D.Y, D.X); }

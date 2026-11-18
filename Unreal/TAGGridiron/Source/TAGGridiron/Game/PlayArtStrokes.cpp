@@ -8,11 +8,16 @@
 
 namespace
 {
-	// play art colours (receivers use their button colours: ButtonColor)
-	const FLinearColor RunPath(1.f, 0.93f, 0.18f);
-	const FLinearColor RunBlockC(1.f, 0.36f, 0.14f);
-	const FLinearColor PassProC(1.f, 0.70f, 0.22f, 0.85f);
-	const FLinearColor QbDrop(0.92f, 0.94f, 1.f, 0.55f);
+	// play art in the style of the current Madden games: thin flat lines on the turf - every route yellow, the first
+	// read's red, the ball carrier's path red, blocking in pale grey with a bar across its end - and the receivers'
+	// button colours on their markers, not on the lines. (The lines were ribbons a yard wide in five colours, with a
+	// halo: they hid the formation they were drawn on.)
+	const FLinearColor RouteC(1.f, 0.95f, 0.12f);
+	const FLinearColor PrimaryC(1.f, 0.13f, 0.10f);
+	const FLinearColor RunPath(1.f, 0.13f, 0.10f);
+	const FLinearColor RunBlockC(0.88f, 0.90f, 0.93f, 0.92f);
+	const FLinearColor PassProC(0.88f, 0.90f, 0.93f, 0.80f);
+	const FLinearColor QbDrop(0.92f, 0.94f, 1.f, 0.45f);
 	const FLinearColor Unlabeled(0.75f, 0.78f, 0.84f);
 	const FLinearColor DeepC(0.18f, 0.46f, 1.f);
 	const FLinearColor FlatC(0.22f, 0.86f, 1.f);
@@ -48,15 +53,55 @@ namespace
 
 std::vector<tag::Ent*> ArtLabelOrder(const tag::PlaySim& P)
 {
-	std::vector<tag::Ent*> Order;
-	for (const std::string& R : P.readOrder)
-		if (tag::Ent* E = P.offRole(R))
-			if (E->state == tag::EntState::Route) Order.push_back(E);
+	// Madden's receiver buttons, by where a man lines up (index = button: 0 CROSS / A, 1 CIRCLE / B, 2 SQUARE / X,
+	// 3 TRIANGLE / Y, 4 R1 / RB): the tight end on CROSS, the wideout on the offense's right on CIRCLE, the one on its
+	// left on SQUARE, the slot on TRIANGLE, the tailback on R1; whoever is left (a second tight end, the fullback, a
+	// fourth wideout) takes a free button. Null where nobody has it.
+	std::vector<tag::Ent*> Slot(5, nullptr);
+	std::vector<tag::Ent*> Eligible;
 	for (tag::Ent* E : P.off)
-		if (E->state == tag::EntState::Route && std::find(Order.begin(), Order.end(), E) == Order.end()) Order.push_back(E);
-	for (tag::Ent* E : P.off)
-		if (E->eligible && std::find(Order.begin(), Order.end(), E) == Order.end()) Order.push_back(E);
-	return Order;
+		if (E->eligible && E != P.qb) Eligible.push_back(E);
+	auto Y = [](const tag::Ent* E) { return E->shiftTo ? E->shiftTo->y : E->pos.y; };
+	auto Take = [&](int32 I, tag::Ent* E)
+	{
+		if (!E || Slot[I] || std::find(Slot.begin(), Slot.end(), E) != Slot.end()) return false;
+		Slot[I] = E;
+		return true;
+	};
+	std::vector<tag::Ent*> Wide, Backs, Ends, Other;
+	for (tag::Ent* E : Eligible)
+	{
+		const std::string& R = E->role;
+		if (R == "RB" || R == "HB") Backs.insert(Backs.begin(), E);
+		else if (R == "FB") Backs.push_back(E);
+		else if (R.rfind("TE", 0) == 0) Ends.push_back(E);
+		else if (R == "X" || R == "Z" || R.rfind("SLOT", 0) == 0 || R.rfind("WR", 0) == 0) Wide.push_back(E);
+		else Other.push_back(E);
+	}
+	if (!Backs.empty()) Take(4, Backs.front());
+	if (!Ends.empty()) Take(0, Ends.front());
+	// the wideouts across the formation: the outermost on each side is the split end / flanker, the rest are slots
+	std::sort(Wide.begin(), Wide.end(), [&](const tag::Ent* A, const tag::Ent* B) { return Y(A) > Y(B); }); // offense's left first
+	const double Mid = P.by;
+	if (!Wide.empty() && Y(Wide.front()) >= Mid) Take(2, Wide.front());
+	if (!Wide.empty() && Y(Wide.back()) < Mid) Take(1, Wide.back());
+	// the slot: the remaining wideout nearest the ball
+	{
+		tag::Ent* Best = nullptr;
+		for (tag::Ent* E : Wide)
+			if (std::find(Slot.begin(), Slot.end(), E) == Slot.end() && (!Best || std::fabs(Y(E) - Mid) < std::fabs(Y(Best) - Mid))) Best = E;
+		Take(3, Best);
+	}
+	// everyone else into the free buttons (TRIANGLE, CROSS, CIRCLE, SQUARE, R1)
+	std::vector<tag::Ent*> Rest;
+	for (tag::Ent* E : Wide) Rest.push_back(E);
+	for (tag::Ent* E : Ends) Rest.push_back(E);
+	for (tag::Ent* E : Backs) Rest.push_back(E);
+	for (tag::Ent* E : Other) Rest.push_back(E);
+	for (tag::Ent* E : Rest)
+		for (int32 I : {3, 0, 1, 2, 4})
+			if (Take(I, E)) break;
+	return Slot;
 }
 
 void BuildArtPicture(const tag::PlaySim& P, bool bOffense, const tag::Ent* PreEnt, const tag::Ent* UserEnt,
@@ -105,10 +150,8 @@ void BuildArtPicture(const tag::PlaySim& P, bool bOffense, const tag::Ent* PreEn
 					Left -= Seg;
 					Last = R;
 				}
-				const int32 L = LabelOf(E);
-				const FLinearColor C = L >= 0 ? ButtonColor(L) : Unlabeled;
 				const bool bPrimary = E->role == First;
-				AddLine(Out, MoveTemp(Pts), C, bPrimary ? 40.f : 32.f, EArtEnd::Arrow, bPrimary || E == PreEnt);
+				AddLine(Out, MoveTemp(Pts), bPrimary ? PrimaryC : RouteC, bPrimary ? 20.f : 18.f, EArtEnd::Arrow, E == PreEnt);
 			}
 			else if (E->state == tag::EntState::PassBlock || E->state == tag::EntState::RunBlock)
 			{
@@ -132,7 +175,7 @@ void BuildArtPicture(const tag::PlaySim& P, bool bOffense, const tag::Ent* PreEn
 				}
 				else
 					To = tag::V2{From.x - 1.3, From.y + (From.y - P.by) * 0.15};  // sets back in his pass set
-				AddLine(Out, {E->pos, To}, bRun ? RunBlockC : PassProC, bRun ? 28.f : 24.f, EArtEnd::Block);
+				AddLine(Out, {E->pos, To}, bRun ? RunBlockC : PassProC, bRun ? 12.f : 11.f, EArtEnd::Block);
 			}
 		}
 		// the quarterback's drop, the run path
@@ -140,7 +183,7 @@ void BuildArtPicture(const tag::PlaySim& P, bool bOffense, const tag::Ent* PreEn
 		{
 			const tag::Formation* F = tag::formationById(Op.formation);
 			const double DropX = P.los - (F ? F->qbDepth : 5.0) - Op.dropDepth.value_or(2.0);
-			if (Q->pos.x - DropX > 0.6) AddLine(Out, {Q->pos, tag::V2{DropX, P.by}}, QbDrop, 22.f, EArtEnd::None);
+			if (Q->pos.x - DropX > 0.6) AddLine(Out, {Q->pos, tag::V2{DropX, P.by}}, QbDrop, 9.f, EArtEnd::None);
 		}
 		if (Op.run)
 		{
@@ -160,7 +203,7 @@ void BuildArtPicture(const tag::PlaySim& P, bool bOffense, const tag::Ent* PreEn
 				Pts.Add(tag::V2{P.los - (bWide ? 1.0 : 0.3), AimY});
 				Pts.Add(tag::V2{P.los + 2.5, AimY + (bWide ? Side * 1.5 : 0)});
 				Pts.Add(tag::V2{P.los + 6.5, AimY + (bWide ? Side * 1.0 : 0)});
-				AddLine(Out, MoveTemp(Pts), RunPath, 44.f, EArtEnd::Arrow, true);
+				AddLine(Out, MoveTemp(Pts), RunPath, 22.f, EArtEnd::Arrow, false);
 			}
 		}
 	}
@@ -182,7 +225,7 @@ void BuildArtPicture(const tag::PlaySim& P, bool bOffense, const tag::Ent* PreEn
 				if (bEdge) Pts.Add(tag::V2{P.los - 1.6, From.y + Out1 * 0.4});
 				const tag::V2 Last = bEdge ? tag::V2{P.los - 1.6, From.y} : From;
 				Pts.Add(tag::add(Qp, tag::scale(tag::norm(tag::sub(Last, Qp)), 1.8)));
-				AddLine(Out, MoveTemp(Pts), RushC, E->isDL ? 26.f : 34.f, EArtEnd::Arrow, !E->isDL || bMe);
+				AddLine(Out, MoveTemp(Pts), RushC, E->isDL ? 14.f : 18.f, EArtEnd::Arrow, bMe);
 				break;
 			}
 			case tag::EntState::Zone:
@@ -199,7 +242,7 @@ void BuildArtPicture(const tag::PlaySim& P, bool bOffense, const tag::Ent* PreEn
 					else if (Z.size() == 2 && Z[0] == 'q') { RX = 6; RY = 6.5; }
 					else if (bFlat) { RX = 4; RY = 5; }
 					AddZone(Out, *E->zoneSpot, RX, RY, C);
-					AddLine(Out, {E->pos, *E->zoneSpot}, C, bMe ? 28.f : 18.f, EArtEnd::None, bMe);
+					AddLine(Out, {E->pos, *E->zoneSpot}, C, bMe ? 16.f : 10.f, EArtEnd::None, bMe);
 				}
 				break;
 			case tag::EntState::Man:
@@ -207,14 +250,14 @@ void BuildArtPicture(const tag::PlaySim& P, bool bOffense, const tag::Ent* PreEn
 				{
 					const tag::V2 Mp = E->man->shiftTo ? *E->man->shiftTo : E->man->pos;
 					const tag::V2 End = tag::add(Mp, tag::scale(tag::norm(tag::sub(From, Mp)), 0.9));
-					AddLine(Out, {E->pos, End}, ManC, bMe ? 28.f : 20.f, EArtEnd::Dot, bMe);
+					AddLine(Out, {E->pos, End}, ManC, bMe ? 16.f : 11.f, EArtEnd::Dot, bMe);
 				}
 				break;
 			case tag::EntState::Spy:
 			{
 				const tag::V2 Spot{FMath::Max(P.los + 4.5, Qp.x + 6), Qp.y};
 				AddZone(Out, Spot, 2.5, 3.5, SpyC);
-				AddLine(Out, {E->pos, Spot}, SpyC, bMe ? 28.f : 20.f, EArtEnd::None, bMe);
+				AddLine(Out, {E->pos, Spot}, SpyC, bMe ? 16.f : 11.f, EArtEnd::None, bMe);
 				break;
 			}
 			default:

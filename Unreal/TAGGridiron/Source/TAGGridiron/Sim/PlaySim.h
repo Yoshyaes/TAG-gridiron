@@ -44,43 +44,73 @@ constexpr double SIM_DT = 1.0 / 60.0;
  *  can override them (SimCalibrate --set name=value) to fit the sim to NFL numbers. Values from Tools/Realism/fit.py
  *  (2026-11-12: 150 games seed 11, validated on 200 games seed 29: loss 18.4 -> 15.2, 15 -> 10 stats out of NFL tolerance). */
 struct Tune {
-  double tackleBase = 3.14;  // tackle success logit base
-  double accBase = 0.3;  // throw placement error: base sd (yd)
-  double accSlope = 0.017648;  // throw placement error: per rating point below 99
+  double tackleBase = 3.24;  // tackle success logit base
+  double accBase = 0.2944;  // throw placement error: base sd (yd)
+  double accMidK = 0.18;     // extra placement error on throws of 12-22 yd (x up to 1 + this)
+  double accSlope = 0.0157;  // throw placement error: per rating point below 99
   double deepErr = 0.01138;  // extra error per air yard past 20
-  double deepReadK = 1.9267;  // QB read penalty for a target past 15 yd
-  double deepReadSlope = 0.16121;  // ... per yard past 15
-  double hotDeepK = 0.90043;  // hot-read penalty for a target past 12 yd
-  double hotDeepSlope = 0.1374;  // ... per yard past 12
-  double manCushion = 2.1;  // man coverage cushion on routes past 8 yd
+  double deepReadK = 1.5;  // QB read penalty for a target past 15 yd
+  double deepReadSlope = 0.16873;  // ... per yard past 15
+  double hotDeepK = 0.73598;  // hot-read penalty for a target past 12 yd
+  double hotDeepSlope = 0.13441;  // ... per yard past 12
+  double manCushion = 1.1;  // man coverage cushion on routes past 8 yd
   double zoneCushion = 3;  // deep zone cushion
   double zoneCushionV = 0.55;  // ... per yd/s of the receiver's speed
   double routeRead = 0.75;  // how far a good cover man plays the route ahead
-  double passProShed = 0.045;  // pass-pro shed hazard base (per s)
-  double qbThresh = 2.6324;  // QB openness bar at the snap
-  double qbDecay = 0.21;  // ... drop per second
+  double zoneEyes = 4;  // yards of pull the quarterback's eyes have on an underneath zone defender (he leans to the receiver being read)
+  double reachA = 14;  // yd/s2 a defender is taken to close on a throw with, in the quarterback's read (0: at once at top speed, the old read)
+  double midContest = 1;  // 0..1: how much of the deep ball's contest radius and tightness a 15 yd throw already has
+  double shortPen = 0;  // how much less open a target under 6 yd looks to the quarterback until shortPenT (he reads downfield first)
+  double shortPenT = 2.2;
+  double zoneReactK = 0.3;  // share of his reaction time a zone defender (eyes on the quarterback) needs to break on a throw
+  double manLagK = 0.6;  // share of the read lag a man defender plays his receiver's moves with
+  double zoneVert = 0;  // 1: a deep zone's cushion goes by the threat's speed upfield, 0: by his speed any way
+  double zoneUnder = 1.2;  // how far under a receiver in his zone an underneath defender sits (yd toward the quarterback)
+  double passProShed = 0.065;  // pass-pro shed hazard base (per s) (0.045 before help blocks, in-order line protection and tackles keeping the edge: pressured back to ~33%)
+  double qbThresh = 3.15;  // QB openness bar at the snap
+  double qbDecay = 0.26;  // ... drop per second
   double qbLate = 0.7;  // ... extra drop per second past 2.5 s
-  double tightDeep = 1.7727;  // catch difficulty from a defender in phase, deep
-  double tightShort = 1.7234;  // ... short
-  double contested = 0.7324;  // catch difficulty of any contested ball
-  double breakdownBase = 1.5;  // pursuit breakdown: speed over the carrier's
+  double tightDeep = 1.9527;  // catch difficulty from a defender in phase, deep
+  double tightShort = 2.51944;  // ... short
+  double contested = 0.45;  // catch difficulty of any contested ball (0.6978 before non-target teammates stopped catching passes thrown past them)
+  double breakdownBase = 1.32;  // pursuit breakdown: speed over the carrier's
   double breakdownK = 1.98;  // ... per yard away
-  double catchKeep = 0.32;  // speed kept through an uncontested catch
+  double catchKeep = 0.55;  // speed kept through an uncontested catch
   double penScale = 1.0324;  // penalty rate multiplier
   double assistRange = 3;  // a closing pursuer this near joins the tackle (yd)
   double tackleReach = 0.44;  // contact reach beyond the two bodies (yd)
-  double pursuitK = 0.69;  // pursuit lead base
+  double pursuitK = 0.97;  // pursuit lead base
   double deepKeep = 1.25;   // how far a deep defender stays over the top of a carrier (1 = 4 yd cap)
+  double behindK = 0.25;   // QB read penalty per yard a man behind the line lacks to get back to it
+  double behindDepthK = 0.3;  // ... and per yard past the first that the catch is behind the line (not on a screen)
+  double screenT = 1.9;       // a screen is thrown once the line has let the rush by (s)
+  double behindHotK = 0.3;    // ... the same on a hot throw
+  double softZone = 0.0;      // how far the underneath zones sink on 2nd/3rd and long (x up to 4 yd)
+  double secondLong = 0.0;    // QB read bonus for a throw short of the sticks on 2nd and 10+
+  double wrapBreak = 0.05;    // a wrapped carrier's chance to tear free mid-drive (before ratings and the stick)
+  double scrambleK = 1.0;     // how readily a quarterback with a lane runs (x; raised to film scrambles)
+  double behindRoom = 3.0; // ... the yards to spare he needs on the nearest defender
   double yacNoise = 2.5;   // a receiver's path-reading noise after the catch (x a back's)
   double runNoise = 1.0;   // a ball carrier's path-reading noise
-  double releaseRate = 8;  // per second: a pass-pro rep breaks up once the ball is caught away from the QB
-  double hotRate = 1.0;   // how readily a QB with a free rusher closing gets rid of it (x the hazard)
-  double outletPen = 0.3; // how much a QB passes up a target at or behind the line
-  double runShed = 0.065;  // run-block shed hazard base (per s)
-  double intBias = 1.344;  // a defender at the ball comes down with it (logit shift; NFL ~2.4% of passes intercepted)
+  double releaseRate = 5;  // per second: a pass-pro rep breaks up once the ball is caught away from the QB
+  double hotRate = 0.5;  // how readily a QB with a free rusher closing gets rid of it (x the hazard)
+  double outletPen = 0.4303; // how much a QB passes up a target at or behind the line
+  double passProHold = 3.8;  // s a pass block holds before it starts to give
+  double setLead = 0.5;  // s ahead of the rusher a pass blocker sets up on his path
+  double setReach = 1.4; // yd beyond touching at which a pass blocker's punch lands (he is engaged)
+  double runShed = 0.0991;  // run-block shed hazard base (per s)
+  double intBias = 0.86;  // a defender at the ball comes down with it (logit shift; NFL ~2.4% of passes intercepted)
   double holdK = 0.06;       // holding: per second of a rep the defender is winning (x how badly)
   double holdShed = 0.003;   // holding: a beaten blocker grabbing as his man gets away
   double aiMoveK = 0.65;     // a CPU ball carrier's move is worth this much of a user's well-timed one (calibrated)
+  double edgeKeep = 9;       // > 0: a tackle keeps his edge rusher while within this many yards of him (0: the old rule)
+  double lineOrder = 1;      // pass protection matches the line to the rushers in order across it (0: nearest first)
+  double stepUp = 1.6;       // the quarterback's step up into the pocket from an edge rush (yd/s of push)
+  double helpPen = 5;        // a pass-pro double team: how much the second blocker takes off the rusher (skill points)
+  double helpBlock = 1;      // a pass blocker with nobody to block helps on the rusher next to him (a double team); 0 off
+  double throwStyle = -1;    // >= 0: the CPU quarterback throws the user's pass types (0 bullet, 1 lob, 2 high, 3 low; a
+                             // man inside 6 yd gets the shovel), for a filmed check (-1: his own calibrated throws)
+  double kickBlock = 0;      // > 0: the chance a punt or field goal is blocked, for a filmed check (0: the real rates)
 };
 Tune& tune();
 /** Set a tune field by name; false if there is none. */
@@ -141,6 +171,8 @@ class Ent {
   double engageEdge = 0;
   double engT = 0;
   double stun = 0;
+  bool kickGunner = false;  // a punt team's gunner: released at the snap
+  double slipT = 0;  // a beaten pass blocker: seconds his rusher still goes past him without bumping
   /** Engaged block: who is winning the rep, from the defender's side (-1 blocker driving him, +1 defender driving
    *  the blocker). Same value on the defender and his blockers; 0 when not engaged. Presentation only. */
   double linePush = 0;
@@ -155,10 +187,16 @@ class Ent {
   std::string routeName;
   /** Pre-snap: walking to a new alignment (a shift, a flipped formation); PlaySim::presnapStep moves him there. */
   std::optional<V2> shiftTo;
+  /** In motion (PlaySim::motion), or a man defender walking across with him: the ball can be snapped while he moves,
+   *  and he keeps his spot and his speed at the snap (a running start). */
+  bool inMotion = false;
+  /** Walking to his spot: the way he faces once he is there (he faces where he walks meanwhile). */
+  std::optional<double> setFace;
   std::string zone;  // "" = no zone
   std::optional<V2> zoneSpot;
   Ent* man = nullptr;
   Ent* blockTarget = nullptr;
+  Ent* snapTarget = nullptr;  // (the man the protection gave him at the snap: diagnostics)
   double pressDelay = 0;
   std::deque<V2> velHist;
   double reactT = 0;
@@ -185,6 +223,17 @@ class Ent {
   bool eligible = false;
   std::vector<Ent*> beatBy;
   double bitFake = 0;
+  /** The trenches, Madden's way: a rusher's energy for his moves (0..1, each move costs it, it comes back slowly) and a
+   *  blocker's power (0..1: worn down by the length of the rep, a pile going backwards and the power moves he takes).
+   *  The user's moves are played against them (PlaySim::rushMove); the CPU's sheds keep the fitted hazard, and its
+   *  failed moves are shown (presentation, off a stable hash: the play's rng is untouched). */
+  double rushEnergy = 1;
+  double blockPower = 1;
+  double moveCd = 0;      // seconds before the next move
+  double stallT = 0;      // a move stoned: the blocker drives him this long
+  std::string lastMove;   // the last move tried, and when, and whether it won
+  double lastMoveT = -9;
+  bool lastMoveWon = false;
 
   const Ratings& r() const { return p->r; }
   double speed() const { return len(vel); }
@@ -210,6 +259,7 @@ struct Ball {
   double t = 0;
   V2 aimNoErr{0, 0};  // where the QB meant the ball to meet the receiver (before his error)
   double flightT = 0;  // planned flight time
+  bool away = false;   // thrown away: nobody on the offense catches it
 };
 
 struct PlayEvent {
@@ -270,9 +320,19 @@ struct PlayResult {
   bool deepContested = false;
   int throwPath = -1;  // what made the QB throw: 0 read, 1 hot (rusher closing), 2 best under pressure, 3 quick game
   double olBlockDepth = -99;  // deepest an offensive lineman was engaged in a block (yards past the LOS)
+  double dblFirstT = -1;      // when the first pass-pro double team formed (-1: none)
+  double dblTeamT = 0;        // seconds a pass rusher had two pass blockers on him (summed over rushers)
+  double manGap[6] = {0, 0, 0, 0, 0, 0}, manGapN[6] = {0, 0, 0, 0, 0, 0};  // man defender to his receiver, each half second from 0.5 s (sum yd, n)
+  double manSpd[6] = {0, 0, 0, 0, 0, 0}, recSpd[6] = {0, 0, 0, 0, 0, 0};   // ... and their speeds
   double catchSep = -1;  // yards from the catcher to the nearest defender at the catch (-1: no catch)
+  double throwSep = -1;  // ... and from the target to the nearest defender when the ball left the hand
+  double arriveSep = -1; // ... and when the ball got there, caught or not (the NGS definition: every target)
+  double flightT = 0;    // seconds the pass was in the air
+  int catchNear = -1;    // who that nearest defender was: 0 the catcher's own man, 1 another man defender, 2 a zone defender, 3 other
   bool thrownAway = false;
   bool pressured = false;
+  std::string pressWhy;  // how the first pressure came: "<near|eta> <shed|unblocked|loose> <role>" (calibration)
+  double pressT = 0;
   double timeToThrow = 0;
   int brokenTackles = 0;
   // fouls from what happened on the field: a blocker beaten and hanging on (holding), a defender playing the man and not
@@ -297,6 +357,16 @@ struct UserInput {
    *  hurdle, the defender's hit stick / cut. stickSide: +1 left, -1 right, 0 = let the sim pick (toward the tackler). */
   Move stickMove = Move::None;
   double stickSide = 0;
+  /** A pass rush move asked for this frame by the user's engaged rusher (consumed by the sim): "swim", "rip", "spin"
+   *  (finesse) or "bull", "club", "longarm" (power). */
+  std::string rushMove;
+  /** The quarterback throws it away (out of bounds, over everyone): consumed by the sim. */
+  bool throwAway = false;
+  /** The pass the user throws (Madden's): 0 bullet (button held), 1 lob / touch (tapped), 2 high (L1), 3 low (L2). A
+   *  throw to a man a few yards away is a shovel whatever was asked. */
+  int passStyle = 0;
+  /** A pump fake (the receiver's button tapped twice): consumed by the sim. */
+  bool pumpFake = false;
 };
 
 /** A live kick return (kickoff or punt), in the RECEIVING team's frame: they are the offense and attack +x. */
@@ -351,6 +421,8 @@ class PlaySim {
   static std::vector<TackleLogEntry>* tackleLog;
 
   explicit PlaySim(const PlayConfig& cfg);
+  /** A number no other play has had (the renderer keys per-play state on it: a new play can reuse the old one's memory). */
+  unsigned long long serial = 0;
   PlaySim(const PlaySim&) = delete;
   PlaySim& operator=(const PlaySim&) = delete;
 
@@ -388,7 +460,7 @@ class PlaySim {
   /** Someone is still walking to his spot (walkFrom / motion / a shift): the formation is not set. */
   bool walking() const {
     for (const Ent* e : ents)
-      if (e->shiftTo) return true;
+      if (e->shiftTo && !e->inMotion) return true;
     return false;
   }
   bool passPlay() const;
@@ -409,12 +481,24 @@ class PlaySim {
   void walkFrom(Ent* e, const V2& from);
   /** Presentation clock before the snap: shifted players walk to their new spots. */
   void presnapStep(double dt);
+  /** The user's engaged rusher tries a move (see Ent::rushEnergy): won, he sheds the block; stoned, he stalls and loses
+   *  more energy. False when he is not engaged or still recovering from the last one. */
+  bool rushMove(Ent* d, const std::string& move);
+  /** After the whistle: a pass dead in the air (out of bounds, past the end line) flies on until it lands. */
+  void coastBall(double dt);
+  /** A punt's two units from the snap to the catch (see PlaySim.cpp). False: the man is left to the ordinary return code. */
+  bool thinkPuntUnit(Ent* e);
+  /** Pre-snap: the user walks his defender to a new spot (stick = direction in the offense frame, length 0..1; a
+   *  jog at full tilt). He stays on his side of the ball, on the field; his assignment runs from where he stands at
+   *  the snap (a rusher's lane, a linebacker's gap, a zone dropped from there, his man followed). */
+  bool userPresnapMove(const V2& stick, double dt);
   /** A deep zone (middle of the field, thirds, halves, quarters), for the play art. */
   static bool deepZone(const std::string& z);
   Ent* carrier = nullptr;
   UserInput input;
   Ent* user = nullptr;
   size_t readIdx = 0;
+  const Ent* qbLook = nullptr;  // the receiver the quarterback is reading now (zone defenders read his eyes)
   double readT = 0;
   bool dropDone = false;
   double dropDoneT = 0;  // sim time the QB hit the top of his drop
@@ -428,15 +512,28 @@ class PlaySim {
     bool lob;
     double at;
     bool away;
+    int style = 0;  // UserInput::passStyle (the CPU throws 0 / 1 by its lob call)
+    bool shovel = false;  // decided as the throw starts (the windup's clip and the flight agree: a back running past
+                          // the quarterback was shovelled to in the clip and thrown to 18 yd downfield in the sim)
   };
   std::optional<PendingThrow> pendingThrow;
   bool pressured = false;
+  std::string pressWhy;
+  double pressT = 0;
+  void notePressure(const Ent* q, const char* how);
   bool scramble = false;
+  double qbThrowFace = 0;  // where the quarterback turned for his throw (the renderer's)
   FoulRisk foulHold, foulDpi, foulDhold, foulRough, foulMask, foulOpi;
   int brokenTackles = 0;
   double catchX = 0;
   double catchSep = -1;
+  double throwSep = -1;
+  double arriveSep = -1;
+  int catchNear = -1;
+  double dblFirstT = -1;
+  double dblTeamT = 0;
   double olBlockDepth = -99;
+  double manGap[6] = {0, 0, 0, 0, 0, 0}, manGapN[6] = {0, 0, 0, 0, 0, 0}, manSpd[6] = {0, 0, 0, 0, 0, 0}, recSpd[6] = {0, 0, 0, 0, 0, 0};
   int throwPath = -1;
   bool firstContact = false;
   const PlayConfig cfg;
@@ -504,7 +601,10 @@ class PlaySim {
   V2 routeWant(const Ent* e, const V2& pos, const V2& vel, size_t& idx) const;
   /** Expected separation (yards) at the catch point if thrown now. */
   double openness(const Ent* r, const Ent* qbEnt) const;
-  void throwBall(Ent* qbEnt, Ent* tgt, bool lob);
+  /** shovelAt: the shovel decided as the throw started (1 / 0), or -1 to decide it at the release. */
+  void throwBall(Ent* qbEnt, Ent* tgt, bool lob, int style = 0, int shovelAt = -1);
+  /** The pass in the air was a shovel (an underhand flip to a man a few yards away): the renderer plays one. */
+  bool shovel = false;
   void throwAway(Ent* qbEnt);
   /** Where the airborne ball reaches catch height (~1.3 yd) on descent. */
   V2 ballLanding() const;
@@ -557,7 +657,9 @@ class PlaySim {
   double rushETA(const Ent* qbEnt) const;
   double laneBlock(const V2& a, const V2& b, const V2& d) const;
   double solveT(double D, double v0, double touch) const;
-  void launch(Ent* qbEnt, const V2& aim, double T, double zTarget);
+  /** z0 / fwd: the release's height and how far in front of him (an overhand ball leaves at 6'2" over his feet; a
+   *  shovel at the waist, out in front - from up there it jumped from the clip's hand to his helmet) */
+  void launch(Ent* qbEnt, const V2& aim, double T, double zTarget, double z0 = 2.05, double fwd = 0.0);
   double dragK() const;
   V3 simulateFlight(const V3& p0, const V3& v0, double T) const;
   void integrate(V3& p, V3& v, double k, double h) const;
@@ -603,6 +705,8 @@ class PlaySim {
     bool dive = false, arm = false;
     double vd = 0, md = 0;
     V2 off{0, 0};        // the tackler's place on the carrier
+    double total = 0;    // the whole drive (yd)
+    bool rolled = false; // his one chance to tear out of it has been taken
   };
   std::optional<Wrap> wrap_;
   void stepWrap(double dt);

@@ -520,9 +520,20 @@ void AStadium::Build(const tag::Team& Home, const tag::Team& Away, const tag::We
 	{
 		// seats on the lowest sideline rows; fans are Mass entities dressed by the crowd sample's appearance pipeline
 		TArray<FTransform> Seats;
-		for (const float Yaw : {90.f, -90.f})
+		// the front rows behind both end zones too, eight deep (-TagEndRows=N, 0 for none): the painted crowd there sits
+		// right behind every touchdown close-up and read as rows of orange discs. The straight run of the end stands,
+		// corners left out. Measured (bench, 1080p, seed 7): 3 sideline rows 485 fans 111 fps; + 3 end rows 780 fans 114;
+		// 8 rows all round 2059 fans 106 (1% low 62); 12 rows 3073 fans 92
+		static int32 EndRows = FParse::Value(FCommandLine::Get(), TEXT("TagEndRows="), EndRows) ? FMath::Clamp(EndRows, 0, 16) : 8;
+		TArray<float> Yaws{90.f, -90.f};
+		if (EndRows > 0) { Yaws.Add(0.f); Yaws.Add(180.f); }
+		for (const float Yaw : Yaws)
 		{
-			const FVector C(50 * YD, Yaw > 0 ? SideY : -SideY, 0);
+			const bool bEnd = Yaw == 0.f || Yaw == 180.f;
+			// yd either side of the stand's middle: the straight run of each stand (the sidelines stopped at the 16s, and the
+			// stands level with the end zones were the painted crowd)
+			const double Span = (bEnd ? BowlSideY - BowlCornerR : BowlHalfX - BowlCornerR) / YD - 1.0;
+			const FVector C = bEnd ? FVector(50 * YD + (Yaw == 0.f ? BowlHalfX : -BowlHalfX), 0, 0) : FVector(50 * YD, Yaw > 0 ? SideY : -SideY, 0);
 			const FVector Fwd = FRotator(0, Yaw, 0).Vector();
 			const FVector Side = FRotator(0, Yaw + 90, 0).Vector();
 			const float P = FMath::DegreesToRadians(33.f);
@@ -531,12 +542,56 @@ void AStadium::Build(const tag::Team& Home, const tag::Team& Away, const tag::We
 			const FVector DeckC = C + Fwd * 1600 + FVector(0, 0, 1050);
 			const float FaceYaw = (-Fwd).Rotation().Yaw;
 			FRandomStream Rand(static_cast<int32>(Yaw) + 11);
-			for (int32 Row = 0; Row < 3; ++Row)
-				for (double T = -34.0 * YD; T <= 34.0 * YD; T += 72.0)
+			// (-TagFanRows=N along the sidelines: past the three on the plain slope the rows stand on the seating steps, one
+			// a tread - a close-up sees ten rows or more, and above the third the painted crowd shows)
+			static int32 SideRows = FParse::Value(FCommandLine::Get(), TEXT("TagFanRows="), SideRows) ? FMath::Clamp(SideRows, 1, 16) : 3;
+			const int32 FanRows = bEnd ? EndRows : SideRows;
+			const double StepTread = (1450.0 / 16.0) * FMath::Cos(P), StepRise = (1450.0 / 16.0) * FMath::Sin(P);
+			const FVector StepBase = C + Fwd * (1600.0 + FMath::Cos(P) * 3600.0 * (0.1 - 0.5) - FMath::Sin(P) * 25.0) + FVector(0, 0, 1050.0 + FMath::Sin(P) * 3600.0 * (0.1 - 0.5) + FMath::Cos(P) * 25.0);
+			for (int32 Row = 0; Row < FanRows; ++Row)
+				for (double T = -Span * YD; T <= Span * YD; T += 72.0)
 				{
 					if (Rand.FRand() < 0.1f) continue;
-					const FVector Feet = DeckC + SlopeF * (120.0 + Row * 92.0 - 1800.0) + SlopeU * 25.0 + Side * (T + Rand.FRandRange(-10, 10));
+					const FVector OnRow = Row < 3 ? DeckC + SlopeF * (120.0 + Row * 92.0 - 1800.0) + SlopeU * 25.0
+						: StepBase + Fwd * ((Row - 3 + 0.5) * StepTread) + FVector(0, 0, (Row - 3 + 1) * StepRise);
+					const FVector Feet = OnRow + Side * (T + Rand.FRandRange(-10, 10));
 					Seats.Add(FTransform(FRotator(0, FaceYaw + Rand.FRandRange(-14, 14), 0), GetActorTransform().TransformPosition(Feet)));
+				}
+		}
+		// the four corners, round the bowl's arcs (-TagCornerRows=N, default 3): the same rows, out from the curved front
+		// edge, facing in to the arc's centre
+		{
+			static int32 CornerRows = FParse::Value(FCommandLine::Get(), TEXT("TagCornerRows="), CornerRows) ? FMath::Clamp(CornerRows, 0, 16) : 3;
+			const double P = FMath::DegreesToRadians(33.0);
+			const double StepTread = (1450.0 / 16.0) * FMath::Cos(P), StepRise = (1450.0 / 16.0) * FMath::Sin(P);
+			auto RowXZ = [&](int32 Row) -> FVector2D
+			{
+				// (out from the front edge, up): as the straight stands place them
+				if (Row < 3)
+				{
+					const double S = 120.0 + Row * 92.0 - 1800.0;
+					return FVector2D(1600.0 + FMath::Cos(P) * S - FMath::Sin(P) * 25.0, 1050.0 + FMath::Sin(P) * S + FMath::Cos(P) * 25.0);
+				}
+				const FVector2D Base(1600.0 + FMath::Cos(P) * 3600.0 * (0.1 - 0.5) - FMath::Sin(P) * 25.0, 1050.0 + FMath::Sin(P) * 3600.0 * (0.1 - 0.5) + FMath::Cos(P) * 25.0);
+				return Base + FVector2D((Row - 3 + 0.5) * StepTread, (Row - 3 + 1) * StepRise);
+			};
+			const double X0 = 50 * YD - BowlHalfX, X1 = 50 * YD + BowlHalfX, Rc = BowlCornerR;
+			const FVector2D Cc[4] = {{X1 - Rc, SideY - Rc}, {X0 + Rc, SideY - Rc}, {X0 + Rc, -SideY + Rc}, {X1 - Rc, -SideY + Rc}};
+			FRandomStream Rand(29);
+			for (int32 q = 0; q < 4; ++q)
+				for (int32 Row = 0; Row < CornerRows; ++Row)
+				{
+					const FVector2D Xz = RowXZ(Row);
+					const double R = Rc + Xz.X, Arc = R * UE_HALF_PI;
+					const int32 N = FMath::Max(1, FMath::FloorToInt(Arc / 72.0));
+					for (int32 k = 0; k < N; ++k)
+					{
+						if (Rand.FRand() < 0.1f) continue;
+						const double Phi = (q + (k + 0.5 + Rand.FRandRange(-0.12f, 0.12f)) / N) * UE_HALF_PI;
+						const FVector Feet(Cc[q].X + R * FMath::Cos(Phi), Cc[q].Y + R * FMath::Sin(Phi), Xz.Y);
+						const float Face = static_cast<float>(FMath::RadiansToDegrees(Phi)) + 180.f;
+						Seats.Add(FTransform(FRotator(0, Face + Rand.FRandRange(-14, 14), 0), GetActorTransform().TransformPosition(Feet)));
+					}
 				}
 		}
 		// model pack spectators when the pack characters are in (one skeletal mesh per fan on the 29 bone crowd rig,
@@ -1190,8 +1245,8 @@ void AStadium::BuildOfficials()
 	{
 		USceneComponent* R = Rig(k ? TEXT("ChainFront") : TEXT("ChainRear"));
 		(k ? ChainFront : ChainRear) = R;
-		if (A.bHero && A.HeroOf(TEXT("Crew"), [](const FHeroItem& I) { return I.Name.Contains(TEXT("chaingangscrimage")); }).Num())
-			continue; // the model pack's rod men carry their own rods (the down box stays: it shows the down)
+		// (the model pack's rod men come with a rod skinned to one finger and modelled lying across the body: it swung
+		// with the hand and rendered as a slanted 2.4 m bar. hero_build strips it (strip_prop) and these stand instead.)
 		Part(R, A.Cylinder, FVector(0, -30, 122), FVector(0.04, 0.04, 2.44), Black, 0.5f);
 		Part(R, A.Cylinder, FVector(0, -30, 236), FVector(0.16, 0.16, 0.3), Orange, 0.6f);
 	}

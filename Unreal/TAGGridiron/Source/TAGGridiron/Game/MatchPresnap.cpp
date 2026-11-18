@@ -171,6 +171,41 @@ void AMatchDirector::EndPresnapUI()
 		It = It->first->state == tag::EntState::Route ? std::next(It) : Labels.erase(It);
 }
 
+void AMatchDirector::PlayAudibleCue(bool bOffense, bool bSignal)
+{
+	if (!Sim || !Game) return;
+	const FAthleteAssets& AA = FAthleteAssets::Get();
+	const tag::TeamKey OffK = Game->poss;
+	auto Ath = [&](const tag::Ent* E) { return AthleteFor(E->p, E->side == tag::Side::Off ? OffK : tag::other(OffK)); };
+	if (bOffense)
+	{
+		if (Sim->qb)
+			if (AAthlete* Q = Ath(Sim->qb))
+			{
+				const bool bGun = Sim->qb->pos.x < Sim->los - 2.5;
+				UAnimSequence* C = bSignal && AA.QBSignal.IsValid() && bGun ? AA.QBSignal.Get() : bGun ? AA.QBAudibleGun.Get() : AA.QBAudibleUnder.Get();
+				if (C) Q->PlayOneShot(C);
+			}
+		if (bSignal) return; // (a hot route is between the quarterback and his receiver)
+		// the men who hear it look up and settle again: the back beside him, and across the line the linebackers
+		for (const tag::Ent* E : Sim->off)
+			if (E != Sim->qb && (E->p->pos == tag::Pos::RB || E->p->pos == tag::Pos::FB) && AA.HBAudible.IsValid())
+				if (AAthlete* A = Ath(E)) A->PlayOneShot(AA.HBAudible.Get());
+		for (const tag::Ent* E : Sim->def)
+			if (E->p->pos == tag::Pos::LB && AA.LBHearsAudible.IsValid())
+				if (AAthlete* A = Ath(E)) A->PlayOneShot(AA.LBHearsAudible.Get());
+	}
+	else
+	{
+		// the defense's call: the linebacker nearest the middle signals it
+		const tag::Ent* Mike = nullptr;
+		for (const tag::Ent* E : Sim->def)
+			if (E->p->pos == tag::Pos::LB && (!Mike || FMath::Abs(E->pos.y - Sim->by) < FMath::Abs(Mike->pos.y - Sim->by))) Mike = E;
+		if (Mike && AA.LBDefAudible.IsValid())
+			if (AAthlete* A = Ath(Mike)) A->PlayOneShot(AA.LBDefAudible.Get());
+	}
+}
+
 void AMatchDirector::RebuildPlay(const tag::OffPlay* Op, const tag::DefCall* Dc, bool bFlip)
 {
 	tag::Game& G = *Game;
@@ -222,7 +257,9 @@ void AMatchDirector::TickPresnap(float Dt)
 	Sim->presnapStep(Dt);
 	APlayerController* PC = GetWorld()->GetFirstPlayerController();
 	const bool bOff = UserOff(), bDef = UserDef();
-	if (PC && (bOff || bDef))
+	// the button that picked the play is not a pre-snap call: nothing is read for the first third of a second (SQUARE
+	// picks a play on the call screen and opens the audible list here - the list came up on its own)
+	if (PC && (bOff || bDef) && PresnapClock > 0.35f)
 	{
 		auto Hit = [&](std::initializer_list<FKey> Ks)
 		{
@@ -241,6 +278,11 @@ void AMatchDirector::TickPresnap(float Dt)
 		const bool kLeft = Hit({EKeys::Gamepad_DPad_Left, EKeys::Left});
 		const bool kRight = Hit({EKeys::Gamepad_DPad_Right, EKeys::Right});
 		const bool kBack = Hit({EKeys::Gamepad_LeftTrigger, EKeys::BackSpace});
+		// R3 (F1): hide / show the pre-play panel (kept for the plays after)
+		if (Hit({EKeys::Gamepad_RightThumbstick, EKeys::F1}))
+		{
+			bPresnapPanelHidden = !bPresnapPanelHidden; // (no toast: it sat big in the middle of the field)
+		}
 		// a receiver by his button (cross, circle, square, triangle, R1 / keys 1-5)
 		auto Receiver = [&]() -> tag::Ent*
 		{
@@ -257,26 +299,43 @@ void AMatchDirector::TickPresnap(float Dt)
 		const tag::DefCall* Dc = Sim->cfg.defCall;
 		const tag::OffPlay* Op = Sim->cfg.offPlay;
 		const EPre Mode = PreMode;
+		const float StickX = PC->GetInputAnalogKeyState(EKeys::Gamepad_RightX) + (PC->WasInputKeyJustPressed(EKeys::RightBracket) ? 1.f : 0.f) - (PC->WasInputKeyJustPressed(EKeys::LeftBracket) ? 1.f : 0.f);
 		auto Use = [&] { bPreConsumed = true; };
 		if (bOff)
 		{
 			switch (Mode)
 			{
 			case EPre::Base:
-				if (kTri)
+				// a flick of the right stick sends a run the other way (the play flipped at the line, the quarterback
+				// calling it out)
+				if (Op && Op->run && FMath::Abs(StickX) > 0.65f && FMath::Abs(PrevStickX) < 0.4f)
+				{
+					Use();
+					const int32 Want = (StickX > 0.f ? 1 : -1) * RS;                       // the offense's +y (its left) is +1
+					const double Now = Op->run->aimDy * (Sim->cfg.flip ? -1.0 : 1.0);
+					if (FMath::Abs(Now) < 0.05 || (Now > 0 ? 1 : -1) != Want)
+					{
+						RebuildPlay(Op, Dc, !Sim->cfg.flip);
+						PlayAudibleCue(true);
+					}
+					Overlay->Toast(StickX > 0.f ? TEXT("Run right") : TEXT("Run left"));
+				}
+				else if (kTri)
 				{
 					Use();
 					if (Sim->passPlay()) PreMode = EPre::HotPick;
 					else Overlay->Toast(TEXT("No hot routes on a run: audible to a pass"));
 				}
 				else if (kSquare) { Use(); PreMode = EPre::Audible; AudibleSel = 0; }
-				else if (kDown)
+				else if (kL1 || kDown)
 				{
+					// pass protection (Madden: L1)
 					Use();
 					if (Sim->passPlay()) PreMode = EPre::Protect;
 					else Overlay->Toast(TEXT("Protection calls are for pass plays"));
 				}
-				else if (kLeft || kRight) { Use(); PreMode = EPre::MotionPick; }
+				else if (kCircle || kLeft || kRight) { Use(); PreMode = EPre::MotionPick; } // motion (Madden: CIRCLE, then the man)
+				else if (kR1) { Use(); PlayFakeSnap(); } // fake snap (Madden: R1)
 				break;
 			case EPre::HotPick:
 			case EPre::MotionPick:
@@ -308,7 +367,7 @@ void AMatchDirector::TickPresnap(float Dt)
 				if (!To.empty())
 				{
 					Use();
-					if (Sim->hotRoute(PreEnt, To))
+					if (Sim->hotRoute(PreEnt, To) && (PlayAudibleCue(true, true), true))
 					{
 						Sim->previewBlocks();
 						Overlay->Toast(FString::Printf(TEXT("Hot route: %s  %s"), *S(PreEnt->role), *RouteName(To)));
@@ -319,18 +378,26 @@ void AMatchDirector::TickPresnap(float Dt)
 				break;
 			}
 			case EPre::Motion:
+			{
 				if (!PreEnt) { PreMode = EPre::Base; break; }
-				if (kLeft || kRight)
+				// the left stick flicked left / right (Madden), or the D-pad
+				const float LSX = PC->GetInputAnalogKeyState(EKeys::Gamepad_LeftX);
+				const bool bFlickR = LSX > 0.7f && PrevMotionX <= 0.7f, bFlickL = LSX < -0.7f && PrevMotionX >= -0.7f;
+				PrevMotionX = LSX;
+				const bool kMR = kRight || bFlickR, kML = kLeft || bFlickL;
+				if (kMR || kML)
 				{
 					Use();
-					if (Sim->motion(PreEnt, (kRight ? RS : -RS) * 4.0))
+					if (Sim->motion(PreEnt, (kMR ? RS : -RS) * 4.0))
 					{
 						Sim->previewBlocks();
 						Overlay->Toast(FString::Printf(TEXT("Motion: %s"), *S(PreEnt->role)));
 					}
 				}
-				else if (kCross || kCircle) { Use(); PreMode = EPre::Base; PreEnt = nullptr; }
+				else if (kCircle) { Use(); PreMode = EPre::MotionPick; PreEnt = nullptr; } // another man
+				else if (kCross) { PreMode = EPre::Base; PreEnt = nullptr; }             // (not used: CROSS snaps, the man still moving)
 				break;
+			}
 			case EPre::Protect:
 				if (kLeft || kRight) { Use(); Sim->setProtection(kRight ? RS : -RS, Sim->maxProtect); }
 				else if (kUp) { Use(); Sim->setProtection(Sim->slide, !Sim->maxProtect); }
@@ -348,13 +415,15 @@ void AMatchDirector::TickPresnap(float Dt)
 					Use();
 					const tag::OffPlay* To = L[FMath::Clamp(AudibleSel, 0, static_cast<int32>(L.size()) - 1)];
 					RebuildPlay(To, Dc, Sim->cfg.flip);
+					PlayAudibleCue(true);
 					Overlay->Toast(FString::Printf(TEXT("Audible: %s"), *S(To->name)));
 					PreMode = EPre::Base;
 				}
-				else if (kL1)
+				else if (kR1 || kL1)
 				{
 					Use();
 					RebuildPlay(Op, Dc, !Sim->cfg.flip);
+					PlayAudibleCue(true);
 					Overlay->Toast(TEXT("Flip play"));
 					PreMode = EPre::Base;
 				}
@@ -371,15 +440,45 @@ void AMatchDirector::TickPresnap(float Dt)
 			using LA = tag::PlaySim::LineAdj;
 			using SA = tag::PlaySim::ShellAdj;
 			using DA = tag::PlaySim::DefAssign;
+			// the left stick (W A S D) walks the man you have anywhere on your side of the ball, as in Madden: a
+			// linebacker walked down into a gap, a safety rolled over the top, an end kicked out wide. Screen-relative,
+			// as the stick reads in the play.
+			{
+				float MX = 0.f, MY = 0.f;
+				if (PC->IsInputKeyDown(EKeys::W)) MY += 1.f;
+				if (PC->IsInputKeyDown(EKeys::S)) MY -= 1.f;
+				if (PC->IsInputKeyDown(EKeys::D)) MX += 1.f;
+				if (PC->IsInputKeyDown(EKeys::A)) MX -= 1.f;
+				const float GX = PC->GetInputAnalogKeyState(EKeys::Gamepad_LeftX), GY = PC->GetInputAnalogKeyState(EKeys::Gamepad_LeftY);
+				if (FMath::Abs(GX) + FMath::Abs(GY) > 0.2f) { MX = GX; MY = GY; }
+				FVector Fw = CamLook - CamPos;
+				Fw.Z = 0;
+				Fw.Normalize();
+				const FVector Rt(-Fw.Y, Fw.X, 0);
+				const FVector Wv = (Rt * MX + Fw * MY).GetClampedToMaxSize(1.f);
+				const tag::V2 Stick = Dir > 0 ? tag::V2{Wv.X, -Wv.Y} : tag::V2{-Wv.X, Wv.Y};
+				if (Sim->userPresnapMove(Stick, Dt) && !bPreMoved)
+				{
+					bPreMoved = true;
+					Sim->previewBlocks();
+				}
+				else if (bPreMoved && Wv.IsNearlyZero())
+				{
+					bPreMoved = false;
+					Sim->previewBlocks(); // (the line re-sets its blocking against where he settled)
+				}
+			}
 			switch (Mode)
 			{
 			case EPre::Base:
+				// Madden 26 pre-play defense: SQUARE audible, TRIANGLE coverage audibles, CROSS defensive hot route,
+				// CIRCLE switch player (the D-pad keeps the line and linebacker shifts)
 				if (kSquare) { Use(); PreMode = EPre::Audible; AudibleSel = 0; }
-				else if (kTri) { Use(); PreMode = EPre::Assign; }
+				else if (kCross) { Use(); PreMode = EPre::Assign; }
 				else if (kUp) { Use(); PreMode = EPre::DLine; }
 				else if (kLeft) { Use(); PreMode = EPre::LBs; }
-				else if (kRight) { Use(); PreMode = EPre::Shell; }
-				else if (kL1) { Use(); Sim->switchUser(); }
+				else if (kTri || kRight) { Use(); PreMode = EPre::Shell; }
+				else if (kL1 || kCircle) { Use(); Sim->switchUser(); }
 				break;
 			case EPre::DLine:
 			case EPre::LBs:
@@ -444,6 +543,7 @@ void AMatchDirector::TickPresnap(float Dt)
 					Use();
 					const tag::DefCall* To = L[FMath::Clamp(AudibleSel, 0, static_cast<int32>(L.size()) - 1)];
 					RebuildPlay(Op, To, Sim->cfg.flip);
+					PlayAudibleCue(false);
 					Overlay->Toast(FString::Printf(TEXT("Audible: %s"), *S(To->name)));
 					PreMode = EPre::Base;
 				}
@@ -456,9 +556,10 @@ void AMatchDirector::TickPresnap(float Dt)
 			}
 		}
 	}
+	if (PC) PrevStickX = PC->GetInputAnalogKeyState(EKeys::Gamepad_RightX);
 	// the art: hold R2 (Q), and while any pre-snap menu is open; it also shows itself briefly as the play comes in
 	ArtAuto -= Dt;
-	const bool bHold = PC && (PC->IsInputKeyDown(EKeys::Gamepad_RightTrigger) || PC->IsInputKeyDown(EKeys::Q));
+	const bool bHold = PC && (PC->IsInputKeyDown(EKeys::Gamepad_LeftTrigger) || PC->IsInputKeyDown(EKeys::Gamepad_RightTrigger) || PC->IsInputKeyDown(EKeys::Q));
 	const bool bShow = (bOff || bDef) && (bHold || ArtAuto > 0.f || PreMode != EPre::Base);
 	if (bHold) ArtAuto = 0.f;
 	if (PlayArt)
@@ -477,10 +578,24 @@ void AMatchDirector::RefreshPresnapPanel()
 		Overlay->ClearPresnapPanel();
 		return;
 	}
+	// hidden by the player (R3 / F1) on the base screen: the menus he opens still show theirs
+	if (bPresnapPanelHidden && PreMode == EPre::Base)
+	{
+		// a small tag in the panel's corner instead, saying how to bring it back
+		using G = EPadGlyph;
+		TArray<FPreRow> Tag;
+		FPreRow X;
+		X.Glyph = G::None;
+		X.Key = PadUI() ? TEXT("R3") : TEXT("F1");
+		X.Label = TEXT("Show controls");
+		Tag.Add(X);
+		Overlay->SetPresnapPanel(FString(), FString(), Tag, PadUI());
+		return;
+	}
 	// holding R2 on the base screen: the field to itself (the menus keep their panel)
 	if (PreMode == EPre::Base)
 		if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
-			if (PC->IsInputKeyDown(EKeys::Gamepad_RightTrigger) || PC->IsInputKeyDown(EKeys::Q))
+			if (PC->IsInputKeyDown(EKeys::Gamepad_LeftTrigger) || PC->IsInputKeyDown(EKeys::Gamepad_RightTrigger) || PC->IsInputKeyDown(EKeys::Q))
 			{
 				Overlay->ClearPresnapPanel();
 				return;
@@ -519,24 +634,29 @@ void AMatchDirector::RefreshPresnapPanel()
 			Title = S(Op.name);
 			Sub = FString::Printf(TEXT("%s  -  %s"), *S(tag::formationById(Op.formation) ? tag::formationById(Op.formation)->name : Op.formation),
 				Sim->cfg.flip ? TEXT("flipped") : TEXT("as called"));
-			Row(G::R2, TEXT("Show play art (hold)"));
+			Row(G::L2, TEXT("Show play art (hold)"), false, TEXT("Q"));
 			if (Sim->passPlay()) Row(G::Triangle, TEXT("Hot route"));
 			Row(G::Square, TEXT("Audible / flip play"));
-			if (Sim->passPlay()) Row(G::DDown, Sim->slide || Sim->maxProtect ? TEXT("Protection (adjusted)") : TEXT("Protection"), Sim->slide || Sim->maxProtect);
-			Row(G::DLeft, TEXT("Motion"));
+			if (!Sim->passPlay()) Row(G::None, TEXT("Flip the run"), false, PadUI() ? TEXT("R-STICK") : TEXT("[ ]"));
+			if (Sim->passPlay()) Row(G::L1, Sim->slide || Sim->maxProtect ? TEXT("Pass protection (adjusted)") : TEXT("Pass protection"), Sim->slide || Sim->maxProtect);
+			Row(G::Circle, TEXT("Motion"));
+			Row(G::R1, TEXT("Fake snap"));
 			Row(G::Cross, TEXT("Snap"));
+			Row(G::None, TEXT("Hide these controls"), false, PadUI() ? TEXT("R3") : TEXT("F1"));
 		}
 		else
 		{
 			Title = S(Dc.name);
 			Sub = FString::Printf(TEXT("You: %s"), Sim->user ? *PlayerTag(Sim->user) : TEXT(""));
-			Row(G::R2, TEXT("Show play art (hold)"));
-			Row(G::Square, TEXT("Coverage audible"));
-			Row(G::Triangle, TEXT("Your assignment"));
+			Row(G::L2, TEXT("Show play art (hold)"), false, TEXT("Q"));
+			Row(G::Square, TEXT("Audible"));
+			Row(G::Triangle, TEXT("Coverage audibles"), Sim->shellAdj != tag::PlaySim::ShellAdj::Base);
+			Row(G::Cross, TEXT("Defensive hot route"));
 			Row(G::DUp, TEXT("D-line shift"), Sim->dlAdj != tag::PlaySim::LineAdj::Base);
 			Row(G::DLeft, TEXT("Linebacker shift"), Sim->lbAdj != tag::PlaySim::LineAdj::Base);
-			Row(G::DRight, TEXT("Coverage shell"), Sim->shellAdj != tag::PlaySim::ShellAdj::Base);
-			Row(G::L1, TEXT("Switch player"));
+			Row(G::Circle, TEXT("Switch player"));
+			Row(G::None, TEXT("Move your player"), bPreMoved, PadUI() ? TEXT("L-STICK") : TEXT("WASD"));
+			Row(G::None, TEXT("Hide these controls"), false, PadUI() ? TEXT("R3") : TEXT("F1"));
 		}
 		break;
 	case EPre::HotPick:
@@ -573,9 +693,9 @@ void AMatchDirector::RefreshPresnapPanel()
 		{
 			Title = FString::Printf(TEXT("MOTION  -  %s"), *S(PreEnt->role));
 			Sub = PlayerTag(PreEnt);
-			Row(G::DLeft, TEXT("Motion left"));
-			Row(G::DRight, TEXT("Motion right"));
-			Row(G::Cross, TEXT("Done"));
+			Row(G::None, TEXT("Send him left / right"), false, PadUI() ? TEXT("L-STICK") : TEXT("< >"));
+			Row(G::Circle, TEXT("Another man"));
+			Row(G::Cross, TEXT("Snap"));
 		}
 		break;
 	case EPre::Protect:
@@ -596,7 +716,7 @@ void AMatchDirector::RefreshPresnapPanel()
 			for (int32 i = 0; i < static_cast<int32>(L.size()); ++i)
 				Row(i == AudibleSel ? G::Cross : G::None, FString::Printf(TEXT("%s   (%s)"), *S(L[i]->name), *S(tag::playTypeName(L[i]->type))), i == AudibleSel,
 					i == AudibleSel ? TEXT("ENTER") : TEXT(""));
-			Row(G::L1, Sim->cfg.flip ? TEXT("Flip play (back as called)") : TEXT("Flip play"));
+			Row(G::R1, Sim->cfg.flip ? TEXT("Flip play (back as called)") : TEXT("Flip play"));
 			Row(G::Circle, TEXT("Back"));
 		}
 		else
@@ -976,7 +1096,7 @@ void AMatchDirector::TickPadTest(float Dt)
 	{
 		switch (ArtStep)
 		{
-		case 0: if (At(3.0f)) { PadCheck(!Shown(), TEXT("offense: art hidden once the intro is over")); PadPress(EKeys::Gamepad_RightTrigger, 1.5f); Next(); } break;
+		case 0: if (At(3.0f)) { PadCheck(!Shown(), TEXT("offense: art hidden once the intro is over")); PadPress(EKeys::Gamepad_LeftTrigger, 1.5f); Next(); } break;
 		case 1:
 			if (At(3.25f) && !bArtDrawShot)
 			{
@@ -984,9 +1104,9 @@ void AMatchDirector::TickPadTest(float Dt)
 				bArtDrawShot = true;
 				FScreenshotRequest::RequestScreenshot(TEXT("tag_pad_drawin.png"), true, false);
 			}
-			if (At(3.6f)) { PadCheck(Shown(), TEXT("offense: holding R2 shows the play art")); FScreenshotRequest::RequestScreenshot(TEXT("tag_pad_r2.png"), true, false); Next(); }
+			if (At(3.6f)) { PadCheck(Shown(), TEXT("offense: holding L2 shows the play art")); FScreenshotRequest::RequestScreenshot(TEXT("tag_pad_r2.png"), true, false); Next(); }
 			break;
-		case 2: if (At(5.2f)) { PadCheck(!Shown(), TEXT("offense: letting go of R2 hides it")); PadPress(EKeys::Gamepad_FaceButton_Top); Next(); } break;
+		case 2: if (At(5.2f)) { PadCheck(!Shown(), TEXT("offense: letting go of L2 hides it")); PadPress(EKeys::Gamepad_FaceButton_Top); Next(); } break;
 		case 3: if (At(5.5f)) { PadCheck(PreMode == EPre::HotPick, TEXT("triangle opens hot routes")); PadPress(EKeys::Gamepad_FaceButton_Right); Next(); } break;
 		case 4:
 			if (At(5.8f))
@@ -1030,15 +1150,15 @@ void AMatchDirector::TickPadTest(float Dt)
 			if (At(7.6f))
 			{
 				PadCheck(Sim->cfg.offPlay != SavedOp && PreMode == EPre::Base && State == EMatchState::Presnap, TEXT("cross calls the audible without snapping"));
-				if (Sim->passPlay()) PadPress(EKeys::Gamepad_DPad_Down);
+				if (Sim->passPlay()) PadPress(EKeys::Gamepad_LeftShoulder);
 				else ArtStep = 12;  // a run: no protection calls
 				Next();
 			}
 			break;
-		case 11: if (At(7.9f)) { PadCheck(PreMode == EPre::Protect, TEXT("D-pad down opens protection")); PadPress(EKeys::Gamepad_DPad_Left); Next(); } break;
+		case 11: if (At(7.9f)) { PadCheck(PreMode == EPre::Protect, TEXT("L1 opens pass protection")); PadPress(EKeys::Gamepad_DPad_Left); Next(); } break;
 		case 12: if (At(8.2f)) { PadCheck(Sim->slide != 0, TEXT("D-pad left slides the line")); PadPress(EKeys::Gamepad_FaceButton_Right); Next(); } break;
-		case 13: if (At(8.5f)) { PadCheck(PreMode == EPre::Base, TEXT("back to the base screen")); PadPress(EKeys::Gamepad_DPad_Right); Next(); } break;
-		case 14: if (At(8.8f)) { PadCheck(PreMode == EPre::MotionPick, TEXT("D-pad right opens motion")); PadPress(EKeys::Gamepad_FaceButton_Bottom); Next(); } break;
+		case 13: if (At(8.5f)) { PadCheck(PreMode == EPre::Base, TEXT("back to the base screen")); PadPress(EKeys::Gamepad_FaceButton_Right); Next(); } break;
+		case 14: if (At(8.8f)) { PadCheck(PreMode == EPre::MotionPick, TEXT("circle opens motion")); PadPress(EKeys::Gamepad_FaceButton_Bottom); Next(); } break;
 		case 15:
 			if (At(9.1f))
 			{
@@ -1053,15 +1173,7 @@ void AMatchDirector::TickPadTest(float Dt)
 			{
 				const double Y = PreEnt ? (PreEnt->shiftTo ? PreEnt->shiftTo->y : PreEnt->pos.y) : SavedY;
 				PadCheck(FMath::Abs(Y - SavedY) > 1.0, TEXT("D-pad right sends him in motion"));
-				PadPress(EKeys::Gamepad_FaceButton_Bottom);
-				Next();
-			}
-			break;
-		case 17:
-			if (At(9.7f))
-			{
-				PadCheck(PreMode == EPre::Base && State == EMatchState::Presnap, TEXT("cross closes motion without snapping"));
-				PadPress(EKeys::Gamepad_FaceButton_Bottom);
+				PadPress(EKeys::Gamepad_FaceButton_Bottom); // (Madden: CROSS snaps with the man in motion)
 				bAwaitSnap = true;
 				Next();
 			}
@@ -1073,9 +1185,9 @@ void AMatchDirector::TickPadTest(float Dt)
 	{
 		switch (ArtStep)
 		{
-		case 0: if (At(3.0f)) { PadCheck(!Shown(), TEXT("defense: art hidden once the intro is over")); PadPress(EKeys::Gamepad_RightTrigger, 1.5f); Next(); } break;
-		case 1: if (At(3.6f)) { PadCheck(Shown(), TEXT("defense: holding R2 shows the play art")); FScreenshotRequest::RequestScreenshot(TEXT("tag_pad_def_r2.png"), true, false); Next(); } break;
-		case 2: if (At(5.2f)) { PadCheck(!Shown(), TEXT("defense: letting go of R2 hides it")); PadPress(EKeys::Gamepad_DPad_Up); Next(); } break;
+		case 0: if (At(3.0f)) { PadCheck(!Shown(), TEXT("defense: art hidden once the intro is over")); PadPress(EKeys::Gamepad_LeftTrigger, 1.5f); Next(); } break;
+		case 1: if (At(3.6f)) { PadCheck(Shown(), TEXT("defense: holding L2 shows the play art")); FScreenshotRequest::RequestScreenshot(TEXT("tag_pad_def_r2.png"), true, false); Next(); } break;
+		case 2: if (At(5.2f)) { PadCheck(!Shown(), TEXT("defense: letting go of L2 hides it")); PadPress(EKeys::Gamepad_DPad_Up); Next(); } break;
 		case 3: if (At(5.5f)) { PadCheck(PreMode == EPre::DLine, TEXT("D-pad up opens the D-line shifts")); PadPress(EKeys::Gamepad_DPad_Right); Next(); } break;
 		case 4:
 			if (At(5.8f))
@@ -1085,8 +1197,8 @@ void AMatchDirector::TickPadTest(float Dt)
 				Next();
 			}
 			break;
-		case 5: if (At(6.1f)) { PadCheck(PreMode == EPre::Base && State == EMatchState::Presnap, TEXT("cross closes the D-line menu")); PadPress(EKeys::Gamepad_FaceButton_Top); Next(); } break;
-		case 6: if (At(6.4f)) { PadCheck(PreMode == EPre::Assign, TEXT("triangle opens the assignment")); PadPress(EKeys::Gamepad_DPad_Down); Next(); } break;
+		case 5: if (At(6.1f)) { PadCheck(PreMode == EPre::Base && State == EMatchState::Presnap, TEXT("cross closes the D-line menu")); PadPress(EKeys::Gamepad_FaceButton_Bottom); Next(); } break;
+		case 6: if (At(6.4f)) { PadCheck(PreMode == EPre::Assign, TEXT("cross opens the defensive hot route")); PadPress(EKeys::Gamepad_DPad_Down); Next(); } break;
 		case 7:
 			if (At(6.7f))
 			{
@@ -1104,8 +1216,8 @@ void AMatchDirector::TickPadTest(float Dt)
 				Next();
 			}
 			break;
-		case 9: if (At(7.3f)) { PadCheck(Sim->user && Sim->user->p != SavedUser, TEXT("L1 switches player")); PadPress(EKeys::Gamepad_DPad_Right); Next(); } break;
-		case 10: if (At(7.6f)) { PadCheck(PreMode == EPre::Shell, TEXT("D-pad right opens the coverage shell")); PadPress(EKeys::Gamepad_DPad_Left); Next(); } break;
+		case 9: if (At(7.3f)) { PadCheck(Sim->user && Sim->user->p != SavedUser, TEXT("L1 switches player")); PadPress(EKeys::Gamepad_FaceButton_Top); Next(); } break;
+		case 10: if (At(7.6f)) { PadCheck(PreMode == EPre::Shell, TEXT("triangle opens the coverage audibles")); PadPress(EKeys::Gamepad_DPad_Left); Next(); } break;
 		case 11:
 			if (At(7.9f))
 			{
@@ -1128,6 +1240,33 @@ void AMatchDirector::TickPadTest(float Dt)
 			if (At(8.8f))
 			{
 				PadCheck(Sim->cfg.defCall != SavedDc && PreMode == EPre::Base, TEXT("cross calls the coverage audible"));
+				Next();
+			}
+			break;
+		case 15:
+			if (At(9.6f))
+			{
+				// the defender walked on the stick (W held a second), then CIRCLE to the next man
+				if (Sim->user) PadMovedFrom = Sim->user->pos;
+				SavedUser = Sim->user ? Sim->user->p : nullptr;
+				PadPress(EKeys::W, 1.0f);
+				Next();
+			}
+			break;
+		case 16:
+			if (At(10.9f))
+			{
+				const double Moved = Sim->user ? tag::dist(Sim->user->pos, PadMovedFrom) : 0.0;
+				PadCheck(Sim->user && Sim->user->p == SavedUser && Moved > 1.5, *FString::Printf(TEXT("the stick walks the defender pre-snap (%.1f yd)"), Moved));
+				FScreenshotRequest::RequestScreenshot(TEXT("tag_pad_def_move.png"), true, false);
+				PadPress(EKeys::Gamepad_FaceButton_Right);
+				Next();
+			}
+			break;
+		case 17:
+			if (At(11.2f))
+			{
+				PadCheck(Sim->user && Sim->user->p != SavedUser, TEXT("circle switches player"));
 				bArtDidDef = true;
 				Timer = 0.f;
 				Next();
@@ -1136,4 +1275,23 @@ void AMatchDirector::TickPadTest(float Dt)
 		default: break;
 		}
 	}
+}
+
+void AMatchDirector::PlayFakeSnap()
+{
+	if (!Sim || !Sim->qb || !Game) return;
+	AAthlete* Q = AthleteFor(Sim->qb->p, Game->poss);
+	if (!Q) return;
+	// the pack's fake snaps (a dozen quarterbacks' own, shotgun and under center)
+	const bool bGun = Sim->qb->pos.x < Sim->los - 2.5;
+	static const TCHAR* Gun[] = {TEXT("FakeSnap_Shotgun_Brady"), TEXT("FakeSnap_Shotgun_PManning"), TEXT("FakeSnap_Shotgun_Brees"), TEXT("FakeSnap_Shotgun_ARodgers"), TEXT("FakeSnap_Shotgun_Romo")};
+	static const TCHAR* Uc[] = {TEXT("FakeSnap_UnderCenter_Brady_MADNMAY04_0964"), TEXT("FakeSnap_UnderCenter_Bulger_MADNMAY04_0964"), TEXT("FakeSnap_UnderCenter_Delhomme_MADNMAY04_0964")};
+	static int32 GSeq = 0;
+	const int32 N = bGun ? UE_ARRAY_COUNT(Gun) : UE_ARRAY_COUNT(Uc);
+	const FString Name = FString::Printf(TEXT("A_TAG_Pack_%s__P01"), bGun ? Gun[GSeq % N] : Uc[GSeq % N]);
+	++GSeq;
+	if (UAnimSequence* C = LoadObject<UAnimSequence>(nullptr, *FString::Printf(TEXT("/Game/TAG/AnimH/Pack/Kicking/%s.%s"), *Name, *Name), nullptr, LOAD_NoWarn | LOAD_Quiet))
+		Q->PlayOneShot(C);
+	if (Overlay) Overlay->Toast(TEXT("Hard count"));
+	UE_LOG(LogTemp, Display, TEXT("TAG fake snap: %s"), *Name);
 }

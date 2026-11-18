@@ -58,6 +58,9 @@ MAP = {
     "Block_DrivenBack_Loop": dict(src="RunBlock_GetEng_Force_D1_to_D1_RTShldr_OffWin_RT__P02", start=1.0, end=2.4, loop=6),
     "Rush_BullDrive_Loop": dict(src="RunBlock_GetEng_Force_D1_to_D1_RTShldr_DefWin__P02", start=0.25, end=1.05, loop=5),
     "Block_Anchor_Loop": dict(src="DL_Move_BullRush_Loss__P01", start=0.3, end=1.3, loop=6),
+    # the pack's pass-block walks only go right and back-right: the left-hand ones are their mirrors (root travel kept)
+    "Block_Walk_L": dict(src="MG_PASSBLOCK_WALK_90__P01", loop=4, mirror=True, mode="root"),
+    "Block_Walk_BackL": dict(src="MG_PASSBLOCK_WALK_135__P01", loop=4, mirror=True, mode="root"),
     "Block_Punch": dict(src="Block_Impact_D1_Stand_Loss_Big_SEP09_0036__P01", end=0.5),
     "Block_Beaten": dict(src="Dline_PassBlock_Stationary_to_Left_Win__P01", start=0.2, end=1.3),
     "Block_Finish": dict(src="Block_Impact_D1_Stand_Loss_Big_SEP09_0036__P01", end=1.1),

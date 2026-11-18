@@ -79,6 +79,9 @@ struct KickFlight {
   double hang = 2;
   double height = 10;
   std::optional<bool> good;
+  // a played place kick: the launch (yd/s) the ball is flown with, and where it is across the field at toX
+  double vx = 0, vz = 0;
+  std::optional<double> endY;
 };
 
 struct SpecialResult {
@@ -210,6 +213,13 @@ class Game {
   Player* punter(TeamKey k) const;
   /** Probability a kick of `dist` yards is good. Fit to 2020s NFL by distance. */
   double fgProb(double dist, const Player& k, TeamKey kt) const;
+  struct PlaceKick {
+    KickFlight flight;
+    bool good = false, blocked = false, isShort = false;
+    double miss = 0;  // across the posts' plane, yd left (+) of centre
+  };
+  /** A place kick played out: leg and line drawn, the ball flown, good if it crosses over the bar between the uprights. */
+  PlaceKick placeKick(double fromX, double p, const Player& k, TeamKey kt, double blockP);
   /** liveReturn: a returnable kick is not resolved here; it is left in pendingReturn for a live return play
    *  (kickReturnSim / finishKickReturn). Touchbacks, fair catches, downed and onside kicks resolve as before. */
   SpecialResult kickoff(bool onside = false, bool liveReturn = false);
@@ -220,6 +230,15 @@ class Game {
     bool punt = false;
   };
   std::optional<PendingReturn> pendingReturn;
+  /** A kick the user swung on the meter: power 0..1.15 (past 1 is the red: no farther, only wilder), aim in degrees
+   *  off straight down the field (+ = the kicking team's left), accuracy -1..1 off the meter's centre. Read and
+   *  cleared by the next kickoff / punt / field goal / extra point, which then play it instead of rolling one. */
+  struct UserKick {
+    double power = 1;
+    double aimDeg = 0;
+    double acc = 0;
+  };
+  std::optional<UserKick> userKick;
   /** The live return play: recv / kick are the units on the field (recv[0] the returner, kick[0] the kicker). */
   std::unique_ptr<PlaySim> kickReturnSim(const std::vector<Player*>& recv, const std::vector<Player*>& kick,
                                          std::optional<Side> userSide = std::nullopt);
@@ -227,6 +246,8 @@ class Game {
   SpecialResult fieldGoal();
   /** Decide 2-point try per a standard chart (CPU). */
   bool goForTwo();
+  /** A flag on the return team during a return (block in the back, holding): 10 yd back from where it ended. */
+  bool returnFoul(TeamKey rt, double& spot, std::string& desc);
   /** PAT kick (33 yards). */
   SpecialResult extraPoint();
   /** Two-point try: a real scrimmage play from the 2. */

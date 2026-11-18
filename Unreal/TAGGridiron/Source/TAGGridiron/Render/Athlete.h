@@ -3,6 +3,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/StreamableManager.h"
+#include "UObject/StrongObjectPtr.h"
 #include "GameFramework/Actor.h"
 #include "Athlete.generated.h"
 
@@ -31,7 +32,8 @@ struct FAthleteFootball
 	uint8 GetOffKind = 0;      // a lineman's job at the snap: 1 pass set, 2 run block, 3 defensive line (0 = not a lineman)
 	bool bLook = false;
 	FVector LookWorld = FVector::ZeroVector;
-	bool bLive = false;        // the play is live (between the snap and the whistle)
+	bool bLookHigh = false;    // he is watching the ball in the air (the catcher, the men on the ball, the passer): the eyes may go up 45 deg, else 20
+	bool bLive = false;       // the play is live (between the snap and the whistle)
 	float CarrierDist = -1.f;  // a defender's distance to the ball carrier (cm), < 0 when there is none
 };
 
@@ -98,8 +100,37 @@ public:
 	FString TelemetryAnim() const;
 	/** Planted-foot travel (cm) over the last animation update: as the clip had it, and as shown after the foot lock. */
 	float LastSlideRaw = 0.f, LastSlideShown = 0.f;
+	int32 LastPlantFeet = 0; // feet the capture held planted in the last evaluation (telemetry)
+	// motion matching warp state for telemetry: what the playing clip's feet cover (cm/s, after the play rate), the stride
+	// scale, the angle from the clip's travel to the man's (degrees, before the clamp) and the orientation warp applied
+	float TelEff = 0.f, TelStride = 1.f, TelAng = 0.f, TelOrient = 0.f;
+	float TelRootOff = 0.f; // how far the matched body's root is turned off the component's facing (deg, the offset node)
+	float MMMisfitT = 0.f, MMForceCool = 0.f; // how long the matched clip has not fitted the move; time until the next forced pick
+	float LastDev[7] = {0, 0, 0, 0, 0, 0, 0}; // shown pose vs the capture (UTagRetargetAnimInstance::Dev), telemetry
 	/** Take the body's offset from the sim spot (a fall that ended away from it) as its position from now on. */
-	void AbsorbVisOffset() { VisOffset = FVector::ZeroVector; }
+	/** Where the sim is steering this man (cm/s, world), for this frame's Drive: motion matching predicts his path
+	 *  toward it. Without it the prediction only extends the acceleration measured so far, which at the snap is nothing:
+	 *  a receiver coming off the line was read as a man starting to walk, and walked for 0.4 s of a sprint release. */
+	void SetIntent(const FVector& WantVelW) { IntentVelW = WantVelW; IntentFrame = GFrameCounter; }
+	FVector IntentVelW = FVector::ZeroVector;
+	uint64 IntentFrame = 0;
+	/** The director takes over from where the body stands (the post-whistle jog): the offset is gone and the follower
+	 *  starts over from here (it read the hand-over as the sim stepping 60 cm and pulled the body back as far: a pop). */
+	void AbsorbVisOffset()
+	{
+		// (a travel handed over by a capture that just ended goes with him: he stays where his body is)
+		if (!PendingCarry.IsNearlyZero(1.f)) SetActorLocation(GetActorLocation() + FVector(PendingCarry.X, PendingCarry.Y, 0.f));
+		PendingCarry = FVector::ZeroVector;
+		VisOffset = FVector::ZeroVector; bFollowActive = false; LastSimLoc = GetActorLocation();
+	}
+	FVector PendingCarry = FVector::ZeroVector; // travel a capture leaves for the actor to take next frame
+	// (GetBallHold) which hand carries the ball: the arm that stays tucked, smoothed and latched (per frame it flipped
+	// hands every few frames as the free arm swung past the chest, bc5)
+	mutable float BallSideEma = 0.f;
+	mutable bool bBallLeft = false;
+	mutable uint64 BallSideFrame = 0;
+	FVector SepNow = FVector::ZeroVector; // the push that keeps him out of another body, eased (AMatchDirector::ResolveEngagedOverlap)
+	float VisOffsetCm() const { return static_cast<float>(VisOffset.Size2D()); } // how far the body is from its sim spot (telemetry)
 	/** How long a fall eases from where he was onto its anchor (a pile-on from a few yards away travels there). */
 	void SetFallEaseTime(float T) { FallEaseT = FMath::Max(0.05f, T); }
 
@@ -118,9 +149,25 @@ public:
 	/** The sim says this player just caught the ball: pick the catch for the ball height, his speed, where the ball
 	 *  came from and whether he is at the sideline (SidelineDirW: unit vector toward the nearest sideline, or zero). */
 	void PlayCatch(float BallZCm, float SpeedCm, const FVector& BallVelW, const FVector& SidelineDirW,
-		const FVector& BallPosW = FVector::ZeroVector, bool bContested = false);
+		const FVector& BallPosW = FVector::ZeroVector, bool bContested = false, bool bAggressive = false);
 	/** The sim just released a pass: play the throw that fits it (FAthleteAssets::EThrow). */
 	void PlayThrow(int32 Kind);
+	/** The throw from its windup, timed so the capture's release comes ReleaseIn seconds from now (when the sim lets the
+	 *  ball go); a one-shot, so the follow-through plays out. */
+	void PlayThrowTimed(int32 Kind, float ReleaseIn);
+	/** A defender plays the ball in the air: a swat for how he is moving (Gait 0 running at it, 1 strafing, 2 backpedal /
+	 *  set), or (bInt) a one-man interception. */
+	bool PlayBallDefense(int32 Gait, bool bInt);
+	/** A returner fields a kick (the pack's kick catches, on the run or set). */
+	bool PlayKickCatch(bool bRunning);
+	/** A shovel pass (the pack's, on the move or set), timed to its release. */
+	void PlayShovelTimed(bool bMoving, float ReleaseIn);
+	/** A pump fake (the pack's). */
+	void PlayPumpFake();
+	/** A timed throw is playing (the ball sits in his throwing hand's grip, not between both hands). */
+	bool IsThrowing() const;
+	bool bThrowTimed = false;
+	UPROPERTY() TObjectPtr<UAnimationAsset> ThrowTimedClip;
 	/** Paired tackle: the first tackler's hit decides the carrier's reaction (head on / from behind / from the side)
 	 *  and the pile's momentum (both players' masses and velocities). */
 	void ApplyHit(const FVector& TacklerVelW, float TacklerKg, const FVector& TacklerLoc);
@@ -143,14 +190,47 @@ public:
 	void PlayRushMove(const FString& Move, const AAthlete* Blocker);
 	/** The blocker was beaten by Rusher: open the hips, lunge and reach to the side he went, turn and chase. */
 	void PlayBeaten(const AAthlete* Rusher);
+	/** A pass rusher beats his blocker: both men play their own part of the same two-man capture from its start (the pack's
+	 *  rush wins; Which picks the capture, bBig one that leaves the blocker on his back). False when there is none. */
+	static bool PlayRepWin(AAthlete* Rusher, AAthlete* Blocker, int32 Which, bool bBig);
+	/** A rusher's move stoned: the pack's two-man capture of the rep he loses (the anchored bull rush for a power move). */
+	static bool PlayRepHold(AAthlete* Rusher, AAthlete* Blocker, int32 Which, bool bPower);
+	/** A double team (two blockers on one rusher): the three men on their parts of one of the pack's three-man captures,
+	 *  each blocker the part on his own side. Returns the seconds it runs (0: none played). */
+	static float PlayRepDouble(AAthlete* Rusher, AAthlete* B1, AAthlete* B2, int32 Which);
+	/** A handoff: the quarterback and the back on their parts of one of the pack's handoffs, timed so the exchange
+	 *  comes ExchangeIn seconds from now. False when none fits. */
+	static bool PlayRepHandoff(AAthlete* QB, AAthlete* Back, bool bGun, float ExchangeIn, int32 Which);
 	/** Pancake: the blocker drives through and finishes over the man he put down. */
 	void PlayPancakeFinish();
 	/** Keyed fall to the turf, see bFalling. bEaseIn: glide from where the actor is onto From in the first 0.15 s. */
 	void BeginPairedFall(UAnimationAsset* Clip, const FVector& From, const FVector& To, float YawW, float DriveTime,
 		float LieTime, bool bEaseIn, float Start = 0.f, bool bRootDrive = false);
 	bool IsFalling() const { return bFalling; }
+	/** His part in a staged capture (a field goal's snap, hold and kick): the clip plays from Start with its root
+	 *  carrying the body from the world anchor and heading, as captured. It runs while the director drives him with
+	 *  the anim "scene" (any other drive ends it); at its end he holds the last pose. A loop stays on its anchor. */
+	void BeginScene(class UAnimSequence* Clip, const FVector& AnchorW, float YawW, float Start = 0.f, bool bLoop = false);
+	bool InScene() const { return bScene; }
+	float SceneClipTime() const { return SceneStart + SceneT; }
 	/** On the ground, falling, or getting up: the body is not his to move. */
 	bool IsDown() const { return bFalling || bGettingUp || bRagdoll || FallHoldLeft > 0.f || TackledLeft > 0.f; }
+	bool IsGettingUp() const { return bGettingUp; }
+	/** Torn out of a tackle that had begun: off the fall's capture and back on his feet where the sim has him. */
+	void BreakFree();
+	/** His hips over the turf as shown (cm), and where they are. */
+	float PelvisZ() const;
+	FVector PelvisAt() const;
+	/** The bodies his arms keep out of this frame (world, w = radius): the men he is in a pile with. */
+	void SetKeepOut(const FVector4f* S, int32 N) { KeepOutN = FMath::Min(N, 12); for (int32 i = 0; i < KeepOutN; ++i) KeepOut[i] = S[i]; }
+	/** His own head, chest and hips as spheres (world, w = radius), as shown last frame; and his hands. */
+	int32 BodySpheres(FVector4f* Out) const;
+	bool Hands(FVector& L, FVector& R) const;
+	bool Feet(FVector& L, FVector& R) const;
+	/** Any two of the visible body's bones (the elbows: lowerarm_l / _r, the knees: calf_l / _r). */
+	bool BonePair(const TCHAR* Ln, const TCHAR* Rn, FVector& L, FVector& R) const;
+	FVector4f KeepOut[12];
+	int32 KeepOutN = 0;
 	/** Where the pile ends: the carrier's anchor at the end of the drive. */
 	FVector FallAnchorEnd() const { return AnchorB; }
 	FVector GetLastVel() const { return LastVelW; }
@@ -159,6 +239,11 @@ public:
 	void ShiftFallTarget(const FVector& Delta);
 	/** The running fall's clip time (its start plus the time fallen, held a frame short of the end). */
 	float FallClipTime() const;
+	/** Where a root-carried fall (BeginPairedFall with bRoot) takes his actor from its start, facing Yaw: the same root
+	 *  motion TickFall applies, so a fall can be planned to end where it will. Zero for a clip without root motion. */
+	FVector FallRootTravel(const UAnimationAsset* Clip, float Start, float Yaw) const;
+	/** Where a scene clip's root motion takes him between two clip times, turned to a scene yaw (BeginScene's frame). */
+	FVector SceneTravel(const UAnimSequence* Seq, float From, float To, float Yaw) const;
 	/** The velocity a fall's glide starts at (cm/s; set after BeginPairedFall: a pile shares one, the momentum of the men
 	 *  in it, so neither drives into the other while the closing speed is spent in the hit). */
 	void SetFallCarry(const FVector& V) { FallV0 = FVector(V.X, V.Y, 0.f).GetClampedToMaxSize(1000.f); }
@@ -264,6 +349,7 @@ private:
 	float MovingTime = 0.f;                   // seconds since this player started moving (motion matching start state)
 	bool bPreSnap = false;
 	bool bWasPreSnap = false;
+	int32 GetOffPending = 0; // frames a lineman's first step still waits for the sim to say which way he goes
 	bool bUnderCenter = false;
 	uint8 GetOffKind = 0;
 	UPROPERTY()
@@ -280,6 +366,15 @@ private:
 	bool bFalling = false;
 	UPROPERTY()
 	TObjectPtr<UAnimationAsset> FallClip;
+	// a part in a staged capture (BeginScene)
+	bool bScene = false, bSceneLoop = false;
+	UPROPERTY()
+	TObjectPtr<class UAnimSequence> SceneClip;
+	float SceneT = 0.f, SceneStart = 0.f, SceneYaw = 0.f;
+	FVector SceneAnchor = FVector::ZeroVector;
+	FVector SceneEaseOff = FVector::ZeroVector; // where he stood off the capture's start, eased out over 0.3 s
+	float SceneEaseYaw = 0.f;                   // and how far he faced off its start heading (deg)
+	void TickScene(float DeltaTime);
 	float FallStart = 0.f;        // seconds into FallClip the fall starts (a library capture's contact)
 	bool bFallRoot = false;       // the clip's root motion carries the body through the fall (library captures)
 	float FallT = 0.f, FallLen = 0.f, FallLie = 0.f, FallDrive = 0.4f, FallFromYaw = 0.f, FallYaw = 0.f;
@@ -294,10 +389,19 @@ private:
 	bool bGettingUp = false;
 	bool bStoodUp = false;
 	FVector VisOffset = FVector::ZeroVector;
+	/** The body follows the sim on its own feet (motion matched locomotion): each frame it moves by what the playing
+	 *  clip's feet cover (the root travel as played, stride and orientation warp included), steered at the sim's spot.
+	 *  The planted foot then stays planted by construction; what the clip cannot do becomes a short lag behind the sim
+	 *  (VisOffset, at most FollowMax) that the next steps make up, instead of a foot skating under him. */
+	FVector FollowVel = FVector::ZeroVector; // the body's own velocity this frame (cm/s, world)
+	bool bFollowActive = false;              // set by DriveMotionMatching for the next frame
+	FVector LastSimLoc = FVector::ZeroVector;
 	float FallEaseT = 0.2f;
 	float OrientWarpSm = 0.f; // the smoothed orientation warp (deg) handed to the retarget layer
+	float ClipStrideSm = 1.f; // the smoothed stride scale of a followed single clip
 	int32 TackleCount = 0;
 	float StillTime = 0.f;   // seconds standing still (post-play idles)
+	FVector StillRef = FVector::ZeroVector; // where he stood at the start of last frame's drive
 	// face (UTagFaceAnimInstance): blinks, effort, breathing, focus, celebration
 	void UpdateFace(float DeltaTime);
 	float BlinkClock = 0.f, NextBlink = 3.f, BlinkPhase = 10.f;
@@ -309,6 +413,17 @@ private:
 	FVector PileVel = FVector::ZeroVector;
 	TWeakObjectPtr<AAthlete> TackleOn;
 	TWeakObjectPtr<AAthlete> BlockPartner;
+	TWeakObjectPtr<UAnimationAsset> LineHeld; // the line clip he is on, and for how long (a clip is given half a second)
+	float LineHeldT = 0.f, LineHeldRate = 1.f;
+	float LineStillT = 0.f;   // how long a locked-up man on the walk has had nothing to cover
+	float LagTime = 0.f;      // how long a followed one-shot has sat at the follow limit
+	double DropTravelUntil = 0.0; // the blend out of the layout dive leaves the dive's travel behind (the actor took it)
+	bool bPocketLoop = false; // the quarterback is on the standing pocket loop
+	int32 QBWalk = -1;        // the in-pocket walk / jog he is on (index; +100 for the jogs), -1 none
+	float QBWalkT = 0.f;      // how long he has been on it
+	int32 LineWalk = -1;      // the pass-block walk he is on while the pile moves (index into BlockWalks, -1 none)
+	bool bRepClip = false;    // playing his part of a two-man capture: its hands are where the capture put them (no reach)
+	bool bOneShotRep = false; // the running one-shot is such a part
 	TWeakObjectPtr<AAthlete> PunchedPartner; // the man this lineman struck at first contact (one punch per engagement)
 	TArray<TWeakObjectPtr<AAthlete>> PunchedThisPlay; // everyone he has struck this play: a double team handing off or a
 	                                                  // partner flickering back does not re-punch
@@ -338,6 +453,9 @@ private:
 	// the pack's hero rig, retargeted from the hidden mannequin like the MetaHumans were
 	void SetupHero(const FUniform& U);
 	void DressHero(class USkeletalMesh* BodyMesh, class USkeletalMesh* HeadMesh, class USkeletalMesh* HelmetMesh, const FString& Rig);
+	int32 OfficialPatch = -1;                   // an official's back patch (the pack's strip: DJ LJ R U BJ SJ FJ), -1 none
+	bool bCapTint = false;                      // the referee: the pack's black official's cap repainted white
+	FLinearColor CapTint = FLinearColor::White;
 	void HideHair(bool bHide);
 	void PaintHero(const FUniform& U);
 	FUniform CurUniform{};
@@ -348,9 +466,11 @@ private:
 	float CarryA = 0.f, SecureA = 0.f, ReachA = 0.f, LeanA = 0.f, StanceA = 0.f, StanceHandA = 0.f, LookA = 0.f;
 	FVector ReachSmoothed = FVector::ZeroVector, LookSmoothed = FVector::ZeroVector;
 	float GazeSetT = 0.f; // seconds this lineman has stood set before the snap (GazeStats)
+	float LookUpMax = 20.f; // how far up his face may turn (eased: 45 deg watching a ball in the air, 20 otherwise)
+	float HeadUpT = 0.f, HeadUpMax = 0.f; // -TagHeadLog: how long his face has been turned up at the stands
 	float ArmSlot = 0.f, StyleJitter = 0.f;
 	// body physics inputs (TagRetargetAnimInstance): the lean from the measured acceleration, planted feet pinned
-	void MeasureMotion(float Dt);
+	void MeasureMotion(const FVector& SimPos, float Dt);
 	FVector LeanSmoothed = FVector::ZeroVector;
 	// the quarterback's drop and pocket, the defender's breakdown (SetFootball feeds these a frame ahead of Drive)
 	bool bHasBallF = false, bLiveF = false, bDropped = false;
@@ -465,7 +585,60 @@ struct FAthleteAssets
 	TObjectPtr<UAnimationAsset> JukeR;
 	TObjectPtr<UAnimationAsset> Kneel;          // QB victory formation
 	TObjectPtr<UAnimationAsset> BlockEngaged;   // hands inside, choppy feet (engaged OL / DL)
+	/** The pack's two-man pass-rush captures, each man his own part: D the defensive lineman's (__P01: in the wins he is
+	 *  the one who gets past and runs on), O the blocker's (__P02). Before, both men of every locked-up pair played the
+	 *  defender's half of the stand-off loop, a beaten blocker the winner's rush and the rusher the loser's half of it.
+	 *  Loops: the stand-off; Wins: the rusher past his man; BigWins: the blocker put on his back; Holds: a rush stoned. */
+	struct FLineRep { TStrongObjectPtr<UAnimSequence> D, O; };
+	TArray<FLineRep> RepLoops, RepWins, RepBigWins, RepHolds, RepPowerHolds;
+	/** The pack's three-man pass-block double teams (pack_dbl.json, Tools/Art/pack_dbl.py): the defender's part, the
+	 *  blocker on his left (A) and on his right (B), and the stretch [T0, T1] where both are on him and the pile holds. */
+	struct FDoubleRep { TStrongObjectPtr<UAnimSequence> D, A, B; float T0 = 0.f, T1 = 0.f; };
+	TArray<FDoubleRep> RepDoubles;
+	/** The pack's two-man handoffs (pack_handoffs.json, Tools/Art/pack_handoffs.py): the quarterback's part, the back's,
+	 *  the exchange T seconds in, and whether it is from the shotgun / pistol. */
+	struct FHandoffRep { TStrongObjectPtr<UAnimSequence> Q, B; float T = 0.f; bool bGun = false; float Bx = 0.f; };
+	TArray<FHandoffRep> RepHandoffs;
+	bool bDoublesLoaded = false;
+	void LoadPackDoubles();
+	/** The pack's pass-block walks (hands up, on the move: forward, back, sideways, the diagonals), for a locked-up man
+	 *  while the pile travels, each with the way its root goes (component space, unit). The stand-off and the engaged
+	 *  loops are captures of men holding their ground: under a pocket giving ground at 0.5-1 m/s their feet skated. */
+	TArray<TStrongObjectPtr<UAnimSequence>> BlockWalks;
+	TArray<FVector> BlockWalkDir;
+	TArray<float> BlockWalkSpeed; // cm/s each walk covers
+	/** The pack's quarterback-in-the-pocket set: walks and jogs to all eight sides with the ball held ready, as captured
+	 *  (MG_QB_InPocket_Walk / Jog D1-D8). A quarterback sliding or stepping up plays the one that goes his way. */
+	struct FWalkSet { TArray<TStrongObjectPtr<UAnimSequence>> Clips; TArray<FVector> Dir; TArray<float> Speed; };
+	FWalkSet QBWalks, QBJogs;
+	/** A quarterback on the run with the ball (MG_Loco_QB_Scramble_Jog, MG_Loco_QB_Run_ShortStride) and the speed each covers. */
+	TStrongObjectPtr<UAnimSequence> QBScramble, QBRun;
+	float QBScrambleSpeed = 450.f, QBRunSpeed = 650.f;
+	/** The pack's field goal operation, a three-man capture (FG_Normal_Kick_v1: P03 the snapper, P01 the holder, P02
+	 *  the kicker) with the loops the three wait in, and where each starts in the capture's world (m: x left and y back
+	 *  of the spot the ball is kicked from, heading in degrees turned left of downfield). */
+	struct FKickScene
+	{
+		TStrongObjectPtr<UAnimSequence> Snap, Hold, Kick, SnapWait, HoldWait, KickWait;
+		bool Ok() const { return Snap.IsValid() && Hold.IsValid() && Kick.IsValid(); }
+	};
+	FKickScene FgScene;
+	/** A help-up after the whistle (Getup_NonBC_15_HelpUp_Knees_D7 P02 the man on his knees, P01 the teammate who pulls him up). */
+	TStrongObjectPtr<UAnimSequence> HelpUpDown, HelpUpBy;
+	/** A call at the line: the quarterback's audible (shotgun, under center, a hand signal), the back and the
+	 *  linebackers who hear it and re-settle, the linebacker who answers with his own. */
+	TStrongObjectPtr<UAnimSequence> QBAudibleGun, QBAudibleUnder, QBSignal, HBAudible, LBHearsAudible, LBDefAudible;
+	/** The punt the same way (Punt_Normal_Kick_v1: P02 the snapper, P01 the punter 12 m behind him; no holder), and
+	 *  the returner's fair catch (the wave, then the catch). */
+	FKickScene PuntScene;
+	TStrongObjectPtr<UAnimSequence> FairCatch;
+	/** A blocked kick's rusher: Madden's field goal block, the edge man off a three-point stance and laid out across
+	 *  the kick (FGBlock_Left_Edge_Block_v2__P03; he leaves his feet at FgBlockAt). */
+	TStrongObjectPtr<UAnimSequence> FgBlockRush;
+	static constexpr float FgBlockAt = 2.2f;
 	TObjectPtr<UAnimationAsset> BlockPassSet;   // pass protection set before contact
+	/** A blocker with nobody on him: the pack's pass-block ready stance (linemen) and a back's / tight end's blocking idle. */
+	TObjectPtr<UAnimationAsset> BlockReadyOL, BlockReadyBack;
 	TObjectPtr<UAnimationAsset> SnapCatch;      // shotgun QB takes the snap
 	TObjectPtr<UAnimationAsset> Handoff;        // QB hands off right and carries out the fake
 	TObjectPtr<UAnimationAsset> GetUpDown;      // get up from lying face down
@@ -513,6 +686,14 @@ struct FAthleteAssets
 	TArray<FPackClip> PackThrowsSet, PackThrowsQuick, PackThrowsDeep, PackThrowsRollR, PackThrowsRollL;
 	TArray<FPackClip> PackKickoffs, PackFieldGoals, PackPunts, PackDropsSG, PackDropsUC;
 	TArray<FPackClip> PackCatchStride, PackCatchHigh, PackCatchLow, PackCatchOverShoulder, PackCatchSideline, PackCatchStand, PackCatchComeback, PackCatchDive;
+	/** The spectacular ones: one-handers, fingertips, leaps (on his feet after: a catch the sim runs on from). */
+	TArray<FPackClip> PackCatchSpectacular;
+	/** A defender playing the ball in the air: the pack's swats on the run, strafing, backpedalling / set, and its
+	 *  one-man interceptions. */
+	TArray<FPackClip> PackSwatRun, PackSwatStrafe, PackSwatBack, PackIntCatch;
+	/** A returner fielding a kick: the pack's kick catches, set and on the run. */
+	TArray<FPackClip> PackKickCatchStand, PackKickCatchRun;
+	TArray<FPackClip> PackShovelSet, PackShovelMove, PackPumpFakes;
 	TArray<FPackClip> PackTackledFront, PackTackledBehind, PackTackledSide, PackTacklers, PackWhiffs, PackStumbles;
 	TArray<FPackClip> PackJukesL, PackJukesR, PackSpinsL, PackSpinsR, PackTrucks, PackHurdles, PackStiffArmsL, PackStiffArmsR;
 	TArray<FPackClip> PackRushWinsL, PackRushWinsR, PackBeatenL, PackBeatenR, PackPancakes, PackGetOffs;
@@ -571,8 +752,8 @@ struct FAthleteAssets
 	void FillPackLoaded();
 	struct FPendingFamily { FFamilySink Sink; int32 Max = 0; bool bLoop = false; TArray<FSoftObjectPath> Paths; };
 	struct FPendingTimed { TArray<FPackClip>* Sink = nullptr; TArray<FPackClip> Clips; };
-	struct FPendingPair { int32 Kind = 0; FPackPair P; FSoftObjectPath TP, CP; };
-	struct FPendingGang { FPackGang G; FSoftObjectPath CP, TP, AP; };
+	struct FPendingPair { int32 Kind = 0; FPackPair P; FSoftObjectPath TP, CP; bool bBad = false; };
+	struct FPendingGang { FPackGang G; FSoftObjectPath CP, TP, AP; bool bBad = false; };
 	TArray<FPendingGang> PendingGangs;
 	TArray<FPendingFamily> PendingFamilies;
 	TArray<FPendingTimed> PendingTimed;
@@ -607,7 +788,10 @@ struct FAthleteAssets
 	TArray<class UPoseSearchDatabase*> MMStop[3];
 	// per-man style variants of the move / start / pivot sets: [gait][player id % 3], each with its own loops database
 	// (PSD_TAG_<gait>_Loops_S1/_S2 hold a different two thirds of each direction's clips; variant 0 is the full set)
-	TArray<class UPoseSearchDatabase*> MMMoveV[3][3], MMStartV[3][3], MMPivotV[3][3];
+	// (six variants: the walk has six sets, S1-S6, mm_walk_sets_hero.py; a gait with three uses S1-S3 twice over)
+	TArray<class UPoseSearchDatabase*> MMMoveV[3][6], MMStartV[3][6], MMPivotV[3][6];
+	// the man with the ball: the pack's ball-carrier loops (MG_BC_*, Tools/Art/mm_build_bc_dbs.py), the ball tucked as captured
+	TArray<class UPoseSearchDatabase*> MMBallMove[3], MMBallPivot[3], MMBallStart[3];
 	// crouched line footwork (pass sets, pulls, drive blocks), same state split: [0] loops, [1] starts, [2] pivots, [3] stops + idles
 	TArray<class UPoseSearchDatabase*> MMCrouch[4];   // that gait's stops + standing idles + turns in place
 	TArray<class UPoseSearchDatabase*> MMAll;

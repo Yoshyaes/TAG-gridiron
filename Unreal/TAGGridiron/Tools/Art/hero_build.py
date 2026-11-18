@@ -210,6 +210,30 @@ def build(job):
             fixed += 1
         print("HERO_RESKIN %s %d vertices" % (job["name"], fixed), flush=True)
 
+    # a hand prop skinned to one bone and reaching far from it (the chain crew's rods): its vertices are dropped
+    sp = job.get("strip_prop")
+    if sp:
+        import re
+        import bmesh
+        Mw = root_arm.matrix_world
+        heads = {b.name: Mw @ b.head_local for b in root_arm.data.bones if re.search(sp["bones"], b.name)}
+        gname = {g.index: g.name for g in mesh.vertex_groups}
+        kill = []
+        for v in mesh.data.vertices:
+            if not v.groups:
+                continue
+            g = max(v.groups, key=lambda x: x.weight)
+            h = heads.get(gname.get(g.group))
+            if h is not None and ((mesh.matrix_world @ v.co) - h).length > sp.get("far", 0.14):
+                kill.append(v.index)
+        bm = bmesh.new()
+        bm.from_mesh(mesh.data)
+        bm.verts.ensure_lookup_table()
+        bmesh.ops.delete(bm, geom=[bm.verts[i] for i in kill], context="VERTS")
+        bm.to_mesh(mesh.data)
+        bm.free()
+        print("HERO_STRIP_PROP %s %d vertices (bones %s)" % (job["name"], len(kill), sorted(heads)), flush=True)
+
     # bind pose measurements (Blender space: metres, character faces -Y) before the renames
     arm = root_arm
     M = arm.matrix_world

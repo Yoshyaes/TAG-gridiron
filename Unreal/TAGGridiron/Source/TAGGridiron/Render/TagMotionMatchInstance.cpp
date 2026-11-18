@@ -2,7 +2,23 @@
 
 #include "PoseSearch/PoseSearchDatabase.h"
 #include "Animation/AnimSequence.h"
+#include "Animation/AnimRootMotionProvider.h"
 #include "Misc/CommandLine.h"
+
+void FTagRootTapNode::Evaluate_AnyThread(FPoseContext& Output)
+{
+	Source.Evaluate(Output);
+	bHave = false;
+	if (const UE::Anim::IAnimRootMotionProvider* P = UE::Anim::IAnimRootMotionProvider::Get())
+	{
+		FTransform D = FTransform::Identity;
+		if (P->ExtractRootMotion(Output.CustomAttributes, D))
+		{
+			Delta = D;
+			bHave = true;
+		}
+	}
+}
 
 void FTagLocoSwitchNode::Initialize_AnyThread(const FAnimationInitializeContext& Context)
 {
@@ -40,8 +56,9 @@ FTagMotionMatchProxy::FTagMotionMatchProxy(UAnimInstance* InInstance, FAnimNode_
 {
 	Switch.Clip.SetLinkNode(&SingleNode);
 	static const bool bNoOffset = FParse::Param(FCommandLine::Get(), TEXT("TagMMNoOffset")); // A/B: no root offset
-	Switch.Match.SetLinkNode(bNoOffset ? static_cast<FAnimNode_Base*>(Match) : static_cast<FAnimNode_Base*>(Offset));
-	Offset->Source.SetLinkNode(Match);
+	Switch.Match.SetLinkNode(bNoOffset ? static_cast<FAnimNode_Base*>(&Tap) : static_cast<FAnimNode_Base*>(Offset));
+	Offset->Source.SetLinkNode(&Tap);
+	Tap.Source.SetLinkNode(Match);
 	History->Source.SetLinkNode(&Switch);
 }
 
@@ -100,7 +117,10 @@ void FTagMotionMatchProxy::PreUpdate(UAnimInstance* InAnimInstance, float DeltaS
 		*I->RateMultiplierSetting = I->SpeedRate;
 	}
 	bool bDbChanged = false;
-	if (SeenDbSerial != I->DbSerial)
+	bool bForcedNow = false; // this update carries a ForceInterrupt: it must search (the node drops the mode after one update)
+	const bool bForceNow = SeenForceSerial != I->ForceSerial; // the clip no longer fits the move (AAthlete::DriveMotionMatching)
+	SeenForceSerial = I->ForceSerial;
+	if (SeenDbSerial != I->DbSerial || bForceNow)
 	{
 		// a clip from a database no longer searched (a start once the player has stopped, or once he has been moving
 		// for 0.6 s and the loops take over) must not keep playing: InterruptOnDatabaseChange left a crouch start
@@ -108,12 +128,14 @@ void FTagMotionMatchProxy::PreUpdate(UAnimInstance* InAnimInstance, float DeltaS
 		// search; the next update puts the mode back so the continuing pose counts again. A change of gait band or into
 		// the pivot set does not: the playing loop carries on until the search finds better (forcing those had the
 		// pick flipping sprint <-> run every few frames while the speed hovered at a band's edge)
+		bDbChanged = SeenDbSerial != I->DbSerial;
 		SeenDbSerial = I->DbSerial;
-		bDbChanged = true;
-		if (I->bForceOnDbChange)
+		if (I->bForceOnDbChange || bForceNow)
 		{
 			Match->SetDatabasesToSearch(I->Databases, EPoseSearchInterruptMode::ForceInterrupt);
-			ForceLeft = 0.15f; // longer than the 66 ms search throttle, so the forced search actually runs
+			bForcedNow = true;
+			ForceLeft = FMath::Max(0.15f, I->ForceHoldSecs); // longer than the 66 ms search throttle, so the forced search actually runs
+			I->ForceHoldSecs = 0.f;
 		}
 		else
 			Match->SetDatabasesToSearch(I->Databases, EPoseSearchInterruptMode::DoNotInterrupt);
@@ -141,7 +163,9 @@ void FTagMotionMatchProxy::PreUpdate(UAnimInstance* InAnimInstance, float DeltaS
 		// (a soft database change - a gait band, the pivot set - holds too: freeing those let a third of all switches
 		// through, -TagMMWhy; a real cut still frees the search by the turn)
 		const bool bFree = bMoveChanged || (bDbChanged && I->bForceOnDbChange) || ForceLeft > 0.f || !I->bMatch;
-		*I->ThrottleSetting = bFree ? I->BaseThrottle : FMath::Max(I->BaseThrottle, I->MinDwell);
+		// (a forced pick searches now: the node resets the interrupt mode after every update, and inside the 66 ms throttle
+		// that update did not search - the force was lost and the continuing pose kept a carrier on his empty-handed sprint, bc6)
+		*I->ThrottleSetting = bForcedNow ? 0.f : bFree ? I->BaseThrottle : FMath::Max(I->BaseThrottle, I->MinDwell);
 		I->DiagFlags = (bMoveChanged ? 1 : 0) | (bDbChanged ? 2 : 0) | (ForceLeft > 0.f ? 4 : 0) | (bFree ? 0 : 8);
 	}
 }
@@ -179,6 +203,15 @@ void FTagMotionMatchProxy::PostUpdate(UAnimInstance* InAnimInstance) const
 		else I->DiagHeld += GetDeltaSeconds();
 		I->DiagPrev = Cur;
 		I->DiagPrevTime = R.SelectedTime;
+	}
+	static const bool bNoOffset = FParse::Param(FCommandLine::Get(), TEXT("TagMMNoOffset"));
+	I->bRootRotValid = Switch.bMatch && Switch.bWasMatch && !bNoOffset && Offset != nullptr;
+	if (I->bRootRotValid) I->RootRotW = Offset->GetOffsetRootRotation();
+	I->bRootDeltaValid = Switch.bMatch && Switch.bWasMatch && Tap.bHave && GetDeltaSeconds() > 1e-4f;
+	if (I->bRootDeltaValid)
+	{
+		I->RootDelta = Tap.Delta.GetTranslation();
+		I->RootDeltaDt = GetDeltaSeconds();
 	}
 	I->MatchedTime = R.SelectedTime;
 	I->MatchedCost = R.SearchCost;
@@ -234,7 +267,10 @@ UTagMotionMatchInstance::UTagMotionMatchInstance(const FObjectInitializer& Objec
 		FParse::Value(FCommandLine::Get(), TEXT("TagMMSpeedMatchCrouch="), CrouchSpeedMatchMax);
 	}
 	// root offset: the clip turns and strides the body, the sim stays the truth (at most 25 cm / 60 deg apart)
-	OffsetNode.TranslationMode = EOffsetRootBoneMode::Interpolate;
+	// (translation: only without the follower, -TagNoFollow. With it the actor itself moves by the clip's root travel,
+	// AAthlete::FollowVel, and an offset on top would count that travel twice.)
+	static const bool bFollowMM = FParse::Param(FCommandLine::Get(), TEXT("TagFollowMM")) && !FParse::Param(FCommandLine::Get(), TEXT("TagNoFollow"));
+	OffsetNode.TranslationMode = bFollowMM ? EOffsetRootBoneMode::Release : EOffsetRootBoneMode::Interpolate;
 	OffsetNode.RotationMode = EOffsetRootBoneMode::Interpolate;
 	OffsetNode.TranslationHalflife = 0.15f;
 	OffsetNode.RotationHalfLife = 0.25f;

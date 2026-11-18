@@ -29,6 +29,7 @@ echo [+] Building PlaybookDump.exe...
 cl %FLAGS% PlaybookDump.cpp %OBJS% /Fobuild\ /Febuild\PlaybookDump.exe || exit /b 1
 cl %FLAGS% ConceptCal.cpp %OBJS% /Fobuild\ /Febuild\ConceptCal.exe || exit /b 1
 cl %FLAGS% MoveCal.cpp %OBJS% /Fobuild\ /Febuild\MoveCal.exe || exit /b 1
+cl %FLAGS% ReturnCal.cpp %OBJS% /Fobuild\ /Febuild\ReturnCal.exe || exit /b 1
 
 echo Build OK: %~dp0build\SimCalibrate.exe, %~dp0build\SimTests.exe
 endlocal

@@ -84,7 +84,11 @@ def gait(speed):
 
 lists = {}
 report = []
-for path in sorted(EAL.list_assets(LIB, recursive=False, include_folder=False)):
+# (and the pack's constant-pace forward walk loops, each a different man, filed under PostPlay and Blocking: without them a
+# man walking back to the huddle had one forward walk per style set, and four or more walked in step on one capture)
+PTM_WALKS = [p for d in ("/Game/TAG/Anim/Pack/PostPlay", "/Game/TAG/Anim/Pack/Blocking")
+             for p in EAL.list_assets(d, recursive=False, include_folder=False) if "Constant_Walk_Loop" in p and "_PTM_" in p]
+for path in sorted(EAL.list_assets(LIB, recursive=False, include_folder=False)) + sorted(PTM_WALKS):
     asset = path.split(".")[0]
     name = asset.rsplit("/", 1)[1][11:]  # after A_TAG_Pack_
     # standing idles of players (the stand-idle set had four, so a dozen men standing played the same one): the plain
@@ -117,7 +121,7 @@ for path in sorted(EAL.list_assets(LIB, recursive=False, include_folder=False)):
         role = gait(m["first"]) + "_Stops"
     elif re.search(r"^Step_Loco_.*_to_", name):
         role = gait(max(m["first"], m["last"])) + "_Pivots"
-    elif re.search(r"^MG_|^Loco_NonBC_15_|^Cycle_|^CarTurn|^Carturn|^Step_Loco_Cycle|Sprint_D1", name):
+    elif re.search(r"^MG_|^Loco_NonBC_15_|^Cycle_|^CarTurn|^Carturn|^Step_Loco_Cycle|Sprint_D1|^PTM_Loco_.*Constant_Walk_Loop", name):
         if m["skate"] >= 0.65 or m["speed"] < 60:
             report.append((name, "skates %.0f%% at %.0f cm/s" % (100 * m["skate"], m["speed"])))
             continue

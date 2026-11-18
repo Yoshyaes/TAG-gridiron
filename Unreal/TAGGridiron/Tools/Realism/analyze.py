@@ -103,7 +103,14 @@ grp = [D["clip"], D["pid"]]
 bj_prev = bj.groupby(grp).shift(1)
 bj_next = bj.groupby(grp).shift(-1)
 spike = bj > 1.8 * np.fmax(bj_prev.fillna(0), bj_next.fillna(0))
-bjumps = D[ok & (bj > 60) & (bj > expect) & spike & D.state.isin(["presnap", "live", "post"]) & (D.frame > 4)]
+# not the frame a man goes into or comes out of a get-up (the actor is re-seated at the body there and the telemetry
+# reads the bones before that frame's pose is evaluated: stale bones under a moved actor, nothing on screen - checked on
+# the frames of the p38 game), and not a man the capture has on the turf (feet in the air through a fall or a roll are
+# the capture's own motion; falls driven as falls were already left out)
+_md = D["anim"].fillna("").str.split(":").str[0]
+_edge = (_md != _md.groupby(grp).shift(1)) & ((_md == "getup") | (_md.groupby(grp).shift(1) == "getup"))
+_edge |= D.down != D.down.groupby(grp).shift(1)
+bjumps = D[ok & (bj > 60) & (bj > expect) & spike & D.state.isin(["presnap", "live", "post"]) & (D.frame > 4) & ~_edge & (D.pz > 45)]
 # a scene reset (the next play set up, everyone re-placed) moves many men in the same frame: not a glitch on one body
 mass = bjumps.groupby(["clip", "frame"]).pid.transform("size") >= 5
 bjumps = bjumps[~mass]
@@ -298,7 +305,10 @@ for _, p in P[P.snap.notna()].iterrows():
         after = bw[(bw.index > lv.index.max()) & (bw.index <= lv.index.max() + 60)].bwx.dropna()
         if len(after) > 3:
             v = after.diff().abs()
-            still = after[v < 1.0]  # the first settled frame (the ball moving < 1 cm a frame)
+            # settled: the first frame from which the ball moves < 1 cm a frame for a third of a second (one still
+            # frame is not it: the ball pauses for a frame as the fall begins, and the fall is what carries it on)
+            calm = v[::-1].rolling(10, min_periods=10).max()[::-1] < 1.0
+            still = after[calm.fillna(False)]
             end_w = (still.iloc[0] if len(still) else after.iloc[-1])
             shown = sgn * (end_w - lv.bwx.iloc[0]) / 91.44
     cmp_.append(dict(clip=c, scored=y, shown=round(float(shown), 1), sim=round(float(sim_shown), 1), diff=round(float(shown - y), 1), desc=dsc[:70]))
@@ -370,12 +380,34 @@ if "slr" in D.columns and "sls" in D.columns:
                       "shown_cm_per_s": round(float(FL.sls.sum() / max(1, len(FL)) * 30), 1),
                       "shown_over_raw": round(float(FL.sls.sum() / max(1e-6, FL.slr.sum())), 3),
                       "by_mode_shown_over_raw": {k: round(float(v.sls.sum() / max(1e-6, v.slr.sum())), 3) for k, v in FL.groupby("mode") if len(v) > 300}}
+# ---------------------------------------------------------------- planted feet by the captures' own verdict (plf column)
+# plf = feet the playing capture holds on the turf this frame (its motion in the clip plus the clip's root travel under
+# 45 cm/s, FTagRetargetProxy::MeasurePlants); slr / sls = how far those feet travel over the ground as driven and as shown.
+# The height test above counts a walker's swing foot (4-6 cm off the turf) as planted and so overstates skating.
+if "plf" in D.columns:
+    PT = D[(D.hidden == 0) & (D.down == 0) & D.state.isin(["presnap", "live", "post"]) & D["mode"].isin(["mm", "one", "clip"]) & (D.plf > 0)]
+    def _truth(p):
+        n = float(p.plf.sum())
+        if n <= 0:
+            return None
+        per = p.sls / p.plf
+        return {"planted_foot_frames": int(n), "raw_cm_s": round(float(p.slr.sum() / n * 30), 1), "shown_cm_s": round(float(p.sls.sum() / n * 30), 1),
+                "frames_over_1cm": round(float((per > 1.0).mean()), 4), "frames_over_3cm": round(float((per > 3.0).mean()), 4)}
+    R["foot_truth"] = {"all": _truth(PT), "live": _truth(PT[PT.state == "live"]), "presnap": _truth(PT[PT.state == "presnap"]), "post": _truth(PT[PT.state == "post"]),
+                       "by_mode_live": {k: _truth(v) for k, v in PT[PT.state == "live"].groupby("mode")}}
+# ---------------------------------------------------------------- the shown pose against the capture as played (dev column)
+if "dev" in D.columns:
+    CF = D[(D.hidden == 0) & D.state.isin(["presnap", "live", "post"]) & D["mode"].isin(["mm", "one", "clip", "fall", "getup"])]
+    LV = CF[CF.state == "live"]
+    R["capture_fidelity"] = {"mean_cm": round(float(CF.dev.mean()), 2), "live_mean_cm": round(float(LV.dev.mean()), 2), "live_p90_cm": round(float(LV.dev.quantile(0.9)), 2),
+                             "live_layers_cm": {n: round(float(LV[c].mean()), 2) for c, n in (("dfb", "football"), ("dor", "orientation"), ("dst", "stride"), ("dln", "lean"), ("dxf", "crossfade"), ("dft", "foot_lock"))},
+                             "live_without_lean_cm": round(float((LV.dev - LV.dln).clip(lower=0).mean()), 2)}
 # ---------------------------------------------------------------- realism-plan measures (rubric.json)
 # the ball in the air never past the end line (110) or far outside the sidelines (sim yards)
 air = D[D.ballmode == "air"].drop_duplicates(["clip", "frame"])
 R["ball_air_max_x_yd"] = round(float(air.bx.max()), 1) if len(air) else None
 # touchdowns followed by a celebration clip (after the whistle or in the replay)
-td_clips = set(P[P["end"] == "td"]["clip"])
+td_clips = set(P[P["end"] == "td"]["clip"]) | {int(c) for c, v in desc.items() if "TOUCHDOWN" in v.get("desc", "") and int(c) in set(P["clip"])}  # (a carrier tackled over the line ends "tackle")
 celeb = D[D["clip"].isin(td_clips) & D.asset.str.contains("Celeb", case=False, na=False)]["clip"].unique()
 R["celebrations"] = {"td_plays": len(td_clips), "with_celebration": int(len(celeb)),
                      "share": round(len(celeb) / len(td_clips), 3) if td_clips else None}
