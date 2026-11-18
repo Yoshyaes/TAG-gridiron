@@ -10,11 +10,16 @@
 #pragma once
 
 #include <algorithm>
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <vector>
 
 namespace tag {
+
+// (Abilities.h: the Superstar / X-Factor catalog and grades; declared here so a Player can carry them)
+enum class AbilityId : uint8_t;
+enum class StarGrade : uint8_t;
 
 enum class Pos { QB, RB, FB, WR, TE, OT, OG, C, DE, DT, LB, CB, S, K, P };
 
@@ -99,6 +104,11 @@ struct Player {
   double injuredWeeks = 0;
   /** Was on the field for the last snap (substitution hysteresis: the man in the game stays in). */
   bool onFieldLast = false;
+  /** His grade against the league at his position (Abilities.h: Star / Superstar / X-Factor), and his loadout: the
+   *  Superstar abilities he has equipped and his X-Factor (AbilityId::None = none). */
+  StarGrade grade{};
+  std::vector<AbilityId> abilities;
+  AbilityId xFactor{};
 };
 
 struct TeamColors {

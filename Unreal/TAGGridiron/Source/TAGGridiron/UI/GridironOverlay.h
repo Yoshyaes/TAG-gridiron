@@ -161,6 +161,10 @@ public:
 	/** The settings screen (commentary captions, ...); Back returns to whatever opened it. */
 	void ShowSettings(std::function<void()> Back);
 	void ShowBoxScore(const FString& Title, const FString& Button, std::function<void()> Done);
+	/** Superstars & X-Factors (UI/AbilityScreen.cpp): a team's graded players and their ability loadouts; Back returns
+	 *  to whatever opened it. The saved loadouts are laid over the coach's picks at startup (LoadAbilityLoadouts). */
+	void ShowAbilities(int32 TeamIdx, std::function<void()> Back);
+	static void LoadAbilityLoadouts(AMatchDirector* D);
 
 	virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
 	/** A controller button (or keyboard key) centred at C, Size across, in G's local space (the glyph widgets use it too). */
@@ -206,6 +210,11 @@ private:
 	FVector2D IconViewport = FVector2D(1920, 1080);
 	bool bIconPad = false;
 	int32 PaintPresnap(FSlateWindowElementList& Out, int32 Layer, const FGeometry& G) const;
+	// abilities (UI/AbilityScreen.cpp): the zone's banners and the badges over the X-Factor men before the snap
+	void PumpAbilities();
+	int32 PaintAbilities(FSlateWindowElementList& Out, int32 Layer, const FGeometry& G) const;
+	int32 AbTeam = -1, AbRow = 0, AbPick = 0, AbCol = 0;
+	std::function<void()> AbBack;
 	FString BannerText;
 	FString BannerSub;
 	FLinearColor BannerColor = FLinearColor::White;

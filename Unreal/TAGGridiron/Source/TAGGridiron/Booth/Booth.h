@@ -157,6 +157,8 @@ class Booth {
 
   // ---- the queue
   Line& push(Who who, Kind kind, const std::string& text, int energy, int prio, double delay = 0, double ttl = 30);
+  /** A man into the zone (his X-Factor live) or knocked out of it. */
+  void onZone(const Game& g, const AbilityEvent& e);
   void dropKind(Kind k);
   void dropStale();
   void snapFlush();
@@ -250,6 +252,7 @@ class Booth {
   // what the booth has seen
   bool opened_ = false, closed_ = false;
   size_t logSeen_ = 0;
+  size_t zoneSeen_ = 0;  // (Game::abil.history read so far: the X-Factor zone calls)
   const PlaySim* sim_ = nullptr;
   double simT_ = 0;
   size_t evSeen_ = 0;

@@ -27,6 +27,7 @@
 #include <utility>
 #include <vector>
 
+#include "Abilities.h"
 #include "Playbook.h"
 #include "Rng.h"
 #include "Types.h"
@@ -113,6 +114,12 @@ struct Tune {
   double throwStyle = -1;    // >= 0: the CPU quarterback throws the user's pass types (0 bullet, 1 lob, 2 high, 3 low; a
                              // man inside 6 yd gets the shovel), for a filmed check (-1: his own calibrated throws)
   double kickBlock = 0;      // > 0: the chance a punt or field goal is blocked, for a filmed check (0: the real rates)
+  double abilities = 1;      // Superstar / X-Factor abilities in play (Abilities.h); 0: every man plays as his ratings
+  // with abilities in play the league's stars are better than their ratings, so the league average is held where the NFL
+  // has it (the stars stand above it, the rest a shade below): a tackle logit and a throw placement factor for every man
+  // (fit with SimCalibrate, abilities on; with them off neither applies and every play is as it was)
+  double abilTackle = 0.12;
+  double abilAcc = 1.05;
 };
 Tune& tune();
 /** Set a tune field by name; false if there is none. */
@@ -237,7 +244,13 @@ class Ent {
   double lastMoveT = -9;
   bool lastMoveWon = false;
 
-  const Ratings& r() const { return p->r; }
+  /** His ratings on this play: the player's, plus what his Superstar abilities (and a live X-Factor) add (Abilities.h).
+   *  fx: the rest of what they do, read where the sim rolls. Without abilities rr == p->r and fx is neutral. */
+  Ratings rr;
+  AbilityFx fx;
+  bool inZone = false;     // his X-Factor is live
+  bool fastBall = false;   // (his top speed with the ball already raised: Home Run Hitter, Slipstream)
+  const Ratings& r() const { return rr; }
   double speed() const { return len(vel); }
   bool free() const { return !engaged && stun <= 0 && state != EntState::Down; }
   const char* animName() const { return tag::animName(anim); }
@@ -405,6 +418,8 @@ struct PlayConfig {
    *  11 players on the field (offUnit[0] = the returner, defUnit[0] = the kicker / punter). */
   std::optional<KickReturnSpec> kick;
   std::vector<Player*> offUnit, defUnit;
+  /** Superstar / X-Factor abilities: on, the game situation they read, who is in the zone (Game::makePlay fills it). */
+  AbilityCtx abil;
 };
 
 struct TackleLogEntry {
@@ -646,6 +661,9 @@ class PlaySim {
   V2 alignPos(const FormationSlot& slot, bool flip) const;
   void setupOffense();
   void setupDefense();
+  /** Every man's abilities for this play (Ent::rr / fx), before anyone's assignment reads his ratings. */
+  void applyAbilities();
+  bool abilOn_ = false;  // abilities in play on this play (Tune::abilTackle / abilAcc apply)
   std::vector<Ent*> eligibles() const;
   void alignDefense();
   void setupAssignments();

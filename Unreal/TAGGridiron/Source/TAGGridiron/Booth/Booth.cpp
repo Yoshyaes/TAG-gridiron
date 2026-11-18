@@ -570,6 +570,7 @@ void Booth::tick(double dt, const Game& g, const View& v) {
     const size_t i = logSeen_++;
     onLog(g, g.log[i], i);
   }
+  while (zoneSeen_ < g.abil.history.size()) onZone(g, g.abil.history[zoneSeen_++]);
   if (sim_) {
     simT_ = sim_->t;
     if (!snapped_ && sim_->t > 0) {
@@ -705,6 +706,45 @@ void Booth::onOpen(const Game& g, const View& v) {
 }
 
 // ------------------------------------------------------------------ the log (Game's own lines)
+
+void Booth::onZone(const Game& g, const AbilityEvent& e) {
+  (void)g;
+  if (!e.p) return;
+  const Player& p = *e.p;
+  const std::string full = p.first + " " + p.last;
+  const std::string& last = p.last;
+  if (!e.entered) {
+    push(Who::Color, Kind::Analysis,
+         pick("zone_out", {"And that cools " + last + " off. " + (e.why.empty() ? std::string() : "It was " + e.why + " that did it. ") + "He's out of the zone.",
+                           "That's what knocks " + last + " out of the zone. He'll have to earn his way back.",
+                           "Well, " + last + " was rolling, but that ends it. He's out of the zone for now."}),
+         1, 3, 0.4, 25)
+        .snapSafe = true;
+    return;
+  }
+  push(Who::PBP, Kind::Story,
+       pick("zone_in", {full + " is in the zone!", "Here comes " + last + ". He's in the zone now.", "You can feel it. " + full + " has found the zone."}),
+       2, 4, 0.3, 25)
+      .snapSafe = true;
+  std::string c;
+  switch (e.id) {
+    case AbilityId::IceVeins: c = "Look at the poise. You can put a man in his face and it doesn't matter, the ball's going to be right there."; break;
+    case AbilityId::RocketArm: c = "When he's like this, no throw is too far. Safeties better stay deep."; break;
+    case AbilityId::Juggernaut: c = "He's running angry. Arm tackles aren't going to get it done, you need two or three guys on him."; break;
+    case AbilityId::Phantom: c = "Good luck getting a clean shot on him. He makes people miss in a phone booth."; break;
+    case AbilityId::Spotlight: c = "Throw it up to him. Fifty-fifty balls aren't fifty-fifty when he's going like this."; break;
+    case AbilityId::Slipstream: c = "He's open on everything, and once he catches it he's gone."; break;
+    case AbilityId::Fortress: c = "Nobody is getting through on his side. That quarterback can set up and stay there."; break;
+    case AbilityId::Havoc: c = "He's winning every rep. The offense has to account for him or he's going to wreck this game."; break;
+    case AbilityId::BlackHole: c = "Run at him and you go nowhere. He's taking on blocks and making the tackle himself."; break;
+    case AbilityId::Enforcer: c = "Every hit is a statement. Receivers are going to hear him coming."; break;
+    case AbilityId::Lockdown: c = "Whoever he's on is not open. I'd throw the other way."; break;
+    case AbilityId::LastLine: c = "He's reading the quarterback's eyes. Anything thrown over the middle is in danger."; break;
+    case AbilityId::Automatic: c = "Right now he could make it from anywhere in range. That's a weapon in a close game."; break;
+    default: break;
+  }
+  if (!c.empty()) push(Who::Color, Kind::Analysis, c, 1, 3, 0.2, 30).snapSafe = true;
+}
 
 void Booth::onLog(const Game& g, const PlayLog& l, size_t index) {
   const std::string& d = l.desc;

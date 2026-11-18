@@ -7,6 +7,7 @@
 #include <numeric>
 #include <set>
 
+#include "Abilities.h"
 #include "Playbook.h"
 #include <utility>
 
@@ -295,6 +296,12 @@ League createLeague(uint32_t seed) {
     std::stable_sort(ix.begin(), ix.end(), [&out](size_t a, size_t b) { return out[a]->blitzLean < out[b]->blitzLean; });
     static const char* const kDefOrder[] = {"Tampa 2", "4-3 Quarters", "4-3 Cover 3", "3-4 Multiple", "3-4 Pressure"};
     for (size_t k = 0; k < ix.size(); k++) out[ix[k]]->defScheme = kDefOrder[(k * 5) / ix.size()];
+  }
+  // the stars: every man graded against his position league-wide, and the coach's ability picks (no RNG either)
+  {
+    std::vector<Team*> teams;
+    for (auto& t : out) teams.push_back(t.get());
+    gradeLeague(teams);
   }
   return out;
 }

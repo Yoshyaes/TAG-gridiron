@@ -13,7 +13,7 @@ if not exist build\booth mkdir build\booth
 set "SRC=..\Source\TAGGridiron"
 set "SIM=%SRC%\Sim"
 set FLAGS=/nologo /std:c++17 /O2 /EHsc /W4 /permissive- /utf-8 /I"%SIM%" /I"%SRC%"
-cl %FLAGS% /c "%SIM%\League.cpp" "%SIM%\Playbook.cpp" "%SIM%\PlaySim.cpp" "%SIM%\Game.cpp" "%SIM%\Stats.cpp" "%SRC%\Booth\Booth.cpp" "%SRC%\Booth\BoothSpeech.cpp" "%SRC%\Booth\BoothWriter.cpp" /Fobuild\booth\ || exit /b 1
-cl %FLAGS% BoothScript.cpp build\booth\League.obj build\booth\Playbook.obj build\booth\PlaySim.obj build\booth\Game.obj build\booth\Stats.obj build\booth\Booth.obj build\booth\BoothSpeech.obj build\booth\BoothWriter.obj /Fobuild\booth\ /Febuild\BoothScript.exe || exit /b 1
+cl %FLAGS% /c "%SIM%\League.cpp" "%SIM%\Playbook.cpp" "%SIM%\PlaySim.cpp" "%SIM%\Game.cpp" "%SIM%\Stats.cpp" "%SIM%\Abilities.cpp" "%SRC%\Booth\Booth.cpp" "%SRC%\Booth\BoothSpeech.cpp" "%SRC%\Booth\BoothWriter.cpp" /Fobuild\booth\ || exit /b 1
+cl %FLAGS% BoothScript.cpp build\booth\League.obj build\booth\Playbook.obj build\booth\PlaySim.obj build\booth\Game.obj build\booth\Stats.obj build\booth\Abilities.obj build\booth\Booth.obj build\booth\BoothSpeech.obj build\booth\BoothWriter.obj /Fobuild\booth\ /Febuild\BoothScript.exe || exit /b 1
 echo Build OK: %~dp0build\BoothScript.exe
 endlocal

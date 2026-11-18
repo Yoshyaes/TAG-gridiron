@@ -94,6 +94,8 @@ struct GameOptions {
   std::optional<double> quarterLen;
   std::optional<Weather> weather;
   std::optional<TeamKey> userTeam;
+  /** Superstar / X-Factor abilities in this game (unset: on; Tune::abilities = 0 turns them off everywhere). */
+  std::optional<bool> abilities;
 };
 
 enum class PenaltySpot { Los, End, Spot };
@@ -158,6 +160,15 @@ class Game {
   /** extra-time flag for untimed down */
   bool untimed = false;
   bool safetyKick = false;
+  /** Superstar / X-Factor abilities: on for this game, and every X-Factor man's zone (Abilities.h). The zone events
+   *  (in / knocked out) pile up in abil.events for the presentation to take (the last 32 are kept). */
+  bool abilitiesOn = true;
+  AbilityState abil;
+  bool abilOn() const;
+  /** What the play's sim needs to know about abilities (PlayConfig::abil). */
+  AbilityCtx abilCtx() const;
+  /** A kicker / punter's ratings for this kick, his abilities in (kickRatings). */
+  Ratings kickR(const Player& k, TeamKey kt, bool punt) const;
 
   Team& teamOf(TeamKey k) const { return k == TeamKey::Home ? *home : *away; }
   Team& offense() const { return teamOf(poss); }

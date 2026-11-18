@@ -602,6 +602,9 @@ int main() {
     Ent* d = sim->defRole("MLB");
     c->userControlled = true;
     auto adj = [&](Move cm, Move dm, double facing, bool dive) {
+      // (the sim reads the play's ratings, Ent::rr, taken at the snap: the test's own numbers go there too)
+      c->rr = c->p->r;
+      d->rr = d->p->r;
       c->move = cm;
       c->moveT = cm == Move::None ? 9 : 0.1;
       d->move = dm;
@@ -659,6 +662,207 @@ int main() {
       for (const Ent* e : s2->ents) check(std::isfinite(e->pos.x) && std::isfinite(e->pos.y), "NaN after a move");
     }
     check(started > 60, "only " + std::to_string(started) + " user moves started in 200 carries");
+  });
+
+  // ------------------------------------------------------------------ Superstar / X-Factor abilities (Abilities.h)
+  t("abilities: grades by position share, loadouts inside slots and AP, X-Factors on the elite", [&] {
+    int graded[4] = {0, 0, 0, 0}, xfWith = 0;
+    for (const auto& tm : league) {
+      int stars = 0;
+      for (const auto& p : tm->roster) {
+        const int g = static_cast<int>(p->grade);
+        graded[g]++;
+        stars += g > 0;
+        check(static_cast<int>(p->abilities.size()) <= gradeSlots(p->grade), p->last + " over his slots");
+        check(abilityAPUsed(*p) <= gradeAP(p->grade), p->last + " over his AP");
+        if (p->xFactor != AbilityId::None) check(p->grade == StarGrade::XFactor, p->last + " has an X-Factor without the grade");
+        if (p->grade == StarGrade::XFactor) xfWith += p->xFactor != AbilityId::None;
+        for (AbilityId id : p->abilities) check(abilityLock(*p, abilityDef(id)).empty(), p->last + " carries a locked ability");
+        if (g > 0) check(!p->abilities.empty() || p->xFactor != AbilityId::None, p->last + " (" + starGradeName(p->grade) + ") has nothing equipped");
+      }
+      check(stars >= 5, tm->abbr + " has only " + std::to_string(stars) + " graded players");
+      int top = 0;
+      for (const auto& p : tm->roster) top += static_cast<int>(p->grade) >= static_cast<int>(StarGrade::Superstar);
+      check(top >= 1, tm->abbr + " has no Superstar");
+    }
+    check(graded[3] >= 30 && graded[3] <= 70, "X-Factor grades " + std::to_string(graded[3]));
+    check(graded[2] >= 100 && graded[2] <= 175, "Superstar grades " + std::to_string(graded[2]));
+    check(xfWith * 10 >= graded[3] * 7, "only " + std::to_string(xfWith) + " of " + std::to_string(graded[3]) + " X-Factor men fit one");
+  });
+
+  t("abilities: the catalog (every id its own entry, unique keys, every graded man has a choice)", [&] {
+    std::set<std::string> keys;
+    for (int i = 1; i < static_cast<int>(AbilityId::Count); i++) {
+      const AbilityDef& a = abilityDef(static_cast<AbilityId>(i));
+      check(static_cast<int>(a.id) == i, "id " + std::to_string(i) + " resolves to " + std::to_string(static_cast<int>(a.id)));
+      check(keys.insert(a.key).second, std::string("duplicate key ") + a.key);
+      check(abilityByKey(a.key) == &a, std::string("key lookup ") + a.key);
+      check(a.posMask != 0 && std::string(a.icon).size() == 2, std::string("positions / icon of ") + a.key);
+      if (a.tier == AbilityTier::XFactor) check(a.need > 0 && *a.trigger && *a.defeat, std::string("zone rules of ") + a.key);
+    }
+    int thin = 0;
+    for (const auto& tm : league)
+      for (const auto& p : tm->roster) {
+        if (p->grade == StarGrade::None) continue;
+        int open = 0;
+        for (const AbilityDef* a : abilitiesFor(p->pos, AbilityTier::Superstar)) open += abilityLock(*p, *a).empty();
+        check(open >= 1, p->last + " (" + posName(p->pos) + ", " + starGradeName(p->grade) + ") can equip nothing");
+        thin += open < 2;
+      }
+    check(thin <= 25, std::to_string(thin) + " graded men with a single choice");
+  });
+
+  t("abilities: locks (position, grade, ratings, AP) and the loadout save string", [&] {
+    Player p;
+    p.pos = Pos::QB;
+    p.r.poise = 90;
+    p.r.accShort = 90;
+    p.r.accMid = 90;
+    p.r.accDeep = 90;
+    p.r.throwPower = 95;
+    p.r.throwOnRun = 90;
+    p.r.decision = 90;
+    p.r.awareness = 90;
+    p.r.agility = 80;
+    p.grade = StarGrade::Star;
+    std::string why;
+    check(!equipAbility(p, AbilityId::Blanket, &why) && why.find("Not for") == 0, "a QB took a corner's ability: " + why);
+    check(!equipAbility(p, AbilityId::MoonballTouch, &why) && why.find("Superstar") != std::string::npos, "a Star took a Superstar ability: " + why);
+    check(!equipAbility(p, AbilityId::IceVeins, &why), "a Star took an X-Factor");
+    check(equipAbility(p, AbilityId::PocketPoise, &why), "Pocket Poise: " + why);
+    check(!equipAbility(p, AbilityId::LaserLine, &why), "a Star took a second ability");
+    p.grade = StarGrade::Superstar;  // 2 slots, 5 AP
+    check(equipAbility(p, AbilityId::MoonballTouch, &why), "Moonball Touch: " + why);
+    check(!equipAbility(p, AbilityId::EscapeHatch, &why), "a third ability on two slots");
+    p.grade = StarGrade::XFactor;  // 3 slots, 7 AP: 2 + 3 used
+    check(equipAbility(p, AbilityId::LaserLine, &why), "Laser Line on 2 AP left: " + why);
+    check(abilityAPUsed(p) == 7, "AP used " + std::to_string(abilityAPUsed(p)));
+    check(equipAbility(p, AbilityId::IceVeins, &why) && equipAbility(p, AbilityId::RocketArm, &why) && p.xFactor == AbilityId::RocketArm,
+          "an X-Factor replaces the last");
+    Player q = p;
+    q.abilities.clear();
+    q.xFactor = AbilityId::None;
+    applyLoadoutString(q, loadoutString(p));
+    check(q.abilities == p.abilities && q.xFactor == p.xFactor, "round trip: " + loadoutString(p) + " -> " + loadoutString(q));
+    q.r.throwPower = 70;  // no longer has the arm: the save's Rocket Arm and Moonball Touch are dropped
+    applyLoadoutString(q, loadoutString(p));
+    check(q.xFactor == AbilityId::None && !hasAbility(q, AbilityId::MoonballTouch) && hasAbility(q, AbilityId::LaserLine), "locked keys kept: " + loadoutString(q));
+    p.r.poise = 50;
+    validateLoadout(p);
+    check(!hasAbility(p, AbilityId::PocketPoise), "validate kept Pocket Poise on 50 poise");
+  });
+
+  t("abilities: neutral when off or unequipped (same game as before), and they change games when on", [&] {
+    auto run = [](int mode) {
+      League L = createLeague(2027);
+      if (mode == 2)
+        for (auto& tm : L)
+          for (auto& p : tm->roster) {
+            p->abilities.clear();
+            p->xFactor = AbilityId::None;
+          }
+      GameOptions o;
+      o.seed = 777;
+      o.abilities = mode != 0;
+      Game g(*L[5], *L[9], o);
+      g.simToEnd();
+      std::string s = std::to_string(g.score.home) + "-" + std::to_string(g.score.away) + "-" + std::to_string(g.log.size());
+      for (const PlayLog& l : g.log) s += l.desc.substr(0, 12);
+      return s;
+    };
+    // (the league offsets that hold the average with stars in it, Tune::abilTackle / abilAcc, set aside: the abilities
+    // themselves must be neutral on a man who carries none)
+    const double keepT = tune().abilTackle, keepA = tune().abilAcc;
+    tune().abilTackle = 0;
+    tune().abilAcc = 1;
+    const std::string off = run(0), bare = run(2);
+    tune().abilTackle = keepT;
+    tune().abilAcc = keepA;
+    check(off == bare, "abilities off != abilities on with none equipped");
+    int differ = 0;
+    for (uint32_t seed = 1; seed <= 4; seed++) {
+      auto one = [seed](bool on) {
+        League L = createLeague(2027);
+        GameOptions o;
+        o.seed = 900 + seed;
+        o.abilities = on;
+        Game g(*L[seed], *L[seed + 10], o);
+        g.simToEnd();
+        return std::to_string(g.score.home) + "-" + std::to_string(g.score.away) + "-" + std::to_string(g.log.size());
+      };
+      differ += one(true) != one(false);
+    }
+    check(differ >= 3, "abilities changed only " + std::to_string(differ) + " of 4 games");
+  });
+
+  t("abilities: the zone (trigger, defeat, events) and what a live X-Factor does to a man", [&] {
+    Player k;
+    k.id = 99001;
+    k.pos = Pos::K;
+    k.grade = StarGrade::XFactor;
+    k.r.kickAcc = 90;
+    k.r.kickPower = 85;
+    check(equipAbility(k, AbilityId::Automatic), "Automatic");
+    AbilityState st;
+    st.afterKick(k, true, true, "TST");
+    check(!st.active(k) && st.zone(k)->progress == 1, "one make: not yet");
+    st.afterKick(k, true, false, "TST");  // an extra point does not count toward it
+    check(st.zone(k)->progress == 1, "a PAT counted");
+    st.afterKick(k, true, true, "TST");
+    check(st.active(k) && st.events.size() == 1 && st.events[0].entered, "two makes: in the zone");
+    AbilitySituation s;
+    const Ratings in = kickRatings(k, false, s, true), out = kickRatings(k, false, s, false);
+    check(in.kickAcc > out.kickAcc + 10, "the zone's kick accuracy");
+    check(st.activeIds() == std::vector<int>{99001}, "active ids");
+    st.afterKick(k, false, false, "TST");
+    check(!st.active(k) && st.zone(k)->progress == 0 && st.events.size() == 2 && !st.events[1].entered, "a miss knocks him out");
+    // an X-Factor out of the zone does nothing; in it, it moves the numbers the sim reads
+    Player cb;
+    cb.pos = Pos::CB;
+    cb.grade = StarGrade::XFactor;
+    cb.r.manCov = 90;
+    cb.r.speed = 94;
+    check(equipAbility(cb, AbilityId::Lockdown), "Lockdown");
+    AbilityFx fx;
+    abilityFx(cb, s, false, fx);
+    check(!fx.any && fx.coverLag == 1, "Lockdown out of the zone");
+    abilityFx(cb, s, true, fx);
+    check(fx.any && fx.coverLag < 0.6 && fx.pbu > 0.5 && fx.add.manCov > 0, "Lockdown in the zone");
+    // situational Superstar abilities: Red Zone Threat only inside the 20
+    Player wr;
+    wr.pos = Pos::WR;
+    wr.grade = StarGrade::Star;
+    wr.r.catchInTraffic = 80;
+    check(equipAbility(wr, AbilityId::RedZoneThreat), "Red Zone Threat");
+    s.los = 50;
+    abilityFx(wr, s, false, fx);
+    check(!fx.any, "Red Zone Threat at midfield");
+    s.los = 88;
+    abilityFx(wr, s, false, fx);
+    check(fx.any && fx.add.catchInTraffic >= 10, "Red Zone Threat at the 12");
+  });
+
+  t("abilities: X-Factor zones come and go over full games", [&] {
+    int in = 0, out = 0;
+    std::set<int> kinds;
+    for (uint32_t seed = 1; seed <= 12; seed++) {
+      League L = createLeague(2027);
+      GameOptions o;
+      o.seed = 5000 + seed;
+      Game g(*L[seed % 32], *L[(seed * 7 + 3) % 32], o);
+      int guard = 0;
+      while (!g.isFinal() && guard++ < 2000) {
+        g.simStep();
+        for (const AbilityEvent& e : g.abil.events) {  // (drained as the presentation does)
+          (e.entered ? in : out)++;
+          kinds.insert(static_cast<int>(e.id));
+        }
+        g.abil.events.clear();
+      }
+    }
+    check(in >= 12, "only " + std::to_string(in) + " zone entries in 12 games");
+    check(out >= 3, "only " + std::to_string(out) + " zone exits in 12 games");
+    check(kinds.size() >= 5, "only " + std::to_string(kinds.size()) + " different X-Factors reached the zone");
   });
 
   std::printf("\n%d passed, %d failed\n", passCount, failCount);

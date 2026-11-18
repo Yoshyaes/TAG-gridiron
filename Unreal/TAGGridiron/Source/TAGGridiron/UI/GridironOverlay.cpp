@@ -136,6 +136,7 @@ void SGridironOverlay::Tick(const FGeometry& G, const double Now, const float Dt
 	LastFrame = GFrameCounter;
 	BannerT += GameDt;
 	ToastT += GameDt;
+	PumpAbilities();  // (the zone: banners, the badges over the X-Factor men)
 	// a menu just opened (laid out by now): give its button focus so the gamepad can drive it
 	if (PendingFocus >= 0 && bModal && ModalBox.IsValid() && FSlateApplication::IsInitialized())
 	{
@@ -199,6 +200,7 @@ int32 SGridironOverlay::OnPaint(const FPaintArgs& Args, const FGeometry& Allotte
 	// pre-snap: the receivers' icons and the adjustments panel
 	if (bHud && !bModal) Layer = PaintPresnap(OutDrawElements, Layer + 1, AllottedGeometry);
 	if (bHud && !bModal) Layer = PaintLineBars(OutDrawElements, Layer + 1, AllottedGeometry);
+	if (bHud && !bModal && !bBroadcastOnly) Layer = PaintAbilities(OutDrawElements, Layer + 1, AllottedGeometry);
 	if (!bModal) Layer = PaintKickMeter(OutDrawElements, Layer + 1, AllottedGeometry);
 	// the focused menu button (gamepad / keyboard navigation) gets a gold frame
 	if (bModal && FSlateApplication::IsInitialized())
@@ -591,6 +593,7 @@ void SGridironOverlay::ShowMainMenu()
 		+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(0, 0, 0, 36)[ SNew(STextBlock).Font(Font(14)).ColorAndOpacity(Dim).Text(T(TEXT("SIMULATION-FIRST PRO FOOTBALL"))) ];
 	Menu->AddSlot().AutoHeight().HAlign(HAlign_Center)[ MakeButton(TEXT("Play Now"), TEXT("You vs CPU. Call plays, control the QB, ball carrier or any defender."), [this] { ShowTeamSelect(true); }) ];
 	Menu->AddSlot().AutoHeight().HAlign(HAlign_Center)[ MakeButton(TEXT("Watch a Game"), TEXT("CPU vs CPU broadcast. Speed up with 1/2/4."), [this] { ShowTeamSelect(false); }) ];
+	Menu->AddSlot().AutoHeight().HAlign(HAlign_Center)[ MakeButton(TEXT("Superstars & X-Factors"), TEXT("Pick the abilities your stars carry into the game."), [this] { ShowAbilities(SelHome, [this] { ShowMainMenu(); }); }) ];
 	Menu->AddSlot().AutoHeight().HAlign(HAlign_Center)[ MakeButton(TEXT("Settings"), TEXT("Commentary captions."), [this] { ShowSettings([this] { ShowMainMenu(); }); }) ];
 	Menu->AddSlot().AutoHeight().HAlign(HAlign_Center)[ MakeButton(TEXT("Quit"), TEXT(""), [] { FPlatformMisc::RequestExit(false); }) ];
 	Menu->AddSlot().AutoHeight().HAlign(HAlign_Center).Padding(0, 30, 0, 0)[ SNew(STextBlock).Font(Font(10)).ColorAndOpacity(Dim).Text(T(TEXT("An original football game. All teams, players and names are fictional."))) ];
@@ -601,6 +604,13 @@ void SGridironOverlay::ShowMainMenu()
 	{
 		bTeamSelectShot = false;
 		ShowTeamSelect(true);
+	}
+	// -TagAbilityShots: straight on to the Superstars & X-Factors screen (its own scripted shots, then the game exits)
+	static bool bAbilityShot = FParse::Param(FCommandLine::Get(), TEXT("TagAbilityShots"));
+	if (bAbilityShot)
+	{
+		bAbilityShot = false;
+		ShowAbilities(SelHome, [this] { ShowMainMenu(); });
 	}
 }
 

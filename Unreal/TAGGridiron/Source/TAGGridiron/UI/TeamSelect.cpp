@@ -836,11 +836,24 @@ void SGridironOverlay::ShowTeamSelect(bool bUserPlays)
 			const TArray<TPair<FString, int32>> K = KeyRatings(*P);
 			FString Keys;
 			for (const auto& KV : K) Keys += (Keys.IsEmpty() ? TEXT("") : TEXT("   ")) + FString::Printf(TEXT("%s %d"), *KV.Key, KV.Value);
-			const FString Tierword = P->ovr >= 90 ? TEXT("SUPERSTAR") : P->ovr >= 85 ? TEXT("STAR") : TEXT("STARTER");
-			const FLinearColor TierC = P->ovr >= 90 ? Gold : P->ovr >= 85 ? FLinearColor(0.75f, 0.8f, 0.88f) : Faint;
+			// his grade (Sim/Abilities.h: his standing at his position league-wide) and what he carries
+			const FString Tierword = P->grade == tag::StarGrade::None ? FString(TEXT("STARTER")) : FString(UTF8_TO_TCHAR(tag::starGradeName(P->grade))).ToUpper();
+			const FLinearColor TierC = P->grade == tag::StarGrade::XFactor ? Col(TEXT("FF6A1A")) : P->grade == tag::StarGrade::Superstar ? Col(TEXT("B58CFF"))
+				: P->grade == tag::StarGrade::Star ? Col(TEXT("72B8FF")) : Faint;
+			TSharedRef<SHorizontalBox> Carry = SNew(SHorizontalBox);
+			auto Pip = [&](const tag::AbilityDef& A)
+			{
+				const FLinearColor C = A.tier == tag::AbilityTier::XFactor ? Col(TEXT("FF6A1A")) : Gold;
+				Carry->AddSlot().AutoWidth().Padding(0, 0, 3, 0)
+				[ SNew(SBox).WidthOverride(22).HeightOverride(14).ToolTipText(Tx(Str(A.name)))
+					[ SNew(SBorder).BorderImage(WhiteBrush()).BorderBackgroundColor(C).Padding(0).HAlign(HAlign_Center).VAlign(VAlign_Center)[ Label(UTF8_TO_TCHAR(A.icon), 7, Ink) ] ] ];
+			};
+			if (P->xFactor != tag::AbilityId::None) Pip(tag::abilityDef(P->xFactor));
+			for (tag::AbilityId Id : P->abilities) Pip(tag::abilityDef(Id));
+			const int32 TeamIdx = bHome ? SelHome : SelAway;
 			StarRow->AddSlot().FillWidth(1).Padding(0, 0, 6, 0)
 			[
-				SNew(SBorder).BorderImage(WhiteBrush()).BorderBackgroundColor(CardHi).Padding(0)
+				Click(SNew(SBorder).BorderImage(WhiteBrush()).BorderBackgroundColor(CardHi).Padding(0)
 				[
 					SNew(SVerticalBox)
 					+ SVerticalBox::Slot().AutoHeight()[ SNew(SBox).HeightOverride(3)[ SNew(SBorder).BorderImage(WhiteBrush()).BorderBackgroundColor(Tier(P->ovr)) ] ]
@@ -856,8 +869,9 @@ void SGridironOverlay::ShowTeamSelect(bool bUserPlays)
 					+ SVerticalBox::Slot().AutoHeight().Padding(FMargin(8, -2, 8, 0))
 					[ SNew(STextBlock).Font(Font(13, "Bold")).ColorAndOpacity(White90).Text(Tx(Str(P->last).ToUpper())).Clipping(EWidgetClipping::ClipToBounds) ]
 					+ SVerticalBox::Slot().AutoHeight().Padding(FMargin(8, 3, 8, 0))[ Label(Keys, 9, White90 * FLinearColor(1, 1, 1, 0.8f), "Regular") ]
-					+ SVerticalBox::Slot().AutoHeight().Padding(FMargin(8, 2, 8, 7))[ Label(Tierword, 8, TierC) ]
-				]
+					+ SVerticalBox::Slot().AutoHeight().Padding(FMargin(8, 2, 8, 0))[ Label(Tierword, 8, TierC) ]
+					+ SVerticalBox::Slot().AutoHeight().Padding(FMargin(8, 2, 8, 7))[ SNew(SBox).HeightOverride(14)[ Carry ] ]
+				], [this, TeamIdx, bUserPlays] { ShowAbilities(TeamIdx, [this, bUserPlays] { ShowTeamSelect(bUserPlays); }); })
 			];
 		}
 
@@ -982,7 +996,7 @@ void SGridironOverlay::ShowTeamSelect(bool bUserPlays)
 						+ SHorizontalBox::Slot().FillWidth(1).Padding(14, 0, 0, 0)[ UnitsR ]
 					]
 					+ SVerticalBox::Slot().AutoHeight().Padding(FMargin(16, 7, 16, 0))[ Chips ]
-					+ SVerticalBox::Slot().AutoHeight().Padding(FMargin(16, 10, 16, 0))[ Heading(TEXT("Star players")) ]
+					+ SVerticalBox::Slot().AutoHeight().Padding(FMargin(16, 10, 16, 0))[ Heading(TEXT("Star players  -  R2 / F: Superstars & X-Factors")) ]
 					+ SVerticalBox::Slot().AutoHeight().Padding(FMargin(16, 0, 10, 0))[ StarRow ]
 					+ SVerticalBox::Slot().AutoHeight().Padding(FMargin(16, 10, 16, 0))
 					[
@@ -1167,6 +1181,7 @@ void SGridironOverlay::ShowTeamSelect(bool bUserPlays)
 		+ SHorizontalBox::Slot().AutoWidth()[ Hint(EPadGlyph::R1, TEXT("E"), TEXT("Change team")) ]
 		+ SHorizontalBox::Slot().AutoWidth()[ Hint(EPadGlyph::Square, TEXT("R"), TEXT("Random team")) ]
 		+ SHorizontalBox::Slot().AutoWidth()[ Hint(EPadGlyph::Triangle, TEXT("T"), TEXT("Swap home / away")) ]
+		+ SHorizontalBox::Slot().AutoWidth()[ Hint(EPadGlyph::R2, TEXT("F"), TEXT("Abilities")) ]
 		+ SHorizontalBox::Slot().AutoWidth()[ Hint(EPadGlyph::Cross, TEXT("Enter"), TEXT("Kick off")) ]
 		+ SHorizontalBox::Slot().AutoWidth()[ Hint(EPadGlyph::Circle, TEXT("Esc"), TEXT("Back")) ];
 
@@ -1224,6 +1239,15 @@ void SGridironOverlay::ShowTeamSelect(bool bUserPlays)
 			return true;
 		}
 		if (K == EKeys::Gamepad_Special_Right) { ATagAudio::Ui(TEXT("UiSelect")); Kick(); return true; }
+		if (K == EKeys::Gamepad_RightTrigger || K == EKeys::F)
+		{
+			// the Superstars & X-Factors screen for the team under the pad (from the options: the user's own, or home)
+			ATagAudio::Ui(TEXT("UiTab"));
+			const bool bHomeT = SelCol == 2 || (SelCol == 1 && (!bSelUserPlays || bSelUserHome));
+			const bool bUserGame = bSelUserPlays;
+			ShowAbilities(bHomeT ? SelHome : SelAway, [this, bUserGame] { ShowTeamSelect(bUserGame); });
+			return true;
+		}
 		if (K == EKeys::Gamepad_FaceButton_Right || K == EKeys::Escape || K == EKeys::BackSpace) { ATagAudio::Ui(TEXT("UiBack")); ShowMainMenu(); return true; }
 		if (K == EKeys::Gamepad_FaceButton_Left || K == EKeys::R)
 		{

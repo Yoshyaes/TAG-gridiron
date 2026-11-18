@@ -131,6 +131,7 @@ Ent::Ent(Player* player, Side s, std::string r_, const V2& position)
   isDL = isDLRole(role);
   face = side == Side::Off ? 0 : kPi;
   const Ratings& rt = p->r;
+  rr = p->r;  // (PlaySim::applyAbilities adds his abilities' points)
   const double fat = 1 - 0.1 * p->fatigue;
   mass = p->weightLb * 0.4536;
   radius = clamp(0.36 + (p->weightLb - 180) / 900, 0.36, 0.55);
@@ -160,6 +161,9 @@ bool setTune(const std::string& name, double v) {
   if (name == "runShed") return t.runShed = v, true;
   if (name == "helpBlock") return t.helpBlock = v, true;
   if (name == "kickBlock") return t.kickBlock = v, true;
+  if (name == "abilities") return t.abilities = v, true;
+  if (name == "abilTackle") return t.abilTackle = v, true;
+  if (name == "abilAcc") return t.abilAcc = v, true;
   if (name == "throwStyle") return t.throwStyle = v, true;
   if (name == "accBase") return t.accBase = v, true;
   if (name == "accSlope") return t.accSlope = v, true;
@@ -243,6 +247,7 @@ PlaySim::PlaySim(const PlayConfig& c) : rng(c.rng), cfg(c), los(c.los), by(c.bal
   ents.reserve(off.size() + def.size());
   for (Ent* e : off) ents.push_back(e);
   for (Ent* e : def) ents.push_back(e);
+  applyAbilities();
   if (cfg.kick) {
     // the user returns the kick, or covers it as the man nearest the landing spot
     if (cfg.userSide) {
@@ -262,6 +267,34 @@ PlaySim::PlaySim(const PlayConfig& c) : rng(c.rng), cfg(c), los(c.los), by(c.bal
   }
   setupAssignments();
   if (cfg.userSide) pickUserEnt(*cfg.userSide);
+}
+
+// ------------------------------------------------------------------ abilities
+void PlaySim::applyAbilities() {
+  if (!cfg.abil.on || tune().abilities <= 0) return;
+  abilOn_ = true;
+  for (Ent* e : ents) {
+    const Player& p = *e->p;
+    if (p.abilities.empty() && p.xFactor == AbilityId::None) continue;
+    AbilitySituation s;
+    s.down = cfg.down ? static_cast<int>(*cfg.down) : 1;
+    s.toGo = cfg.toGo.value_or(10.0);
+    s.los = los;
+    s.q = cfg.abil.q;
+    s.clock = cfg.abil.clock;
+    s.offense = e->side == Side::Off;
+    s.margin = s.offense ? cfg.abil.offMargin : -cfg.abil.offMargin;
+    s.kick = cfg.kick.has_value();
+    e->inZone = p.xFactor != AbilityId::None && cfg.abil.inZone(p.id);
+    abilityFx(p, s, e->inZone, e->fx);
+    if (!e->fx.any) continue;
+    addRatings(e->rr, e->fx.add);
+    // the physical ones move his body too (the same formulas as the Ent's)
+    const double fat = 1 - 0.1 * p.fatigue;
+    e->vmax += e->fx.add.speed * 0.057 * 0.97 * fat;
+    e->tau = (std::max)(0.3, e->tau - e->fx.add.accel * 0.0078 / fat);
+    e->latA += e->fx.add.agility * 0.12 * fat;
+  }
 }
 
 // ------------------------------------------------------------------ kick returns
@@ -1521,7 +1554,8 @@ bool PlaySim::rushMove(Ent* d, const std::string& m) {
   // the same move twice running is read; a second blocker on him is twice the hands to beat
   const double repeat = m == d->lastMove && t - d->lastMoveT < 3.0 ? 0.35 : 0.0;
   const double x = (ms - bs) / 9 + 1.6 * (1 - b->blockPower) - 0.55 - (tired ? 1.5 : 0.0) - repeat -
-                   (static_cast<double>(blockers.size()) - 1) * 1.0 + (power ? 0.6 * (std::max)(0.0, d->linePush) : 0.0);
+                   (static_cast<double>(blockers.size()) - 1) * 1.0 + (power ? 0.6 * (std::max)(0.0, d->linePush) : 0.0) +
+                   d->fx.moveWin;  // (abilities: Bull Charge, Havoc)
   const bool won = rng.chance(sigmoid(x));
   d->lastMove = m;
   d->lastMoveT = t;
@@ -1862,6 +1896,11 @@ void PlaySim::updateSnap() {
 
 void PlaySim::setCarrier(Ent* e) {
   carrier = e;
+  // (abilities: Home Run Hitter / Slipstream find another gear with the ball)
+  if (e->fx.topSpeed > 0 && !e->fastBall) {
+    e->vmax *= 1 + e->fx.topSpeed;
+    e->fastBall = true;
+  }
   e->hasBall = true;
   e->state = EntState::Carrier;
   e->anim = Anim::Run;
@@ -2517,7 +2556,7 @@ double PlaySim::maxAir(const Ent* q) const {
   // NFL arms: the strongest put ~65 yd of air on a catchable ball. Never farther than the arm's launch speed can
   // carry it (range ~ v^2/g, less drag): a throw past that solved to a 6 s moonball.
   const double v0 = throwSpeed(q);
-  return (std::min)(48 + (q->r().throwPower - 50) * 0.4, 0.9 * v0 * v0 / G);
+  return (std::min)(48 + (q->r().throwPower - 50) * 0.4 + q->fx.armAdd, 0.9 * v0 * v0 / G + q->fx.armAdd);
 }
 
 double PlaySim::openness(const Ent* r, const Ent* q) const {
@@ -2623,12 +2662,14 @@ void PlaySim::throwBall(Ent* q, Ent* tgt, bool lob, int style, int shovelAt) {
   const double depthAcc = D < 10 ? q->r().accShort : D < 20 ? q->r().accMid : q->r().accDeep;
   const double pressure = pressureOn(q);
   const double moving = q->speed() / q->vmax;
-  const double onRun = moving > 0.35 ? 1 + (1 - q->r().throwOnRun / 100) * moving * 1.5 : 1;
-  const double poise = 1 + pressure * (1.4 - q->r().poise / 100);
+  // (abilities: Off Script / Pocket Poise / Ice Veins take off part of what the move and the rush cost him)
+  const double onRun = moving > 0.35 ? 1 + (1 - q->r().throwOnRun / 100) * moving * 1.5 * q->fx.runAcc : 1;
+  const double poise = 1 + pressure * (std::max)(0.0, 1.4 - q->r().poise / 100) * q->fx.pressAcc;
   const double weather = cfg.weather.precip == Precip::Rain ? 1.12 : cfg.weather.precip == Precip::Snow ? 1.18 : 1;
   // placement error grows faster than linearly past 20 yards: deep balls are dropped in a bucket, not darted
   const double deepK = D > 20 ? 1 + (D - 20) * tune().deepErr : 1;
-  const double sd = (tune().accBase + (99 - depthAcc) * tune().accSlope) * (0.5 + D / 19) * (1 + tune().accMidK * clamp((D - 12) / 10, 0.0, 1.0)) * deepK * onRun * poise * weather * (1 + q->p->fatigue * 0.2);
+  const double abilAcc = (D >= 20 ? q->fx.deepAcc : q->fx.shortAcc) * (abilOn_ ? tune().abilAcc : 1.0);
+  const double sd = (tune().accBase + (std::max)(0.0, 99 - depthAcc) * tune().accSlope) * (0.5 + D / 19) * (1 + tune().accMidK * clamp((D - 12) / 10, 0.0, 1.0)) * deepK * onRun * poise * weather * (1 + q->p->fatigue * 0.2) * abilAcc;
   {
     const double nx = rng.normal(0, sd * 0.9);
     const double ny = rng.normal(0, sd);
@@ -3096,7 +3137,8 @@ void PlaySim::thinkMan(Ent* e) {
     e->want = V2{0, 0};
     return;
   }
-  const double lag = (0.1 + (99 - e->r().manCov) * 0.006 + (99 - e->r().agility) * 0.002) * tune().manLagK;
+  // (abilities: Blanket / Lockdown read him sooner; Route Artist / Slipstream on the receiver make the read late)
+  const double lag = clamp((0.1 + (99 - e->r().manCov) * 0.006 + (99 - e->r().agility) * 0.002) * tune().manLagK * e->fx.coverLag + r->fx.sepLag, 0.02, 1.2);
   const V2 rv = delayedVel(r, lag);
   // trail with inside/over leverage: stay slightly deeper (+x) on deep routes
   const double depth = r->pos.x - los;
@@ -3144,7 +3186,7 @@ void PlaySim::thinkZone(Ent* e) {
   }
   V2 tgt = spot;
   if (threat) {
-    const double lag = 0.15 + (99 - e->r().zoneCov) * 0.008;
+    const double lag = clamp((0.15 + (99 - e->r().zoneCov) * 0.008) * e->fx.zoneLag + threat->fx.sepLag * 0.5, 0.02, 1.2);
     const V2 rv = delayedVel(threat, lag);
     const V2 tp = add(threat->pos, scale(rv, 0.45));
     if (deep) {
@@ -3586,7 +3628,7 @@ void PlaySim::updateEngagements(double dt) {
     for (Ent* b : blockers) b->engT += dt;
     // the bars: the rusher's energy comes back slowly; the blocker's power wears with the rep's length (the hazard's own
     // decay below) and a pile going his way backwards, and is never more than it was (the moves he took stay taken)
-    d->rushEnergy = (std::min)(1.0, d->rushEnergy + 0.07 * dt);
+    d->rushEnergy = (std::min)(1.0, d->rushEnergy + 0.07 * dt * d->fx.energyRegen);
     if (d->moveCd > 0) d->moveCd -= dt;
     for (Ent* b : blockers) {
       const double worn = 1 - 0.32 * (std::max)(0.0, b->engT - (passPro ? tune().passProHold : 1.6)) - 0.3 * (std::max)(0.0, push);
@@ -3610,6 +3652,14 @@ void PlaySim::updateEngagements(double dt) {
     const bool holderNear = holder && holder->side != d->side && dist(holder->pos, d->pos) < 1.6;
     const double decay = (std::max)(0.0, blockers[0]->engT - (passPro ? tune().passProHold : 1.6)) * 0.5;
     double lambda = (base * std::exp(diff / 17) + decay) * (holderNear ? 3.2 : 1);
+    {
+      // abilities: the rusher's (Edge Bender, Havoc; Gap Plugger, Black Hole against the run) against his blockers'
+      // (Brick Wall, Fortress; Road Grader)
+      double hold = 1;
+      for (Ent* b : blockers) hold *= passPro ? b->fx.holdShed : b->fx.runHold;
+      lambda *= (passPro ? d->fx.shed : d->fx.runShed) * hold;
+      if (passPro && holderNear) lambda *= d->fx.sackArm;  // (Finisher, Havoc: off the block with the quarterback in reach)
+    }
     // the ball is caught (or handed off) away from the quarterback: a pass rusher stops rushing a quarterback who no
     // longer has it, turns and chases; his blocker cannot hold him (that is holding), so the rep breaks up in a beat
     // (the blockers turned convoy at the catch: a pass rep still running when the ball was caught)
@@ -3867,7 +3917,7 @@ void PlaySim::resolveAir() {
     if (e->side == Side::Off) {
       if (!e->eligible) continue;
       // catch probability
-      const double skill = contested ? e->r().catchInTraffic * 0.6 + e->r().catching * 0.4 : e->r().catching;
+      const double skill = contested ? e->r().catchInTraffic * 0.6 + e->r().catching * 0.4 + e->fx.contested : e->r().catching;
       const double offT = d / 1.2;  // how far off-target relative to reach
       const double ballSpeed = jsHypot(b.vel.x, b.vel.y, b.vel.z);
       // how tight the coverage is at the catch: a defender in phase (hip to hip) makes it a ~45% catch (PFF contested
@@ -3895,7 +3945,7 @@ void PlaySim::resolveAir() {
         for (Ent* o : oppNear)
           if (dist(o->pos, bp) < dist(dbest->pos, bp)) dbest = o;
         const double edge = d - dist(dbest->pos, bp);  // >0: defender closer to the ball than the receiver
-        const double pbu = sigmoid((dbest->r().ballSkills - 70) / 12 + edge * 1.6 - 1.2 + (deepBall ? 0.35 : 0)) * (deepBall ? 0.6 : 0.62);
+        const double pbu = sigmoid((dbest->r().ballSkills - 70) / 12 + edge * 1.6 - 1.2 + (deepBall ? 0.35 : 0) + dbest->fx.pbu - e->fx.winBall) * (deepBall ? 0.6 : 0.62);
         if (rng.chance(pbu)) {
           pbuBy = dbest;
           deepContested = airYds > 15;
@@ -3904,7 +3954,7 @@ void PlaySim::resolveAir() {
           b.vel.z = 1.5;
           b.target = nullptr;
           // defender in great position may come down with it; or tipped and picked
-          const double pInt = sigmoid((dbest->r().catching - 62) / 10 + edge * 1.2 - 1.4 - (deepBall ? 1.0 : 0) + tune().intBias);
+          const double pInt = sigmoid((dbest->r().catching - 62) / 10 + edge * 1.2 - 1.4 - (deepBall ? 1.0 : 0) + tune().intBias + dbest->fx.intAdj - (b.thrower ? b.thrower->fx.ballSafe : 0.0) - e->fx.winBall);
           if (rng.chance(pInt)) intercept(dbest);
           return;
         }
@@ -3938,7 +3988,7 @@ void PlaySim::resolveAir() {
         e->anim = Anim::Catch;
         e->animT = 0;
         // momentum loss when catching
-        impulse(e, scale(e->vel, (contested ? 0.3 : tune().catchKeep) - 1), 0.35);
+        impulse(e, scale(e->vel, (std::min)(0.9, (contested ? 0.3 : tune().catchKeep) + e->fx.catchKeep) - 1), 0.35);
         setCarrier(e);
         if (diving) {
           e->pos = add(e->pos, scale(diveDir, 2.8));
@@ -3962,9 +4012,9 @@ void PlaySim::resolveAir() {
       Ent* tgt = b.target;
       const double rd = tgt ? dist(tgt->pos, bp) : 9;
       const double edge = clamp(rd - d, -2, 1.5);  // defender beat the receiver to the ball
-      const double pPlay = sigmoid((e->r().ballSkills - 70) / 10 + edge * 1.0 - 1.1 - d * 0.8 - (b.pos.z > 2.5 ? 0.8 : 0));
+      const double pPlay = sigmoid((e->r().ballSkills - 70) / 10 + edge * 1.0 - 1.1 - d * 0.8 - (b.pos.z > 2.5 ? 0.8 : 0) + e->fx.pbu - (tgt ? tgt->fx.winBall : 0.0));
       if (!rng.chance(pPlay)) continue;
-      const double pInt = sigmoid((e->r().catching - 62) / 10 + edge * 0.6 - 1.2 - (b.pos.x - los > 18 ? 1.0 : 0) + tune().intBias);
+      const double pInt = sigmoid((e->r().catching - 62) / 10 + edge * 0.6 - 1.2 - (b.pos.x - los > 18 ? 1.0 : 0) + tune().intBias + e->fx.intAdj - (b.thrower ? b.thrower->fx.ballSafe : 0.0));
       if (rng.chance(pInt)) {
         intercept(e);
       } else {
@@ -4021,7 +4071,7 @@ void PlaySim::checkTackles() {
       // engaged defenders can still reach out for a nearby carrier
       // a hazard per second (a blocked man gets an arm free now and then), not a per-tick roll
       // against a runner the shed-and-tackle stays a per-tick roll (calibrated for run defence)
-      const double armP = qbPocket ? (0.5 + d->r().blockShed * 0.01) * SIM_DT : 0.06 + d->r().blockShed * 0.0012;
+      const double armP = (qbPocket ? (0.5 + d->r().blockShed * 0.01) * SIM_DT * d->fx.sackArm : 0.06 + d->r().blockShed * 0.0012);
       if (dd < range + 0.1 && d->tackleCd <= 0 && rng.chance(armP)) {
         if (tryTackle(d, c, gang, true)) return;
       }
@@ -4084,6 +4134,12 @@ bool PlaySim::tryTackle(Ent* d, Ent* c, int gang, bool arm, bool dive) {
   if (c->moveOn(Move::Juke)) x -= 0.6 + (std::max)(0.0, c->r().elusiveness - 70) * 0.02;
   if (c->userControlled && input.juke) x -= 0.4;
   x += moveTackleAdj(d, c, facing, arm, dive);
+  // abilities: the tackler's (Sure Tackler, Enforcer, Finisher on a sack), the carrier's (Battering Ram / Juggernaut
+  // against a man in front, Ankle Taker / Phantom against one from the side, more off a live move, Escape Hatch)
+  x += d->fx.tackleAdj + (facing > 0.3 ? c->fx.powerAdj : c->fx.elusAdj);
+  if (c->move != Move::None && c->moveOn(c->move)) x += c->fx.moveAdj;
+  if (isSack) x += d->fx.sackFinish + c->fx.qbEscape;
+  if (abilOn_) x += tune().abilTackle;
   const double p = sigmoid(x);
   if (tackleLog) tackleLog->push_back(TackleLogEntry{p, facing, dive, arm, gang, c->pos.x - los, vc, c->move != Move::None && c->moveOn(c->move)});
   d->tackleCd = 0.55;
@@ -4105,7 +4161,8 @@ bool PlaySim::tryTackle(Ent* d, Ent* c, int gang, bool arm, bool dive) {
         if (o != d && o->free() && dist(o->pos, c->pos) < 2.2) help++;
       const double mu = 0.45 + (c->r().breakTackle * 0.5 + c->r().strength * 0.5 - d->r().tackling) * 0.025 + (mc - md) * 0.012 +
                         c->speed() * 0.07 - help * 0.55 - (facing > 0.3 ? 0.25 : 0) - (d->moveOn(Move::Cut) ? 0.8 : 0) +
-                        (c->moveOn(Move::Truck) && facing > 0.2 ? 0.5 : 0);  // cut at the knees / the shoulder still driving
+                        (c->moveOn(Move::Truck) && facing > 0.2 ? 0.5 : 0) +  // cut at the knees / the shoulder still driving
+                        c->fx.driveAdd - d->fx.stopDrive;                     // (abilities: the pile's way)
       drive = clamp(rng.normal(mu, 0.75), 0, 4);
     }
     // a big hit stops him where he stands: no pile to drive, he goes back the way the hit came
@@ -4219,7 +4276,7 @@ void PlaySim::stepWrap(double dt) {
   // take the ball instead of the body.
   if (!w.rolled && !help && !edge && w.left < 0.5 * w.total && tune().wrapBreak > 0) {
     w.rolled = true;
-    double p = tune().wrapBreak + (c->r().breakTackle - 70) * 0.004 + (c->r().strength - d->r().tackling) * 0.002 + (w.arm ? 0.05 : 0);
+    double p = tune().wrapBreak + (c->r().breakTackle - 70) * 0.004 + (c->r().strength - d->r().tackling) * 0.002 + (w.arm ? 0.05 : 0) + c->fx.wrapBreak;
     if (c->userControlled) p *= (input.juke || input.stickMove != Move::None || c->move != Move::None) ? 2.2 : 0.5;
     if (rng.chance(clamp(p, 0.005, 0.3))) {
       wrap_.reset();
@@ -4281,7 +4338,8 @@ void PlaySim::finishTackle(Ent* d, Ent* c, double fall, double latY, bool dive, 
   // the hit stick jars it loose; a spin or a hurdle leaves the ball out away from the body
   const double moveF = (d->moveOn(Move::Hit) ? 2.4 : 1) * (c->moveOn(Move::Spin) ? 1.5 : 1) * (c->moveOn(Move::Hurdle) && !dive ? 1.8 : 1);
   const double pf = 0.0135 * std::exp((70 - c->r().carrying) / 16) * (0.6 + hit) * (isSack ? 3.5 : 1) *
-                    (cfg.weather.precip != Precip::None ? 1.3 : 1) * (cfg.kick ? 0.12 : 1) * moveF;  // returners: ~1% (they are picked for it)
+                    (cfg.weather.precip != Precip::None ? 1.3 : 1) * (cfg.kick ? 0.12 : 1) * moveF *  // returners: ~1% (they are picked for it)
+                    c->fx.fumble * d->fx.hitFumble;  // (abilities: Vise Grip; Ball Punch, Enforcer)
   if (rng.chance(pf) && !(isSack && rng.chance(0.3))) {
     fumble(c, d);
     return;

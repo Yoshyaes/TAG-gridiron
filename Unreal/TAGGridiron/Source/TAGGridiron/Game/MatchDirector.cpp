@@ -142,6 +142,8 @@ void AMatchDirector::BeginPlay()
 		}
 	}
 	League = tag::createLeague(2027);
+	// the user's Superstar / X-Factor loadouts over the coach's picks (-TagCoachPicks: the coach's picks only)
+	if (!FParse::Param(FCommandLine::Get(), TEXT("TagCoachPicks"))) SGridironOverlay::LoadAbilityLoadouts(this);
 	FAthleteAssets::Get().Load();
 
 	Camera = GetWorld()->SpawnActor<ACineCameraActor>(ACineCameraActor::StaticClass(), FTransform(FRotator(-20, -90, 0), CamPos));
@@ -224,7 +226,14 @@ void AMatchDirector::BeginPlay()
 		bWatch = true;
 		int32 SoakWx = 1; // dry unless -TagWeather= asks for wind (2), rain (3) or snow (4)
 		FParse::Value(FCommandLine::Get(), TEXT("TagWeather="), SoakWx);
-		StartMatch(3, 7, false, true, SoakWx, true, QLen);
+		int32 SoakHome = 3, SoakAway = 7;  // -TagHome= / -TagAway=: league indexes (0..31)
+		FParse::Value(FCommandLine::Get(), TEXT("TagHome="), SoakHome);
+		FParse::Value(FCommandLine::Get(), TEXT("TagAway="), SoakAway);
+		const int32 NT = static_cast<int32>(League.size());
+		SoakHome = FMath::Clamp(SoakHome, 0, NT - 1);
+		SoakAway = FMath::Clamp(SoakAway, 0, NT - 1);
+		if (SoakAway == SoakHome) SoakAway = (SoakHome + 1) % NT;
+		StartMatch(SoakHome, SoakAway, false, true, SoakWx, true, QLen);
 	}
 	else if (FParse::Param(FCommandLine::Get(), TEXT("TagTackleCam")))
 	{
@@ -2535,6 +2544,7 @@ void AMatchDirector::StartMatch(int HomeIdx, int AwayIdx, bool bUserPlays, bool 
 	O.quarterLen = QuarterLen;
 	O.weather = W;
 	if (bUserPlays) O.userTeam = bUserHome ? tag::TeamKey::Home : tag::TeamKey::Away;
+	O.abilities = !FParse::Param(FCommandLine::Get(), TEXT("TagNoAbilities"));  // (Superstar / X-Factor abilities: A/B)
 	Game = std::make_unique<tag::Game>(Home, Away, O);
 	UserTeam = O.userTeam;
 	// the broadcast booth for this match (not on the highlight reel, not with -TagNoBooth)
