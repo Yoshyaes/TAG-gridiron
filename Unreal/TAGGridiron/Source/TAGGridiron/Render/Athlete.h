@@ -143,6 +143,11 @@ public:
 	void SetLabel(const FString& Text);
 	/** Play a keyed clip once over the current state, then hand back (crossfaded). Contact states override it. */
 	void PlayOneShot(UAnimationAsset* Clip);
+	/** A one-shot for a man set before the snap (the quarterback calling an audible, a hard count, a linebacker's hand
+	 *  signals): it plays over his stance and he settles back into it; the snap ends it. (An ordinary one-shot is
+	 *  dropped while the men are set: nothing left over from the last play goes off in the stance.) */
+	void PlayPreSnapShot(UAnimationAsset* Clip);
+	bool PreShotPlaying() const { return bPreShot && OneShot != nullptr && OneShotLeft > 0.f; }
 	void PlayOneShotFrom(UAnimationAsset* Clip, float Start); // from Start seconds into the clip (a library capture's moment less its lead)
 	/** Seconds into the current keyed get-up (-1 when not getting up). */
 	float GetUpElapsed() const;
@@ -356,6 +361,7 @@ private:
 	TObjectPtr<UAnimationAsset> OneShot;   // keyed one-shot in progress (get-off, snap catch, handoff)
 	float OneShotLeft = 0.f;
 	bool bOneShotCatch = false;  // the running one-shot is a catch (it hands over to the run once he is away with it)
+	bool bPreShot = false;       // the running one-shot was asked for before the snap (PlayPreSnapShot)
 	float OneShotAge = 0.f;
 	float OneShotStart = 0.f;     // seconds into the one-shot's clip it starts at (a library capture's moment less its lead)
 	// get-up after a ragdoll: snapshot the lying pose, play the matching keyed get-up where the body lies

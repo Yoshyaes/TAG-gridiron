@@ -180,22 +180,23 @@ void AMatchDirector::PlayAudibleCue(bool bOffense, bool bSignal)
 	auto Ath = [&](const tag::Ent* E) { return AthleteFor(E->p, E->side == tag::Side::Off ? OffK : tag::other(OffK)); };
 	if (bOffense)
 	{
-		if (Sim->qb)
+		// (a man on his way to a new spot does not stop to act it out: the capture would slide across the turf with him)
+		if (Sim->qb && !(Sim->qb->shiftTo && tag::dist(*Sim->qb->shiftTo, Sim->qb->pos) > 0.6))
 			if (AAthlete* Q = Ath(Sim->qb))
 			{
 				const bool bGun = Sim->qb->pos.x < Sim->los - 2.5;
 				UAnimSequence* C = bSignal && AA.QBSignal.IsValid() && bGun ? AA.QBSignal.Get() : bGun ? AA.QBAudibleGun.Get() : AA.QBAudibleUnder.Get();
-				if (C) Q->PlayOneShot(C);
+				if (C) Q->PlayPreSnapShot(C);
 				if (Audio && !bSignal) Audio->Cue(TEXT("audible"), Q->GetActorLocation());
 			}
 		if (bSignal) return; // (a hot route is between the quarterback and his receiver)
 		// the men who hear it look up and settle again: the back beside him, and across the line the linebackers
 		for (const tag::Ent* E : Sim->off)
-			if (E != Sim->qb && (E->p->pos == tag::Pos::RB || E->p->pos == tag::Pos::FB) && AA.HBAudible.IsValid())
-				if (AAthlete* A = Ath(E)) A->PlayOneShot(AA.HBAudible.Get());
+			if (E != Sim->qb && !E->shiftTo && (E->p->pos == tag::Pos::RB || E->p->pos == tag::Pos::FB) && AA.HBAudible.IsValid())
+				if (AAthlete* A = Ath(E)) A->PlayPreSnapShot(AA.HBAudible.Get());
 		for (const tag::Ent* E : Sim->def)
-			if (E->p->pos == tag::Pos::LB && AA.LBHearsAudible.IsValid())
-				if (AAthlete* A = Ath(E)) A->PlayOneShot(AA.LBHearsAudible.Get());
+			if (E->p->pos == tag::Pos::LB && !E->shiftTo && AA.LBHearsAudible.IsValid())
+				if (AAthlete* A = Ath(E)) A->PlayPreSnapShot(AA.LBHearsAudible.Get());
 	}
 	else
 	{
@@ -204,7 +205,7 @@ void AMatchDirector::PlayAudibleCue(bool bOffense, bool bSignal)
 		for (const tag::Ent* E : Sim->def)
 			if (E->p->pos == tag::Pos::LB && (!Mike || FMath::Abs(E->pos.y - Sim->by) < FMath::Abs(Mike->pos.y - Sim->by))) Mike = E;
 		if (Mike && AA.LBDefAudible.IsValid())
-			if (AAthlete* A = Ath(Mike)) A->PlayOneShot(AA.LBDefAudible.Get());
+			if (AAthlete* A = Ath(Mike)) A->PlayPreSnapShot(AA.LBDefAudible.Get());
 		if (Mike && Audio) Audio->Cue(TEXT("defcall"), TagCoords::ToWorld(Mike->pos.x, Mike->pos.y, Dir, 1.0));
 	}
 }
@@ -314,14 +315,23 @@ void AMatchDirector::TickPresnap(float Dt)
 				if (Op && Op->run && FMath::Abs(StickX) > 0.65f && FMath::Abs(PrevStickX) < 0.4f)
 				{
 					Use();
+					// (the run only: the formation stays as it is lined up and the same men block the mirror of the play;
+					// an offset back in the gun crosses behind the quarterback. Flipping the whole formation is the audible
+					// menu's "flip play".)
 					const int32 Want = (StickX > 0.f ? 1 : -1) * RS;                       // the offense's +y (its left) is +1
-					const double Now = Op->run->aimDy * (Sim->cfg.flip ? -1.0 : 1.0);
-					if (FMath::Abs(Now) < 0.05 || (Now > 0 ? 1 : -1) != Want)
+					const double Now = Sim->runAimDy();
+					if (FMath::Abs(Now) < 0.05) Overlay->Toast(TEXT("This run goes up the middle"));
+					else
 					{
-						RebuildPlay(Op, Dc, !Sim->cfg.flip);
-						PlayAudibleCue(true);
+						if ((Now > 0 ? 1 : -1) != Want && Sim->flipRun())
+						{
+							Sim->previewBlocks();
+							PlayAudibleCue(true);
+							ArtAuto = 1.8f; // the new blocking and the run's path shown for a moment
+							UE_LOG(LogTemp, Display, TEXT("TAG run flipped at the line: aim %.1f -> %.1f yd, formation %s"), Now, Sim->runAimDy(), Sim->cfg.flip ? TEXT("flipped") : TEXT("as called"));
+						}
+						Overlay->Toast(StickX > 0.f ? TEXT("Run right") : TEXT("Run left"));
 					}
-					Overlay->Toast(StickX > 0.f ? TEXT("Run right") : TEXT("Run left"));
 				}
 				else if (kTri)
 				{
@@ -459,7 +469,46 @@ void AMatchDirector::TickPresnap(float Dt)
 				Fw.Normalize();
 				const FVector Rt(-Fw.Y, Fw.X, 0);
 				const FVector Wv = (Rt * MX + Fw * MY).GetClampedToMaxSize(1.f);
-				const tag::V2 Stick = Dir > 0 ? tag::V2{Wv.X, -Wv.Y} : tag::V2{-Wv.X, Wv.Y};
+				tag::V2 Stick = Dir > 0 ? tag::V2{Wv.X, -Wv.Y} : tag::V2{-Wv.X, Wv.Y};
+				// the switch button held (CIRCLE / L1; BACKSPACE / TAB): the stick does not walk him, it picks the man that
+				// way from the one you have - one pick a push, the stick back to the middle for the next. A tap with the
+				// stick alone still steps through the defense (on the button's release, so a hold is not also a step).
+				// (it starts with the button's press on the base screen - or L1 in the assignment menu, where CIRCLE is
+				// "done" - so the CIRCLE that closes a menu is not also a switch)
+				const bool bSwitchKey = PC->IsInputKeyDown(EKeys::Gamepad_FaceButton_Right) || PC->IsInputKeyDown(EKeys::Gamepad_LeftShoulder) ||
+					PC->IsInputKeyDown(EKeys::BackSpace) || PC->IsInputKeyDown(EKeys::Tab);
+				const bool bCanSwitch = Mode == EPre::Base || Mode == EPre::Assign;
+				if ((Mode == EPre::Base && (kCircle || kL1)) || (Mode == EPre::Assign && kL1))
+				{
+					bSwitchHeld = true;
+					bSwitchPicked = false;
+					bSwitchStickArmed = true;
+					SwitchHeldT = 0.f;
+				}
+				if (bSwitchHeld && bSwitchKey && bCanSwitch)
+				{
+					SwitchHeldT += FMath::Min(Dt, 0.034f); // (a hitched frame does not turn a tap into a hold)
+					const double Mag = tag::len(Stick);
+					if (Mag < 0.3) bSwitchStickArmed = true;
+					else if (Mag > 0.55 && bSwitchStickArmed)
+					{
+						bSwitchStickArmed = false;
+						bSwitchPicked = true;
+						const tag::Ent* Was = Sim->user;
+						if (Sim->switchUserToward(Stick))
+						{
+							ATagAudio::Ui(TEXT("UiMove"));
+							UE_LOG(LogTemp, Display, TEXT("TAG presnap switch by stick (%.2f, %.2f): %s -> %s"), Stick.x, Stick.y, Was ? UTF8_TO_TCHAR(Was->role.c_str()) : TEXT("-"),
+								Sim->user ? UTF8_TO_TCHAR(Sim->user->role.c_str()) : TEXT("-"));
+						}
+					}
+					Stick = tag::V2{0, 0};
+				}
+				else if (bSwitchHeld)
+				{
+					bSwitchHeld = false;
+					if (!bSwitchPicked && SwitchHeldT < 0.45f && bCanSwitch) Sim->switchUser();
+				}
 				if (Sim->userPresnapMove(Stick, Dt) && !bPreMoved)
 				{
 					bPreMoved = true;
@@ -481,7 +530,7 @@ void AMatchDirector::TickPresnap(float Dt)
 				else if (kUp) { Use(); PreMode = EPre::DLine; }
 				else if (kLeft) { Use(); PreMode = EPre::LBs; }
 				else if (kTri || kRight) { Use(); PreMode = EPre::Shell; }
-				else if (kL1 || kCircle) { Use(); Sim->switchUser(); }
+				else if (kL1 || kCircle) Use(); // (switch player: on its release, or by the stick while held - above)
 				break;
 			case EPre::DLine:
 			case EPre::LBs:
@@ -532,8 +581,8 @@ void AMatchDirector::TickPresnap(float Dt)
 						Overlay->Toast(FString::Printf(TEXT("%s: %s"), *S(Sim->user->role), Names[static_cast<int32>(*A)]));
 					}
 				}
-				else if (kL1) { Use(); Sim->switchUser(); }
-				else if (kCross || kCircle) { Use(); PreMode = EPre::Base; }
+				else if (kL1) Use(); // (switch player: above)
+				else if (kCross || kCircle) { Use(); PreMode = EPre::Base; bSwitchHeld = false; }
 				break;
 			}
 			case EPre::Audible:
@@ -560,6 +609,20 @@ void AMatchDirector::TickPresnap(float Dt)
 		}
 	}
 	if (PC) PrevStickX = PC->GetInputAnalogKeyState(EKeys::Gamepad_RightX);
+	// the look to the sides: the art's trigger held (R2 / L2 / Q) on offense, the left stick (A / D) swings the camera
+	// along the line to see the men split wide and the corners over them; let go and it comes back
+	{
+		float Want = 0.f;
+		if (PC && bOff && PreMode == EPre::Base && (PC->IsInputKeyDown(EKeys::Gamepad_RightTrigger) || PC->IsInputKeyDown(EKeys::Gamepad_LeftTrigger) || PC->IsInputKeyDown(EKeys::Q)))
+		{
+			Want = PC->GetInputAnalogKeyState(EKeys::Gamepad_LeftX);
+			if (FMath::Abs(Want) < 0.18f) Want = 0.f;
+			if (PC->IsInputKeyDown(EKeys::D)) Want += 1.f;
+			if (PC->IsInputKeyDown(EKeys::A)) Want -= 1.f;
+			Want = FMath::Clamp(Want, -1.f, 1.f);
+		}
+		PreLookWant = Want;
+	}
 	// the art: hold R2 (Q), and while any pre-snap menu is open; it also shows itself briefly as the play comes in
 	ArtAuto -= Dt;
 	const bool bHold = PC && (PC->IsInputKeyDown(EKeys::Gamepad_LeftTrigger) || PC->IsInputKeyDown(EKeys::Gamepad_RightTrigger) || PC->IsInputKeyDown(EKeys::Q));
@@ -635,12 +698,13 @@ void AMatchDirector::RefreshPresnapPanel()
 		if (UserOff())
 		{
 			Title = S(Op.name);
-			Sub = FString::Printf(TEXT("%s  -  %s"), *S(tag::formationById(Op.formation) ? tag::formationById(Op.formation)->name : Op.formation),
-				Sim->cfg.flip ? TEXT("flipped") : TEXT("as called"));
+			Sub = FString::Printf(TEXT("%s  -  %s%s"), *S(tag::formationById(Op.formation) ? tag::formationById(Op.formation)->name : Op.formation),
+				Sim->cfg.flip ? TEXT("flipped") : TEXT("as called"), Sim->runFlip ? TEXT("  -  run flipped") : TEXT(""));
 			Row(G::L2, TEXT("Show play art (hold)"), false, TEXT("Q"));
 			if (Sim->passPlay()) Row(G::Triangle, TEXT("Hot route"));
 			Row(G::Square, TEXT("Audible / flip play"));
-			if (!Sim->passPlay()) Row(G::None, TEXT("Flip the run"), false, PadUI() ? TEXT("R-STICK") : TEXT("[ ]"));
+			if (!Sim->passPlay()) Row(G::None, TEXT("Flip the run's direction"), Sim->runFlip, PadUI() ? TEXT("R-STICK") : TEXT("[ ]"));
+			Row(G::None, TEXT("Look left / right (hold R2)"), false, PadUI() ? TEXT("L-STICK") : TEXT("A D"));
 			if (Sim->passPlay()) Row(G::L1, Sim->slide || Sim->maxProtect ? TEXT("Pass protection (adjusted)") : TEXT("Pass protection"), Sim->slide || Sim->maxProtect);
 			Row(G::Circle, TEXT("Motion"));
 			Row(G::R1, TEXT("Fake snap"));
@@ -657,7 +721,7 @@ void AMatchDirector::RefreshPresnapPanel()
 			Row(G::Cross, TEXT("Defensive hot route"));
 			Row(G::DUp, TEXT("D-line shift"), Sim->dlAdj != tag::PlaySim::LineAdj::Base);
 			Row(G::DLeft, TEXT("Linebacker shift"), Sim->lbAdj != tag::PlaySim::LineAdj::Base);
-			Row(G::Circle, TEXT("Switch player"));
+			Row(G::Circle, TEXT("Switch player  (hold + L-STICK: pick)"));
 			Row(G::None, TEXT("Move your player"), bPreMoved, PadUI() ? TEXT("L-STICK") : TEXT("WASD"));
 			Row(G::None, TEXT("Hide these controls"), false, PadUI() ? TEXT("R3") : TEXT("F1"));
 		}
@@ -1095,6 +1159,80 @@ void AMatchDirector::TickPadTest(float Dt)
 		return nullptr;
 	};
 	auto Next = [&] { ++ArtStep; };
+	// before the scripted presses: a run flipped at the line (the direction only), the quarterback's call, and the look
+	// to the sides on the art's trigger; then back to the pass the rest is written for
+	static int32 FlipStep = 0;
+	static const tag::OffPlay* FlipOrig = nullptr;
+	static std::map<tag::Player*, tag::V2> FlipAt;
+	static double FlipAim = 0;
+	static bool bFlipWas = false;
+	if (bO && ArtStep == 0 && FlipStep < 6)
+	{
+		auto SpotOf = [](const tag::Ent* E) { return E->shiftTo ? *E->shiftTo : E->pos; };
+		switch (FlipStep)
+		{
+		case 0:
+			if (At(0.8f))
+			{
+				FlipOrig = Sim->cfg.offPlay;
+				const tag::OffPlay* Run = nullptr;
+				for (const tag::OffPlay* Pl : tag::offBookFor(Game->offense()).playsIn(Sim->cfg.offPlay->formation))
+					if (Pl->run && FMath::Abs(Pl->run->aimDy) > 0.5 && Pl->run->carrier != "QB") { Run = Pl; break; }
+				if (!Run) { FlipStep = 6; break; }
+				RebuildPlay(Run, Sim->cfg.defCall, Sim->cfg.flip);
+				++FlipStep;
+			}
+			break;
+		case 1:
+			if (At(1.3f))
+			{
+				FlipAt.clear();
+				for (const tag::Ent* E : Sim->off) FlipAt[E->p] = SpotOf(E);
+				FlipAim = Sim->runAimDy();
+				bFlipWas = Sim->cfg.flip;
+				PadPress(EKeys::RightBracket);
+				++FlipStep;
+			}
+			break;
+		case 2: if (At(1.55f)) { if ((Sim->runAimDy() > 0) == (FlipAim > 0)) PadPress(EKeys::LeftBracket); ++FlipStep; } break;
+		case 3:
+			if (At(1.85f))
+			{
+				int32 Moved = 0;
+				bool bBack = false;
+				const tag::Ent* Car = Sim->cfg.offPlay->run ? Sim->offRole(Sim->cfg.offPlay->run->carrier) : nullptr;
+				for (const tag::Ent* E : Sim->off)
+					if (tag::dist(SpotOf(E), FlipAt[E->p]) > 0.05) { if (E == Car) bBack = true; else ++Moved; }
+				PadCheck((Sim->runAimDy() > 0) != (FlipAim > 0) && Sim->cfg.flip == bFlipWas && Moved == 0,
+					*FString::Printf(TEXT("the right stick flips the run only (aim %.1f -> %.1f yd, %d other men moved, back crossed %d)"), FlipAim, Sim->runAimDy(), Moved, bBack ? 1 : 0));
+				AAthlete* Q = Sim->qb ? AthleteFor(Sim->qb->p, Game->poss) : nullptr;
+				PadCheck(Q && Q->PreShotPlaying(), TEXT("the quarterback's audible capture plays at the line"));
+				FScreenshotRequest::RequestScreenshot(TEXT("tag_pad_runflip.png"), true, false);
+				ArtAuto = 0.f;
+				PadPress(EKeys::Gamepad_RightTrigger, 0.55f);
+				PadPress(EKeys::D, 0.55f);
+				++FlipStep;
+			}
+			break;
+		case 4:
+			if (At(2.3f))
+			{
+				PadCheck(PreLook > 0.4f, *FString::Printf(TEXT("R2 held and the stick right swings the camera right (%.2f)"), PreLook));
+				FScreenshotRequest::RequestScreenshot(TEXT("tag_pad_look.png"), true, false);
+				++FlipStep;
+			}
+			break;
+		case 5:
+			if (At(2.75f))
+			{
+				ArtAuto = 0.f;
+				if (FlipOrig) RebuildPlay(FlipOrig, Sim->cfg.defCall, bFlipWas);
+				++FlipStep;
+			}
+			break;
+		default: break;
+		}
+	}
 	if (bO)
 	{
 		switch (ArtStep)
@@ -1270,6 +1408,32 @@ void AMatchDirector::TickPadTest(float Dt)
 			if (At(11.2f))
 			{
 				PadCheck(Sim->user && Sim->user->p != SavedUser, TEXT("circle switches player"));
+				// the switch button held and the stick pushed: the man that way
+				SavedUser = Sim->user ? Sim->user->p : nullptr;
+				if (Sim->user) PadMovedFrom = Sim->user->pos;
+				PadPress(EKeys::Gamepad_FaceButton_Right, 0.7f);
+				Next();
+			}
+			break;
+		case 18: if (At(11.35f)) { PadPress(EKeys::D, 0.3f); Next(); } break;
+		case 19:
+			if (At(11.7f))
+			{
+				const tag::Ent* Was = nullptr;
+				for (const tag::Ent* E : Sim->def) if (E->p == SavedUser) Was = E;
+				const double Dy = Sim->user && Was ? (Sim->user->pos.y - Was->pos.y) * ScreenRightSign() : 0.0;
+				PadCheck(Sim->user && Sim->user->p != SavedUser && Dy > 0.5 && Was && !Was->userControlled,
+					*FString::Printf(TEXT("circle held + stick right picks the man to the right (%s -> %s, %.1f yd right)"),
+						Was ? UTF8_TO_TCHAR(Was->role.c_str()) : TEXT("-"), Sim->user ? UTF8_TO_TCHAR(Sim->user->role.c_str()) : TEXT("-"), Dy));
+				SavedUser = Sim->user ? Sim->user->p : nullptr;
+				FScreenshotRequest::RequestScreenshot(TEXT("tag_pad_def_pick.png"), true, false);
+				Next();
+			}
+			break;
+		case 20:
+			if (At(12.3f))
+			{
+				PadCheck(Sim->user && Sim->user->p == SavedUser, TEXT("letting go after a pick does not also step to the next man"));
 				bArtDidDef = true;
 				Timer = 0.f;
 				Next();
@@ -1295,7 +1459,7 @@ void AMatchDirector::PlayFakeSnap()
 	const FString Name = FString::Printf(TEXT("A_TAG_Pack_%s__P01"), bGun ? Gun[GSeq % N] : Uc[GSeq % N]);
 	++GSeq;
 	if (UAnimSequence* C = LoadObject<UAnimSequence>(nullptr, *FString::Printf(TEXT("/Game/TAG/AnimH/Pack/Kicking/%s.%s"), *Name, *Name), nullptr, LOAD_NoWarn | LOAD_Quiet))
-		Q->PlayOneShot(C);
+		Q->PlayPreSnapShot(C);
 	if (Overlay) Overlay->Toast(TEXT("Hard count"));
 	UE_LOG(LogTemp, Display, TEXT("TAG fake snap: %s"), *Name);
 }

@@ -154,6 +154,8 @@ public:
 	void ShowMainMenu();
 	void ShowTeamSelect(bool bUserPlays);
 	void ShowPlayCall(bool bOffense, bool bFourthDown, bool bTwoPoint, std::function<void(FCallChoice)> Done);
+	/** The defensive call screen's line on what the offense has come out in (its formation and personnel); empty: none. */
+	void SetCallOffenseLook(const FString& S) { CallOffLook = S; }
 	void ShowPatChoice(std::function<void(bool)> Done);
 	void ShowPause(std::function<void()> Resume, std::function<void()> SimToEnd, std::function<void()> Quit);
 	/** The settings screen (commentary captions, ...); Back returns to whatever opened it. */
@@ -223,6 +225,7 @@ private:
 	int32 SelRow = 0;
 	bool bSelUserPlays = false;
 	FString CallTab;
+	FString CallOffLook;
 	/** The formation (offense: its id) or set (defense: its name) shown inside the tab's family. */
 	FString CallSet;
 	/** The formations / sets of the current tab, in the book's order (D-pad up / down steps through them). */

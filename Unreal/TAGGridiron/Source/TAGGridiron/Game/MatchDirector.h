@@ -390,6 +390,22 @@ private:
 	bool bSprinting = false, bSprintSpent = false;
 	bool bPresnapPanelHidden = false; // R3 / F1 hides the pre-play panel
 	float PrevMotionX = 0.f;   // (pre-snap motion: the left stick's last x, for a flick)
+	/** Pre-snap on defense: the switch button held, the left stick picks the man that way (one a push); a tap steps
+	 *  through the defense on its release. */
+	bool bSwitchHeld = false, bSwitchPicked = false, bSwitchStickArmed = true;
+	float SwitchHeldT = 0.f;
+	/** Pre-snap on offense: the art's trigger held and the left stick pushed left / right swings the camera along the
+	 *  line to see the edges of the field (-1 .. 1, the screen's left / right; PreLook is what the camera has reached). */
+	float PreLookWant = 0.f, PreLook = 0.f;
+	/** The officials' routes between plays: every man on the field as an obstacle (where he is, how he moves, where he is
+	 *  walking to), gathered once a frame; OfficialSteer picks the heading that gets an official to his spot around
+	 *  them - behind the formation, outside the huddle - instead of through them. */
+	struct FOffBody { FVector P = FVector::ZeroVector, V = FVector::ZeroVector, Dest = FVector::ZeroVector; bool bDest = false; };
+	TArray<FOffBody> OffBodies;
+	TArray<float> CrewSteerSide;
+	float UmpSteerSide = 0.f;
+	void GatherOfficialBodies();
+	FVector OfficialSteer(const FVector& Pos, const FVector& Target, float Pace, float& Turn, bool bCoreOk, float* OutCrowd = nullptr) const;
 	/** R1 at the line: the quarterback's fake snap (a hard count), from the pack's captures. */
 	void PlayFakeSnap();
 	/** A pad throw (Madden): the receiver's button tapped is a touch pass, held a bullet (thrown on release, or at 0.3 s). */

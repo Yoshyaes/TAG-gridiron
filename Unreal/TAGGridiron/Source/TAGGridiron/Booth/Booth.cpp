@@ -1122,7 +1122,7 @@ void Booth::buildPlan(const Game& g, const PlaySim& s) {
     const Ent* rb = sm.offRole(op->run->carrier.empty() ? std::string("RB") : op->run->carrier);
     if (rb && rb != sm.qb) {
       // the play's design: +y is the offense's left (a flipped formation runs the other way)
-      const double aim = op->run->aimDy * (sm.cfg.flip ? -1.0 : 1.0);
+      const double aim = sm.runAimDy();
       const bool mid = std::fabs(aim) < 2.5;
       const std::string dir = mid ? std::string("up the middle") : std::string(aim > 0 ? "to the left side" : "to the right side");
       plan_.at["handoff"] = {rot(rb->p->id, oHand(nm(rb->p), qb, dir, op->run->style)), 1};

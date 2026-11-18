@@ -1289,8 +1289,21 @@ void AMatchDirector::TickUmpire(float Dt)
 	FVector Vel = FVector::ZeroVector;
 	if (Jog > 0.f && D > 25.f)
 	{
-		const float Sp = FMath::Min(Jog, 110.f + D * 3.f); // a short sidestep is quick, not a stroll
-		Vel = To / D * Sp;
+		float Sp = FMath::Min(Jog, 110.f + D * 3.f); // a short sidestep is quick, not a stroll
+		// between plays he goes to his spot round the men, not through them (OfficialSteer): the way to go this frame,
+		// and at a run when the formation is coming to the line across his path
+		FVector Way = To / D;
+		const bool bToBall = bUmpHasBall || FVector::Dist2D(Target, BallW) < 1.2f * YD || FVector::Dist2D(Target, Spot) < 1.2f * YD;
+		if (State != EMatchState::Live && !(Sim && Sim->isReturn()))
+		{
+			float Crowd = 0.f;
+			const FVector Go = OfficialSteer(UmpPos, Target, FMath::Max(Sp, 380.f), UmpSteerSide, bToBall, &Crowd);
+			FVector G2 = Go - UmpPos;
+			G2.Z = 0.f;
+			if (G2.Size() > 5.f) Way = G2.GetSafeNormal();
+			if (State == EMatchState::Presnap && D > 3.f * YD) Sp = FMath::Max(Sp, FMath::Min(620.f, 110.f + D * 3.f));
+		}
+		Vel = Way * Sp;
 		UmpPos += Vel * FMath::Min(Dt, D / Sp);
 	}
 	if (FVector::Dist2D(UmpPos, BallW) > 1.5f * YD) OfficialPushOut(UmpPos, Dt); // (at the ball he takes it from the man: close by design)
@@ -1317,6 +1330,114 @@ void AMatchDirector::TickUmpire(float Dt)
 		if (bUmpHasBall && Umpire->GetBallHold(HoldLoc, HoldRot)) { Ball->SetActorLocation(HoldLoc); Ball->SetActorRotation(HoldRot); }
 		else if (bUmpSpotted) { Ball->SetActorLocation(Spot + FVector(0, 0, 9)); Ball->SetActorRotation(FRotator(0, NewDir > 0 ? 0 : 180, 0)); }
 	}
+}
+
+void AMatchDirector::GatherOfficialBodies()
+{
+	OffBodies.Reset();
+	if (!Game) return;
+	if (Sim)
+	{
+		const bool bPre = State == EMatchState::Presnap;
+		const bool bSimMoves = State == EMatchState::Live || bPre;
+		const FVector Down = ToWorld(1, 0, Dir) - ToWorld(0, 0, Dir);
+		const FVector Left = ToWorld(0, 1, Dir) - ToWorld(0, 0, Dir);
+		for (const tag::Ent* E : Sim->ents)
+		{
+			AAthlete* A = AthleteFor(E->p, Game->home->hasPlayer(E->p) ? tag::TeamKey::Home : tag::TeamKey::Away);
+			if (!A || A->IsHidden()) continue;
+			FOffBody B;
+			B.P = A->GetActorLocation();
+			B.P.Z = 0.f;
+			if (bSimMoves) B.V = Down * E->vel.x + Left * E->vel.y;
+			else if (auto It = PostVel.find(E); It != PostVel.end()) B.V = FVector(It->second.X, It->second.Y, 0.f);
+			// a man walking to his spot: where he will be is known (the formation he is lining up in)
+			if (bPre && E->shiftTo)
+			{
+				B.bDest = true;
+				B.Dest = ToWorld(E->shiftTo->x, E->shiftTo->y, Dir);
+			}
+			OffBodies.Add(B);
+		}
+	}
+	else
+		for (const FBetweenMan& M : Between)
+		{
+			AAthlete* A = AthleteFor(M.P, Game->home->hasPlayer(M.P) ? tag::TeamKey::Home : tag::TeamKey::Away);
+			FOffBody B;
+			B.P = A && !A->IsHidden() ? A->GetActorLocation() : M.Pos;
+			B.P.Z = 0.f;
+			OffBodies.Add(B);
+		}
+}
+
+FVector AMatchDirector::OfficialSteer(const FVector& Pos, const FVector& Target, float Pace, float& Turn, bool bCoreOk, float* OutCrowd) const
+{
+	// An official on his way to a spot looks down a fan of headings (straight at it, and up to 105 degrees either side)
+	// a few strides ahead, with every player moved on to where he will be by then - his sim velocity, or his walk to
+	// the place he is lining up - and takes the heading that still makes ground without crossing anyone's path or
+	// standing where a man is about to arrive. Before the snap the heart of the formation (the two lines and the
+	// backfield around the ball) is out of bounds to him altogether: he goes round behind it. He keeps going round
+	// the way he started (Turn) rather than dithering in front of a moving group. The reactive dodge and the push-out
+	// stay as the last resort; this is what stops him needing them.
+	if (OutCrowd) *OutCrowd = 0.f;
+	static const bool bNoSteer = FParse::Param(FCommandLine::Get(), TEXT("TagNoRefSteer")); // (the straight line, for the comparison)
+	FVector To = Target - Pos;
+	To.Z = 0.f;
+	const float D = static_cast<float>(To.Size());
+	if (bNoSteer || D < 140.f || OffBodies.Num() == 0) { Turn = 0.f; return Target; }
+	const FVector Fwd = To / D;
+	const float Sp = FMath::Max(Pace, 260.f);
+	const float Y = static_cast<float>(YD);
+	const bool bCore = !bCoreOk && Sim && State == EMatchState::Presnap && !Sim->isReturn();
+	FVector CoreC = FVector::ZeroVector;
+	if (bCore) CoreC = ToWorld(Sim->los - 1.0, Sim->by, Dir);
+	static const float Angles[] = {0.f, 20.f, -20.f, 40.f, -40.f, 60.f, -60.f, 80.f, -80.f, 105.f, -105.f};
+	float BestS = -1e9f, BestA = 0.f;
+	FVector BestDir = Fwd;
+	for (const float Ang : Angles)
+	{
+		const FVector Dv = Fwd.RotateAngleAxis(Ang, FVector::UpVector);
+		float Danger = 0.f;
+		for (int32 k = 1; k <= 4; ++k)
+		{
+			const float S = k * 1.6f * Y;
+			if (Ang == 0.f && S > D + 0.5f * Y) break; // (straight at it: no further than the spot)
+			const FVector Pt = Pos + Dv * S;
+			const float Tk = S / Sp, Wk = 1.f / FMath::Sqrt(static_cast<float>(k));
+			for (const FOffBody& B : OffBodies)
+			{
+				FVector Bp = B.P;
+				if (B.bDest)
+				{
+					FVector Td = B.Dest - B.P;
+					Td.Z = 0.f;
+					const float Ld = static_cast<float>(Td.Size());
+					if (Ld > 1.f) Bp += Td / Ld * FMath::Min(Ld, 4.5f * Y * Tk);
+					const float De = static_cast<float>(FVector::Dist2D(B.Dest, Pt));
+					if (De < 3.2f * Y) Danger += 0.5f * FMath::Exp(-(De * De) / (2.f * FMath::Square(1.3f * Y))) * Wk;
+				}
+				else Bp += B.V * Tk;
+				const float Dd = static_cast<float>(FVector::Dist2D(Bp, Pt));
+				if (Dd < 4.f * Y) Danger += FMath::Exp(-(Dd * Dd) / (2.f * FMath::Square(1.3f * Y))) * Wk;
+			}
+			if (bCore && FMath::Abs(static_cast<float>(Pt.X - CoreC.X)) < 6.5f * Y && FMath::Abs(static_cast<float>(Pt.Y - CoreC.Y)) < 8.f * Y) Danger += 2.5f * Wk;
+			// (the benches and the wall: nowhere to go round out there)
+			if (FMath::Abs(static_cast<float>(Pt.Y)) > (tag::FIELD_W / 2 + 4.0) * Y || Pt.X < -12.5 * Y || Pt.X > 112.5 * Y) Danger += 3.f;
+		}
+		float Sc = FMath::Cos(FMath::DegreesToRadians(Ang)) * 1.2f - Danger * 1.5f;
+		if (Ang != 0.f && Turn != 0.f && (Ang > 0.f) == (Turn > 0.f)) Sc += 0.25f;
+		if (Ang == 0.f && OutCrowd) *OutCrowd = Danger;
+		if (Sc > BestS)
+		{
+			BestS = Sc;
+			BestA = Ang;
+			BestDir = Dv;
+		}
+	}
+	Turn = BestA == 0.f ? 0.f : FMath::Sign(BestA);
+	if (BestA == 0.f) return Target;
+	return Pos + BestDir * FMath::Min(D, 4.f * Y);
 }
 
 FVector AMatchDirector::OfficialDodge(const FVector& Pos, float Keep, float Look, float& Urgency)
@@ -1404,6 +1525,7 @@ void AMatchDirector::TickCrew(float Dt)
 		CrewTgt = CrewPos;
 		CrewYaw.Init(0.f, Crew.Num());
 		CrewGo.Init(false, Crew.Num());
+		CrewSteerSide.Init(0.f, Crew.Num());
 		for (int32 R = 0; R < Crew.Num(); ++R) if (Crew[R]) CrewYaw[R] = Crew[R]->GetActorRotation().Yaw;
 	}
 	// a kick play (a live return) starts: the crew is put on its kick stations at once (they ran across the field from
@@ -1519,7 +1641,18 @@ void AMatchDirector::TickCrew(float Dt)
 		if (Dd > 150.f && Jog > 0.f) CrewGo[R] = true;
 		else if (Dd < 30.f || Jog <= 0.f) CrewGo[R] = false;
 		const float Arrive = FMath::Sqrt(2.f * 450.f * FMath::Max(0.f, Dd - 20.f));
-		const FVector Want = CrewGo[R] && Dd > 1.f ? To / Dd * FMath::Min(Jog, Arrive) : FVector::ZeroVector;
+		// between plays the way to his spot goes round the men (OfficialSteer): behind the formation as it comes to the
+		// line, outside the huddle - and he hustles when there is a way to go before the snap
+		FVector Way = Dd > 1.f ? To / Dd : FVector::ZeroVector;
+		if (!bLiveNow && !bReturn && CrewGo[R] && Dd > 1.f && CrewSteerSide.IsValidIndex(R))
+		{
+			if (State == EMatchState::Presnap && Dd > 4.f * YD) Jog = FMath::Max(Jog, 560.f);
+			const FVector Go = OfficialSteer(Pos, CrewTgt[R], FMath::Max(Jog, 300.f), CrewSteerSide[R], false);
+			FVector G2 = Go - Pos;
+			G2.Z = 0.f;
+			if (G2.Size() > 5.f) Way = G2.GetSafeNormal();
+		}
+		const FVector Want = CrewGo[R] && Dd > 1.f ? Way * FMath::Min(Jog, Arrive) : FVector::ZeroVector;
 		CrewVel[R] = FMath::VInterpConstantTo(CrewVel[R], Want, Dt, 650.f);
 		FVector Vel = CrewVel[R];
 		Pos += Vel * Dt;
@@ -3075,7 +3208,30 @@ void AMatchDirector::CallPlays(bool bTwo)
 	{
 		const tag::OffPlay* Op = bTwo ? G.cpuTwoPointPlay() : G.cpuOffense();
 		if (UserDef())
+		{
+			// what the offense has come out in (its formation and the men on the field), as a defense sees before it
+			// calls: "SHOTGUN - Trips TE   11 personnel (1 RB, 1 TE, 3 WR)"
+			FString LookStr;
+			if (const tag::Formation* F = Op ? tag::formationById(Op->formation) : nullptr)
+			{
+				int32 Rb = 0, Te = 0, Wr = 0;
+				for (const tag::FormationSlot& Sl : F->slots)
+				{
+					if (Sl.pos.empty()) continue;
+					const tag::Pos Ps = Sl.pos.front();
+					if (Ps == tag::Pos::RB || Ps == tag::Pos::FB) ++Rb;
+					else if (Ps == tag::Pos::TE) ++Te;
+					else if (Ps == tag::Pos::WR) ++Wr;
+				}
+				const FString Fam = FString(UTF8_TO_TCHAR(tag::formationFamily(*F).c_str())).ToUpper();
+				const FString Name = FString(UTF8_TO_TCHAR(F->name.c_str()));
+				LookStr = FString::Printf(TEXT("OFFENSE IN  %s%s     %d%d PERSONNEL  (%d RB, %d TE, %d WR)"), *Fam,
+					Name.Equals(Fam, ESearchCase::IgnoreCase) ? TEXT("") : *(TEXT("  -  ") + Name), Rb, Te, Rb, Te, Wr);
+				UE_LOG(LogTemp, Display, TEXT("TAG defensive call sees: %s"), *LookStr);
+			}
+			Overlay->SetCallOffenseLook(LookStr);
 			Overlay->ShowPlayCall(false, false, false, [this, Op, Finish](FCallChoice C) { Finish(Op, C.Kind == FCallChoice::Def && C.Call ? C.Call : Game->cpuDefense(*Op)); });
+		}
 		else
 		{
 			// -TagHuddleSecs=<n>: a watched or filmed game takes this long over its call, as a user picking his play does
@@ -3272,7 +3428,9 @@ void AMatchDirector::ApplyPlay()
 	{
 		bLiveReturn = false;
 		const tag::PlayLog L = G.finishKickReturn(P);
+		UE_LOG(LogTemp, Display, TEXT("TAG live return result: %s (caught %d, end %.1f yd, %s)"), *S(L.desc), P.catcher ? 1 : 0, P.result ? P.result->endX : 0.0, *S(P.endReason));
 		if (L.big == tag::LogTag::Turnover) Overlay->Banner(TEXT("FUMBLE"), S(L.desc), Bad);
+		else if (L.desc.find("Touchback") != std::string::npos) Overlay->Toast(TEXT("TOUCHBACK"));
 		State = EMatchState::Wait;
 		Timer = 0.f;
 		return;
@@ -3868,7 +4026,7 @@ void AMatchDirector::StartLiveReturn(const std::vector<tag::Player*>& KickTeam, 
 	ReplayClock = 0.f;
 	ReplayPostRec = 0.f;
 	bReplayWorthy = false;
-	Overlay->SetHint(US && *US == tag::Side::Off ? (PadUI() ? PadHint(TEXT("Returning the kick    L-STICK run    R2 juke")) : FString(TEXT("Returning the kick    WASD run    SPACE juke")))
+	Overlay->SetHint(US && *US == tag::Side::Off ? (PadUI() ? PadHint(TEXT("Returning the kick    L-STICK run    R2 sprint    in the end zone: leave the stick alone to take a knee")) : FString(TEXT("Returning the kick    WASD run    SPACE juke    in the end zone: stand still to take a knee")))
 		: US ? (PadUI() ? PadHint(TEXT("Kick coverage    nobody moves until the catch    L-STICK run    L1 switch    R2 dive tackle")) : FString(TEXT("Kick coverage    nobody moves until the catch    WASD run    TAB switch    SPACE dive tackle")))
 		: FString());
 	UE_LOG(LogTemp, Display, TEXT("TAG live %s return: land %.1f, hang %.1f s"), Sim->cfg.kick->punt ? TEXT("punt") : TEXT("kickoff"),
@@ -4098,10 +4256,14 @@ void AMatchDirector::UpdateKick(float Dt)
 		}
 		for (size_t i = 0; i < K.Recv.size(); ++i)
 		{
-			if (i == 0) { Pose(K.Recv[i], FMath::Min(K.ToX, 104.0), F.y, -1, TEXT("idle"), 0.f); continue; }
+			// (a kick nobody fields - over the end line, out of bounds, short: the returner still goes to where it is
+			// coming down, on its own line across the field; he stood in the middle while it landed 15 yd from him)
+			const double RetY = FMath::Clamp(F.endY ? *F.endY : F.y, 3.0, W - 3.0);
+			const double RetX = FMath::Min(K.ToX, 108.0);
+			if (i == 0) { Pose(K.Recv[i], RetX, RetY, -1, TEXT("idle"), 0.f); continue; }
 			const int32 j = static_cast<int32>(i) - 1;
 			if (j < 9) Pose(K.Recv[i], 67.0 - (j % 2) * 1.5, 4 + j * (W - 8) / 8.0, -1, TEXT("idle"), 0.f);
-			else Pose(K.Recv[i], FMath::Min(K.ToX, 104.0) - 6.0, FMath::Clamp(F.y - 3.0, 4.0, W - 4.0), -1, TEXT("idle"), 0.f);
+			else Pose(K.Recv[i], FMath::Min(K.ToX, 104.0) - 6.0, FMath::Clamp(RetY - 3.0, 4.0, W - 4.0), -1, TEXT("idle"), 0.f);
 		}
 	}
 	else if (K.Kind == 0)
@@ -5413,6 +5575,20 @@ void AMatchDirector::UpdateCamera(float Dt, const FVector& InFocus)
 		break;
 	}
 	}
+	// before the snap, the art's trigger held and the left stick pushed: the camera swings along the line to show the
+	// edges of the field (the receivers split wide, the corners and safeties over them), and comes back when let go
+	{
+		PreLook = FMath::FInterpTo(PreLook, State == EMatchState::Presnap ? PreLookWant : 0.f, Dt, 5.f);
+		if (FMath::Abs(PreLook) > 0.004f)
+		{
+			FVector Fw = Look - T;
+			Fw.Z = 0.0;
+			Fw.Normalize();
+			const FVector Rt(-Fw.Y, Fw.X, 0.0); // the screen's right on the ground (as the left stick reads)
+			Look += Rt * (PreLook * 17.0 * Y);
+			if (CamMode != ECamMode::Sideline) T += Rt * (PreLook * 6.0 * Y);
+		}
+	}
 	// a user kick being aimed: over the kicker's shoulder (Game/MatchKicking.cpp)
 	const bool bKickAim = KickAimCamera(T, Look);
 	// keep cameras over the field / in front of the stands (never inside geometry); backed up against an end line
@@ -6305,6 +6481,20 @@ void AMatchDirector::Tick(float Dt)
 		UpdateCamera(Dt, FocusPoint());
 		RecordReplayFrame(SDt);
 		Overlay->SetClockOffset(Sim->t);
+		{
+			// a kick downed in the end zone: the returner on his knee (logged; filmed under automation)
+			static unsigned long long KneelSerial = 0;
+			if (bLiveReturn && Sim->kneelT >= 0 && Sim->serial != KneelSerial && Sim->t - Sim->kneelT > 0.45 && Sim->returner)
+			{
+				KneelSerial = Sim->serial;
+				static int32 GKneelShots = 0;
+				UE_LOG(LogTemp, Display, TEXT("TAG kick downed: #%d fielded it at %.1f yd (%.1f s) and took a knee in the end zone at %.1f, %.1f yd (%s, %s returner)"),
+					Sim->returner->p->number, Sim->catchX, Sim->kickCatchT, Sim->returner->pos.x, Sim->returner->pos.y, Sim->cfg.kick->punt ? TEXT("punt") : TEXT("kickoff"),
+					Sim->returner->userControlled ? TEXT("user") : TEXT("CPU"));
+				if ((bAuto || bPadTest || FParse::Param(FCommandLine::Get(), TEXT("TagUserKicks"))) && GKneelShots < 4)
+					FScreenshotRequest::RequestScreenshot(FString::Printf(TEXT("tag_kneel_%d.png"), GKneelShots++), true, false);
+			}
+		}
 		if (bLiveReturn && Sim->catcher && !bKickCatchLogged)
 		{
 			// the dynamic kickoff: nobody on the coverage may have moved before this moment
@@ -6370,8 +6560,40 @@ void AMatchDirector::Tick(float Dt)
 	FeedAudio(Dt);
 	if (State != EMatchState::Menu && State != EMatchState::Final && !bLineup)
 	{
+		GatherOfficialBodies();
 		TickUmpire(Dt);
 		TickCrew(Dt);
+		{
+			// measured: how much of the time before the snap an official is in among the players (within 2 yd, within
+			// 1.2 yd of one), logged as each snap goes ("TAG officials presnap")
+			static double PreSecs = 0, Near2 = 0, Near1 = 0, PlaySecs = 0, PlayNear2 = 0;
+			static int32 Plays = 0;
+			static bool bWasPre = false;
+			const bool bPreNow = State == EMatchState::Presnap && Sim && !Sim->isReturn();
+			if (bPreNow && OffBodies.Num())
+			{
+				float MinD = 1e9f;
+				auto Probe = [&](const AAthlete* O)
+				{
+					if (!O || O->IsHidden()) return;
+					for (const FOffBody& B : OffBodies) MinD = FMath::Min(MinD, static_cast<float>(FVector::Dist2D(B.P, O->GetActorLocation())));
+				};
+				Probe(Umpire);
+				for (const AAthlete* O : Crew) Probe(O);
+				PreSecs += Dt;
+				PlaySecs += Dt;
+				if (MinD < 2.f * YD) { Near2 += Dt; PlayNear2 += Dt; }
+				if (MinD < 1.2f * YD) Near1 += Dt;
+			}
+			if (bWasPre && !bPreNow)
+			{
+				++Plays;
+				UE_LOG(LogTemp, Display, TEXT("TAG officials presnap: play %d had an official within 2 yd of a player for %.2f of %.1f s; so far %.1f%% of %.0f s within 2 yd, %.1f%% within 1.2 yd"),
+					Plays, PlayNear2, PlaySecs, PreSecs > 0 ? 100.0 * Near2 / PreSecs : 0.0, PreSecs, PreSecs > 0 ? 100.0 * Near1 / PreSecs : 0.0);
+				PlaySecs = PlayNear2 = 0;
+			}
+			bWasPre = bPreNow;
+		}
 	}
 	UpdateIcons();
 	UpdateHighlight();

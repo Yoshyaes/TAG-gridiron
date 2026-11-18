@@ -1121,7 +1121,10 @@ SpecialResult Game::kickoff(bool onside, bool liveReturn) {
     });
     kr = c.empty() ? nullptr : c[0];
   }
-  if (land >= 100 && (uk ? land >= 103 || rng.chance(0.5) : rng.chance(0.75))) {
+  // a kick into the end zone is downed there three times in four (a user's kick: always from 3 yd deep). On the field
+  // (liveReturn) the returner still fields it and takes the knee himself - only a ball over the end line is nobody's
+  const bool downed = land >= 100 && (uk ? land >= 103 || rng.chance(0.5) : rng.chance(0.75));
+  if (downed && !(liveReturn && land < 109.0)) {
     start = 35;
     desc = nm(k) + " kicks " + SR(dist) + " yards into the end zone. Touchback.";
   } else if (liveReturn) {
@@ -1129,7 +1132,8 @@ SpecialResult Game::kickoff(bool onside, bool liveReturn) {
     KickReturnSpec s;
     s.kickX = 100 - fromX;
     s.coverX = 40;  // dynamic kickoff: the coverage lines up at the receiving 40 and releases on the catch
-    s.landX = (std::max)(-6.0, 100 - land);
+    s.landX = (std::max)(downed ? -8.6 : -6.0, 100 - land);
+    s.downIt = downed;
     // (the return is played in the receiving team's frame, the kicking team's turned round: its y mirrored - the
     // aimed kick came down on the far side of the field from the arrow)
     s.landY = landY >= 0 ? FIELD_W - clamp(landY, 3, FIELD_W - 3) : clamp(FIELD_W / 2 + rng.normal(0, 5), 8, FIELD_W - 8);
@@ -1372,7 +1376,8 @@ PlayLog Game::finishKickReturn(PlaySim& sim) {
   pendingReturn.reset();
   const TeamKey rt = poss, kt = other(rt);
   Player* kr = sim.returner ? sim.returner->p : nullptr;
-  runClock(r.duration, true);
+  // (a kick downed in the end zone takes no time off the clock)
+  if (!(r.endX <= 0 && !r.turnover && !r.td)) runClock(r.duration, true);
   for (Ent* e : sim.ents)
     e->p->fatigue = clamp(e->p->fatigue + (0.028 + r.duration * 0.0035) * (1.25 - e->p->r.stamina / 120), 0, 1);
   const std::string who = kr ? nm(kr) : std::string("the returner");

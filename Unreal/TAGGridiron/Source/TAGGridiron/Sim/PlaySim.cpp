@@ -154,6 +154,10 @@ bool setTune(const std::string& name, double v) {
   if (name == "edgeKeep") return t.edgeKeep = v, true;
   if (name == "stepUp") return t.stepUp = v, true;
   if (name == "lineOrder") return t.lineOrder = v, true;
+  if (name == "frontGap") return t.frontGap = v, true;
+  if (name == "smartBlock") return t.smartBlock = v, true;
+  if (name == "passProShed") return t.passProShed = v, true;
+  if (name == "runShed") return t.runShed = v, true;
   if (name == "helpBlock") return t.helpBlock = v, true;
   if (name == "kickBlock") return t.kickBlock = v, true;
   if (name == "throwStyle") return t.throwStyle = v, true;
@@ -274,7 +278,8 @@ void PlaySim::setupReturn() {
   for (size_t i = 0; i < cfg.offUnit.size() && i < 11; ++i) {
     Player* p = cfg.offUnit[i];
     if (i == 0) {
-      returner = mk(p, Side::Off, "KR", V2{k.landX - 4, clamp(k.landY + 3, 3, W - 3)});
+      // (a kick deep into the end zone: he waits inside the end line, not behind it)
+      returner = mk(p, Side::Off, "KR", V2{(std::max)(k.landX - 4, -9.0), clamp(k.landY + 3, 3, W - 3)});
       returner->state = EntState::Idle;
       continue;
     }
@@ -363,7 +368,7 @@ bool PlaySim::thinkReturn(Ent* e) {
   if (e == returner) {
     // settle under it: arrive a beat early, a step behind the spot, moving forward into the catch
     const double left = k.hang - ball.t;
-    const V2 spot{land.x - 0.6, land.y};
+    const V2 spot{(std::max)(land.x - 0.6, -9.4), clamp(land.y, 1.0, FIELD_W - 1.0)};
     const V2 to = sub(spot, e->pos);
     e->want = scale(norm(to), (std::min)(e->vmax, len(to) / (std::max)(0.25, left - 0.3)));
     return true;
@@ -493,8 +498,10 @@ void PlaySim::updateKickBall(double dt) {
   ball.vel = V3{(k.landX - k.kickX) / k.hang, (k.landY - FIELD_W / 2) / k.hang, 4 * k.apex * (1 - 2 * f) / k.hang};
   ball.spin += dt * 30;
   if (f >= 1) {
-    if (returner && dist(returner->pos, V2{k.landX, k.landY}) < 2.2) {
+    // (the returner is always under an inbounds kick: he goes for it from wherever he got to)
+    if (returner && returner->state != EntState::Down && dist(returner->pos, V2{k.landX, k.landY}) < 3.0) {
       catchX = returner->pos.x;
+      kickCatchT = t;
       catcher = returner;
       impulse(returner, scale(returner->vel, -0.4), 0.3);
       setCarrier(returner);
@@ -506,6 +513,33 @@ void PlaySim::updateKickBall(double dt) {
       ball.vel = V3{ball.vel.x * 0.4, ball.vel.y * 0.4, 2.5};
     }
   }
+}
+
+bool PlaySim::thinkDownIt(Ent* e) {
+  // the kick fielded in his own end zone: a returner told to down it (the game's call for a CPU team), or a user's
+  // returner whose stick is left alone, stands a beat with the ball and takes a knee - the touchback. Once he starts
+  // out, or steps over the goal line, the return is on.
+  if (kickCatchT < 0 || returnOut || kneelT >= 0) return kneelT >= 0;
+  if (e->pos.x > 0.2 || catchX > 0) {
+    returnOut = true;
+    return false;
+  }
+  const double since = t - kickCatchT;
+  if (e->userControlled) {
+    if (len(input.move) > 0.25) returnMoved = true;
+    if (returnMoved) return false;
+  } else if (!cfg.kick->downIt) {
+    return false;
+  }
+  e->want = V2{0, 0};
+  if (since > (e->userControlled ? 0.7 : 0.45) && e->speed() < 1.6) {
+    kneelT = t;
+    e->vel = V2{0, 0};
+    e->anim = Anim::Kneel;
+    e->animT = 0;
+    ev("kneel", e);
+  }
+  return true;
 }
 
 Ent* PlaySim::offRole(const std::string& role) const {
@@ -738,6 +772,7 @@ void PlaySim::alignDefense() {
   }
   // never let defenders line up in the neutral zone
   for (Ent* e : def) e->pos.x = (std::max)(e->pos.x, L + 0.95);
+  spaceFront(false);
 }
 
 void PlaySim::setupAssignments() {
@@ -945,7 +980,7 @@ void PlaySim::assignBlocks() {
     if (e->state == (isRun ? EntState::RunBlock : EntState::PassBlock) &&
         (e->isOL || e->role == "TE" || e->role == "TE2" || e->role == "FB" || e->role == "RB"))
       blockers.push_back(e);
-  const double aimDy = play.run ? (cfg.flip ? -play.run->aimDy : play.run->aimDy) : 0;
+  const double aimDy = runAimDy();
   const double playDir = jsSign(orIfZero(aimDy, 0.001));
   const bool zone = play.run && (play.run->style == RunStyle::Zone || play.run->style == RunStyle::Stretch);
   std::vector<Ent*> targets;
@@ -1029,7 +1064,28 @@ void PlaySim::assignBlocks() {
       usedD.push_back(pr.d);
     }
   }
-  for (Ent* b : blockers) b->snapTarget = b->blockTarget;
+  // a run's perimeter: each receiver has the man over him (his own cover man, else the nearest defender nobody has) -
+  // the stalk block. They had no man at all and took whoever came near.
+  if (isRun && tune().smartBlock > 0) {
+    for (Ent* b : off) {
+      if (b->state != EntState::RunBlock || b->blockTarget || contains(blockers, b)) continue;
+      Ent* best = nullptr;
+      double bd = 11;
+      for (Ent* d : def) {
+        if (contains(usedD, d) || d->pos.x < los) continue;
+        const double dd = dist(d->pos, b->pos) - (d->state == EntState::Man && d->man == b ? 4.0 : 0.0);
+        if (dd < bd) {
+          bd = dd;
+          best = d;
+        }
+      }
+      if (best) {
+        b->blockTarget = best;
+        usedD.push_back(best);
+      }
+    }
+  }
+  for (Ent* b : off) b->snapTarget = b->blockTarget;
 }
 
 // ------------------------------------------------------------------ pre-snap adjustments
@@ -1043,6 +1099,100 @@ double routeDelay(const Ent* e) {
 bool isLB(const Ent* e) { return e->role == "WLB" || e->role == "MLB" || e->role == "SLB" || e->role == "LOLB" || e->role == "ROLB"; }
 bool isCorner(const Ent* e) { return e->role == "LCB" || e->role == "RCB" || e->role == "NB" || e->role == "DB"; }
 }  // namespace
+
+double PlaySim::runAimDy() const {
+  const OffPlay& play = *cfg.offPlay;
+  if (!play.run) return 0;
+  return play.run->aimDy * (cfg.flip ? -1.0 : 1.0) * (runFlip ? -1.0 : 1.0);
+}
+
+bool PlaySim::flipRun() {
+  if (!preSnap() || !cfg.offPlay->run) return false;
+  runFlip = !runFlip;
+  // a back offset beside the quarterback (the gun, an offset pistol) crosses behind him to the other side, so the
+  // exchange is the mirror of the one called; a man covering him goes across with him. Everyone else stays put.
+  Ent* c = offRole(cfg.offPlay->run->carrier);
+  if (c && c != qb && !c->isOL) {
+    const V2 at = c->shiftTo ? *c->shiftTo : c->pos;
+    const double dy = at.y - by;
+    if (std::fabs(dy) > 0.6 && std::fabs(dy) < 4.0 && at.x < los - 2.5) {
+      moveTo(c, V2{at.x, by - dy});
+      for (Ent* d : def) {
+        if (d->state != EntState::Man || d->man != c) continue;
+        const V2 dp = d->shiftTo ? *d->shiftTo : d->pos;
+        moveTo(d, V2{dp.x, clamp(dp.y - 2 * dy, 1, FIELD_W - 1)});
+      }
+    }
+  }
+  adjusted_ = true;
+  return true;
+}
+
+void PlaySim::spaceFront(bool targets) {
+  // The men on the line of scrimmage each in his own gap: the down linemen at least 2.2 yd apart centre to centre (a
+  // body, its pads and an arm: at 1.8 two linemen in their stances stood shoulder against shoulder), spread from the
+  // ball outward so the inside techniques keep their spots and the ends widen; then anyone else up on the line (a 3-4's
+  // outside backers, a linebacker walked up to show blitz) takes the nearest spot 2 yd clear of every man already there.
+  const double gap = tune().frontGap, gap2 = gap - 0.2;
+  if (gap <= 0) return;
+  struct M {
+    Ent* e;
+    V2 at;
+    double y;
+  };
+  std::vector<M> dl, rest;
+  for (Ent* e : def) {
+    if (isCorner(e) || e->role == "FS" || e->role == "SS") continue;
+    const V2 at = targets && e->shiftTo ? *e->shiftTo : e->pos;
+    if (at.x > los + 1.9 || std::fabs(at.y - by) > 14) continue;
+    (e->isDL ? dl : rest).push_back(M{e, at, at.y});
+  }
+  if (dl.size() + rest.size() < 2) return;
+  std::sort(dl.begin(), dl.end(), [](const M& a, const M& b) { return a.y < b.y; });
+  size_t mid = 0;
+  while (mid < dl.size() && dl[mid].y < by) ++mid;  // [0, mid) on the offense's right, [mid, n) on its left
+  if (mid > 0 && mid < dl.size() && dl[mid].y - dl[mid - 1].y < gap) {
+    const double c = (dl[mid].y + dl[mid - 1].y) / 2;
+    dl[mid].y = c + gap / 2;
+    dl[mid - 1].y = c - gap / 2;
+  }
+  for (size_t i = mid + 1; i < dl.size(); ++i) dl[i].y = (std::max)(dl[i].y, dl[i - 1].y + gap);
+  for (size_t i = mid; i-- > 1;) dl[i - 1].y = (std::min)(dl[i - 1].y, dl[i].y - gap);
+  if (mid == 0)
+    for (size_t i = 1; i < dl.size(); ++i) dl[i].y = (std::max)(dl[i].y, dl[i - 1].y + gap);
+  std::vector<double> placed;
+  for (const M& m : dl) placed.push_back(m.y);
+  std::sort(rest.begin(), rest.end(), [this](const M& a, const M& b) { return std::fabs(a.y - by) < std::fabs(b.y - by); });
+  for (M& m : rest) {
+    // (the user's own man stands where he was walked to)
+    if (!(m.e == user && m.e->userControlled)) {
+      auto clear = [&](double y) {
+        for (double p : placed)
+          if (std::fabs(p - y) < gap2 - 1e-6) return false;
+        return true;
+      };
+      if (!clear(m.y)) {
+        double best = m.y, bd = 1e9;
+        for (double p : placed)
+          for (double c : {p - gap2, p + gap2})
+            if (clear(c) && std::fabs(c - m.at.y) < bd) {
+              bd = std::fabs(c - m.at.y);
+              best = c;
+            }
+        m.y = best;
+      }
+    }
+    placed.push_back(m.y);
+  }
+  auto apply = [&](const M& m) {
+    const double y = clamp(m.y, 1, FIELD_W - 1);
+    if (std::fabs(y - m.at.y) < 0.02) return;
+    if (targets) moveTo(m.e, V2{m.at.x, y});
+    else m.e->pos.y = y;
+  };
+  for (const M& m : dl) apply(m);
+  for (const M& m : rest) apply(m);
+}
 
 void PlaySim::assignRoute(Ent* e, const std::string& rname) {
   e->routeName = rname;
@@ -1149,6 +1299,7 @@ void PlaySim::adjustLine(LineAdj a) {
     }
     moveTo(e, to);
   }
+  spaceFront(true);
 }
 
 void PlaySim::adjustLBs(LineAdj a) {
@@ -1170,6 +1321,7 @@ void PlaySim::adjustLBs(LineAdj a) {
     if (shellAdj == ShellAdj::ShowBlitz) to.x = los + 1.6;  // still walked up to the line
     moveTo(e, to);
   }
+  spaceFront(true);
 }
 
 void PlaySim::adjustShell(ShellAdj a) {
@@ -1212,6 +1364,7 @@ void PlaySim::adjustShell(ShellAdj a) {
     moveTo(fs, tf);
     moveTo(ss, ts);
   }
+  spaceFront(true);
 }
 
 bool PlaySim::assignDefender(Ent* d, DefAssign a) {
@@ -1511,6 +1664,32 @@ void PlaySim::switchUser() {
   user->userControlled = true;
 }
 
+bool PlaySim::switchUserToward(const V2& dir) {
+  if (!user || len(dir) < 0.1) return false;
+  const V2 d = norm(dir);
+  const std::vector<Ent*>& team = user->side == Side::Off ? off : def;
+  Ent* best = nullptr;
+  double bs = 1e9;
+  for (Ent* e : team) {
+    if (e == user || e->state == EntState::Down) continue;
+    const V2 rel = sub(e->pos, user->pos);
+    const double l = len(rel);
+    if (l < 0.05) continue;
+    const double c = dot(rel, d) / l;
+    if (c < 0.64) continue;  // within about 50 degrees of the stick
+    const double s = l * (1 + 2.5 * (1 - c));  // the nearest man that way, a man dead on the line before one off it
+    if (s < bs) {
+      bs = s;
+      best = e;
+    }
+  }
+  if (!best) return false;
+  user->userControlled = false;
+  user = best;
+  user->userControlled = true;
+  return true;
+}
+
 // ------------------------------------------------------------------ helpers
 void PlaySim::ev(const char* type, Ent* a, Ent* b, const std::string& note) {
   PlayEvent e;
@@ -1564,6 +1743,11 @@ void PlaySim::step(double dt) {
     }
   }
   if (cfg.kick) updateKickBall(dt);
+  // the returner on his knee in the end zone: the whistle once he is down
+  if (kneelT >= 0 && t - kneelT > 0.8) {
+    endPlay("kneel");
+    return;
+  }
   for (Ent* e : ents) think(e, dt);
   for (Ent* e : ents) move(e, dt);
   if (!input.rushMove.empty()) {
@@ -1719,6 +1903,10 @@ void PlaySim::think(Ent* e, double dt) {
   if (cfg.kick && (!kicked || ball.mode == BallMode::Air) &&
       !(e->userControlled && kicked && e->side == Side::Def && cfg.kick->punt && t > cfg.kick->kickT + 0.5)) {
     if (thinkReturn(e)) return;
+  }
+  if (cfg.kick && e == returner && carrier == e && thinkDownIt(e)) {
+    e->want = V2{0, 0};
+    return;
   }
   if (e->userControlled && applyUser(e)) return;
   if (e->side == Side::Def && t < e->getOff) {
@@ -1932,7 +2120,7 @@ void PlaySim::thinkIdle(Ent* e) {
   if (play.run && play.run->carrier == e->role && !handedOff) {
     // path to mesh point then aiming point
     const RunScheme& run = *play.run;
-    const double aim = by + (cfg.flip ? -run.aimDy : run.aimDy);
+    const double aim = by + runAimDy();
     const V2 q = qb->pos;
     const V2 mesh{q.x - 0.2, q.y + jsSign(orIfZero(aim - q.y, 1)) * 0.9};
     const V2 tgt = t < run.handoffDelay - 0.15 ? mesh : V2{q.x + 0.3, q.y + jsSign(orIfZero(aim - q.y, 1)) * 0.4};
@@ -1953,7 +2141,7 @@ void PlaySim::thinkQB(Ent* e, double dt) {
   if (play.type == PlayType::Run) {
     // ride the mesh then carry out fake
     const RunScheme& run = *play.run;
-    const double aim = by + (cfg.flip ? -run.aimDy : run.aimDy);
+    const double aim = by + runAimDy();
     const double dir = jsSign(orIfZero(aim - by, 1));
     e->want = t < run.handoffDelay * 0.6 ? V2{-1.5, dir * 0.6} : V2{0, 0};
     return;
@@ -2653,6 +2841,31 @@ void PlaySim::thinkPassBlock(Ent* e) {
   Ent* best = nullptr;
   double bs = 1e9;
   Ent* as = e->blockTarget;
+  const bool smart = tune().smartBlock > 0;
+  // passing a man off: two blockers whose rushers have crossed (a twist, a blitzer coming through the next gap) trade
+  // them, each taking the one now coming at him, instead of chasing his own across his neighbour's face
+  if (smart && as && as->free() && as->state == EntState::Rush) {
+    const V2 asAt = add(as->pos, scale(as->vel, 0.3));
+    for (Ent* o : off) {
+      if (o == e || o->state != EntState::PassBlock || o->engaged || o->stun > 0) continue;
+      Ent* os = o->blockTarget;
+      if (!os || os == as || !os->free() || os->state != EntState::Rush) continue;
+      const V2 osAt = add(os->pos, scale(os->vel, 0.3));
+      if (dist(e->pos, osAt) + dist(o->pos, asAt) + 1.2 < dist(e->pos, asAt) + dist(o->pos, osAt)) {
+        std::swap(e->blockTarget, o->blockTarget);
+        as = e->blockTarget;
+        break;
+      }
+    }
+  }
+  // a man another free blocker already has, and is nearer to: not mine to chase (two on one and a rusher loose)
+  auto claimed = [&](const Ent* d) {
+    for (const Ent* o : off)
+      if (o != e && o->state == EntState::PassBlock && !o->engaged && o->stun <= 0 && o->blockTarget == d &&
+          dist(o->pos, d->pos) <= dist(e->pos, d->pos))
+        return true;
+    return false;
+  };
   // (a tackle stays on the edge rusher he was given however wide that man loops - dropping him once he was further from
   // the quarterback than the tackle left him unblocked on the arc: four in ten pressures came from a man nobody blocked)
   const bool tackle = e->role == "LT" || e->role == "RT";
@@ -2662,14 +2875,24 @@ void PlaySim::thinkPassBlock(Ent* e) {
     bs = -1;
   }
   // otherwise find most dangerous unblocked rusher
+  // (eyes up: a back or tight end kept in scans the whole pocket for the free man nearest the quarterback - the
+  // blitzer off the far edge, a linebacker green-dogging late - and a lineman with nobody on him looks a gap further
+  // than his own; a defender who was not sent but is now coming for the passer counts as a rusher)
+  const bool lineman = e->isOL;
+  const double reach = smart ? (lineman ? 6.0 : 9.0) : 5.0;
   for (Ent* d : def) {
     if (bs < 0) break;
-    if (d->state != EntState::Rush || !d->free()) continue;
-    const double dd = dist(d->pos, e->pos);
-    if (dd > 5) continue;
+    if (!d->free()) continue;
     const double threat = dist(d->pos, q);
+    const bool coming = d->state == EntState::Rush ||
+                        (smart && ball.holder == qb && (d->state == EntState::Pursue || d->state == EntState::Spy) && threat < 8 &&
+                         dot(d->vel, sub(q, d->pos)) > 0.5);
+    if (!coming) continue;
+    const double dd = dist(d->pos, e->pos);
+    if (dd > reach) continue;
+    if (smart && claimed(d)) continue;
     const double blockers = static_cast<double>(d->engagedBy.size());
-    const double s = dd * 0.9 + threat * 0.5 + blockers * 3;
+    const double s = (smart && !lineman ? dd * 0.5 + threat * 0.9 : dd * 0.9 + threat * 0.5) + blockers * 3;
     if (s < bs) {
       bs = s;
       best = d;
@@ -2745,7 +2968,7 @@ void PlaySim::thinkRunBlock(Ent* e) {
   Ent* c = carrier;
   if (c && c->side == e->side && trailPlay(e, c)) return;
   if (e->engaged) return;
-  const double aimDy = run ? (cfg.flip ? -run->aimDy : run->aimDy) : 0;
+  const double aimDy = runAimDy();
   const double playDir = jsSign(orIfZero(aimDy, 0.001));
   Ent* best = nullptr;
   double bs = 1e9;
@@ -2753,27 +2976,70 @@ void PlaySim::thinkRunBlock(Ent* e) {
   const double zoneShift = run && (run->style == RunStyle::Zone || run->style == RunStyle::Stretch) ? playDir * 1.4 : 0;
   const V2 myPt{e->pos.x + 1.5, e->pos.y + zoneShift};
   Ent* as = e->blockTarget;
-  if (as && as->state != EntState::Down && !as->engaged && as->stun <= 0 && dist(as->pos, e->pos) < 7) {
+  const bool smart = tune().smartBlock > 0;
+  const bool ours = c && c->side == e->side;
+  // where the ball is going: the carrier once he has it, the play's aiming point until then
+  const V2 hole = ours ? c->pos : V2{los + 1.0, by + aimDy};
+  bool asOk = as && as->state != EntState::Down && !as->engaged && as->stun <= 0 && dist(as->pos, e->pos) < (smart && !isLineman ? 11 : 7);
+  // his man is out of the play (the ball is by him and going away): he leaves him for someone who can still make it
+  if (asOk && smart && ours && c->pos.x > as->pos.x + 1.5 && dist(as->pos, c->pos) > 4.5) asOk = false;
+  if (asOk) {
     best = as;
     bs = -1;
   }
+  // a man another free blocker already has, and is nearer to: not mine (two on one and the next man unblocked)
+  auto claimed = [&](const Ent* d) {
+    for (const Ent* o : off)
+      if (o != e && o->state == EntState::RunBlock && !o->engaged && o->stun <= 0 && o->blockTarget == d &&
+          dist(o->pos, d->pos) <= dist(e->pos, d->pos))
+        return true;
+    return false;
+  };
   for (Ent* d : def) {
     if (bs < 0) break;
     if (!d->free()) continue;
     const double dd = dist(d->pos, myPt);
     const double range = isLineman ? 4.5 : 9;
     if (dd > range) continue;
+    if (smart && claimed(d)) continue;
     // prefer defenders in front, and those not already blocked
     double s = dd + static_cast<double>(d->engagedBy.size()) * 4 + (d->pos.x < e->pos.x - 0.5 ? 3 : 0);
     if (!isLineman && c) s += dist(d->pos, c->pos) * 0.5;
+    else if (smart) s += dist(d->pos, hole) * 0.3;  // (the man nearer the hole before the one further from it)
     if (s < bs) {
       bs = s;
       best = d;
     }
   }
+  // nobody in reach: climb to the man who matters - the free defender nearest the ball's path that nobody has -
+  // on the angle that cuts him off (the old climb ran straight up the field and blocked whoever it bumped into)
+  if (!best && smart) {
+    double cs = 1e9;
+    for (Ent* d : def) {
+      if (!d->free() || d->pos.x < e->pos.x - 0.5 || claimed(d)) continue;
+      const double de = dist(d->pos, e->pos);
+      if (de > 13) continue;
+      const double s = dist(d->pos, hole) * 0.6 + de * 0.5;
+      if (s < cs) {
+        cs = s;
+        best = d;
+      }
+    }
+  }
+  if (smart) e->blockTarget = best;
   if (best) {
-    const V2 contact = add(best->pos, scale(norm(sub(e->pos, best->pos)), 0.6));
-    e->want = scale(norm(sub(contact, e->pos)), e->vmax);
+    V2 contact = add(best->pos, scale(norm(sub(e->pos, best->pos)), 0.6));
+    double sp = e->vmax;
+    if (smart) {
+      // leverage: meet him where he is going, on the side the ball is on (between him and the hole), under control
+      // from a few yards out
+      const double de = dist(best->pos, e->pos);
+      const V2 at = interceptPoint(e->pos, best->pos, best->vel, e->vmax, (std::min)(1.2, de / (std::max)(1.0, e->vmax)));
+      const V2 side = norm(add(norm(sub(e->pos, at)), scale(norm(sub(hole, at)), 0.7)));
+      contact = add(at, scale(side, 0.6));
+      if (de > 4.5) sp = e->vmax * 0.9;
+    }
+    e->want = scale(norm(sub(contact, e->pos)), sp);
     if (dist(best->pos, e->pos) < e->radius + best->radius + 0.3) engage(e, best);
   } else {
     // climb to second level along the play side
@@ -3032,7 +3298,7 @@ void PlaySim::thinkCarrier(Ent* e) {
   double bestScore = -1e9;
   const double vis = e->r().vision;
   const std::vector<Ent*>& foes = defendersOf(e);
-  const double aimY = play.run ? by + (cfg.flip ? -play.run->aimDy : play.run->aimDy) : e->pos.y;
+  const double aimY = play.run ? by + runAimDy() : e->pos.y;
   for (int ai = -85; ai <= 85; ai += 10) {
     const double a = (static_cast<double>(ai) * kPi) / 180;
     const V2 dir = fromAngle(gd > 0 ? a : kPi - a);
@@ -3184,7 +3450,9 @@ void PlaySim::move(Ent* e, double dt) {
   else if (e->side == Side::Def && !passThrown && ball.mode != BallMode::Air && ns < 5.5 && e->vel.x > -0.3 &&
            (e->state == EntState::Zone || e->state == EntState::Man || e->state == EntState::Spy))
     e->face = angleOf(sub(V2{ball.pos.x, ball.pos.y}, e->pos));
-  if ((e->anim != Anim::Throw && e->anim != Anim::Juke && e->anim != Anim::Tackle) || e->animT > 0.5)
+  if (e->anim == Anim::Kneel && kneelT >= 0) {
+    // (down on a knee with the kick: he stays there)
+  } else if ((e->anim != Anim::Throw && e->anim != Anim::Juke && e->anim != Anim::Tackle) || e->animT > 0.5)
     e->anim = ns > 0.6 ? Anim::Run : Anim::Idle;
   if (e->engaged == nullptr && e->state == EntState::PassBlock && ns < 2) e->anim = Anim::Block;
 }
@@ -4086,6 +4354,11 @@ void PlaySim::endPlay(const std::string& reason) {
   // a defensive player downed in his own end zone after a takeaway = touchback
   if (turnover && !td && endX >= 100) touchback = true;
   if (!turnover && holder && !td && endX <= 0 && reason != "incomplete") safety = true;
+  // a kick fielded and downed in the receiving team's own end zone is a touchback, not a safety
+  if (cfg.kick && safety && holder->side == Side::Off) {
+    safety = false;
+    touchback = true;
+  }
   // loose ball out of bounds: offense keeps at spot
   if (reason == "oob" && b.mode == BallMode::Loose) endX = clamp(b.pos.x, 0.5, 99.5);
   endX = clamp(endX, -10, 110);

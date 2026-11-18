@@ -2099,10 +2099,18 @@ void AAthlete::PlayOneShot(UAnimationAsset* Clip)
 	PlayOneShotFrom(Clip, 0.f);
 }
 
+void AAthlete::PlayPreSnapShot(UAnimationAsset* Clip)
+{
+	if (!Clip || bRagdoll) return;
+	PlayOneShotFrom(Clip, 0.f);
+	bPreShot = true;
+}
+
 void AAthlete::PlayOneShotFrom(UAnimationAsset* Clip, float Start)
 {
 	if (!Clip || bRagdoll) return;
 	OneShot = Clip;
+	bPreShot = false;
 	bOneShotCatch = false;
 	OneShotAge = 0.f;
 	OneShotStart = Start;
@@ -3590,8 +3598,13 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 		// and nothing left over from the last one: a one-shot started as the whistle blew (a receiver laying out for an
 		// incompletion) never got to play, waited through the huddle and the stance and went off at the next snap - a
 		// wide receiver diving out of his stance on a run play, then a 3.3 m jump back (p14-p19, clip 3)
-		OneShot = nullptr;
-		OneShotLeft = 0.f;
+		// (not one asked for here, before the snap: the quarterback's audible, a hard count - they were dropped too,
+		// and no call at the line was ever seen)
+		if (!bPreShot)
+		{
+			OneShot = nullptr;
+			OneShotLeft = 0.f;
+		}
 		bMissing = false;
 	}
 	if (Anim != TEXT("down") && FVector(VelWorld.X, VelWorld.Y, 0.f).SizeSquared() > 100.f) LastVelW = FVector(VelWorld.X, VelWorld.Y, 0.f);
@@ -3971,6 +3984,13 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 	// angled sets left and right, steps down the line); taken in turn, a guard the sim sends straight back played a set
 	// angled 45 degrees to his right. The pick waits up to three frames (a lineman's reaction to the snap is longer) for
 	// the sim to steer him, then takes, of eight candidates in turn, the one whose first 0.7 s travels nearest that way.
+	// the snap ends a call still being made at the line
+	if (bPreShot && !bPreSnap)
+	{
+		bPreShot = false;
+		OneShot = nullptr;
+		OneShotLeft = 0.f;
+	}
 	if (bWasPreSnap && !bPreSnap && bLine && A.GetOff) GetOffPending = 3;
 	if (bPreSnap) GetOffPending = 0;
 	if (GetOffPending > 0 && !bPreSnap)
@@ -4011,7 +4031,7 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 		else if (Player && Player->pos == tag::Pos::QB && A.SnapCatch) PlayOneShot(A.SnapCatch);
 	}
 	bWasPreSnap = bPreSnap;
-	if (OneShotLeft > 0.f && OneShot && !bPreSnap)
+	if (OneShotLeft > 0.f && OneShot && (!bPreSnap || bPreShot))
 	{
 		OneShotLeft -= DeltaTime;
 		OneShotAge += DeltaTime;
@@ -4066,6 +4086,7 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 			}
 			bMissing = false;
 			OneShot = nullptr;
+			bPreShot = false;
 			CurrentAnim.Reset(); // one-shot done: let whatever state follows (re)start next frame (crossfaded)
 		}
 		return;

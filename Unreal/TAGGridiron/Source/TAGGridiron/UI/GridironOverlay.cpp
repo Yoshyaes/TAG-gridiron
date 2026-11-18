@@ -921,6 +921,13 @@ void SGridironOverlay::BuildPlayCall()
 			+ SVerticalBox::Slot().AutoHeight()[ SNew(STextBlock).Font(Font(12, "Bold")).ColorAndOpacity(Accent)
 				.Text(T(FString(bOffense ? (bTwoPoint ? TEXT("TWO-POINT TRY  -  CALL OFFENSE") : TEXT("CALL OFFENSE")) : TEXT("CALL DEFENSE")) + TEXT("     ") + BookLine)) ]
 			+ SVerticalBox::Slot().AutoHeight()[ SNew(STextBlock).Font(Font(30, "Bold")).ColorAndOpacity(White90).Text(T(TabLabel)) ]
+			// calling defense: what the offense has come out in
+			+ SVerticalBox::Slot().AutoHeight().Padding(0, 2, 0, 2)
+			[
+				SNew(SBorder).BorderImage(White()).BorderBackgroundColor(FLinearColor(0.10f, 0.08f, 0.02f, 0.92f)).Padding(FMargin(10, 4))
+				.Visibility(!bOffense && !CallOffLook.IsEmpty() ? EVisibility::HitTestInvisible : EVisibility::Collapsed)
+				[ SNew(STextBlock).Font(Font(14, "Bold")).ColorAndOpacity(Accent).Text(T(CallOffLook)) ]
+			]
 		]
 		+ SHorizontalBox::Slot().FillWidth(1.f)[ SNullWidget::NullWidget ]
 		+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Bottom).Padding(0, 0, 24, 4)

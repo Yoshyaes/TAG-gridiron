@@ -66,7 +66,7 @@ struct Tune {
   double manLagK = 0.6;  // share of the read lag a man defender plays his receiver's moves with
   double zoneVert = 0;  // 1: a deep zone's cushion goes by the threat's speed upfield, 0: by his speed any way
   double zoneUnder = 1.2;  // how far under a receiver in his zone an underneath defender sits (yd toward the quarterback)
-  double passProShed = 0.065;  // pass-pro shed hazard base (per s) (0.045 before help blocks, in-order line protection and tackles keeping the edge: pressured back to ~33%)
+  double passProShed = 0.075;  // pass-pro shed hazard base (per s) (0.045 before help blocks, 0.065 before blockers passed rushers off and backs picked up the blitz: pressured ~33%, sacks 6.7%)
   double qbThresh = 3.15;  // QB openness bar at the snap
   double qbDecay = 0.26;  // ... drop per second
   double qbLate = 0.7;  // ... extra drop per second past 2.5 s
@@ -103,7 +103,9 @@ struct Tune {
   double holdK = 0.06;       // holding: per second of a rep the defender is winning (x how badly)
   double holdShed = 0.003;   // holding: a beaten blocker grabbing as his man gets away
   double aiMoveK = 0.65;     // a CPU ball carrier's move is worth this much of a user's well-timed one (calibrated)
-  double edgeKeep = 9;       // > 0: a tackle keeps his edge rusher while within this many yards of him (0: the old rule)
+  double frontGap = 2.2;     // yd between the men on the defensive line, centre to centre, at least (0: as each set draws them)
+  double smartBlock = 1;     // > 0: blockers read the play as it goes (pass-offs, blitz pickup, climbing to the man who matters)
+  double edgeKeep = 9;      // > 0: a tackle keeps his edge rusher while within this many yards of him (0: the old rule)
   double lineOrder = 1;      // pass protection matches the line to the rushers in order across it (0: nearest first)
   double stepUp = 1.6;       // the quarterback's step up into the pocket from an edge rush (yd/s of push)
   double helpPen = 5;        // a pass-pro double team: how much the second blocker takes off the rusher (skill points)
@@ -379,6 +381,9 @@ struct KickReturnSpec {
   double kickT = 0.45;            // the kick happens this far into the play (the kicker's approach)
   double apex = 22;               // flight height, yards (presentation)
   bool punt = false;
+  /** Fielded in the end zone and downed there: the returner catches it and takes a knee (a touchback). A CPU returner
+   *  does as told; a user's returner kneels when the stick is left alone after the catch. */
+  bool downIt = false;
 };
 
 struct PlayConfig {
@@ -443,6 +448,10 @@ class PlaySim {
   Ent* returner = nullptr;
   bool kicked = false;
   bool isReturn() const { return cfg.kick.has_value(); }
+  /** The kick fielded: when, and whether the returner has since brought it out of his end zone; kneelT: when he
+   *  started down onto a knee (< 0: he has not). */
+  double kickCatchT = -1, kneelT = -1;
+  bool returnOut = false, returnMoved = false;
 
   // ---- pre-snap adjustments (before the first step only). Deterministic: none of them draws from the rng, and a
   // play nobody adjusts runs exactly as before. Left / right are the offense's (+y / -y).
@@ -453,6 +462,13 @@ class PlaySim {
   std::vector<std::string> readOrder;
   int slide = 0;              // pass protection slide: +1 toward +y, -1 toward -y
   bool maxProtect = false;    // backs and tight ends stay in to block
+  /** The run sent the other way at the line (the quarterback's call): the formation stays as it is, the play's aiming
+   *  point and its blocking mirror; an offset back beside the quarterback crosses to his other side. */
+  bool runFlip = false;
+  bool flipRun();
+  /** The run's aiming point across from the ball as it will be run (+ = the offense's left): the play's, mirrored by a
+   *  flipped formation and by a run flipped at the line. 0 when the play is not a run. */
+  double runAimDy() const;
   LineAdj dlAdj = LineAdj::Base;
   LineAdj lbAdj = LineAdj::Base;
   ShellAdj shellAdj = ShellAdj::Base;
@@ -573,6 +589,9 @@ class PlaySim {
   // ---- user control
   void pickUserEnt(Side side);
   void switchUser();
+  /** Switch to the teammate that lies in a direction from the man the user has (dir: offense frame, any length): the
+   *  nearest man within about 50 degrees of it. False when nobody is that way. */
+  bool switchUserToward(const V2& dir);
 
   // ---- queries / actions (public in TS)
   V2 zoneLandmark(const std::string& z) const;
@@ -680,6 +699,10 @@ class PlaySim {
   void setupReturn();
   /** Kick return AI before the return starts (approach, flight, coverage lanes, the wall); false = normal AI. */
   bool thinkReturn(Ent* e);
+  /** The returner with the ball in his own end zone: downs it (a knee, the touchback) when that is the call. */
+  bool thinkDownIt(Ent* e);
+  /** The front spaced out: no two men on the line of scrimmage closer than a body and an arm (yards between centres). */
+  void spaceFront(bool targets);
   void updateKickBall(double dt);
   /** The pass rush / block shedding move that beat this blocker (presentation: "swim", "rip", "club", "spin",
    *  "bull", "longarm", "diprip"). Deterministic: does not draw from the rng. */

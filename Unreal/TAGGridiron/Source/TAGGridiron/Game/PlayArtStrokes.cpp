@@ -190,7 +190,7 @@ void BuildArtPicture(const tag::PlaySim& P, bool bOffense, const tag::Ent* PreEn
 			const tag::RunScheme& Rs = *Op.run;
 			if (const tag::Ent* C = P.offRole(Rs.carrier))
 			{
-				const double AimY = P.by + (P.cfg.flip ? -Rs.aimDy : Rs.aimDy);
+				const double AimY = P.by + P.runAimDy();
 				const double Side = FMath::Sign(AimY - P.by) == 0 ? 1.0 : FMath::Sign(AimY - P.by);
 				TArray<tag::V2> Pts;
 				Pts.Add(C->pos);
