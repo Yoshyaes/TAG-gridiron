@@ -26,6 +26,10 @@
 #include "Widgets/Layout/SWrapBox.h"
 #include "Widgets/Input/SButton.h"
 #include "Widgets/Text/STextBlock.h"
+#include "Widgets/Images/SImage.h"
+#include "Brushes/SlateDynamicImageBrush.h"
+#include "HAL/FileManager.h"
+#include "Misc/Paths.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Fonts/FontMeasure.h"
 #include "Rendering/SlateRenderer.h"
@@ -37,6 +41,23 @@
 #include "GameFramework/PlayerController.h"
 #include "UnrealClient.h"
 #include <algorithm>
+
+namespace TagAbilityArt
+{
+	/** The ability's icon (Tools/Art/gen_ability_icons.py: Content/Slate/AbilityIcons/<key>.png), or null when it is
+	 *  missing (the two-letter badge stands in). */
+	const FSlateBrush* Icon(const tag::AbilityDef& A)
+	{
+		static TMap<FString, TSharedPtr<FSlateDynamicImageBrush>> Cache;
+		const FString Key = UTF8_TO_TCHAR(A.key);
+		if (const TSharedPtr<FSlateDynamicImageBrush>* Hit = Cache.Find(Key)) return Hit->Get();
+		const FString Path = FPaths::ConvertRelativePathToFull(FPaths::ProjectContentDir() / TEXT("Slate/AbilityIcons") / (Key + TEXT(".png")));
+		// (a dynamic brush: Slate loads it from the file the first time it is drawn)
+		TSharedPtr<FSlateDynamicImageBrush>& B = Cache.Add(Key);
+		if (!Key.IsEmpty() && IFileManager::Get().FileExists(*Path)) B = MakeShared<FSlateDynamicImageBrush>(FName(*Path), FVector2D(128, 128));
+		return B.Get();
+	}
+}
 
 // (a named namespace: in a unity build this file shares a translation unit with the other UI files)
 namespace AbilUI
@@ -98,9 +119,14 @@ namespace AbilUI
 		return SNew(SButton).IsFocusable(false).ButtonStyle(&FCoreStyle::Get().GetWidgetStyle<FButtonStyle>("NoBorder")).ContentPadding(0)
 			.OnClicked_Lambda([OnClick] { OnClick(); return FReply::Handled(); })[ Content ];
 	}
-	/** An ability's badge: its two letters on the grade colour (a hollow one when it is not equipped). */
-	TSharedRef<SWidget> Badge(const tag::AbilityDef& A, bool bOn, float Size = 22.f)
+	/** An ability's badge: its icon (dimmed when it is not equipped, greyed out when he cannot carry it); its two
+	 *  letters on the grade colour when the icon is missing. */
+	TSharedRef<SWidget> Badge(const tag::AbilityDef& A, bool bOn, float Size = 22.f, bool bLocked = true)
 	{
+		if (const FSlateBrush* Ic = TagAbilityArt::Icon(A))
+			return SNew(SBox).WidthOverride(Size).HeightOverride(Size).ToolTipText(Tx(Str(A.name)))
+				[ SNew(SImage).Image(Ic).ColorAndOpacity(bOn ? FLinearColor::White : bLocked ? FLinearColor(0.4f, 0.42f, 0.48f, 0.7f) : FLinearColor(0.78f, 0.8f, 0.85f, 0.95f)) ];
+		Size *= 0.7f;
 		const FLinearColor C = A.tier == tag::AbilityTier::XFactor ? GradeColor(tag::StarGrade::XFactor) : Gold;
 		return SNew(SBox).WidthOverride(Size + 6).HeightOverride(Size)
 			[
@@ -237,6 +263,7 @@ namespace AbilUI
 	{
 		FVector2D Screen;
 		FString Icon;
+		const FSlateBrush* Brush = nullptr;
 		bool bActive = false;
 		int32 Progress = 0, Need = 0;
 	};
@@ -311,8 +338,8 @@ void SGridironOverlay::ShowAbilities(int32 TeamIdx, std::function<void()> Back)
 		const bool bSel = i == AbRow;
 		const FLinearColor Gc = GradeColor(M.grade);
 		TSharedRef<SHorizontalBox> Carried = SNew(SHorizontalBox);
-		if (M.xFactor != tag::AbilityId::None) Carried->AddSlot().AutoWidth().Padding(0, 0, 3, 0)[ Badge(tag::abilityDef(M.xFactor), true, 18.f) ];
-		for (tag::AbilityId Id : M.abilities) Carried->AddSlot().AutoWidth().Padding(0, 0, 3, 0)[ Badge(tag::abilityDef(Id), true, 18.f) ];
+		if (M.xFactor != tag::AbilityId::None) Carried->AddSlot().AutoWidth().Padding(0, 0, 3, 0)[ Badge(tag::abilityDef(M.xFactor), true, 24.f) ];
+		for (tag::AbilityId Id : M.abilities) Carried->AddSlot().AutoWidth().Padding(0, 0, 3, 0)[ Badge(tag::abilityDef(Id), true, 24.f) ];
 		List->AddSlot().AutoHeight().Padding(0, 0, 0, 3)
 		[
 			Click(SNew(SBorder).BorderImage(WhiteBrush()).BorderBackgroundColor(bSel ? (AbCol == 0 ? Gold : Gold * FLinearColor(1, 1, 1, 0.45f)) : FLinearColor::Transparent).Padding(bSel ? 2.f : 0.f)
@@ -344,14 +371,14 @@ void SGridironOverlay::ShowAbilities(int32 TeamIdx, std::function<void()> Back)
 	{
 		const bool bHas = s < Used;
 		const bool bOpen = s < Slots;
-		TSharedRef<SWidget> In = bHas ? Badge(tag::abilityDef(P.abilities[s]), true, 26.f)
-			: SNew(SBox).WidthOverride(32).HeightOverride(26)[ SNew(SBorder).BorderImage(WhiteBrush()).BorderBackgroundColor(FLinearColor(1, 1, 1, bOpen ? 0.1f : 0.03f))
+		TSharedRef<SWidget> In = bHas ? Badge(tag::abilityDef(P.abilities[s]), true, 40.f)
+			: SNew(SBox).WidthOverride(40).HeightOverride(40)[ SNew(SBorder).BorderImage(WhiteBrush()).BorderBackgroundColor(FLinearColor(1, 1, 1, bOpen ? 0.1f : 0.03f))
 				.HAlign(HAlign_Center).VAlign(VAlign_Center)[ Label(bOpen ? TEXT("+") : TEXT("-"), 12, bOpen ? Dim : Faint) ] ];
 		SlotRow->AddSlot().AutoWidth().Padding(0, 0, 6, 0)[ In ];
 	}
 	TSharedRef<SWidget> XfSlot = P.grade == tag::StarGrade::XFactor
-		? (P.xFactor != tag::AbilityId::None ? Badge(tag::abilityDef(P.xFactor), true, 26.f)
-			: SNew(SBox).WidthOverride(32).HeightOverride(26)[ SNew(SBorder).BorderImage(WhiteBrush()).BorderBackgroundColor(Gc * FLinearColor(1, 1, 1, 0.2f)).HAlign(HAlign_Center).VAlign(VAlign_Center)[ Label(TEXT("+"), 12, Gc) ] ])
+		? (P.xFactor != tag::AbilityId::None ? Badge(tag::abilityDef(P.xFactor), true, 40.f)
+			: SNew(SBox).WidthOverride(40).HeightOverride(40)[ SNew(SBorder).BorderImage(WhiteBrush()).BorderBackgroundColor(Gc * FLinearColor(1, 1, 1, 0.2f)).HAlign(HAlign_Center).VAlign(VAlign_Center)[ Label(TEXT("+"), 12, Gc) ] ])
 		: StaticCastSharedRef<SWidget>(Label(TEXT("X-Factor grade only"), 9, Faint, "Regular"));
 	TSharedRef<SHorizontalBox> APBar = SNew(SHorizontalBox);
 	for (int32 a = 0; a < 7; ++a)
@@ -445,7 +472,7 @@ void SGridironOverlay::ShowAbilities(int32 TeamIdx, std::function<void()> Back)
 				SNew(SBorder).BorderImage(WhiteBrush()).BorderBackgroundColor(bSel ? CardHi : Card).Padding(FMargin(0))
 				[
 					SNew(SHorizontalBox)
-					+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(10, 6, 10, 6)[ Badge(A, bOn, 28.f) ]
+					+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(10, 6, 10, 6)[ Badge(A, bOn, 44.f, bLocked) ]
 					+ SHorizontalBox::Slot().FillWidth(1).Padding(0, 6, 12, 6)[ Body ]
 				]
 			], [this, i, Rebuild] { AbCol = 1; AbPick = i; Rebuild(); })
@@ -760,6 +787,7 @@ void SGridironOverlay::PumpAbilities()
 		FBadge B;
 		B.Screen = Scr;
 		B.Icon = UTF8_TO_TCHAR(A.icon);
+		B.Brush = TagAbilityArt::Icon(A);
 		B.bActive = Z && Z->active;
 		B.Progress = Z ? Z->progress : 0;
 		B.Need = A.need;
@@ -784,20 +812,35 @@ int32 SGridironOverlay::PaintAbilities(FSlateWindowElementList& Out, int32 Layer
 	for (const FBadge& B : Badges)
 	{
 		const FVector2D C = B.Screen * Scale;
-		const FVector2D Sz(38, 24);
+		const FVector2D Sz = B.Brush ? FVector2D(B.bActive ? 44 : 36, B.bActive ? 44 : 36) : FVector2D(38, 24);
 		const FVector2D TL = C - Sz * 0.5;
-		if (B.bActive)
+		if (B.Brush)
 		{
-			// a glow behind a lit badge
-			const FVector2D Gs = Sz + FVector2D(8, 8) * Pulse;
-			FSlateDrawElement::MakeBox(Out, Layer, G.ToPaintGeometry(FVector2f(Gs), FSlateLayoutTransform(FVector2f(C - Gs * 0.5))), WhiteBrush(),
-				ESlateDrawEffect::None, Flame * FLinearColor(1, 1, 1, 0.35f * Pulse));
+			// his X-Factor's icon: a pulsing glow behind it when he is in the zone, greyed until he gets there
+			if (B.bActive)
+			{
+				const FVector2D Gs = Sz * (1.12f + 0.1f * Pulse);
+				FSlateDrawElement::MakeBox(Out, Layer, G.ToPaintGeometry(FVector2f(Gs), FSlateLayoutTransform(FVector2f(C - Gs * 0.5))), B.Brush,
+					ESlateDrawEffect::None, Flame * FLinearColor(1.4f, 1.4f, 1.4f, 0.45f * Pulse));
+			}
+			FSlateDrawElement::MakeBox(Out, Layer + 1, G.ToPaintGeometry(FVector2f(Sz), FSlateLayoutTransform(FVector2f(TL))), B.Brush, ESlateDrawEffect::None,
+				B.bActive ? FLinearColor::White : FLinearColor(0.5f, 0.5f, 0.55f, 0.9f));
 		}
-		FSlateDrawElement::MakeBox(Out, Layer + 1, G.ToPaintGeometry(FVector2f(Sz), FSlateLayoutTransform(FVector2f(TL))), WhiteBrush(), ESlateDrawEffect::None,
-			B.bActive ? Flame : FLinearColor(0.02f, 0.025f, 0.035f, 0.85f));
-		const FVector2D M = FSlateApplication::Get().GetRenderer()->GetFontMeasureService()->Measure(B.Icon, F);
-		FSlateDrawElement::MakeText(Out, Layer + 2, G.ToPaintGeometry(FVector2f(M), FSlateLayoutTransform(FVector2f(C - M * 0.5))), B.Icon, F,
-			ESlateDrawEffect::None, B.bActive ? Ink : Flame);
+		else
+		{
+			if (B.bActive)
+			{
+				// a glow behind a lit badge
+				const FVector2D Gs = Sz + FVector2D(8, 8) * Pulse;
+				FSlateDrawElement::MakeBox(Out, Layer, G.ToPaintGeometry(FVector2f(Gs), FSlateLayoutTransform(FVector2f(C - Gs * 0.5))), WhiteBrush(),
+					ESlateDrawEffect::None, Flame * FLinearColor(1, 1, 1, 0.35f * Pulse));
+			}
+			FSlateDrawElement::MakeBox(Out, Layer + 1, G.ToPaintGeometry(FVector2f(Sz), FSlateLayoutTransform(FVector2f(TL))), WhiteBrush(), ESlateDrawEffect::None,
+				B.bActive ? Flame : FLinearColor(0.02f, 0.025f, 0.035f, 0.85f));
+			const FVector2D M = FSlateApplication::Get().GetRenderer()->GetFontMeasureService()->Measure(B.Icon, F);
+			FSlateDrawElement::MakeText(Out, Layer + 2, G.ToPaintGeometry(FVector2f(M), FSlateLayoutTransform(FVector2f(C - M * 0.5))), B.Icon, F,
+				ESlateDrawEffect::None, B.bActive ? Ink : Flame);
+		}
 		if (!B.bActive && B.Need > 0)
 		{
 			// his pips toward the zone under the badge

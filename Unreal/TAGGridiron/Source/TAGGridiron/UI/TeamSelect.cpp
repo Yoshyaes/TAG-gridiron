@@ -38,6 +38,9 @@
 #include <algorithm>
 #include <cmath>
 
+// the ability icons (UI/AbilityScreen.cpp)
+namespace TagAbilityArt { const FSlateBrush* Icon(const tag::AbilityDef& A); }
+
 // (a named namespace, not an anonymous one: in a unity build this file shares a translation unit with the overlay's)
 namespace TeamSel
 {
@@ -850,6 +853,12 @@ void SGridironOverlay::ShowTeamSelect(bool bUserPlays)
 			TSharedRef<SHorizontalBox> Carry = SNew(SHorizontalBox);
 			auto Pip = [&](const tag::AbilityDef& A)
 			{
+				if (const FSlateBrush* Ic = TagAbilityArt::Icon(A))
+				{
+					Carry->AddSlot().AutoWidth().Padding(0, 0, 2, 0)
+					[ SNew(SBox).WidthOverride(22).HeightOverride(22).ToolTipText(Tx(Str(A.name)))[ SNew(SImage).Image(Ic) ] ];
+					return;
+				}
 				const FLinearColor C = A.tier == tag::AbilityTier::XFactor ? Col(TEXT("FF6A1A")) : Gold;
 				Carry->AddSlot().AutoWidth().Padding(0, 0, 3, 0)
 				[ SNew(SBox).WidthOverride(22).HeightOverride(14).ToolTipText(Tx(Str(A.name)))
