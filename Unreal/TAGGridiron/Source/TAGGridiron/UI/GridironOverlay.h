@@ -87,7 +87,20 @@ struct FUserMarkerUI
 	FVector2D Head = FVector2D::ZeroVector;
 	FVector2D Viewport = FVector2D(1920, 1080);
 	FString Number;
+	/** Local multiplayer: the player's colour and tag ("P2") over the number, and his own sprint bar (V < 0: none). */
+	FLinearColor Color = FLinearColor(0.45f, 0.95f, 1.f);
+	FString Tag;
+	FVector2D StaminaAt = FVector2D::ZeroVector;
+	float StaminaV = -1.f;
+	bool bSprint = false;
 };
+
+/** The local players' colours (P1 blue, P2 red, P3 green, P4 gold): their markers, their lobby cards. */
+inline FLinearColor PlayerColor(int32 Index)
+{
+	static const FLinearColor C[4] = {FLinearColor(0.3f, 0.66f, 1.f), FLinearColor(1.f, 0.32f, 0.3f), FLinearColor(0.32f, 0.95f, 0.45f), FLinearColor(1.f, 0.82f, 0.2f)};
+	return C[FMath::Clamp(Index, 0, 3)];
+}
 
 /** The receivers' button colours: their icons and their routes in the play art share them. */
 inline FLinearColor ButtonColor(int32 Button)
@@ -111,6 +124,8 @@ public:
 	void ShowModal(TSharedRef<SWidget> W, bool bKeepFocus = false);
 	void ClearModal();
 	bool HasModal() const { return bModal; }
+	/** The play call screen is up (waiting for its pick). */
+	bool IsPlayCall() const { return bModal && CallDone != nullptr; }
 	/** The screen the pause menu came over (a play call, the try choice): back as it was, or nothing. */
 	void RestoreSuspended();
 	void DropSuspended() { Suspended.Reset(); }
@@ -135,6 +150,19 @@ public:
 		bPrePad = bPad;
 	}
 	void ClearPresnapPanel() { PreRows.Reset(); }
+	/** Multiplayer: whose the panel is (his tag chip in his colour on its title line; empty: nobody's). */
+	void SetPresnapWho(const FString& Who, const FLinearColor& C) { PreWho = Who; PreWhoColor = C; }
+	/** Head to head: the defense's caller's own pre-snap panel, bottom left (the offense's is bottom right). */
+	void SetDefPresnapPanel(const FString& Title, const FString& Sub, const TArray<FPreRow>& Rows, bool bPad, const FString& Who, const FLinearColor& C)
+	{
+		DefPreTitle = Title;
+		DefPreSub = Sub;
+		DefPreRows = Rows;
+		bDefPrePad = bPad;
+		DefPreWho = Who;
+		DefPreWhoColor = C;
+	}
+	void ClearDefPresnapPanel() { DefPreRows.Reset(); }
 	void SetIcons(const TArray<FArtIcon>& In, const FVector2D& ViewportSize, bool bPad)
 	{
 		Icons = In;
@@ -145,7 +173,9 @@ public:
 	void SetKickMeter(const FKickMeterUI& K) { KickMeter = K; }
 	/** The swing made: the meter stays up with it (the arrow gone: the camera has cut away). */
 	void HoldKickResult() { KickMeter.Arc.Reset(); KickMeter.Stage = 3; KickMeter.bAccShown = true; }
-	void SetUserMarker(const FUserMarkerUI& M) { UserMarker = M; }
+	void SetUserMarker(const FUserMarkerUI& M) { UserMarkers = {M}; }
+	/** Every local player's man (multiplayer): one marker each, in his colour. */
+	void SetUserMarkers(const TArray<FUserMarkerUI>& M) { UserMarkers = M; }
 	/** The user's sprint stamina under his man (Screen: viewport px; V < 0 hides it). */
 	void SetStamina(const FVector2D& Screen, const FVector2D& Viewport, float V, bool bSprint) { StaminaAt = Screen; StaminaVp = Viewport; StaminaV = V; bStaminaSprint = bSprint; }
 	void SetLineBars(const TArray<FLineBarUI>& B, const FVector2D& Viewport) { LineBars = B; LineViewport = Viewport; }
@@ -156,6 +186,8 @@ public:
 	void ShowPlayCall(bool bOffense, bool bFourthDown, bool bTwoPoint, std::function<void(FCallChoice)> Done);
 	/** The defensive call screen's line on what the offense has come out in (its formation and personnel); empty: none. */
 	void SetCallOffenseLook(const FString& S) { CallOffLook = S; }
+	/** Multiplayer: the player making this call ("P2 CALLING  -  PS5 CONTROLLER") and his colour; empty: none shown. */
+	void SetCallWho(const FString& S, const FLinearColor& C) { CallWho = S; CallWhoColor = C; }
 	void ShowPatChoice(std::function<void(bool)> Done);
 	void ShowPause(std::function<void()> Resume, std::function<void()> SimToEnd, std::function<void()> Quit);
 	/** The settings screen (commentary captions, ...); Back returns to whatever opened it. */
@@ -164,6 +196,11 @@ public:
 	/** Superstars & X-Factors (UI/AbilityScreen.cpp): a team's graded players and their ability loadouts; Back returns
 	 *  to whatever opened it. The saved loadouts are laid over the coach's picks at startup (LoadAbilityLoadouts). */
 	void ShowAbilities(int32 TeamIdx, std::function<void()> Back);
+	/** Local multiplayer (UI/Lobby.cpp): up to four players join (a button on their pad, or the keyboard), each picks
+	 *  a side (away / home) and, on a side with two or more, who calls the plays; then the team select. */
+	void ShowLobby();
+	/** The team select for a multiplayer game (the sides were picked in the lobby). */
+	bool IsMultiSelect() const { return bSelMulti; }
 	static void LoadAbilityLoadouts(AMatchDirector* D);
 	/** The depth chart (UI/DepthChart.cpp): every slot a team fills (the eleven a side by their spots, the specialists,
 	 *  the situational subs) and who is listed there, in order; the user's order is what the game plays. FocusSlot /
@@ -188,6 +225,7 @@ public:
 		FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
 
 private:
+	friend class AMatchDirector; // (the multiplayer test reads which call is up)
 	TSharedRef<SWidget> MakeButton(const FString& Label, const FString& Sub, std::function<void()> OnClick, float Width = 420.f);
 	TSharedRef<SWidget> MakeScoreBug();
 	FText ClockText() const;
@@ -209,10 +247,16 @@ private:
 	FString PreTitle, PreSub;
 	TArray<FPreRow> PreRows;
 	bool bPrePad = false;
+	FString PreWho;
+	FLinearColor PreWhoColor = FLinearColor::White;
+	FString DefPreTitle, DefPreSub, DefPreWho;
+	TArray<FPreRow> DefPreRows;
+	bool bDefPrePad = false;
+	FLinearColor DefPreWhoColor = FLinearColor::White;
 	TArray<FArtIcon> Icons;
 	FHighlightCue Highlight;
 	FKickMeterUI KickMeter;
-	FUserMarkerUI UserMarker;
+	TArray<FUserMarkerUI> UserMarkers;
 	FVector2D StaminaAt = FVector2D::ZeroVector, StaminaVp = FVector2D(1920, 1080);
 	float StaminaV = -1.f;
 	bool bStaminaSprint = false;
@@ -246,8 +290,12 @@ private:
 	int32 SelCol = 2;
 	int32 SelRow = 0;
 	bool bSelUserPlays = false;
+	bool bSelMulti = false;   // the team select of a multiplayer game (no "You control": the lobby picked the sides)
+	int32 LobbyFocus = 0;     // (UI/Lobby.cpp) the options row the keyboard / first pad is on
 	FString CallTab;
 	FString CallOffLook;
+	FString CallWho;
+	FLinearColor CallWhoColor = FLinearColor::White;
 	/** The formation (offense: its id) or set (defense: its name) shown inside the tab's family. */
 	FString CallSet;
 	/** The formations / sets of the current tab, in the book's order (D-pad up / down steps through them). */

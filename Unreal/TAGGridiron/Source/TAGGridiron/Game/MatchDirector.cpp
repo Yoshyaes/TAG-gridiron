@@ -33,6 +33,7 @@
 #include "Sim/Roster.h"
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
+#include "Misc/ScopeExit.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/SkeletalMesh.h"
@@ -197,6 +198,9 @@ void AMatchDirector::BeginPlay()
 	if (Overlay) Overlay->SetPadKind(bPlayStationPad);
 	if (Overlay) Overlay->Toast(bPlayStationPad ? TEXT("PS5 controller connected: PlayStation buttons") : bXboxPad ? TEXT("Xbox controller connected: Xbox buttons")
 		: TEXT("No controller found: keyboard (plug in a PS5 or Xbox controller any time)"));
+	FTagInputHub::Get(); // (every pad and the keyboard, each on its own: local multiplayer)
+	// -TagMultiTest: a scripted four-player game on made-up devices, from the lobby (TickMultiTest)
+	bMultiTest = FParse::Param(FCommandLine::Get(), TEXT("TagMultiTest"));
 	if (FParse::Param(FCommandLine::Get(), TEXT("TagAutoWatch")))
 	{
 		bAuto = true;
@@ -2322,6 +2326,7 @@ void AMatchDirector::TickAutomation(float Dt)
 void AMatchDirector::EndPlay(const EEndPlayReason::Type Reason)
 {
 	if (GEngine && GEngine->GameViewport && Overlay.IsValid()) GEngine->GameViewport->RemoveViewportWidgetContent(Overlay.ToSharedRef());
+	FTagInputHub::Shutdown();
 	Super::EndPlay(Reason);
 }
 
@@ -2505,6 +2510,10 @@ void AMatchDirector::ShowMainMenu()
 	Sim.reset();
 	Game.reset();
 	ShowOnly({});
+	bLobby = false;
+	bMulti = false;
+	SetMenuOwner(-1);
+	if (Overlay) Overlay->SetCallWho(FString(), FLinearColor::White);
 	if (Overlay) Overlay->ShowMainMenu();
 }
 
@@ -2523,6 +2532,11 @@ void AMatchDirector::QuitToMenu()
 void AMatchDirector::StartMatch(int HomeIdx, int AwayIdx, bool bUserPlays, bool bUserHome, int WeatherKind, bool bNight, double QuarterLen)
 {
 	if (Audio) Audio->Hush(); // (the loading reel has its own sound; the menu's music must not play over it)
+	bMulti = bMultiNext; // (StartMultiMatch; the one-player screens start a one-player game)
+	bMultiNext = false;
+	bLobby = false;
+	SetMenuOwner(-1);
+	for (FTagHuman& H : Humans) { H.Slot = -1; H.Last = nullptr; H.Ctl = FHumanCtl(); }
 	// -TagWeatherSeed=<n>: the same weather every run (like-for-like performance comparisons)
 	int32 WeatherSeed = -1;
 	FParse::Value(FCommandLine::Get(), TEXT("TagWeatherSeed="), WeatherSeed);
@@ -2579,7 +2593,7 @@ void AMatchDirector::StartMatch(int HomeIdx, int AwayIdx, bool bUserPlays, bool 
 
 bool AMatchDirector::BeginLoadingScreen(const tag::Team& Home, const tag::Team& Away, const tag::Weather& W, bool bNight)
 {
-	if (bAuto || bCallShot || bMoveShot || bArtTest || bLineup || bHighlights || bTackleCam || SoakSecs > 0.f || FParse::Param(FCommandLine::Get(), TEXT("TagNoLoad"))) return false;
+	if (bAuto || bCallShot || bMoveShot || bArtTest || bMultiTest || bLineup || bHighlights || bTackleCam || SoakSecs > 0.f || FParse::Param(FCommandLine::Get(), TEXT("TagNoLoad"))) return false;
 	if (!IsMoviePlayerEnabled() || !GetMoviePlayer()->IsInitialized() || GetMoviePlayer()->IsMovieCurrentlyPlaying()) return false;
 	const FString Reel = FPaths::ProjectContentDir() / TEXT("Movies/TAG_Highlights.mp4");
 	const bool bReel = FPaths::FileExists(Reel);
@@ -2955,8 +2969,8 @@ void AMatchDirector::TickTackleCam(float Dt)
 	FScreenshotRequest::RequestScreenshot(FString::Printf(TEXT("%s/t%03d_%04d.png"), *TcDir(), TcClip, TcFrame++), false, false);
 }
 
-bool AMatchDirector::UserOff() const { return UserTeam.has_value() && Game && *UserTeam == Game->poss; }
-bool AMatchDirector::UserDef() const { return UserTeam.has_value() && Game && *UserTeam == tag::other(Game->poss); }
+bool AMatchDirector::UserOff() const { return bMulti ? Game && TeamHuman(Game->poss) : UserTeam.has_value() && Game && *UserTeam == Game->poss; }
+bool AMatchDirector::UserDef() const { return bMulti ? Game && TeamHuman(tag::other(Game->poss)) : UserTeam.has_value() && Game && *UserTeam == tag::other(Game->poss); }
 
 // ------------------------------------------------------------------ flow
 void AMatchDirector::Next()
@@ -3030,7 +3044,8 @@ void AMatchDirector::Next()
 		if (UserOff())
 		{
 			State = EMatchState::Call;
-			Overlay->ShowPatChoice(Decide);
+			if (bMulti) SetMenuOwner(CallerOf(G.poss));
+			Overlay->ShowPatChoice([this, Decide](bool bTwo) { SetMenuOwner(-1); Decide(bTwo); });
 			return;
 		}
 		return Decide(G.goForTwo());
@@ -3140,6 +3155,7 @@ void AMatchDirector::CallPlays(bool bTwo)
 	PostStay.clear();
 	PostVel.clear();
 	PostYaw.clear();
+	SyncHumanLast(); // (each player gets his man back next play)
 	Sim.reset();
 	{
 		std::vector<tag::Player*> Keep;
@@ -3206,45 +3222,56 @@ void AMatchDirector::CallPlays(bool bTwo)
 		}), 3.f, false);
 		return;
 	}
+	// the defense's call (a user defense: the call screen, with what the offense has come out in)
+	std::function<void(const tag::OffPlay*)> DefCall = [this, Finish](const tag::OffPlay* Op)
+	{
+		// what the offense has come out in (its formation and the men on the field), as a defense sees before it
+		// calls: "SHOTGUN - Trips TE   11 personnel (1 RB, 1 TE, 3 WR)"
+		FString LookStr;
+		if (const tag::Formation* F = Op ? tag::formationById(Op->formation) : nullptr)
+		{
+			int32 Rb = 0, Te = 0, Wr = 0;
+			for (const tag::FormationSlot& Sl : F->slots)
+			{
+				if (Sl.pos.empty()) continue;
+				const tag::Pos Ps = Sl.pos.front();
+				if (Ps == tag::Pos::RB || Ps == tag::Pos::FB) ++Rb;
+				else if (Ps == tag::Pos::TE) ++Te;
+				else if (Ps == tag::Pos::WR) ++Wr;
+			}
+			const FString Fam = FString(UTF8_TO_TCHAR(tag::formationFamily(*F).c_str())).ToUpper();
+			const FString Name = FString(UTF8_TO_TCHAR(F->name.c_str()));
+			LookStr = FString::Printf(TEXT("OFFENSE IN  %s%s     %d%d PERSONNEL  (%d RB, %d TE, %d WR)"), *Fam,
+				Name.Equals(Fam, ESearchCase::IgnoreCase) ? TEXT("") : *(TEXT("  -  ") + Name), Rb, Te, Rb, Te, Wr);
+			UE_LOG(LogTemp, Display, TEXT("TAG defensive call sees: %s"), *LookStr);
+		}
+		Overlay->SetCallOffenseLook(LookStr);
+		if (bMulti) SetMenuOwner(CallerOf(tag::other(Game->poss)));
+		Overlay->ShowPlayCall(false, false, false, [this, Op, Finish](FCallChoice C)
+		{
+			SetMenuOwner(-1);
+			Finish(Op, C.Kind == FCallChoice::Def && C.Call ? C.Call : Game->cpuDefense(*Op));
+		});
+	};
 	if (UserOff())
 	{
-		Overlay->ShowPlayCall(true, G.down == 4 && !bTwo, bTwo, [this, bTwo, Finish](FCallChoice C)
+		// (multiplayer: the offense's caller works the screen; a defense with people on it calls next)
+		if (bMulti) SetMenuOwner(CallerOf(G.poss));
+		Overlay->ShowPlayCall(true, G.down == 4 && !bTwo, bTwo, [this, bTwo, Finish, DefCall](FCallChoice C)
 		{
+			SetMenuOwner(-1);
 			tag::Game& GG = *Game;
 			if (C.Kind == FCallChoice::Punt) return DoPunt();
 			if (C.Kind == FCallChoice::FG) return DoFG();
 			const tag::OffPlay* Op = C.Kind == FCallChoice::Off && C.Play ? C.Play : bTwo ? GG.cpuTwoPointPlay() : GG.cpuOffense();
+			if (bMulti && UserDef()) return DefCall(Op);
 			Finish(Op, GG.cpuDefense(*Op));
 		});
 	}
 	else
 	{
 		const tag::OffPlay* Op = bTwo ? G.cpuTwoPointPlay() : G.cpuOffense();
-		if (UserDef())
-		{
-			// what the offense has come out in (its formation and the men on the field), as a defense sees before it
-			// calls: "SHOTGUN - Trips TE   11 personnel (1 RB, 1 TE, 3 WR)"
-			FString LookStr;
-			if (const tag::Formation* F = Op ? tag::formationById(Op->formation) : nullptr)
-			{
-				int32 Rb = 0, Te = 0, Wr = 0;
-				for (const tag::FormationSlot& Sl : F->slots)
-				{
-					if (Sl.pos.empty()) continue;
-					const tag::Pos Ps = Sl.pos.front();
-					if (Ps == tag::Pos::RB || Ps == tag::Pos::FB) ++Rb;
-					else if (Ps == tag::Pos::TE) ++Te;
-					else if (Ps == tag::Pos::WR) ++Wr;
-				}
-				const FString Fam = FString(UTF8_TO_TCHAR(tag::formationFamily(*F).c_str())).ToUpper();
-				const FString Name = FString(UTF8_TO_TCHAR(F->name.c_str()));
-				LookStr = FString::Printf(TEXT("OFFENSE IN  %s%s     %d%d PERSONNEL  (%d RB, %d TE, %d WR)"), *Fam,
-					Name.Equals(Fam, ESearchCase::IgnoreCase) ? TEXT("") : *(TEXT("  -  ") + Name), Rb, Te, Rb, Te, Wr);
-				UE_LOG(LogTemp, Display, TEXT("TAG defensive call sees: %s"), *LookStr);
-			}
-			Overlay->SetCallOffenseLook(LookStr);
-			Overlay->ShowPlayCall(false, false, false, [this, Op, Finish](FCallChoice C) { Finish(Op, C.Kind == FCallChoice::Def && C.Call ? C.Call : Game->cpuDefense(*Op)); });
-		}
+		if (UserDef()) DefCall(Op);
 		else
 		{
 			// -TagHuddleSecs=<n>: a watched or filmed game takes this long over its call, as a user picking his play does
@@ -3295,6 +3322,7 @@ void AMatchDirector::StartPresnap(const tag::OffPlay* Op, const tag::DefCall* Dc
 	bUmpHasBall = false;
 	bUmpSpotted = false;
 	Sim = bTwoPoint ? G.twoPointSim(*Op, *Dc, US) : G.makePlay(*Op, *Dc, US);
+	SetupHumans();
 	Dir = G.worldDir();
 	double Far = 0.0;
 	int32 Walkers = 0, Known = 0;
@@ -3501,6 +3529,7 @@ void AMatchDirector::OnPlayDead()
 	SprintStamina = 1.f; // (his wind is back by the next snap)
 	CoastV.clear();
 	bSprintSpent = false;
+	for (FTagHuman& H : Humans) { H.Ctl.SprintStamina = 1.f; H.Ctl.bSprintSpent = false; }
 	bRealClock = UserTeam.has_value() && !bAuto;
 	PostAge = 0.f;
 	// a help-up: on an ordinary tackle, one time in four, the nearest teammate on his feet comes over for the carrier
@@ -3737,6 +3766,12 @@ void AMatchDirector::SetInvertRightY(bool b)
 float AMatchDirector::RightStickY(APlayerController* PC) const
 {
 	const float Y = PC ? PC->GetInputAnalogKeyState(EKeys::Gamepad_RightY) : 0.f;
+	return bOptInvertRY ? -Y : Y;
+}
+
+float AMatchDirector::RightStickY(const FTagReader& R) const
+{
+	const float Y = R ? R->GetInputAnalogKeyState(EKeys::Gamepad_RightY) : 0.f;
 	return bOptInvertRY ? -Y : Y;
 }
 
@@ -4055,7 +4090,9 @@ void AMatchDirector::StartLiveReturn(const std::vector<tag::Player*>& KickTeam, 
 	std::optional<tag::Side> US;
 	if (UserOff()) US = tag::Side::Off;
 	else if (UserDef()) US = tag::Side::Def;
+	if (Sim) SyncHumanLast();
 	Sim = G.kickReturnSim(RecvTeam, KickTeam, US);
+	SetupHumans();
 	bLiveReturn = true;
 	bKickCatchLogged = false;
 	Dir = G.worldDir();
@@ -5947,7 +5984,29 @@ void AMatchDirector::UpdateCamera(float Dt, const FVector& InFocus)
 
 void AMatchDirector::ReadUserInput()
 {
-	APlayerController* PC = GetWorld()->GetFirstPlayerController();
+	if (!Sim) return;
+	if (!bMulti)
+	{
+		CurIn = FTagReader(GetWorld()->GetFirstPlayerController());
+		CurIn.bPad = PadUI();
+		ReadUserInputSlot();
+		return;
+	}
+	// every player in turn: his man and his controls in slot 0 while his own pad (or the keyboard) is read
+	for (FTagHuman& H : Humans)
+	{
+		if (H.Slot < 0 || !Sim->slotEnt(H.Slot)) continue;
+		CurIn = H.Reader();
+		SwapHuman(H);
+		ReadUserInputSlot();
+		SwapHuman(H);
+	}
+	CurIn = FTagReader();
+}
+
+void AMatchDirector::ReadUserInputSlot()
+{
+	const FTagReader& PC = CurIn;
 	if (!PC || !Sim) return;
 	tag::PlaySim& P = *Sim;
 	float MX = 0, MY = 0;
@@ -5973,9 +6032,9 @@ void AMatchDirector::ReadUserInput()
 		const bool bMoving = P.user && tag::len(P.input.move) > 0.2;
 		if (SprintStamina < 0.02f) bSprintSpent = true;
 		else if (SprintStamina > 0.25f) bSprintSpent = false;
-		bSprinting = PadUI() && bWant && bMoving && !bSprintSpent;
+		bSprinting = PC.IsPad() && bWant && bMoving && !bSprintSpent;
 		SprintStamina = FMath::Clamp(SprintStamina + (bSprinting ? -Dt / 6.f : Dt / 4.f), 0.f, 1.f);
-		P.input.sprint = !PadUI() || bSprinting;
+		P.input.sprint = !PC.IsPad() || bSprinting;
 	}
 	const FKey Nums[5] = {EKeys::One, EKeys::Two, EKeys::Three, EKeys::Four, EKeys::Five};
 	const FKey Pads[5] = {EKeys::Gamepad_FaceButton_Bottom, EKeys::Gamepad_FaceButton_Right, EKeys::Gamepad_FaceButton_Left, EKeys::Gamepad_FaceButton_Top, EKeys::Gamepad_RightShoulder};
@@ -5992,6 +6051,7 @@ void AMatchDirector::ReadUserInput()
 	for (int i = 0; i < 5; ++i)
 	{
 		// the keyboard throws at once: a bullet (SHIFT lob, CTRL high, ALT low)
+		if (P.user != P.qb) break; // (the receivers' buttons are the quarterback's: a player on a receiver has his own)
 		if (PC->WasInputKeyJustPressed(Nums[i]))
 			ThrowTo(i, PC->IsInputKeyDown(EKeys::LeftShift) ? 1 : PC->IsInputKeyDown(EKeys::LeftControl) ? 2 : PC->IsInputKeyDown(EKeys::LeftAlt) ? 3 : 0);
 		// the pad, Madden's way: the receiver's button held is a bullet, tapped a lob / touch, tapped twice a pump fake
@@ -6001,7 +6061,7 @@ void AMatchDirector::ReadUserInput()
 			else { PadThrowIdx = i; PadThrowT0 = Now; }
 		}
 	}
-	if (PadThrowIdx >= 0)
+	if (PadThrowIdx >= 0 && P.user == P.qb)
 	{
 		const double Held = Now - PadThrowT0;
 		if (!PC->IsInputKeyDown(Pads[PadThrowIdx]) || Held >= 0.3)
@@ -6011,7 +6071,7 @@ void AMatchDirector::ReadUserInput()
 			PadThrowIdx = -1;
 		}
 	}
-	if (PadTapIdx >= 0 && Now - PadTapT >= 0.22) { ThrowTo(PadTapIdx, 1); PadTapIdx = -1; }
+	if (PadTapIdx >= 0 && Now - PadTapT >= 0.22 && P.user == P.qb) { ThrowTo(PadTapIdx, 1); PadTapIdx = -1; }
 	// the pump fake on the keyboard
 	if (PC->WasInputKeyJustPressed(EKeys::P) && P.ball.holder == P.qb && !P.passThrown) P.input.pumpFake = true;
 	// throw it away (Madden: R3; keyboard T)
@@ -6061,7 +6121,7 @@ void AMatchDirector::ReadUserInput()
 			if (!bRushHint && Overlay)
 			{
 				bRushHint = true;
-				Overlay->SetHint(PadUI() ? PadHint(TEXT("PASS RUSH   R-STICK up rip   down bull rush   left / right swim or club   R2 speed rush"))
+				Overlay->SetHint(PC.IsPad() ? PadHint(TEXT("PASS RUSH   R-STICK up rip   down bull rush   left / right swim or club   R2 speed rush"))
 					: FString(TEXT("J finesse   K power   (A / D side: swim / club   S back: spin / long arm)")));
 			}
 		}
@@ -6128,7 +6188,7 @@ void AMatchDirector::ReadUserInput()
 		if (bCarrier && !bCarrierHint && Overlay)
 		{
 			bCarrierHint = true;
-			Overlay->SetHint(PadUI() ? PadHint(TEXT("R2 sprint    R-STICK up truck   left / right / back juke    CROSS stiff arm    CIRCLE spin    TRIANGLE hurdle"))
+			Overlay->SetHint(PC.IsPad() ? PadHint(TEXT("R2 sprint    R-STICK up truck   left / right / back juke    CROSS stiff arm    CIRCLE spin    TRIANGLE hurdle"))
 				: FString(TEXT("F truck   G stiff arm   Q / E juke   R spin   V hurdle   SPACE juke")));
 		}
 	}
@@ -6141,12 +6201,14 @@ void AMatchDirector::ReadUserInput()
 	if (PC->WasInputKeyJustPressed(EKeys::Tab) || PC->WasInputKeyJustPressed(EKeys::Gamepad_LeftShoulder)) P.input.switchReq = true;
 	// auto-switch to our ball carrier after a handoff / catch
 	tag::Ent* H = P.ball.holder;
-	if (H && P.user && H->side == P.user->side && H != P.user && H != P.qb)
+	// (multiplayer: a man another player has is his; on offense only the player on the quarterback follows the ball)
+	const bool bMayTake = !bMulti || (H && !H->userControlled && (P.user == P.qb || P.user->side == tag::Side::Def));
+	if (H && P.user && H->side == P.user->side && H != P.user && H != P.qb && bMayTake)
 	{
 		P.user->userControlled = false;
 		P.user = H;
 		H->userControlled = true;
-		Labels.clear();
+		if (!bMulti || H->side == tag::Side::Off) Labels.clear();
 	}
 	if (P.passThrown) Labels.clear();
 }
@@ -6297,6 +6359,16 @@ void AMatchDirector::UpdateKeepOut()
 void AMatchDirector::Tick(float Dt)
 {
 	Super::Tick(Dt);
+	// every device's "just pressed" lasts this one tick, whichever way it returns
+	ON_SCOPE_EXIT { FTagInputHub::Get().EndFrame(); };
+	{
+		// a menu one player works (multiplayer: a play call, the try): the other pads and keys go nowhere
+		const bool bOwned = bMulti && MenuOwner >= 0 && Overlay && Overlay->HasModal() && !bEnginePaused && State != EMatchState::Paused;
+		FTagInputHub::Get().SetMenuOwners(bOwned ? HumanDevices(MenuOwner) : TArray<int32>());
+		if (bMulti && Overlay) Overlay->SetPadKind(Humans.IsValidIndex(MenuOwner) ? HumanDevice(MenuOwner).Contains(TEXT("PlayStation")) : bPlayStationPad);
+	}
+	if (bMultiTest) TickMultiTest(Dt);
+	if (bLobby) TickLobby();
 	UpdateKeepOut();
 	TickHelpUp(Dt);
 	TickAutomation(Dt);
@@ -6327,6 +6399,10 @@ void AMatchDirector::Tick(float Dt)
 		if (bBetween && !UGameplayStatics::IsGamePaused(this)) // (the pause menu holds both clocks)
 		{
 			PlayClockF = FMath::Max(0.f, PlayClockF - Dt);
+			// (multiplayer: the defense's caller taking his time is not the offense's delay of game - the clock holds at 10
+			// while his call is up)
+			if (bMulti && State == EMatchState::Call && Humans.IsValidIndex(MenuOwner) && Game && KeyOf(Humans[MenuOwner].Team) != Game->poss)
+				PlayClockF = FMath::Max(PlayClockF, FMath::Min(10.f, PlayClockF + Dt));
 			if (State == EMatchState::Post || State == EMatchState::Wait) { if (bPreRun && Game) HudPreRun = FMath::Min(HudPreRun + Dt, FMath::Max(0.0, Game->clock)); } // (never past 0:00)
 			else if (bClockLive && Game) HudRunoffLeft = FMath::Max(HudRunoffLeft - Dt, -FMath::Max(0.0, Game->clock - 1.0));
 			// the user's offense let it run out: delay of game (not on a try)
@@ -6432,6 +6508,13 @@ void AMatchDirector::Tick(float Dt)
 	}
 	const float SDt = Dt * (bWatch ? Speed : 1.f);
 	const bool bSpace = PC && (PC->WasInputKeyJustPressed(EKeys::SpaceBar) || PC->WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Bottom));
+	// the snap: the offense's own (multiplayer: the player in slot 0 - the offense's caller - and nobody else)
+	bool bSnapKey = bSpace;
+	if (bMulti)
+	{
+		const FTagReader Pr = PrimaryReader();
+		bSnapKey = Pr && (Pr->WasInputKeyJustPressed(EKeys::SpaceBar) || Pr->WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Bottom));
+	}
 	if (Game && Game->q != PackQ && (State == EMatchState::Wait || State == EMatchState::Call))
 	{
 		// a new quarter: a fresh draw of the pack library streams in behind the game
@@ -6479,7 +6562,7 @@ void AMatchDirector::Tick(float Dt)
 		SetClock = Sim->walking() ? 0.f : SetClock + SDt;
 		// the rolled pre-snap foul: once the men are set at the line (and before anyone can snap it - the user's snap
 		// press draws it too, as a jump on the cadence does)
-		if (PendingPreFlag && !Sim->walking() && (SetClock >= PreFlagAt || (UserOff() && bSpace && PreMode == EPre::Base && !bPreConsumed)))
+		if (PendingPreFlag && !Sim->walking() && (SetClock >= PreFlagAt || (UserOff() && bSnapKey && PreMode == EPre::Base && !bPreConsumed)))
 		{
 			CallPresnapFlag();
 			break;
@@ -6489,10 +6572,10 @@ void AMatchDirector::Tick(float Dt)
 		const bool bCpuSet = SetClock >= 1.f;
 		const bool bStuck = PresnapClock > 12.f && Sim->walking();
 		if (bStuck) UE_LOG(LogTemp, Warning, TEXT("TAG presnap: men still walking after %.1f s, snapping anyway"), PresnapClock);
-		if ((Timer <= 0 && (bCpuSet || bStuck) && !(BoothHold() && !UserOff())) || (UserDef() && PresnapClock > 25.f && (bCpuSet || bStuck)) ||
+		if ((Timer <= 0 && (bCpuSet || bStuck) && !(BoothHold() && !UserOff())) || (UserDef() && !UserOff() && PresnapClock > 25.f && (bCpuSet || bStuck)) ||
 			(bRealClock && !UserOff() && PlayClockF <= 1.5f && (bCpuSet || bStuck)) || // a CPU offense beats the play clock
 			((bCallShot || bMoveShot) && PresnapClock > 4.f && bCpuSet) ||
-			(UserOff() && bSpace && !bMenu && !bPreConsumed && !Sim->walking()))
+			(UserOff() && bSnapKey && !bMenu && !bPreConsumed && !Sim->walking()))
 		{
 			EndPresnapUI();
 			State = EMatchState::Live;
@@ -6520,8 +6603,11 @@ void AMatchDirector::Tick(float Dt)
 			CapturePrev();
 			Sim->step(STEP);
 			Acc -= STEP;
-			Sim->input.juke = false;
-			Sim->input.stickMove = tag::Move::None; // a flick is one move, on the step it came in
+			for (int32 Us = 0; Us < Sim->userSlots(); ++Us)
+			{
+				Sim->slotInput(Us).juke = false;
+				Sim->slotInput(Us).stickMove = tag::Move::None; // a flick is one move, on the step it came in
+			}
 		}
 		SyncPlay(Dt, FMath::Min(1.f, Acc / STEP));
 		UpdateCamera(Dt, FocusPoint());

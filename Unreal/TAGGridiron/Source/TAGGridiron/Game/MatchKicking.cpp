@@ -24,6 +24,7 @@ bool AMatchDirector::UserKicks(tag::TeamKey Kicking) const
 	static const bool bAutoKicks = FParse::Param(FCommandLine::Get(), TEXT("TagUserKicks"));
 	if (bAutoKicks) return true;
 	// (the look-dev and pad tests drive a user game with nobody at the meter: their kicks are the CPU's)
+	if (bMulti) return TeamHuman(Kicking) && !bAuto && !bMultiTest;
 	return UserTeam.has_value() && *UserTeam == Kicking && !bAuto && !bHighlights && !bArtTest && !bPadTest && !bPauseTest && !bMoveShot;
 }
 
@@ -79,15 +80,22 @@ void AMatchDirector::TickUserKick(float Dt)
 	static const bool bAutoKicks = FParse::Param(FCommandLine::Get(), TEXT("TagUserKicks"));
 	float LX = 0.f, RX = 0.f, RY = 0.f;
 	bool bDown = false, bHit = false;
-	if (PC)
+	// the swing is the kicking side's: one player's controller, or in a multiplayer game his caller's pad / keys
+	FTagReader In(PC);
+	if (bMulti)
 	{
-		LX = PC->GetInputAnalogKeyState(EKeys::Gamepad_LeftX);
-		if (PC->IsInputKeyDown(EKeys::A) || PC->IsInputKeyDown(EKeys::Left)) LX -= 1.f;
-		if (PC->IsInputKeyDown(EKeys::D) || PC->IsInputKeyDown(EKeys::Right)) LX += 1.f;
-		RX = PC->GetInputAnalogKeyState(EKeys::Gamepad_RightX);
-		RY = RightStickY(PC);
-		bDown = PC->IsInputKeyDown(EKeys::SpaceBar) || PC->IsInputKeyDown(EKeys::Gamepad_FaceButton_Bottom);
-		bHit = PC->WasInputKeyJustPressed(EKeys::SpaceBar) || PC->WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Bottom);
+		const int32 Kh = CallerOf(UK.Kind == 0 ? Game->kicking : Game->poss);
+		In = Humans.IsValidIndex(Kh) ? Humans[Kh].Reader() : FTagReader();
+	}
+	if (In)
+	{
+		LX = In->GetInputAnalogKeyState(EKeys::Gamepad_LeftX);
+		if (In->IsInputKeyDown(EKeys::A) || In->IsInputKeyDown(EKeys::Left)) LX -= 1.f;
+		if (In->IsInputKeyDown(EKeys::D) || In->IsInputKeyDown(EKeys::Right)) LX += 1.f;
+		RX = In->GetInputAnalogKeyState(EKeys::Gamepad_RightX);
+		RY = RightStickY(In);
+		bDown = In->IsInputKeyDown(EKeys::SpaceBar) || In->IsInputKeyDown(EKeys::Gamepad_FaceButton_Bottom);
+		bHit = In->WasInputKeyJustPressed(EKeys::SpaceBar) || In->WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Bottom);
 	}
 	if (bAutoKicks)
 	{

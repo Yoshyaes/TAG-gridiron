@@ -686,7 +686,7 @@ void SGridironOverlay::ShowTeamSelect(bool bUserPlays)
 	// the options column's rows (the last one is the kickoff)
 	struct FOpt { FString Label, Value; std::function<void(int32)> Step; };
 	TArray<FOpt> Opts;
-	if (bUserPlays)
+	if (bUserPlays && !bSelMulti)
 		Opts.Add({TEXT("You control"), bSelUserHome ? Str(Home.Tm->abbr) + TEXT("  (home)") : Str(Away.Tm->abbr) + TEXT("  (away)"), [this](int32) { bSelUserHome = !bSelUserHome; }});
 	Opts.Add({TEXT("Weather"), WxNames[SelWeather], [this](int32 D) { SelWeather = (SelWeather + D + 5) % 5; }});
 	Opts.Add({TEXT("Kickoff"), bSelNight ? TEXT("Night (lights)") : TEXT("Day"), [this](int32) { bSelNight = !bSelNight; }});
@@ -702,7 +702,12 @@ void SGridironOverlay::ShowTeamSelect(bool bUserPlays)
 		Sel = (Sel + D + NTeams) % NTeams;
 		if (Sel == Other) Sel = (Sel + D + NTeams) % NTeams;
 	};
-	auto Kick = [this, bUserPlays] { Director->StartMatch(SelHome, SelAway, bUserPlays, bSelUserHome, SelWeather, bSelNight, Quarters[SelQuarter]); };
+	auto Kick = [this, bUserPlays]
+	{
+		// (a multiplayer game: the sides were picked in the lobby)
+		if (bSelMulti) Director->StartMultiMatch(SelHome, SelAway, SelWeather, bSelNight, Quarters[SelQuarter]);
+		else Director->StartMatch(SelHome, SelAway, bUserPlays, bSelUserHome, SelWeather, bSelNight, Quarters[SelQuarter]);
+	};
 	auto Random = [this, NTeams](bool bHome)
 	{
 		int32& Sel = bHome ? SelHome : SelAway;
@@ -723,7 +728,7 @@ void SGridironOverlay::ShowTeamSelect(bool bUserPlays)
 		const FLinearColor Sec = Col(Tm.colors.secondary);
 		const FLinearColor OnPri = OnColor(Pri);
 		const bool bFocus = SelCol == (bHome ? 2 : 0);
-		const bool bUsers = bUserPlays && bSelUserHome == bHome;
+		const bool bUsers = bSelMulti ? Director->TeamHumanInLobby(bHome) : bUserPlays && bSelUserHome == bHome;
 		const int32 St = FMath::RoundToInt(I.Unit[UKP]);
 		const int32 Col0 = bHome ? 2 : 0;
 
@@ -739,7 +744,9 @@ void SGridironOverlay::ShowTeamSelect(bool bUserPlays)
 				];
 		};
 		const FString Side = bHome ? TEXT("HOME") : TEXT("AWAY");
-		const FString Who = bUserPlays ? (bUsers ? TEXT("YOU") : TEXT("CPU")) : TEXT("CPU");
+		FString Who = bUserPlays ? (bUsers ? TEXT("YOU") : TEXT("CPU")) : TEXT("CPU");
+		if (bSelMulti && bUsers) Who = Director->LobbyTags(bHome); // "P1  P2"
+		const bool bYou = bUsers;
 		TSharedRef<SWidget> Header = SNew(SBorder).BorderImage(WhiteBrush()).BorderBackgroundColor(Pri).Padding(FMargin(8, 10, 8, 10))
 		[
 			SNew(SHorizontalBox)
@@ -754,8 +761,8 @@ void SGridironOverlay::ShowTeamSelect(bool bUserPlays)
 					+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)
 					[ SNew(SBorder).BorderImage(WhiteBrush()).BorderBackgroundColor(FLinearColor(0, 0, 0, 0.35f)).Padding(FMargin(7, 1))[ Label(Side, 9, FLinearColor::White) ] ]
 					+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(4, 0, 0, 0)
-					[ SNew(SBorder).BorderImage(WhiteBrush()).BorderBackgroundColor(Who == TEXT("YOU") ? Gold : FLinearColor(1, 1, 1, 0.2f)).Padding(FMargin(7, 1))
-						[ Label(Who, 9, Who == TEXT("YOU") ? Ink : FLinearColor::White) ] ]
+					[ SNew(SBorder).BorderImage(WhiteBrush()).BorderBackgroundColor(bYou ? Gold : FLinearColor(1, 1, 1, 0.2f)).Padding(FMargin(7, 1))
+						[ Label(Who, 9, bYou ? Ink : FLinearColor::White) ] ]
 					+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(8, 0, 0, 0)
 					[ Label(FString::Printf(TEXT("%s CONFERENCE  ·  %s"), *Str(Tm.conference).ToUpper(), *Str(Tm.division).ToUpper()), 9, OnPri * FLinearColor(1, 1, 1, 0.75f)) ]
 				]
@@ -1191,9 +1198,9 @@ void SGridironOverlay::ShowTeamSelect(bool bUserPlays)
 		[
 			SNew(SHorizontalBox)
 			+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Bottom)
-			[ SNew(STextBlock).Font(Font(30, "Bold")).ColorAndOpacity(FLinearColor::White).Text(Tx(bUserPlays ? TEXT("PLAY NOW") : TEXT("WATCH A GAME"))) ]
+			[ SNew(STextBlock).Font(Font(30, "Bold")).ColorAndOpacity(FLinearColor::White).Text(Tx(bSelMulti ? TEXT("MULTIPLAYER") : bUserPlays ? TEXT("PLAY NOW") : TEXT("WATCH A GAME"))) ]
 			+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Bottom).Padding(14, 0, 0, 5)
-			[ Label(bUserPlays ? TEXT("EXHIBITION  ·  SELECT YOUR MATCHUP") : TEXT("CPU VS CPU BROADCAST  ·  SELECT THE MATCHUP"), 11, Dim) ]
+			[ Label(bSelMulti ? TEXT("LOCAL  ·  PICK THE TEAMS  (THE SIDES ARE THE LOBBY'S)") : bUserPlays ? TEXT("EXHIBITION  ·  SELECT YOUR MATCHUP") : TEXT("CPU VS CPU BROADCAST  ·  SELECT THE MATCHUP"), 11, Dim) ]
 			+ SHorizontalBox::Slot().FillWidth(1)
 			+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Bottom).Padding(0, 0, 0, 5)
 			[ Label(FString::Printf(TEXT("%d TEAMS  ·  RATINGS RANKED LEAGUE-WIDE"), NTeams), 9, Faint) ]
@@ -1249,7 +1256,6 @@ void SGridironOverlay::ShowTeamSelect(bool bUserPlays)
 			ShowAbilities(bHomeT ? SelHome : SelAway, [this, bUserGame] { ShowTeamSelect(bUserGame); });
 			return true;
 		}
-		if (K == EKeys::Gamepad_FaceButton_Right || K == EKeys::Escape || K == EKeys::BackSpace) { ATagAudio::Ui(TEXT("UiBack")); ShowMainMenu(); return true; }
 		if (K == EKeys::Gamepad_LeftTrigger || K == EKeys::G)
 		{
 			// the depth chart of the team under the pad
@@ -1257,6 +1263,13 @@ void SGridironOverlay::ShowTeamSelect(bool bUserPlays)
 			const bool bHomeT = SelCol == 2 || (SelCol == 1 && (!bSelUserPlays || bSelUserHome));
 			const bool bUserGame = bSelUserPlays;
 			ShowDepthChart(bHomeT ? SelHome : SelAway, [this, bUserGame] { ShowTeamSelect(bUserGame); });
+			return true;
+		}
+		if (K == EKeys::Gamepad_FaceButton_Right || K == EKeys::Escape || K == EKeys::BackSpace)
+		{
+			ATagAudio::Ui(TEXT("UiBack"));
+			if (bSelMulti) Director->ShowLobby(); // (back to the players' sides)
+			else ShowMainMenu();
 			return true;
 		}
 		if (K == EKeys::Gamepad_FaceButton_Left || K == EKeys::R)
@@ -1273,6 +1286,7 @@ void SGridironOverlay::ShowTeamSelect(bool bUserPlays)
 			ATagAudio::Ui(TEXT("UiTab"));
 			Swap(SelHome, SelAway);
 			bSelUserHome = !bSelUserHome;
+			if (bSelMulti) Director->LobbySwapSides(); // (every player stays with his team)
 			if (SelCol != 1) SelCol = 2 - SelCol;
 			Rebuild();
 			return true;

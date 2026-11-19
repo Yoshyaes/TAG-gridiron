@@ -560,7 +560,7 @@ bool PlaySim::thinkDownIt(Ent* e) {
   }
   const double since = t - kickCatchT;
   if (e->userControlled) {
-    if (len(input.move) > 0.25) returnMoved = true;
+    if (len(inputOf(e).move) > 0.25) returnMoved = true;
     if (returnMoved) return false;
   } else if (!cfg.kick->downIt) {
     return false;
@@ -1575,23 +1575,24 @@ void PlaySim::presnapStep(double dt) {
   }
 }
 
-bool PlaySim::userPresnapMove(const V2& stick, double dt) {
-  if (!preSnap() || !user || user->side != Side::Def) return false;
+bool PlaySim::userPresnapMove(const V2& stick, double dt, int slot) {
+  Ent* const me = slotEnt(slot);  // (the human walking his man: slot 0 is the one-player game's)
+  if (!preSnap() || !me || me->side != Side::Def) return false;
   const double m = (std::min)(1.0, len(stick));
   if (m < 0.2) {
-    if (!user->shiftTo) user->vel = V2{0, 0};
+    if (!me->shiftTo) me->vel = V2{0, 0};
     return false;
   }
   // a shuffle for a nudge, a jog (4.5 yd/s) for a full push
   const double sp = 1.2 + 3.3 * clamp((m - 0.2) / 0.8, 0.0, 1.0);
-  user->shiftTo.reset();
-  user->vel = scale(norm(stick), sp);
-  V2 to = add(user->pos, scale(user->vel, dt));
+  me->shiftTo.reset();
+  me->vel = scale(norm(stick), sp);
+  V2 to = add(me->pos, scale(me->vel, dt));
   // his side of the neutral zone (a lineman's hand at the ball, everyone else a yard off it), on the field
-  to.x = clamp(to.x, los + (user->isDL ? 0.55 : 1.0), los + 25.0);
+  to.x = clamp(to.x, los + (me->isDL ? 0.55 : 1.0), los + 25.0);
   to.y = clamp(to.y, 1.0, FIELD_W - 1.0);
-  user->pos = to;
-  basePos_[user] = to;  // (a shift called after this is relative to where he is now)
+  me->pos = to;
+  basePos_[me] = to;  // (a shift called after this is relative to where he is now)
   adjusted_ = true;
   return true;
 }
@@ -1738,38 +1739,38 @@ void PlaySim::pickUserEnt(Side side) {
   if (user) user->userControlled = true;
 }
 
-void PlaySim::switchUser() {
-  if (!user) return;
-  const Side side = user->side;
+void PlaySim::switchUser(int slot) {
+  Ent* const cur = slotEnt(slot);
+  if (!cur) return;
+  const Side side = cur->side;
   const V2 bp{ball.pos.x, ball.pos.y};
   const std::vector<Ent*>& team = side == Side::Off ? off : def;
   std::vector<Ent*> cands;
   for (Ent* e : team)
-    if (e != user && e->state != EntState::Down) cands.push_back(e);
+    if (e != cur && e->state != EntState::Down && !e->userControlled) cands.push_back(e);  // (never another human's man)
   if (cands.empty()) return;
   // before the snap the switch cycles the whole defense, nearest the ball first (Madden's CIRCLE): taking the nearest
   // other man each time only ever flipped between the same two
-  if (preSnap() && side == Side::Def) cands.push_back(user);
+  if (preSnap() && side == Side::Def) cands.push_back(cur);
   std::stable_sort(cands.begin(), cands.end(), [&bp](const Ent* a, const Ent* b) { return dist(a->pos, bp) - dist(b->pos, bp) < 0; });
   Ent* next = cands[0];
   if (preSnap() && side == Side::Def) {
-    const auto it = std::find(cands.begin(), cands.end(), user);
+    const auto it = std::find(cands.begin(), cands.end(), cur);
     next = (it == cands.end() || it + 1 == cands.end()) ? cands[0] : *(it + 1);
   }
-  user->userControlled = false;
-  user = next;
-  user->userControlled = true;
+  setSlotEnt(slot, next);
 }
 
-bool PlaySim::switchUserToward(const V2& dir) {
-  if (!user || len(dir) < 0.1) return false;
+bool PlaySim::switchUserToward(const V2& dir, int slot) {
+  Ent* const me = slotEnt(slot);
+  if (!me || len(dir) < 0.1) return false;
   const V2 d = norm(dir);
-  const std::vector<Ent*>& team = user->side == Side::Off ? off : def;
+  const std::vector<Ent*>& team = me->side == Side::Off ? off : def;
   Ent* best = nullptr;
   double bs = 1e9;
   for (Ent* e : team) {
-    if (e == user || e->state == EntState::Down) continue;
-    const V2 rel = sub(e->pos, user->pos);
+    if (e == me || e->state == EntState::Down || e->userControlled) continue;
+    const V2 rel = sub(e->pos, me->pos);
     const double l = len(rel);
     if (l < 0.05) continue;
     const double c = dot(rel, d) / l;
@@ -1781,10 +1782,90 @@ bool PlaySim::switchUserToward(const V2& dir) {
     }
   }
   if (!best) return false;
-  user->userControlled = false;
-  user = best;
-  user->userControlled = true;
+  return setSlotEnt(slot, best);
+}
+
+int PlaySim::slotOf(const Ent* e) const {
+  if (!e) return -1;
+  if (e == user) return 0;
+  for (size_t i = 0; i < mates.size(); ++i)
+    if (mates[i].ent == e) return static_cast<int>(i) + 1;
+  return -1;
+}
+
+bool PlaySim::setSlotEnt(int s, Ent* e) {
+  const int has = slotOf(e);
+  if (e && has >= 0 && has != s) return false;  // another human's man
+  Ent* const was = slotEnt(s);
+  if (was == e) return true;
+  if (was) was->userControlled = false;
+  if (s <= 0) user = e;
+  else if (s - 1 < static_cast<int>(mates.size())) mates[s - 1].ent = e;
+  else return false;
+  if (e) {
+    e->userControlled = true;
+    if (s > 0) mates[s - 1].side = e->side;
+  }
   return true;
+}
+
+namespace {
+// the order a second, third... human on a side is given his man: the playmakers first (the backs and the receivers
+// on offense, the linebackers and the secondary on defense), the line last
+int mateRank(const Ent* e) {
+  switch (e->p->pos) {
+    case Pos::RB: return 0;
+    case Pos::WR: return 1;
+    case Pos::TE: return 2;
+    case Pos::FB: return 3;
+    case Pos::LB: return 0;
+    case Pos::S: return 1;
+    case Pos::CB: return 2;
+    case Pos::DE: return 3;
+    case Pos::DT: return 4;
+    default: return 9;
+  }
+}
+}  // namespace
+
+int PlaySim::addMate(Side side, Ent* prefer) {
+  UserSlot sl;
+  sl.side = side;
+  mates.push_back(sl);
+  const int s = static_cast<int>(mates.size());
+  const std::vector<Ent*>& team = side == Side::Off ? off : def;
+  Ent* pick = nullptr;
+  if (prefer && !prefer->userControlled && std::find(team.begin(), team.end(), prefer) != team.end()) pick = prefer;
+  if (!pick) {
+    std::vector<Ent*> cands;
+    for (Ent* e : team)
+      if (!e->userControlled && e != qb && e != kickerEnt && !(side == Side::Off && !cfg.kick && !e->eligible)) cands.push_back(e);
+    // (a kick return: every man on the field may be had; the returner is usually slot 0's)
+    const V2 bp{ball.pos.x, ball.pos.y};
+    std::stable_sort(cands.begin(), cands.end(), [&](const Ent* a, const Ent* b) {
+      const int ra = cfg.kick ? 0 : mateRank(a), rb = cfg.kick ? 0 : mateRank(b);
+      if (ra != rb) return ra < rb;
+      return dist(a->pos, bp) < dist(b->pos, bp);
+    });
+    if (!cands.empty()) pick = cands[0];
+  }
+  setSlotEnt(s, pick);
+  return s;
+}
+
+bool PlaySim::cycleEligible(int slot, int dir) {
+  Ent* const cur = slotEnt(slot);
+  if (!preSnap() || !cur || cur->side != Side::Off || cur == qb) return false;
+  // the eligible men across the formation (left to right as the offense sees it), the ones another human has skipped
+  std::vector<Ent*> el;
+  for (Ent* e : off)
+    if (e->eligible && e != qb && (e == cur || !e->userControlled)) el.push_back(e);
+  if (el.size() < 2) return false;
+  std::stable_sort(el.begin(), el.end(), [](const Ent* a, const Ent* b) { return a->pos.y > b->pos.y; });
+  const auto it = std::find(el.begin(), el.end(), cur);
+  if (it == el.end()) return setSlotEnt(slot, el[0]);
+  const int n = static_cast<int>(el.size()), i = static_cast<int>(it - el.begin());
+  return setSlotEnt(slot, el[((i + (dir >= 0 ? 1 : -1)) % n + n) % n]);
 }
 
 // ------------------------------------------------------------------ helpers
@@ -1816,9 +1897,12 @@ void PlaySim::step(double dt) {
     finishPresnap();
   }
   t += dt;
-  if (input.switchReq) {
-    input.switchReq = false;
-    switchUser();
+  for (int s = 0; s < userSlots(); ++s) {
+    UserInput& in = slotInput(s);
+    if (in.switchReq) {
+      in.switchReq = false;
+      switchUser(s);
+    }
   }
   updateSnap();
   for (Ent* e : ents) {
@@ -1847,9 +1931,12 @@ void PlaySim::step(double dt) {
   }
   for (Ent* e : ents) think(e, dt);
   for (Ent* e : ents) move(e, dt);
-  if (!input.rushMove.empty()) {
-    if (user && user->side == Side::Def) rushMove(user, input.rushMove);
-    input.rushMove.clear();
+  for (int s = 0; s < userSlots(); ++s) {
+    UserInput& in = slotInput(s);
+    if (in.rushMove.empty()) continue;
+    Ent* u = slotEnt(s);
+    if (u && u->side == Side::Def) rushMove(u, in.rushMove);
+    in.rushMove.clear();
   }
   updateEngagements(dt);
   collide();
@@ -2033,7 +2120,7 @@ void PlaySim::think(Ent* e, double dt) {
 }
 
 bool PlaySim::applyUser(Ent* e) {
-  UserInput& i = input;
+  UserInput& i = inputOf(e);
   const V2 m = i.move;
   const double ml = len(m);
   // QB throw
@@ -4128,7 +4215,7 @@ void PlaySim::checkTackles() {
     if (d->state == EntState::Down || d->stun > 0) continue;
     const double dd = dist(d->pos, c->pos);
     const bool qbPocket = c == qb && !passThrown && !scramble && cfg.offPlay->type != PlayType::Run;
-    const double range = c->radius + d->radius + (d->userControlled && input.dive ? 1.0 : qbPocket ? 0.3 : tune().tackleReach) +
+    const double range = c->radius + d->radius + (d->userControlled && inputOf(d).dive ? 1.0 : qbPocket ? 0.3 : tune().tackleReach) +
                          (d->moveOn(Move::Hit) ? 0.6 : d->moveOn(Move::Cut) ? 0.4 : 0);
     if (d->engaged) {
       // engaged defenders can still reach out for a nearby carrier
@@ -4195,7 +4282,7 @@ bool PlaySim::tryTackle(Ent* d, Ent* c, int gang, bool arm, bool dive) {
   if (dive) x -= 1.3;
   if (isSack) x += 0.6;
   if (c->moveOn(Move::Juke)) x -= 0.6 + (std::max)(0.0, c->r().elusiveness - 70) * 0.02;
-  if (c->userControlled && input.juke) x -= 0.4;
+  if (c->userControlled && inputOf(c).juke) x -= 0.4;
   x += moveTackleAdj(d, c, facing, arm, dive);
   // abilities: the tackler's (Sure Tackler, Enforcer, Finisher on a sack), the carrier's (Battering Ram / Juggernaut
   // against a man in front, Ankle Taker / Phantom against one from the side, more off a live move, Escape Hatch)
@@ -4340,7 +4427,7 @@ void PlaySim::stepWrap(double dt) {
   if (!w.rolled && !help && !edge && w.left < 0.5 * w.total && tune().wrapBreak > 0) {
     w.rolled = true;
     double p = tune().wrapBreak + (c->r().breakTackle - 70) * 0.004 + (c->r().strength - d->r().tackling) * 0.002 + (w.arm ? 0.05 : 0) + c->fx.wrapBreak;
-    if (c->userControlled) p *= (input.juke || input.stickMove != Move::None || c->move != Move::None) ? 2.2 : 0.5;
+    if (c->userControlled) p *= (inputOf(c).juke || inputOf(c).stickMove != Move::None || c->move != Move::None) ? 2.2 : 0.5;
     if (rng.chance(clamp(p, 0.005, 0.3))) {
       wrap_.reset();
       d->stun = (std::max)(d->stun, 0.9);

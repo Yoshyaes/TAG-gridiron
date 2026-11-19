@@ -12,12 +12,14 @@
 #include "Sim/League.h"
 #include "Sim/Game.h"
 #include "Sim/PlaySim.h"
+#include "Game/TagInput.h"
 #include "MatchDirector.generated.h"
 
 class AAthlete;
 class AStadium;
 class ACineCameraActor;
 class SGridironOverlay;
+struct FPreRow;
 class ATagBooth;
 class ATagAudio;
 class AStaticMeshActor;
@@ -87,6 +89,56 @@ public:
 	bool bWatch = false;
 	float Speed = 1.f;
 	std::optional<tag::TeamKey> UserTeam;
+
+	// ---- local multiplayer (Game/MatchMulti.cpp, UI/Lobby.cpp): up to four people on one screen, each on his own pad
+	// or the keyboard. Each picks a side; each drives one man at a time; on a side with two or more, one calls the plays.
+	/** What one player's controls keep between frames (a throw button held, the right stick's flick, his sprint, the
+	 *  pre-snap switch). A one-player game keeps these in the director's own members; in a multiplayer game each
+	 *  player's are swapped in while his input is read (SwapHuman). */
+	struct FHumanCtl
+	{
+		int32 PadThrowIdx = -1, PadTapIdx = -1;
+		double PadThrowT0 = 0.0, PadTapT = 0.0;
+		bool bRStickArmed = true;
+		float SprintStamina = 1.f;
+		bool bSprinting = false, bSprintSpent = false;
+		bool bSwitchHeld = false, bSwitchPicked = false, bSwitchStickArmed = true;
+		float SwitchHeldT = 0.f;
+		bool bPreMoved = false, bCarrierHint = false, bRushHint = false;
+	};
+	struct FTagHuman
+	{
+		int32 Dev = -1;            // FTagInputHub's device
+		bool bPad = false;
+		TArray<int32> Twins;       // the same pad seen through a second interface (XInput and GameInput): its buttons are his too
+		int32 Team = -1;           // the lobby's pick: -1 not yet (watching), 0 away, 1 home
+		bool bCaller = false;      // calls his side's plays (one per side)
+		int32 Slot = -1;           // the sim's user slot he drives this play (-1 none)
+		tag::Player* Last = nullptr; // the man he had: he keeps him from play to play while he is on the field
+		FHumanCtl Ctl;
+		FTagReader Reader() const { return FTagReader(Dev, bPad); }
+	};
+	TArray<FTagHuman> Humans;
+	bool bMulti = false;
+	/** The lobby is up (its input read from every device in Tick). */
+	bool bLobby = false;
+	void ShowLobby();
+	void StartMultiMatch(int HomeIdx, int AwayIdx, int WeatherKind, bool bNight, double QuarterLen);
+	/** The lobby can go on: someone has picked a side. */
+	bool LobbyReady() const;
+	/** A side with people on it (multiplayer) / the user's side (one player). */
+	bool TeamHuman(tag::TeamKey K) const;
+	/** The player who calls a side's plays (index into Humans), -1 for a CPU side. */
+	int32 CallerOf(tag::TeamKey K) const;
+	static tag::TeamKey KeyOf(int32 Team) { return Team == 1 ? tag::TeamKey::Home : tag::TeamKey::Away; }
+	/** "P2", the player's place in the lobby (his colour: PlayerColor). */
+	static FString HumanTag(int32 H) { return FString::Printf(TEXT("P%d"), H + 1); }
+	FString HumanDevice(int32 H) const;
+	/** The team select's view of the lobby: a side with players, their tags ("P1  P3"), the sides swapped (each player
+	 *  goes with his team). */
+	bool TeamHumanInLobby(bool bHome) const;
+	FString LobbyTags(bool bHome) const;
+	void LobbySwapSides();
 
 private:
 	// flow
@@ -242,6 +294,12 @@ private:
 	void BuildPlayArt();
 	void UpdateIcons();
 	void RefreshPresnapPanel();
+	/** The pre-snap panel's rows for the man in slot 0 (bOffense: the offense's menus, else the defense's); false: no panel. */
+	bool PresnapPanelRows(bool bOffense, bool bPad, const FTagReader& PC, FString& Title, FString& Sub, TArray<FPreRow>& Rows) const;
+	/** The defense's pre-snap menus (audible, coverage shell, shifts, hot route, walk + switch) for the man in slot 0 and
+	 *  the reader PC. An audible is left in DefAudibleTo for the caller to make (RebuildPlay remakes the slots). */
+	void PresnapDefMenus(const FTagReader& PC, float Dt);
+	const tag::DefCall* DefAudibleTo = nullptr;
 	void RebuildPlay(const tag::OffPlay* Op, const tag::DefCall* Dc, bool bFlip);
 	/** A call at the line, shown: the quarterback's audible capture and the men who hear it (the back, the linebackers)
 	 *  re-settling; a defensive call is the middle linebacker's hand signals. bSignal: a hot route / motion (the quieter hand signal). */
@@ -279,7 +337,7 @@ private:
 	void TrackInputDevice(APlayerController* PC);
 	/** A Sony pad is plugged in or paired right now (RawInput device list). */
 	bool FindPlayStationPad();
-	bool PadUI() const { return bPadActive; }
+	bool PadUI() const;
 	/** Settings (kept in GameUserSettings.ini, [TAG.Settings]). Captions: the booth's words as text; off unless asked for. */
 	bool CaptionsOn() const { return bOptCaptions; }
 	void SetCaptionsOn(bool b);
@@ -288,6 +346,7 @@ private:
 	bool InvertRightY() const { return bOptInvertRY; }
 	void SetInvertRightY(bool b);
 	float RightStickY(class APlayerController* PC) const;
+	float RightStickY(const FTagReader& R) const;
 	bool bOptInvertRY = true;
 	bool bOptCaptions = false;
 	/** The highlight stick: the right stick has to come back to the middle before the next flick counts. */
@@ -576,6 +635,56 @@ private:
 	TObjectPtr<ATagAudio> Audio;
 	void FeedAudio(float Dt);
 	bool BoothHold() const;
+
+	// ---- local multiplayer (Game/MatchMulti.cpp)
+	bool bMultiNext = false;     // (StartMatch: the game being started is a multiplayer one)
+	void TickLobby();
+	void LobbyJoin(int32 Dev);
+	/** After a play's sim is made (or remade at the line): each player on a side gets his man - slot 0 the play's first
+	 *  player (the offense's caller on the quarterback, else the defense's), the rest a man of their own. */
+	void SetupHumans();
+	/** Each player's man as he stands now (he gets him back on the next play). */
+	void SyncHumanLast();
+	/** One player's man, input and control state in and out of slot 0 / the director's members. */
+	void SwapHuman(FTagHuman& H);
+	/** The live controls of the player whose reader is CurIn (the man in slot 0 and the director's control members). */
+	void ReadUserInputSlot();
+	FTagReader CurIn;
+	/** The reader of the player in slot 0 (one player: the controller). */
+	FTagReader PrimaryReader() const;
+	/** Before the snap, the players other than slot 0's: a defender walks his man and switches; an offensive player
+	 *  steps through the eligible men (L1 / R1, TAB). */
+	void TickMatePresnap(float Dt);
+	/** Head to head, the defense's caller (not in slot 0: the quarterback is) has his own pre-snap menus: their state is
+	 *  swapped with PreMode / AudibleSel / bPresnapPanelHidden while his menus run, and his panel is the left one. */
+	EPre DefPreMode = EPre::Base;
+	int32 DefAudibleSel = 0;
+	bool bDefPanelHidden = false;
+	void SwapDefMenus();
+	/** -1: no defense caller apart from slot 0 (one player, co-op against the CPU, or the defense calling in slot 0). */
+	int32 DefMenuHuman() const;
+	/** The defense's pre-snap walk and switch (the left stick walks him, the switch button held picks by the stick). */
+	void PresnapWalkSwitch(const FTagReader& PC, float Dt, bool bCanSwitch, bool bSwitchPress);
+	/** A menu that one player works (a play call, the try): only his pad / keys reach it. -1: everyone's. */
+	void SetMenuOwner(int32 Human);
+	int32 MenuOwner = -1;
+	TArray<int32> HumanDevices(int32 H) const;
+	/** Every player's marker (multiplayer): ring, chevron, his tag, his sprint. */
+	void UpdateHumanMarkers(class APlayerController* PC, const FVector2D& VP);
+	/** -TagMultiTest: a scripted 2v2 on fake devices (joins, sides, callers, both calls, both defenses' switches, a
+	 *  player on a receiver), checked and logged PASS / FAIL. */
+	bool bMultiTest = false;
+	int32 MultiStep = 0, MultiFails = 0, MultiPasses = 0;
+	float MultiT = 0.f;
+	int32 MultiOwnerDev = -1, MultiOffDev = -1, MultiDefDev = -1, MultiPlays = 0;
+	bool bMultiCallOff = false;
+	const tag::Ent* MultiPrevOff = nullptr;
+	const tag::Ent* MultiPrevDef = nullptr;
+	tag::V2 MultiWalkFrom{0, 0};
+	int32 MultiDefCallDev = -1;
+	const tag::DefCall* MultiPrevCall = nullptr;
+	void TickMultiTest(float Dt);
+	void MultiCheck(bool bOk, const FString& What);
 
 	friend class SGridironOverlay;
 };

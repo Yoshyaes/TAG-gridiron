@@ -523,12 +523,36 @@ class PlaySim {
   /** Pre-snap: the user walks his defender to a new spot (stick = direction in the offense frame, length 0..1; a
    *  jog at full tilt). He stays on his side of the ball, on the field; his assignment runs from where he stands at
    *  the snap (a rusher's lane, a linebacker's gap, a zone dropped from there, his man followed). */
-  bool userPresnapMove(const V2& stick, double dt);
+  bool userPresnapMove(const V2& stick, double dt, int slot = 0);
   /** A deep zone (middle of the field, thirds, halves, quarters), for the play art. */
   static bool deepZone(const std::string& z);
   Ent* carrier = nullptr;
   UserInput input;
   Ent* user = nullptr;
+  /** Local multiplayer: the other humans on the field this play, each driving one man of his own side with his own
+   *  input. Slot 0 is user / input above (the play's first human: the offense's play caller, else the defense's);
+   *  mates[i] is slot i + 1. A man is never driven by two slots. */
+  struct UserSlot {
+    Ent* ent = nullptr;
+    UserInput input;
+    Side side = Side::Off;
+  };
+  std::vector<UserSlot> mates;
+  int userSlots() const { return 1 + static_cast<int>(mates.size()); }
+  Ent* slotEnt(int s) const { return s <= 0 ? user : (s - 1 < static_cast<int>(mates.size()) ? mates[s - 1].ent : nullptr); }
+  UserInput& slotInput(int s) { return s <= 0 || s - 1 >= static_cast<int>(mates.size()) ? input : mates[s - 1].input; }
+  /** The slot driving e (-1: the CPU's man). */
+  int slotOf(const Ent* e) const;
+  /** The input of the human driving e (slot 0's when e is nobody's). */
+  UserInput& inputOf(const Ent* e) { const int s = slotOf(e); return slotInput(s < 0 ? 0 : s); }
+  /** Slot s takes e (the man he had goes back to the CPU). False if another slot has e. */
+  bool setSlotEnt(int s, Ent* e);
+  /** Another human on side `side`: his man is `prefer` if it is on the field and free, else the next free man by the
+   *  side's order (offense: the backs, then the ends and receivers; defense: the linebackers, then the secondary, then
+   *  the line). Returns his slot. */
+  int addMate(Side side, Ent* prefer = nullptr);
+  /** Before the snap, a human on offense who is not on the quarterback steps through the eligible men (dir +1 / -1). */
+  bool cycleEligible(int slot, int dir);
   size_t readIdx = 0;
   const Ent* qbLook = nullptr;  // the receiver the quarterback is reading now (zone defenders read his eyes)
   double readT = 0;
@@ -604,10 +628,11 @@ class PlaySim {
 
   // ---- user control
   void pickUserEnt(Side side);
-  void switchUser();
+  /** (slot: which human switches - he never takes a man another human has) */
+  void switchUser(int slot = 0);
   /** Switch to the teammate that lies in a direction from the man the user has (dir: offense frame, any length): the
    *  nearest man within about 50 degrees of it. False when nobody is that way. */
-  bool switchUserToward(const V2& dir);
+  bool switchUserToward(const V2& dir, int slot = 0);
 
   // ---- queries / actions (public in TS)
   V2 zoneLandmark(const std::string& z) const;

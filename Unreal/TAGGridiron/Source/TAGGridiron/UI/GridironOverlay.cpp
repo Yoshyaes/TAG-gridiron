@@ -418,30 +418,48 @@ int32 SGridironOverlay::PaintPresnap(FSlateWindowElementList& Out, int32 Layer, 
 			}
 		}
 	}
-	if (PreRows.Num() == 0) return Layer + 4;
-	// the pre-snap panel, bottom right (over the icons)
+	if (PreRows.Num() == 0 && DefPreRows.Num() == 0) return Layer + 4;
+	// the pre-snap panel, bottom right (over the icons); head to head the defense's caller has his own, bottom left
 	Layer += 6;
-	const float W = 480.f, RowH = 34.f, Head = PreSub.IsEmpty() ? 44.f : 62.f;
-	const float H = Head + PreRows.Num() * RowH + 12.f;
-	const FVector2D TL(Local.X - W - 30.f, Local.Y - H - 128.f);
-	FSlateDrawElement::MakeBox(Out, Layer, G.ToPaintGeometry(FVector2f(W, H), FSlateLayoutTransform(FVector2f(TL))), White(), ESlateDrawEffect::None, Panel);
-	FSlateDrawElement::MakeBox(Out, Layer + 1, G.ToPaintGeometry(FVector2f(4.f, H), FSlateLayoutTransform(FVector2f(TL))), White(), ESlateDrawEffect::None, Accent);
-	FSlateDrawElement::MakeText(Out, Layer + 1, G.ToPaintGeometry(FVector2f(W - 30, 24), FSlateLayoutTransform(FVector2f(TL + FVector2D(20, 12)))), PreTitle,
-		Font(15, "Bold"), ESlateDrawEffect::None, Accent);
-	if (!PreSub.IsEmpty())
-		FSlateDrawElement::MakeText(Out, Layer + 1, G.ToPaintGeometry(FVector2f(W - 30, 18), FSlateLayoutTransform(FVector2f(TL + FVector2D(20, 36)))), PreSub,
-			Font(11), ESlateDrawEffect::None, Dim);
-	for (int32 i = 0; i < PreRows.Num(); ++i)
+	auto PaintPanel = [&](const FString& Title, const FString& Sub, const TArray<FPreRow>& Rows, bool bPad, const FString& Who, const FLinearColor& WhoC, bool bLeft)
 	{
-		const FPreRow& Rw = PreRows[i];
-		const FVector2D RowTL = TL + FVector2D(8, Head + i * RowH);
-		if (Rw.bOn)
-			FSlateDrawElement::MakeBox(Out, Layer + 1, G.ToPaintGeometry(FVector2f(W - 16, RowH - 4), FSlateLayoutTransform(FVector2f(RowTL))), White(),
-				ESlateDrawEffect::None, FLinearColor(1.f, 0.83f, 0.f, 0.13f));
-		PaintGlyph(Out, Layer + 1, G, RowTL + FVector2D(30, (RowH - 4) * 0.5f), 26.f, Rw.Glyph, Rw.Key, bPrePad, Rw.Tint);
-		FSlateDrawElement::MakeText(Out, Layer + 4, G.ToPaintGeometry(FVector2f(W - 90, RowH), FSlateLayoutTransform(FVector2f(RowTL + FVector2D(64, 6)))), Rw.Label,
-			Font(13, Rw.bOn ? "Bold" : "Regular"), ESlateDrawEffect::None, Rw.bOn ? Accent : FLinearColor(0.9f, 0.92f, 0.95f));
-	}
+		const float W = 480.f, RowH = 34.f, Head = (Sub.IsEmpty() ? 44.f : 62.f) + (Who.IsEmpty() ? 0.f : 6.f);
+		const float SubY = Who.IsEmpty() ? 36.f : 42.f; // (below the tag chip)
+		const float H = Head + Rows.Num() * RowH + 12.f;
+		const FVector2D TL(bLeft ? 30.f : Local.X - W - 30.f, Local.Y - H - 128.f);
+		FSlateDrawElement::MakeBox(Out, Layer, G.ToPaintGeometry(FVector2f(W, H), FSlateLayoutTransform(FVector2f(TL))), White(), ESlateDrawEffect::None, Panel);
+		FSlateDrawElement::MakeBox(Out, Layer + 1, G.ToPaintGeometry(FVector2f(4.f, H), FSlateLayoutTransform(FVector2f(TL))), White(), ESlateDrawEffect::None, Who.IsEmpty() ? Accent : WhoC);
+		float TitleX = 20.f;
+		if (!Who.IsEmpty())
+		{
+			// whose panel it is: his tag on a chip in his colour
+			const FSlateFontInfo WF = Font(12, "Bold");
+			const FVector2D M = Measure(Who, WF);
+			FSlateDrawElement::MakeBox(Out, Layer + 1, G.ToPaintGeometry(FVector2f(M.X + 14.f, 24.f), FSlateLayoutTransform(FVector2f(TL + FVector2D(18, 11)))), White(),
+				ESlateDrawEffect::None, WhoC);
+			FSlateDrawElement::MakeText(Out, Layer + 2, G.ToPaintGeometry(FVector2f(M), FSlateLayoutTransform(FVector2f(TL + FVector2D(25, 14)))), Who, WF,
+				ESlateDrawEffect::None, FLinearColor(0.03f, 0.04f, 0.06f));
+			TitleX += M.X + 24.f;
+		}
+		FSlateDrawElement::MakeText(Out, Layer + 1, G.ToPaintGeometry(FVector2f(W - 30 - TitleX, 24), FSlateLayoutTransform(FVector2f(TL + FVector2D(TitleX, 12)))), Title,
+			Font(15, "Bold"), ESlateDrawEffect::None, Accent);
+		if (!Sub.IsEmpty())
+			FSlateDrawElement::MakeText(Out, Layer + 1, G.ToPaintGeometry(FVector2f(W - 30, 18), FSlateLayoutTransform(FVector2f(TL + FVector2D(20, SubY)))), Sub,
+				Font(11), ESlateDrawEffect::None, Dim);
+		for (int32 i = 0; i < Rows.Num(); ++i)
+		{
+			const FPreRow& Rw = Rows[i];
+			const FVector2D RowTL = TL + FVector2D(8, Head + i * RowH);
+			if (Rw.bOn)
+				FSlateDrawElement::MakeBox(Out, Layer + 1, G.ToPaintGeometry(FVector2f(W - 16, RowH - 4), FSlateLayoutTransform(FVector2f(RowTL))), White(),
+					ESlateDrawEffect::None, FLinearColor(1.f, 0.83f, 0.f, 0.13f));
+			PaintGlyph(Out, Layer + 1, G, RowTL + FVector2D(30, (RowH - 4) * 0.5f), 26.f, Rw.Glyph, Rw.Key, bPad, Rw.Tint);
+			FSlateDrawElement::MakeText(Out, Layer + 4, G.ToPaintGeometry(FVector2f(W - 90, RowH), FSlateLayoutTransform(FVector2f(RowTL + FVector2D(64, 6)))), Rw.Label,
+				Font(13, Rw.bOn ? "Bold" : "Regular"), ESlateDrawEffect::None, Rw.bOn ? Accent : FLinearColor(0.9f, 0.92f, 0.95f));
+		}
+	};
+	if (PreRows.Num() > 0) PaintPanel(PreTitle, PreSub, PreRows, bPrePad, PreWho, PreWhoColor, false);
+	if (DefPreRows.Num() > 0) PaintPanel(DefPreTitle, DefPreSub, DefPreRows, bDefPrePad, DefPreWho, DefPreWhoColor, true);
 	return Layer + 6;
 }
 
@@ -588,10 +606,12 @@ static TSharedRef<SWidget> Centered(TSharedRef<SWidget> Inner, float BgAlpha = 0
 void SGridironOverlay::ShowMainMenu()
 {
 	bHud = false;
+	bSelMulti = false;
 	TSharedRef<SVerticalBox> Menu = SNew(SVerticalBox)
 		+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center)[ SNew(STextBlock).Font(Font(72, "Bold")).ColorAndOpacity(Accent).ShadowOffset(FVector2D(3, 3)).Text(T(TEXT("TAG GRIDIRON"))) ]
 		+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(0, 0, 0, 36)[ SNew(STextBlock).Font(Font(14)).ColorAndOpacity(Dim).Text(T(TEXT("SIMULATION-FIRST PRO FOOTBALL"))) ];
 	Menu->AddSlot().AutoHeight().HAlign(HAlign_Center)[ MakeButton(TEXT("Play Now"), TEXT("You vs CPU. Call plays, control the QB, ball carrier or any defender."), [this] { ShowTeamSelect(true); }) ];
+	Menu->AddSlot().AutoHeight().HAlign(HAlign_Center)[ MakeButton(TEXT("Multiplayer"), TEXT("Up to 4 players on one screen, pads and keyboard. Pick sides, share a team, choose who calls the plays."), [this] { if (Director) Director->ShowLobby(); }) ];
 	Menu->AddSlot().AutoHeight().HAlign(HAlign_Center)[ MakeButton(TEXT("Watch a Game"), TEXT("CPU vs CPU broadcast. Speed up with 1/2/4."), [this] { ShowTeamSelect(false); }) ];
 	Menu->AddSlot().AutoHeight().HAlign(HAlign_Center)[ MakeButton(TEXT("Superstars & X-Factors"), TEXT("Pick the abilities your stars carry into the game."), [this] { ShowAbilities(SelHome, [this] { ShowMainMenu(); }); }) ];
 	Menu->AddSlot().AutoHeight().HAlign(HAlign_Center)[ MakeButton(TEXT("Depth Chart"), TEXT("Every slot on every team: starters, specialists, situational subs. Your order is the one the game plays."), [this] { ShowDepthChart(SelHome, [this] { ShowMainMenu(); }); }) ];
@@ -937,6 +957,13 @@ void SGridironOverlay::BuildPlayCall()
 		+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Bottom)
 		[
 			SNew(SVerticalBox)
+			// a multiplayer game: whose call this is (only his pad / keys work this screen)
+			+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Left).Padding(0, 0, 0, 4)
+			[
+				SNew(SBorder).BorderImage(White()).BorderBackgroundColor(CallWhoColor).Padding(FMargin(10, 3))
+				.Visibility(CallWho.IsEmpty() ? EVisibility::Collapsed : EVisibility::HitTestInvisible)
+				[ SNew(STextBlock).Font(Font(14, "Bold")).ColorAndOpacity(FLinearColor(0.03f, 0.04f, 0.06f)).Text(T(CallWho)) ]
+			]
 			+ SVerticalBox::Slot().AutoHeight()[ SNew(STextBlock).Font(Font(12, "Bold")).ColorAndOpacity(Accent)
 				.Text(T(FString(bOffense ? (bTwoPoint ? TEXT("TWO-POINT TRY  -  CALL OFFENSE") : TEXT("CALL OFFENSE")) : TEXT("CALL DEFENSE")) + TEXT("     ") + BookLine)) ]
 			+ SVerticalBox::Slot().AutoHeight()[ SNew(STextBlock).Font(Font(30, "Bold")).ColorAndOpacity(White90).Text(T(TabLabel)) ]
@@ -1327,12 +1354,15 @@ int32 SGridironOverlay::PaintKickMeter(FSlateWindowElementList& Out, int32 Layer
 int32 SGridironOverlay::PaintLineBars(FSlateWindowElementList& Out, int32 Layer, const FGeometry& G) const
 {
 	// the user's man: a glowing ring at his feet with a notch the way he faces, and a chevron with his number over him
-	if (UserMarker.bOn && UserMarker.Ring.Num() > 2)
+	// (in a multiplayer game each player's, in his colour, with his tag over the number and his own sprint bar)
+	for (const FUserMarkerUI& UserMarker : UserMarkers)
 	{
+		if (!UserMarker.bOn || UserMarker.Ring.Num() <= 2) continue;
 		const FVector2D Local = G.GetLocalSize();
 		const FVector2D Sc(Local.X / FMath::Max(1.0, UserMarker.Viewport.X), Local.Y / FMath::Max(1.0, UserMarker.Viewport.Y));
 		const float Pulse = 0.8f + 0.2f * FMath::Sin(FPlatformTime::Seconds() * 5.0);
-		const FLinearColor Glow(0.25f, 0.85f, 1.f, 0.35f * Pulse), Core(0.45f, 0.95f, 1.f, 0.95f);
+		const FLinearColor Core(UserMarker.Color.R, UserMarker.Color.G, UserMarker.Color.B, 0.95f);
+		const FLinearColor Glow(UserMarker.Color.R * 0.6f, UserMarker.Color.G * 0.9f, UserMarker.Color.B, 0.35f * Pulse);
 		TArray<FVector2f> R, N;
 		for (const FVector2D& P : UserMarker.Ring) R.Add(FVector2f(P * Sc));
 		for (const FVector2D& P : UserMarker.Notch) N.Add(FVector2f(P * Sc));
@@ -1347,14 +1377,36 @@ int32 SGridironOverlay::PaintLineBars(FSlateWindowElementList& Out, int32 Layer,
 		const FVector2f H = FVector2f(UserMarker.Head * Sc);
 		const float W = 11.f, Hh = 12.f;
 		FSlateDrawElement::MakeLines(Out, Layer + 1, G.ToPaintGeometry(), {H + FVector2f(-W, -Hh), H, H + FVector2f(W, -Hh), H + FVector2f(-W, -Hh)}, ESlateDrawEffect::None, Core, true, 3.f);
+		float Up = Hh + 4.f;
 		if (!UserMarker.Number.IsEmpty())
 		{
 			const FSlateFontInfo F = Font(12, "Bold");
 			const FVector2D M = Measure(UserMarker.Number, F);
-			FSlateDrawElement::MakeText(Out, Layer + 2, G.ToPaintGeometry(FVector2f(M), FSlateLayoutTransform(H + FVector2f(-M.X * 0.5f, -Hh - 4.f - M.Y))), UserMarker.Number, F, ESlateDrawEffect::None, Core);
+			FSlateDrawElement::MakeText(Out, Layer + 2, G.ToPaintGeometry(FVector2f(M), FSlateLayoutTransform(H + FVector2f(-M.X * 0.5f, -Up - M.Y))), UserMarker.Number, F, ESlateDrawEffect::None, Core);
+			Up += M.Y + 2.f;
 		}
-		Layer += 3;
+		if (!UserMarker.Tag.IsEmpty())
+		{
+			// the player's tag on a chip of his colour
+			const FSlateFontInfo F = Font(13, "Bold");
+			const FVector2D M = Measure(UserMarker.Tag, F);
+			const FVector2f TL = H + FVector2f(-M.X * 0.5f - 6.f, -Up - M.Y - 4.f);
+			FSlateDrawElement::MakeBox(Out, Layer + 2, G.ToPaintGeometry(FVector2f(M.X + 12.f, M.Y + 4.f), FSlateLayoutTransform(TL)), White(), ESlateDrawEffect::None, Core);
+			FSlateDrawElement::MakeText(Out, Layer + 3, G.ToPaintGeometry(FVector2f(M), FSlateLayoutTransform(TL + FVector2f(6.f, 2.f))), UserMarker.Tag, F, ESlateDrawEffect::None, FLinearColor(0.03f, 0.04f, 0.06f));
+		}
+		if (UserMarker.StaminaV >= 0.f)
+		{
+			const FVector2D C = UserMarker.StaminaAt * Sc;
+			const float BW = 64.f, BH = 6.f;
+			const FVector2D TL(C.X - BW * 0.5f, C.Y + 6.f);
+			const float V = UserMarker.StaminaV;
+			const FLinearColor Fill = V < 0.2f ? FLinearColor(1.f, 0.25f, 0.2f) : V < 0.45f ? FLinearColor(1.f, 0.72f, 0.15f) : Core;
+			FSlateDrawElement::MakeBox(Out, Layer + 1, G.ToPaintGeometry(FVector2f(BW + 4, BH + 4), FSlateLayoutTransform(FVector2f(TL - FVector2D(2, 2)))), White(), ESlateDrawEffect::None, FLinearColor(0, 0, 0, 0.6f));
+			FSlateDrawElement::MakeBox(Out, Layer + 2, G.ToPaintGeometry(FVector2f(BW * FMath::Clamp(V, 0.f, 1.f), BH), FSlateLayoutTransform(FVector2f(TL))), White(), ESlateDrawEffect::None,
+				Fill * FLinearColor(1, 1, 1, UserMarker.bSprint ? 1.f : 0.75f));
+		}
 	}
+	Layer += 4;
 	// the user's sprint stamina: a short bar under his man (green, amber when low, red run dry), brighter while he sprints
 	if (StaminaV >= 0.f)
 	{

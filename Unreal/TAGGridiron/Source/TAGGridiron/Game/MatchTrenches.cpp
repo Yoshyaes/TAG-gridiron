@@ -81,6 +81,13 @@ void AMatchDirector::UpdateLineBars()
 		}
 	}
 	Overlay->SetLineBars(Bars, VP);
+	if (bMulti)
+	{
+		// every player's man in his colour, his sprint under him (Game/MatchMulti.cpp)
+		UpdateHumanMarkers(PC, VP);
+		Overlay->SetStamina(FVector2D::ZeroVector, VP, -1.f, false);
+		return;
+	}
 	{
 		FUserMarkerUI M;
 		M.Viewport = VP;
