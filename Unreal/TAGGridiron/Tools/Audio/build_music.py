@@ -3,7 +3,8 @@
   MusIntro      the broadcast's theme ("Sunday Kickoff"): brass fanfare over driving strings, snare and timpani
   MusBumperOut  the theme's second half, to go to a break       MusBumperIn   its last phrase, to come back
   MusFinal      the theme broad and slow, for the final whistle  MusHalftime   a halftime-show bed on the theme
-  MusMenu       the menu's playlist: a trap anthem with real brass, a driving electronic piece, a horn-riff groove
+  MusMenu       the menu's playlist: a trap anthem with real brass, a driving orchestral piece, a horn-riff groove,
+                the band in the stands (drumline and brass), a slow cinematic anthem
 
   <booth venv python> build_music.py <src dir> <out dir> [name ...]
 """
@@ -445,6 +446,144 @@ def menu_groove(base, seed=13):
     return al.fade(out[: int((m.t(len(plan)) + 1.5) * SR)], 0.01, 1.8)
 
 
+def menu_band(base, seed=14):
+    """B flat, 104: the band in the stands. A drumline cadence on real snares and bass drums, tubas on the bass line,
+    trombones with the riff and the trumpets answering it. No synths at all."""
+    rng = np.random.default_rng(seed)
+    B = band(base)
+    bpm = 104
+    prog = [(34, (0, 4, 7)), (39, (0, 4, 7)), (43, (0, 3, 7)), (41, (0, 4, 7))]   # Bb  Eb  Gm  F
+    riff = [[(0, 2, 70), (2, 2, 74), (4, 2, 77), (6, 4, 74), (12, 2, 72), (14, 2, 70)], [(0, 2, 75), (2, 2, 79), (4, 4, 82), (8, 4, 79), (12, 4, 75)],
+            [(0, 2, 74), (2, 2, 77), (4, 2, 82), (6, 4, 79), (12, 2, 77), (14, 2, 74)], [(0, 4, 77), (4, 4, 81), (8, 8, 84)]]
+    cad = [[.9, .25, .3, .7, .25, .3, .8, .3, .9, .3, .7, .3, .85, .3, .6, .6], [.9, .3, .3, .7, .3, .7, .3, .3, .9, .3, .5, .5, .9, .6, .7, .8]]
+    plan = ['intro'] * 2 + ['a'] * 8 + ['b'] * 8 + ['break'] * 4 + ['b'] * 8 + ['out'] * 2
+    m = ml.Mix(len(plan) * 4 * 60.0 / bpm + 3.0, bpm, swing=0.12)
+    for name, gain, pan, send in (('bd', 1.0, 0, 0.12), ('snare', 0.7, 0.1, 0.2), ('cym', 0.5, -0.1, 0.25), ('tuba', 0.95, 0, 0.15), ('tbn', 0.9, -0.3, 0.25),
+                                  ('tpt', 0.9, 0.3, 0.25), ('hn', 0.7, 0, 0.3)):
+        m.track(name, gain, pan, send)
+    for b, sec in enumerate(plan):
+        root, tri = prog[b % 4]
+        tones = [root + 24 + t for t in tri]
+        if sec != 'out':
+            # the drumline: every sixteenth on the snares, the accents its tune; the bass drums in fours with a pickup
+            for s, vel in enumerate(cad[b % 2]):
+                if sec == 'break' and vel < 0.6:
+                    continue
+                m.add('snare', B['snare'].hit(vel, max_len=0.22), m.t(b, s), 0.5 + 0.5 * vel)
+                if vel > 0.8:
+                    m.add('snare', B['snare'].hit(vel, 0.94, max_len=0.22), m.t(b, s) + 0.011, 0.5)   # (the line is several drummers)
+            for s, pitch in ((0, 0.9), (4, 1.0), (8, 0.9), (12, 1.0)) + (((14, 1.12),) if b % 2 else ((10, 1.12),)):
+                m.add('bd', B['bd'].hit(0.95 if s % 8 == 0 else 0.8, pitch), m.t(b, s))
+            if b % 4 == 3:
+                for k in range(6):
+                    m.add('snare', B['snare'].hit(0.5 + 0.08 * k, max_len=0.15), m.t(b, 13 + k * 0.5), 0.6 + 0.07 * k)
+        if (sec in ('a', 'b') and b % 8 == 0) or (sec == 'intro' and b == 0):
+            m.add('cym', B['crash'].hit(0.85), m.t(b), 0.7)
+        if sec in ('a', 'b', 'break'):
+            for s, n in ((0, 0), (3, 0), (6, 7), (8, 0), (11, 12), (14, 7)):
+                section(m, 'tuba', B['tuba_s'], fit(root, 29, 40) + n, m.t(b, s), m.dur(2.2), 0.9 if s % 8 == 0 else 0.75, 2, rng)
+        if sec == 'a':
+            for (s, l, n) in riff[b % 4]:
+                section(m, 'tbn', B['tbn'] if l >= 4 else B['tbn_s'], n - 12, m.t(b, s), m.dur(l) * 0.85, 0.8, 3, rng)
+            if b % 2 == 1:
+                for s in (2, 5, 10):   # the trumpets' answer: three stabs on the chord
+                    for n in (fit(tones[0], 65, 76), fit(tones[1], 68, 79), fit(tones[2], 70, 81)):
+                        section(m, 'tpt', B['tpt_s'], n, m.t(b, s), m.dur(1.5), 0.75, 1, rng)
+        if sec == 'b':
+            for (s, l, n) in riff[b % 4]:
+                long_note = l >= 4
+                section(m, 'tpt', B['tpt'] if long_note else B['tpt_s'], n, m.t(b, s), m.dur(l) * 0.88, 0.9, 3, rng)
+                section(m, 'tbn', B['tbn'] if long_note else B['tbn_s'], n - 12, m.t(b, s), m.dur(l) * 0.88, 0.9, 3, rng)
+                if long_note:
+                    section(m, 'hn', B['hn'], n - 12 + (3 if tri[1] == 4 else 4) - 7, m.t(b, s), m.dur(l) * 0.88, 0.7, 2, rng)
+            for s in (0, 8):
+                for n in (fit(tones[1], 53, 64), fit(tones[2], 55, 66)):
+                    section(m, 'hn', B['hn'], n, m.t(b, s), m.dur(7), 0.55, 2, rng)
+        if sec == 'break' and b % 2 == 0:
+            for (s, l, n) in riff[b % 4][:3]:
+                section(m, 'tbn', B['tbn_s'], n - 12, m.t(b, s), m.dur(l) * 0.8, 0.6, 2, rng)
+        if sec == 'out' and b == len(plan) - 2:
+            m.add('cym', B['crash'].hit(1.0), m.t(b), 0.9)
+            m.add('bd', B['bd'].hit(1.0, 0.85), m.t(b))
+            m.add('snare', B['roll'].hit(0.8, max_len=m.dur(14)), m.t(b), 0.5)
+            for n, who in ((82, 'tpt'), (77, 'tpt'), (74, 'tpt'), (65, 'hn'), (58, 'tbn'), (53, 'tbn'), (34, 'tuba')):
+                section(m, 'hn' if who == 'hn' else who, B[who], n, m.t(b), m.dur(16), 0.9, 2, rng)
+            m.add('bd', B['bd'].hit(1.0, 0.85), m.t(b + 1, 2))
+            m.add('cym', B['crash'].hit(0.9), m.t(b + 1, 2), 0.6)
+    out = m.render(rng, hall=1.3, wet=0.7, lufs=-14.5)
+    return al.fade(out[: int((m.t(len(plan)) + 1.5) * SR)], 0.01, 1.8)
+
+
+def menu_anthem(base, seed=15):
+    """D minor, 88: the trailer for the game to come. Low strings that never let go, big drums in half time, and the
+    horns with a long tune over them; the trumpets take it the second time."""
+    rng = np.random.default_rng(seed)
+    B = band(base)
+    bpm = 88
+    prog = [(38, (0, 3, 7)), (34, (0, 4, 7)), (41, (0, 4, 7)), (36, (0, 4, 7))]   # Dm  Bb  F  C
+    tune = [[(0, 8, 74), (8, 4, 77), (12, 4, 76)], [(0, 8, 74), (8, 8, 70)], [(0, 8, 72), (8, 4, 77), (12, 4, 81)], [(0, 12, 79), (12, 4, 76)]]
+    plan = ['intro'] * 4 + ['a'] * 8 + ['b'] * 8 + ['break'] * 4 + ['c'] * 8 + ['out'] * 2
+    m = ml.Mix(len(plan) * 4 * 60.0 / bpm + 4.0, bpm)
+    for name, gain, pan, send in (('bd', 1.0, 0, 0.2), ('snare', 0.75, 0, 0.3), ('timp', 0.8, 0.1, 0.3), ('ost', 0.8, -0.2, 0.3), ('str', 0.6, 0.15, 0.45),
+                                  ('low', 0.85, 0, 0.3), ('hn', 0.95, -0.1, 0.4), ('tpt', 0.85, 0.2, 0.4), ('fx', 0.6, 0, 0.35)):
+        m.track(name, gain, pan, send)
+    for b, sec in enumerate(plan):
+        root, tri = prog[b % 4]
+        tones = [root + 12 + t for t in tri]
+        loud = sec in ('b', 'c')
+        if sec != 'out':
+            pat = [0, 0, 7, 0, 12, 0, 7, 0, 0, 0, 7, 0, 12, 7, tri[1] + 12, 7]
+            for s in range(16):
+                v = (0.85 if s % 4 == 0 else 0.55) * (0.6 if sec in ('intro', 'break') else 1.0) * (0.5 + 0.5 * min(1, b / 3) if sec == 'intro' else 1)
+                n = fit(root, 38, 49) + pat[s]
+                section(m, 'ost', B['vc_s'] if n < 55 else B['vla_s'], n, m.t(b, s), m.dur(0.9), v, 3, rng, 0.006)
+                if loud and s % 2 == 0:
+                    section(m, 'ost', B['vln_s'], n + 12, m.t(b, s), m.dur(0.9), v * 0.7, 2, rng, 0.006)
+            for n, who in ((fit(tones[1], 60, 71), 'vln'), (fit(tones[2], 55, 66), 'vla'), (fit(tones[0], 43, 54), 'vc')):
+                section(m, 'str', B[who], n, m.t(b), m.dur(16), 0.5 if sec == 'intro' else 0.65, 2, rng)
+        if sec in ('a', 'b', 'c'):
+            for s, vel, pitch in ((0, 1.0, 0.85), (6, 0.8, 0.95), (10, 0.85, 0.85)) + (((14, 0.8, 1.0), (15, 0.9, 0.92)) if b % 2 else ()):
+                m.add('bd', B['bd'].hit(vel, pitch), m.t(b, s))
+            m.add('bd', ml.kick(1.0, 0.4, 44), m.t(b), 0.6)
+            m.add('snare', B['snare'].hit(1.0, 0.9, max_len=0.4), m.t(b, 8))
+            m.add('snare', ml.clap(rng, 0.3), m.t(b, 8), 0.5)
+            m.add('timp', B['timp'].note(fit(root, 41, 52), m.dur(8), 0.9), m.t(b), 0.9)
+            if b % 4 == 3:
+                for k in range(8):
+                    m.add('timp', B['timp'].note(fit(root, 41, 52), m.dur(1), 0.45 + 0.06 * k), m.t(b, 12 + k * 0.5), 0.5 + 0.06 * k)
+            for who, n in (('tuba', fit(root, 26, 37)), ('tbn', fit(root, 38, 49)), ('tbn', fit(tones[2], 45, 56))):
+                section(m, 'low', B[who], n, m.t(b), m.dur(15), 0.75 if loud else 0.6, 2, rng)
+        if loud:
+            if b % 8 == 0:
+                m.add('fx', ml.impact(rng, 3.0), m.t(b), 0.7)
+                m.add('fx', B['crash'].hit(0.9), m.t(b), 0.5)
+            for (s, l, n) in tune[b % 4]:
+                section(m, 'hn', B['hn'], n - 12, m.t(b, s), m.dur(l) * 0.95, 0.9, 4, rng)
+                section(m, 'str', B['vln'], n + (12 if sec == 'c' else 0), m.t(b, s), m.dur(l) * 0.97, 0.7, 3, rng)
+                if sec == 'c':
+                    section(m, 'tpt', B['tpt'], n, m.t(b, s), m.dur(l) * 0.93, 0.85, 3, rng)
+                    section(m, 'hn', B['hn'], n - 12 - (3 if n % 12 in (2, 9, 4) else 4), m.t(b, s), m.dur(l) * 0.95, 0.6, 2, rng)
+        if sec == 'break':
+            if b % 4 == 0:
+                for (s, l, n) in tune[0]:
+                    section(m, 'hn', B['hn'], n - 12, m.t(b, s), m.dur(l) * 0.95, 0.5, 1, rng)   # one horn, alone, remembering it
+            if b % 4 == 2:
+                m.add('fx', ml.riser(rng, m.dur(32)), m.t(b), 0.6)
+                m.add('fx', B['swell'].hit(0.8, max_len=m.dur(32)), m.t(b), 0.3)
+            if b % 4 == 3:
+                for k in range(16):
+                    m.add('timp', B['timp'].note(fit(root, 41, 52), m.dur(1), 0.3 + 0.04 * k), m.t(b, k), 0.35 + 0.04 * k)
+        if sec == 'out' and b == len(plan) - 2:
+            m.add('fx', ml.impact(rng, 4.0), m.t(b), 0.9)
+            m.add('fx', B['crash'].hit(1.0), m.t(b), 0.6)
+            m.add('bd', B['bd'].hit(1.0, 0.8), m.t(b))
+            m.add('timp', B['timp'].note(50, m.dur(16), 1.0), m.t(b))
+            for n, who in ((74, 'tpt'), (69, 'tpt'), (62, 'hn'), (57, 'hn'), (50, 'tbn'), (38, 'tbn'), (26, 'tuba'), (74, 'vln'), (69, 'vln'), (62, 'vla'), (38, 'vc')):
+                section(m, {'tpt': 'tpt', 'hn': 'hn', 'tbn': 'low', 'tuba': 'low'}.get(who, 'str'), B[who], n, m.t(b), m.dur(24), 0.9, 2, rng)
+    out = m.render(rng, hall=2.3, wet=1.0, lufs=-14.5)
+    return al.fade(out[: int((m.t(len(plan)) + 2.5) * SR)], 0.01, 2.5)
+
+
 def main():
     base, out = sys.argv[1], sys.argv[2]
     R = {
@@ -456,6 +595,8 @@ def main():
         'Music/MusMenu/MusMenu_01': lambda: menu_trap(base),
         'Music/MusMenu/MusMenu_02': lambda: menu_drive(base),
         'Music/MusMenu/MusMenu_03': lambda: menu_groove(base),
+        'Music/MusMenu/MusMenu_04': lambda: menu_band(base),
+        'Music/MusMenu/MusMenu_05': lambda: menu_anthem(base),
     }
     for n, fn in R.items():
         if sys.argv[3:] and not any(a in n for a in sys.argv[3:]):

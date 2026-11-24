@@ -396,18 +396,7 @@ def recipes(base):
     def ui(name, fn):
         R['Ui/%s/%s_01' % (name, name)] = fn
     rng = rng0
-    ui('UiMove', lambda: norm(al.hp(blip(1250, 0.05, 0.02, harm=(1, 0.2)), 300), -14))
-    ui('UiTab', lambda: norm(np.concatenate([blip(900, 0.035, 0.02), blip(1350, 0.06, 0.03)]), -13))
-
-    def select():
-        out = np.zeros(int(0.35 * SR), np.float32)
-        al.place(out, blip(660, 0.2, 0.09, harm=(1, 0.4, 0.15)), 0, 0.8)
-        al.place(out, blip(990, 0.25, 0.12, harm=(1, 0.3)), 0.045, 0.7)
-        al.place(out, thump(np.random.default_rng(3), 70, 0.1, 0.3), 0, 0.5)
-        return norm(out, -9)
-    ui('UiSelect', select)
-    ui('UiBack', lambda: norm(np.concatenate([blip(700, 0.05, 0.03), blip(470, 0.12, 0.06)]), -12))
-    ui('UiError', lambda: norm(np.concatenate([blip(220, 0.09, 0.06, harm=(1, 0.6, 0.4)), np.zeros(int(0.03 * SR), np.float32), blip(200, 0.14, 0.08, harm=(1, 0.6, 0.4))]), -11))
+    # (the menus' own sounds - moving, choosing, screens, the title and the kickoff - are build_ui.py's)
     ui('UiTick', lambda: norm(al.hp(blip(1900, 0.025, 0.01, harm=(1, 0.1)), 500), -16))
     ui('UiLock', lambda: norm(blip(1320, 0.3, 0.14, harm=(1, 0.5, 0.2)) + np.pad(thump(np.random.default_rng(4), 90, 0.1, 0.3), (0, int(0.3 * SR) - int(0.1 * SR))) * 0.5, -9))
 

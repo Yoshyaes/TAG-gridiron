@@ -1,5 +1,5 @@
 # Unreal Editor Python (headless). The pack library's three-man gang tackles as groups the game can place: a carrier
-# (__P01), the first tackler (__P02) and the man who joins him (__P03), all followed through the capture's shared world
+# (the man with the ball - any of __P01..__P03), the first tackler and the man who joins him, all followed through the capture's shared world
 # the way pack_pairs.py follows a pair (each man's anchor = his trajectory at frame 0, plus his root motion).
 # The group's moment is the first tackler's contact (pelvises within 0.9 m). At that moment, in the carrier's frame
 # (m; x left, y back; yaw deg relative to the carrier's heading, + turns left):
@@ -47,19 +47,43 @@ def world_of(anchor, heading_deg, x_left, y_back):
 
 
 def man(anim, j):
+    """Per frame: pelvis, root, heading and the ball sockets' distances from the chest (see pack_pairs.py carry)."""
     anc, h0 = j["source"]["anchor"], j["source"]["anchor_heading_deg"]
     L = anim.get_play_length()
     n = int(round(L * 30)) + 1
     rows = []
     for i in range(n):
         t = min(L, i / 30.0)
-        r = bone(anim, t, "root")
-        p = bone(anim, t, "pelvis")
+        pose = unreal.AnimPoseExtensions.get_anim_pose_at_time(anim, t, opts)
+        def at(b):
+            return unreal.AnimPoseExtensions.get_bone_pose(pose, b, unreal.AnimPoseSpaces.WORLD)
+        r = at("root")
+        p = at("pelvis")
         rx, ry = clip_xy(r)
         px, py = clip_xy(p)
         yaw = -(r.rotation.rotator().yaw - ROOT_REST_YAW)
-        rows.append((world_of(anc, h0, px, py), world_of(anc, h0, rx, ry), h0 + yaw))
+        try:
+            ch = at("spine_05").translation
+            sock = tuple((at(s).translation - ch).length() / 100.0 for s in ("RightFootball", "LeftFootball"))
+        except Exception:
+            sock = (9.0, 9.0)
+        rows.append((world_of(anc, h0, px, py), world_of(anc, h0, rx, ry), h0 + yaw, sock))
     return rows, L
+
+
+def carry(M, i0, i1):
+    """Carry score (m): min over hands of the mean + 1.5 std of the ball socket's distance from the chest."""
+    i1 = min(i1, len(M))
+    i0 = max(0, min(i0, i1 - 4))
+    best = 9.0
+    for h in (0, 1):
+        d = [M[i][3][h] for i in range(i0, i1)]
+        if not d:
+            continue
+        mu = sum(d) / len(d)
+        sd = math.sqrt(sum((x - mu) ** 2 for x in d) / len(d))
+        best = min(best, mu + 1.5 * sd)
+    return best
 
 
 def rel(p_from, h_from, p_to):
@@ -99,9 +123,19 @@ for g, parts in sorted(groups.items()):
         an = {k: unreal.load_asset(LIB + ns[k]) for k in ns}
         if not all(an.values()):
             continue
-        C, LC = man(an["01"], js["01"])
-        T, LT = man(an["02"], js["02"])
-        A, LA = man(an["03"], js["03"])
+        M = {k: man(an[k], js[k]) for k in ("01", "02", "03")}
+        # the carrier is the man with the ball (its socket held still at his chest over the first 0.6 s), not always
+        # __P01: in 29 of 42 groups it was __P02 or __P03 and the game played a tackler's capture on its carrier
+        # (Tools/Anim/pack_role_check.py). No clear carrier: left out.
+        sc = sorted((carry(M[k][0], 0, 18), k) for k in M)
+        if sc[0][0] > 0.50 or sc[1][0] < sc[0][0] + 0.12:
+            unreal.log("TAG_PACK_GANGS %s left out: no clear ball carrier (carry %s)" % (g, ", ".join("%s %.2f" % (k, s) for s, k in sc)))
+            continue
+        kc = sc[0][1]
+        kt, ka = [k for k in ("01", "02", "03") if k != kc]
+        (C, LC), (T, LT), (A, LA) = M[kc], M[kt], M[ka]
+        ns["01"], ns["02"], ns["03"] = ns[kc], ns[kt], ns[ka]
+        js["01"] = js[kc]
         c0 = first_within(C, T, 0)
         if c0 is None:
             continue
@@ -115,9 +149,9 @@ for g, parts in sorted(groups.items()):
         t0 = c0 / 30.0
         if min(LC, LT, LA) - t0 < 0.8:
             continue
-        cp, cr, ch = C[c0]
-        _, tr_, th = T[c0]
-        _, ar, ah = A[c0]
+        cp, cr, ch = C[c0][:3]
+        _, tr_, th = T[c0][:3]
+        _, ar, ah = A[c0][:3]
         tx, ty = rel(cr, ch, tr_)
         ax, ay = rel(cr, ch, ar)
         ex, ey = rel(cr, ch, C[-1][0])

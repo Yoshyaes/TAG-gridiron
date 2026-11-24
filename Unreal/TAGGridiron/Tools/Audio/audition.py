@@ -12,7 +12,7 @@ import audiolib as al  # noqa: E402
 SR = al.SR
 GROUPS = {
     'crowd': ('Crowd', 2, 9.0), 'field': ('Field', 3, 2.0), 'voices': ('Voice', 2, 4.0), 'stadium': ('Stadium', 1, 9.0), 'weather': ('Weather', 1, 8.0),
-    'music': ('Music', 9, 400.0), 'ui': ('Ui', 1, 2.0),
+    'music': ('Music', 9, 400.0), 'ui': ('Ui', 2, 7.0),
 }
 
 
