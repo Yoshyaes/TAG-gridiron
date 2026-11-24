@@ -2,7 +2,8 @@
 // game (the play calls are made for the user, a run on offense and Cover 3 on defense). Each check reads what the sim or
 // the director did with the press: R1 with the ball covers it up, R1 on defense goes for the strip, L2 held strafes,
 // CROSS held after the whistle hurries up (no call screen: the last play again), TRIANGLE held spikes it, VIEW tapped
-// keeps the camera and VIEW held changes it. PASS / FAIL lines, "TAG padplaytest done", then the game exits.
+// keeps the camera and VIEW held changes it. Before all that, on the first runs, the move buffer: a second move pressed
+// before the sim allows it still comes within 150 ms. PASS / FAIL lines, "TAG padplaytest done", then the game exits.
 #include "Game/MatchDirector.h"
 
 #include "Engine/Engine.h"
@@ -45,6 +46,60 @@ void AMatchDirector::TickPadPlayTest(float Dt)
 	}
 	if (T.ReleaseCross > 0.f && (T.ReleaseCross -= Dt) <= 0.f) PadKey(EKeys::Gamepad_FaceButton_Bottom, false);
 	if (State == EMatchState::Live) T.bSnapSent = false;
+
+	// first, on the first runs: the move buffer (Game/TagMoveBuffer.h). F (truck) once he has the ball, then G (stiff arm)
+	// pressed 0.47-0.55 s into the truck - before the 0.6 s the sim wants between a carrier's moves (PlaySim::startMove),
+	// so it is refused when pressed - must still come, from the buffer, within its 150 ms. -TagNoMoveBuffer: it fails.
+	static struct FBufTest { int32 Stage = 0, Tries = 0; float T = 0.f; double PressAnimT = 0.0; unsigned long long Serial = 0; } BT;
+	if (T.Step == 0 && BT.Stage < 9)
+	{
+		tag::Ent* U = S ? S->user : nullptr;
+		const bool bRun = State == EMatchState::Live && S && UserOff() && U && U->hasBall && U != S->qb && S->ball.mode == tag::BallMode::Held &&
+			U->state != tag::EntState::Down && !U->protecting;
+		if (BT.Stage > 0 && (!bRun || S->serial != BT.Serial))
+		{
+			// the run ended before the check could finish (a tackle, a pile): again on the next one
+			PadKey(EKeys::F, false);
+			PadKey(EKeys::G, false);
+			UE_LOG(LogTemp, Display, TEXT("TAG padplaytest: the move buffer's run ended at stage %d, again on the next run"), BT.Stage);
+			BT.Stage = 0;
+			if (++BT.Tries >= 4) { Check(false, TEXT("the move buffer: no run long enough to press a second move in 4 tries")); BT.Stage = 9; }
+		}
+		else if (bRun)
+		{
+			BT.T += Dt;
+			switch (BT.Stage)
+			{
+			case 0: PadKey(EKeys::F, true); BT.Serial = S->serial; BT.T = 0.f; BT.Stage = 1; break;
+			case 1: PadKey(EKeys::F, false); BT.Stage = 2; break;
+			case 2: // the truck on: wait for the window
+				if (U->move == tag::Move::Truck && U->animT >= 0.47 && U->animT <= 0.55)
+				{
+					BT.PressAnimT = U->animT;
+					PadKey(EKeys::G, true);
+					BT.T = 0.f;
+					BT.Stage = 3;
+				}
+				else if (BT.T > 1.5f) BT.Stage = 0; // (no truck came, or the window was missed: press again)
+				break;
+			case 3: PadKey(EKeys::G, false); BT.Stage = 4; break;
+			case 4:
+				if (U->move == tag::Move::StiffArm)
+				{
+					Check(true, *FString::Printf(TEXT("a stiff arm pressed %.2f s into the truck (refused before 0.60) came from the move buffer %.0f ms later"), BT.PressAnimT, BT.T * 1000.f));
+					BT.Stage = 9;
+				}
+				else if (BT.T > 0.35f)
+				{
+					Check(false, *FString::Printf(TEXT("a stiff arm pressed %.2f s into the truck never came (the move buffer: -TagNoMoveBuffer?)"), BT.PressAnimT));
+					BT.Stage = 9;
+				}
+				break;
+			default: break;
+			}
+		}
+		if (BT.Stage < 9) return; // (the cover-up check waits: R1 held is no moves)
+	}
 
 	switch (T.Step)
 	{

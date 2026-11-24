@@ -89,8 +89,16 @@ public:
 	static void StepLevel(int32 Which);
 	float LevelMaster = 1.f, LevelMusic = 1.f, LevelStadium = 1.f;
 
-	/** How loud the crowd is right now, 0..1 (the stands' animation can follow it). */
-	float CrowdEnergy() const { return FMath::Clamp(0.25f + 0.75f * FMath::Max(Excite, 0.6f * DNoise), 0.f, 1.f); }
+	/** How hard the home crowd is cheering right now, 0..1: the stands' animation follows it (AMatchDirector::TickStands).
+	 *  Its roar (Excite) and its own offense breaking a play open (Swell past what an away gain gives); not the noise it
+	 *  makes against the visitors' offense (DNoise, which is not cheering), and nothing while it sits stunned after a
+	 *  visitors' score (Deflate). */
+	float CrowdEnergy() const
+	{
+		if (Deflate > 0.f) return 0.f;
+		const float Rise = P.bOffHome && !P.bReturn ? FMath::Max(0.f, Swell - 0.3f) / 0.7f : 0.f;
+		return FMath::Clamp(FMath::Max(Excite, 0.8f * Rise), 0.f, 1.f);
+	}
 
 private:
 	// ---- banks

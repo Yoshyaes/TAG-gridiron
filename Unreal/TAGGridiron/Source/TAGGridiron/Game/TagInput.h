@@ -11,6 +11,21 @@
 
 class APlayerController;
 
+namespace TagInput
+{
+	/** A thumbstick as the game reads it: a scaled radial dead zone. The stick's length (not each axis on its own) is
+	 *  measured against the dead zone and rescaled from it to the outer edge, (|v| - Dz) / (Outer - Dz) clamped to 1, and
+	 *  its direction is kept as it is. A per-axis dead zone (the engine's, 0.25 on each axis) snapped every push within
+	 *  14.5 deg of up / down / left / right onto it, and gave a full diagonal only 86 % of a straight push's speed.
+	 *  Dz < 0 / Outer < 0: the project's values (GameUserSettings [TAG.Settings] StickDeadZone / StickOuter, 0.15 / 0.95;
+	 *  -TagStickDZ= / -TagStickOuter= override them). -TagAxialStick: the old per-axis reading, to compare. */
+	FVector2D Stick(const FVector2D& Raw, float Dz = -1.f, float Outer = -1.f);
+	/** The dead zone and outer edge Stick uses by default. */
+	float StickDeadZone();
+	float StickOuter();
+	bool IsStickAxis(const FKey& K);
+}
+
 /** One input device as the hub knows it: a pad (its gamepad keys) or the keyboard (every other key). A pad seen twice
  *  (an Xbox pad comes through XInput and GameInput both) is two devices: the lobby marks the second a twin. */
 struct FTagDevice
@@ -56,8 +71,10 @@ public:
 	bool Down(int32 D, const FKey& K) const;
 	bool Pressed(int32 D, const FKey& K) const;
 	bool Released(int32 D, const FKey& K) const;
-	/** An analog key's value (sticks with the project's 0.25 dead zone, remapped as the controller does). */
+	/** An analog key's value (a stick's axis read with both of its axes: TagInput::Stick's radial dead zone). */
 	float Axis(int32 D, const FKey& K) const;
+	/** Device D's left (or right) stick, raw from the device through TagInput::Stick. */
+	FVector2D Stick(int32 D, bool bLeft) const;
 	/** The devices that pressed a button since the last frame ended. */
 	TArray<int32> PressedThisFrame() const;
 	/** When device D last pressed K (seconds, platform time; < 0 never). */
@@ -87,7 +104,7 @@ private:
 	/** Pairs of pads (lo << 32 | hi) seen pressing together, and how often. */
 	TMap<uint64, int32> PairHits;
 	/** A twin's presses waiting for its pad's own (none: it is a pad of its own after all). */
-	struct FPend { int32 D; FKey K; double T; };
+	struct FPend { int32 D; FKey K; double T; uint64 Gen; };
 	TArray<FPend> Pending;
 	int32 NumSwallowed = 0;
 };
@@ -110,5 +127,8 @@ struct FTagReader
 	bool IsInputKeyDown(const FKey& K) const;
 	bool WasInputKeyJustPressed(const FKey& K) const;
 	bool WasInputKeyJustReleased(const FKey& K) const;
+	/** A stick's axis comes from the whole stick (Stick: the radial dead zone), the controller's raw value or the hub's. */
 	float GetInputAnalogKeyState(const FKey& K) const;
+	/** The left (or right) stick, both axes, through TagInput::Stick. */
+	FVector2D Stick(bool bLeft) const;
 };

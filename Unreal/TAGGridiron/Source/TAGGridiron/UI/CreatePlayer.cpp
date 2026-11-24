@@ -17,6 +17,7 @@
 
 #include "Audio/TagAudio.h"
 #include "Game/MatchDirector.h"
+#include "Game/TagResult.h"
 #include "Render/Athlete.h"
 #include "Sim/Abilities.h"
 #include "Sim/League.h"
@@ -284,6 +285,35 @@ void SGridironOverlay::LogChartTest(AMatchDirector* D)
 		UE_LOG(LogTemp, Display, TEXT("TAG chart test %s rushing:%s"), *Str(T->abbr), *Rush);
 		UE_LOG(LogTemp, Display, TEXT("TAG chart test %s returner %s named in %d of %d return plays"), *Str(T->abbr), *ChartTest::Tag(KR), Ret, Returns);
 	}
+	// the verdict (Game/TagResult.h): on each side the chart's quarterback threw the most passes, and the created back
+	// at the top of the home halfback chart carried the ball - checked once a side has thrown / run enough to tell
+	int32 Pass = 0, Fail = 0;
+	auto Check = [&Pass, &Fail](bool bOk, const FString& What)
+	{
+		(bOk ? Pass : Fail)++;
+		UE_LOG(LogTemp, Display, TEXT("TAG chart test %s: %s"), bOk ? TEXT("PASS") : TEXT("FAIL"), *What);
+	};
+	for (const tag::Team* T : {G.home, G.away})
+	{
+		const tag::Player* Q = tag::chartSpecialist(*T, tag::DSlot::QB);
+		int32 QAtt = 0, MostAtt = 0, TeamAtt = 0, TeamRush = 0, MadeRush = 0;
+		for (const tag::PlayerLine* L : G.stats.forTeam(T->abbr))
+		{
+			TeamAtt += L->passAtt;
+			TeamRush += L->rushAtt;
+			MostAtt = FMath::Max(MostAtt, L->passAtt);
+			if (Q && L->pid == Q->id) QAtt = L->passAtt;
+			if (ChartTest::Made && L->pid == ChartTest::Made->id) MadeRush = L->rushAtt;
+		}
+		if (TeamAtt >= 3) Check(QAtt > 0 && QAtt == MostAtt, FString::Printf(TEXT("%s: the chart's QB %s threw the most passes (%d of %d)"), *Str(T->abbr), *ChartTest::Tag(Q), QAtt, TeamAtt));
+		else UE_LOG(LogTemp, Display, TEXT("TAG chart test %s: %d passes, too few to check the QB"), *Str(T->abbr), TeamAtt);
+		if (T == G.home)
+		{
+			if (TeamRush >= 5) Check(MadeRush > 0, FString::Printf(TEXT("%s: the created HB %s carried the ball (%d of %d rushes)"), *Str(T->abbr), *ChartTest::Tag(ChartTest::Made), MadeRush, TeamRush));
+			else UE_LOG(LogTemp, Display, TEXT("TAG chart test %s: %d rushes, too few to check the HB"), *Str(T->abbr), TeamRush);
+		}
+	}
+	TagResult::Finish(TEXT("TagChartTest"), Pass, Fail, false); // (the soak that runs it quits the game)
 }
 
 void RosterUI::SaveChart(const tag::Team& T)

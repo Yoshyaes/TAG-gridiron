@@ -54,6 +54,8 @@ struct FHighlightCue
 	FString Move;          // "TRUCK"
 	EPadGlyph Glyph = EPadGlyph::None;  // a face button, or None for a right-stick flick (Key says which way)
 	FString Key;
+	/** A move the player pressed too early just ran out unused (Game/TagMoveBuffer.h): the pill greys, 0..1 as it fades. */
+	float RefusedA = 0.f;
 };
 
 /** The kick meter (a user kick, Madden style): the aim arrow's flight on screen, the power swing, the accuracy needle. */
@@ -97,6 +99,10 @@ struct FUserMarkerUI
 	FVector2D StaminaAt = FVector2D::ZeroVector;
 	float StaminaV = -1.f;
 	bool bSprint = false;
+	/** A move he pressed too early ran out unused (Game/TagMoveBuffer.h): a grey pill over him ("TRUCK  -  TOO EARLY"),
+	 *  RefusedA 0..1 as it fades. */
+	FString Refused;
+	float RefusedA = 0.f;
 };
 
 /** The local players' colours (P1 blue, P2 red, P3 green, P4 gold): their markers, their lobby cards. */

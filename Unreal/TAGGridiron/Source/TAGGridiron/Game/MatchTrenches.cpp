@@ -132,6 +132,7 @@ void AMatchDirector::UpdateLineBars()
 					Vis ? *Vis->GetName() : TEXT("none"), Vis ? Vis->GetBoneIndex(TEXT("pelvis")) : -2);
 			}
 		}
+		MoveRefusedCue(0, M); // (a move pressed too early that ran out: Game/MatchFeel.cpp)
 		Overlay->SetUserMarker(M);
 	}
 	// the user's sprint stamina, under his man's feet while the play is live (pad users: R2 is the sprint)

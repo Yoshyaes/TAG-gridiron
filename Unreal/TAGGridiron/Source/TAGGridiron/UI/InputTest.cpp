@@ -1,13 +1,21 @@
 // -TagInputTest: one button press that reaches the game twice (an Xbox pad is read through XInput and GameInput both,
 // a frame or so apart) must move a menu once. The check sends each press from two made-up devices a frame apart, the
 // way the pad does, and walks the main menu, the team select and a play call; also the stick (its key and its analog
-// value, which Slate used to take as a second push). PASS / FAIL lines, "TAG inputtest done", then the game exits.
+// value, which Slate used to take as a second push). First the sticks' radial dead zone: heading and length read back
+// at a dozen angles and lengths, through a pad of the hub's and through the controller ("stick ..." lines). PASS / FAIL
+// lines, "TAG inputtest done", then the game exits.
 #include "UI/GridironOverlay.h"
 
 #include "Containers/Ticker.h"
+#include "Engine/Engine.h"
+#include "Engine/GameViewportClient.h"
 #include "Framework/Application/SlateApplication.h"
+#include "GameFramework/PlayerController.h"
+#include "GenericPlatform/GenericPlatformInputDeviceMapper.h"
+#include "InputKeyEventArgs.h"
 #include "Game/MatchDirector.h"
 #include "Game/TagInput.h"
+#include "Game/TagResult.h"
 #include "UI/LoadingScreen.h"
 
 namespace InputTest
@@ -105,18 +113,123 @@ void SGridironOverlay::StartInputTest()
 	});
 	Shot(TEXT("teamselect"));
 
+	// ---- the sticks' radial dead zone (TagInput::Stick; after the menus' checks, which time their two copies of a press
+	// to the frame): the way the stick points is the way the man goes at every angle,
+	// its length the speed (a full diagonal as fast as a full push up), nothing inside the dead zone. Read through a
+	// player's own pad (the hub) and through the controller (the one-player game), each a raw value set and read back.
+	Do([Check]
+	{
+		FTagInputHub& H = FTagInputHub::Get();
+		const int32 D = H.AddFake(true, TEXT("StickTest"));
+		const FTagReader R(D, true);
+		const float Dz = TagInput::StickDeadZone(), Outer = TagInput::StickOuter();
+		struct FCase { float Deg, Len; };
+		// full pushes on a round gate, a square gate's diagonal (longer than 1), part pushes, one inside the dead zone
+		const FCase Cases[] = {{0.f, 1.f}, {10.f, 1.f}, {20.f, 1.f}, {30.f, 1.f}, {45.f, 1.f}, {60.f, 1.f}, {80.f, 1.f}, {135.f, 1.f}, {200.f, 1.f}, {290.f, 1.f},
+			{45.f, 1.06f}, {30.f, 0.55f}, {100.f, 0.4f}, {70.f, Dz * 0.8f}};
+		for (const FCase& Cs : Cases)
+		{
+			const float Rad = FMath::DegreesToRadians(Cs.Deg);
+			const FVector2D Raw(FMath::Cos(Rad) * Cs.Len, FMath::Sin(Rad) * Cs.Len);
+			H.SetAxis(D, EKeys::Gamepad_LeftX, static_cast<float>(Raw.X));
+			H.SetAxis(D, EKeys::Gamepad_LeftY, static_cast<float>(Raw.Y));
+			const FVector2D V(R.GetInputAnalogKeyState(EKeys::Gamepad_LeftX), R.GetInputAnalogKeyState(EKeys::Gamepad_LeftY));
+			const float WantLen = FMath::Clamp((Cs.Len - Dz) / (Outer - Dz), 0.f, 1.f);
+			const float Len = static_cast<float>(V.Size());
+			float Head = FMath::RadiansToDegrees(FMath::Atan2(static_cast<float>(V.Y), static_cast<float>(V.X)));
+			if (Head < 0.f) Head += 360.f;
+			const float HeadErr = FMath::Abs(FMath::FindDeltaAngleDegrees(Head, Cs.Deg));
+			// (what the old per-axis 0.25 dead zone made of the same push, for the record)
+			auto Old = [](double Ax) { const double M = FMath::Abs(Ax); return M < 0.25 ? 0.0 : FMath::Sign(Ax) * FMath::Min(1.0, (M - 0.25) / 0.75); };
+			const double OX = Old(Raw.X), OY = Old(Raw.Y);
+			double OldHead = FMath::RadiansToDegrees(FMath::Atan2(OY, OX));
+			if (OldHead < 0.0) OldHead += 360.0;
+			const bool bOk = WantLen <= 0.f ? Len == 0.f : (FMath::Abs(Len - WantLen) < 0.01f && HeadErr < 1.f);
+			Check(bOk, FString::Printf(TEXT("stick (pad) %3.0f deg at %.2f: heading %.1f deg, length %.2f (want %.2f); the per-axis dead zone read %.1f deg at %.2f"),
+				Cs.Deg, Cs.Len, Len > 0.f ? Head : 0.f, Len, WantLen, OX == 0.0 && OY == 0.0 ? 0.0 : OldHead, FMath::Sqrt(OX * OX + OY * OY)));
+		}
+		H.SetAxis(D, EKeys::Gamepad_LeftX, 0.f);
+		H.SetAxis(D, EKeys::Gamepad_LeftY, 0.f);
+		// a full diagonal is as fast as a full push up (the sim's speed goes with the stick's length)
+		const FVector2D Up = TagInput::Stick(FVector2D(0.0, 1.0)), Diag = TagInput::Stick(FVector2D(0.7071, 0.7071));
+		Check(FMath::Abs(Up.Size() - Diag.Size()) < 0.01, FString::Printf(TEXT("stick: a full diagonal's length %.2f is a full push up's %.2f"), Diag.Size(), Up.Size()));
+	});
+	// the same through the controller: a raw value put into its input each frame (as a pad sends it), read back before
+	// the controller takes the next one (the engine's own per-axis dead zone is not used). Leave the pads alone while it runs.
+	auto CtlStick = [W](float Deg)
+	{
+		const TSharedPtr<SGridironOverlay> O = W.Pin();
+		APlayerController* PC = O && O->Director && O->Director->GetWorld() ? O->Director->GetWorld()->GetFirstPlayerController() : nullptr;
+		if (!PC) return;
+		FViewport* VP = GEngine && GEngine->GameViewport ? GEngine->GameViewport->Viewport : nullptr;
+		const FInputDeviceId Dv = IPlatformInputDeviceMapper::Get().GetDefaultInputDevice();
+		const float Rad = FMath::DegreesToRadians(Deg);
+		const float LX = Deg < 0.f ? 0.f : FMath::Cos(Rad), LY = Deg < 0.f ? 0.f : FMath::Sin(Rad);
+		PC->InputKey(FInputKeyEventArgs(VP, Dv, EKeys::Gamepad_LeftX, LX, 1.f / 60.f, 1, FPlatformTime::Cycles64()));
+		PC->InputKey(FInputKeyEventArgs(VP, Dv, EKeys::Gamepad_LeftY, LY, 1.f / 60.f, 1, FPlatformTime::Cycles64()));
+	};
+	Do([CtlStick] { CtlStick(20.f); });
+	Frames(1);
+	Do([CtlStick] { CtlStick(20.f); });
+	Frames(1);
+	Do([W, Check, CtlStick]
+	{
+		const TSharedPtr<SGridironOverlay> O = W.Pin();
+		APlayerController* PC = O && O->Director && O->Director->GetWorld() ? O->Director->GetWorld()->GetFirstPlayerController() : nullptr;
+		if (!PC) { Check(false, TEXT("stick (controller): no player controller")); return; }
+		const FTagReader R(PC);
+		const FVector2D V = R.Stick(true);
+		const float Head = FMath::RadiansToDegrees(FMath::Atan2(static_cast<float>(V.Y), static_cast<float>(V.X)));
+		Check(FMath::Abs(Head - 20.f) < 1.f && FMath::Abs(V.Size() - 1.0) < 0.01, FString::Printf(TEXT("stick (controller) 20 deg at 1.00: heading %.1f deg, length %.2f (the per-axis dead zone read 7.6 deg)"), Head, V.Size()));
+		CtlStick(-1.f); // (let go)
+	});
+
+
 	// ---- a play call: formation families (R1), formations (d-pad up / down), pages (d-pad left / right)
 	Do([W] { if (auto O = W.Pin()) if (O->Director) O->Director->StartMatch(O->SelHome, O->SelAway, true, true, 1, false, 300); });
 	Do([S] { S->StepT = FPlatformTime::Seconds(); });
 	Until([W, S, Check]
 	{
 		const TSharedPtr<SGridironOverlay> O = W.Pin();
-		if (O && O->IsPlayCall()) { S->Wait = 0; Axis(C, EKeys::Gamepad_RightY, 0.f); return true; }
+		if (O && O->IsPlayCall())
+		{
+			S->Wait = 0;
+			Axis(C, EKeys::Gamepad_RightY, 0.f);
+			if (APlayerController* PC0 = O->Director && O->Director->GetWorld() ? O->Director->GetWorld()->GetFirstPlayerController() : nullptr)
+			{
+				FViewport* VP0 = GEngine && GEngine->GameViewport ? GEngine->GameViewport->Viewport : nullptr;
+				PC0->InputKey(FInputKeyEventArgs(VP0, IPlatformInputDeviceMapper::Get().GetDefaultInputDevice(), EKeys::Gamepad_RightY, 0.f, 1.f / 60.f, 1, FPlatformTime::Cycles64()));
+				PC0->InputKey(FInputKeyEventArgs(VP0, IPlatformInputDeviceMapper::Get().GetDefaultInputDevice(), EKeys::Gamepad_FaceButton_Bottom, IE_Released, 0.f, false, FPlatformTime::Cycles64()));
+			}
+			return true;
+		}
 		// (a kickoff of ours: the right stick's swing, both ways round as -TagUiShots does; the return: cross now and
-		// then on a pad of its own until the call is up)
+		// then on a pad of its own until the call is up. The kick meter reads the player controller in a one-player game,
+		// and a made-up device's events reach only Slate's widgets and the hub, never the controller - the engine maps no
+		// player to the device: the swing and the cross go to the controller too, as the pad tests press them.)
 		const int32 F = ++S->Wait % 120, Sign = (S->Wait / 120) % 2 ? 1 : -1;
-		Axis(C, EKeys::Gamepad_RightY, F < 40 ? -1.f * Sign : F < 48 ? 1.f * Sign : 0.f);
-		if (S->Wait % 45 == 0) { Send(C, EKeys::Gamepad_FaceButton_Bottom, true); Send(C, EKeys::Gamepad_FaceButton_Bottom, false); }
+		const float RY = F < 40 ? -1.f * Sign : F < 48 ? 1.f * Sign : 0.f;
+		Axis(C, EKeys::Gamepad_RightY, RY);
+		APlayerController* KPC = O && O->Director && O->Director->GetWorld() ? O->Director->GetWorld()->GetFirstPlayerController() : nullptr;
+		FViewport* KVP = GEngine && GEngine->GameViewport ? GEngine->GameViewport->Viewport : nullptr;
+		const FInputDeviceId KDv = IPlatformInputDeviceMapper::Get().GetDefaultInputDevice();
+		if (KPC) KPC->InputKey(FInputKeyEventArgs(KVP, KDv, EKeys::Gamepad_RightY, RY, 1.f / 60.f, 1, FPlatformTime::Cycles64()));
+		if (S->Wait % 45 == 0)
+		{
+			Send(C, EKeys::Gamepad_FaceButton_Bottom, true);
+			Send(C, EKeys::Gamepad_FaceButton_Bottom, false);
+			if (KPC) KPC->InputKey(FInputKeyEventArgs(KVP, KDv, EKeys::Gamepad_FaceButton_Bottom, IE_Pressed, 1.f, false, FPlatformTime::Cycles64()));
+		}
+		if (S->Wait % 45 == 2 && KPC) KPC->InputKey(FInputKeyEventArgs(KVP, KDv, EKeys::Gamepad_FaceButton_Bottom, IE_Released, 0.f, false, FPlatformTime::Cycles64()));
+		if (S->Wait % 240 == 0 && O && O->Director)
+		{
+			// (what the game is waiting on, every few seconds: the state, a kick meter's stage, the stick as the game reads it)
+			const AMatchDirector& D = *O->Director;
+			APlayerController* PC = D.GetWorld() ? D.GetWorld()->GetFirstPlayerController() : nullptr;
+			const FVector2D RS = PC ? FTagReader(PC).Stick(false) : FVector2D::ZeroVector;
+			UE_LOG(LogTemp, Display, TEXT("TAG inputtest waiting for the play call: state %d, kick meter %d stage %d, right stick (%.2f, %.2f) cooked y %.2f, modal %d"),
+				static_cast<int32>(D.State), D.UK.bOn ? 1 : 0, D.UK.Stage, RS.X, RS.Y, PC ? PC->GetInputAnalogKeyState(EKeys::Gamepad_RightY) : 0.f, O->HasModal() ? 1 : 0);
+		}
 		if (FPlatformTime::Seconds() - S->StepT > 150) { Check(false, TEXT("no play call within 150 s")); S->I = S->Steps.Num() - 2; return false; }
 		return false;
 	});
@@ -155,14 +268,18 @@ void SGridironOverlay::StartInputTest()
 	});
 	Shot(TEXT("playcall"));
 	// a press only the "twin" makes: a pad of its own after all (the hub lets it go)
-	Do([]
+	Do([S]
 	{
 		const FTagInputHub& H = FTagInputHub::Get();
 		const int32 DA = H.Find(FInputDeviceId::CreateFromInternalId(A), true);
 		const int32 Twin = H.Dev(DA) && H.Dev(DA)->TwinOf >= 0 ? A : B;
 		Send(Twin, EKeys::Gamepad_DPad_Left, true);
+		S->StepT = FPlatformTime::Seconds();
 	});
-	Frames(30);
+	// (the hub gives the pad's own copy a quarter second to come: wait that out in time, not frames - 30 frames at 175 fps
+	// were 0.19 s, and the check ran before the hub had decided)
+	Until([S] { return FPlatformTime::Seconds() - S->StepT > 0.45; });
+	Frames(2);
 	Do([] { Send(A, EKeys::Gamepad_DPad_Left, false); Send(B, EKeys::Gamepad_DPad_Left, false); });
 	Do([Check]
 	{
@@ -187,7 +304,7 @@ void SGridironOverlay::StartInputTest()
 	Do([S]
 	{
 		UE_LOG(LogTemp, Display, TEXT("TAG inputtest done: %d pass, %d fail"), S->Pass, S->Fail);
-		FPlatformMisc::RequestExit(false);
+		TagResult::Finish(TEXT("TagInputTest"), S->Pass, S->Fail); // (the result line and the exit status, Game/TagResult.h)
 	});
 
 	FTSTicker::GetCoreTicker().AddTicker(FTickerDelegate::CreateLambda([S](float) -> bool

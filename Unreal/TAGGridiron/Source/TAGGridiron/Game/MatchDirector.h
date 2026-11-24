@@ -13,6 +13,7 @@
 #include "Sim/Game.h"
 #include "Sim/PlaySim.h"
 #include "Game/TagInput.h"
+#include "Game/TagMoveBuffer.h"
 #include "MatchDirector.generated.h"
 
 class AAthlete;
@@ -20,6 +21,7 @@ class AStadium;
 class ACineCameraActor;
 class SGridironOverlay;
 struct FPreRow;
+struct FUserMarkerUI;
 class ATagBooth;
 class ATagAudio;
 class AStaticMeshActor;
@@ -536,6 +538,63 @@ private:
 	 *  hop round him as he rolls over), a second camera cut to only when the first is blocked for a beat; a cut back
 	 *  to the game camera at the end (not a swoop). */
 	bool bCutInPlaced = false, bCutNext = false;
+
+	// ---- the broadcast (Game/MatchBroadcast.cpp): camera cuts, replay choice, field overlays, the stands
+	/** A hard cut of the view this frame (a replay in or out, a station change, a cut-in, a break's wide shot): the
+	 *  renderer is told (APlayerCameraManager::SetGameCameraCutThisFrame), so TSR and motion blur do not carry the last
+	 *  shot's history across it. CommitCameraFrame also catches a jump of the view nobody marked. */
+	void MarkCameraCut(const TCHAR* Why);
+	/** Once a frame, after every actor has ticked (OnPostActorTick): the cut signal, and the camera's numbers for the
+	 *  -TagHlFull telemetry (CameraTelemetryCols). */
+	void CommitCameraFrame(float Dt);
+	/** The camera columns of a -TagHlFull telemetry row (",camx,...": the frame the last screenshot showed). */
+	FString CameraTelemetryCols();
+	bool bCamCutPending = false;
+	const TCHAR* CamCutWhy = nullptr;
+	struct FCamFrame
+	{
+		bool bValid = false, bCut = false;
+		FVector Pos = FVector::ZeroVector, Fwd = FVector::ForwardVector;
+		float Focal = 0.f, AngSpeed = 0.f; // (deg/s, the view direction's swing since the last frame)
+		int32 Cuts = 0;
+	} CamFrame;
+	/** Replay-worthiness (replaces the yes/no test): every play scored from what the sim did (yards over the down's
+	 *  expectation, a sack, a third / fourth down converted or stopped, the red zone, the sim's big hit, broken tackles,
+	 *  a layout or a long-odds catch, late and close), against a budget of about one replay per five scrimmage plays.
+	 *  Touchdowns, takeaways, safeties and blocked kicks always replay; two routine sacks in a row do not. Read from the
+	 *  sim's result and the game only (nothing random, nothing measured on the drawn bodies): the same game replays the
+	 *  same plays. -TagReplayOld: the old test (A/B); -TagReplayAll: every play. Sets bReplayWorthy. */
+	void DecideReplay(const tag::PlayResult& R);
+	/** A replay chosen by DecideReplay has started (StartReplay): it is paid for out of the budget. */
+	void SpendReplay();
+	void ResetReplayBudget();
+	void LogReplaySummary() const;
+	float ReplayCredit = 1.f, ReplayScoreNow = 0.f;
+	bool bReplayForced = false;
+	FString ReplayWhyNow, LastReplayWhy;
+	int32 ReplayPlays = 0, ReplaysShown = 0, ReplayGap = 0, ReplayGapMax = 0;
+	TMap<FString, int32> ReplayWhyCount;
+	/** The field's graphics to broadcast convention, each frame: the line to gain red on fourth down, both lines on a
+	 *  glowing (emissive) look that reads the same by day and night, the down and distance on the turf beside the line
+	 *  before the snap, and nothing of it in a replay, a cut-in or a break's wide shot. -TagLitLines: the old lit lines. */
+	void TickFieldOverlays(float Dt);
+	TWeakObjectPtr<AStadium> OverlayStadium;
+	UPROPERTY()
+	TObjectPtr<class UMaterialInstanceDynamic> LosLineMID;
+	UPROPERTY()
+	TObjectPtr<class UMaterialInstanceDynamic> FdLineMID;
+	UPROPERTY()
+	TObjectPtr<class UTextRenderComponent> DownMark;
+	int32 OverlayDown = 0;          // the down the lines were styled for (4: the line to gain is red)
+	bool bOverlayHidden = false;
+	FString DownMarkText;
+	/** The stands move with the home crowd's mood (ATagAudio::CrowdEnergy: its roar, not every touchdown): a visitors'
+	 *  score leaves them seated. Without the sound (-TagNoAudio) HomeCheer stands in, for the home side only. */
+	void TickStands();
+	void HomeCheer(float Level, tag::TeamKey For);
+	bool bStandsUp = false;
+	/** Once a frame from Tick (after the sound): the overlays and the stands. */
+	void TickBroadcast(float Dt);
 	/** Pre-snap: the user is walking his defender (the blocking preview is redone when he settles). */
 	bool bPreMoved = false;
 	float SprintStamina = 1.f; // the user's sprint (R2) stamina, 0..1, drawn under his man
@@ -826,6 +885,23 @@ private:
 	const tag::DefCall* MultiPrevCall = nullptr;
 	void TickMultiTest(float Dt);
 	void MultiCheck(bool bOk, const FString& What);
+
+	// ---- the feel of the controls (Game/MatchFeel.cpp)
+	/** Each user slot's moves pressed a beat early (Game/TagMoveBuffer.h): taken out of the input after it is read, handed
+	 *  to the sim before each step until it takes them (150 ms), and what became of them after the step. */
+	FTagMoveBuf MoveBufs[4];
+	void TakeMovePresses();
+	void OfferBufferedMoves();
+	void SettleBufferedMoves();
+	/** The grey "too early" pill for slot Slot's move that ran out unused: 0..1 as it fades (What: the move). */
+	float MoveRefusedA(int32 Slot, FString* What = nullptr) const;
+	void MoveRefusedCue(int32 Slot, FUserMarkerUI& M) const;
+	/** The pad's rumble (Game/TagRumble.h) for the events of the players' men; held while paused or in a replay. */
+	void TickRumble(float Dt);
+	unsigned long long RumbleSerial = 0;
+	size_t RumbleSeen = 0;
+	bool bRumbleTd = false, bRumbleKick = false;
+	int32 RumbleWarned = -1;
 
 	friend class SGridironOverlay;
 };

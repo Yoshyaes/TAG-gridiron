@@ -3,6 +3,7 @@
 // PlaySim's pre-snap API (deterministic, applied before the first step); this file is the controls and the drawing.
 #include "Game/MatchDirector.h"
 #include "Game/TagBindings.h"
+#include "Game/TagResult.h"
 
 #include "Render/Athlete.h"
 #include "Render/Coords.h"
@@ -341,6 +342,7 @@ void AMatchDirector::PresnapWalkSwitch(const FTagReader& PC, float Dt, bool bCan
 					UE_LOG(LogTemp, Display, TEXT("TAG presnap switch by stick (%.2f, %.2f): %s -> %s"), Stick.x, Stick.y, Was ? UTF8_TO_TCHAR(Was->role.c_str()) : TEXT("-"),
 						Sim->user ? UTF8_TO_TCHAR(Sim->user->role.c_str()) : TEXT("-"));
 				}
+				else UE_LOG(LogTemp, Display, TEXT("TAG presnap switch by stick (%.2f, %.2f): nobody that way from %s"), Stick.x, Stick.y, Was ? UTF8_TO_TCHAR(Was->role.c_str()) : TEXT("-"));
 			}
 			Stick = tag::V2{0, 0};
 		}
@@ -999,6 +1001,7 @@ void AMatchDirector::UpdateHighlight()
 			}
 		}
 	}
+	Cue.RefusedA = MoveRefusedA(0); // (a move pressed too early just ran out: the pill greys, Game/MatchFeel.cpp)
 	Overlay->SetHighlight(Cue);
 }
 
@@ -1204,12 +1207,14 @@ void AMatchDirector::TickPadTest(float Dt)
 	static std::string SavedRoute;
 	static tag::Player* SavedUser = nullptr;
 	static double SavedY = 0;
+	static int32 PadPickSign = 1; // (the circle-held pick's push: +1 screen right, -1 left)
 	if (bArtDidOff && bArtDidDef)
 	{
 		if ((ArtExitT += Dt) > 3.f)
 		{
 			UE_LOG(LogTemp, Display, TEXT("TAG pad test: %d passed, %d failed"), PadPasses, PadFails);
-			FPlatformMisc::RequestExit(false);
+			TagResult::Finish(TEXT("TagPadTest"), PadPasses, PadFails); // (the result line and the exit status, Game/TagResult.h)
+			ArtExitT = -1e9f; // (once: the engine quits after this frame)
 		}
 		return;
 	}
@@ -1495,16 +1500,33 @@ void AMatchDirector::TickPadTest(float Dt)
 				Next();
 			}
 			break;
-		case 18: if (At(11.35f)) { PadPress(EKeys::D, 0.3f); Next(); } break;
+		case 18:
+			if (At(11.35f))
+			{
+				// the stick pushed toward a man: right, unless the circle tap left him the last man on the right of the screen
+				// (the right corner, say: nobody to pick that way), then left
+				PadPickSign = 1;
+				if (const tag::Ent* U = Sim->user)
+				{
+					bool bAnyRight = false;
+					for (const tag::Ent* E : Sim->def)
+						if (E != U && (E->pos.y - U->pos.y) * ScreenRightSign() > 0.5) bAnyRight = true;
+					if (!bAnyRight) PadPickSign = -1;
+				}
+				PadPress(PadPickSign > 0 ? EKeys::D : EKeys::A, 0.3f);
+				Next();
+			}
+			break;
 		case 19:
 			if (At(11.7f))
 			{
 				const tag::Ent* Was = nullptr;
 				for (const tag::Ent* E : Sim->def) if (E->p == SavedUser) Was = E;
-				const double Dy = Sim->user && Was ? (Sim->user->pos.y - Was->pos.y) * ScreenRightSign() : 0.0;
+				const double Dy = Sim->user && Was ? (Sim->user->pos.y - Was->pos.y) * ScreenRightSign() * PadPickSign : 0.0;
 				PadCheck(Sim->user && Sim->user->p != SavedUser && Dy > 0.5 && Was && !Was->userControlled,
-					*FString::Printf(TEXT("circle held + stick right picks the man to the right (%s -> %s, %.1f yd right)"),
-						Was ? UTF8_TO_TCHAR(Was->role.c_str()) : TEXT("-"), Sim->user ? UTF8_TO_TCHAR(Sim->user->role.c_str()) : TEXT("-"), Dy));
+					*FString::Printf(TEXT("circle held + stick %s picks the man that way (%s -> %s, %.1f yd %s)"), PadPickSign > 0 ? TEXT("right") : TEXT("left"),
+						Was ? UTF8_TO_TCHAR(Was->role.c_str()) : TEXT("-"), Sim->user ? UTF8_TO_TCHAR(Sim->user->role.c_str()) : TEXT("-"), Dy,
+						PadPickSign > 0 ? TEXT("right") : TEXT("left")));
 				SavedUser = Sim->user ? Sim->user->p : nullptr;
 				FScreenshotRequest::RequestScreenshot(TEXT("tag_pad_def_pick.png"), true, false);
 				Next();

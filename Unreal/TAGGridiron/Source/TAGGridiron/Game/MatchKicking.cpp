@@ -453,7 +453,7 @@ void AMatchDirector::TickPlaceKickCalls()
 		FgCallSim = Sim->serial;
 		const tag::Player* Bp = Sim->placeBlockBy ? Sim->placeBlockBy->p : nullptr;
 		Overlay->Toast(Bp ? FString::Printf(TEXT("BLOCKED BY #%d %s"), Bp->number, UTF8_TO_TCHAR(Bp->last.c_str())) : FString(TEXT("BLOCKED")));
-		Stadium->Hype = 0.8f;
+		HomeCheer(0.8f, tag::other(Game->poss)); // (the block team's; with the sound the stands follow the crowd: TickStands)
 		UE_LOG(LogTemp, Display, TEXT("TAG place kick blocked: %s by %s, %.2f s after the foot, %.1f yd past the spot"), *What,
 			Sim->placeBlockBy ? UTF8_TO_TCHAR(Sim->placeBlockBy->role.c_str()) : TEXT("-"), Sim->placeBlockT - Sim->placeKickT(), Sim->placeBlockX);
 		return;

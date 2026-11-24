@@ -9,6 +9,7 @@
 // A menu one person works (his side's play call, the try) takes only his device's buttons.
 #include "Game/MatchDirector.h"
 #include "Game/TagBindings.h"
+#include "Game/TagResult.h"
 
 #include "Render/Athlete.h"
 #include "Render/Coords.h"
@@ -527,6 +528,7 @@ void AMatchDirector::UpdateHumanMarkers(APlayerController* PC, const FVector2D& 
 			M.StaminaV = H.Ctl.SprintStamina;
 			M.bSprint = H.Ctl.bSprinting;
 		}
+		MoveRefusedCue(H.Slot, M); // (his move pressed too early that ran out: Game/MatchFeel.cpp)
 		if (M.bOn) Ms.Add(M);
 	}
 	Overlay->SetUserMarkers(Ms);
@@ -592,7 +594,7 @@ void AMatchDirector::TickMultiTest(float Dt)
 	{
 		UE_LOG(LogTemp, Display, TEXT("TAG multitest done: %d pass, %d fail"), MultiPasses, MultiFails);
 		bMultiTest = false;
-		FPlatformMisc::RequestExit(false);
+		TagResult::Finish(TEXT("TagMultiTest"), MultiPasses, MultiFails); // (the result line and the exit status)
 	};
 	if (MultiT > 90.f) { MultiCheck(false, FString::Printf(TEXT("step %d timed out"), MultiStep)); return Finish(); }
 	switch (MultiStep)

@@ -6,8 +6,8 @@
 //     (Tools/Booth/booth_tts.py, started here when it is not already running) and kept: a line said once is never
 //     synthesized again. A line with no audio yet is asked for at once and waited on briefly; the live calls the
 //     next snap could need are asked for before it (the booth's forecast), the generic ones at the start of a match.
-//   - the audio plays through a 2D audio component (a procedural sound wave fed the wav's samples); a line the booth
-//     cuts (a live call takes the floor) fades out in 0.15 s.
+//   - the audio plays through a 2D audio component (a procedural sound wave fed the wav's samples) at the settings'
+//     Master x Commentary volume; a line the booth cuts (a live call takes the floor) fades out in 0.15 s.
 //   - the caption shows who is talking and what he says, broadcast closed-caption style. Without the speech service
 //     (no venv, -TagBoothMute) the booth still runs, captions only, at the estimated pace.
 // -TagBoothLog writes every line to the log ("TAG booth ..."), -TagNoBooth turns the booth off.
@@ -48,6 +48,12 @@ public:
 	static FString LineKey(const tag::booth::Line& L);
 	/** Start the speech service now (at boot), so the voices are loaded by the first kickoff. */
 	static void WarmService();
+	/** The settings screen's commentary volume, in quarters (0..4) like the sound's (ATagAudio::Level), kept in
+	 *  GameUserSettings [TAG.Settings] VolumeCommentary. The voices play at Master x Commentary. */
+	static int32 CommentaryLevel();
+	static void StepCommentaryLevel();
+	/** The voices' gain now: the settings' Master (ATagAudio::Level(0)) times Commentary, each in quarters. */
+	float VoiceGain() const;
 
 private:
 	struct FClip
@@ -93,6 +99,7 @@ private:
 	bool bWaitingAudio = false;
 	bool bPlaying = false;
 	float WaitT = 0.f, PlayT = 0.f, PlaySecs = 0.f, FadeT = -1.f;
+	float GainSet = -1.f;           // the voice's volume as last set (a settings change reaches a line already playing)
 	FString CurKey;
 	tag::booth::Line CurLine;
 	TSet<FString> Asked;

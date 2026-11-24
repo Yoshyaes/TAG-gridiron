@@ -2,6 +2,8 @@
 
 #include "Game/MatchDirector.h"
 #include "Audio/TagAudio.h"
+#include "Booth/TagBooth.h"
+#include "Game/TagRumble.h"
 #include "Game/PlayArtStrokes.h"
 #include "UI/PlayDiagram.h"
 #include "UI/RosterUI.h"
@@ -460,12 +462,16 @@ int32 SGridironOverlay::PaintPresnap(FSlateWindowElementList& Out, int32 Layer, 
 		const FVector2D TL = C - FVector2D(Pill.X * 0.5, Pill.Y * 0.5);
 		FSlateDrawElement::MakeBox(Out, Layer + 1, G.ToPaintGeometry(FVector2f(Pill), FSlateLayoutTransform(FVector2f(TL))), White(), ESlateDrawEffect::None,
 			FLinearColor(0.02f, 0.025f, 0.035f, 0.88f));
+		// (a move pressed too early just ran out unused: the pill goes grey a moment, Game/TagMoveBuffer.h)
+		const float Grey = FMath::Clamp(Highlight.RefusedA, 0.f, 1.f);
+		const FLinearColor Bar = FMath::Lerp(Accent, FLinearColor(0.45f, 0.46f, 0.5f), Grey);
+		const FLinearColor Ink = FMath::Lerp(FLinearColor::White, FLinearColor(0.6f, 0.62f, 0.66f), Grey);
 		FSlateDrawElement::MakeBox(Out, Layer + 2, G.ToPaintGeometry(FVector2f(Pill.X, 3.f), FSlateLayoutTransform(FVector2f(TL + FVector2D(0, Pill.Y - 3)))), White(),
-			ESlateDrawEffect::None, Accent);
+			ESlateDrawEffect::None, Bar);
 		PaintGlyph(Out, Layer + 3, G, TL + FVector2D(8 + Gs * 0.5, Pill.Y * 0.5), Gs, Highlight.Glyph, Highlight.Key,
-			Highlight.Glyph != EPadGlyph::None && bIconPad, FLinearColor::White);
+			Highlight.Glyph != EPadGlyph::None && bIconPad, Ink);
 		FSlateDrawElement::MakeText(Out, Layer + 6, G.ToPaintGeometry(FVector2f(M), FSlateLayoutTransform(FVector2f(TL + FVector2D(8 + Gs + 8, (Pill.Y - M.Y) * 0.5)))),
-			Highlight.Move, F, ESlateDrawEffect::None, FLinearColor::White);
+			Highlight.Move, F, ESlateDrawEffect::None, Ink);
 		Layer += 8;
 	}
 	// receivers' button icons over their heads
@@ -2142,11 +2148,17 @@ void SGridironOverlay::ShowSettings(std::function<void()> Back)
 	const bool bInv = Director && Director->InvertRightY();
 	V->AddSlot().AutoHeight()[ MakeButton(FString::Printf(TEXT("Right stick up / down: %s"), bInv ? TEXT("Inverted") : TEXT("Standard")),
 		TEXT("If the hit stick, truck and kick swing go the wrong way on your controller, flip this."), [this, Back, bInv] { if (Director) Director->SetInvertRightY(!bInv); ShowSettings(Back); }) ];
+	// the pad's rumble (Game/TagRumble.h): Normal, Low, Off
+	V->AddSlot().AutoHeight()[ MakeButton(FString::Printf(TEXT("Vibration: %s"), FTagRumble::LevelName(FTagRumble::Level())),
+		TEXT("The controller's rumble on hits, catches, kicks and scores."), [this, Back] { FTagRumble::StepLevel(); ShowSettings(Back); }) ];
 	static const TCHAR* const VolName[3] = {TEXT("Volume"), TEXT("Music volume"), TEXT("Stadium volume")};
 	static const TCHAR* const VolSub[3] = {TEXT("Everything."), TEXT("The broadcast theme and the menu music."), TEXT("The crowd, the field, the stadium announcer.")};
 	for (int32 W = 0; W < 3; ++W)
 		V->AddSlot().AutoHeight()[ MakeButton(FString::Printf(TEXT("%s: %d%%"), VolName[W], ATagAudio::Level(W) * 25), VolSub[W],
 			[this, Back, W] { ATagAudio::StepLevel(W); ShowSettings(Back); }) ];
+	// the booth's two voices (Booth/TagBooth.h), under Volume as the others are
+	V->AddSlot().AutoHeight()[ MakeButton(FString::Printf(TEXT("Commentary volume: %d%%"), ATagBooth::CommentaryLevel() * 25), TEXT("The two voices in the booth."),
+		[this, Back] { ATagBooth::StepCommentaryLevel(); ShowSettings(Back); }) ];
 	V->AddSlot().AutoHeight().Padding(0, 10, 0, 0)[ MakeButton(TEXT("Back"), TEXT(""), [Back] { Back(); }) ];
 	ShowModal(SNew(SOverlay)
 		+ SOverlay::Slot()[ SNew(TagTheme::SBackdrop).Strength(0.9f) ]
@@ -2372,6 +2384,19 @@ int32 SGridironOverlay::PaintLineBars(FSlateWindowElementList& Out, int32 Layer,
 			const FVector2f TL = H + FVector2f(-M.X * 0.5f - 6.f, -Up - M.Y - 4.f);
 			FSlateDrawElement::MakeBox(Out, Layer + 2, G.ToPaintGeometry(FVector2f(M.X + 12.f, M.Y + 4.f), FSlateLayoutTransform(TL)), White(), ESlateDrawEffect::None, Core);
 			FSlateDrawElement::MakeText(Out, Layer + 3, G.ToPaintGeometry(FVector2f(M), FSlateLayoutTransform(TL + FVector2f(6.f, 2.f))), UserMarker.Tag, F, ESlateDrawEffect::None, FLinearColor(0.03f, 0.04f, 0.06f));
+		}
+		if (UserMarker.RefusedA > 0.f && !UserMarker.Refused.IsEmpty())
+		{
+			// a move pressed too early that ran out unused (Game/TagMoveBuffer.h): a grey pill over him, fading
+			const float Fade = FMath::Clamp(UserMarker.RefusedA, 0.f, 1.f);
+			const FSlateFontInfo F = Font(12, "Bold");
+			const FVector2D M = Measure(UserMarker.Refused, F);
+			const float Above = Up + (UserMarker.Tag.IsEmpty() ? 4.f : 30.f);
+			const FVector2f TL = H + FVector2f(-M.X * 0.5f - 8.f, -Above - M.Y - 6.f);
+			FSlateDrawElement::MakeBox(Out, Layer + 2, G.ToPaintGeometry(FVector2f(M.X + 16.f, M.Y + 6.f), FSlateLayoutTransform(TL)), White(), ESlateDrawEffect::None,
+				FLinearColor(0.16f, 0.17f, 0.19f, 0.88f * Fade));
+			FSlateDrawElement::MakeText(Out, Layer + 3, G.ToPaintGeometry(FVector2f(M), FSlateLayoutTransform(TL + FVector2f(8.f, 3.f))), UserMarker.Refused, F, ESlateDrawEffect::None,
+				FLinearColor(0.72f, 0.74f, 0.78f, Fade));
 		}
 		if (UserMarker.StaminaV >= 0.f)
 		{

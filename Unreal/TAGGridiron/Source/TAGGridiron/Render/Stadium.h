@@ -36,6 +36,10 @@ public:
 
 	/** Line of scrimmage / first-down overlays (world X in cm, or <0 to hide). */
 	void SetLines(double LosX, double FirstDownX);
+	/** The two overlay lines (0 the line of scrimmage, 1 the line to gain) for the director's broadcast look
+	 *  (Game/MatchBroadcast.cpp: their colour and material, hidden in replays and close shots by SetHiddenInGame,
+	 *  so SetLines' own showing and hiding stands). */
+	UStaticMeshComponent* OverlayLine(int32 i) const { return i == 0 ? LosLine.Get() : FdLine.Get(); }
 
 	/** Crowd excitement 0..1 (makes the crowd bounce). */
 	float Hype = 0.f;

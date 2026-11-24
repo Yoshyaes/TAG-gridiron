@@ -20,6 +20,7 @@
 #include "Game/MatchDirector.h"
 #include "Game/TagBindings.h"
 #include "Game/TagInput.h"
+#include "Game/TagResult.h"
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
 #include "Rendering/DrawElements.h"
@@ -1297,7 +1298,7 @@ void SGridironOverlay::StartControlsTest()
 	{
 		TagBind::ResetAll();
 		UE_LOG(LogTemp, Display, TEXT("TAG controls test done: %d pass, %d fail"), S->Pass, S->Fail);
-		FPlatformMisc::RequestExit(false);
+		TagResult::Finish(TEXT("TagControlsTest"), S->Pass, S->Fail);
 	});
 
 	FTSTicker::GetCoreTicker().AddTicker(FTickerDelegate::CreateLambda([S](float) -> bool

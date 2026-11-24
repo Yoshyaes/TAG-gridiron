@@ -1,4 +1,5 @@
 #include "Booth/TagBooth.h"
+#include "Audio/TagAudio.h"
 
 #include "Async/Async.h"
 #include "Components/AudioComponent.h"
@@ -7,6 +8,7 @@
 #include "HAL/FileManager.h"
 #include "HAL/PlatformProcess.h"
 #include "Misc/CommandLine.h"
+#include "Misc/ConfigCacheIni.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
 #include "Sound/SoundWaveProcedural.h"
@@ -24,6 +26,11 @@ namespace
 
 	FString Utf8(const std::string& S) { return FString(UTF8_TO_TCHAR(S.c_str())); }
 
+	// the commentary volume (Settings), in quarters; read from GameUserSettings the first time it is asked for
+	int32 GCommentary = 4;
+	bool GCommentaryRead = false;
+	const TCHAR* const kCommentaryKey = TEXT("VolumeCommentary");
+
 	FString JsonEsc(const FString& S)
 	{
 		FString O;
@@ -37,6 +44,43 @@ namespace
 		}
 		return O;
 	}
+}
+
+int32 ATagBooth::CommentaryLevel()
+{
+	if (!GCommentaryRead && GConfig)
+	{
+		GCommentaryRead = true;
+		GConfig->GetInt(TEXT("TAG.Settings"), kCommentaryKey, GCommentary, GGameUserSettingsIni);
+		GCommentary = FMath::Clamp(GCommentary, 0, 4);
+	}
+	return GCommentary;
+}
+
+void ATagBooth::StepCommentaryLevel()
+{
+	GCommentary = (CommentaryLevel() + 4) % 5; // down a quarter a press, round to full again (as the other volumes)
+	if (GConfig && !FParse::Param(FCommandLine::Get(), TEXT("TagMenuAudio"))) // (the scripted walk through the menus keeps nothing)
+	{
+		GConfig->SetInt(TEXT("TAG.Settings"), kCommentaryKey, GCommentary, GGameUserSettingsIni);
+		GConfig->Flush(false, GGameUserSettingsIni);
+	}
+	// what the new level sounds like: the settings' click at it
+	ATagAudio::Ui(TEXT("UiValue"), 1.f, 0.9f + 0.05f * GCommentary);
+}
+
+float ATagBooth::VoiceGain() const
+{
+	// Master is the sound actor's (it reads the settings as it starts, and the settings screen steps it); with no sound
+	// actor in the world (-TagNoAudio) the settings file's own
+	int32 Master = 4;
+	if (ATagAudio::Get(this)) Master = ATagAudio::Level(0);
+	else if (GConfig)
+	{
+		GConfig->GetInt(TEXT("TAG.Settings"), TEXT("VolumeMaster"), Master, GGameUserSettingsIni);
+		Master = FMath::Clamp(Master, 0, 4);
+	}
+	return (Master / 4.f) * (CommentaryLevel() / 4.f);
 }
 
 ATagBooth::ATagBooth()
@@ -352,6 +396,16 @@ void ATagBooth::Feed(float Dt, const tag::Game& G, const tag::booth::View& V)
 	// the line being said
 	if (CurId)
 	{
+		// a volume changed in the settings (the pause menu's) reaches the line already playing
+		if (bPlaying && FadeT < 0.f && Voice)
+		{
+			const float Gain = VoiceGain();
+			if (!FMath::IsNearlyEqual(Gain, GainSet))
+			{
+				GainSet = Gain;
+				Voice->SetVolumeMultiplier(Gain);
+			}
+		}
 		if (FadeT < 0.f && Core->cutCurrent())
 		{
 			if (bPlaying && Voice) Voice->FadeOut(0.15f, 0.f);
@@ -396,8 +450,11 @@ void ATagBooth::Feed(float Dt, const tag::Game& G, const tag::booth::View& V)
 				Wave->bLooping = false;
 				Wave->QueueAudio(C.Pcm.GetData(), C.Pcm.Num());
 				Voice->SetSound(Wave);
-				Voice->SetVolumeMultiplier(1.f);
+				// (the settings' Master x Commentary: the voices went out at full whatever the volume was set to)
+				GainSet = VoiceGain();
+				Voice->SetVolumeMultiplier(GainSet);
 				Voice->Play();
+				if (bLog) UE_LOG(LogTemp, Display, TEXT("TAG booth voice gain %.2f (master %d/4, commentary %d/4)"), GainSet, ATagAudio::Get(this) ? ATagAudio::Level(0) : -1, CommentaryLevel());
 				bPlaying = true;
 				PlayT = 0.f;
 				PlaySecs = C.Secs;
