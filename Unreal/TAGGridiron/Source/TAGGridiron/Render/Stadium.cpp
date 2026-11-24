@@ -46,6 +46,82 @@ static const double BowlCornerR = 14 * YD;    // corner radius where the sidelin
 static const double BowlRoofEdgeD = 3900;     // roof canopy's front edge, out from the bowl's front edge (cm)
 static const double BowlRoofEdgeZ = 5600;
 
+/** The broadcast picture and the night rig (Research/NextLevel/03 A1 and A3). Each number reads the -Tag flag beside it
+ *  for A/B tests, and the comment gives the value it replaced. -TagOldLook puts all of them back, -TagOldGrade only the
+ *  picture (A1), -TagOldNight only the night lighting (A3); a flag for one number still applies on top of those. */
+struct FStadiumLook
+{
+	// A1, the picture. A TV feed has no vignette and no grain, and a camera's knee rolls the highlights off so a white
+	// jersey keeps its folds: a softer, longer shoulder that approaches white without reaching it (the filmic curve with
+	// Shoulder 0.20 / White clip 0 reaches 250 of 255 at about 1.9x the scene level the engine's 0.26 / 0.04 did).
+	float Vignette = 0.f;            // -TagVignette=      (was 0.35)
+	float Grain = 0.f;               // -TagGrain=         (was 0.04)
+	float Shoulder = 0.20f;          // -TagShoulder=      (was the engine's 0.26; smaller is a softer roll-off)
+	float WhiteClip = 0.f;           // -TagWhiteClip=     (was the engine's 0.04)
+	float HiContrastNight = 0.7f;    // -TagHiContrast=    (was 0.8, the project's r.DefaultFeature.LocalExposure.HighlightContrastScale)
+	float HiContrastDay = 0.8f;      // -TagHiContrastDay= (unchanged: the sunlit field keeps its punch)
+	float BloomThrNight = 2.f;       // -TagBloomThr=      (was -1, no threshold): only what is brighter than white blooms
+	float BloomThrDay = -1.f;        // -TagBloomThrDay=   (unchanged)
+	// A3, the night rig. The stands were lit by the banks' own beams (46 degree cones aimed 8 yd past the middle put the
+	// far lower bowl 7 degrees off the beam axis, so the seats got as much light as the grass and, being paler, read
+	// brighter); the painted crowd's glow barely mattered. Tighter beams aimed at the middle keep the light on the field
+	// and leave the front rows in the spill, the upper deck and roof in the dark. The candelas went up so the field
+	// between the 20s keeps its illuminance (a point-light model of the 12 banks, not a render: ~82 -> ~90 lux between
+	// the 20s, ~57 -> ~55 in the end zones; the far lower bowl's middle rows from ~64 to ~28 lux, upper deck ~27 -> ~1.5).
+	float CrowdGlowNight = 0.03f;    // -TagCrowdGlow=     (was 0.07; 0.08 by day, unchanged)
+	float LampGlow = 120.f;          // -TagLampGlow=      (was 60): the lamp housings' emissive at night, so they glare
+	float BankCd = 70000.f;          // -TagBankCd=        (was 60000) sideline banks, before the throw scaling
+	float BankInner = 16.f;          // -TagBankInner=     (was 24) cone half-angles, degrees
+	float BankOuter = 28.f;          // -TagBankOuter=     (was 46)
+	float BankAimYd = 0.f;           // -TagBankAimYd=     (was 8): how far past the middle the sideline banks aim
+	float EndCd = 96000.f;           // -TagEndCd=         (was 50000) end-zone banks
+	float EndInner = 20.f;           // -TagEndInner=      (was 24)
+	float EndOuter = 36.f;           // -TagEndOuter=      (was 46)
+
+	static const FStadiumLook& Get()
+	{
+		static const FStadiumLook Look = []()
+		{
+			FStadiumLook L;
+			const TCHAR* Cmd = FCommandLine::Get();
+			const bool bOldAll = FParse::Param(Cmd, TEXT("TagOldLook"));
+			if (bOldAll || FParse::Param(Cmd, TEXT("TagOldGrade")))
+			{
+				L.Vignette = 0.35f; L.Grain = 0.04f; L.Shoulder = 0.26f; L.WhiteClip = 0.04f;
+				L.HiContrastNight = 0.8f; L.HiContrastDay = 0.8f; L.BloomThrNight = -1.f; L.BloomThrDay = -1.f;
+			}
+			if (bOldAll || FParse::Param(Cmd, TEXT("TagOldNight")))
+			{
+				L.CrowdGlowNight = 0.07f; L.LampGlow = 60.f;
+				L.BankCd = 60000.f; L.BankInner = 24.f; L.BankOuter = 46.f; L.BankAimYd = 8.f;
+				L.EndCd = 50000.f; L.EndInner = 24.f; L.EndOuter = 46.f;
+			}
+			FParse::Value(Cmd, TEXT("TagVignette="), L.Vignette);
+			FParse::Value(Cmd, TEXT("TagGrain="), L.Grain);
+			FParse::Value(Cmd, TEXT("TagShoulder="), L.Shoulder);
+			FParse::Value(Cmd, TEXT("TagWhiteClip="), L.WhiteClip);
+			FParse::Value(Cmd, TEXT("TagHiContrast="), L.HiContrastNight);
+			FParse::Value(Cmd, TEXT("TagHiContrastDay="), L.HiContrastDay);
+			FParse::Value(Cmd, TEXT("TagBloomThr="), L.BloomThrNight);
+			FParse::Value(Cmd, TEXT("TagBloomThrDay="), L.BloomThrDay);
+			FParse::Value(Cmd, TEXT("TagCrowdGlow="), L.CrowdGlowNight);
+			FParse::Value(Cmd, TEXT("TagLampGlow="), L.LampGlow);
+			FParse::Value(Cmd, TEXT("TagBankCd="), L.BankCd);
+			FParse::Value(Cmd, TEXT("TagBankInner="), L.BankInner);
+			FParse::Value(Cmd, TEXT("TagBankOuter="), L.BankOuter);
+			FParse::Value(Cmd, TEXT("TagBankAimYd="), L.BankAimYd);
+			FParse::Value(Cmd, TEXT("TagEndCd="), L.EndCd);
+			FParse::Value(Cmd, TEXT("TagEndInner="), L.EndInner);
+			FParse::Value(Cmd, TEXT("TagEndOuter="), L.EndOuter);
+			UE_LOG(LogTemp, Display, TEXT("TAG look: vignette %.2f grain %.2f shoulder %.2f white clip %.2f hi contrast %.2f/%.2f bloom thr %.1f/%.1f | night: crowd glow %.2f lamps %.0f banks %.0f cd %.0f/%.0f deg aim %.0f yd, ends %.0f cd %.0f/%.0f deg"),
+				L.Vignette, L.Grain, L.Shoulder, L.WhiteClip, L.HiContrastDay, L.HiContrastNight, L.BloomThrDay, L.BloomThrNight,
+				L.CrowdGlowNight, L.LampGlow, L.BankCd, L.BankInner, L.BankOuter, L.BankAimYd, L.EndCd, L.EndInner, L.EndOuter);
+			return L;
+		}();
+		return Look;
+	}
+};
+
 namespace
 {
 	// rounded-rectangle path along the bowl's front edge. Each sample carries its outward normal angle Phi; a point at
@@ -308,7 +384,9 @@ void AStadium::BuildBowl(const tag::Team& Home, const tag::Team& Away, bool bNig
 		UMaterialInstanceDynamic* D = UMaterialInstanceDynamic::Create(A.CrowdMat, this);
 		D->SetVectorParameterValue(TEXT("TeamColor"), Hex(Home.colors.primary));
 		D->SetVectorParameterValue(TEXT("Tiling"), FLinearColor(1, 1, 0, 0)); // the sweep's UVs are already in tiles
-		D->SetScalarParameterValue(TEXT("Glow"), bNight ? 0.07f : 0.08f); // at night the floodlit field outshines the stands
+		// self-glow: by day it lifts the stands under the roof's shade; at night it is kept faint, so the seats away from
+		// the light banks fall off into the dark and the floodlit field outshines them (FStadiumLook, -TagCrowdGlow=)
+		D->SetScalarParameterValue(TEXT("Glow"), bNight ? FStadiumLook::Get().CrowdGlowNight : 0.08f);
 		CrowdM = D;
 	}
 	const FLinearColor HomeC = Hex(Home.colors.primary), HomeC2 = Hex(Home.colors.secondary), AwayC = Hex(Away.colors.primary);
@@ -746,7 +824,10 @@ void AStadium::Build(const tag::Team& Home, const tag::Team& Away, const tag::We
 	// stadium is lit (housings by day; lit at night). Many sources from both sides give every player the broadcast
 	// look: a fan of crisp shadows around the feet, specular glints on the helmets from several directions, and no dark
 	// side to anyone. Six banks cast shadows (cost). Each bank's intensity is set by its throw to the field, so moving
-	// the banks out to the roof edge kept the field's illuminance where it was tuned.
+	// the banks out to the roof edge kept the field's illuminance where it was tuned. The beams are tight and aimed at
+	// the field (FStadiumLook, A3): the field is bright, the front rows catch the spill and the bowl above falls off
+	// into the dark, as at a night game on TV; the lit housings glare.
+	const FStadiumLook& Look = FStadiumLook::Get();
 	{
 		UMaterialInstanceDynamic* LampMat = nullptr;
 		if (A.LEDMat)
@@ -754,10 +835,10 @@ void AStadium::Build(const tag::Team& Home, const tag::Team& Away, const tag::We
 			LampMat = UMaterialInstanceDynamic::Create(A.LEDMat, this);
 			LampMat->SetVectorParameterValue(TEXT("Color"), FLinearColor(1.f, 0.97f, 0.92f));
 			LampMat->SetVectorParameterValue(TEXT("ColorB"), FLinearColor(1.f, 0.97f, 0.92f));
-			LampMat->SetScalarParameterValue(TEXT("Intensity"), bNight ? 60.f : 0.4f);
+			LampMat->SetScalarParameterValue(TEXT("Intensity"), bNight ? Look.LampGlow : 0.4f);
 			LampMat->SetScalarParameterValue(TEXT("Diffuse"), 0.6f);
 		}
-		auto Bank = [&](const FVector& At, const FVector& Aim, const FVector& WasAt, bool bShadow, float Candela)
+		auto Bank = [&](const FVector& At, const FVector& Aim, const FVector& WasAt, bool bShadow, float Candela, float ConeIn, float ConeOut)
 		{
 			UStaticMeshComponent* H = AddMesh(Cube, At, FVector(9, 1.2f, 3.5f), FLinearColor(0.75f, 0.75f, 0.72f), 0.3f, (Aim - At).Rotation(), false);
 			if (LampMat) H->SetMaterial(0, LampMat);
@@ -770,8 +851,8 @@ void AStadium::Build(const tag::Team& Home, const tag::Team& Away, const tag::We
 			L->SetIntensityUnits(ELightUnits::Candelas);
 			L->SetIntensity(Candela);
 			L->SetAttenuationRadius(32000.f);
-			L->SetOuterConeAngle(46.f);
-			L->SetInnerConeAngle(24.f);
+			L->SetOuterConeAngle(ConeOut);
+			L->SetInnerConeAngle(ConeIn);
 			L->bUseTemperature = true;
 			L->Temperature = 5700.f;                 // LED sports lighting
 			L->SourceRadius = 80.f;                  // a bank of lamps, not a point: slightly soft shadow edges
@@ -785,14 +866,14 @@ void AStadium::Build(const tag::Team& Home, const tag::Team& Away, const tag::We
 			{
 				const double X = (10 + 20 * i) * YD;
 				const FVector At(X, Side * (BowlSideY + EdgeD), EdgeZ);
-				const FVector Aim(X + (50 * YD - X) * 0.25, -Side * 8 * YD, 0);
-				Bank(At, Aim, FVector(X, Side * (FW / 2 + 24) * YD, 4600), i % 2 == 1 || i == 2, 60000.f);
+				const FVector Aim(X + (50 * YD - X) * 0.25, -Side * Look.BankAimYd * YD, 0);
+				Bank(At, Aim, FVector(X, Side * (FW / 2 + 24) * YD, 4600), i % 2 == 1 || i == 2, Look.BankCd, Look.BankInner, Look.BankOuter);
 			}
 		for (int32 End : {-1, 1})
 		{
 			const FVector At(50 * YD + End * (BowlHalfX + EdgeD), 0, EdgeZ);
 			const FVector Aim((50 + End * 28) * YD, 0, 0);
-			Bank(At, Aim, FVector((50 + End * 66) * YD, 0, 4200), false, 50000.f);
+			Bank(At, Aim, FVector((50 + End * 66) * YD, 0, 4200), false, Look.EndCd, Look.EndInner, Look.EndOuter);
 		}
 	}
 
@@ -819,10 +900,24 @@ void AStadium::Build(const tag::Team& Home, const tag::Team& Away, const tag::We
 	PP->Settings.ColorContrast = FVector4(1.1f, 1.1f, 1.1f, 1.f);
 	PP->Settings.bOverride_BloomIntensity = true;
 	PP->Settings.BloomIntensity = bNight ? 0.9f : 0.5f;
+	// at night only what is brighter than white blooms (threshold in exposed luminance): the light banks glare and the
+	// white kits and lines stay crisp instead of hazing. No extra pass: the bloom setup pass already runs while local
+	// exposure is on (r.Bloom.ApplyLocalExposure), the threshold is one more term in it
+	PP->Settings.bOverride_BloomThreshold = true;
+	PP->Settings.BloomThreshold = bNight ? Look.BloomThrNight : Look.BloomThrDay;
+	// a TV picture, not a film (FStadiumLook, A1): no vignette or grain, and a camera's knee on the highlights so white
+	// jerseys keep their folds and pads instead of clipping flat (the filmic curve's shoulder and white clip, and local
+	// exposure holding the big bright areas of a close shot down a little more at night)
 	PP->Settings.bOverride_VignetteIntensity = true;
-	PP->Settings.VignetteIntensity = 0.35f;
+	PP->Settings.VignetteIntensity = Look.Vignette;
 	PP->Settings.bOverride_FilmGrainIntensity = true;
-	PP->Settings.FilmGrainIntensity = 0.04f;
+	PP->Settings.FilmGrainIntensity = Look.Grain;
+	PP->Settings.bOverride_FilmShoulder = true;
+	PP->Settings.FilmShoulder = Look.Shoulder;
+	PP->Settings.bOverride_FilmWhiteClip = true;
+	PP->Settings.FilmWhiteClip = Look.WhiteClip;
+	PP->Settings.bOverride_LocalExposureHighlightContrastScale = true;
+	PP->Settings.LocalExposureHighlightContrastScale = bNight ? Look.HiContrastNight : Look.HiContrastDay;
 	PP->RegisterComponent();
 
 	// weather
