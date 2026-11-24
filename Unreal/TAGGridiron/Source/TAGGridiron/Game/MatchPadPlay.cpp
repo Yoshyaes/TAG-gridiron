@@ -37,7 +37,14 @@ void AMatchDirector::TickPadPlayTest(float Dt)
 	};
 	if (T.Clock > 600.f) { Check(false, TEXT("the test ran out of time")); Done(); T.Clock = -1e9f; return; }
 	tag::PlaySim* S = Sim.get();
-	// the snap: CROSS once the men are set (the user's offense)
+	// the snap: CROSS once the men are set (the user's offense), once a play. (It was once until the next snap: a press
+	// that drew a pre-snap flag - a false start on the cadence - never went live, so the replayed down was never snapped
+	// and the user's offense took a delay of game every 40 s until the gate's timeout: padplay 2026-11-24 13:23.)
+	if (S && S->serial != T.SnapSerial)
+	{
+		T.SnapSerial = S->serial;
+		T.bSnapSent = false;
+	}
 	if (State == EMatchState::Presnap && UserOff() && S && !S->walking() && PresnapClock > 1.2f && !T.bSnapSent)
 	{
 		T.bSnapSent = true;
@@ -46,6 +53,50 @@ void AMatchDirector::TickPadPlayTest(float Dt)
 	}
 	if (T.ReleaseCross > 0.f && (T.ReleaseCross -= Dt) <= 0.f) PadKey(EKeys::Gamepad_FaceButton_Bottom, false);
 	if (State == EMatchState::Live) T.bSnapSent = false;
+
+	// first of all, on the user's first snap: a false start drawn by his own snap press (the flag held back until the press,
+	// PreFlagAt), and then the down played again - the next snap has to come (that one never did, above)
+	if (T.FlagStage == 0 && State == EMatchState::Presnap && UserOff() && S && !PendingPreFlag && Game->phase == tag::GamePhase::Scrimmage)
+	{
+		tag::Penalty Pen;
+		Pen.name = "False Start";
+		Pen.on = tag::Side::Off;
+		Pen.yards = 5;
+		Pen.spot = tag::PenaltySpot::Los;
+		Pen.replayDown = true;
+		PendingPreFlag = Pen;
+		PreFlagAt = 1e9f; // (only his press draws it)
+		T.FlagStage = 1;
+		UE_LOG(LogTemp, Display, TEXT("TAG padplaytest: a false start set to come on the user's snap press"));
+	}
+	else if (T.FlagStage == 1 && State != EMatchState::Presnap)
+	{
+		if (State == EMatchState::Live)
+		{
+			Check(false, TEXT("the user's snap press did not draw the false start set for it"));
+			T.FlagStage = 3;
+		}
+		else
+		{
+			T.FlagStage = 2;
+			T.FlagT = 0.f;
+		}
+	}
+	else if (T.FlagStage == 2)
+	{
+		T.FlagT += Dt;
+		if (State == EMatchState::Live)
+		{
+			Check(true, *FString::Printf(TEXT("after a false start on the user's own snap press the down is snapped again (%.1f s later)"), T.FlagT));
+			T.FlagStage = 3;
+		}
+		else if (T.FlagT > 30.f)
+		{
+			Check(false, TEXT("after a false start on the user's own snap press the down was never snapped again (30 s)"));
+			T.FlagStage = 3;
+		}
+	}
+	if (T.FlagStage == 1 || T.FlagStage == 2) return; // (nothing else until it is settled)
 
 	// first, on the first runs: the move buffer (Game/TagMoveBuffer.h). F (truck) once he has the ball, then G (stiff arm)
 	// pressed 0.47-0.55 s into the truck - before the 0.6 s the sim wants between a carrier's moves (PlaySim::startMove),
@@ -117,7 +168,8 @@ void AMatchDirector::TickPadPlayTest(float Dt)
 		}
 		break;
 	case 1: // CROSS held after the whistle: the hurry-up
-		if (State == EMatchState::Post && UserOff() && S && S->result && !S->result->td && !S->result->turnover)
+		// (not after a fourth down: one short of the line is the other side's ball, and no tempo of ours comes next)
+		if (State == EMatchState::Post && UserOff() && S && S->result && !S->result->td && !S->result->turnover && Game->down < 4)
 		{
 			if (T.HoldT == 0.f) PadKey(EKeys::Gamepad_FaceButton_Bottom, true);
 			if ((T.HoldT += Dt) > 0.5f)
@@ -137,7 +189,7 @@ void AMatchDirector::TickPadPlayTest(float Dt)
 		}
 		break;
 	case 3: // TRIANGLE held after the whistle: the spike
-		if (State == EMatchState::Post && UserOff() && S && S->result && !S->result->td && !S->result->turnover && Game->phase == tag::GamePhase::Scrimmage)
+		if (State == EMatchState::Post && UserOff() && S && S->result && !S->result->td && !S->result->turnover && Game->phase == tag::GamePhase::Scrimmage && Game->down < 4)
 		{
 			if (T.HoldT == 0.f) PadKey(EKeys::Gamepad_FaceButton_Top, true);
 			if ((T.HoldT += Dt) > 0.5f)

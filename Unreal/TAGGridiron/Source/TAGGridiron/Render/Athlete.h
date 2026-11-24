@@ -14,7 +14,7 @@ class UAnimationAsset;
 class FJsonObject;
 class UMaterialInstanceDynamic;
 
-namespace tag { struct Player; }
+namespace tag { struct Player; class PlaySim; class Ent; }
 
 /** What the simulation says this player is doing this frame (world space), for the football anim layer. */
 struct FAthleteFootball
@@ -37,6 +37,22 @@ struct FAthleteFootball
 	bool bLookHigh = false;    // he is watching the ball in the air (the catcher, the men on the ball, the passer): the eyes may go up 45 deg, else 20
 	bool bLive = false;       // the play is live (between the snap and the whistle)
 	float CarrierDist = -1.f;  // a defender's distance to the ball carrier (cm), < 0 when there is none
+};
+
+/** AAthlete::ProbeBreaks: one frame of a free man's motion (time, the sim's heading and speed, the pelvis's yaw, the
+ *  orientation warp and clip angle, planted-foot travel as shown and the feet planted) ... */
+struct FAthleteBreakSample { float T = 0.f, Head = 0.f, Speed = 0.f, PelYaw = 0.f, Ang = 0.f, Orient = 0.f, Slide = 0.f; int32 Plant = 0; bool bAng = false; };
+/** ... and a break being followed: its onset, when the sim's heading had turned 45 degrees, the first pick change, the
+ *  pelvis's 45 degrees and the playing clip's travel back within 15 degrees of his (realign) after it, and the window's
+ *  sums (warps where measured, slide). Group 0 the man a human drives, 1 a route runner, 2 anyone else; Kind the forecast
+ *  he had (AAthlete::SimFutKind, 0 the old prediction). */
+struct FAthleteBreak
+{
+	bool bOn = false;
+	float T0 = 0.f, TSim = 0.f, H0 = 0.f, Sign = 1.f, Pel0 = 0.f, TPick = -99.f, TMesh = -99.f, TRealign = -99.f, TEnd = 0.f;
+	double Ang = 0.0, Orient = 0.0, Slide = 0.0, PlantT = 0.0;
+	int32 N = 0, AngN = 0;
+	uint8 Group = 0, Kind = 0;
 };
 
 struct FUniform
@@ -122,6 +138,21 @@ public:
 	void SetIntent(const FVector& WantVelW) { IntentVelW = WantVelW; IntentFrame = GFrameCounter; }
 	FVector IntentVelW = FVector::ZeroVector;
 	uint64 IntentFrame = 0;
+	/** The sim's own forecast of his next 1.6 s, for motion matching's query (AMatchDirector::SyncPlay, this frame, while the
+	 *  sim steers him and he is free: not engaged, not stunned). Called for every man; it forecasts the ones whose path
+	 *  the sim already knows, read only from the sim (PlaySim::routeWant / steerVel, the law the sim moves him by):
+	 *    - a route runner (EntState::Route, no pass in the air to him): his route, step by step, as PlaySim::predictPos;
+	 *    - the man a human drives, with the stick held: his stick's want held, under the sim's acceleration and turn limits;
+	 *    - a pursuer: his want held the same way.
+	 *  An impulse under way (a juke, a catch) is carried through. The others, and anyone the call does not reach this frame,
+	 *  keep the old prediction (the measured acceleration extended half a second). Alpha: how far the shown frame is between
+	 *  the sim's last two steps. -TagNoSimFuture: the old prediction for all; -TagSimFutureNoPursue: not for pursuers;
+	 *  -TagSimFutureAll: every free man's want held.
+	 *  It also marks the man a human drives (his own motion matching settings, UTagMotionMatchInstance::bUserMan). */
+	void SetSimFuture(const tag::PlaySim& Sim, const tag::Ent& E, int32 Dir, float Alpha);
+	/** Contact reactions (Game/TagContact.h): contacts over the stumble threshold on men free to react, and reactions
+	 *  played, since the last reset (all athletes). */
+	static void StumbleStats(int32& OutOver, int32& OutPlayed, bool bReset);
 	/** The director takes over from where the body stands (the post-whistle jog): the offset is gone and the follower
 	 *  starts over from here (it read the hand-over as the sim stepping 60 cm and pulled the body back as far: a pop). */
 	void AbsorbVisOffset()
@@ -170,6 +201,14 @@ public:
 	/** The throw from its windup, timed so the capture's release comes ReleaseIn seconds from now (when the sim lets the
 	 *  ball go); a one-shot, so the follow-through plays out. */
 	void PlayThrowTimed(int32 Kind, float ReleaseIn);
+	/** The pass changed during its windup (the user's tap settled as a lob: Game/MatchFeel.cpp): the windup goes on as the
+	 *  throw of Kind, timed to the same release, unless the clip playing is already one of Kind's (nothing to change). The
+	 *  change of clip is dead-blended like any other (UTagRetargetAnimInstance). True: switched. */
+	bool RetimeThrow(int32 Kind, float ReleaseIn);
+	/** The last clip switch's transition jerk on his body (xfj: 1 = a switch the joints do not show; measured with
+	 *  -TagDev / -TagHlFull only) and how many he has had measured. */
+	float LastClipXfj = -1.f;
+	int32 ClipXfjN = 0;
 	/** A defender plays the ball in the air: a swat for how he is moving (Gait 0 running at it, 1 strafing, 2 backpedal /
 	 *  set), or (bInt) a one-man interception. */
 	bool PlayBallDefense(int32 Gait, bool bInt, float CatchIn = -1.f);
@@ -183,6 +222,7 @@ public:
 	bool IsThrowing() const;
 	bool bThrowTimed = false;
 	UPROPERTY() TObjectPtr<UAnimationAsset> ThrowTimedClip;
+	int32 ThrowTimedKind = -1; // (the FAthleteAssets::EThrow it was picked for; -1 a shovel)
 	/** Paired tackle: the first tackler's hit decides the carrier's reaction (head on / from behind / from the side)
 	 *  and the pile's momentum (both players' masses and velocities). */
 	void ApplyHit(const FVector& TacklerVelW, float TacklerKg, const FVector& TacklerLoc);
@@ -404,6 +444,39 @@ private:
 	bool DriveMotionMatching(const FVector& VelWorld, float SimYaw, float DeltaTime, bool bCrouch = false);
 	void RecordTrajectory();
 	bool bInMatch = false;
+	// SetSimFuture: where the sim takes him, world cm, every 1/30 s from the sim's latest step (index 0) to 1.6 s; worked
+	// out again only when the sim has stepped. Fresh for this frame's motion matching only (SimFutFrame).
+	FVector SimFut[49];
+	uint64 SimFutFrame = 0;
+	double SimFutT = -1.0;
+	uint64 SimFutSerial = 0; // (the play's PlaySim::serial)
+	float SimFutLag = 0.f;   // the shown frame is this far (s) behind the sim's latest step
+	uint8 SimFutKind = 0;    // 1 his route, 2 the stick, 3 his want held (a pursuer)
+	uint64 UserFrame = 0;    // the frame a human was last seen driving him (SetSimFuture)
+	uint64 RouteFrame = 0;   // ... and he was last running a route
+	bool IsUserMan() const { return UserFrame == GFrameCounter; }
+	/** The motion matching sets of his body (Tools/Art/mm_style_sets_hero.py): 0 big (the line), 1 medium (linebackers,
+	 *  tight ends, fullbacks, power backs), 2 agile (receivers, the secondary, light backs); -1 none. */
+	int32 BodyClass() const;
+	float LiveT = 0.f;       // seconds into the live play (the tired gaits wait 2 s)
+	// the break probe (-TagHlFull / -TagMoveTest / -TagPadPlayTest / -TagBreakLog): how soon the body answers a sharp change
+	// of the sim's heading - the first matched pick change, the pelvis's turn, the warps and the planted-foot travel
+	// around it (AAthlete::ProbeBreaks, "TAG break lag" in the log)
+	void ProbeBreaks(const FVector& VelWorld, float Dt);
+	TArray<FAthleteBreakSample> BreakRing; // the last 0.9 s
+	float BreakClock = 0.f;
+	float BreakCool = 0.f;
+	TArray<float> PickTimes;               // matched pick changes over the last second (BreakClock)
+	TWeakObjectPtr<const UAnimationAsset> BreakPickAsset;
+	FAthleteBreak Brk;
+	// contact reactions (Game/TagContact.h): the contacts read so far, and how long until he may stumble again
+	void ReadContacts(const FString& Anim, const FVector& VelWorld, float Dt);
+	uint64 ContactCursor = 0;
+	bool bContactCursorSet = false;
+	float StumbleCool = 0.f;
+	FVector ProbeVelW = FVector::ZeroVector; // last frame's sim velocity (the break probe reads the frame it describes)
+	// the transition jerk measured on his body (UTagRetargetAnimInstance::JerkOut), pooled over everyone (log "TAG xfj")
+	static void PoolJerk(TArray<FVector2f>& In);
 	int32 SidelineVariant = 0;
 	bool bAnimAwake = true;  // SleepWhenOffscreen: the bodies' ticks are on
 	float SleepClock = 0.f;  // seconds since the first SleepWhenOffscreen (the first second always animates: a pose to freeze in)
@@ -829,6 +902,10 @@ struct FAthleteAssets
 	TArray<FPackClip> PackKickCatchStand, PackKickCatchRun;
 	TArray<FPackClip> PackShovelSet, PackShovelMove, PackPumpFakes;
 	TArray<FPackClip> PackTackledFront, PackTackledBehind, PackTackledSide, PackTacklers, PackWhiffs, PackStumbles;
+	/** A man knocked off his line who stays up (AAthlete::ReadContacts): the pack's traffic bumps (walking, jogging or
+	 *  backpedalling into a man: Avoidance_Bump, TwoMan_Neg_Bump), the jams a receiver loses (DB_Jam_Loss, DB_WR_Jam) and
+	 *  a stumble off a hit (NonBC_Stumble_Hit). The ball carrier's are PackStumbles, upright ones only. */
+	TArray<FPackClip> PackBumps;
 	TArray<FPackClip> PackJukesL, PackJukesR, PackSpinsL, PackSpinsR, PackTrucks, PackHurdles, PackStiffArmsL, PackStiffArmsR;
 	TArray<FPackClip> PackRushWinsL, PackRushWinsR, PackBeatenL, PackBeatenR, PackPancakes, PackGetOffs;
 	// get-offs by job (the shared PackGetOffs pool gave centers a DL get-off and DL a guard's pull)
@@ -961,6 +1038,19 @@ struct FAthleteAssets
 	TArray<class UPoseSearchDatabase*> MMMoveV[3][6], MMStartV[3][6], MMPivotV[3][6];
 	// standing: the stops and the stand idles split three ways (PSD_TAG_Stand_Idles_S1..S3, Tools/Art/mm_idle_sets_hero.py)
 	TArray<class UPoseSearchDatabase*> MMStopV[3][6];
+	/** Locomotion by body class (Tools/Art/mm_style_sets_hero.py; AAthlete::BodyClass): [gait][style set][class] the move /
+	 *  start / pivot sets with that set's loops split in two - the class's own captures with the general ones
+	 *  (PSD_TAG_<Gait>_Loops_S<n>_<Class>) and the other classes' at a cost (..._<Class>_Off, BaseCostBias +0.1: they win
+	 *  only where nothing of his own fits; a class has 8-12 captures, too few to stand alone in every direction). Empty
+	 *  where the databases are not built (the style set as before). The tired captures (MG_NonBC_Fatigued_MC_*) are in
+	 *  none of them: MMFatigued[gait] is searched besides only by a tired man (Player::fatigue, -TagFatigueGait=0.35)
+	 *  after the first 2 s of a live play. -TagNoStyleSets: every man on the style sets as before. */
+	TArray<class UPoseSearchDatabase*> MMMoveC[3][6][3], MMStartC[3][6][3], MMPivotC[3][6][3];
+	class UPoseSearchDatabase* MMFatigued[3] = {nullptr, nullptr, nullptr};
+	bool bMMStyle = false; // any class set is in
+	/** The class a capture was filmed in, from its name (0 big, 1 medium, 2 agile, 3 tired, -1 general): the style-share
+	 *  stats ("TAG style share") and the editor script share these rules. */
+	static int32 CaptureClass(const FString& Name);
 	// the man with the ball: the pack's ball-carrier loops (MG_BC_*, Tools/Art/mm_build_bc_dbs.py), the ball tucked as captured
 	TArray<class UPoseSearchDatabase*> MMBallMove[3], MMBallPivot[3], MMBallStart[3];
 	// crouched line footwork (pass sets, pulls, drive blocks), same state split: [0] loops, [1] starts, [2] pivots, [3] stops + idles

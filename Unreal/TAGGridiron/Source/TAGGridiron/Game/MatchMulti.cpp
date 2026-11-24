@@ -398,6 +398,7 @@ void AMatchDirector::SwapHuman(FTagHuman& H)
 	Swap(bPreMoved, C.bPreMoved);
 	Swap(bCarrierHint, C.bCarrierHint);
 	Swap(bRushHint, C.bRushHint);
+	Swap(FeelCtl, C.Feel); // (his throw's windup, his switch's grace: Game/TagFeel.h)
 }
 
 int32 AMatchDirector::DefMenuHuman() const

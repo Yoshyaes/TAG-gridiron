@@ -33,7 +33,10 @@ struct FTagProcInput
 	float ArmSlot = 0.f;       // -1 sidearm .. +1 over the top
 	float StyleJitter = 0.f;   // -1..1 small timing / height variation
 	// transition crossfade: bump ClipSerial whenever the source clip changes; the displayed pose eases from the last
-	// shown pose into the new one over BlendTime (single node playback cannot blend on its own)
+	// shown pose into the new one over BlendTime (single node playback cannot blend on its own). The pose blended out of
+	// keeps moving the way it was moving (dead blending: each joint's turn rate at the switch, decaying with a half-life
+	// of DeadBlendHalfLife s), so an arm in mid swing carries its swing into the new clip instead of easing out of a pose
+	// that stopped dead. -TagFrozenFade: the old frozen pose; -TagDeadBlendHL=<s> to try other half-lives.
 	int32 ClipSerial = 0;
 	float BlendTime = 0.2f;
 	// body physics (AAthlete::Drive): the whole body leans from the ankles into its measured acceleration (starts,
@@ -149,8 +152,33 @@ private:
 	float RefFootZ = -1.f;  // the foot bone's height in the reference pose (component space), computed on first use
 
 	TArray<FTransform> LastPose;   // last displayed local pose (compact order)
-	TArray<FTransform> FromPose;   // frozen pose a transition blends out of
+	TArray<FTransform> PrevPose;   // the one shown an evaluation before it (with LastPose: each joint's turn rate)
+	float LastPoseDt = 0.f;        // seconds between the two
+	bool bPrevPoseValid = false;
+	TArray<FTransform> FromPose;   // pose a transition blends out of (as it was at the switch)
+	TArray<FVector> FromAngVel;    // each bone's local turn rate at the switch (rad/s, rotation vector; dead blending)
+	bool bFromVel = false;
 	int32 SeenSerial = 0;
+	/** xfj (-TagHlFull / -TagDev): how much a transition jerks the joints - the mean acceleration of the eleven DevJoints
+	 *  (second difference, cm/s2) over the 0.25 s after a switch over the same man's mean over the 0.25 s before. Kind 0:
+	 *  a ClipSerial bump (into or out of a single clip), 1: motion matching changing its pick (the source's matched clip).
+	 *  1 = the switch cannot be seen in the joints' motion; a frozen fade shows as a dip then a spike. */
+	void MeasureJerk(FPoseContext& Output);
+	FVector JerkJ[2][11];
+	float JerkDt[2] = {0.f, 0.f};
+	int32 JerkHave = 0;
+	float JerkRingA[48] = {}, JerkRingT[48] = {}; // the last evaluations' joint acceleration and when (JerkClock)
+	int32 JerkRingHead = 0, JerkRingCount = 0;
+	float JerkClock = 0.f;
+	int32 JerkSerial = 0, JerkPickSerial = 0; // the switches seen
+	bool bJerkPost = false;
+	uint8 JerkKind = 0;
+	float JerkPostT0 = 0.f, JerkPre = 0.f;
+	double JerkPostSum = 0.0;
+	int32 JerkPostN = 0;
+	mutable TArray<FVector2f> JerkOutFrame; // finished since the last PostUpdate: (xfj, kind)
+	TWeakObjectPtr<const UAnimationAsset> JerkPickAsset; // the source's matched clip last seen (game thread, PreUpdate)
+	int32 PickSerialIn = 0;
 	float BlendElapsed = 1e3f;
 	float CurBlendTime = 0.f;      // > 0 overrides In.BlendTime for the current blend (pose snapshots)
 	TArray<FTransform> CsFrom, CsTo; // component-space scratch for a snapshot blend
@@ -192,6 +220,9 @@ public:
 	int32 PlantFeet = 0; // feet the capture held planted in the last evaluation
 	float Dev[7] = {0, 0, 0, 0, 0, 0, 0}; // the last evaluation's distance from the capture (FTagRetargetProxy::DevFrame)
 	int32 Touchdowns = 0; // feet that came down on the turf since the game thread last cleared it (gait cadence)
+	/** Transition jerk measured since the game thread last cleared it (FTagRetargetProxy::MeasureJerk): x = xfj, y = kind
+	 *  (0 a clip switch, 1 a matched pick change). AAthlete::XfjStats pools them. */
+	TArray<FVector2f> JerkOut;
 
 protected:
 	virtual FAnimInstanceProxy* CreateAnimInstanceProxy() override;

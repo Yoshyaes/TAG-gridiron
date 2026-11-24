@@ -62,6 +62,9 @@ $GameModes = @(
     @{ Name = "multi";    On = $true; Timeout = 480; Flags = "-TagMultiTest" },
     @{ Name = "artpad";   On = $true; Timeout = 480; Flags = "-TagArtTest -TagPadTest" },
     @{ Name = "padplay";  On = $true; Timeout = 480; Flags = "-TagPadPlayTest" },
+    @{ Name = "feel";        On = $true; Timeout = 900; Flags = "-TagFeelTest" },
+    @{ Name = "hitstop-off"; On = $true; Timeout = 900; Flags = "-TagHitStopTest -TagNoHitStop -TagWeatherSeed=7 -TagHitStopPlays=16 -TagQuarterLen=120 -TagNoLoad" },
+    @{ Name = "hitstop";     On = $true; Timeout = 900; Flags = "-TagHitStopTest -TagWeatherSeed=7 -TagHitStopPlays=16 -TagQuarterLen=120 -TagNoLoad" },
     @{ Name = "chart";    On = $true; Timeout = 900; Flags = "-TagChartTest -TagSoak=540 -TagQuarterLen=60 -TagNoLoad" },
     @{ Name = "soak";     On = $true; Timeout = 900; Flags = "-TagSoak=600 -TagQuarterLen=60 -TagNoLoad -TagWeatherSeed=7" }
 )

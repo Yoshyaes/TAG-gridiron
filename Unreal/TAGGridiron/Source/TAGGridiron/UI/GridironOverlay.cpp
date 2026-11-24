@@ -2151,6 +2151,16 @@ void SGridironOverlay::ShowSettings(std::function<void()> Back)
 	// the pad's rumble (Game/TagRumble.h): Normal, Low, Off
 	V->AddSlot().AutoHeight()[ MakeButton(FString::Printf(TEXT("Vibration: %s"), FTagRumble::LevelName(FTagRumble::Level())),
 		TEXT("The controller's rumble on hits, catches, kicks and scores."), [this, Back] { FTagRumble::StepLevel(); ShowSettings(Back); }) ];
+	// the feel options (Game/TagFeel.h): your own man's movement, the big hit's hold and shake, the switch's assist
+	V->AddSlot().AutoHeight()[ MakeButton(FString::Printf(TEXT("Movement: %s"), TagFeel::MovementName()),
+		TagFeel::Responsive() ? TEXT("Responsive: your man cuts and stops sooner than a real player could. The CPU's players move as always.")
+			: TEXT("Authentic: your man moves as real players do (true speed, true cuts). Responsive gives you sharper cuts."),
+		[this, Back] { TagFeel::ToggleMovement(); ShowSettings(Back); }) ];
+	V->AddSlot().AutoHeight()[ MakeButton(FString::Printf(TEXT("Hit effects: %s"), TagFeel::HitFx() ? TEXT("On") : TEXT("Off")),
+		TEXT("A big hit holds the picture for a split second and shakes the camera; sacks and scores shake it too."), [this, Back] { TagFeel::ToggleHitFx(); ShowSettings(Back); }) ];
+	V->AddSlot().AutoHeight()[ MakeButton(FString::Printf(TEXT("Switch assist: %s"), TagFeel::SwitchAssist() ? TEXT("On") : TEXT("Off")),
+		TEXT("After you switch players, your stick does not steer the new man for a moment, so he does not take a step the wrong way."),
+		[this, Back] { TagFeel::ToggleSwitchAssist(); ShowSettings(Back); }) ];
 	static const TCHAR* const VolName[3] = {TEXT("Volume"), TEXT("Music volume"), TEXT("Stadium volume")};
 	static const TCHAR* const VolSub[3] = {TEXT("Everything."), TEXT("The broadcast theme and the menu music."), TEXT("The crowd, the field, the stadium announcer.")};
 	for (int32 W = 0; W < 3; ++W)

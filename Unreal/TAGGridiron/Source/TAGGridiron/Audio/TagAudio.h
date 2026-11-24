@@ -81,6 +81,10 @@ public:
 	void Hush();
 	/** Things only the director knows: "hardcount", "audible", "flag", "replay", "banner". */
 	void Cue(FName What, const FVector& At = FVector::ZeroVector);
+	/** Two bodies meeting on screen that the sim's events do not sound - a block, a collision in traffic, a pile-up - from
+	 *  the director's contacts (Game/TagContact.h; it picks which, Game/MatchFeel.cpp): a quiet pad clack (HitLight) or a
+	 *  body thud (HitMed) by Strength 0..1, its gain 6 dB and more under a tackle's hit. Heard in the replay too. */
+	void ContactHit(const FVector& At, float Strength);
 
 	/** 0..1 each (the settings screen). */
 	void SetLevels(float Master, float Music, float Stadium);

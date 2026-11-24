@@ -14,6 +14,8 @@
 #include "Sim/PlaySim.h"
 #include "Game/TagInput.h"
 #include "Game/TagMoveBuffer.h"
+#include "Game/TagContact.h"
+#include "Game/TagFeel.h"
 #include "MatchDirector.generated.h"
 
 class AAthlete;
@@ -108,6 +110,7 @@ public:
 		bool bSwitchHeld = false, bSwitchPicked = false, bSwitchStickArmed = true;
 		float SwitchHeldT = 0.f;
 		bool bPreMoved = false, bCarrierHint = false, bRushHint = false;
+		FTagFeelCtl Feel;          // the throw's windup, the switch's grace (Game/TagFeel.h)
 	};
 	struct FTagHuman
 	{
@@ -142,6 +145,9 @@ public:
 	bool TeamHumanInLobby(bool bHome) const;
 	FString LobbyTags(bool bHome) const;
 	void LobbySwapSides();
+
+	/** The bodies meeting this frame (Game/TagContact.h; the same as FTagContacts::Get().ThisFrame()). */
+	TArrayView<const FTagContact> ContactsThisFrame() const { return FTagContacts::Get().ThisFrame(); }
 
 private:
 	// flow
@@ -505,7 +511,9 @@ private:
 	bool bSetAfterBreak = false;
 	/** -TagPadPlayTest (Game/MatchPadPlay.cpp): the in-game pad controls pressed into the controller and checked. */
 	bool bPadPlayTest = false;
-	struct FPadPlay { int32 Step = 0, Pass = 0, Fail = 0, CamWas = 0; float Clock = 0.f, HoldT = 0.f, Wait = 0.f, ReleaseCross = 0.f; bool bSnapSent = false; } PadPlay;
+	// (SnapSerial: the play the snap press was for - a new play set up, a press of its own; FlagStage / FlagT: the check
+	// that a pre-snap flag drawn by that press still leaves the next snap to be made)
+	struct FPadPlay { int32 Step = 0, Pass = 0, Fail = 0, CamWas = 0, FlagStage = 0; float Clock = 0.f, HoldT = 0.f, Wait = 0.f, ReleaseCross = 0.f, FlagT = 0.f; bool bSnapSent = false; unsigned long long SnapSerial = 0; } PadPlay;
 	void TickPadPlayTest(float Dt);
 	void PadKey(const FKey& Key, bool bDown); // the next snap's men are put on their spots (the teams changed ends during the break)
 	void BeginBreak(const FString& Title, const FString& Sub, float Secs);
@@ -902,6 +910,71 @@ private:
 	size_t RumbleSeen = 0;
 	bool bRumbleTd = false, bRumbleKick = false;
 	int32 RumbleWarned = -1;
+	/** The pass started on the press (06 item 3): the windup begins as the receiver's button goes down, the pass type
+	 *  (bullet / lob / high / low) and a pump fake are settled during it. bOldTiming (-TagThrowOnRelease): the old code
+	 *  throws; this only counts the press to the windup. The human's quarterback only. */
+	void FeelThrow(const FTagReader& PC, int32 ModStyle, bool bOldTiming);
+	/** The switch (06 item 5), every frame of a live play: the press picks by where the ball is going (in the air: who
+	 *  gets to the catch point first; a run: who gets to the carrier first; else the sim's nearest-the-ball), the button
+	 *  held with the stick pushed picks the man that way, and the stick as it was does not steer the new man for 0.25 s
+	 *  (Switch assist). -TagSwitchOld: the sim's switch, as before. */
+	void FeelSwitch(bool bPress, bool bKeyHeld);
+	/** The man the switch picks for slot 0 (nullptr: leave it to the sim's nearest-the-ball). */
+	tag::Ent* SmartSwitchPick(tag::Ent* From, FTagSwitchNote& Note) const;
+	/** How long E takes to get to Spot (s): his top speed, a turn if he runs the other way, getting going from a stand. */
+	double ArriveSecs(const tag::Ent* E, const tag::V2& Spot) const;
+	FTagFeelCtl FeelCtl;
+	FTagSwitchNote LastSwitch;
+	FTagThrowNote LastThrow;
+	/** Responsive movement (Game/TagFeel.h): before a sim step each player's man is given his steering (the sim steers
+	 *  him by it on the steps his stick drives him: PlaySim::setUserSteer); after it, the steps it changed are counted
+	 *  (every man's Ent::steerBoosted over the step: a player's man, or a man the CPU had - which must never be). */
+	void FeelBeforeStep();
+	void FeelAfterStep();
+	const tag::Ent* PreStepEnt[4] = {nullptr, nullptr, nullptr, nullptr};
+	TArray<int32> PreStepBoosted;
+	int32 FeelSteps = 0;              // sim steps the director has taken (the press-to-windup count)
+	int32 ResponsiveSteps = 0, ResponsiveCpu = 0; // steps a player's man was steered Responsive; men the CPU had (must stay 0)
+	/** The hit-stop and the camera's shake (06 item 10) and the sound of the bodies meeting (05 A8), from the contacts
+	 *  DetectContacts found this frame and the sim's events. */
+	void OnContactsFound();
+	void StartHitStop(int32 Steps, float Trauma, const FString& Why);
+	void TickHitStop();
+	/** The frame's real seconds (Dt is held near 0 through a hit-stop: the rumble and the shake run on real time). */
+	float FeelRealDt(float Dt) const;
+	/** A shake of the camera: Old (cm, -TagOldShake's random jitter) or Trauma (0..1; bSway a touchdown's slow sway). */
+	void ShakeCam(float Old, float Trauma, bool bSway);
+	/** The camera's shake this frame: its position offset (returned) and rotation (OutRot). */
+	FVector CameraShake(float Dt, FRotator& OutRot);
+	FTagHitStop HitStop;
+	FTagTrauma CamTrauma;
+	/** The contact sounds: when the last ones played (platform s, the cap's window), this play's counts. */
+	TArray<double> ContactSoundT;
+	unsigned long long ContactSoundSerial = 0;
+	int32 CsContacts = 0, CsSounds = 0, CsTackle = 0, CsFar = 0, CsAfterHit = 0, CsCap = 0, CsLate = 0;
+	int32 CsAllContacts = 0, CsAllSounds = 0, CsAllLate = 0, CsMostInWindow = 0; // (since the start: the self-check's)
+	uint64 ContactsHeardSerial = 0; // the last contact the sound has taken (FTagContact::Serial): each one once
+	/** The windup's throw clip (SyncPlay): its key, whether it came from the standing choice (the pass type picks it there)
+	 *  and the pass type it was picked for; a pass settled in the windup (a tap's lob) switches it (AAthlete::RetimeThrow). */
+	int32 ThrowTimedKey = -1;
+	uint64 QbStyleOpenFrame = 0; // (the frame FeelThrow last saw the player's pass type still open in its windup)
+	bool bThrowTimedStand = false, bThrowTimedTouch = false;
+	int32 ThrowRetimes = 0;
+	unsigned long long ThrowRetimeSerial = 0;
+	double ThrowRetimeAt = -1.0;  // platform s of the last switch
+	int32 ThrowRetimeXfjN = 0;    // the quarterback's clip-switch measures before it (AAthlete::ClipXfjN)
+	/** -TagLatencyLog (Game/TagLatency.h): the gameplay presses PC read this frame. */
+	void FeelNotePresses(const FTagReader& PC);
+	/** -TagFeelTest (Game/MatchFeelTest.cpp): a user game that presses the throws, the switches and the stick, checks
+	 *  each, the steering law, the shake, the contact events and sounds, the hit-stop and the latency log. */
+	bool bFeelTest = false;
+	void TickFeelTest(float Dt);
+	/** The play the feel test wants next (CallPlays): the user's side and the offense's play. */
+	bool FeelTestCall(const tag::OffPlay*& Op, const tag::DefCall*& Dc);
+	/** -TagHitStopTest (MatchFeelTest.cpp): a CPU game with a hit-stop on every big hit, its play log's digest saved and
+	 *  compared with the other run's (-TagNoHitStop): the same seed must give the same plays. */
+	bool bHitStopTest = false;
+	void TickHitStopTest();
 
 	friend class SGridironOverlay;
 };

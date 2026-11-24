@@ -17,6 +17,7 @@
 #include "PoseSearch/AnimNode_MotionMatching.h"
 #include "PoseSearch/AnimNode_PoseSearchHistoryCollector.h"
 #include "BoneControllers/AnimNode_OffsetRootBone.h"
+#include "Animation/AnimNode_DeadBlending.h"
 #include "TagMotionMatchInstance.generated.h"
 
 class UPoseSearchDatabase;
@@ -62,7 +63,7 @@ struct FTagMotionMatchProxy : public FAnimSingleNodeInstanceProxy
 
 	FTagMotionMatchProxy() = default;
 	FTagMotionMatchProxy(UAnimInstance* InInstance, FAnimNode_PoseSearchHistoryCollector* InHistory, FAnimNode_OffsetRootBone* InOffset,
-		FAnimNode_MotionMatching* InMatch);
+		FAnimNode_MotionMatching* InMatch, FAnimNode_DeadBlending* InDead);
 
 	virtual FAnimNode_Base* GetCustomRootNode() override { return History; }
 	virtual void GetCustomNodes(TArray<FAnimNode_Base*>& OutNodes) override;
@@ -74,6 +75,8 @@ struct FTagMotionMatchProxy : public FAnimSingleNodeInstanceProxy
 	FAnimNode_PoseSearchHistoryCollector* History = nullptr;
 	FAnimNode_OffsetRootBone* Offset = nullptr;
 	FAnimNode_MotionMatching* Match = nullptr;
+	/** -TagMMDeadBlend: the engine's dead blending node between the root tap and motion matching (null without the flag) */
+	FAnimNode_DeadBlending* Dead = nullptr;
 	FTagLocoSwitchNode Switch;
 	FTagRootTapNode Tap;
 	int32 SeenDbSerial = -1;
@@ -123,6 +126,15 @@ public:
 	 *  nearly every search through: a route runner's acceleration and curve cross it in a few frames.) */
 	float MinDwell = 0.3f, DwellBreak = 250.f, DwellTurnDeg = 30.f, BaseThrottle = 0.066f;
 	float* ThrottleSetting = nullptr; // the node's SearchThrottleTime, found through reflection
+	/** The man a human drives (AAthlete, this frame): the most responsive animator on the field. He searches every update,
+	 *  holds a pick 0.12 s (not 0.3), lets a 15 degree turn of the stick through the dwell (not 30) and blends 0.2 s (not
+	 *  0.3), so the body turns with the thumb. One man of 22 at full search rate (all 22 cost ~25 fps; one ~1).
+	 *  -TagUserMMSame: he animates like the other 21; -TagUserMMThrottle= / -TagUserMMDwell= / -TagUserMMTurn= /
+	 *  -TagUserMMBlend= to try others. */
+	bool bUserMan = false;
+	float UserThrottle = 0.f, UserMinDwell = 0.12f, UserDwellTurnDeg = 15.f, UserBlendTime = 0.2f;
+	float BaseBlendTime = 0.3f;
+	float* BlendTimeSetting = nullptr; // the node's BlendTime, found through reflection
 	/** The next database change must pick a fresh clip (a start running out, a stop, a crouch): else the playing clip
 	 *  carries on into the new set until the search finds better (a run into the sprint loops, a cut's pivot set). */
 	bool bForceOnDbChange = true;
@@ -180,4 +192,11 @@ protected:
 
 	UPROPERTY(Transient)
 	FAnimNode_MotionMatching MatchNode;
+
+	/** -TagMMDeadBlend (A/B, off by default): the matching node's transitions as the engine's dead blending (the outgoing
+	 *  clip extrapolated with its own velocities and faded into the new one) instead of its blend stack (up to four clips
+	 *  evaluated and mixed per man). The node asks for it through the graph's inertialization message, which this node
+	 *  answers from above it in the update; with it the blend stack holds one clip (MaxActiveBlends 0). */
+	UPROPERTY(Transient)
+	FAnimNode_DeadBlending DeadNode;
 };

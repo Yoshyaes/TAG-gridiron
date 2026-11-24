@@ -984,6 +984,14 @@ void ATagAudio::Cue(FName What, const FVector& AtPos)
 	else if (What == NBanner) PlayNow(FLater{0.f, NUiWhoosh, FVector::ZeroVector, 0.45f, 1.15f, ECat::Ui});
 }
 
+void ATagAudio::ContactHit(const FVector& AtPos, float Strength)
+{
+	// (a tackle's hit plays at 0.6-1.0: these at 0.12-0.42, 6 dB and more under it - under the crowd and the voices too, T19;
+	// the harder the meeting the lower the pitch)
+	const float St = FMath::Clamp(Strength, 0.f, 1.f);
+	Field(St < 0.4f ? NHitLight : NHitMed, AtPos, 0.12f + 0.3f * St, 1.06f - 0.1f * St);
+}
+
 void ATagAudio::Feed(float Dt, const FTagAudioView& V)
 {
 	Dt = FMath::Min(Dt, 0.1f);

@@ -2,6 +2,7 @@
 #include "Game/TagBindings.h"
 #include "Game/TackleMomentum.h"
 #include "Game/TagResult.h"
+#include "Game/TagLatency.h"
 #include "Misc/ScopeExit.h"
 #include "HAL/FileManager.h"
 #include "Async/Async.h"
@@ -139,6 +140,7 @@ void AMatchDirector::BeginPlay()
 	Super::BeginPlay();
 	PostTickHandle = FWorldDelegates::OnWorldPostActorTick.AddUObject(this, &AMatchDirector::OnPostActorTick);
 	TagResult::StartWatchdog(); // -TagTimeout=<s>: a test run that hangs ends with status 2 (Game/TagResult.h)
+	FTagLatency::Get().Start(); // the frame-pacing A/B flags, the latency log (Game/TagLatency.h)
 	ATagBooth::WarmService(); // the booth's voices load while the menus are up
 	if (!FParse::Param(FCommandLine::Get(), TEXT("TagNoAudio"))) Audio = GetWorld()->SpawnActor<ATagAudio>();
 	// controllers: GameInput (GameInputWindows plugin) reads PS5 DualSense pads as standard gamepads, XInput pads too;
@@ -299,6 +301,23 @@ void AMatchDirector::BeginPlay()
 		FParse::Value(FCommandLine::Get(), TEXT("TagHome="), HlHome);
 		FParse::Value(FCommandLine::Get(), TEXT("TagAway="), HlAway);
 		StartMatch(HlHome, HlAway, false, true, HlWx, !FParse::Param(FCommandLine::Get(), TEXT("TagDay")), HlQLen); // (-TagDay films a day game)
+	}
+	else if (FParse::Param(FCommandLine::Get(), TEXT("TagFeelTest")))
+	{
+		// the feel checks (Game/MatchFeelTest.cpp): a user game, his calls made for him, the CPU kicking for him
+		bFeelTest = true;
+		bPadTest = true;
+		StartMatch(3, 7, true, true, 1, true, 900);
+	}
+	else if (FParse::Param(FCommandLine::Get(), TEXT("TagHitStopTest")))
+	{
+		// a watched CPU game with a hit-stop on every big hit, its play log's digest against the -TagNoHitStop run's
+		// (Game/MatchFeelTest.cpp; give both runs the same -TagWeatherSeed=)
+		bHitStopTest = true;
+		bWatch = true;
+		double HsQLen = 120.0;
+		FParse::Value(FCommandLine::Get(), TEXT("TagQuarterLen="), HsQLen);
+		StartMatch(3, 7, false, true, 1, true, HsQLen);
 	}
 	else if (FParse::Param(FCommandLine::Get(), TEXT("TagPadPlayTest")))
 	{
@@ -2275,13 +2294,13 @@ void AMatchDirector::TickGapTest(float Dt)
 		const int32 Kinds[] = {FAthleteAssets::ThrowQuickK, FAthleteAssets::ThrowDeepK, FAthleteAssets::ThrowFadeK,
 			FAthleteAssets::ThrowSidearmK, FAthleteAssets::ThrowTouchK, FAthleteAssets::ThrowRunRK, FAthleteAssets::ThrowRunLK};
 		const int32 Idx = FMath::Clamp(static_cast<int32>(Tt / 2.f), 0, 6);
-		static int32 LastThrow = -1;
+		static int32 GapLastThrow = -1;
 		const bool bRun = Kinds[Idx] == FAthleteAssets::ThrowRunRK || Kinds[Idx] == FAthleteAssets::ThrowRunLK;
 		const FVector V = bRun ? FVector(400.f, 0.f, 0.f) : FVector::ZeroVector;
 		QB->Drive(O + FVector(-600.f, 0.f, 0.f), 0.f, V, 9.f, TEXT("throw"), Tt, Dt, false);
-		if (Idx != LastThrow)
+		if (Idx != GapLastThrow)
 		{
-			LastThrow = Idx;
+			GapLastThrow = Idx;
 			QB->PlayThrow(Kinds[Idx]);
 			UE_LOG(LogTemp, Display, TEXT("TAG gap test: throw kind %d"), Kinds[Idx]);
 		}
@@ -2529,6 +2548,7 @@ void AMatchDirector::OnPostActorTick(UWorld* InWorld, ELevelTick InTickType, flo
 {
 	if (InWorld != GetWorld()) return;
 	CommitCameraFrame(InDt); // (the view is final for the frame: a cut is told to the renderer, MatchBroadcast.cpp)
+	FTagLatency::Get().EndFrame(); // (-TagLatencyLog: the presses drawn this frame, the frame's timings)
 	if (!bOverlayDue) return;
 	bOverlayDue = false;
 	UpdateIcons();
@@ -3325,7 +3345,7 @@ void AMatchDirector::Next()
 			bTwoPoint = true;
 			CallPlays(true);
 		};
-		if (UserOff() && !bPadPlayTest)
+		if (UserOff() && !bPadPlayTest && !bFeelTest)
 		{
 			State = EMatchState::Call;
 			if (bMulti) SetMenuOwner(CallerOf(G.poss));
@@ -3586,6 +3606,19 @@ void AMatchDirector::CallPlays(bool bTwo)
 		const tag::OffPlay* Op = UserOff() ? tag::playById("i_power") : G.cpuOffense();
 		if (UserOff()) LastUserPlay = Op;
 		return Finish(Op, UserDef() ? tag::defById("base_c3") : G.cpuDefense(*Op));
+	}
+	if (bFeelTest)
+	{
+		// (-TagFeelTest's calls: the side and the play its next check wants, Game/MatchFeelTest.cpp; a try for two is the CPU's call)
+		const tag::OffPlay* FOp = nullptr;
+		const tag::DefCall* FDc = nullptr;
+		if (bTwo || !FeelTestCall(FOp, FDc))
+		{
+			FOp = bTwo ? G.cpuTwoPointPlay() : G.cpuOffense();
+			FDc = G.cpuDefense(*FOp);
+		}
+		if (UserOff() && !bTwo) LastUserPlay = FOp;
+		return Finish(FOp, FDc);
 	}
 	if (UserOff())
 	{
@@ -3977,7 +4010,7 @@ void AMatchDirector::OnPlayDead()
 		// (the stands follow the home crowd's mood: TickStands; without the sound, the home side's score only)
 		const tag::Ent* TdBy = Sim->ball.holder;
 		HomeCheer(1.f, (TdBy ? TdBy->side : *R.td) == tag::Side::Off ? Game->poss : tag::other(Game->poss));
-		Shake = 25.f;
+		ShakeCam(25.f, 0.5f, true); // (a slow sway: Game/MatchFeel.cpp)
 		if (tag::Ent* Scorer = Sim->ball.holder)
 		{
 			// (a scorer tackled into the end zone falls first: the celebrate anim would skip the fall and jump him onto the spot.
@@ -4038,7 +4071,7 @@ void AMatchDirector::OnPlayDead()
 	if (R.td) {}
 	else if (R.interception) Overlay->Banner(TEXT("INTERCEPTED"), TEXT(""), Bad);
 	else if (R.fumbleLost) Overlay->Banner(TEXT("FUMBLE"), TEXT("Defense recovers"), Bad);
-	else if (R.kind == tag::PlayKind::Sack) { Overlay->Banner(TEXT("SACK"), TEXT(""), Flag); Shake = 12.f; }
+	else if (R.kind == tag::PlayKind::Sack) { Overlay->Banner(TEXT("SACK"), TEXT(""), Flag); ShakeCam(12.f, 0.3f, false); }
 	else if (R.safety) Overlay->Banner(TEXT("SAFETY"), TEXT(""), Bad);
 }
 
@@ -5616,6 +5649,7 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 		// where the sim steers him (while it is the sim that moves him: not on the post-whistle jog)
 		if (Sim->isLive() && PostPos.find(E) == PostPos.end() && !E->engaged && E->stun <= 0)
 			A->SetIntent(Dir > 0 ? FVector(E->want.x, -E->want.y, 0) * YD : FVector(-E->want.x, E->want.y, 0) * YD);
+		if (Sim->isLive() && PostPos.find(E) == PostPos.end() && !E->engaged && E->stun <= 0) A->SetSimFuture(*Sim, *E, Dir, Alpha); // (and his next 1.6 s as the sim moves him: motion matching's query)
 		A->Drive(Loc, Yaw, VelW, static_cast<float>(E->vmax), AnimName, AnimT, Dt, E->isOL || E->isDL);
 		A->SetSelected(false); // (the user's man is marked by the overlay ring and chevron: UpdateLineBars)
 		A->SetLabel(FString()); // receivers' buttons are drawn by the overlay (UpdateIcons)
@@ -6290,23 +6324,63 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 				if (O->side != QE->side) Rush = FMath::Min(Rush, tag::dist(O->pos, QE->pos));
 			int32 K = FAthleteAssets::ThrowSet;
 			static int32 GPressSeqW = 0;
+			const bool bWindTouch = Sim->pendingThrow->lob || Sim->pendingThrow->style == 2;
+			bThrowTimedStand = false;
 			if (Sp > 2.5)
 			{
 				const FVector VW = Dir > 0 ? FVector(QE->vel.x, -QE->vel.y, 0) : FVector(-QE->vel.x, QE->vel.y, 0);
 				K = FVector::DotProduct(VW, Q->GetActorRightVector()) > 0.f ? FAthleteAssets::ThrowRunRK : FAthleteAssets::ThrowRunLK;
 			}
 			else if (Rush < 1.6) K = (GPressSeqW++ % 2) ? FAthleteAssets::ThrowSidearmK : FAthleteAssets::ThrowFadeK;
-			else if (Sim->pendingThrow->lob || Sim->pendingThrow->style == 2) K = FAthleteAssets::ThrowTouchK;
-			else if (D > 28.0) K = FAthleteAssets::ThrowDeepK;
-			else if (D < 10.0) K = FAthleteAssets::ThrowQuickK;
+			else
+			{
+				// (set and clear of the rush: the pass type picks the throw - and a pass settled in the windup re-picks it below)
+				bThrowTimedStand = true;
+				K = bWindTouch ? FAthleteAssets::ThrowTouchK : D > 28.0 ? FAthleteAssets::ThrowDeepK : D < 10.0 ? FAthleteAssets::ThrowQuickK : FAthleteAssets::ThrowSet;
+				// a player's pass whose type is still open (pressed, not let go, no L1 / L2: FeelThrow) starts as the set throw -
+				// the touch pass's own family, so a tap that turns out a lob goes on in it unchanged; the quick and the deep
+				// throws are a bullet's only (a switch from one of them into the set throws 0.12 s before the release showed:
+				// transition jerk 6.7)
+				if (QbStyleOpenFrame == GFrameCounter && !bWindTouch && (K == FAthleteAssets::ThrowQuickK || K == FAthleteAssets::ThrowDeepK)) K = FAthleteAssets::ThrowSet;
+			}
+			ThrowTimedKey = K;
+			bThrowTimedTouch = bWindTouch;
 			// (a man a few yards off: the pack's shovel - underhand, out of the set or on the move)
 			const bool bShovel = Sim->pendingThrow->shovel; // (the sim's call as the throw started: the clip and the flight agree)
 			if (bShovel) Q->PlayShovelTimed(Sp > 2.5, static_cast<float>(Sim->pendingThrow->at - Sim->t));
 			else Q->PlayThrowTimed(K, static_cast<float>(Sim->pendingThrow->at - Sim->t));
 			UE_LOG(LogTemp, Display, TEXT("TAG throw type: style %d lob %d %s, %.1f yd, clip key %d"), Sim->pendingThrow->style, Sim->pendingThrow->lob ? 1 : 0,
 				bShovel ? TEXT("shovel") : TEXT("overhand"), D, K);
+			if (bShovel) bThrowTimedStand = false;
 			ThrowTimedSerial = Sim->serial;
 		}
+	// the pass settled in the windup (the player's throw starts on the press and a tap turns out a lob, L1 a high one:
+	// Game/MatchFeel.cpp): the throw that fits it from here, timed to the same release - a lob does not finish as the quick or
+	// the deep throw it started as. (The clip change is dead-blended; too near the release it is left alone.)
+	if (Sim->pendingThrow && !Sim->passThrown && Sim->qb && ThrowTimedSerial == Sim->serial && bThrowTimedStand && !Sim->pendingThrow->away && Sim->pendingThrow->tgt)
+	{
+		const bool bRtTouch = Sim->pendingThrow->lob || Sim->pendingThrow->style == 2;
+		const float RtIn = static_cast<float>(Sim->pendingThrow->at - Sim->t);
+		AAthlete* RtQ = AthOf(Sim->qb);
+		if (bRtTouch != bThrowTimedTouch && RtIn > 0.05f && RtQ)
+		{
+			const double RtD = tag::dist(Sim->qb->pos, Sim->pendingThrow->tgt->pos);
+			const int32 RtK = bRtTouch ? FAthleteAssets::ThrowTouchK : RtD > 28.0 ? FAthleteAssets::ThrowDeepK : RtD < 10.0 ? FAthleteAssets::ThrowQuickK : FAthleteAssets::ThrowSet;
+			const int32 XfjBefore = RtQ->ClipXfjN;
+			const bool bSwitched = RtQ->RetimeThrow(RtK, RtIn);
+			if (bSwitched)
+			{
+				++ThrowRetimes;
+				ThrowRetimeSerial = Sim->serial;
+				ThrowRetimeAt = FPlatformTime::Seconds();
+				ThrowRetimeXfjN = XfjBefore;
+			}
+			UE_LOG(LogTemp, Display, TEXT("TAG throw re-picked in the windup: %s, clip key %d -> %d (%s), %.2f s before the release"), bRtTouch ? TEXT("now a lob / high") : TEXT("now driven"),
+				ThrowTimedKey, RtK, bSwitched ? TEXT("switched") : TEXT("the clip playing already fits"), RtIn);
+			ThrowTimedKey = RtK;
+			bThrowTimedTouch = bRtTouch;
+		}
+	}
 	// the pass's outcome, rolled by the sim ~0.4 s before it gets there (PlaySim::preRollCatch): the interaction it is
 	// starts now, in time - the defender and the receiver in one of the pack's two-man interceptions, the named defender's
 	// breakup, the receiver's drop (a catch is primed below as before). An interception's pair is chosen from where the
@@ -6993,9 +7067,17 @@ void AMatchDirector::TickCatchCheck(float Dt, float BendWas, float SnapNow)
 
 void AMatchDirector::DetectContacts()
 {
+	// (-TagNoImpact: the bodies are not pushed; the contacts are still found and reported, Game/TagContact.h)
 	static const bool bOff = FParse::Param(FCommandLine::Get(), TEXT("TagNoImpact"));
-	if (bOff || !GetWorld()) return;
+	if (!GetWorld()) return;
 	const double Now = GetWorld()->GetTimeSeconds();
+	FTagContacts& Found = FTagContacts::Get();
+	Found.BeginFrame(GFrameCounter);
+	// each man's sim entity by player id (who a player drives; whether the two are in a tackle)
+	TMap<int32, const tag::Ent*, TInlineSetAllocator<32>> EntOf;
+	if (Sim)
+		for (const tag::Ent* E : Sim->ents)
+			if (E && E->p) EntOf.Add(E->p->id, E);
 	TArray<AAthlete*, TInlineAllocator<64>> All;
 	for (const auto& KV : Athletes)
 		if (AAthlete* X = KV.Value.Get(); X && !X->IsHidden()) All.Add(X);
@@ -7020,15 +7102,52 @@ void AMatchDirector::DetectContacts()
 			const float M1 = A1->MassKg(), M2 = A2->MassKg();
 			const float Jmp = 1.15f * FMath::Min(Closing, 900.f) / (1.f / M1 + 1.f / M2);
 			const float S1 = A1->IsFalling() || A1->IsDown() ? 0.33f : 1.f, S2 = A2->IsFalling() || A2->IsDown() ? 0.33f : 1.f;
-			A1->AddImpact(-N * (Jmp / M1) * S1);
-			A2->AddImpact(N * (Jmp / M2) * S2);
+			if (!bOff)
+			{
+				A1->AddImpact(-N * (Jmp / M1) * S1);
+				A2->AddImpact(N * (Jmp / M2) * S2);
+			}
 			++ContactsThisPlay;
 			MaxJoltThisPlay = FMath::Max(MaxJoltThisPlay, FMath::Max(Jmp / M1 * S1, Jmp / M2 * S2));
 			UE_LOG(LogTemp, Verbose, TEXT("TAG contact #%d / #%d closing %.0f cm/s: %.0f / %.0f cm/s"), A1->Player ? A1->Player->number : -1, A2->Player ? A2->Player->number : -1,
 				Closing, Jmp / M1 * S1, Jmp / M2 * S2);
+			// the contact, for whoever reads it (Game/TagContact.h: the body reactions, the sound, the hit-stop)
+			FTagContact C;
+			C.SimT = Sim ? Sim->t : 0.0;
+			C.PlaySerial = Sim ? Sim->serial : 0;
+			C.IdA = A1->Player ? A1->Player->id : -1;
+			C.IdB = A2->Player ? A2->Player->id : -1;
+			C.AthA = A1;
+			C.AthB = A2;
+			C.Pos = 0.5f * (A1->GetActorLocation() + A2->GetActorLocation());
+			C.Normal = N;
+			C.ClosingSpeed = Closing;
+			C.Impulse = Jmp;
+			C.DvA = Jmp / M1 * S1;
+			C.DvB = Jmp / M2 * S2;
+			C.bImpactApplied = !bOff;
+			const tag::Ent* const* EA = EntOf.Find(C.IdA);
+			const tag::Ent* const* EB = EntOf.Find(C.IdB);
+			if (Sim && EA && EB)
+			{
+				C.SlotA = (*EA)->userControlled ? Sim->slotOf(*EA) : -1;
+				C.SlotB = (*EB)->userControlled ? Sim->slotOf(*EB) : -1;
+				C.bHuman = C.SlotA >= 0 || C.SlotB >= 0;
+				// a tackle: the sim's tackle (wrap, big hit, truck, assist) between these two in the last 0.35 s
+				for (int32 e = static_cast<int32>(Sim->events.size()) - 1; e >= 0 && !C.bTackle; --e)
+				{
+					const tag::PlayEvent& V = Sim->events[e];
+					if (V.t < Sim->t - 0.35) break;
+					const bool bPair = (V.a == *EA && V.b == *EB) || (V.a == *EB && V.b == *EA);
+					C.bTackle = bPair && (V.type == "tackle" || V.type == "wrap" || V.type == "bighit" || V.type == "trucked" || V.type == "assist");
+				}
+			}
+			C.bTackle = C.bTackle || (A1->IsFalling() && A2->IsFalling());
+			Found.Add(C);
 		}
 	if (ContactUntil.Num() > 512)
 		for (auto It = ContactUntil.CreateIterator(); It; ++It) if (Now > It->Value) It.RemoveCurrent();
+	OnContactsFound(); // (the sound of them, the hit-stop on a player's big hit: Game/MatchFeel.cpp)
 }
 
 void AMatchDirector::ResolveEngagedOverlap()
@@ -7298,11 +7417,9 @@ void AMatchDirector::UpdateCamera(float Dt, const FVector& InFocus)
 	if (CamMode == ECamMode::Player) // (the TV game camera is on a tripod head)
 		Hand = FVector(FMath::PerlinNoise1D(CamTime * 0.31f), FMath::PerlinNoise1D(CamTime * 0.27f + 17.f), FMath::PerlinNoise1D(CamTime * 0.23f + 41.f)) * 6.f;
 	P += Hand;
-	if (Shake > 0.1f)
-	{
-		P += FVector(FMath::FRandRange(-Shake, Shake), FMath::FRandRange(-Shake, Shake), FMath::FRandRange(-Shake, Shake));
-		Shake *= FMath::Exp(-Dt * 6.f);
-	}
+	// the shake (a big hit, a sack, a touchdown's sway): smooth noise off a decaying trauma (Game/MatchFeel.cpp)
+	FRotator ShakeRot = FRotator::ZeroRotator;
+	P += CameraShake(Dt, ShakeRot);
 	if (bAutoEstablish && GAutoCoach)
 	{
 		const FVector C(46 * Y, (tag::FIELD_W / 2 + 1.7) * Y, 0);
@@ -7549,7 +7666,7 @@ void AMatchDirector::UpdateCamera(float Dt, const FVector& InFocus)
 		}
 	}
 	Camera->SetActorLocation(P);
-	Camera->SetActorRotation((CamLook - P).Rotation());
+	Camera->SetActorRotation((CamLook - P).Rotation() + ShakeRot);
 	if (UCineCameraComponent* C = Camera->GetCineCameraComponent())
 	{
 		C->FocusSettings.ManualFocusDistance = (CamLook - P).Size();
@@ -7646,6 +7763,10 @@ void AMatchDirector::ReadUserInputSlot()
 	const double Now = FPlatformTime::Seconds();
 	// L1 held: a high pass; L2 held: a low one
 	const int32 ModStyle = PC->IsInputKeyDown(EKeys::Gamepad_LeftShoulder) ? 2 : PC->IsInputKeyDown(EKeys::Gamepad_LeftTrigger) ? 3 : -1;
+	// the pad's pass starts on the press (Game/MatchFeel.cpp: the windup as the button goes down, the pass settled during
+	// it); -TagThrowOnRelease: the old timing below, the press only counted to the windup
+	const bool bOldThrow = TagFeel::ThrowOnRelease();
+	FeelThrow(PC, ModStyle, bOldThrow);
 	for (int i = 0; i < 5; ++i)
 	{
 		// the keyboard throws at once: a bullet (SHIFT lob, CTRL high, ALT low)
@@ -7653,13 +7774,13 @@ void AMatchDirector::ReadUserInputSlot()
 		if (PC->WasInputKeyJustPressed(Nums[i]))
 			ThrowTo(i, PC->IsInputKeyDown(EKeys::LeftShift) ? 1 : PC->IsInputKeyDown(EKeys::LeftControl) ? 2 : PC->IsInputKeyDown(EKeys::LeftAlt) ? 3 : 0);
 		// the pad, Madden's way: the receiver's button held is a bullet, tapped a lob / touch, tapped twice a pump fake
-		if (PC->WasInputKeyJustPressed(Pads[i]) && !Labels.empty() && P.ball.holder == P.qb && !P.passThrown)
+		if (bOldThrow && PC->WasInputKeyJustPressed(Pads[i]) && !Labels.empty() && P.ball.holder == P.qb && !P.passThrown)
 		{
 			if (PadTapIdx == i && Now - PadTapT < 0.22) { P.input.pumpFake = true; PadTapIdx = -1; PadThrowIdx = -1; }
 			else { PadThrowIdx = i; PadThrowT0 = Now; }
 		}
 	}
-	if (PadThrowIdx >= 0 && P.user == P.qb)
+	if (PadThrowIdx >= 0 && P.user == P.qb && bOldThrow)
 	{
 		const double Held = Now - PadThrowT0;
 		if (!PC->IsInputKeyDown(Pads[PadThrowIdx]) || Held >= 0.3)
@@ -7669,7 +7790,7 @@ void AMatchDirector::ReadUserInputSlot()
 			PadThrowIdx = -1;
 		}
 	}
-	if (PadTapIdx >= 0 && Now - PadTapT >= 0.22 && P.user == P.qb) { ThrowTo(PadTapIdx, 1); PadTapIdx = -1; }
+	if (PadTapIdx >= 0 && Now - PadTapT >= 0.22 && P.user == P.qb && bOldThrow) { ThrowTo(PadTapIdx, 1); PadTapIdx = -1; }
 	// the pump fake on the keyboard
 	if (PC->WasInputKeyJustPressed(EKeys::P) && P.ball.holder == P.qb && !P.passThrown) P.input.pumpFake = true;
 	// throw it away (Madden: R3; keyboard T)
@@ -7688,8 +7809,9 @@ void AMatchDirector::ReadUserInputSlot()
 		P.input.strafe = bDefUser && (PC->IsInputKeyDown(EKeys::Gamepad_LeftTrigger) || PC->IsInputKeyDown(EKeys::LeftShift));
 		if (bDefUser && (PC->WasInputKeyJustPressed(EKeys::Gamepad_RightShoulder) || PC->WasInputKeyJustPressed(EKeys::X))) P.input.strip = true;
 	}
-	// switch player on defense (Madden: CIRCLE)
-	if (bDefUser && PC->WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Right)) P.input.switchReq = true;
+	// switch player on defense (Madden: CIRCLE): FeelSwitch below, with TAB / L1
+	const bool bSwitchCircle = bDefUser && PC->WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Right);
+	const bool bSwitchCircleHeld = bDefUser && PC->IsInputKeyDown(EKeys::Gamepad_FaceButton_Right);
 	// a field goal block: TRIANGLE (keyboard C) leaps at the line, hands up; SQUARE / SPACE lays out across the kick (dive)
 	if (bDefUser && P.isPlaceKick() && (PC->WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Top) || PC->WasInputKeyJustPressed(EKeys::C))) P.input.blockJump = true;
 	// the highlight stick. With the ball: flick the right stick ahead of him to truck, back to stiff arm, to a side to
@@ -7808,7 +7930,13 @@ void AMatchDirector::ReadUserInputSlot()
 	}
 	else if (P.ball.mode == tag::BallMode::Held && P.ball.holder == P.qb) bAggroCatch = false;
 	// (the quarterback's L1 is the high pass, not a switch: it took him off the quarterback with the ball in his hands)
-	if (PC->WasInputKeyJustPressed(EKeys::Tab) || (BindCtx != TagBind::ECtx::Passing && PC->WasInputKeyJustPressed(EKeys::Gamepad_LeftShoulder))) P.input.switchReq = true;
+	// the switch follows the ball, the button held with the stick picks the man that way, and the stick does not steer
+	// the new man for a beat (Game/MatchFeel.cpp; -TagSwitchOld: the sim's nearest-the-ball switch, as it was)
+	{
+		const bool bL1 = BindCtx != TagBind::ECtx::Passing;
+		FeelSwitch(bSwitchCircle || PC->WasInputKeyJustPressed(EKeys::Tab) || (bL1 && PC->WasInputKeyJustPressed(EKeys::Gamepad_LeftShoulder)),
+			bSwitchCircleHeld || PC->IsInputKeyDown(EKeys::Tab) || (bL1 && PC->IsInputKeyDown(EKeys::Gamepad_LeftShoulder)));
+	}
 	// auto-switch to our ball carrier after a handoff / catch
 	tag::Ent* H = P.ball.holder;
 	// (multiplayer: a man another player has is his; on offense only the player on the quarterback follows the ball)
@@ -7824,6 +7952,7 @@ void AMatchDirector::ReadUserInputSlot()
 	// (a handoff: the sim hands the user the back in the tick the ball is his - PlaySim::updateSnap - so the switch above
 	// finds him already there; the receivers' buttons go as they did when it switched here)
 	else if (P.handedOff && P.user && P.user != P.qb && P.user->side == tag::Side::Off && P.ball.holder == P.user && !Labels.empty()) Labels.clear();
+	FeelNotePresses(PC); // (-TagLatencyLog: each press followed to the step that takes it, Game/TagLatency.h)
 }
 
 // ------------------------------------------------------------------ tick
@@ -7976,6 +8105,9 @@ void AMatchDirector::Tick(float Dt)
 	Super::Tick(Dt);
 	// every device's "just pressed" lasts this one tick, whichever way it returns
 	ON_SCOPE_EXIT { FTagInputHub::Get().EndFrame(); };
+	TickHitStop(); // (a hit-stop lets go on real time, and at once for a pause or the end of the play: Game/MatchFeel.cpp)
+	if (bFeelTest) TickFeelTest(Dt);
+	if (bHitStopTest) TickHitStopTest();
 	{
 		// a menu one player works (multiplayer: a play call, the try): the other pads and keys go nowhere
 		const bool bOwned = bMulti && MenuOwner >= 0 && Overlay && Overlay->HasModal() && !bEnginePaused && State != EMatchState::Paused;
@@ -8106,7 +8238,7 @@ void AMatchDirector::Tick(float Dt)
 		InputPrereq = PC;
 	}
 	TrackInputDevice(PC);
-	TickRumble(Dt); // (the pad's rumble, Game/MatchFeel.cpp: before the pause's return, so a pause stops it at once)
+	TickRumble(FeelRealDt(Dt)); // (the pad's rumble, Game/MatchFeel.cpp: before the pause's return, so a pause stops it at once; on real time through a hit-stop)
 	if (bPlayNowPending && !(IsMoviePlayerEnabled() && GetMoviePlayer()->IsMovieCurrentlyPlaying()))
 	{
 		bPlayNowPending = false;
@@ -8304,13 +8436,15 @@ void AMatchDirector::Tick(float Dt)
 			ReadUserInput();
 			TakeMovePresses(); // (a move pressed a beat early waits 150 ms for the sim to take it: Game/MatchFeel.cpp)
 		}
-		Acc += SDt;
+		if (!HitStop.bOn) Acc += SDt; // (a hit-stop holds the sim's steps from the frame it starts: Game/MatchFeel.cpp)
 		int N = 0;
 		while (Acc >= STEP && Sim->isLive() && N++ < 12)
 		{
 			CapturePrev();
 			OfferBufferedMoves();
+			FeelBeforeStep(); // (Responsive movement, the step count, the hit-stop's check: Game/MatchFeel.cpp)
 			Sim->step(STEP);
+			FeelAfterStep();
 			SettleBufferedMoves();
 			Acc -= STEP;
 			for (int32 Us = 0; Us < Sim->userSlots(); ++Us)

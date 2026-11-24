@@ -1,4 +1,5 @@
 #include "Render/TagRetargetAnimInstance.h"
+#include "Render/TagMotionMatchInstance.h"
 
 #include "Components/SkeletalMeshComponent.h"
 #include "Retargeter/IKRetargeter.h"
@@ -82,7 +83,38 @@ void FTagRetargetProxy::PreUpdate(UAnimInstance* InAnimInstance, float DeltaSeco
 		FromPose = LastPose; // previous Evaluate finished before this PreUpdate
 		BlendElapsed = 0.f;
 		CurBlendTime = 0.f;
+		// dead blending: each joint's turn rate between the last two shown poses carries the pose blended out of on (local
+		// rotations only: the root and the hips' travel are the follower's and bDropFromTravel's). The engine's
+		// FAnimNode_DeadBlending does this inside a node graph, extrapolating every bone's translation too; this crossfade
+		// sits in the middle of a layer stack on a pose copied from another mesh, where an extrapolated root or hip
+		// translation is travel the actor has already taken (the dive-catch pop, p58) - so it is done here, the same way.
+		static const bool bFrozen = FParse::Param(FCommandLine::Get(), TEXT("TagFrozenFade"));
+		bFromVel = false;
+		if (!bFrozen && bPrevPoseValid && PrevPose.Num() == LastPose.Num() && LastPoseDt > 1e-3f && LastPoseDt < 0.1f)
+		{
+			// (360 deg/s at most, the engine's dead blending default: a capture's own glitch frame is not carried on)
+			constexpr float MaxRate = 6.2832f;
+			FromAngVel.SetNum(LastPose.Num(), EAllowShrinking::No);
+			FromAngVel[0] = FVector::ZeroVector;
+			for (int32 i = 1; i < LastPose.Num(); ++i)
+			{
+				FQuat Delta = LastPose[i].GetRotation() * PrevPose[i].GetRotation().Inverse();
+				Delta.EnforceShortestArcWith(FQuat::Identity);
+				FromAngVel[i] = (Delta.ToRotationVector() / LastPoseDt).GetClampedToMaxSize(MaxRate);
+			}
+			bFromVel = true;
+		}
 	}
+	// the source's matched clip changing (motion matching's pick; the source mesh has finished its update by now): the
+	// jerk measure's second kind of switch
+	if (const UTagRetargetAnimInstance* I = Cast<UTagRetargetAnimInstance>(InAnimInstance))
+		if (const USkeletalMeshComponent* Src = I->CopySource.Get())
+			if (const UTagMotionMatchInstance* MI = Cast<UTagMotionMatchInstance>(Src->GetAnimInstance()))
+			{
+				const UAnimationAsset* Now = MI->bMatch ? MI->GetMatchedAsset() : nullptr;
+				if (Now && JerkPickAsset.Get() && Now != JerkPickAsset.Get()) ++PickSerialIn;
+				JerkPickAsset = Now;
+			}
 	// an explicit pose snapshot (ragdoll -> get-up) wins over the last displayed pose
 	if (const UTagRetargetAnimInstance* I = Cast<UTagRetargetAnimInstance>(InAnimInstance))
 	{
@@ -143,6 +175,8 @@ bool FTagRetargetProxy::Evaluate(FPoseContext& Output)
 			LastPose[I.GetInt()] = Output.Pose[I];
 		}
 		BlendElapsed = 1e3f;
+		bPrevPoseValid = false; // (a recorded pose has no rate to carry into the live one)
+		JerkHave = 0;
 		for (float& D : DevFrame) D = 0.f;
 		return true;
 	}
@@ -176,12 +210,92 @@ bool FTagRetargetProxy::Evaluate(FPoseContext& Output)
 	ApplyFeet(Output); // on the shown pose, after the blend (a blended foot would slide through every transition)
 	Step(6);
 	ApplyKeepOut(Output);
-	if (bMeasure) DevFrame[0] = DevMean(J0, Ja);
+	if (bMeasure)
+	{
+		DevFrame[0] = DevMean(J0, Ja);
+		MeasureJerk(Output);
+	}
 	ApplyTwist(Output);
 	const int32 N = Output.Pose.GetNumBones();
+	// (the pose before it kept as well, by swapping the buffers: the two give each joint's turn rate at a switch)
+	Swap(PrevPose, LastPose);
+	bPrevPoseValid = PrevPose.Num() == N;
+	LastPoseDt = Dt;
 	LastPose.SetNum(N, EAllowShrinking::No);
 	for (FCompactPoseBoneIndex I(0); I < N; ++I) LastPose[I.GetInt()] = Output.Pose[I];
 	return true;
+}
+
+void FTagRetargetProxy::MeasureJerk(FPoseContext& Output)
+{
+	// the shown joints this evaluation (component space) and their acceleration over the last three
+	JerkClock += Dt;
+	FVector J[kDevN];
+	DevJoints(Output, J);
+	float Acc = -1.f;
+	if (JerkHave >= 2 && Dt > 1e-4f && JerkDt[0] > 1e-4f)
+	{
+		double S = 0.0;
+		for (int32 k = 0; k < kDevN; ++k)
+		{
+			const FVector V1 = (J[k] - JerkJ[0][k]) / Dt;
+			const FVector V0 = (JerkJ[0][k] - JerkJ[1][k]) / JerkDt[0];
+			S += (V1 - V0).Size() / (0.5f * (Dt + JerkDt[0]));
+		}
+		Acc = static_cast<float>(S / kDevN);
+	}
+	for (int32 k = 0; k < kDevN; ++k)
+	{
+		JerkJ[1][k] = JerkJ[0][k];
+		JerkJ[0][k] = J[k];
+	}
+	JerkDt[1] = JerkDt[0];
+	JerkDt[0] = Dt;
+	JerkHave = FMath::Min(JerkHave + 1, 2);
+	// a switch: the window before it is the ring's last 0.25 s; the one after is gathered from here
+	auto Finish = [this]()
+	{
+		if (bJerkPost && JerkPostN >= 3 && JerkPre > 1.f) JerkOutFrame.Add(FVector2f(static_cast<float>(JerkPostSum / JerkPostN) / JerkPre, static_cast<float>(JerkKind)));
+		bJerkPost = false;
+	};
+	const bool bClip = In.ClipSerial != JerkSerial, bPick = PickSerialIn != JerkPickSerial;
+	JerkSerial = In.ClipSerial;
+	JerkPickSerial = PickSerialIn;
+	if ((bClip || bPick) && CurBlendTime <= 0.f) // (not a get-up's snapshot blend)
+	{
+		Finish();
+		double PreSum = 0.0;
+		int32 PreN = 0;
+		for (int32 k = 0; k < JerkRingCount; ++k)
+		{
+			const int32 R = (JerkRingHead - 1 - k + 48) % 48;
+			if (JerkClock - JerkRingT[R] > 0.25f + 1e-3f) break;
+			PreSum += JerkRingA[R];
+			++PreN;
+		}
+		if (PreN >= 3)
+		{
+			bJerkPost = true;
+			JerkKind = static_cast<uint8>(bClip ? 0 : 1);
+			JerkPre = static_cast<float>(PreSum / PreN);
+			JerkPostT0 = JerkClock;
+			JerkPostSum = 0.0;
+			JerkPostN = 0;
+		}
+	}
+	if (Acc >= 0.f)
+	{
+		if (bJerkPost && JerkClock - JerkPostT0 <= 0.25f)
+		{
+			JerkPostSum += Acc;
+			++JerkPostN;
+		}
+		JerkRingA[JerkRingHead] = Acc;
+		JerkRingT[JerkRingHead] = JerkClock;
+		JerkRingHead = (JerkRingHead + 1) % 48;
+		JerkRingCount = FMath::Min(JerkRingCount + 1, 48);
+	}
+	if (bJerkPost && JerkClock - JerkPostT0 > 0.25f) Finish();
 }
 
 void FTagRetargetProxy::PostUpdate(UAnimInstance* InAnimInstance) const
@@ -195,6 +309,11 @@ void FTagRetargetProxy::PostUpdate(UAnimInstance* InAnimInstance) const
 		I->Touchdowns += TouchdownsFrame;
 		for (int32 k = 0; k < 7; ++k) I->Dev[k] = DevFrame[k];
 		I->PlantFeet = PlantFeetFrame;
+		if (JerkOutFrame.Num())
+		{
+			I->JerkOut.Append(JerkOutFrame);
+			JerkOutFrame.Reset();
+		}
 	}
 }
 
@@ -306,6 +425,7 @@ void FTagRetargetProxy::ApplyCrossfade(FPoseContext& Output)
 			FromPose[I.GetInt()] = PendingMesh.IsValidIndex(M) ? PendingMesh[M] : Output.Pose[I];
 		}
 		bPendingSnap = false;
+		bFromVel = false; // (a snapshot is a lying body: nothing to carry on)
 	}
 	const float BlendTime = CurBlendTime > 0.f ? CurBlendTime : In.BlendTime;
 	if (FromPose.Num() == N && BlendElapsed < BlendTime && BlendTime > 0.f)
@@ -357,11 +477,20 @@ void FTagRetargetProxy::ApplyCrossfade(FPoseContext& Output)
 				if (FVector::DistSquared2D(Ft, Tt) > 60.f * 60.f) FromPose[I.GetInt()].SetTranslation(FVector(Tt.X, Tt.Y, Ft.Z)); // (his height still blends)
 			}
 		}
+		// dead blending (In.ClipSerial's note): the pose blended out of goes on turning at each joint's rate from the switch,
+		// the rate decaying by half every HalfLife s, for as long as it has been since that pose was shown (this evaluation
+		// is a frame after it: the frozen fade showed the same pose twice, a one-frame stall at every switch). Each joint
+		// turns 0.6 rad at most, so a pose cannot fold. The blend's own ease is unchanged.
+		static float HalfLife = FParse::Value(FCommandLine::Get(), TEXT("TagDeadBlendHL="), HalfLife) ? FMath::Max(HalfLife, 0.01f) : 0.12f;
+		const bool bDead = bFromVel && FromAngVel.Num() == N;
+		const float Carry = bDead ? HalfLife / 0.6931f * (1.f - FMath::Exp(-0.6931f * (BlendElapsed + Dt) / HalfLife)) : 0.f;
 		for (FCompactPoseBoneIndex I(0); I < N; ++I)
 		{
 			FTransform& T = Output.Pose[I];
 			const FTransform& F = FromPose[I.GetInt()];
-			T.SetRotation(FQuat::Slerp(F.GetRotation(), T.GetRotation(), A).GetNormalized());
+			FQuat FromRot = F.GetRotation();
+			if (bDead) FromRot = (FQuat::MakeFromRotationVector((FromAngVel[I.GetInt()] * Carry).GetClampedToMaxSize(0.6f)) * FromRot).GetNormalized();
+			T.SetRotation(FQuat::Slerp(FromRot, T.GetRotation(), A).GetNormalized());
 			T.SetTranslation(FMath::Lerp(F.GetTranslation(), T.GetTranslation(), A));
 			T.SetScale3D(FMath::Lerp(F.GetScale3D(), T.GetScale3D(), A));
 		}
