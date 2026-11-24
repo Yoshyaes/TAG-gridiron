@@ -36,6 +36,23 @@ P = {
     "hotDeepSlope": (0.07041, 0.0, 0.3, 0.04),
     "manCushion": (1.1, 0.4, 3.0, 0.3),
     "manLagK": (0.6, 0.3, 1.0, 0.15),
+    # (man coverage by the body, Research/NextLevel/02 A1: the cut reaction, the drive on a break, the lead it plays)
+    "manCutBase": (0.2, 0.04, 0.4, 0.05),
+    "manDriveLead": (1.2, 0.0, 2.5, 0.3),
+    "manDriveT": (0.3, 0.1, 0.6, 0.08),
+    "manLead": (0.35, 0.2, 0.7, 0.06),
+    "manCueCushion": (0.6, 0.0, 2.0, 0.25),
+    # (leverage at engagement, A5: where the edge is even, how far past the blocker's middle he is by him, its spread)
+    "levCen": (0.9, 0.3, 1.5, 0.15),
+    "levHip": (0.3, 0.0, 0.8, 0.1),
+    "levK": (6.0, 2.0, 12.0, 1.5),
+    "levSd": (4.0, 1.0, 8.0, 1.0),
+    # (read keys, A4: how fast a man reads them, how long he holds, how hard a run read pulls him up)
+    "keyTau": (0.15, 0.05, 0.4, 0.05),
+    "keyTauK": (0.006, 0.0, 0.015, 0.002),
+    "keyStepT": (0.0, 0.0, 0.4, 0.08),
+    "keyBiteK": (3.0, 0.5, 4.0, 0.5),
+    "keyFill": (4.0, 0.0, 5.0, 0.5),
     "zoneEyes": (4.0, 0.0, 8.0, 1.5),
     "reachA": (14, 6.0, 30.0, 3.0),
     "midContest": (1.0, 0.0, 1.0, 0.25),

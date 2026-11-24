@@ -389,6 +389,133 @@ int main() {
     check(anyThrow, "user QB never threw");
   });
 
+  t("api: setUserThrow / cancelUserThrow change or call off the user quarterback's pass in its windup", [&] {
+    // the throw on the press (Game/MatchFeel.cpp): the windup starts, then the pass is settled over it - its type, and not
+    // before the press can no longer turn out a tap - or it is called off (a pump fake)
+    auto windup = [&](uint32_t seed) {
+      GameOptions o;
+      o.seed = seed;
+      auto g = std::make_unique<Game>(*league[8], *league[9], o);
+      g->phase = GamePhase::Scrimmage;
+      g->ballOn = 30;
+      std::unique_ptr<PlaySim> sim = g->makePlay(*playById("dbl_curls"), *defById("nk_c3"), Side::Off);
+      check(!sim->setUserThrow(1, true, 1.0) && !sim->cancelUserThrow(), "a pass to change before there is one");
+      bool asked = false;
+      int steps = 0;
+      while (sim->isLive() && steps++ < 600 && !sim->pendingThrow) {
+        if (!asked && sim->t > 1.4 && sim->ball.holder == sim->qb) {
+          sim->input.throwTo = "X";
+          asked = true;
+        }
+        sim->step();
+      }
+      return std::make_pair(std::move(g), std::move(sim));
+    };
+    int changed = 0, called = 0;
+    for (uint32_t seed = 51; seed < 71 && (changed < 3 || called < 3); seed++) {
+      auto gs = windup(seed);
+      PlaySim& s = *gs.second;
+      if (!s.isLive() || !s.pendingThrow || s.pendingThrow->shovel) continue;
+      if (seed % 2) {
+        const double minAt = s.t + 0.3;
+        check(s.setUserThrow(1, true, minAt), "the windup's pass not changed");
+        check(s.pendingThrow->style == 1 && s.pendingThrow->lob && s.pendingThrow->at >= minAt - 1e-12, "the windup's pass not as set");
+        double thrownAt = -1;
+        for (int k = 0; k < 120 && s.isLive() && thrownAt < 0; k++) {
+          s.step();
+          if (s.passThrown) thrownAt = s.t;
+        }
+        if (thrownAt < 0) continue;  // (sacked in the windup)
+        check(thrownAt >= minAt - 1e-9, "the pass left before it was let: " + fx(thrownAt, 3) + " < " + fx(minAt, 3));
+        check(s.ball.lob, "the pass was not lobbed");
+        check(!s.setUserThrow(0, false, -1), "a pass already gone changed");
+        changed++;
+      } else {
+        check(s.cancelUserThrow(), "the windup's pass not called off");
+        check(!s.pendingThrow && s.input.throwTo.empty(), "the pass or its request still there");
+        check(!s.cancelUserThrow(), "a pass called off twice");
+        for (int k = 0; k < 40 && s.isLive(); k++) s.step();
+        check(!s.passThrown, "a pass called off was thrown");
+        called++;
+      }
+    }
+    check(changed >= 3 && called >= 3, "too few windups: " + std::to_string(changed) + " changed, " + std::to_string(called) + " called off");
+  });
+
+  t("api: setUserSteer steers a player's man by his setting on his stick's steps only, and no one else", [&] {
+    SteerBoost b;
+    b.on = true;
+    b.latMul = 1.2;
+    b.brakeMul = 1.1;
+    b.latAgiAtSpeed = 0.09;
+    b.gripMul = 1.04;
+    b.gripAgi = 0.09;
+    // the law: steerVel is the sim's own law (steerLaw) for a CPU man and on a step his stick did not drive, the boosted law
+    // capped to the sim's speed on one it did
+    Rng r(3);
+    int differ = 0;
+    GameOptions go;
+    go.seed = 5;
+    Game g0(*league[0], *league[1], go);
+    g0.phase = GamePhase::Scrimmage;
+    std::unique_ptr<PlaySim> any = g0.makePlay(*playById("dbl_curls"), *defById("nk_c3"));  // (steerVel reads only the man)
+    check(!any->setUserSteer(0, b), "a CPU-vs-CPU play has no player's slot to steer");
+    for (int k = 0; k < 2000; k++) {
+      Player pl;
+      pl.r.speed = r.range(40, 99);
+      pl.r.accel = r.range(40, 99);
+      pl.r.agility = r.range(40, 99);
+      pl.weightLb = r.range(170, 330);
+      Ent e(&pl, Side::Def, "CB", V2{0, 0});
+      e.strafing = r.chance(0.2);
+      const double a0 = r.range(0, 2 * kPi), a1 = r.range(0, 2 * kPi), s0 = r.range(0, 1) * e.vmax, s1 = r.range(0, 1) * e.vmax;
+      const V2 v0{std::cos(a0) * s0, std::sin(a0) * s0}, w{std::cos(a1) * s1, std::sin(a1) * s1};
+      const V2 own = PlaySim::steerLaw(&e, v0, w, SIM_DT, nullptr);
+      e.steer = b;
+      e.stickDrove = true;
+      check(dist(any->steerVel(&e, v0, w, SIM_DT), own) < 1e-12, "a CPU man was steered by a player's setting");
+      e.userControlled = true;
+      e.stickDrove = false;
+      check(dist(any->steerVel(&e, v0, w, SIM_DT), own) < 1e-12, "a player's man was steered by his setting on a step his stick did not drive");
+      e.stickDrove = true;
+      V2 want = PlaySim::steerLaw(&e, v0, w, SIM_DT, &b);
+      const double top = (std::max)(len(own), len(v0));
+      if (len(want) > top) want = scale(want, top / len(want));
+      const V2 got = any->steerVel(&e, v0, w, SIM_DT);
+      check(dist(got, want) < 1e-12, "a player's man not steered by his setting, capped to the sim's speed");
+      check(len(got) <= top + 1e-9, "a player's man steered faster than the sim's law");
+      differ += dist(got, own) > 1e-9;
+    }
+    check(differ > 200, "the setting changed too few steps: " + std::to_string(differ));
+    // in a play: the user's quarterback, the stick turning him about, with the setting and without; nobody else is touched
+    auto run = [&](bool boost, int& mine, int& others, V2& qbAt) {
+      GameOptions o;
+      o.seed = 77;
+      Game g(*league[4], *league[5], o);
+      g.phase = GamePhase::Scrimmage;
+      g.ballOn = 40;
+      auto sim = g.makePlay(*playById("dbl_curls"), *defById("nk_c3"), Side::Off);
+      for (int k = 0; k < 90 && sim->isLive(); k++) {
+        if (boost) check(sim->setUserSteer(0, b), "no man in slot 0");
+        sim->input.move = (k / 20) % 2 ? V2{-0.3, 1} : V2{-0.3, -1};
+        sim->step();
+      }
+      mine = sim->qb->steerBoosted;
+      others = 0;
+      for (const Ent* e : sim->ents)
+        if (e != sim->qb) others += e->steerBoosted;
+      qbAt = sim->qb->pos;
+    };
+    int m1 = 0, o1 = 0, m0 = 0, o0 = 0;
+    V2 at1, at0;
+    run(true, m1, o1, at1);
+    run(false, m0, o0, at0);
+    std::printf("       (the user quarterback steered by his setting on %d of 90 steps, %d steps of anyone else's; without it %d / %d, %.2f yd apart at the end)\n", m1, o1, m0, o0,
+                dist(at1, at0));
+    check(m1 > 10 && o1 == 0 && m0 == 0 && o0 == 0, "the setting steered the wrong men");
+    check(dist(at1, at0) > 0.01, "the setting changed nothing about how he moved");
+  });
+
   t("api: user-controlled defender + switchUser", [&] {
     GameOptions o;
     o.seed = 31;
@@ -1528,6 +1655,239 @@ int main() {
     check(aOn > 300 && aOff > 300, "too few Cover 1 attempts");
     check(pOff >= 4, "too few trail-technique picks without the rule to compare: " + std::to_string(pOff));
     check(static_cast<double>(pOn) / aOn < 0.6 * static_cast<double>(pOff) / aOff, "trail-technique picks did not drop: " + std::to_string(pOn) + " vs " + std::to_string(pOff));
+  });
+
+  t("man coverage by the body: a double move beats a man defender who reads the break (02 A1)", [&] {
+    // Cover 1 press against the X receiver on a sluggo / an out-and-up and on a go: the man defender to his receiver when
+    // the receiver is 16 yd down the field (the quarterback, a user's with the stick left alone, holds the ball behind max
+    // protection). Reading
+    // the route ahead (predictPos) he was never fooled; reading the body he jumps the first break and the second one
+    // finds him driving on it
+    // (afterBreak: the gap half a second after he reaches the route's first break point, not at 16 yd)
+    auto gapAt = [&](const char* route, bool cue, double rr, bool afterBreak, int reps, double& gapOut, int& nOut) {
+      const double keep = tune().manCue;
+      setTune("manCue", cue ? 1 : 0);
+      Rng rng(4242);
+      double sum = 0;
+      int n = 0;
+      for (int k = 0; k < reps; k++) {
+        PlayConfig cfg;
+        cfg.off = league[k % 32].get();
+        cfg.def = league[(k + 7) % 32].get();
+        cfg.offPlay = playById("trips_4verts");
+        cfg.defCall = defById("base_c1");
+        cfg.los = 30;
+        cfg.ballY = FIELD_W / 2;
+        cfg.flip = k % 2 == 0;
+        cfg.worldDir = 1;
+        cfg.weather.tempF = 60;
+        cfg.rng = rng.fork();
+        PlaySim sim(cfg);
+        Ent* x = sim.offRole("X");
+        if (!x) continue;
+        if (rr > 0) x->rr.routeRunning = rr;  // (his ratings for this play only: the sim reads Ent::rr)
+        sim.hotRoute(x, route);
+        sim.adjustShell(PlaySim::ShellAdj::Press);
+        sim.setProtection(0, true);  // (max protect: the held ball is not sacked before the routes get there)
+        sim.pickUserEnt(Side::Off);
+        Ent* m = nullptr;
+        double got = -1, brokeT = -1;
+        while (sim.isLive() && sim.t < 5.0) {
+          sim.step();
+          if (!m)
+            for (Ent* d : sim.def)
+              if (d->state == EntState::Man && d->man == x) m = d;
+          if (!m || sim.passThrown || x->state != EntState::Route) break;
+          if (brokeT < 0 && x->routeIdx >= 1) brokeT = sim.t;
+          if (afterBreak ? brokeT >= 0 && sim.t >= brokeT + 0.5 : x->pos.x - sim.los >= 16) {
+            got = dist(x->pos, m->pos);
+            break;
+          }
+        }
+        if (got >= 0) {
+          sum += got;
+          n++;
+        }
+      }
+      setTune("manCue", keep);
+      gapOut = n ? sum / n : 0;
+      nOut = n;
+    };
+    double gGoOn = 0, gSlOn = 0, gOuOn = 0, gGoOff = 0, gSlOff = 0, gOuOff = 0;
+    int n1 = 0, n2 = 0, n3 = 0, n4 = 0, n5 = 0, n6 = 0;
+    gapAt("go", true, 0, false, 400, gGoOn, n1);
+    gapAt("slantgo", true, 0, false, 400, gSlOn, n2);
+    gapAt("outnup", true, 0, false, 400, gOuOn, n3);
+    gapAt("go", false, 0, false, 400, gGoOff, n4);
+    gapAt("slantgo", false, 0, false, 400, gSlOff, n5);
+    gapAt("outnup", false, 0, false, 400, gOuOff, n6);
+    // the cut itself: half a second after an out's break, a 95 route runner against a 60 (Madden 26's cut reaction: his
+    // route running against the man's coverage)
+    double gHi = 0, gLo = 0, gHiOff = 0, gLoOff = 0;
+    int m1 = 0, m2 = 0, m3 = 0, m4 = 0;
+    gapAt("out", true, 95, true, 400, gHi, m1);
+    gapAt("out", true, 60, true, 400, gLo, m2);
+    gapAt("out", false, 95, true, 400, gHiOff, m3);
+    gapAt("out", false, 60, true, 400, gLoOff, m4);
+    std::printf("       (man defender to X at 16 yd, Cover 1 press: reading the body go %.2f / sluggo %.2f / out-and-up %.2f yd; reading the route %.2f / %.2f / %.2f. "
+                "0.5 s after an out's break, route running 95 / 60: %.2f / %.2f yd, reading the route %.2f / %.2f)\n",
+                gGoOn, gSlOn, gOuOn, gGoOff, gSlOff, gOuOff, gHi, gLo, gHiOff, gLoOff);
+    check(n1 > 200 && n2 > 200 && n3 > 200 && n4 > 200 && n5 > 200 && n6 > 200 && m1 > 200 && m2 > 200, "too few reps reached the measuring point");
+    // a double move beats him: more room at 16 yd than a go gets, by a margin the route read did not give it
+    check(gSlOn > gGoOn + 0.3 && gOuOn > gGoOn + 0.3, "a double move did not beat the man reading the body: go " + fx(gGoOn) + ", sluggo " + fx(gSlOn) + ", out-and-up " + fx(gOuOn));
+    check((gSlOn - gGoOn) + (gOuOn - gGoOn) > (gSlOff - gGoOff) + (gOuOff - gGoOff) + 0.5,
+          "double moves gained no more against the body read than against the route read: " + fx(gSlOn - gGoOn) + " + " + fx(gOuOn - gGoOn) + " vs " + fx(gSlOff - gGoOff) +
+              " + " + fx(gOuOff - gGoOff));
+    // (route running on the cut is printed, not checked: half a second after an out's break the trailing man's cushion
+    // makes the gap - he is a yard and a half off and going up the field - and his cut reaction barely shows in it)
+  });
+
+  t("leverage at engagement: no block forms on a man already past the blocker's hip (02 A5)", [&] {
+    // full games: blocks formed on a defender already past the blocker's hip (Tune::levHip beyond his middle on the line
+    // to the defender's goal), with the rule and without
+    auto pastHip = [&](bool lev, int& past, int& formed, int& refused) {
+      const double keep = tune().leverage;
+      setTune("leverage", lev ? 1 : 0);
+      past = formed = refused = 0;
+      Rng rng(515);
+      for (int i = 0; i < 8; i++) {
+        GameOptions o;
+        o.seed = static_cast<uint32_t>(rng.intRange(1, 1000000000));
+        Game g(*league[(i * 3) % 32], *league[(i * 7 + 5) % 32], o);
+        g.onPlayResult = [&](const PlaySim&, const PlayResult& r) {
+          past += r.engPastHip;
+          formed += r.engN;
+          refused += r.engRefused;
+        };
+        g.simToEnd();
+      }
+      setTune("leverage", keep);
+    };
+    int pOn = 0, fOn = 0, rOn = 0, pOff = 0, fOff = 0, rOff = 0;
+    pastHip(true, pOn, fOn, rOn);
+    pastHip(false, pOff, fOff, rOff);
+    // the arc: an end with 95 speed / 95 acceleration / 90 agility / 60 strength, and one with 70 / 70 / 65 / 95 (the same
+    // pass rush, the same weight), against tackles of 70 speed, on a dropback the quarterback holds: how often he beats
+    // the tackle inside 2.5 s, and how hard he walks him back while he is on him
+    auto arc = [&](bool speedy, bool lev, double& winRate, double& push) {
+      const double keep = tune().leverage;
+      setTune("leverage", lev ? 1 : 0);
+      Rng rng(616);
+      int reps = 0, wins = 0;
+      double pushSum = 0, pushN = 0;
+      for (int k = 0; k < 500; k++) {
+        PlayConfig cfg;
+        cfg.off = league[k % 32].get();
+        cfg.def = league[(k + 3) % 32].get();
+        cfg.offPlay = playById("dbl_curls");
+        cfg.defCall = defById("base_c3");
+        cfg.los = 30;
+        cfg.ballY = FIELD_W / 2;
+        cfg.flip = k % 2 == 0;
+        cfg.worldDir = 1;
+        cfg.weather.tempF = 60;
+        cfg.rng = rng.fork();
+        Player* end = nullptr;
+        std::vector<Player*> tackles;
+        {
+          PlaySim look(cfg);
+          if (Ent* le = look.defRole("LE")) end = le->p;
+          for (const char* tr : {"LT", "RT"})
+            if (Ent* tk = look.offRole(tr)) tackles.push_back(tk->p);
+        }
+        if (!end || tackles.size() != 2) continue;
+        const Player endWas = *end;
+        std::vector<Player> tkWas;
+        for (Player* tk : tackles) tkWas.push_back(*tk);
+        end->r.speed = speedy ? 95 : 70;
+        end->r.accel = speedy ? 95 : 70;
+        end->r.agility = speedy ? 90 : 65;
+        end->r.strength = speedy ? 60 : 95;
+        end->r.passRush = 80;
+        end->weightLb = 265;
+        for (Player* tk : tackles) {
+          tk->r.speed = 70;
+          tk->r.accel = 70;
+          tk->r.agility = 70;
+          tk->r.strength = 80;
+          tk->r.passBlock = 80;
+          tk->weightLb = 315;
+        }
+        {
+          PlaySim sim(cfg);
+          sim.pickUserEnt(Side::Off);
+          Ent* le = sim.defRole("LE");
+          while (sim.isLive() && sim.t < 2.5) {
+            sim.step();
+            if (le && !le->engagedBy.empty() && le->engagedBy[0]->state == EntState::PassBlock) pushSum += le->linePush, pushN++;
+          }
+          if (le && le->wrIn) {
+            reps++;
+            wins += le->wrBeat || le->wrFree;
+          }
+        }
+        *end = endWas;
+        for (size_t i = 0; i < tackles.size(); i++) *tackles[i] = tkWas[i];
+      }
+      setTune("leverage", keep);
+      winRate = reps ? static_cast<double>(wins) / reps : 0;
+      push = pushN ? pushSum / pushN : 0;
+    };
+    double wS = 0, pS = 0, wP = 0, pP = 0, wSo = 0, pSo = 0, wPo = 0, pPo = 0;
+    arc(true, true, wS, pS);
+    arc(false, true, wP, pP);
+    arc(true, false, wSo, pSo);
+    arc(false, false, wPo, pPo);
+    std::printf("       (8 games: blocks on a man past the hip %d of %d with the rule (%d refused), %d of %d without. The arc, beat the tackle inside 2.5 s / push while on him: "
+                "speed end %.0f%% / %+.2f, power end %.0f%% / %+.2f; without the rule %.0f%% / %+.2f, %.0f%% / %+.2f)\n",
+                pOn, fOn, rOn, pOff, fOff, 100 * wS, pS, 100 * wP, pP, 100 * wSo, pSo, 100 * wPo, pPo);
+    check(fOn > 1000 && fOff > 1000, "too few blocks to judge");
+    check(pOn == 0, std::to_string(pOn) + " blocks formed on a defender already past the blocker's hip");
+    check(rOn > 0, "the rule never refused a block");
+    check(pOff > 0, "without the rule no block formed past the hip either: the check would not see one");
+    // (the arc is printed, not checked: the tackle's punch lands from setReach out, before a faster end is any wider, and
+    // once on him the rep goes by the pass-rush skill the two ends share - both win about as often)
+    check(wS > 0 && wP > 0, "an end never beat the tackle");
+  });
+
+  t("read keys: play action holds the linebackers up, a draw sends them to their drops (02 A4)", [&] {
+    // the linebackers' depth past the line 1.5 s into the play (the ball not thrown) against Cover 3, by what was run: a
+    // dropback and play action, an inside zone and a draw. Reading what they see, the fake keeps them shallow on play
+    // action and the draw's pass look takes them back; keyed on the play's type, a draw fooled nobody
+    auto lbDepth = [&](const char* play, bool keys) {
+      const double keep = tune().readKeys;
+      setTune("readKeys", keys ? 1 : 0);
+      Rng rng(717);
+      double sum = 0, n = 0;
+      for (int k = 0; k < 300; k++) {
+        PlayConfig cfg;
+        cfg.off = league[k % 32].get();
+        cfg.def = league[(k + 5) % 32].get();
+        cfg.offPlay = playById(play);
+        cfg.defCall = defById("base_c3");
+        cfg.los = 30;
+        cfg.ballY = FIELD_W / 2;
+        cfg.flip = k % 2 == 0;
+        cfg.worldDir = 1;
+        cfg.weather.tempF = 60;
+        cfg.rng = rng.fork();
+        PlaySim sim(cfg);
+        while (sim.isLive() && sim.t < 1.5 - 1e-9) sim.step();
+        if (!sim.isLive() || sim.passThrown) continue;
+        for (const Ent* d : sim.def)
+          if (d->role == "MLB" || d->role == "WLB" || d->role == "SLB") sum += d->pos.x - sim.los, n++;
+      }
+      setTune("readKeys", keep);
+      check(n > 300, std::string("too few linebackers measured on ") + play);
+      return sum / n;
+    };
+    const double dbOn = lbDepth("dbl_curls", true), paOn = lbDepth("ace_pa", true), izOn = lbDepth("dbl_iz", true), drOn = lbDepth("trips_draw", true);
+    const double dbOff = lbDepth("dbl_curls", false), paOff = lbDepth("ace_pa", false), izOff = lbDepth("dbl_iz", false), drOff = lbDepth("trips_draw", false);
+    std::printf("       (linebacker depth at 1.5 s, reading keys: dropback %.1f, play action %.1f, inside zone %.1f, draw %.1f yd; keyed on the play's type: %.1f, %.1f, %.1f, %.1f)\n",
+                dbOn, paOn, izOn, drOn, dbOff, paOff, izOff, drOff);
+    check(paOn < dbOn - 1.5, "play action did not hold the linebackers up: " + fx(paOn, 1) + " against a dropback's " + fx(dbOn, 1));
+    check(drOn > izOn + 1.0, "the draw did not send the linebackers back: " + fx(drOn, 1) + " against an inside zone's " + fx(izOn, 1));
+    check(drOn - izOn > drOff - izOff + 0.5, "the draw fooled them no more than when they knew the play: " + fx(drOn - izOn, 1) + " vs " + fx(drOff - izOff, 1));
   });
 
   // ---------------- the rules, every action of many games (Sim/GameInvariants.h)

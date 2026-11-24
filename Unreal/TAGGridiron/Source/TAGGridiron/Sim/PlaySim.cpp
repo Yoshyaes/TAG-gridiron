@@ -237,6 +237,38 @@ bool setTune(const std::string& name, double v) {
   if (name == "routePace") return t.routePace = v, true;
   if (name == "releaseRate") return t.releaseRate = v, true;
   if (name == "intBias") return t.intBias = v, true;
+  if (name == "manCue") return t.manCue = v, true;
+  if (name == "manCutBase") return t.manCutBase = v, true;
+  if (name == "manCutRating") return t.manCutRating = v, true;
+  if (name == "manCutAgi") return t.manCutAgi = v, true;
+  if (name == "manCutLev") return t.manCutLev = v, true;
+  if (name == "manBreakDeg") return t.manBreakDeg = v, true;
+  if (name == "manDriveT") return t.manDriveT = v, true;
+  if (name == "manDriveLead") return t.manDriveLead = v, true;
+  if (name == "routePass") return t.routePass = v, true;
+  if (name == "manLead") return t.manLead = v, true;
+  if (name == "manCueCushion") return t.manCueCushion = v, true;
+  if (name == "readKeys") return t.readKeys = v, true;
+  if (name == "keyTau") return t.keyTau = v, true;
+  if (name == "keyTauK") return t.keyTauK = v, true;
+  if (name == "keyStepT") return t.keyStepT = v, true;
+  if (name == "keyOL") return t.keyOL = v, true;
+  if (name == "keyBack") return t.keyBack = v, true;
+  if (name == "keyBiteK") return t.keyBiteK = v, true;
+  if (name == "drawSet") return t.drawSet = v, true;
+  if (name == "keyFill") return t.keyFill = v, true;
+  if (name == "keySafety") return t.keySafety = v, true;
+  if (name == "keyPaLine") return t.keyPaLine = v, true;
+  if (name == "keyZoneFill") return t.keyZoneFill = v, true;
+  if (name == "leverage") return t.leverage = v, true;
+  if (name == "levHip") return t.levHip = v, true;
+  if (name == "levGrabHold") return t.levGrabHold = v, true;
+  if (name == "levK") return t.levK = v, true;
+  if (name == "levCen") return t.levCen = v, true;
+  if (name == "levCap") return t.levCap = v, true;
+  if (name == "levClose") return t.levClose = v, true;
+  if (name == "levSet") return t.levSet = v, true;
+  if (name == "levSd") return t.levSd = v, true;
   if (name == "eyesOn") return t.eyesOn = v, true;
   if (name == "eyesDeg") return t.eyesDeg = v, true;
   if (name == "eyesHead") return t.eyesHead = v, true;
@@ -2024,6 +2056,7 @@ bool PlaySim::rushMove(Ent* d, const std::string& m) {
   // won: off the block (as the hazard's shed)
   ev("shed", d, b, m);
   if (b->side == Side::Off) foulHold.add(tune().holdShed, b->p);
+  if (passPro) noteBeat(d, blockers);
   V2 goal = qb && ball.holder == qb ? qb->pos : V2{d->pos.x - goalDir(b) * 3, d->pos.y};
   if (ball.holder && ball.holder->side != d->side) goal = ball.holder->pos;
   for (Ent* bb : blockers) {
@@ -2310,6 +2343,7 @@ void PlaySim::step(double dt) {
   } else {
     updateSnap();
   }
+  updateReads(dt);
   for (Ent* e : ents) {
     if (e->stun > 0) e->stun -= dt;
     if (e->slipT > 0) e->slipT -= dt;
@@ -2347,6 +2381,7 @@ void PlaySim::step(double dt) {
   }
   updateEngagements(dt);
   collide();
+  noteWinReps();
   for (Ent* e : off) {
     // (a lineman 16 yd downfield is done blocking, whatever he was doing: a block was once carried 40 yd past the line)
     if (e->isOL && e->engaged && !cfg.kick && e->pos.x - los > 16) disengage(e);
@@ -2358,6 +2393,11 @@ void PlaySim::step(double dt) {
       if (dblFirstT < 0) dblFirstT = t;
     }
   }
+  if (!cfg.kick && !cfg.place && !passThrown)
+    for (int k = 0; k < 3; k++)
+      if (t - dt < 0.5 * (k + 1) - 1e-9 && t >= 0.5 * (k + 1) - 1e-9)
+        for (const Ent* e : def)
+          if (isLB(e)) lbDepth_[k] += e->pos.x - los, lbDepthN_[k]++;
   for (Ent* e : def)
     if (e->state == EntState::Man && e->man && e->man->state == EntState::Route && !passThrown && !cfg.kick) {
       const int k = static_cast<int>(t * 2 + 1e-6) - 1;
@@ -2982,6 +3022,7 @@ void PlaySim::setCarrier(Ent* e) {
 
 // ------------------------------------------------------------------ AI
 void PlaySim::think(Ent* e, double dt) {
+  e->stickDrove = false;  // (applyUser says so when his stick drives this step: steerVel's player steering)
   if (wrap_ && (e == wrap_->c || e == wrap_->d)) {
     e->want = V2{0, 0};
     return;
@@ -3102,6 +3143,7 @@ bool PlaySim::applyUser(Ent* e) {
   const double cap = e->protecting ? 0.93 : e->strafing ? 0.7 : 1.0;
   const double sp = e->vmax * (i.sprint && !e->strafing ? 1 : 0.82) * (std::min)(1.0, ml) * cap;
   e->want = scale(norm(m), (std::min)(sp, e->vmax * cap));
+  e->stickDrove = true;
   if (i.juke && e->hasBall && e->animT > 0.6 && !e->protecting) {
     i.juke = false;
     // juke: sharp lateral impulse with brief speed loss, to the side the stick leans
@@ -3705,6 +3747,17 @@ V2 PlaySim::predictPos(const Ent* e, double T) const {
  *  last leg run on (or settling), stopping at the back of the end zone. Advances idx past reached points. */
 V2 PlaySim::routeWant(const Ent* e, const V2& pos, const V2& vel, size_t& idx) const {
   while (idx < e->route.size() && dist(pos, e->route[idx]) < 0.7) idx++;
+  // a break point he has run past - beyond it along the leg into it, within a couple of yards - is behind him: the next
+  // leg starts from where he is (Tune::routePass). At speed he cannot turn inside a 3 yd leg, and he looped back to touch
+  // the point: an out-and-up's receiver ran back toward the line of scrimmage, a sluggo's curled 1 yd back, and the loop
+  // was a "double move" no defender could have played. (A point he has to come back to - a hitch - is still his.)
+  if (tune().routePass > 0)
+    while (idx > 0 && idx + 1 < e->route.size()) {
+      const V2 tgt = e->route[idx];
+      const V2 legIn = norm(sub(tgt, e->route[idx - 1]));
+      if (dist(pos, tgt) > 2.5 || dot(sub(pos, tgt), legIn) <= 0) break;
+      idx++;
+    }
   const double s = len(vel);
   if (idx < e->route.size()) {
     const V2 tgt = e->route[idx];
@@ -4471,6 +4524,69 @@ double PlaySim::fakeBite(const Ent* d) const {
   return clamp(tune().paBite * fooled * (t < paPullT() ? 1.0 : (end - t) / (end - paPullT())), 0.0, 1.0);
 }
 
+void PlaySim::updateReads(double dt) {
+  // read keys (Tune::readKeys): what the offense shows - not what it called
+  if (tune().readKeys <= 0 || cfg.kick || cfg.place || !qb || phase != SimPhase::Live) return;
+  // the line: low, firing out at the defense is run; high hats, hands up in a set is pass. The draw's line shows pass
+  // (drawSet); play action's fires out to sell the fake while it lasts, as far as a line that may not go downfield can.
+  // (Where the linemen go tells it badly here: the sim's pass sets step up to meet the rush, and a pile goes the way
+  // whoever is winning it pushes.)
+  {
+    const OffPlay& op = *cfg.offPlay;
+    const bool draw = op.run && op.run->style == RunStyle::Draw && t < tune().drawSet;
+    const bool fake = op.type == PlayType::PlayAction && t < paPullT();
+    double s = 0;
+    int n = 0;
+    for (const Ent* o : off)
+      if (o->isOL) {
+        s += draw ? -1.0 : fake ? tune().keyPaLine : o->state == EntState::RunBlock ? 1.0 : o->state == EntState::PassBlock ? -1.0 : 0.0;
+        n++;
+      }
+    olKey_ = n ? s / n : 0.0;
+  }
+  // the backfield: the ball in a back's hands (or shown in his belly as he goes by the quarterback at the mesh) is run;
+  // the quarterback set with it, or still going back deep with nobody at his hip, is pass (his first steps back from
+  // under center say nothing: he takes them to hand off too)
+  const Ent* h = ball.holder;
+  double bk = 0;
+  if (passThrown || ball.mode == BallMode::Air) {
+    bk = -1;
+  } else if (h && h->side == Side::Off && h != qb) {
+    bk = 1;
+  } else if (h == qb) {
+    bool atMesh = false;
+    for (const Ent* o : off)
+      if (o != qb && isBackRole(o->role) && dist(o->pos, qb->pos) < 2.0 && o->speed() > 3.0 && o->vel.x > -0.5) atMesh = true;
+    if (carrier == qb && !scramble) bk = 1;  // (a designed run: he has taken off with it)
+    else if (atMesh) bk = 0.8;
+    else if (dropDone || (qb->vel.x < -1.0 && qb->pos.x < los - 5.5)) bk = -0.8;
+  }
+  backKey_ = bk;
+  // (the ball in a back's hands is the whole story: nothing the line showed changes it)
+  const double target = bk >= 1 ? 1.0 : clamp(0.5 + 0.5 * (tune().keyOL * olKey_ + tune().keyBack * backKey_), 0, 1);
+  for (Ent* d : def) {
+    if (!d->rkSet) {
+      d->rkSet = true;
+      d->rkOn = isLB(d) || (tune().keySafety > 0 && (d->role == "FS" || d->role == "SS") && d->pos.x - los < 9);
+    }
+    if (!d->rkOn) continue;
+    const double tau = tune().keyTau + (99 - d->r().playRec) * tune().keyTauK;
+    d->rkRun += (target - d->rkRun) * (std::min)(1.0, dt / (std::max)(0.02, tau));
+  }
+}
+
+bool PlaySim::keyReader(const Ent* e) const {
+  return tune().readKeys > 0 && e->rkOn && !e->userControlled && !cfg.kick && !cfg.place;
+}
+
+bool PlaySim::keyStep(const Ent* e) const { return t < e->reactT + tune().keyStepT; }
+
+double PlaySim::keyBite(const Ent* e) const {
+  // a run read on a play the ball has not been given on: he comes up for it (the fake working on him)
+  if (ball.mode == BallMode::Air || (ball.holder && ball.holder->side == Side::Off && ball.holder != qb)) return 0;
+  return clamp((e->rkRun - 0.5) * 2 * tune().keyBiteK, 0.0, 1.0);
+}
+
 void PlaySim::thinkRush(Ent* e) {
   if (e->engaged) return;
   Ent* holder = ball.holder;
@@ -4528,6 +4644,17 @@ V2 PlaySim::delayedVel(const Ent* e, double lag) const {
   return h.empty() ? e->vel : h[0];
 }
 
+double PlaySim::manCutTime(const Ent* d, const Ent* r, const V2& cut) const {
+  // Madden 26's cut reaction: the receiver's route running against the man's coverage and his feet; a cut into his
+  // leverage he is already standing in, one away from it he has to open his hips to
+  const double lev = jsSign(d->pos.y - r->pos.y);  // (the side of the receiver he is on)
+  const double into = cut.y * lev > 0.3 ? -1.0 : cut.y * lev < -0.3 ? 1.0 : 0.0;
+  const double base = tune().manCutBase + (r->r().routeRunning - d->r().manCov) * tune().manCutRating + (80 - d->r().agility) * tune().manCutAgi +
+                      into * tune().manCutLev;
+  // (abilities, as the old read had them: Blanket / Lockdown answer sooner, Route Artist / Slipstream make it later)
+  return clamp(base * d->fx.coverLag + r->fx.sepLag, 0.04, 0.8);
+}
+
 void PlaySim::thinkMan(Ent* e) {
   if (reactToBall(e)) return;
   Ent* r = e->man;
@@ -4552,14 +4679,78 @@ void PlaySim::thinkMan(Ent* e) {
   // route recognition: a good cover man reads the receiver's hips and plays where the route is going (the same
   // physical path the QB reads), a poor one chases where he has been
   const double read = clamp((e->r().manCov - 55) / 40, 0, 1);
+  if (tune().manCue > 0 && !e->userControlled && r->state == EntState::Route) {
+    // the body, not the route (Tune::manCue): he plays the receiver going the way he has seen him go - not where the
+    // route goes next, which he cannot know (predictPos showed him the break, a double move's real one included, 0.45 s
+    // before it came)
+    const V2 rvNow = r->vel;
+    const double rs = len(rvNow);
+    if (len(e->mcDir) < 0.5 || (depth < 2.5 && e->mcSeenT < 0)) {
+      // (his release off the line is no break: the man on him mirrors it step for step)
+      if (rs > 1.0) e->mcDir = norm(rvNow);
+    } else if (rs > 1.5) {
+      const V2 h = norm(rvNow);
+      const double offDeg = std::acos(clamp(dot(h, e->mcDir), -1, 1)) * 180 / kPi;
+      // (a rounded cut is a cut too: turned that far from where he was going a fifth of a second ago)
+      const V2 before = delayedVel(r, 0.2);
+      const double turnDeg = len(before) > 1.5 ? std::acos(clamp(dot(h, norm(before)), -1, 1)) * 180 / kPi : 0.0;
+      if (e->mcSeenT < 0) {
+        if (offDeg > tune().manBreakDeg || turnDeg > tune().manBreakDeg) {
+          // a break: seen now, answered after his cut reaction
+          e->mcSeenT = t;
+          e->mcNext = h;
+          e->mcReact = manCutTime(e, r, h);
+        } else {
+          // (a route's drift and bend he runs with, a quarter second behind it: a rounded cut that keeps turning is a
+          // break once it has turned far enough from where he thought the man was going)
+          e->mcDir = norm(add(scale(e->mcDir, 0.94), scale(h, 0.06)));
+        }
+      } else if (offDeg < tune().manBreakDeg * 0.5) {
+        e->mcSeenT = -1;  // (a wobble, not a break)
+      } else {
+        e->mcNext = h;  // (still turning: he answers the cut where it ends up)
+      }
+    }
+    // the gather: a receiver braking hard for a cut shows it. He reads the break coming the way his leverage and the stem
+    // say (inside leverage: the out; a deep stem sinking: back to the ball) and sits on it
+    if (!e->mcSank && e->mcSeenT < 0 && depth > 2.5) {
+      const double was = len(delayedVel(r, 0.2));
+      if (was > 4.0 && rs < was * 0.8) {
+        const double lev = orIfZero(jsSign(e->pos.y - r->pos.y), jsSign(by - r->pos.y));
+        e->mcSank = true;
+        e->mcPrior = depth < 9 ? norm(V2{0.3, -lev}) : norm(V2{-0.5, -lev});
+      }
+    }
+    // answered: he turns with the break and drives on it (the harder when it went where he read it going). A break that
+    // comes while he drives waits for the drive to end: the false step
+    if (e->mcSeenT >= 0 && t - e->mcSeenT >= e->mcReact && t >= e->mcDriveEnd) {
+      const bool expected = e->mcSank && dot(e->mcNext, e->mcPrior) > 0.5;
+      e->mcDir = e->mcNext;
+      e->mcSeenT = -1;
+      e->mcDriveEnd = t + tune().manDriveT;
+      e->mcBite = expected ? 0.5 + 0.5 * read : 0.4;
+      e->mcSank = false;
+    }
+    V2 cue = add(r->pos, scale(e->mcDir, rs * tune().manLead * (depth > 12 ? 1.43 : 1.0)));
+    if (t < e->mcDriveEnd) cue = add(cue, scale(e->mcDir, tune().manDriveLead * e->mcBite));
+    else if (e->mcSank && e->mcSeenT < 0) cue = add(cue, scale(e->mcPrior, 0.6 * read));
+    // (the cushion as the old read had it, its fitted part manCueCushion: he no longer gets the break early to make up
+    // for playing off)
+    const double cush = depth > 8 ? tune().manCueCushion + (e->pos.x < r->pos.x ? 1 : 0) : 0.3;
+    const V2 tgt = add(cue, V2{cush, inside});
+    const double d = dist(tgt, e->pos);
+    e->want = scale(norm(sub(tgt, e->pos)), (std::min)(e->vmax, d * 4 + rs));
+    if (const double bite = keyReader(e) ? keyBite(e) : fakeBite(e); bite > 0) e->want = scale(e->want, 1 - 0.45 * bite);
+    return;
+  }
   const V2 seen = add(r->pos, scale(rv, depth > 12 ? 0.5 : 0.35));
   const V2 ahead = r->state == EntState::Route ? predictPos(r, 0.45) : seen;
   const V2 tgt = add(add(scale(seen, 1 - read * tune().routeRead), scale(ahead, read * tune().routeRead)), V2{cushion, inside});
   const double d = dist(tgt, e->pos);
   e->want = scale(norm(sub(tgt, e->pos)), (std::min)(e->vmax, d * 4 + len(rv)));
   // play action: a man defender who reads run peeks into the backfield and gives his receiver a step (how long, by his
-  // play recognition: fakeBite)
-  if (const double bite = fakeBite(e); bite > 0) e->want = scale(e->want, 1 - 0.45 * bite);
+  // play recognition: fakeBite; a linebacker's or box safety's own run read with read keys)
+  if (const double bite = keyReader(e) ? keyBite(e) : fakeBite(e); bite > 0) e->want = scale(e->want, 1 - 0.45 * bite);
 }
 
 void PlaySim::thinkZone(Ent* e) {
@@ -4616,7 +4807,8 @@ void PlaySim::thinkZone(Ent* e) {
   // false steps up; each comes back to his drop once his read catches up (fakeBite: his play recognition and reaction -
   // a sharp linebacker for a beat past the pull, a poor one well after it). It was the underneath men only, a 2 yd
   // step for the 0.85 s of the fake, whatever their read, and nobody stayed fooled.
-  if (const double bite = fakeBite(e); bite > 0) {
+  // (read keys: a linebacker's or box safety's own run read does it, on whatever play made him read run - keyBite)
+  if (const double bite = keyReader(e) ? keyBite(e) : fakeBite(e); bite > 0) {
     const Ent* rb = offRole("RB");
     const V2 fill{los + (deep ? 7.0 : 1.5), rb ? rb->pos.y : by};
     const double k = deep ? 0.3 * bite : bite;
@@ -4643,11 +4835,17 @@ bool PlaySim::reactToBall(Ent* e) {
     return false;
   }
   Ent* h = b.holder;
+  // read keys (Tune::readKeys): what he reads from the line and the backfield, not the play's type - a run read, or still
+  // reading (his read step, every snap); off, the play's type said run
+  const bool keys = keyReader(e);
+  // (keyZoneFill: a run read with the ball not yet given is played as play action's bite was - downhill at the back -
+  // not in the read step's hold)
+  const bool runLook = keys ? keyStep(e) || (tune().keyZoneFill > 0 ? runRead : e->rkRun > 0.5) : cfg.offPlay->type == PlayType::Run;
   // run keys: a linebacker reads the line, not the handoff. Linemen firing out in run blocks say run, and he fills
   // downhill along the back's flow (his own gap's side of it) before the ball is handed off. Keyed on the handoff,
   // half of them were still in their zone drops a second into a run, 4.7 yd deep and 8 yd from the ball: runs past the
   // line ran on to the safeties (first contact 4-9 yd: safeties 58-80 %), 4-6 yd gains 17 % against the NFL's 25 %.
-  if (tune().lbFill > 0 && isLB(e) && cfg.offPlay->type == PlayType::Run && !runRead && !e->engaged && e->engagedBy.empty() &&
+  if (tune().lbFill > 0 && isLB(e) && (keys ? e->rkRun > 0.5 : runLook) && !runRead && !e->engaged && e->engagedBy.empty() &&
       t > e->reactT + tune().lbKeyT && b.mode != BallMode::Air) {
     const Ent* rb = cfg.offPlay->run ? offRole(cfg.offPlay->run->carrier) : offRole("RB");  // (the run's back: a jet man, a QB)
     const double flowY = rb ? rb->pos.y + rb->vel.y * 0.6 : by + runAimDy();
@@ -4659,20 +4857,26 @@ bool PlaySim::reactToBall(Ent* e) {
   // read step: until he has read the run, a zone linebacker on a run play does not bail into his drop - he holds his
   // depth (steps up if he is deeper than 4.5 yd) and shuffles with the back's flow, so when he triggers he is over the
   // ball, not 5 yd wide and 5 deep in pursuit.
-  if (tune().lbRead > 0 && isLB(e) && e->state == EntState::Zone && cfg.offPlay->type == PlayType::Run &&
-      (!runRead || t - runReadT <= e->reactT) && !e->engaged && e->engagedBy.empty() && t > e->reactT &&
-      b.mode != BallMode::Air) {
+  // (read keys: from the snap, on every play - the hold while he reads it is the step every linebacker takes)
+  if (tune().lbRead > 0 && isLB(e) && e->state == EntState::Zone && runLook &&
+      (!runRead || t - runReadT <= e->reactT) && !e->engaged && e->engagedBy.empty() && (keys || t > e->reactT) &&
+      b.mode != BallMode::Air && !(keys && (passThrown || scramble))) {
     const Ent* rb = cfg.offPlay->run ? offRole(cfg.offPlay->run->carrier) : offRole("RB");  // (the run's back: a jet man, a QB)
     const double flowY = rb ? rb->pos.y + rb->vel.y * 0.6 : by + runAimDy();
     const double ty = flowY + (e->gap - by) * 0.6;
-    const V2 w{(std::min)(0.0, (los + 4.5 - e->pos.x) * 2.0), (ty - e->pos.y) * 2.0};
+    // (read keys: the ball shown at the mesh, not yet given, is what a linebacker comes downhill for - on a run for the
+    // beat before the handoff, on play action for as long as the fake lasts: keyFill yd at a full run read)
+    const bool shown = keys && backKey_ > 0 && backKey_ < 1;
+    const double hold = 4.5 - (shown ? tune().keyFill * keyBite(e) : 0.0);
+    const V2 w{(std::min)(0.0, (los + hold - e->pos.x) * 2.0), (ty - e->pos.y) * 2.0};
     const double sp = std::sqrt(w.x * w.x + w.y * w.y);
     const double cap = e->vmax * tune().lbRead;
     e->want = sp > cap ? scale(w, cap / sp) : w;
     return true;
   }
   if (h && h->side == Side::Off && h->state == EntState::Carrier) {
-    const bool rr = t - runReadT > e->reactT + (cfg.offPlay->type == PlayType::Run ? 0 : 0.1);
+    // (a man who read pass is a beat later to it: read keys say so from what he saw, the old read from the play's type)
+    const bool rr = t - runReadT > e->reactT + ((keys ? e->rkRun > 0.5 : cfg.offPlay->type == PlayType::Run) ? 0 : 0.1);
     const bool crossed = h->pos.x > los + 0.5;
     // a scramble is read like anything else, after the man's reaction: a zone defender has his eyes on the quarterback
     // but is dropping - he has to see it, plant and come back downhill; a man defender stays on his receiver (the
@@ -5002,6 +5206,19 @@ void PlaySim::thinkCarrier(Ent* e) {
 // ------------------------------------------------------------------ physics
 /** One step of the human acceleration law: velocity vel heads toward want within the man's limits. */
 V2 PlaySim::steerVel(const Ent* e, const V2& vel, const V2& want, double dt) const {
+  const V2 own = steerLaw(e, vel, want, dt, nullptr);
+  // a player's own steering (Responsive): only his man, only on a step his stick drove him
+  if (!e->steer.on || !e->userControlled || !e->stickDrove) return own;
+  V2 v = steerLaw(e, vel, want, dt, &e->steer);
+  // (never faster than the sim's own law would have him, or than he was: top speed is the sim's)
+  const double top = (std::max)(len(own), len(vel));
+  const double lv = len(v);
+  if (lv > top && lv > 1e-9) v = scale(v, top / lv);
+  if (dist(v, own) > 1e-12) e->steerBoosted++;
+  return v;
+}
+
+V2 PlaySim::steerLaw(const Ent* e, const V2& vel, const V2& want, double dt, const SteerBoost* boost) {
   const V2 vd = want;
   const double s = len(vel);
   const V2 dir = s > 0.25 ? scale(vel, 1 / s) : norm(vd);
@@ -5011,14 +5228,20 @@ V2 PlaySim::steerVel(const Ent* e, const V2& vel, const V2& want, double dt) con
   // Human limits (yd/s^2; 1 g = 10.72). Speeding up follows the sprint curve that gives the right 40 times
   // (a = A (1 - v/vmax)); braking tops out near 0.9 g; cornering grip falls with speed (a jump cut at a jog,
   // a rounded turn at full speed: ~0.6 g lateral at top speed); and the whole push never exceeds ~1.05 g of grip.
+  // (boost: a player's Responsive numbers on each limit, never below the sim's own; speeding up is left alone)
   const double A = e->vmax / e->tau;
   const double aFwd = A * (std::max)(0.12, 1 - s / e->vmax);
-  const double aBrake = (std::min)(A * 1.35, 9.6 + (e->r().agility - 50) * 0.03) * (e->strafing ? 1.15 : 1.0);
+  double aBrake = (std::min)(A * 1.35, 9.6 + (e->r().agility - 50) * 0.03) * (e->strafing ? 1.15 : 1.0);
+  if (boost) aBrake = (std::max)(aBrake, aBrake * boost->brakeMul);
   double parC = clamp(par, -aBrake * dt, aFwd * dt);
   const double pl = len(perp);
-  const double latLow = e->latA * 1.2;                                    // planting at a jog
+  double latLow = e->latA * 1.2;                                    // planting at a jog
   // at speed; a receiver adjusting to a ball in the air gathers (gives up speed) and gets his full cut back
-  const double latHigh = e->catchAdjust ? e->latA : (std::min)(e->latA, 6.6 + (e->r().agility - 50) * 0.03);
+  double latHigh = e->catchAdjust ? e->latA : (std::min)(e->latA, 6.6 + (e->r().agility - 50) * 0.03);
+  if (boost) {
+    latLow = (std::max)(latLow, latLow * boost->latMul);
+    latHigh = (std::max)(latHigh, (e->catchAdjust ? e->latA : (std::min)(e->latA, 6.6 + (e->r().agility - 50) * boost->latAgiAtSpeed)) * boost->latMul);
+  }
   // (the jog's plant is gone by 6.5 yd/s: blended out to 7.5 a man at 6 m/s still cut at the p95 sharper than a man in
   // full stride can, 7.1 m/s2 sideways)
   const double kSp = clamp((s - 2.5) / 4.0, 0, 1);
@@ -5026,7 +5249,9 @@ V2 PlaySim::steerVel(const Ent* e, const V2& vel, const V2& want, double dt) con
   const double lat = (latLow + (latHigh - latLow) * kSp) * dt * (e->strafing ? 1.3 : 1.0);
   V2 perpC = pl > lat ? scale(perp, lat / pl) : perp;
   {
-    const double grip = (std::max)(9.9 + (e->r().agility - 50) * 0.03, aFwd) * dt;  // ~0.92 g (at 1.05 g a sixth of all free-running 0.2 s windows read over 1 g, half of them cuts)
+    double gripA = 9.9 + (e->r().agility - 50) * 0.03;  // ~0.92 g (at 1.05 g a sixth of all free-running 0.2 s windows read over 1 g, half of them cuts)
+    if (boost) gripA = (std::max)(gripA, (9.9 + (e->r().agility - 50) * boost->gripAgi) * boost->gripMul);
+    const double grip = (std::max)(gripA, aFwd) * dt;
     const double tot = std::sqrt(parC * parC + dot(perpC, perpC));
     if (tot > grip) {
       parC *= grip / tot;
@@ -5034,6 +5259,28 @@ V2 PlaySim::steerVel(const Ent* e, const V2& vel, const V2& want, double dt) con
     }
   }
   return add(vel, add(scale(dir, parC), perpC));
+}
+
+bool PlaySim::setUserSteer(int slot, const SteerBoost& b) {
+  Ent* e = slotEnt(slot);
+  if (!e) return false;
+  e->steer = b;
+  return true;
+}
+
+bool PlaySim::setUserThrow(int style, bool lob, double minAt) {
+  if (!pendingThrow || pendingThrow->away || !qb || !qb->userControlled || ball.holder != qb || passThrown) return false;
+  pendingThrow->style = style;
+  pendingThrow->lob = lob;
+  if (minAt >= 0 && !pendingThrow->shovel) pendingThrow->at = (std::max)(pendingThrow->at, minAt);
+  return true;
+}
+
+bool PlaySim::cancelUserThrow() {
+  if (!pendingThrow || pendingThrow->away || !qb || !qb->userControlled || ball.holder != qb || passThrown) return false;
+  pendingThrow.reset();
+  inputOf(qb).throwTo.clear();
+  return true;
 }
 
 void PlaySim::impulse(Ent* e, const V2& dv, double dur) {
@@ -5122,10 +5369,35 @@ void PlaySim::move(Ent* e, double dt) {
   if (e->engaged == nullptr && e->state == EntState::PassBlock && ns < 2) e->anim = Anim::Block;
 }
 
+V2 PlaySim::blockGoal(const Ent* blocker, const Ent* d) const {
+  if (blocker->state == EntState::PassBlock && qb && ball.holder == qb) return qb->pos;
+  if (ball.holder && ball.holder->side != d->side) return ball.holder->pos;
+  return V2{d->pos.x - goalDir(blocker) * 3, d->pos.y};
+}
+
 void PlaySim::engage(Ent* blocker, Ent* d) {
   if (blocker->engaged || (d->engaged && d->engaged != blocker && d->engagedBy.size() >= 2)) return;
   if (contains(blocker->beatBy, d)) return;
   if (blocker->stun > 0 || d->stun > 0) return;
+  // where the two are on the blocker's line to the defender's goal: how far past the blocker he is (> 0: by his hip,
+  // going away) and how far off the line - square in front of the blocker, or at his shoulder
+  const bool scrim = !cfg.place && blocker->side != d->side;
+  const V2 goal = blockGoal(blocker, d);
+  const V2 u = norm(sub(goal, blocker->pos));
+  const V2 rel = sub(d->pos, blocker->pos);
+  const double along = dot(rel, u);
+  const double lat = std::fabs(u.x * rel.y - u.y * rel.x);
+  const bool lev = tune().leverage > 0 && scrim;
+  const bool past = scrim && along > tune().levHip;
+  if (lev && past) {
+    // leverage (Tune::leverage): he is by him - a hand on him as he goes, not a block (snapped back into a block he had
+    // already beaten was the "suction"). The blocker is beaten by him.
+    if (blocker->side == Side::Off && ball.mode != BallMode::Snap) foulHold.add(tune().levGrabHold, blocker->p);
+    if (!contains(blocker->beatBy, d)) blocker->beatBy.push_back(d);
+    engRefused_++;
+    if (blocker->state == EntState::PassBlock && d->state == EntState::Rush) noteBeat(d, std::vector<Ent*>{blocker});  // (he won the rep at the set)
+    return;
+  }
   // defenders in space can slip a block entirely (smaller, quicker players more so)
   const bool inSpace = d->pos.x > los + 2.5 || std::fabs(d->pos.y - by) > 7;
   // (not a pass rusher coming at his blocker: a wide end is 'in space' by where he lines up, and slipping the tackle's
@@ -5141,7 +5413,23 @@ void PlaySim::engage(Ent* blocker, Ent* d) {
   blocker->engT = 0;
   d->engagedBy.push_back(blocker);
   if (!d->engaged) d->engaged = blocker;
-  blocker->engageEdge = rng.normal(0, 7);
+  if (lev) {
+    // the rep's edge from the angle they met at (head leverage): square in front of him the blocker has it, at his
+    // shoulder the defender does; a defender coming hard at his goal and a pass blocker late to his set give it away
+    const bool passSet = blocker->state == EntState::PassBlock;
+    const double dClose = dot(d->vel, norm(sub(goal, d->pos)));
+    const double geo = clamp(tune().levK * (tune().levCen - lat), -tune().levCap, tune().levCap) - tune().levClose * (std::max)(0.0, dClose - 2.5) -
+                       (passSet ? tune().levSet * (std::max)(0.0, len(blocker->vel) - 1.5) : 0.0);
+    blocker->engageEdge = geo + rng.normal(0, tune().levSd);
+    engGeoSum_ += geo;
+  } else {
+    blocker->engageEdge = rng.normal(0, 7);
+  }
+  if (scrim) {
+    engN_++;
+    engPastHip_ += past;
+    engLatSum_ += lat;
+  }
   blocker->anim = Anim::Block;
   d->anim = Anim::Block;
   if (!firstContact) firstContact = true;
@@ -5184,6 +5472,46 @@ const char* PlaySim::shedMove(const Ent* d, const Ent* b, bool passPro, double p
   if (edge) return (r.accel + r.agility > 170 || h % 3 == 0) ? "diprip" : "club";
   if (r.agility > 80 && h % 4 == 0) return "spin";
   return power ? (h % 2 ? "longarm" : "bull") : (h % 2 ? "swim" : "rip");
+}
+
+bool PlaySim::winWindow() const {
+  // (ESPN's window: 2.5 s from the snap, screens not counted; it closes early when the ball is out or he leaves the pocket)
+  return phase == SimPhase::Live && !cfg.kick && !cfg.place && qb && cfg.offPlay && passPlay() && cfg.offPlay->type != PlayType::Screen &&
+         t <= 2.5 + 1e-9 && (ball.holder == qb || ball.mode == BallMode::Snap) && !passThrown && !scramble && !pendingThrow;
+}
+
+void PlaySim::noteWinReps() {
+  // pass rush / pass block win rates (telemetry, Research/NextLevel/02 A3): a rusher wins by beating his block inside
+  // 2.5 s, a blocker by holding his that long; an unblocked rusher who gets to the quarterback is the rush's win at the
+  // team level (he beat nobody, so not his own)
+  if (!winWindow()) return;
+  winPlay_ = true;
+  for (Ent* d : def) {
+    if (!d->wrIn) {
+      if (d->state != EntState::Rush) continue;
+      d->wrIn = true;
+      d->wrCls = d->isDL ? (d->role == "LE" || d->role == "RE" ? 0 : 1) : std::fabs(d->pos.y - by) > 3.5 ? 0 : 2;
+    }
+    if (!d->engagedBy.empty() && d->engagedBy[0]->state == EntState::PassBlock) d->wrEng = true;
+    if (!d->wrEng && d->free() && dist(d->pos, qb->pos) < 2.5) d->wrFree = true;
+  }
+  for (Ent* e : off) {
+    if (e == qb) continue;
+    if (!e->wrIn) {
+      if (e->state != EntState::PassBlock) continue;
+      e->wrIn = true;
+      e->wrCls = e->role == "LT" || e->role == "RT" ? 0 : e->isOL ? 1 : 2;
+    }
+    if (e->engaged && e->state == EntState::PassBlock) e->wrEng = true;
+  }
+}
+
+void PlaySim::noteBeat(Ent* d, const std::vector<Ent*>& blockers) {
+  if (!winWindow()) return;
+  d->wrEng = true;
+  d->wrBeat = true;
+  for (Ent* b : blockers)
+    if (b->side != d->side) b->wrEng = b->wrBeat = true;
 }
 
 void PlaySim::updateEngagements(double dt) {
@@ -5333,6 +5661,7 @@ void PlaySim::updateEngagements(double dt) {
         d->lastMoveWon = true;
       }
       if (ball.mode != BallMode::Snap && blockers[0]->side == Side::Off) foulHold.add(tune().holdShed, blockers[0]->p);
+      if (passPro) noteBeat(d, blockers);
       for (Ent* b : blockers) {
         disengage(b);
         b->stun = (passPro ? 0.6 : 0.35) + rng.range(0, 0.3);
@@ -6724,6 +7053,16 @@ void PlaySim::endPlay(const std::string& reason) {
   r.intFaceDeg = intBy ? intFaceDeg : -1;
   r.intBlind = intBy && intBlind;
   r.pbuBlind = pbuBy && pbuBlind && !intBy;
+  r.engN = engN_;
+  r.engPastHip = engPastHip_;
+  r.engRefused = engRefused_;
+  r.engLatSum = engLatSum_;
+  r.engGeoSum = engGeoSum_;
+  for (int k = 0; k < 3; k++) r.lbDepth[k] = lbDepth_[k], r.lbDepthN[k] = lbDepthN_[k];
+  r.winPlay = winPlay_;
+  if (winPlay_)
+    for (const Ent* e : ents)
+      if (e->wrIn && e->p) r.winReps.push_back(PlayResult::WinRep{e->p, e->side == Side::Def, e->wrCls, e->wrEng, e->wrBeat, e->wrFree});
   r.airYards = catcher ? jsRoundI(catchX - L) : ball.targetSpot ? jsRoundI(ball.targetSpot->x - L) : 0;
   r.yac = (catcher && !intBy) ? jsRoundI(endX - catchX) : 0;
   r.deepContested = deepContested;

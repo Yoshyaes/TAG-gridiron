@@ -1,7 +1,8 @@
 // Port of tools/calibrate.ts
 // Headless realism calibration: simulate many full games and compare to NFL per-team-game averages.
-// Usage: SimCalibrate [games=40] [seed=7] [--scores]
+// Usage: SimCalibrate [games=40] [seed=7] [--scores] [--set name=value] [--json file] [--season | --seasons n]
 //   --scores  also print one line per game (teams, final score, log length) for diffing vs TS.
+//   --season  play whole 17-game seasons (n of them; the games count is ignored) for the season and star spreads.
 #include <algorithm>
 #include <cctype>
 #include <chrono>
@@ -24,6 +25,9 @@ int main(int argc, char** argv) {
   int N = 40;
   uint32_t seed = 7;
   bool printScores = false;
+  // --season [n]: play n whole seasons (17 rounds, every team once a round) instead of N random games: the season spreads
+  // (wins, point differential, OVR against wins) and every per-man rate over a real season's sample
+  int seasons = 0;
   const char* jsonOut = nullptr;  // --json <file>: every number below as one JSON object (Tools/Realism/score.py reads it)
   int positional = 0;
   for (int i = 1; i < argc; i++) {
@@ -42,6 +46,14 @@ int main(int argc, char** argv) {
     }
     if (std::strcmp(argv[i], "--json") == 0 && i + 1 < argc) {
       jsonOut = argv[++i];
+      continue;
+    }
+    if (std::strcmp(argv[i], "--season") == 0) {
+      seasons = (std::max)(seasons, 1);
+      continue;
+    }
+    if (std::strcmp(argv[i], "--seasons") == 0 && i + 1 < argc) {
+      seasons = (std::max)(1, std::atoi(argv[++i]));
       continue;
     }
     if (positional == 0) N = std::atoi(argv[i]);
@@ -133,11 +145,66 @@ int main(int argc, char** argv) {
   double yacB[4] = {0, 0, 0, 0}, yacBN[4] = {0, 0, 0, 0}, yacBig[4] = {0, 0, 0, 0};
   // eyes on the ball (PlaySim Tune::eyesOn): interceptions by how the man faced the ball, breakups, blind swipes
   double eyAtt = 0, eyInt = 0, eyBlind = 0, eyFace[3] = {0, 0, 0}, eyPbu = 0, eyPbuBlind = 0;
+  // win rates (ESPN's PRWR / PBWR, Research/NextLevel/02 A3) and the star spread: per class, per team, per man
+  struct Rate {
+    double n = 0, w = 0;
+    double r() const { return n > 0 ? w / n : 0.0; }
+  };
+  Rate prCls[3], pbCls[3], wrTeam, wrFreeN;
+  std::map<std::string, Rate> teamPB, teamPR;  // (by abbreviation: the protection of a team on offense, its rush on defense)
+  std::map<const Player*, Rate> manPR, manSep, manTack, manRun;
+  std::map<const Player*, std::vector<double>> manPRcls;
+  struct Att {
+    const Player* qb;
+    int air, sep;
+    bool pr, c;
+  };
+  std::vector<Att> atts;  // (CPOE: each attempt against the league's completion at its depth, separation and pressure)
+  // separation at arrival (A1): share of targets with a defender within a yard (NGS "aggressiveness", attempt-weighted 14.6 %)
+  Rate tightWin;
+  // play action (A4): yards an attempt and sacks a dropback with and without the fake (nflverse 2023 x FTN charting:
+  // 8.31 against 6.69 an attempt, sacks 6.5 % against 6.9 %)
+  Rate paYpa[2], paSack[2], paComp[2];
+  // leverage at engagement (A5): blocks formed, those on a man already past the blocker's hip, those refused
+  double engN = 0, engHip = 0, engRef = 0, engLat = 0, engGeo = 0;
+  // read keys (A4): linebacker depth at 0.5 / 1 / 1.5 s by what was called (run, draw, dropback, play action), and yards
+  // a carry by the run's style (a draw should not trail the inside zone by much)
+  double lbD[4][3] = {{0}}, lbN[4][3] = {{0}};
+  Rate ypcStyle[5];
+  // the season: every team's wins and point differential (ties a half) and its OVR, by season
+  std::vector<std::pair<int, int>> sched;
+  if (seasons > 0) {
+    N = seasons * 17 * 16;
+    for (int s = 0; s < seasons * 17; s++) {
+      std::vector<int> perm(32);
+      for (int k = 0; k < 32; k++) perm[k] = k;
+      for (int k = 31; k > 0; k--) std::swap(perm[k], perm[rng.intRange(0, k)]);
+      for (int k = 0; k < 32; k += 2) sched.push_back(std::make_pair(perm[k], perm[k + 1]));
+    }
+  }
+  std::vector<double> seasonWins(32, 0), seasonPd(32, 0), allWins, allPd, allOvr;
+  std::vector<double> teamOvrNow(32, 0);
 
   for (int g = 0; g < N; g++) {
-    const int hi = rng.intRange(0, 31);
-    int ai = rng.intRange(0, 31);
-    if (ai == hi) ai = (ai + 1) % 32;
+    int hi = 0, ai = 0;
+    if (seasons > 0) {
+      // (a week between rounds: injuries heal a week's worth, and a new season starts everyone healthy - left to pile up,
+      // 34 games of them had every team on its backups)
+      if (g % 16 == 0)
+        for (int k = 0; k < 32; k++)
+          for (const auto& pl : league[k]->roster) pl->injuredWeeks = g % (17 * 16) == 0 ? 0.0 : (std::max)(0.0, pl->injuredWeeks - 1);
+      if (g % (17 * 16) == 0)
+        for (int k = 0; k < 32; k++) {
+          seasonWins[k] = seasonPd[k] = 0;
+          teamOvrNow[k] = teamOvr(*league[k]).ovr;
+        }
+      hi = sched[g].first;
+      ai = sched[g].second;
+    } else {
+      hi = rng.intRange(0, 31);
+      ai = rng.intRange(0, 31);
+      if (ai == hi) ai = (ai + 1) % 32;
+    }
     GameOptions opts;
     opts.seed = static_cast<uint32_t>(rng.intRange(1, 1000000000));
     Game game(*league[hi], *league[ai], opts);
@@ -285,6 +352,83 @@ int main(int argc, char** argv) {
         if (r.pbuBy && !r.interception) {
           eyPbu++;
           eyPbuBlind += r.pbuBlind;
+        }
+      }
+      if (r.winPlay && !sim.isReturn()) {
+        bool rushWon = false;
+        for (const PlayResult::WinRep& w : r.winReps) {
+          const int c = (std::min)(2, (std::max)(0, w.cls));
+          if (w.rusher) {
+            rushWon = rushWon || w.beat || w.unblocked;
+            wrFreeN.n++;
+            wrFreeN.w += w.unblocked;
+            if (!w.engaged) continue;
+            prCls[c].n++;
+            prCls[c].w += w.beat;
+            manPR[w.p].n++;
+            manPR[w.p].w += w.beat;
+            std::vector<double>& cl = manPRcls[w.p];
+            cl.resize(3, 0.0);
+            cl[c]++;
+          } else if (w.engaged) {
+            pbCls[c].n++;
+            pbCls[c].w += !w.beat;
+          }
+        }
+        wrTeam.n++;
+        wrTeam.w += !rushWon;
+        teamPB[sim.cfg.off->abbr].n++;
+        teamPB[sim.cfg.off->abbr].w += !rushWon;
+        teamPR[sim.cfg.def->abbr].n++;
+        teamPR[sim.cfg.def->abbr].w += rushWon;
+      }
+      engN += r.engN;
+      engHip += r.engPastHip;
+      engRef += r.engRefused;
+      engLat += r.engLatSum;
+      engGeo += r.engGeoSum;
+      if (!sim.isReturn() && !sim.cfg.place && sim.cfg.offPlay) {
+        const OffPlay& op = *sim.cfg.offPlay;
+        const int ty = op.type == PlayType::Run ? (op.run && op.run->style == RunStyle::Draw ? 1 : 0) : op.type == PlayType::PlayAction ? 3 : op.type == PlayType::Pass ? 2 : -1;
+        if (ty >= 0)
+          for (int k = 0; k < 3; k++) lbD[ty][k] += r.lbDepth[k], lbN[ty][k] += r.lbDepthN[k];
+        if (r.kind == PlayKind::Run && op.type == PlayType::Run && op.run) {
+          const int st = static_cast<int>(op.run->style);
+          if (st >= 0 && st < 5) ypcStyle[st].n++, ypcStyle[st].w += r.yards;
+        }
+      }
+      if (!sim.isReturn() && !sim.cfg.place) {
+        if (r.kind == PlayKind::Pass && !r.thrownAway && r.target && r.arriveSep >= 0) {
+          manSep[r.target].n++;
+          manSep[r.target].w += r.arriveSep;
+          tightWin.n++;
+          tightWin.w += r.arriveSep < 1.0;
+        }
+        if (r.kind == PlayKind::Pass && !r.thrownAway && r.passer && r.throwSep >= 0)
+          atts.push_back(Att{r.passer, r.airYards < 0 ? 0 : r.airYards < 5 ? 1 : r.airYards < 10 ? 2 : r.airYards < 15 ? 3 : r.airYards < 20 ? 4 : r.airYards < 30 ? 5 : 6,
+                             r.throwSep < 1 ? 0 : r.throwSep < 2 ? 1 : r.throwSep < 3 ? 2 : r.throwSep < 5 ? 3 : 4, r.pressured, r.complete});
+        for (const PlayEvent& e : r.events)
+          if ((e.type == "broken" || e.type == "divemiss") && e.b && e.b->p && e.b->side != Side::Off) {
+            manTack[e.b->p].n++;
+            manTack[e.b->p].w++;
+          }
+        for (const Player* tk : r.tacklers) manTack[tk].n++;
+        if (r.kind == PlayKind::Run && r.rusher) {
+          manRun[r.rusher].n++;
+          manRun[r.rusher].w += r.yards;
+        }
+        if ((r.kind == PlayKind::Pass || r.kind == PlayKind::Sack) && sim.cfg.offPlay && sim.cfg.offPlay->type != PlayType::Screen) {
+          const int pa = sim.cfg.offPlay->type == PlayType::PlayAction ? 1 : 0;
+          paSack[pa].n++;
+          paSack[pa].w += r.kind == PlayKind::Sack;
+        }
+        if (r.kind == PlayKind::Pass && sim.cfg.offPlay) {
+          // (nflverse's "not play action" holds the screens: so does this)
+          const int pa = sim.cfg.offPlay->type == PlayType::PlayAction ? 1 : 0;
+          paYpa[pa].n++;
+          paYpa[pa].w += r.interception ? 0 : r.yards;
+          paComp[pa].n++;
+          paComp[pa].w += r.complete;
         }
       }
       if (r.kind == PlayKind::Pass && !r.thrownAway) {
@@ -538,6 +682,19 @@ int main(int argc, char** argv) {
                   game.score.home, game.log.size());
     if (game.score.home == game.score.away) ties++;
     if (game.score.home > game.score.away) homeWins++;
+    if (seasons > 0) {
+      const double hw = game.score.home > game.score.away ? 1.0 : game.score.home == game.score.away ? 0.5 : 0.0;
+      seasonWins[hi] += hw;
+      seasonWins[ai] += 1 - hw;
+      seasonPd[hi] += game.score.home - game.score.away;
+      seasonPd[ai] += game.score.away - game.score.home;
+      if (g % (17 * 16) == 17 * 16 - 1)
+        for (int k = 0; k < 32; k++) {
+          allWins.push_back(seasonWins[k]);
+          allPd.push_back(seasonPd[k]);
+          allOvr.push_back(teamOvrNow[k]);
+        }
+    }
     for (const PlayLog& l : game.log) {
       // accepted penalties by foul ("PENALTY on XXX: <foul>[ (#nn)], ...")
       const size_t at = l.desc.find("PENALTY on ");
@@ -957,6 +1114,134 @@ int main(int argc, char** argv) {
     std::printf("\n0-9 yd outcomes:");
     for (const auto& kv : shortOutcome) std::printf("  %s %d", kv.first.c_str(), kv.second);
     std::printf("\n");
+  }
+  {
+    // win rates (ESPN, built on NGS tracking: a rusher wins by beating his block inside 2.5 s, a blocker by holding it;
+    // screens out; unblocked rushers count for the rush at team level). ESPN: individual PRWR ~25 %, edge 22 %; PBWR ~75 %
+    // across blockers, tackles 79 %; team ~50 %; 2023 team PBWR 43-76 %, team PRWR 31-60 %; top edges 30-35 %, top DTs ~20 %
+    const double perTeam = 2.0 * N / 32 / 17;  // (seasons' worth of games each team played: the qualifying bars scale with it)
+    const Rate prAll{prCls[0].n + prCls[1].n + prCls[2].n, prCls[0].w + prCls[1].w + prCls[2].w};
+    const Rate pbAll{pbCls[0].n + pbCls[1].n + pbCls[2].n, pbCls[0].w + pbCls[1].w + pbCls[2].w};
+    double pbMin = 1, pbMax = 0, prMin = 1, prMax = 0;
+    for (const auto& kv : teamPB) pbMin = (std::min)(pbMin, kv.second.r()), pbMax = (std::max)(pbMax, kv.second.r());
+    for (const auto& kv : teamPR) prMin = (std::min)(prMin, kv.second.r()), prMax = (std::max)(prMax, kv.second.r());
+    std::printf("\nwin rates (2.5 s, screens out): PRWR %.1f%% (edge %.1f, interior DL %.1f, other blitzers %.1f; ESPN ~25, edge 22) | PBWR %.1f%% "
+                "(tackles %.1f, interior OL %.1f, TE/backs %.1f; ESPN ~75, tackles 79) | team PBWR %.1f%% (ESPN ~50; %.0f plays), by team %.0f-%.0f%% "
+                "(2023 43-76), team PRWR by team %.0f-%.0f%% (31-60) | unblocked rushers free at the QB %.1f%% of rushes\n",
+                100 * prAll.r(), 100 * prCls[0].r(), 100 * prCls[1].r(), 100 * prCls[2].r(), 100 * pbAll.r(), 100 * pbCls[0].r(), 100 * pbCls[1].r(),
+                100 * pbCls[2].r(), 100 * wrTeam.r(), wrTeam.n, 100 * pbMin, 100 * pbMax, 100 * prMin, 100 * prMax, 100 * wrFreeN.r());
+    J["wr.prwr"] = 100 * prAll.r();
+    J["wr.prwr_edge"] = 100 * prCls[0].r();
+    J["wr.prwr_dt"] = 100 * prCls[1].r();
+    J["wr.pbwr"] = 100 * pbAll.r();
+    J["wr.pbwr_tackle"] = 100 * pbCls[0].r();
+    J["wr.pbwr_interior"] = 100 * pbCls[1].r();
+    J["wr.team_pbwr"] = 100 * wrTeam.r();
+    J["wr.team_pbwr_lo"] = 100 * pbMin;
+    J["wr.team_pbwr_hi"] = 100 * pbMax;
+    J["wr.team_prwr_lo"] = 100 * prMin;
+    J["wr.team_prwr_hi"] = 100 * prMax;
+    // the stars: each qualified man's own PRWR (150 blocked rushes a season), the best edges and interior linemen
+    std::vector<std::pair<double, const Player*>> edges, dts;
+    for (const auto& kv : manPR) {
+      if (kv.second.n < 150 * perTeam) continue;
+      const std::vector<double>& cl = manPRcls[kv.first];
+      const int c = cl[0] >= cl[1] && cl[0] >= cl[2] ? 0 : cl[1] >= cl[2] ? 1 : 2;
+      if (c == 0) edges.push_back(std::make_pair(kv.second.r(), kv.first));
+      if (c == 1) dts.push_back(std::make_pair(kv.second.r(), kv.first));
+    }
+    auto sdOf = [](const std::vector<double>& v) {
+      if (v.size() < 2) return 0.0;
+      double m = 0, s = 0;
+      for (double x : v) m += x;
+      m /= static_cast<double>(v.size());
+      for (double x : v) s += (x - m) * (x - m);
+      return std::sqrt(s / static_cast<double>(v.size() - 1));
+    };
+    for (int k = 0; k < 2; k++) {
+      std::vector<std::pair<double, const Player*>>& v = k ? dts : edges;
+      std::sort(v.begin(), v.end(), [](const std::pair<double, const Player*>& a, const std::pair<double, const Player*>& b) { return a.first > b.first; });
+      std::vector<double> rs;
+      for (const auto& x : v) rs.push_back(x.first);
+      std::printf("  qualified %s rushers %zu (PRWR SD %.1f%%): best", k ? "interior" : "edge", v.size(), 100 * sdOf(rs));
+      for (size_t i = 0; i < v.size() && i < 4; i++) std::printf("  %.1f%% (%s pr %.0f str %.0f agi %.0f)", 100 * v[i].first, posName(v[i].second->pos), v[i].second->r.passRush, v[i].second->r.strength, v[i].second->r.agility);
+      if (!v.empty()) std::printf("  ... worst %.1f%%", 100 * v.back().first);
+      std::printf("   (ESPN 2023: top edge 30-35%%, top DT ~20%%)\n");
+      J[k ? "wr.top_dt" : "wr.top_edge"] = v.empty() ? 0.0 : 100 * v[0].first;
+    }
+    // per-man spreads over qualified men (NGS 2023 season rows, nflverse: separation SD 0.525 yd over receivers with 45+
+    // targets; CPOE SD 2.91 over passers with 136+ attempts; RYOE/att SD 0.62 and YPC SD 0.78 over 100+ carries)
+    std::vector<double> sepV, ypcV, mtrV, cpoeV;
+    for (const auto& kv : manSep)
+      if (kv.second.n >= 45 * perTeam) sepV.push_back(kv.second.r());
+    for (const auto& kv : manRun)
+      if (kv.second.n >= 100 * perTeam) ypcV.push_back(kv.second.r());
+    for (const auto& kv : manTack)
+      if (kv.second.n >= 40 * perTeam) mtrV.push_back(kv.second.r());
+    {
+      // (expected completion: the league's own rate at the attempt's depth, separation at the throw and pressure - NGS's
+      // model reads the same things off the tracking)
+      std::map<int, Rate> cell;
+      auto key = [](const Att& x) { return x.air * 100 + x.sep * 10 + (x.pr ? 1 : 0); };
+      for (const Att& x : atts) cell[key(x)].n++, cell[key(x)].w += x.c;
+      std::map<const Player*, Rate> qbC, qbX;
+      for (const Att& x : atts) {
+        qbC[x.qb].n++;
+        qbC[x.qb].w += x.c;
+        qbX[x.qb].w += cell[key(x)].r();
+      }
+      for (const auto& kv : qbC)
+        if (kv.second.n >= 136 * perTeam) cpoeV.push_back(100 * (kv.second.w - qbX[kv.first].w) / kv.second.n);
+    }
+    std::printf("star spread (SD across qualified men): separation at arrival %.3f yd (n %zu; NGS 0.525), CPOE %.2f%% (n %zu; NGS 2.91), "
+                "YPC %.2f (n %zu; NGS 0.78, RYOE/att 0.62), missed-tackle rate %.1f%% (n %zu)\n",
+                sdOf(sepV), sepV.size(), sdOf(cpoeV), cpoeV.size(), sdOf(ypcV), ypcV.size(), 100 * sdOf(mtrV), mtrV.size());
+    J["spread.sep_sd"] = sdOf(sepV);
+    J["spread.cpoe_sd"] = sdOf(cpoeV);
+    J["spread.ypc_sd"] = sdOf(ypcV);
+    J["spread.mtr_sd"] = 100 * sdOf(mtrV);
+    std::printf("blocks formed %.0f a game: on a man already past the blocker's hip %.0f (%.2f%%; the leverage rule makes it 0), refused as past %.0f; "
+                "his offset from the blocker's line %.2f yd, the edge's geometric part %+.2f points (mean)\n",
+                engN / (std::max)(1, N), engHip, 100 * engHip / (std::max)(1.0, engN), engRef, engLat / (std::max)(1.0, engN), engGeo / (std::max)(1.0, engN));
+    J["eng.past_hip"] = engHip;
+    J["eng.past_hip_pct"] = 100 * engHip / (std::max)(1.0, engN);
+    J["eng.refused"] = engRef;
+    std::printf("targets with a defender within 1 yd at arrival %.1f%% (NGS aggressiveness 14.6%%)\n", 100 * tightWin.r());
+    J["tight_window_pct"] = 100 * tightWin.r();
+    std::printf("play action: %.2f yd an attempt against %.2f without (lift %+.2f; nflverse x FTN 2023 8.31 / 6.69, +1.62), comp %.1f%% / %.1f%%, "
+                "sacks %.1f%% / %.1f%% of dropbacks (6.5 / 6.9), %.1f%% of dropbacks (20.4)\n",
+                paYpa[1].r(), paYpa[0].r(), paYpa[1].r() - paYpa[0].r(), 100 * paComp[1].r(), 100 * paComp[0].r(), 100 * paSack[1].r(), 100 * paSack[0].r(),
+                100 * paSack[1].n / (std::max)(1.0, paSack[0].n + paSack[1].n));
+    {
+      const char* tn[4] = {"run", "draw", "dropback", "play action"};
+      std::printf("linebacker depth past the line at 0.5 / 1.0 / 1.5 s:");
+      for (int k = 0; k < 4; k++)
+        std::printf("  %s %.1f / %.1f / %.1f", tn[k], lbD[k][0] / (std::max)(1.0, lbN[k][0]), lbD[k][1] / (std::max)(1.0, lbN[k][1]), lbD[k][2] / (std::max)(1.0, lbN[k][2]));
+      std::printf("\nyards a carry by run style: zone %.2f (%.0f), gap %.2f (%.0f), stretch %.2f (%.0f), draw %.2f (%.0f), sneak %.2f (%.0f)\n", ypcStyle[0].r(), ypcStyle[0].n,
+                  ypcStyle[1].r(), ypcStyle[1].n, ypcStyle[2].r(), ypcStyle[2].n, ypcStyle[3].r(), ypcStyle[3].n, ypcStyle[4].r(), ypcStyle[4].n);
+      J["lb.depth1_run"] = lbD[0][1] / (std::max)(1.0, lbN[0][1]);
+      J["lb.depth1_draw"] = lbD[1][1] / (std::max)(1.0, lbN[1][1]);
+      J["lb.depth1_pass"] = lbD[2][1] / (std::max)(1.0, lbN[2][1]);
+      J["lb.depth1_pa"] = lbD[3][1] / (std::max)(1.0, lbN[3][1]);
+      J["ypc.zone"] = ypcStyle[0].r();
+      J["ypc.draw"] = ypcStyle[3].r();
+    }
+    J["pa.ypa_lift"] = paYpa[1].r() - paYpa[0].r();
+    J["pa.ypa"] = paYpa[1].r();
+    J["pa.sack_pct"] = 100 * paSack[1].r();
+    if (!allWins.empty()) {
+      double mo = 0, mw = 0, cov = 0, vo = 0, vw = 0;
+      for (size_t k = 0; k < allWins.size(); k++) mo += allOvr[k], mw += allWins[k];
+      mo /= static_cast<double>(allWins.size());
+      mw /= static_cast<double>(allWins.size());
+      for (size_t k = 0; k < allWins.size(); k++) cov += (allOvr[k] - mo) * (allWins[k] - mw), vo += (allOvr[k] - mo) * (allOvr[k] - mo), vw += (allWins[k] - mw) * (allWins[k] - mw);
+      const double rr = vo > 0 && vw > 0 ? cov / std::sqrt(vo * vw) : 0.0;
+      std::printf("seasons %d: team wins SD %.2f (nflverse 2023 2.75), point differential SD %.1f a season (100.1), team OVR against wins r = %.2f\n", seasons,
+                  sdOf(allWins), sdOf(allPd), rr);
+      J["season.wins_sd"] = sdOf(allWins);
+      J["season.pd_sd"] = sdOf(allPd);
+      J["season.ovr_wins_r"] = rr;
+    }
   }
   if (jsonOut) {
     if (FILE* f = std::fopen(jsonOut, "w")) {

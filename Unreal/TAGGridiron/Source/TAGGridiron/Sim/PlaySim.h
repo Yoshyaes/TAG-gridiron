@@ -71,6 +71,26 @@ struct Tune {
   double shortPenT = 2.2;
   double zoneReactK = 0.3;  // share of his reaction time a zone defender (eyes on the quarterback) needs to break on a throw
   double manLagK = 0.6;  // share of the read lag a man defender plays his receiver's moves with
+  // man coverage reads the receiver's body, not his route (Research/NextLevel/02 A1; Madden 26's cut reaction). The man
+  // defender plays his receiver going the way he has seen him go. A break - the receiver's heading turning past
+  // manBreakDeg - he answers after a cut-reaction time: manCutBase s at even ratings, + manCutRating a point of route
+  // running over his man coverage, + manCutAgi a point of agility under 80, manCutLev less for a cut into his leverage
+  // and more for one away from it. Then he drives on it for manDriveT (manDriveLead yd ahead of the man), and a break that
+  // comes while he drives waits for the drive to end: the false step. A receiver who sinks to cut is read (the gather is
+  // there to see) toward the break the defender's leverage and the stem's depth say is coming; when the break goes that
+  // way he drives on it the harder - which a double move's second break punishes. 0: the old read, ahead along the
+  // receiver's actual route (predictPos) by routeRead x his man coverage.
+  double manCue = 1;
+  double manCutBase = 0.2;
+  double manCutRating = 0.004;
+  double manCutAgi = 0.002;
+  double manCutLev = 0.05;
+  double manBreakDeg = 28;
+  double manDriveT = 0.3;
+  double manDriveLead = 1.2;
+  double manLead = 0.35;   // s ahead of the receiver, on the way he reads him going, that he plays (x 1.43 past 12 yd)
+  double manCueCushion = 0.6;  // ... and his cushion on routes past 8 yd (manCushion's part; 2026-11-24: 200 games x seeds 11/29/41, held-out 53 - 1.1 left the box 2.3 out, loss 2.91 / 3.71)
+  double routePass = 1;  // > 0: a receiver past a break point takes the next leg from where he is (0: he loops back to touch it)
   double zoneVert = 0;  // 1: a deep zone's cushion goes by the threat's speed upfield, 0: by his speed any way
   double zoneUnder = 1.2;  // how far under a receiver in his zone an underneath defender sits (yd toward the quarterback)
   double passProShed = 0.08;  // (0.075 before the 2026-11-22 playbook expansion: its quick game, screens and RPOs cut sacks 2.08 -> 1.9) pass-pro shed hazard base (per s) (0.045 before help blocks, 0.065 before blockers passed rushers off and backs picked up the blitz: pressured ~33%, sacks 6.7%)
@@ -114,6 +134,34 @@ struct Tune {
   double pursueAvoid = 1.0;   // pursuers steer around bodies in their path (look-ahead 1.5 + 2x this yd; 0: straight at the ball)
   double fallMu = 0.35;      // a tackled carrier's forward fall past his momentum's share (yd, mean)
   double lbRead = 0.8;       // read step: a zone linebacker on a run holds depth and shuffles with the flow until he reads it (x top speed cap; 0: drops)
+  // read keys (Research/NextLevel/02 A4): linebackers and box safeties read the play from what they can see, not from
+  // the play's type - the line (low and firing out is run, high hats in a set are pass; a draw's line shows pass for
+  // drawSet s, play action's sells run while the fake lasts: keyOL) and the backfield (the ball handed or shown to a back
+  // going by the quarterback is run, the quarterback set with it or still going back deep is pass: keyBack). Each man's
+  // read - how sure he is it is a run - moves toward what the keys say at the rate his play recognition allows (a time
+  // constant of keyTau s at 99, + keyTauK a point under). Every one of them takes his read step on every snap until he has
+  // had his reaction time and keyStepT more; then a run read keeps a zone linebacker in it (coming downhill keyFill yd
+  // while the ball is shown at the mesh), a pass read sends him to his drop, and a run read on a pass - the fake - pulls a
+  // zone or man defender up the way play action's did (keyBiteK x his read past even). 0: the old reads, keyed on the
+  // play's type (the read step on runs only, a fake on play action only).
+  // OFF by default (2026-11-24, 200 games x seeds 11/29/41, held-out 53, on top of A1 + A5): the league stays in the
+  // box (1.7 stats out against 1.0, loss 1.65 / 1.33 held out against 1.35 / 1.38) but the item's own marks go the wrong
+  // way - play action's lift 1.51 -> 1.26 yd an attempt (nflverse x FTN 2023: +1.62), the draw 0.1 yd a carry over the
+  // inside zone -> 0.3 under it - and 0.18 yd an attempt comes off every pass (the read step holds the underneath
+  // droppers up on the quick game). A run read played downhill like play action's bite (keyZoneFill 1) gives the lift
+  // back (1.44) but runs go for 4.7-5.0 a carry. Fit with readKeys 1 before turning it on.
+  double readKeys = 0;
+  double keyTau = 0.15;
+  double keyTauK = 0.006;
+  double keyStepT = 0.0;
+  double keyOL = 0.4;
+  double keyBack = 0.6;
+  double keyBiteK = 3.0;
+  double keyFill = 4.0;      // yd a linebacker in his read step comes downhill at a full run read while the ball is shown at the mesh
+  double keySafety = 1;      // > 0: a safety in the box (within 9 yd at the snap) reads them too (0: the linebackers only)
+  double keyPaLine = 0.5;    // what play action's line shows while the fake lasts (-1 pass set .. +1 a run block's fire-out)
+  double keyZoneFill = 0;    // > 0: a run read before the ball is given sends a zone linebacker downhill at the back (the bite), not into the read step's hold
+  double drawSet = 0.9;    // s a draw's line shows the read keys a pass set (0: its run blocks say run from the snap)
   double readMinT = 1.15;     // s into the play before a progression read can be thrown
   double quickMinT = 0.7;     // ... and a quick-game throw
   double paDrop = 1.0;        // x the drop a play-action quarterback takes after the fake
@@ -171,6 +219,25 @@ struct Tune {
   double stepUp = 1.6;       // the quarterback's step up into the pocket from an edge rush (yd/s of push)
   double helpPen = 5;        // a pass-pro double team: how much the second blocker takes off the rusher (skill points)
   double helpBlock = 1;      // a pass blocker with nobody to block helps on the rusher next to him (a double team); 0 off
+  // leverage at engagement (Research/NextLevel/02 A5, the "suction" fix; Madden 26's head leverage): a block forms only
+  // where the blocker has the angle. A defender already past the blocker's hip (more than levHip yd beyond his middle on
+  // his line to the defender's goal - the quarterback, the ball) is not blocked: the blocker gets a hand on him at most (levGrabHold of
+  // holding risk) and is beaten. The rep's edge (skill points to the blocker) is no longer a roll of N(0, 7): levK points
+  // a yard the defender is nearer square in front of him than levCen (past it the defender has the edge; at most levCap
+  // either way), less levClose a yd/s the defender comes at his goal past 2.5 and, for a pass blocker, levSet a yd/s he is
+  // still moving past 1.5 (late to his set), plus N(0, levSd). 0: the old roll, a block wherever the bodies met.
+  // (fit 2026-11-24, 200 games x seeds 11/29/41, held-out 53: levCen 0.6 / levHip 0 had the defender the edge on average
+  // - 1.7 points - and the rush everywhere: pressure 38.6 %, sacks 7.1 %, 8 box stats out; levCen 0.9 / levHip 0.3:
+  // pressure 33.0 %, sacks 6.8 %, 1 out, loss 3.2 -> 1.35 on the fit seeds and 3.0 -> 1.4 held out)
+  double leverage = 1;
+  double levHip = 0.3;
+  double levGrabHold = 0.02;
+  double levK = 6;
+  double levCen = 0.9;
+  double levCap = 8;
+  double levClose = 1.0;
+  double levSet = 1.5;
+  double levSd = 4;
   double throwStyle = -1;    // >= 0: the CPU quarterback throws the user's pass types (0 bullet, 1 lob, 2 high, 3 low; a
                              // man inside 6 yd gets the shovel), for a filmed check (-1: his own calibrated throws)
   double kickBlock = 0;      // > 0: the chance a punt or field goal is blocked, for a filmed check (0: the real rates)
@@ -237,6 +304,19 @@ const char* animName(Anim a);
 enum class Move { None, Juke, Spin, Truck, StiffArm, Hurdle, Hit, Cut };
 const char* moveName(Move m);
 double moveWindow(Move m);
+
+/** A player's own steering (Settings > Movement: Responsive, Game/TagFeel.h): the sim's steering limits scaled for the
+ *  man a local player's stick drives. PlaySim::steerVel reads it only for a user-controlled man on a step his stick drove
+ *  him (Ent::stickDrove); the CPU's men, and every CPU-vs-CPU game, never. Each term goes on top of the sim's own and
+ *  never takes it below; the result is never faster than the sim's own law or than he was (top speed is the sim's). */
+struct SteerBoost {
+  bool on = false;
+  double latMul = 1;           // the lateral (cornering) limit at a jog and at speed, x this
+  double brakeMul = 1;         // braking, x this
+  double latAgiAtSpeed = 0.03; // at speed, the lateral limit's yd/s^2 per agility point over 50 (the sim's: 0.03)
+  double gripMul = 1;          // the whole push's ceiling, x this ...
+  double gripAgi = 0.03;       // ... and its yd/s^2 per agility point over 50 (the sim's: 0.03)
+};
 
 class Ent {
  public:
@@ -331,6 +411,28 @@ class Ent {
   std::string lastMove;   // the last move tried, and when, and whether it won
   double lastMoveT = -9;
   bool lastMoveWon = false;
+  /** Win rates (ESPN's PRWR / PBWR; telemetry only, PlaySim::noteWinReps): in the first 2.5 s of a dropback that is not a
+   *  screen, a rusher rushed (wrIn), was blocked (wrEng), beat his block (wrBeat) or came free at the quarterback with
+   *  nobody on him (wrFree); a pass blocker blocked (wrIn), had a man (wrEng), was beaten (wrBeat). wrCls: a rusher's 0
+   *  edge, 1 interior lineman, 2 other blitzer; a blocker's 0 tackle, 1 interior lineman, 2 tight end or back. */
+  bool wrIn = false, wrEng = false, wrBeat = false, wrFree = false;
+  int wrCls = -1;
+  /** Man coverage by the body (Tune::manCue): the way he has seen his receiver going (mcDir; zero until he has), a break
+   *  he has seen and not yet answered (its heading mcNext, seen at mcSeenT, answered mcReact s later; mcSeenT < 0: none),
+   *  his drive on the last break he answered (until mcDriveEnd, mcBite how hard), and a gather he has read (mcSank: the
+   *  receiver sinking for a break, which he expects toward mcPrior). */
+  V2 mcDir{0, 0}, mcNext{0, 0}, mcPrior{0, 0};
+  double mcSeenT = -1, mcReact = 0, mcDriveEnd = -1, mcBite = 0;
+  bool mcSank = false;
+  /** Read keys (Tune::readKeys): a linebacker's or box safety's read of the play, 0 pass .. 1 run (even at the snap), and
+   *  whether he is one of the readers (rkOn: a linebacker, or a safety within 9 yd of the ball when it was snapped). */
+  double rkRun = 0.5;
+  bool rkOn = false, rkSet = false;
+  /** His player's steering (PlaySim::setUserSteer; off: the sim's law), whether his stick drove him this step (set by
+   *  applyUser, cleared at the start of each think), and the steps it changed his steering on (telemetry). */
+  SteerBoost steer;
+  bool stickDrove = false;
+  mutable int steerBoosted = 0;
 
   /** His ratings on this play: the player's, plus what his Superstar abilities (and a live X-Factor) add (Abilities.h).
    *  fx: the rest of what they do, read where the sim rolls. Without abilities rr == p->r and fx is neutral. */
@@ -465,6 +567,24 @@ struct PlayResult {
   double intFaceDeg = -1;
   bool intBlind = false;
   bool pbuBlind = false;
+  // win rates (ESPN's, Research/NextLevel/02 A3): every man in the rush and the protection of a dropback that is not a
+  // screen (winPlay), as Ent::wrIn .. wrCls had him at 2.5 s, the throw or the scramble, whichever came first
+  struct WinRep {
+    Player* p = nullptr;
+    bool rusher = false;
+    int cls = 0;
+    bool engaged = false, beat = false, unblocked = false;
+  };
+  bool winPlay = false;
+  std::vector<WinRep> winReps;
+  // leverage at engagement (Tune::leverage, A5): blocks formed on the play (scrimmage, not a place kick), those formed on
+  // a defender already past the blocker's hip (with the rule on: none), the ones the rule refused, and the sums of the
+  // defender's offset from the blocker's line and the edge's geometric part at the blocks formed
+  int engN = 0, engPastHip = 0, engRefused = 0;
+  double engLatSum = 0, engGeoSum = 0;
+  // read keys (A4): the linebackers' depth past the line (sum yd, n) at 0.5, 1.0 and 1.5 s, the ball not yet thrown
+  double lbDepth[3] = {0, 0, 0};
+  int lbDepthN[3] = {0, 0, 0};
   bool pressured = false;
   std::string pressWhy;  // how the first pressure came: "<near|eta> <shed|unblocked|loose> <role>" (calibration)
   double pressT = 0;
@@ -917,7 +1037,22 @@ class PlaySim {
   Move suggestMove(const Ent* c, const Ent** threat = nullptr) const;
   /** The tackle logit shift from the moves live at a contact (the carrier's lower it, the defender's raise it). */
   double moveTackleAdj(const Ent* d, const Ent* c, double facing, bool arm, bool dive) const;
+  /** A man's velocity after a step toward `want`, by the human steering limits: the sim's own law, or for a man a
+   *  player's stick drove on this step his player's steering on it (Ent::steer, setUserSteer). */
   V2 steerVel(const Ent* e, const V2& vel, const V2& want, double dt) const;
+  /** The steering law itself: with boost nullptr the sim's own, to the bit; with one, its numbers on the sim's terms
+   *  (uncapped: steerVel holds a boosted man to the sim's speed). */
+  static V2 steerLaw(const Ent* e, const V2& vel, const V2& want, double dt, const SteerBoost* boost);
+  /** Slot s's man steers by b on the steps his stick drives him (b.on false: the sim's law). Set before each step: a man
+   *  switched to has none until it is set. False when the slot has no man. */
+  bool setUserSteer(int slot, const SteerBoost& b);
+  /** The user quarterback's pass in its windup (the throw started on the press): its type (UserInput::passStyle's: 0
+   *  bullet, 1 lob / touch, 2 high, 3 low), lobbed or not, and not to leave before sim time minAt (a press that may still
+   *  turn out a tap; ignored for a shovel, and < 0 for none). False when there is no such pass to change. */
+  bool setUserThrow(int style, bool lob, double minAt);
+  /** The user quarterback's pass in its windup called off (a pump fake: UserInput::pumpFake shows it); the throw request
+   *  is cleared too. False when there is none. */
+  bool cancelUserThrow();
   V2 routeWant(const Ent* e, const V2& pos, const V2& vel, size_t& idx) const;
   /** Expected separation (yards) at the catch point if thrown now. */
   double openness(const Ent* r, const Ent* qbEnt) const;
@@ -1046,9 +1181,21 @@ class PlaySim {
   void thinkRunBlock(Ent* e);
   void thinkRush(Ent* e);
   double fakeBite(const Ent* d) const;  // play action: how much a front man is still playing the run fake (0..1)
+  /** Read keys (Tune::readKeys): this tick's keys (the line and the backfield, each -1 pass .. +1 run) and
+   *  every reader's read of them; whether e reads them on this play (a CPU linebacker or box safety); whether he is still
+   *  in his read step; how much his run read pulls him up off a pass (0..1). */
+  void updateReads(double dt);
+  bool keyReader(const Ent* e) const;
+  bool keyStep(const Ent* e) const;
+  double keyBite(const Ent* e) const;
+  double olKey_ = 0, backKey_ = 0;
+  double lbDepth_[3] = {0, 0, 0};
+  int lbDepthN_[3] = {0, 0, 0};
   /** The back on a play-action fake: to the mesh and through it toward the line, then his job. */
   bool thinkPaBack(Ent* e);
   V2 delayedVel(const Ent* e, double lag) const;
+  /** Man coverage by the body (Tune::manCue): s the man defender d takes to answer receiver r's cut toward `cut`. */
+  double manCutTime(const Ent* d, const Ent* r, const V2& cut) const;
   void thinkMan(Ent* e);
   void thinkZone(Ent* e);
   bool reactToBall(Ent* e);
@@ -1059,6 +1206,11 @@ class PlaySim {
   void thinkCarrier(Ent* e);
   void move(Ent* e, double dt);
   void engage(Ent* blocker, Ent* d);
+  /** Where defender d is going, as his blocker has to keep him from it (updateEngagements' goal): the quarterback in a
+   *  pass set, the ball carrier, else back past the blocker. */
+  V2 blockGoal(const Ent* blocker, const Ent* d) const;
+  int engN_ = 0, engPastHip_ = 0, engRefused_ = 0;
+  double engLatSum_ = 0, engGeoSum_ = 0;
   void disengage(Ent* b);
   void setupReturn();
   // a place kick (Sim/PlaceKick.cpp)
@@ -1088,6 +1240,13 @@ class PlaySim {
    *  "bull", "longarm", "diprip"). Deterministic: does not draw from the rng. */
   const char* shedMove(const Ent* d, const Ent* b, bool passPro, double push) const;
   double pancakeRoll(const Ent* d) const;
+  /** Win rates (telemetry): the window they are counted in (the first 2.5 s of a dropback that is not a screen, the ball
+   *  still in the quarterback's hands), each tick's note of who is rushing, blocking and free, and a pass rusher off his
+   *  block (d beat `blockers`). None of it changes the play. */
+  bool winWindow() const;
+  void noteWinReps();
+  void noteBeat(Ent* d, const std::vector<Ent*>& blockers);
+  bool winPlay_ = false;
   void updateEngagements(double dt);
   void collide();
   void updateBall(double dt);
