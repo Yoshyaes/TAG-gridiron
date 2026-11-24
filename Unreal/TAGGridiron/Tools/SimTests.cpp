@@ -13,6 +13,7 @@
 #include <string>
 
 #include "Game.h"
+#include "GameInvariants.h"
 #include "League.h"
 #include "PlaySim.h"
 #include "Playbook.h"
@@ -1465,6 +1466,554 @@ int main() {
         *out += fx(sim->ball.pos.x, 4) + "," + fx(sim->ball.pos.y, 4);
       }
       check(a == b, "seed " + std::to_string(s) + " played two different kicks");
+    }
+  });
+
+  // ---------------- eyes on the ball (PlaySim Tune::eyesOn, Research/NextLevel/02 A2)
+  t("eyes on the ball: no pick by a defender who cannot see it; the trail man swipes at the hands; Cover 1 go-route picks drop", [&] {
+    // over full games: every interception was made by a man who could see the ball, and the hands play happens
+    int ints = 0, blind = 0, swipes = 0, overShoulder = 0;
+    {
+      Rng rng(808);
+      for (int i = 0; i < 30; i++) {
+        GameOptions o;
+        o.seed = static_cast<uint32_t>(rng.intRange(1, 1000000000));
+        Game g(*league[i % 32], *league[(i * 5 + 11) % 32], o);
+        g.onPlayResult = [&](const PlaySim&, const PlayResult& r) {
+          if (r.interception) {
+            ints++;
+            blind += r.intBlind;
+            overShoulder += r.intFaceDeg > tune().eyesDeg;
+          }
+          swipes += r.pbuBlind;
+        };
+        g.simToEnd();
+      }
+    }
+    check(ints >= 15, "too few interceptions to judge: " + std::to_string(ints));
+    check(blind == 0, std::to_string(blind) + " of " + std::to_string(ints) + " interceptions by a defender who could not see the ball");
+    check(swipes > 0, "no blind swipe at the hands in 30 games");
+    // Cover 1 against four verticals: picks by the target's own man (the trail technique) with the rule and without
+    auto trailPicks = [&](bool eyes, int& picks, int& att) {
+      const double keep = tune().eyesOn;
+      setTune("eyesOn", eyes ? 1 : 0);
+      Rng rng(99);
+      picks = att = 0;
+      for (int k = 0; k < 900; k++) {
+        PlayConfig cfg;
+        cfg.off = league[k % 32].get();
+        cfg.def = league[(k + 9) % 32].get();
+        cfg.offPlay = playById("trips_4verts");
+        cfg.defCall = defById("base_c1");
+        cfg.los = 30;
+        cfg.ballY = FIELD_W / 2;
+        cfg.flip = k % 2 == 0;
+        cfg.worldDir = 1;
+        cfg.weather.tempF = 60;
+        cfg.rng = rng.fork();
+        PlaySim sim(cfg);
+        const PlayResult& r = sim.runToEnd();
+        if (r.kind != PlayKind::Pass || r.thrownAway) continue;
+        att++;
+        if (sim.intBy && sim.intBy->man && sim.intBy->man->p == r.target) picks++;
+      }
+      setTune("eyesOn", keep);
+    };
+    int pOn = 0, aOn = 0, pOff = 0, aOff = 0;
+    trailPicks(true, pOn, aOn);
+    trailPicks(false, pOff, aOff);
+    std::printf("       (30 games: %d interceptions, %d over the shoulder, 0 blind; %d blind swipes. Cover 1 v four verticals: picks by the target's man %d of %d "
+                "attempts, %d of %d without the rule)\n",
+                ints, overShoulder, swipes, pOn, aOn, pOff, aOff);
+    check(aOn > 300 && aOff > 300, "too few Cover 1 attempts");
+    check(pOff >= 4, "too few trail-technique picks without the rule to compare: " + std::to_string(pOff));
+    check(static_cast<double>(pOn) / aOn < 0.6 * static_cast<double>(pOff) / aOff, "trail-technique picks did not drop: " + std::to_string(pOn) + " vs " + std::to_string(pOff));
+  });
+
+  // ---------------- the rules, every action of many games (Sim/GameInvariants.h)
+  t("rules invariants: every action of 360 games keeps score, downs, clock, timeouts, possession, tries, OT legal", [&] {
+    // A rule broken here is a sim bug, not noise: a known one stays listed below with its note (it is reported, and does
+    // not fail the run) until it is fixed - the check itself is never loosened to pass.
+    const std::map<std::string, std::string> known = {};
+    Rng rng(4711);
+    std::map<std::string, std::pair<int, std::string>> byRule;
+    long steps = 0;
+    for (int i = 0; i < 360; i++) {
+      const int h = rng.intRange(0, 31);
+      const int a = (h + 1 + rng.intRange(0, 30)) % 32;
+      GameOptions o;
+      o.seed = static_cast<uint32_t>(rng.intRange(1, 1000000000));
+      // (a third at full length, the rest at short quarters: they put far more snaps at the ends of the halves)
+      o.quarterLen = i % 3 == 0 ? 900.0 : i % 3 == 1 ? 240.0 : 120.0;
+      Game g(*league[h], *league[a], o);
+      GameInvariants inv(g);
+      for (int n = 0; !g.isFinal() && n < 3000; n++) {
+        g.simStep();
+        inv.afterStep(g);
+        steps++;
+      }
+      check(g.isFinal(), "a game did not finish");
+      g.simStep();  // (after the final whistle: nothing may happen)
+      inv.afterStep(g);
+      for (const std::string& v : inv.violations) {
+        auto& e = byRule[v.substr(0, v.find(':'))];
+        if (e.first++ == 0) e.second = v;
+      }
+    }
+    std::string bad;
+    for (const auto& kv : byRule) {
+      const auto k = known.find(kv.first);
+      std::printf("       %s %d x%s, first: %s\n", k != known.end() ? "KNOWN FAILURE" : "BROKEN", kv.second.first,
+                  k != known.end() ? (" (" + k->second + ")").c_str() : "", kv.second.second.c_str());
+      if (k == known.end()) bad += (bad.empty() ? "" : ", ") + kv.first;
+    }
+    std::printf("       (360 games, %ld actions checked)\n", steps);
+    check(bad.empty(), "rules broken: " + bad);
+  });
+
+  // ---------------- the long tail of the rules, each from a state set by hand (and every action of it checked)
+  auto newGame = [&](uint32_t seed, int h = 0, int a = 1) {
+    GameOptions o;
+    o.seed = seed;
+    return std::make_unique<Game>(*league[h], *league[a], o);
+  };
+  auto setScrim = [](Game& g, TeamKey poss, double ballOn, int down, double toGo, int q, double clock) {
+    g.phase = GamePhase::Scrimmage;
+    g.poss = poss;
+    g.ballOn = ballOn;
+    g.ballY = FIELD_W / 2;
+    g.down = down;
+    g.toGo = toGo;
+    g.q = q;
+    g.clock = clock;
+    g.clockRunning = false;
+    g.untimed = false;
+    g.safetyKick = false;
+  };
+  auto playDown = [](Game& g, const OffPlay& op, const DefCall& dc) {
+    auto sim = g.makePlay(op, dc);
+    sim->runToEnd();
+    return g.finishPlay(*sim);
+  };
+  auto clean = [](const GameInvariants& inv) { check(inv.violations.empty(), inv.violations.empty() ? std::string() : inv.violations[0]); };
+  auto said = [](const Game& g, size_t from, const char* s) {
+    for (size_t i = from; i < g.log.size(); ++i)
+      if (g.log[i].desc.find(s) != std::string::npos) return true;
+    return false;
+  };
+
+  t("rules: backed up at the 1 - a safety is 2, and the team scored on free-kicks from its 20", [&] {
+    int safeties = 0;
+    for (uint32_t s = 1; s <= 300 && safeties < 3; ++s) {
+      auto g = newGame(1000 + s);
+      setScrim(*g, TeamKey::Home, 1, 1, 10, 1, 600);
+      GameInvariants inv(*g);
+      const OffPlay* op = g->cpuOffense();
+      const DefCall* dc = g->cpuDefense(*op);
+      const PlayLog l = playDown(*g, *op, *dc);
+      inv.afterStep(*g);
+      if (l.big != LogTag::Safety) continue;
+      safeties++;
+      check(g->score.away == 2 && g->score.home == 0, "safety score " + std::to_string(g->score.away) + "-" + std::to_string(g->score.home));
+      check(g->phase == GamePhase::Kickoff && g->kicking == TeamKey::Home && g->poss == TeamKey::Away && g->safetyKick, "not set up for the free kick");
+      const SpecialResult k = g->kickoff();
+      inv.afterStep(*g);
+      check(k.flight && k.flight->fromX == 20, "the free kick was not from the 20");
+      check(!g->safetyKick && g->poss == TeamKey::Away, "after the free kick");
+      clean(inv);
+    }
+    check(safeties >= 1, "no safety from the 1 in 300 snaps");
+  });
+
+  t("rules: the half ends on a safety - the second half still opens with a kickoff from the 35", [&] {
+    auto g = newGame(77);
+    g->q = 2;
+    g->clock = 0;
+    g->phase = GamePhase::Kickoff;
+    g->kicking = TeamKey::Home;
+    g->poss = TeamKey::Away;
+    g->safetyKick = true;  // (as a safety with the clock run out leaves it)
+    GameInvariants inv(*g);
+    g->simStep();
+    inv.afterStep(*g);
+    check(g->q == 3 && g->phase == GamePhase::Kickoff && !g->safetyKick, "the half did not end, or the free kick carried over");
+    const SpecialResult k = g->kickoff();
+    inv.afterStep(*g);
+    check(k.flight && k.flight->fromX == 35, "second-half kickoff from " + (k.flight ? fx(k.flight->fromX, 0) : std::string("?")));
+    clean(inv);
+  });
+
+  t("rules: trailing late the kicking team onsides it (about 1 in 8 back); leading it kicks deep; the 2-point chart", [&] {
+    int onside = 0, back = 0;
+    for (uint32_t s = 1; s <= 400; ++s) {
+      auto g = newGame(2000 + s);
+      g->q = 4;
+      g->clock = 150;
+      g->phase = GamePhase::Kickoff;
+      g->kicking = TeamKey::Home;
+      g->poss = TeamKey::Home;
+      g->score.home = 17;
+      g->score.away = 22;
+      GameInvariants inv(*g);
+      g->kickoff();
+      inv.afterStep(*g);
+      clean(inv);
+      check(said(*g, 0, "onside"), "trailing by 5 with 2:30 left and no onside kick: " + g->log.back().desc);
+      onside++;
+      back += g->poss == TeamKey::Home;
+      check(g->down == 1 && g->toGo == 10 && g->ballOn == (g->poss == TeamKey::Home ? 46 : 54), "after the onside kick: " + g->log.back().desc);
+    }
+    const double rate = 100.0 * back / onside;
+    check(rate > 6 && rate < 20, "onside kicks recovered " + fx(rate, 1) + "%");
+    {
+      auto g = newGame(3);
+      g->q = 4;
+      g->clock = 150;
+      g->phase = GamePhase::Kickoff;
+      g->kicking = TeamKey::Home;
+      g->score.home = 24;
+      g->score.away = 17;
+      g->kickoff();
+      check(!said(*g, 0, "onside"), "leading and it onside kicked");
+    }
+    // after the touchdown, late: down 2 or 5 goes for two, in overtime never
+    for (int m : {-2, -5}) {
+      auto g = newGame(4);
+      g->q = 4;
+      g->clock = 300;
+      g->phase = GamePhase::Pat;
+      g->poss = TeamKey::Home;
+      g->score.home = 20;
+      g->score.away = 20 - m;
+      check(g->goForTwo(), "down " + std::to_string(-m) + " after the touchdown late and it kicked");
+      g->q = 5;
+      check(!g->goForTwo(), "went for two in overtime");
+    }
+    std::printf("       (%d onside kicks, %.1f%% recovered by the kicking team)\n", onside, rate);
+  });
+
+  t("rules: overtime - a 10:00 period with 2 timeouts; a first-possession FG / TD / turnover gives the other team the ball, a safety ends it", [&] {
+    auto otGame = [&](uint32_t seed) {
+      auto g = newGame(seed, 6, 9);
+      g->q = 4;
+      g->clock = 0;
+      g->phase = GamePhase::Kickoff;
+      g->score.home = g->score.away = 17;
+      GameInvariants inv(*g);
+      g->simStep();
+      inv.afterStep(*g);
+      clean(inv);
+      check(g->q == 5 && g->clock == 600 && g->timeouts.home == 2 && g->timeouts.away == 2 && g->phase == GamePhase::Kickoff && said(*g, 0, "Overtime!"),
+            "tied after four quarters and no overtime");
+      return g;
+    };
+    // play the rest out, every action checked; the team that had the ball second must have had it
+    auto finishOT = [&](Game& g, TeamKey second) {
+      GameInvariants inv(g);
+      const size_t from = g.log.size();
+      for (int n = 0; !g.isFinal() && n < 400; ++n) {
+        g.simStep();
+        inv.afterStep(g);
+      }
+      clean(inv);
+      check(g.isFinal(), "overtime never ended");
+      bool had = false;
+      for (size_t i = from; i < g.log.size(); ++i) had = had || (g.log[i].poss == second && g.log[i].q == 5);
+      check(had, "the second team never had the ball in overtime");
+    };
+    int fg = 0, td = 0, sf = 0, to = 0;
+    for (uint32_t s = 1; s <= 400 && (fg < 2 || td < 2 || sf < 1 || to < 1); ++s) {
+      // a field goal on the first possession: not over
+      if (fg < 2) {
+        auto g = otGame(100 + s);
+        const TeamKey r = other(g->kicking);
+        setScrim(*g, r, 85, 4, 5, 5, 400);
+        GameInvariants inv(*g);
+        g->fieldGoal();
+        inv.afterStep(*g);
+        clean(inv);
+        if (g->score[r] == 20) {
+          fg++;
+          check(!g->isFinal() && g->otPossDone == 1 && g->phase == GamePhase::Kickoff && g->kicking == r, "a first-possession field goal ended overtime");
+          finishOT(*g, other(r));
+        }
+      }
+      // a touchdown on the first possession: the try, then the other team's turn
+      if (td < 2) {
+        auto g = otGame(200 + s);
+        const TeamKey r = other(g->kicking);
+        setScrim(*g, r, 99.4, 1, 0.6, 5, 400);
+        GameInvariants inv(*g);
+        playDown(*g, *playById("gl_sneak"), *defById("gl_c1"));
+        inv.afterStep(*g);
+        if (g->phase == GamePhase::Pat) {
+          td++;
+          g->extraPoint();
+          inv.afterStep(*g);
+          clean(inv);
+          check(!g->isFinal() && g->otPossDone == 1, "a first-possession touchdown ended overtime");
+          finishOT(*g, other(r));
+        }
+      }
+      // a safety on the first possession: over
+      if (sf < 1) {
+        auto g = otGame(300 + s);
+        const TeamKey r = other(g->kicking);
+        // (from the 2, a pass grounded from the end zone: a safety every time the flag is accepted - a run stopped
+        // behind the goal line from the 1 is rarer than one a yard deep, short of it)
+        setScrim(*g, r, 2, 2, 8, 5, 400);
+        GameInvariants inv(*g);
+        auto sim = g->makePlay(*playById("dbl_curls"), *defById("nk_c3"));
+        sim->runToEnd();
+        Penalty ig;
+        ig.name = "Intentional Grounding";
+        ig.on = Side::Off;
+        ig.yards = 10;
+        if (sim->passThrown && sim->ball.throwX <= 0) g->forcedFlag = ig;
+        g->finishPlay(*sim);
+        g->forcedFlag.reset();
+        inv.afterStep(*g);
+        clean(inv);
+        if (said(*g, 0, "SAFETY!")) {  // (finishPlay hands back the last line: FINAL, after the safety)
+          sf++;
+          check(g->isFinal() && g->score[other(r)] == 19, "a safety on the first possession did not end overtime");
+        }
+      }
+      // a turnover on the first possession: the other team's turn, not over
+      if (to < 1) {
+        auto g = otGame(400 + s);
+        const TeamKey r = other(g->kicking);
+        setScrim(*g, r, 40, 1, 10, 5, 400);
+        const double keep = tune().forceInt;
+        setTune("forceInt", 1);
+        GameInvariants inv(*g);
+        const PlayLog l = playDown(*g, *playById("dbl_curls"), *defById("nk_c3"));
+        setTune("forceInt", keep);
+        inv.afterStep(*g);
+        clean(inv);
+        if (l.big == LogTag::Turnover && g->phase == GamePhase::Scrimmage) {
+          to++;
+          check(!g->isFinal() && g->otPossDone == 1 && g->poss == other(r), "a first-possession interception ended overtime");
+          finishOT(*g, other(r));
+        }
+      }
+    }
+    check(fg >= 2 && td >= 2 && sf >= 1 && to >= 1, "scenarios not reached: fg " + std::to_string(fg) + " td " + std::to_string(td) + " safety " + std::to_string(sf) + " turnover " + std::to_string(to));
+    // the period runs out tied: a tie (the regular season's rule)
+    auto g = otGame(9);
+    g->clock = 0;
+    GameInvariants inv(*g);
+    g->simStep();
+    inv.afterStep(*g);
+    clean(inv);
+    check(g->isFinal() && g->score.home == g->score.away, "overtime ran out and the game went on");
+  });
+
+  t("rules: a defensive foul accepted at 0:00 gets an untimed down; an offensive one ends the half", [&] {
+    int untimedDowns = 0, ended = 0;
+    for (uint32_t s = 1; s <= 40 && (untimedDowns < 3 || ended < 3); ++s) {
+      for (Side on : {Side::Def, Side::Off}) {
+        auto g = newGame(500 + s);
+        setScrim(*g, TeamKey::Home, 30, 1, 10, 2, 0.5);
+        GameInvariants inv(*g);
+        check(g->preSnap(), "no snap with 0:00.5 left");
+        Penalty p;
+        p.on = on;
+        if (on == Side::Def) {
+          p.name = "Unnecessary Roughness";
+          p.yards = 15;
+          p.autoFirst = true;
+          p.spot = PenaltySpot::End;
+        } else {
+          p.name = "Offensive Holding";
+          p.yards = 10;
+          p.replayDown = true;
+        }
+        g->forcedFlag = p;
+        const PlayLog l = playDown(*g, *playById("gl_dive"), *defById("base_c3"));
+        inv.afterStep(*g);
+        if (l.big != LogTag::Penalty || g->clock > 0) continue;  // (declined, or time left: not this case)
+        const size_t at = g->log.size();
+        const bool snap = g->preSnap();  // (the snap and its play are one action, as in simStep)
+        if (on == Side::Def) {
+          check(snap && g->q == 2 && g->clock <= 0, "a defensive foul at 0:00 and no untimed down");
+          playDown(*g, *playById("gl_dive"), *defById("base_c3"));
+          inv.afterStep(*g);
+          // (then the try if it scored, another untimed down if it drew another foul, and the half)
+          for (int k = 0; k < 8 && g->q == 2; ++k) {
+            g->simStep();
+            inv.afterStep(*g);
+          }
+          check(g->q == 3 && said(*g, at, "Halftime."), "the half did not end after its untimed down");
+          untimedDowns++;
+        } else {
+          inv.afterStep(*g);
+          check(!snap && g->q == 3, "an offensive foul at 0:00 gave the offense another down");
+          ended++;
+        }
+        clean(inv);
+      }
+    }
+    check(untimedDowns >= 3 && ended >= 3, "cases reached: untimed " + std::to_string(untimedDowns) + " ended " + std::to_string(ended));
+  });
+
+  t("rules: a fumble out of bounds - ahead of the fumble back to its spot, behind it where it went out, a safety / touchback off an end zone", [&] {
+    const double keep = tune().fumbleK;
+    setTune("fumbleK", 60);
+    int fwd = 0, back = 0, sfty = 0, tb = 0, n = 0;
+    Rng rng(31);
+    for (int k = 0; k < 2400 && (fwd < 4 || back < 4); ++k) {
+      auto g = newGame(7000 + static_cast<uint32_t>(k), k % 32, (k + 5) % 32);
+      const double los = k % 4 == 0 ? rng.range(1, 4) : k % 4 == 1 ? rng.range(93, 98) : rng.range(15, 85);
+      setScrim(*g, TeamKey::Home, los, 1, (std::min)(10.0, 100 - los), 1, 600);
+      GameInvariants inv(*g);
+      const OffPlay* op = g->cpuOffense();
+      auto sim = g->makePlay(*op, *g->cpuDefense(*op));
+      const PlayResult& r = sim->runToEnd();
+      const bool oobLoose = r.fumbleBy && r.outOfBounds && sim->ball.mode == BallMode::Loose && sim->fumbler && sim->fumbler->side == Side::Off;
+      double fumX = 0;
+      for (const PlayEvent& e : sim->events)
+        if (e.type == "fumble") fumX = e.x;
+      const double outX = sim->ball.pos.x;
+      g->finishPlay(*sim);
+      inv.afterStep(*g);
+      clean(inv);
+      if (!oobLoose) continue;
+      n++;
+      if (outX <= 0 || (fumX <= 0 && outX > fumX)) {
+        sfty++;
+        check(r.safety, "a fumble out of the offense's own end zone (or out ahead of a fumble in it) was not a safety");
+      } else if (outX >= 100) {
+        tb++;
+        check(r.turnover && r.touchback, "a fumble out through the other end zone was not a touchback");
+      } else if (outX > fumX) {
+        fwd++;
+        check(!r.turnover && std::fabs(r.endX - clamp(fumX, 0.5, 99.5)) < 1e-9, "a fumble out of bounds forward was spotted at " + fx(r.endX) + ", not its spot " + fx(fumX));
+      } else {
+        back++;
+        check(!r.turnover && std::fabs(r.endX - clamp(outX, 0.5, 99.5)) < 1e-9, "a fumble out of bounds backward was spotted at " + fx(r.endX) + ", not where it went out " + fx(outX));
+      }
+    }
+    setTune("fumbleK", keep);
+    std::printf("       (%d fumbles out of bounds: %d forward, %d backward, %d out of the own end zone, %d out through the other)\n", n, fwd, back, sfty, tb);
+    check(fwd >= 1 && back >= 1, "too few fumbles out of bounds to judge");
+  });
+
+  t("rules: intentional grounding - loss of down and 10 (or at the spot), a safety from the end zone, a turnover on 4th down", [&] {
+    Penalty ig;
+    ig.name = "Intentional Grounding";
+    ig.on = Side::Off;
+    ig.yards = 10;
+    int ez = 0, field = 0, fourth = 0;
+    for (uint32_t s = 1; s <= 120 && (ez < 3 || field < 3 || fourth < 3); ++s) {
+      const int kind = static_cast<int>(s % 3);  // 0 backed up at the 2, 1 from the 30, 2 4th down at the 40
+      auto g = newGame(800 + s);
+      const double los = kind == 0 ? 2 : kind == 1 ? 30 : 40;
+      setScrim(*g, TeamKey::Home, los, kind == 2 ? 4 : 2, kind == 2 ? 5 : 8, 1, 600);
+      GameInvariants inv(*g);
+      auto sim = g->makePlay(*playById("dbl_curls"), *defById("nk_c3"));
+      const PlayResult& r = sim->runToEnd();
+      if (!sim->passThrown || r.turnover || r.td || r.kind == PlayKind::Sack) continue;
+      const double throwX = sim->ball.throwX;
+      g->forcedFlag = ig;
+      const PlayLog l = g->finishPlay(*sim);
+      inv.afterStep(*g);
+      clean(inv);
+      if (kind == 0 && throwX <= 0) {
+        ez++;
+        check(l.big == LogTag::Safety && g->score.away == 2 && g->phase == GamePhase::Kickoff && g->kicking == TeamKey::Home,
+              "grounding from the end zone (thrown from " + fx(throwX) + ") was not a safety: " + l.desc);
+      } else if (kind <= 1 && l.big == LogTag::Penalty) {
+        field++;
+        const double want = throwX < los - 10 ? throwX : los - (std::min)(10.0, los / 2);
+        check(g->down == 3 && std::fabs(g->ballOn - want) < 1e-9 && std::fabs(g->ballOn + g->toGo - (los + 8)) < 1e-9,
+              "grounding from the " + fx(los, 0) + " (thrown from " + fx(throwX) + "): " + g->downText() + " at " + fx(g->ballOn));
+      } else if (kind == 2 && l.big == LogTag::Turnover) {
+        fourth++;
+        check(g->poss == TeamKey::Away && g->down == 1 && g->phase == GamePhase::Scrimmage, "grounding on 4th down: " + l.desc);
+      }
+    }
+    check(ez >= 3 && field >= 3 && fourth >= 3, "cases reached: end zone " + std::to_string(ez) + ", field " + std::to_string(field) + ", 4th down " + std::to_string(fourth));
+  });
+
+  t("rules: kneel-out - ahead late, the offense kneels when the other team's timeouts cannot stop the clock", [&] {
+    auto g = newGame(42);
+    setScrim(*g, TeamKey::Home, 30, 1, 10, 4, 100);
+    g->score.home = 20;
+    g->score.away = 17;
+    g->timeouts.away = 0;
+    check(g->shouldKneel(), "ahead with 1:40 left, the other team out of timeouts, and no kneel");
+    g->timeouts.away = 3;
+    check(!g->shouldKneel(), "knelt with 1:40 left against three timeouts");
+    g->clock = 40;
+    check(!g->shouldKneel(), "knelt with 0:40 left against three timeouts (three kneels and a punt hand it back with ~0:30)");
+    g->clock = 4;
+    check(g->shouldKneel(), "no kneel with 0:04 left against three timeouts");
+    // whenever it kneels, the kneels run it out: no more points, the leader wins, the other team never snaps the ball,
+    // every kneel and timeout legal (down, timeouts left, clock)
+    const struct { int down; int tos; double clock; } cases[] = {{1, 0, 100}, {1, 1, 80}, {1, 2, 40}, {2, 0, 80}, {3, 0, 40}, {1, 3, 4}};
+    int run = 0;
+    for (const auto& cs : cases) {
+      auto h = newGame(43 + static_cast<uint32_t>(run++));
+      setScrim(*h, TeamKey::Home, 30, cs.down, 10, 4, cs.clock);
+      h->score.home = 20;
+      h->score.away = 17;
+      h->timeouts.away = cs.tos;
+      h->clockRunning = true;
+      check(h->shouldKneel(), "no kneel at " + std::to_string(cs.down) + " down, " + std::to_string(cs.tos) + " timeouts, " + fmtClock(cs.clock));
+      GameInvariants inv(*h);
+      const size_t from = h->log.size();
+      for (int k = 0; !h->isFinal() && k < 40; ++k) {
+        h->simStep();
+        inv.afterStep(*h);
+      }
+      clean(inv);
+      bool theirs = false;
+      for (size_t i = from; i < h->log.size(); ++i) {
+        const PlayLog& l = h->log[i];
+        if (l.poss == TeamKey::Away && l.desc.rfind("End of", 0) != 0 && l.desc.rfind("FINAL", 0) != 0 && l.desc.rfind("Timeout", 0) != 0) theirs = true;
+      }
+      check(h->isFinal() && h->score.home == 20 && h->score.away == 17 && said(*h, from, " kneels.") && !theirs,
+            "kneeling from " + std::to_string(cs.down) + " down, " + std::to_string(cs.tos) + " timeouts, " + fmtClock(cs.clock) + " did not run it out: " +
+                h->log.back().desc);
+    }
+  });
+
+  t("rules: overtime - a punt run back for a touchdown is a score after both teams have had the ball (a live return)", [&] {
+    // lead 0: the punting team has the first possession, tied. lead 3: the return team kicked a field goal on the first
+    // possession and the punting team's second one ends in the punt
+    for (int lead : {0, 3}) {
+      int done = 0;
+      for (uint32_t s = 1; s <= 60 && !done; ++s) {
+        auto g = newGame(900 + s, 10, 20);
+        const TeamKey pt = TeamKey::Home, rt = TeamKey::Away;  // pt punts, rt returns it
+        setScrim(*g, pt, 35, 4, 9, 5, 400);
+        g->score[pt] = 17;
+        g->score[rt] = 17 + lead;
+        g->otPossDone = lead ? 1 : 0;
+        g->timeouts = PerTeam<int>{2, 2};
+        GameInvariants inv(*g);
+        g->punt(true);  // (a live return: the punt and the return are one action, logged by finishKickReturn)
+        if (!g->pendingReturn) continue;
+        std::vector<Player*> kickU = g->fgUnit(pt, true), recvU = g->fgUnit(rt, false);
+        auto sim = g->kickReturnSim(recvU, kickU);
+        sim->runToEnd();
+        sim->result->td = Side::Off;  // (the return taken all the way: what the game does with it)
+        sim->result->turnover = false;
+        g->finishKickReturn(*sim);
+        inv.afterStep(*g);
+        done++;
+        if (lead) {
+          check(g->isFinal() && g->score[rt] == 26 && g->score[pt] == 17, "the return team led after both possessions and overtime went on");
+        } else {
+          check(!g->isFinal() && g->phase == GamePhase::Pat && g->otPossDone == 1, "after the return touchdown: not the try");
+          g->extraPoint();
+          inv.afterStep(*g);
+          check(g->isFinal(), "a punt return touchdown in overtime and the punting team got the ball back");
+        }
+        clean(inv);
+      }
+      check(done, "no live punt return to test");
     }
   });
 

@@ -131,6 +131,8 @@ int main(int argc, char** argv) {
   double mtBroken = 0, mtMade = 0, yac0 = 0, yac0N = 0, yacMt = 0, yacMtN = 0;
   double yacSep[5] = {0, 0, 0, 0, 0}, yacSepN[5] = {0, 0, 0, 0, 0};
   double yacB[4] = {0, 0, 0, 0}, yacBN[4] = {0, 0, 0, 0}, yacBig[4] = {0, 0, 0, 0};
+  // eyes on the ball (PlaySim Tune::eyesOn): interceptions by how the man faced the ball, breakups, blind swipes
+  double eyAtt = 0, eyInt = 0, eyBlind = 0, eyFace[3] = {0, 0, 0}, eyPbu = 0, eyPbuBlind = 0;
 
   for (int g = 0; g < N; g++) {
     const int hi = rng.intRange(0, 31);
@@ -271,6 +273,18 @@ int main(int argc, char** argv) {
             for (const auto& kv : callN) std::printf(" %s %.1f%%", kv.first.c_str(), 100.0 * kv.second / (std::max)(1, tot));
             std::printf(" (NFL screens ~9-10%% of passes)\n");
           });
+        }
+      }
+      if (r.kind == PlayKind::Pass && !r.thrownAway && !sim.isReturn()) {
+        eyAtt++;
+        if (r.interception) {
+          eyInt++;
+          eyBlind += r.intBlind;
+          eyFace[r.intFaceDeg <= 90 ? 0 : r.intFaceDeg <= 150 ? 1 : 2]++;
+        }
+        if (r.pbuBy && !r.interception) {
+          eyPbu++;
+          eyPbuBlind += r.pbuBlind;
         }
       }
       if (r.kind == PlayKind::Pass && !r.thrownAway) {
@@ -931,6 +945,13 @@ int main(int argc, char** argv) {
                   sepThrow[sepThrow.size() / 2], sepFly[sepFly.size() / 2], nearN[0], nearSep[0] / (std::max)(nearN[0], 1.0), nearN[1], nearSep[1] / (std::max)(nearN[1], 1.0),
                   nearN[2], nearSep[2] / (std::max)(nearN[2], 1.0), nearN[3], nearSep[3] / (std::max)(nearN[3], 1.0));
     }
+    std::printf("eyes on the ball: interceptions by defenders not facing the ball: %.0f of %.0f (his body to the ball <=90 deg %.0f, 90-150 %.0f, "
+                ">150 %.0f); breakups %.2f%% of attempts (%.0f blind swipes at the hands), passes defensed %.2f%%\n",
+                eyBlind, eyInt, eyFace[0], eyFace[1], eyFace[2], 100 * eyPbu / (std::max)(1.0, eyAtt), eyPbuBlind, 100 * (eyPbu + eyInt) / (std::max)(1.0, eyAtt));
+    J["int_blind"] = eyBlind;
+    J["int_total"] = eyInt;
+    J["pbu_per_att_pct"] = 100 * eyPbu / (std::max)(1.0, eyAtt);
+    J["pd_per_att_pct"] = 100 * (eyPbu + eyInt) / (std::max)(1.0, eyAtt);
     std::printf("20+ yd outcomes:");
     for (const auto& kv : deepOutcome) std::printf("  %s %d", kv.first.c_str(), kv.second);
     std::printf("\n0-9 yd outcomes:");

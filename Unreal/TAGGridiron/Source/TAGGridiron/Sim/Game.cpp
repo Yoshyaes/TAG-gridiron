@@ -278,9 +278,12 @@ bool Game::preSnap() {
     }
     runClock(run);
   }
+  // (a defensive foul accepted at 0:00 extends the period by an untimed down: it is played with no time on the clock.
+  // The flag was cleared here before the clock was looked at, and the period ended without it)
+  const bool extraDown = untimed;
   untimed = false;
   lastOOB = false;
-  if (clock <= 0) {
+  if (clock <= 0 && !extraDown) {
     endQuarter();
     return false;
   }
@@ -307,6 +310,7 @@ void Game::endQuarter() {
     q = 5;
     clock = 600;
     timeouts = PerTeam<int>{2, 2};
+    safetyKick = false;  // (a safety as time ran out: overtime opens with a kickoff from the 35, not its free kick)
     kicking = rng.chance(0.5) ? TeamKey::Home : TeamKey::Away;
     poss = other(kicking);
     phase = GamePhase::Kickoff;
@@ -320,6 +324,7 @@ void Game::endQuarter() {
   if (q == 3) {
     // halftime: rest, timeouts reset, other team receives
     timeouts = PerTeam<int>{3, 3};
+    safetyKick = false;  // (a safety as the half ran out: the second half opens with a kickoff from the 35)
     kicking = openingReceiver;
     poss = other(kicking);
     phase = GamePhase::Kickoff;
@@ -381,8 +386,11 @@ bool Game::shouldKneel() const {
   const int m = margin();
   if (m <= 0) return false;
   const int oppTO = timeouts[other(poss)];
+  // (the kneels run the clock down to the 4th-down snap - that one is a punt or a kick, fourthDownCall: the downs left
+  // before it each take a kneel and a runoff, and each of the other team's timeouts takes one runoff away. It counted a
+  // runoff after the 4th down as well, and knelt with 0:40 left against three timeouts to punt it back with 0:30)
   const int snaps = 5 - down;
-  const double burn = (std::max)(0, snaps - oppTO) * 40 + snaps * 1.5;
+  const double burn = (std::max)(0, snaps - 1 - oppTO) * 40 + (snaps - 1) * 1.5;
   if (q >= 4 && clock <= burn) return true;
   if (q == 2 && clock <= 30 && ballOn < 55 && m > 0) return true;  // (past the 55 they try for points: the timeouts above)
   return false;
@@ -767,11 +775,25 @@ PlayLog Game::finishPlay(PlaySim& sim) {
 
   // postsnap penalty
   std::optional<Penalty> pen = rollPostsnap(res, play);
+  if (forcedFlag) {
+    pen = *forcedFlag;
+    forcedFlag.reset();
+  }
   bool usePen = false;
   if (pen) {
     // compare options from offense's perspective
     const double rEP = resultEP(res, los);
-    const double penBall = enforce(*pen, los, res.endX);
+    // (a foul marked from the end of the play is marked from the line when the play ended with the other team's ball -
+    // the end of a takeaway's return is in the other team's frame: it put the ball at the offense's goal line, 1st and 0)
+    const double endSpot = res.turnover ? los : res.endX;
+    double penBall = enforce(*pen, los, endSpot);
+    // intentional grounding: loss of down and 10 yd from the line, or at the spot of the foul when the passer threw it
+    // from more than 10 yd behind it - and from his own end zone it is a safety (it was always 10 yd, half the distance
+    // to the goal, and a quarterback grounding it from his end zone gave up nothing)
+    const bool grounding = pen->name == "Intentional Grounding";
+    const double foulX = sim.ball.throwX;
+    const bool groundSafety = grounding && sim.passThrown && foulX <= 0;
+    if (grounding && !groundSafety && sim.passThrown && foulX < los - 10) penBall = foulX;
     double penEP;
     if (pen->on == Side::Def) {
       const bool first = pen->autoFirst || penBall >= los + toGo;
@@ -779,13 +801,28 @@ PlayLog Game::finishPlay(PlaySim& sim) {
       usePen = penEP > rEP && !res.td;
       if (res.td == Side::Off) usePen = false;
     } else {
-      penEP = expectedPoints(penBall, down, toGo + (los - penBall));
+      // (a loss of down on 4th down hands the ball over where it is marked)
+      penEP = groundSafety ? -3.0
+              : !pen->replayDown && down >= 4 ? -expectedPoints(100 - penBall, 1, 10)
+                                              : expectedPoints(penBall, down, toGo + (los - penBall));
       usePen = penEP < rEP;
+    }
+    if (usePen && groundSafety) {
+      team[ok].penalties++;
+      score[dk] += 2;
+      addLog(describe(res, play, sim) + " PENALTY on " + O.abbr + ": " + pen->name + " in the end zone. SAFETY! " + D.abbr + " +2.", LogTag::Safety);
+      kicking = ok;
+      poss = dk;
+      phase = GamePhase::Kickoff;
+      safetyKick = true;
+      clockRunning = false;
+      if (q == 5) finish();
+      return log.back();
     }
     if (usePen) {
       const TeamKey k = pen->on == Side::Off ? ok : dk;
       team[k].penalties++;
-      team[k].penYds += jsRoundI(std::fabs(penBall - (pen->spot == PenaltySpot::End ? res.endX : los)));
+      team[k].penYds += jsRoundI(std::fabs(penBall - (pen->spot == PenaltySpot::End ? endSpot : los)));
       const double moved = penBall - los;
       ballOn = penBall;
       if (pen->on == Side::Def && (pen->autoFirst || penBall >= los + toGo)) {
@@ -799,6 +836,15 @@ PlayLog Game::finishPlay(PlaySim& sim) {
       clockRunning = false;
       if (clock <= 0 && pen->on == Side::Def) untimed = true;
       const Team& pt = pen->on == Side::Off ? O : D;
+      if (down > 4) {
+        // (loss of down on fourth down - intentional grounding: the ball goes over where the foul is marked. It was a
+        // 5th down)
+        addLog(describe(res, play, sim) + " PENALTY on " + pt.abbr + ": " + pen->name + ", enforced. Turnover on downs.", LogTag::Turnover);
+        if (q == 5) otDriveEnded();
+        if (phase == GamePhase::Final) return log.back();
+        changePossessionRaw(100 - ballOn);
+        return log.back();
+      }
       const std::string line = describe(res, play, sim) + " PENALTY on " + pt.abbr + ": " + pen->name + ", enforced. " + downText() + " at " + ydLine() + ".";
       addLog(line, LogTag::Penalty);
       // half-distance etc handled; stats for the nullified play are not counted
@@ -1247,7 +1293,7 @@ SpecialResult Game::kickoff(bool onside, bool liveReturn) {
       poss = kt;
       ballOn = 100 - clamp(start, 5, 95);
       down = 1;
-      toGo = 10;
+      toGo = (std::min)(10.0, 100 - ballOn);  // (inside the 10 it is 1st and goal: it was 1st and 10 at the 5)
       ballY = FIELD_W / 2;
       addLog(nm(k) + " kicks off. " + nm(kr) + " FUMBLES the return! Recovered by " + teamOf(kt).abbr + " at the " + ydLine() + ".",
              LogTag::Turnover);
@@ -1272,7 +1318,7 @@ SpecialResult Game::kickoff(bool onside, bool liveReturn) {
   poss = rt;
   ballOn = start;
   down = 1;
-  toGo = 10;
+  toGo = (std::min)(10.0, 100 - ballOn);  // (a return inside the 10: 1st and goal)
   ballY = FIELD_W / 2;
   driveStartBallOn = ballOn;
   inRedZone = false;
@@ -1479,12 +1525,17 @@ PlayLog Game::finishKickReturn(PlaySim& sim) {
   toGo = 10;
   ballY = FIELD_W / 2;
   inRedZone = false;
+  // (overtime: the punt ended the kicking team's possession, and a touchdown on the return - the return team's, or the
+  // kicking team's off a fumble - is a score after both teams have had the ball. Only a return that did not score counted
+  // the punt, and a punt run back for a touchdown in overtime gave the punting team another possession)
+  const bool otPuntScore = pr.punt && q == 5 && r.td;
   if (r.td && *r.td == Side::Off) {
     score[rt] += 6;
     if (kr) stats.line(*kr, teamOf(rt).abbr).defTD++;
     phase = GamePhase::Pat;
     ballOn = 85;
     addLog(pr.kickDesc + ". " + who + " returns it ALL THE WAY! TOUCHDOWN " + teamOf(rt).abbr + "!", LogTag::Td);
+    if (otPuntScore) otDriveEnded();  // (ahead after both have had it: over, no try)
     return log.back();
   }
   if (r.turnover) {
@@ -1494,10 +1545,12 @@ PlayLog Game::finishKickReturn(PlaySim& sim) {
       phase = GamePhase::Pat;
       ballOn = 85;
       addLog(pr.kickDesc + ". " + who + " FUMBLES, returned for a TOUCHDOWN by " + teamOf(kt).abbr + "!", LogTag::Td);
+      if (otPuntScore) otDriveEnded();
       return log.back();
     }
     poss = kt;
     ballOn = clamp(100 - r.endX, 1, 99);
+    toGo = (std::min)(10.0, 100 - ballOn);
     phase = GamePhase::Scrimmage;
     driveStartBallOn = ballOn;
     addLog(pr.kickDesc + ". " + who + " FUMBLES the return! Recovered by " + teamOf(kt).abbr + " at the " + ydLine() + ".", LogTag::Turnover);
@@ -1515,6 +1568,7 @@ PlayLog Game::finishKickReturn(PlaySim& sim) {
     driveStartBallOn = ballOn;
     clockRunning = false;
   }
+  toGo = (std::min)(10.0, 100 - ballOn);  // (a return inside the 10: 1st and goal)
   if (tb)
     addLog(pr.kickDesc + ", fielded in the end zone by " + who + " and downed. Touchback.");
   else
@@ -1939,7 +1993,7 @@ SpecialResult Game::finishPlaceKick(PlaySim& sim) {
     const double tg = toGo - (endX - los);
     ballOn = clamp(endX, 1, 99);
     down++;
-    toGo = (std::max)(1.0, tg);
+    toGo = tg;  // (short of the sticks, so > 0; it was at least 1, which moved the line to gain - past the goal from inside the 1)
     ballY = FIELD_W / 2;
     addLog(desc + " at the " + ydLine(ballOn, kt) + ".");
     return SpecialResult{log.back().desc, std::nullopt};

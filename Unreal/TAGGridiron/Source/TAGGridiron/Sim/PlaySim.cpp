@@ -237,6 +237,14 @@ bool setTune(const std::string& name, double v) {
   if (name == "routePace") return t.routePace = v, true;
   if (name == "releaseRate") return t.releaseRate = v, true;
   if (name == "intBias") return t.intBias = v, true;
+  if (name == "eyesOn") return t.eyesOn = v, true;
+  if (name == "eyesDeg") return t.eyesDeg = v, true;
+  if (name == "eyesHead") return t.eyesHead = v, true;
+  if (name == "eyesTurnT") return t.eyesTurnT = v, true;
+  if (name == "handsT") return t.handsT = v, true;
+  if (name == "swipeK") return t.swipeK = v, true;
+  if (name == "dpiBlind") return t.dpiBlind = v, true;
+  if (name == "landErr") return t.landErr = v, true;
   if (name == "runShed") return t.runShed = v, true;
   if (name == "hotRate") return t.hotRate = v, true;
   if (name == "outletPen") return t.outletPen = v, true;
@@ -4101,6 +4109,58 @@ V2 PlaySim::ballLanding() const {
   return landingOut_;
 }
 
+namespace {
+// a uniform in (0, 1) off a 64-bit key (splitmix64): a fixed draw that leaves the play's rng where it was
+double hashUnit(uint64_t x) {
+  x += 0x9E3779B97F4A7C15ull;
+  x = (x ^ (x >> 30)) * 0xBF58476D1CE4E5B9ull;
+  x = (x ^ (x >> 27)) * 0x94D049BB133111EBull;
+  x ^= x >> 31;
+  return (static_cast<double>(x >> 11) + 0.5) * (1.0 / 9007199254740992.0);
+}
+}  // namespace
+
+V2 PlaySim::landingFor(const Ent* d) const {
+  // A defender reads the flight: early his spot is off by a yard or two (more for poor ball skills), and it closes on
+  // the real one as the ball comes down. Everyone ran at the exact spot from his reaction on - the "psychic" break on
+  // the ball a defender cannot yet know.
+  const V2 land = ballLanding();
+  const Ball& b = ball;
+  if (tune().eyesOn <= 0 || tune().landErr <= 0 || !d->p || b.mode != BallMode::Air || !b.target || b.flightT <= 0.05) return land;
+  const double left = clamp(1 - b.t / b.flightT, 0, 1);
+  const double sd = tune().landErr * left * clamp(1.6 - d->r().ballSkills / 100.0, 0.5, 1.2);
+  uint64_t key = 0;
+  std::memcpy(&key, &throwStart, sizeof key);
+  // (the man by his jersey and side, not Player::id: ids count up across leagues, and the same game in a second league
+  // read the ball differently - SimDigest's twice-in-one-process check)
+  key ^= static_cast<uint64_t>(static_cast<uint32_t>(d->p->number) * 2u + (d->side == Side::Def ? 1u : 0u) + 1u) * 0x9E3779B97F4A7C15ull;
+  key ^= static_cast<uint64_t>(std::llround(los * 64.0));
+  const double u1 = hashUnit(key), u2 = hashUnit(key ^ 0xD1B54A32D192ED03ull);
+  const double rad = std::sqrt(-2 * std::log(u1)) * sd;
+  return V2{land.x + rad * std::cos(2 * kPi * u2), land.y + rad * std::sin(2 * kPi * u2)};
+}
+
+double PlaySim::ballFacingDeg(const Ent* d) const {
+  const Ball& b = ball;
+  V2 from{-b.vel.x, -b.vel.y};  // (where it is coming from: back along its flight)
+  if (len(from) < 0.5) from = sub(V2{b.pos.x, b.pos.y}, d->pos);
+  if (len(from) < 1e-6) return 0;
+  const V2 f = fromAngle(d->face);
+  return std::acos(clamp(dot(norm(from), f), -1, 1)) * 180 / kPi;
+}
+
+bool PlaySim::eyesOnBall(const Ent* d) const { return tune().eyesOn <= 0 || canSeeBall(d); }
+
+bool PlaySim::canSeeBall(const Ent* d) const {
+  const double ang = ballFacingDeg(d);
+  if (ang <= tune().eyesDeg) return true;
+  // the trail man: on the target with his back to the ball, he stays on his man (turning to look loses him)
+  if (d->state == EntState::Man && d->man && d->man == ball.target) return false;
+  // anyone else looks back over his shoulder once he has read the throw and turned his head
+  const double react = d->state == EntState::Man ? d->reactT + 0.12 : d->reactT * tune().zoneReactK;
+  return ang <= tune().eyesDeg + tune().eyesHead && throwStart >= 0 && t - throwStart >= react + tune().eyesTurnT;
+}
+
 void PlaySim::thinkPassBlock(Ent* e) {
   if (ball.holder && ball.holder != qb && ball.holder->side == Side::Off) {
     e->state = EntState::Convoy;
@@ -4571,7 +4631,11 @@ bool PlaySim::reactToBall(Ent* e) {
   const Ball& b = ball;
   if (b.mode == BallMode::Air && b.target != nullptr) {
     if (t - throwStart > (e->state == EntState::Man ? e->reactT + 0.12 : e->reactT * tune().zoneReactK)) {
-      const V2 spot = ballLanding();
+      V2 spot = landingFor(e);
+      // the trail man, his back to the ball: he runs with his man (at his hip) and goes for the catch point only when the
+      // receiver's hands come up, handsT before it gets there
+      if (tune().eyesOn > 0 && e->state == EntState::Man && e->man == b.target && b.flightT - b.t > tune().handsT && !eyesOnBall(e))
+        spot = add(b.target->pos, scale(b.target->vel, 0.3));
       const double dd = dist(spot, e->pos);
       e->want = scale(norm(sub(spot, e->pos)), (std::min)(e->vmax, dd * 4 + 0.5));
       return true;
@@ -4639,7 +4703,7 @@ bool PlaySim::reactToBall(Ent* e) {
 void PlaySim::thinkPursue(Ent* e) {
   const Ball& b = ball;
   if (b.mode == BallMode::Air) {
-    const V2 spot = ballLanding();
+    const V2 spot = e->side == Side::Def ? landingFor(e) : ballLanding();
     e->want = scale(norm(sub(spot, e->pos)), (std::min)(e->vmax, dist(spot, e->pos) * 4 + 0.5));
     return;
   }
@@ -5651,7 +5715,7 @@ void PlaySim::preRollCatch() {
     Ent* dn = nullptr;
     double dnD = 1e9;
     for (Ent* o : def) {
-      if (!o->free() || dist(o->pos, e->pos) > 6.0) continue;
+      if (!o->free() || dist(o->pos, e->pos) > 6.0 || !eyesOnBall(o)) continue;
       const double od = runTo(o, 0.9).first;
       if (od < o->p->heightIn / 36 * 0.5 + 0.85 && od < dnD) {
         dn = o;
@@ -5668,11 +5732,12 @@ void PlaySim::preRollCatch() {
   const double midK = tune().midContest > 0 ? clamp((bp.x - los - 6) / 9, 0, 1) * tune().midContest : 0;
   const double cRad = deepBall ? 2.2 : 1.3 + 0.9 * midK;
   const double airYds = bp.x - los;
-  // a defender to the ball first plays it (resolveAir takes the nearest man first)
+  // a defender to the ball first plays it (resolveAir takes the nearest man first) - one who can see it: a man with his
+  // back to it plays the receiver, below
   Ent* first = nullptr;
   double fd = d;
   for (Ent* o : def) {
-    if (!o->free()) continue;
+    if (!o->free() || !eyesOnBall(o)) continue;
     const double od = runTo(o, 0.9).first;
     const double reach = o->p->heightIn / 36 * 0.5 + 0.55 + (o->r().ballSkills > 60 ? 0.1 : 0);
     if (od < reach && od < fd) {
@@ -5721,9 +5786,17 @@ void PlaySim::preRollCatch() {
     for (Ent* o : oppNear)
       if (runTo(o, 0.9).first < runTo(dbest, 0.9).first) dbest = o;
     const double edge = d - runTo(dbest, 0.9).first;
-    const double pbu = sigmoid((dbest->r().ballSkills - 70) / 12 + edge * 1.6 - 1.2 + (deepBall ? 0.35 : 0) + dbest->fx.pbu - e->fx.winBall) * (deepBall ? 0.6 : 0.62);
+    // (a man who cannot see it swipes at the hands: lower odds, and never comes down with it)
+    const bool sees = eyesOnBall(dbest);
+    const double pbu = sigmoid((dbest->r().ballSkills - 70) / 12 + edge * 1.6 - 1.2 + (deepBall ? 0.35 : 0) + dbest->fx.pbu - e->fx.winBall) * (deepBall ? 0.6 : 0.62) *
+                       (sees ? 1.0 : tune().swipeK);
     b.fatePbu = pbu;
     if (rng.chance(pbu)) {
+      if (!sees) {
+        b.fate = 3;
+        b.fateBy = dbest;
+        return;
+      }
       const double pInt = sigmoid((dbest->r().catching - 62) / 10 + edge * 1.2 - 1.4 - (deepBall ? 1.0 : 0) + tune().intBias + dbest->fx.intAdj -
                                   (b.thrower ? b.thrower->fx.ballSafe : 0.0) - e->fx.winBall);
       b.fate = rng.chance(pInt) ? 4 : 3;
@@ -5765,7 +5838,7 @@ void PlaySim::preRollLane() {
   approach(tgt, tgtT, tgtD, tgtZ);
   if (tgtT < 0) tgtT = (std::max)(0.0, b.flightT - b.t);
   for (Ent* o : def) {
-    if (!o->free() || reached_.count(o) || lanePassed_.count(o) || b.fatePassed == o) continue;
+    if (!o->free() || reached_.count(o) || lanePassed_.count(o) || b.fatePassed == o || !eyesOnBall(o)) continue;  // (one who cannot see it does not undercut it)
     double ct = 0, cd = 0, cz = 0;
     approach(o, ct, cd, cz);
     const double oh = o->p->heightIn / 36;
@@ -5968,7 +6041,8 @@ void PlaySim::resolveAir() {
         for (Ent* o : oppNear)
           if (dist(o->pos, e->pos) < dist(dm->pos, e->pos)) dm = o;
         const bool behind = dist(dm->pos, bp) > d - 0.2;
-        foulDpi.add(tight * tight * (deepBall ? 2.4 : 0.8) * (behind ? 1.0 : 0.35), dm->p);
+        // (one who cannot see the ball is playing nothing but the man: more of it is interference)
+        foulDpi.add(tight * tight * (deepBall ? 2.4 : 0.8) * (behind ? 1.0 : 0.35) * (eyesOnBall(dm) ? 1.0 : tune().dpiBlind), dm->p);
         foulOpi.add(tight * 0.075, e->p);
       }
       const double tough = offT * 1.2 + (ballSpeed > 24 ? 0.25 : 0) + (contested ? tune().contested + tight * (deepBall ? tune().tightDeep : tune().tightShort + (tune().tightDeep - tune().tightShort) * midK) : 0) +
@@ -6014,9 +6088,15 @@ void PlaySim::resolveAir() {
           for (Ent* o : oppNear)
             if (dist(o->pos, bp) < dist(dbest->pos, bp)) dbest = o;
         const double edge = d - dist(dbest->pos, bp);  // >0: defender closer to the ball than the receiver
-        const double pbu = sigmoid((dbest->r().ballSkills - 70) / 12 + edge * 1.6 - 1.2 + (deepBall ? 0.35 : 0) + dbest->fx.pbu - e->fx.winBall) * (deepBall ? 0.6 : 0.62);
+        // (eyes on the ball: one with his back to it swipes at the hands as they come up - swipeK x the odds, no pick)
+        const bool sees = eyesOnBall(dbest);
+        const double faceDeg = ballFacingDeg(dbest);
+        const bool seeable = canSeeBall(dbest);  // (telemetry, before the breakup takes the ball off its target)
+        const double pbu = sigmoid((dbest->r().ballSkills - 70) / 12 + edge * 1.6 - 1.2 + (deepBall ? 0.35 : 0) + dbest->fx.pbu - e->fx.winBall) * (deepBall ? 0.6 : 0.62) *
+                           (sees ? 1.0 : tune().swipeK);
         if (fate >= 3 || (fate == 0 && rng.chance(pbu))) {
           pbuBy = dbest;
+          pbuBlind = !sees;
           deepContested = airYds > 15;
           gContact.add(3, dbest, b.pos, fate >= 3);
           ev("pbu", dbest, e);
@@ -6027,11 +6107,13 @@ void PlaySim::resolveAir() {
           // defender in great position may come down with it; or tipped and picked
           const double pInt = sigmoid((dbest->r().catching - 62) / 10 + edge * 1.2 - 1.4 - (deepBall ? 1.0 : 0) + tune().intBias + dbest->fx.intAdj - (b.thrower ? b.thrower->fx.ballSafe : 0.0) - e->fx.winBall);
           // (an interception is the defender's hands on it, inHands; a ball past them he only tips)
-          const bool dHands = !(tune().homeA > 0 && tune().handReach > 0 && !inHands(dbest, b.pos, 1.0));
+          const bool dHands = sees && !(tune().homeA > 0 && tune().handReach > 0 && !inHands(dbest, b.pos, 1.0));
           if (dHands && (fate == 4 || (fate == 0 && rng.chance(pInt)))) {
             gFate.intRecv++;
             gFate.intRecvF += fate == 4;
             gContact.add(4, dbest, b.pos, fate == 4);
+            intBlind = !seeable;  // (telemetry: never with the rule on - any other way to a pick would show here)
+            intFaceDeg = faceDeg;
             intercept(dbest);
           }
           return;
@@ -6107,16 +6189,22 @@ void PlaySim::resolveAir() {
       if (b.fate >= 3 && b.fateBy != e && b.fateBy && b.fateBy->free()) continue;
       if (b.fatePassed == e) continue;  // (his go at it was rolled early)
       if (!fated && lanePassed_.count(e)) continue;  // (and so was his: preRollLane)
-      const double pPlay = sigmoid((e->r().ballSkills - 70) / 10 + edge * 1.0 - 1.1 - d * 0.8 - (b.pos.z > 2.5 ? 0.8 : 0) + e->fx.pbu - (tgt ? tgt->fx.winBall : 0.0));
+      // (eyes on the ball: a man who cannot see it gets only a blind hand to it - swipeK x the odds - and never the pick)
+      const bool sees = eyesOnBall(e);
+      const double pPlay = sigmoid((e->r().ballSkills - 70) / 10 + edge * 1.0 - 1.1 - d * 0.8 - (b.pos.z > 2.5 ? 0.8 : 0) + e->fx.pbu - (tgt ? tgt->fx.winBall : 0.0)) *
+                           (sees ? 1.0 : tune().swipeK);
       if (!fated && !rng.chance(pPlay)) continue;
       const double pInt = sigmoid((e->r().catching - 62) / 10 + edge * 0.6 - 1.2 - (b.pos.x - los > 18 ? 1.0 : 0) + tune().intBias + e->fx.intAdj - (b.thrower ? b.thrower->fx.ballSafe : 0.0));
       // (not rolled ahead and so not brought to him: from past handReach he gets a hand to it, no more)
       // (and one rolled ahead too: an interception is his hands on it - inHands - or it is a tip)
-      const bool handsOn = !(tune().homeA > 0 && tune().handReach > 0 && !inHands(e, b.pos, 1.0));
+      const bool handsOn = sees && !(tune().homeA > 0 && tune().handReach > 0 && !inHands(e, b.pos, 1.0));
+      pbuBlind = !sees;
       if (fated ? b.fate == 4 && handsOn : handsOn && rng.chance(pInt)) {
         gFate.intDef++;
         gFate.intDefF += fated;
         gContact.add(6, e, b.pos, fated);
+        intBlind = !canSeeBall(e);
+        intFaceDeg = ballFacingDeg(e);
         intercept(e);
       } else {
         pbuBy = e;
@@ -6554,6 +6642,37 @@ void PlaySim::endPlay(const std::string& reason) {
   }
   // loose ball out of bounds: offense keeps at spot
   if (reason == "oob" && b.mode == BallMode::Loose) endX = clamp(b.pos.x, 0.5, 99.5);
+  // a fumble out of bounds: the team that fumbled keeps it - at the spot of the fumble when it went out ahead of it, where
+  // it went out when behind it; out behind the fumbling offense's own goal line it is a safety, out through the other
+  // end zone a touchback to the other team. (The offense kept it where it went out, wherever that was: a fumble rolled
+  // forward out of bounds gained its yards, one out of the end zone in front was still the offense's at the 1, one out
+  // of its own end zone was no safety, and a defender's fumble out of bounds gave the ball back to the offense.)
+  if (reason == "oob" && b.mode == BallMode::Loose && fumbler && !cfg.kick && !cfg.place) {
+    double fumX = b.pos.x;
+    for (const PlayEvent& e : events)
+      if (e.type == "fumble") fumX = e.x;  // (the last one: where the ball came out)
+    const bool offBall = fumbler->side == Side::Off;
+    // in the fumbling team's frame: 0 its own goal line, 100 the one it attacks
+    const double outU = offBall ? b.pos.x : 100 - b.pos.x, fumU = offBall ? fumX : 100 - fumX;
+    if (outU >= 100) {
+      turnover = offBall;  // (a defender's fumble out through the offense's end zone: the offense's ball, as before)
+      touchback = offBall;
+      endX = offBall ? 100 : 0.5;
+    } else if (outU <= 0) {
+      // (a defender's fumble out of his own end zone would be a safety for the offense; it stays the defense's, at its 20)
+      safety = offBall;
+      turnover = !offBall;
+      touchback = !offBall;
+      endX = offBall ? 0 : 100;
+    } else if (offBall && outU > fumU && fumU <= 0) {
+      safety = true;  // (fumbled in his own end zone and out ahead of it: back to the spot of the fumble, in the end zone)
+      endX = 0;
+    } else {
+      const double spotU = outU > fumU ? clamp(fumU, 0.5, 99.5) : clamp(outU, 0.5, 99.5);
+      endX = offBall ? spotU : 100 - spotU;
+      turnover = !offBall;
+    }
+  }
   endX = clamp(endX, -10, 110);
   // (a run the quarterback pulled and threw - an RPO - is a pass)
   PlayKind kind = play.type == PlayType::Run && !passThrown ? PlayKind::Run : PlayKind::Pass;
@@ -6602,6 +6721,9 @@ void PlaySim::endPlay(const std::string& reason) {
   r.fumbleRecBy = recoveredBy ? recoveredBy->p : nullptr;
   r.forcedBy = forcedBy ? forcedBy->p : nullptr;
   r.pbuBy = pbuBy ? pbuBy->p : nullptr;
+  r.intFaceDeg = intBy ? intFaceDeg : -1;
+  r.intBlind = intBy && intBlind;
+  r.pbuBlind = pbuBy && pbuBlind && !intBy;
   r.airYards = catcher ? jsRoundI(catchX - L) : ball.targetSpot ? jsRoundI(ball.targetSpot->x - L) : 0;
   r.yac = (catcher && !intBy) ? jsRoundI(endX - catchX) : 0;
   r.deepContested = deepContested;

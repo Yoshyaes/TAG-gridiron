@@ -2,6 +2,7 @@
 rem Builds the engine-independent C++ sim + headless tools with MSVC (Build Tools 2022).
 rem   build\SimCalibrate.exe [games=40] [seed=7] [--scores]   -- port of tools/calibrate.ts
 rem   build\SimTests.exe                                       -- port of tools/test.ts
+rem   build\SimDigest.exe [--bless "reason"]                   -- golden sim digest (QA\golden_sim.txt)
 setlocal
 set "VCVARS=C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
 if not exist "%VCVARS%" (
@@ -24,6 +25,9 @@ cl %FLAGS% SimCalibrate.cpp %OBJS% /Fobuild\ /Febuild\SimCalibrate.exe || exit /
 
 echo [3/3] Building SimTests.exe...
 cl %FLAGS% SimTests.cpp %OBJS% /Fobuild\ /Febuild\SimTests.exe || exit /b 1
+
+echo [+] Building SimDigest.exe (golden sim digest: build\SimDigest.exe checks against QA\golden_sim.txt)...
+cl %FLAGS% SimDigest.cpp %OBJS% /Fobuild\ /Febuild\SimDigest.exe || exit /b 1
 
 echo [+] Building PlaybookDump.exe...
 cl %FLAGS% PlaybookDump.cpp %OBJS% /Fobuild\ /Febuild\PlaybookDump.exe || exit /b 1

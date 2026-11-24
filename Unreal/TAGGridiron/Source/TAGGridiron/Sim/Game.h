@@ -156,6 +156,8 @@ class Game {
   std::vector<std::string> recent;
   /** pending penalty to show on next snap */
   std::optional<Penalty> lastPenalty;
+  /** (tests) the flag the next finishPlay throws instead of the one it rolls (the roll is still drawn), then cleared */
+  std::optional<Penalty> forcedFlag;
   std::vector<Player*> injuries;
   /** extra-time flag for untimed down */
   bool untimed = false;

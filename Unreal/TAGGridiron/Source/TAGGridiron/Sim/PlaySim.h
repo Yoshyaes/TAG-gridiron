@@ -145,7 +145,22 @@ struct Tune {
   double lvl2Near = 1.36;    // ... and the yd the runner is from him when he works to get off it (a lineman's: 1.6)
   double rushEarly = 0.6;   // x the pass-rush shed hazard on 1st and 2nd down (the front plays the run first)
   double rushLate = 2.5;    // ... and on 3rd / 4th and 5+ (ears pinned back)
-  double intBias = 1.15;  // a defender at the ball comes down with it (logit shift; NFL ~2.4% of passes intercepted. 0.56 before only men with the ball in their hands' reach could intercept it - inHands, homeBall - 2026-11-21)
+  double intBias = 2.3;  // a defender at the ball comes down with it (logit shift; NFL 2.35% of passes intercepted. 0.56 before only men with the ball in their hands' reach could intercept it - inHands, homeBall - 2026-11-21; 1.15 before eyes on the ball took the blind picks away - 54 % of them - 2026-11-24: 200 games x seeds 11/29/41, held-out 53: 0.78 -> 0.80 a team game)
+  // eyes on the ball (Research/NextLevel/02 A2, Madden 26 / CFB 26's fix for "psychic" picks): a defender intercepts, or
+  // breaks a pass up cleanly, only when he can see it - his body within eyesDeg of where the ball is coming from, or
+  // within eyesDeg + eyesHead looking back over his shoulder once he has reacted to the throw and had eyesTurnT to turn
+  // his head. A man defender on the target with his back to the ball (the trail man) does not turn: he runs with his
+  // man and plays the hands as they come up (handsT before the ball gets there) - a late swipe at swipeK x the breakup
+  // odds, never an interception, and dpiBlind x the interference risk. Every defender runs at a landing spot he reads
+  // with an error (landErr yd at the release, scaled by his ball skills) that closes to nothing as the ball comes down.
+  double eyesOn = 1;       // > 0: as above; 0: every defender at the ball plays it, and runs at its exact landing spot
+  double eyesDeg = 90;
+  double eyesHead = 90;    // (60 left the picks at 0.6 a team game even with every play on the ball a pick: too few men saw it)
+  double eyesTurnT = 0.3;
+  double handsT = 0.4;
+  double swipeK = 0.85;
+  double dpiBlind = 3.0;   // (fit to hold accepted DPI at 0.35 a team game, as before; nflverse 2023: 0.50 flagged)
+  double landErr = 2.0;
   double holdK = 0.06;       // holding: per second of a rep the defender is winning (x how badly)
   double holdShed = 0.003;   // holding: a beaten blocker grabbing as his man gets away
   double aiMoveK = 0.65;     // a CPU ball carrier's move is worth this much of a user's well-timed one (calibrated)
@@ -445,6 +460,11 @@ struct PlayResult {
   double flightT = 0;    // seconds the pass was in the air
   int catchNear = -1;    // who that nearest defender was: 0 the catcher's own man, 1 another man defender, 2 a zone defender, 3 other
   bool thrownAway = false;
+  // eyes on the ball (Tune::eyesOn): at an interception, how far the man's body faced from where the ball came (deg) and
+  // whether he could not see it (telemetry: must never happen); a breakup that was a blind swipe at the hands
+  double intFaceDeg = -1;
+  bool intBlind = false;
+  bool pbuBlind = false;
   bool pressured = false;
   std::string pressWhy;  // how the first pressure came: "<near|eta> <shed|unblocked|loose> <role>" (calibration)
   double pressT = 0;
@@ -908,6 +928,19 @@ class PlaySim {
   void throwAway(Ent* qbEnt);
   /** Where the airborne ball reaches catch height (~1.3 yd) on descent. */
   V2 ballLanding() const;
+  /** Where defender d reads the ball coming down: ballLanding() plus his read's error, which closes as it comes down
+   *  (Tune::landErr; a fixed draw per man and throw off a hash - the play's rng is not touched). */
+  V2 landingFor(const Ent* d) const;
+  /** How far (deg) d's body faces from where the ball in the air is coming from (0: square to it). */
+  double ballFacingDeg(const Ent* d) const;
+  /** Defender d can see the pass now (Tune::eyesOn): facing it, or looking back over his shoulder in time - never the
+   *  man on the target with his back to it. */
+  bool eyesOnBall(const Ent* d) const;
+  /** The rule itself, whether or not it is in play (the telemetry asks it with Tune::eyesOn 0 too). */
+  bool canSeeBall(const Ent* d) const;
+  bool intBlind = false;    // (telemetry: an interception by a man who could not see the ball - PlayResult::intBlind)
+  double intFaceDeg = -1;
+  bool pbuBlind = false;
   /** A pile on the move (stepWrap): where the carrier goes down if nothing stops it (his yards still to drive plus the
    *  fall), and the seconds the drive takes. False when no pile is moving. Read only (the presentation starts the paired
    *  tackle at the wrap, not at its end). */
