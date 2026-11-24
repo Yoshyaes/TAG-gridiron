@@ -2,6 +2,7 @@
 // audibles, line / linebacker shifts, the coverage shell and player assignments for the defense. The adjustments are
 // PlaySim's pre-snap API (deterministic, applied before the first step); this file is the controls and the drawing.
 #include "Game/MatchDirector.h"
+#include "Game/TagBindings.h"
 
 #include "Render/Athlete.h"
 #include "Render/Coords.h"
@@ -470,6 +471,8 @@ void AMatchDirector::TickPresnap(float Dt)
 	// (the player in slot 0: one player's controller, or in a multiplayer game the offense's caller - else the defense's)
 	const FTagReader PC = PrimaryReader();
 	const bool bOff = UserOff(), bDef = UserDef();
+	// every button below is the player's own (Settings > Controls: the pre-snap offense / defense layout)
+	const TagBind::FScope BindScope(bOff ? TagBind::ECtx::PreOff : bDef ? TagBind::ECtx::PreDef : TagBind::ECtx::None);
 	// the button that picked the play is not a pre-snap call: nothing is read for the first third of a second (SQUARE
 	// picks a play on the call screen and opens the audible list here - the list came up on its own)
 	if (PC && (bOff || bDef) && PresnapClock > 0.35f)
@@ -731,13 +734,28 @@ bool AMatchDirector::PresnapPanelRows(bool bOffense, bool bPad, const FTagReader
 		if (PC->IsInputKeyDown(EKeys::Gamepad_LeftTrigger) || PC->IsInputKeyDown(EKeys::Gamepad_RightTrigger) || PC->IsInputKeyDown(EKeys::Q))
 			return false;
 	using G = EPadGlyph;
+	// each row on the button the player put it on (Settings > Controls): the glyph, the key, a pad name written as
+	// a key ("R3")
+	const TagBind::FScope BindScope(bOffense ? TagBind::ECtx::PreOff : TagBind::ECtx::PreDef);
 	auto Row = [&](G Gl, const FString& Label, bool bOn = false, const FString& Key = FString(), FLinearColor Tint = FLinearColor::White)
 	{
 		FPreRow X;
-		X.Glyph = Gl;
+		X.Glyph = TagBind::PhysGlyph(Gl);
 		X.Label = Label;
 		X.bOn = bOn;
 		X.Key = Key;
+		if (bPad && Gl == G::None && (Key == TEXT("R3") || Key == TEXT("L3")))
+		{
+			const FKey Was = Key == TEXT("R3") ? EKeys::Gamepad_RightThumbstick : EKeys::Gamepad_LeftThumbstick;
+			const FKey Now = TagBind::Phys(Was);
+			if (Now != Was) { X.Glyph = TagBind::GlyphOf(Now); X.Key.Reset(); }
+		}
+		else if (!bPad)
+		{
+			const FString L = Key.IsEmpty() ? TagBind::DefaultKbdLabel(Gl) : Key;
+			const FString P = TagBind::PhysKeyLabel(L);
+			if (P != L) X.Key = P;
+		}
 		X.Tint = Tint;
 		R.Add(X);
 	};
@@ -973,10 +991,10 @@ void AMatchDirector::UpdateHighlight()
 			const bool bPad = PadUI();
 			switch (M)
 			{
-			case tag::Move::Truck: Cue.Move = TEXT("TRUCK"); Cue.Key = bPad ? TEXT("R\u2191") : TEXT("F"); break;
-			case tag::Move::StiffArm: Cue.Move = TEXT("STIFF ARM"); Cue.Key = bPad ? TEXT("R\u2193") : TEXT("G"); break;
-			case tag::Move::Spin: Cue.Move = TEXT("SPIN"); Cue.Glyph = bPad ? EPadGlyph::Circle : EPadGlyph::None; Cue.Key = bPad ? FString() : TEXT("R"); break;
-			case tag::Move::Hurdle: Cue.Move = TEXT("HURDLE"); Cue.Glyph = bPad ? EPadGlyph::Triangle : EPadGlyph::None; Cue.Key = bPad ? FString() : TEXT("V"); break;
+			case tag::Move::Truck: Cue.Move = TEXT("TRUCK"); Cue.Key = bPad ? TEXT("R\u2191") : TagBind::PhysKeyLabel(TagBind::ECtx::Carrier, TEXT("F")); break;
+			case tag::Move::StiffArm: Cue.Move = TEXT("STIFF ARM"); Cue.Key = bPad ? TEXT("R\u2193") : TagBind::PhysKeyLabel(TagBind::ECtx::Carrier, TEXT("G")); break;
+			case tag::Move::Spin: Cue.Move = TEXT("SPIN"); Cue.Glyph = bPad ? TagBind::PhysGlyph(TagBind::ECtx::Carrier, EPadGlyph::Circle) : EPadGlyph::None; Cue.Key = bPad ? FString() : TagBind::PhysKeyLabel(TagBind::ECtx::Carrier, TEXT("R")); break;
+			case tag::Move::Hurdle: Cue.Move = TEXT("HURDLE"); Cue.Glyph = bPad ? TagBind::PhysGlyph(TagBind::ECtx::Carrier, EPadGlyph::Triangle) : EPadGlyph::None; Cue.Key = bPad ? FString() : TagBind::PhysKeyLabel(TagBind::ECtx::Carrier, TEXT("V")); break;
 			default: Cue.Move = TEXT("JUKE"); Cue.Key = bPad ? TEXT("R\u2194") : TEXT("Q/E"); break;
 			}
 		}
@@ -1506,21 +1524,38 @@ void AMatchDirector::TickPadTest(float Dt)
 	}
 }
 
+// the pack's fake snaps (a dozen quarterbacks' own, shotgun and under center)
+static const TCHAR* const FakeSnapGun[] = {TEXT("FakeSnap_Shotgun_Brady"), TEXT("FakeSnap_Shotgun_PManning"), TEXT("FakeSnap_Shotgun_Brees"), TEXT("FakeSnap_Shotgun_ARodgers"), TEXT("FakeSnap_Shotgun_Romo")};
+static const TCHAR* const FakeSnapUc[] = {TEXT("FakeSnap_UnderCenter_Brady_MADNMAY04_0964"), TEXT("FakeSnap_UnderCenter_Bulger_MADNMAY04_0964"), TEXT("FakeSnap_UnderCenter_Delhomme_MADNMAY04_0964")};
+static FString FakeSnapPath(const TCHAR* Stem)
+{
+	const FString Name = FString::Printf(TEXT("A_TAG_Pack_%s__P01"), Stem);
+	return FString::Printf(TEXT("/Game/TAG/AnimH/Pack/Kicking/%s.%s"), *Name, *Name);
+}
+
+void AMatchDirector::WarmPresnapAssets()
+{
+	// under the loading screen (StartMatch): the hard counts' clips, and the play art's actor with its material made -
+	// each was a load on the game thread the first time it was used in play
+	for (const TCHAR* Stem : FakeSnapGun) WarmClip(FakeSnapPath(Stem));
+	for (const TCHAR* Stem : FakeSnapUc) WarmClip(FakeSnapPath(Stem));
+	if (!PlayArt && GetWorld()) PlayArt = GetWorld()->SpawnActor<ATagPlayArt>();
+	if (PlayArt) PlayArt->Warm();
+}
+
 void AMatchDirector::PlayFakeSnap()
 {
 	if (!Sim || !Sim->qb || !Game) return;
 	AAthlete* Q = AthleteFor(Sim->qb->p, Game->poss);
 	if (!Q) return;
 	if (Audio) Audio->Cue(TEXT("hardcount"), Q->GetActorLocation());
-	// the pack's fake snaps (a dozen quarterbacks' own, shotgun and under center)
 	const bool bGun = Sim->qb->pos.x < Sim->los - 2.5;
-	static const TCHAR* Gun[] = {TEXT("FakeSnap_Shotgun_Brady"), TEXT("FakeSnap_Shotgun_PManning"), TEXT("FakeSnap_Shotgun_Brees"), TEXT("FakeSnap_Shotgun_ARodgers"), TEXT("FakeSnap_Shotgun_Romo")};
-	static const TCHAR* Uc[] = {TEXT("FakeSnap_UnderCenter_Brady_MADNMAY04_0964"), TEXT("FakeSnap_UnderCenter_Bulger_MADNMAY04_0964"), TEXT("FakeSnap_UnderCenter_Delhomme_MADNMAY04_0964")};
 	static int32 GSeq = 0;
-	const int32 N = bGun ? UE_ARRAY_COUNT(Gun) : UE_ARRAY_COUNT(Uc);
-	const FString Name = FString::Printf(TEXT("A_TAG_Pack_%s__P01"), bGun ? Gun[GSeq % N] : Uc[GSeq % N]);
+	const int32 N = bGun ? UE_ARRAY_COUNT(FakeSnapGun) : UE_ARRAY_COUNT(FakeSnapUc);
+	const FString Name = FString::Printf(TEXT("A_TAG_Pack_%s__P01"), bGun ? FakeSnapGun[GSeq % N] : FakeSnapUc[GSeq % N]);
 	++GSeq;
-	if (UAnimSequence* C = LoadObject<UAnimSequence>(nullptr, *FString::Printf(TEXT("/Game/TAG/AnimH/Pack/Kicking/%s.%s"), *Name, *Name), nullptr, LOAD_NoWarn | LOAD_Quiet))
+	// (loaded under the loading screen, WarmPresnapAssets: here it is a lookup)
+	if (UAnimSequence* C = WarmClip(FString::Printf(TEXT("/Game/TAG/AnimH/Pack/Kicking/%s.%s"), *Name, *Name)))
 		Q->PlayPreSnapShot(C);
 	if (Overlay) Overlay->Toast(TEXT("Hard count"));
 	UE_LOG(LogTemp, Display, TEXT("TAG fake snap: %s"), *Name);

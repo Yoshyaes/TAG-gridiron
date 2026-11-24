@@ -75,6 +75,21 @@ private:
 	void AddText(const FString& S, const FVector& Loc, const FRotator& Rot, float Size, const FColor& Color);
 	void BuildCrowd(const tag::Team& Home);
 	void BuildRain(const tag::Weather& W);
+	/** Close-up grass: one patch of real blades (M_TagGrassBlade wraps it around the shot's subject in the vertex
+	 *  shader). Hidden from the game camera; shown when a blade is tall enough on screen or the lens is wide open
+	 *  (the f/1.2 close shots). -TagNoGrass3D leaves it out. */
+	void BuildGrass3D();
+	void UpdateGrass3D(float Dt);
+	UPROPERTY()
+	TObjectPtr<class UProceduralMeshComponent> Grass3D;
+	UPROPERTY()
+	TObjectPtr<class UMaterialInstanceDynamic> GrassMID;
+	float GrassGrow = 0.f;          // 0 hidden .. 1 full height (eased, snapped on a camera cut)
+	float GrassPx = 7.f;            // blades show once one is this many pixels tall in a 1080p frame (-TagGrassPx=)
+	float GrassMaxDist = 3000.f;    // never further than this from the lens, cm (-TagGrassDist=)
+	float GrassPatch = 1500.f;      // side of the blade patch, cm
+	bool bGrassAlways = false;      // -TagGrassAlways: full height in every shot (look tests)
+	FVector GrassCamPrev = FVector::ZeroVector;
 	/** 3D spectators (MetaHuman Crowd Sample merged meshes) in the lowest rows of the sideline stands, idling and
 	 *  cheering with Hype. Superseded by the Mass fan spawner (TagFanSpawner); kept as a fallback. */
 	void BuildHeroCrowd(const FVector& StandC, float Yaw);
@@ -84,6 +99,9 @@ private:
 	void BuildPackSideline(const tag::Team& Home, const tag::Team& Away);
 	class USkeletalMeshComponent* AddStaticPerson(int32 Item, int32 HeadItem, const FVector& Rel, float FaceYaw, const FLinearColor& Team,
 		const FLinearColor& Bottom, bool bKneel, int32 Seed);
+	/** Set while BuildPackSideline runs its collect pass: AddStaticPerson records the catalog items it is asked for
+	 *  here and builds nothing, so the meshes can be loaded as one batch before the build pass. */
+	TArray<int32>* PackPreload = nullptr;
 	UPROPERTY()
 	TArray<TObjectPtr<class USkeletalMeshComponent>> SidelinePeople;
 	UPROPERTY()

@@ -8,6 +8,7 @@
 // are swapped into slot 0 and the director's members while his input is read, so the one-player code serves all four.
 // A menu one person works (his side's play call, the try) takes only his device's buttons.
 #include "Game/MatchDirector.h"
+#include "Game/TagBindings.h"
 
 #include "Render/Athlete.h"
 #include "Render/Coords.h"
@@ -145,7 +146,7 @@ void AMatchDirector::LobbyJoin(int32 Dev)
 	H.Dev = Dev;
 	H.bPad = D->bPad;
 	Humans.Add(H);
-	ATagAudio::Ui(TEXT("UiSelect"));
+	ATagAudio::Ui(TEXT("UiJoin"), 1.f, 1.f + 0.06f * (Humans.Num() - 1)); // (each player's own note)
 	UE_LOG(LogTemp, Display, TEXT("TAG lobby: %s joined on %s (device %d)"), *HumanTag(Humans.Num() - 1), *D->Label(), Dev);
 }
 
@@ -229,7 +230,7 @@ void AMatchDirector::TickLobby()
 		else if (P({EKeys::Gamepad_DPad_Right, EKeys::Gamepad_LeftStick_Right, EKeys::Right, EKeys::D})) Hm.Team = Hm.Team == 0 ? -1 : 1;
 		if (Hm.Team != Was)
 		{
-			ATagAudio::Ui(TEXT("UiMove"));
+			ATagAudio::Ui(TEXT("UiTeam"));
 			Hm.bCaller = false;
 			bChanged = true;
 		}
@@ -239,13 +240,13 @@ void AMatchDirector::TickLobby()
 			for (FTagHuman& O : Humans)
 				if (O.Team == Hm.Team) O.bCaller = false;
 			Hm.bCaller = true;
-			ATagAudio::Ui(TEXT("UiTab"));
+			ATagAudio::Ui(TEXT("UiCaller"));
 			bChanged = true;
 			UE_LOG(LogTemp, Display, TEXT("TAG lobby: %s calls the plays for the %s side"), *HumanTag(H), Hm.Team == 1 ? TEXT("home") : TEXT("away"));
 		}
 		if (P({EKeys::Gamepad_FaceButton_Right, EKeys::BackSpace, EKeys::Escape}))
 		{
-			ATagAudio::Ui(TEXT("UiBack"));
+			ATagAudio::Ui(Hm.Team >= 0 ? TEXT("UiBack") : TEXT("UiLeave"));
 			if (Hm.Team >= 0) { Hm.Team = -1; Hm.bCaller = false; }
 			else
 			{
@@ -280,6 +281,7 @@ void AMatchDirector::TickLobby()
 		ShowMainMenu();
 		return;
 	}
+	if (bGo && !LobbyReady()) ATagAudio::Ui(TEXT("UiError")); // (nobody has picked a side yet)
 	if (bGo && LobbyReady())
 	{
 		bLobby = false;
@@ -421,6 +423,8 @@ void AMatchDirector::TickMatePresnap(float Dt)
 		tag::Ent* E = Sim->slotEnt(H.Slot);
 		if (!E) continue;
 		const FTagReader R = H.Reader();
+		// (his own layout: Settings > Controls, the pre-snap offense / defense)
+		const TagBind::FScope BindScope(E->side == tag::Side::Def ? TagBind::ECtx::PreDef : TagBind::ECtx::PreOff);
 		auto P = [&R](std::initializer_list<FKey> Ks)
 		{
 			for (const FKey& K : Ks)
@@ -498,7 +502,7 @@ void AMatchDirector::UpdateHumanMarkers(APlayerController* PC, const FVector2D& 
 		M.Viewport = VP;
 		M.Color = PlayerColor(i);
 		M.Tag = HumanTag(i);
-		const FVector Feet = FVector(U->GetActorLocation().X, U->GetActorLocation().Y, 3.f);
+		const FVector Feet = U->MarkerFeet(); // (under his visible body, not his actor)
 		const FVector Fw = U->GetActorForwardVector().GetSafeNormal2D();
 		FVector2D S;
 		bool bOk = true;
@@ -514,11 +518,11 @@ void AMatchDirector::UpdateHumanMarkers(APlayerController* PC, const FVector2D& 
 			bOk = bOk && PC->ProjectWorldLocationToScreen(Pt, S, true);
 			M.Notch.Add(S);
 		}
-		bOk = bOk && PC->ProjectWorldLocationToScreen(U->GetActorLocation() + FVector(0, 0, 225.f), M.Head, true);
+		bOk = bOk && PC->ProjectWorldLocationToScreen(FVector(Feet.X, Feet.Y, U->GetActorLocation().Z + 225.f), M.Head, true);
 		M.bOn = bOk;
 		M.Number = E->p ? FString::FromInt(E->p->number) : FString();
 		// his sprint (a pad's R2) while the play is live
-		if (H.bPad && State == EMatchState::Live && PC->ProjectWorldLocationToScreen(U->GetActorLocation(), M.StaminaAt, true))
+		if (H.bPad && State == EMatchState::Live && PC->ProjectWorldLocationToScreen(FVector(Feet.X, Feet.Y, U->GetActorLocation().Z), M.StaminaAt, true))
 		{
 			M.StaminaV = H.Ctl.SprintStamina;
 			M.bSprint = H.Ctl.bSprinting;

@@ -7,8 +7,10 @@
 // only draws it, and is rebuilt whenever it changes. Its root keeps the keyboard focus and swallows the keys, so nothing
 // behind it acts on them.
 #include "UI/GridironOverlay.h"
+#include "Audio/TagAudio.h"
 
 #include "Game/MatchDirector.h"
+#include "UI/TagTheme.h"
 #include "Styling/CoreStyle.h"
 #include "Widgets/SOverlay.h"
 #include "Widgets/SBoxPanel.h"
@@ -42,6 +44,7 @@ void SGridironOverlay::ShowLobby()
 {
 	using namespace TagLobby;
 	if (!Director) return;
+	ATagAudio::Screen(TEXT("Lobby"));
 	bHud = false;
 	bSelMulti = false;
 	const TArray<AMatchDirector::FTagHuman>& Hs = Director->Humans;
@@ -52,44 +55,57 @@ void SGridironOverlay::ShowLobby()
 		const AMatchDirector::FTagHuman& H = Hs[i];
 		const FLinearColor C = PlayerColor(i);
 		const FString Dev = Director->HumanDevice(i);
-		const FString Hint = H.Team < 0 ? (H.bPad ? TEXT("<  pick a side  >") : TEXT("A  pick a side  D")) : H.Team == 0 ? (H.bPad ? TEXT("AWAY   >") : TEXT("AWAY   D")) : (H.bPad ? TEXT("<   HOME") : TEXT("A   HOME"));
-		return SNew(SBorder).BorderImage(LWhite()).BorderBackgroundColor(FLinearColor(0.1f, 0.11f, 0.15f, 0.97f)).Padding(0)
+		const FString Hint = H.Team < 0 ? (H.bPad ? TEXT("<  PICK A SIDE  >") : TEXT("A  PICK A SIDE  D")) : H.Team == 0 ? (H.bPad ? TEXT("AWAY   >") : TEXT("AWAY   D")) : (H.bPad ? TEXT("<   HOME") : TEXT("A   HOME"));
+		return SNew(TagTheme::SPanel).Fill(FLinearColor(0.07f, 0.085f, 0.125f, 0.97f)).Radius(6.f).Padding(FMargin(0))
 		[
 			SNew(SHorizontalBox)
 			+ SHorizontalBox::Slot().AutoWidth()
 			[
-				SNew(SBorder).BorderImage(LWhite()).BorderBackgroundColor(C).Padding(FMargin(14, 10)).VAlign(VAlign_Center)
-				[ SNew(STextBlock).Font(LFont(24, "Bold")).ColorAndOpacity(LInk).Text(LTx(AMatchDirector::HumanTag(i))) ]
+				SNew(SBorder).BorderImage(TagTheme::Round(6.f)).BorderBackgroundColor(C).Padding(FMargin(16, 10)).VAlign(VAlign_Center)
+				[ SNew(STextBlock).Font(TagTheme::Font(26, "Black")).ColorAndOpacity(LInk).Text(LTx(AMatchDirector::HumanTag(i))) ]
 			]
-			+ SHorizontalBox::Slot().FillWidth(1).VAlign(VAlign_Center).Padding(FMargin(12, 6))
+			+ SHorizontalBox::Slot().FillWidth(1).VAlign(VAlign_Center).Padding(FMargin(14, 6))
 			[
 				SNew(SVerticalBox)
-				+ SVerticalBox::Slot().AutoHeight()[ SNew(STextBlock).Font(LFont(13, "Bold")).ColorAndOpacity(FLinearColor::White).Text(LTx(Dev.ToUpper())) ]
-				+ SVerticalBox::Slot().AutoHeight()[ SNew(STextBlock).Font(LFont(10)).ColorAndOpacity(LDim).Text(LTx(Hint)) ]
+				+ SVerticalBox::Slot().AutoHeight()[ SNew(STextBlock).Font(TagTheme::Font(16, "BoldCondensed", 40)).ColorAndOpacity(FLinearColor::White).Text(LTx(Dev.ToUpper())) ]
+				+ SVerticalBox::Slot().AutoHeight()[ SNew(STextBlock).Font(TagTheme::Font(11, "BoldCondensed", 120)).ColorAndOpacity(LDim).Text(LTx(Hint)) ]
 				+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Left).Padding(0, 4, 0, 0)
 				[
-					SNew(SBorder).BorderImage(LWhite()).BorderBackgroundColor(LGold).Padding(FMargin(8, 2))
+					SNew(SBorder).BorderImage(TagTheme::Round(3.f)).BorderBackgroundColor(LGold).Padding(FMargin(8, 2))
 					.Visibility(H.bCaller ? EVisibility::HitTestInvisible : EVisibility::Collapsed)
-					[ SNew(STextBlock).Font(LFont(10, "Bold")).ColorAndOpacity(LInk).Text(LTx(TEXT("CALLS THE PLAYS"))) ]
+					[ SNew(STextBlock).Font(TagTheme::Font(10, "BoldCondensed", 120)).ColorAndOpacity(LInk).Text(LTx(TEXT("CALLS THE PLAYS"))) ]
 				]
 			]
 		];
 	};
 	auto Empty = [&](int32 i) -> TSharedRef<SWidget>
 	{
-		return SNew(SBorder).BorderImage(LWhite()).BorderBackgroundColor(FLinearColor(1, 1, 1, 0.05f)).Padding(FMargin(14, 16)).HAlign(HAlign_Center)
-		[ SNew(STextBlock).Font(LFont(12, "Bold")).ColorAndOpacity(PlayerColor(i) * FLinearColor(1, 1, 1, 0.55f))
-			.Text(LTx(FString::Printf(TEXT("%s   PRESS  CROSS / A  OR  ENTER  TO JOIN"), *AMatchDirector::HumanTag(i)))) ];
+		const FLinearColor C = PlayerColor(i);
+		return SNew(SBorder).BorderImage(TagTheme::Round(6.f)).BorderBackgroundColor(FLinearColor(1, 1, 1, 0.035f)).Padding(FMargin(0)).VAlign(VAlign_Center)
+		[
+			SNew(SHorizontalBox)
+			+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Fill)
+			[
+				SNew(SBorder).BorderImage(TagTheme::Round(6.f)).BorderBackgroundColor(C * FLinearColor(1, 1, 1, 0.22f)).Padding(FMargin(16, 10)).VAlign(VAlign_Center)
+				[ SNew(STextBlock).Font(TagTheme::Font(26, "Black")).ColorAndOpacity(C * FLinearColor(1, 1, 1, 0.6f)).Text(LTx(AMatchDirector::HumanTag(i))) ]
+			]
+			+ SHorizontalBox::Slot().FillWidth(1).VAlign(VAlign_Center).Padding(FMargin(14, 6))
+			[
+				SNew(SVerticalBox)
+				+ SVerticalBox::Slot().AutoHeight()[ SNew(STextBlock).Font(TagTheme::Font(14, "BoldCondensed", 80)).ColorAndOpacity(FLinearColor(1, 1, 1, 0.55f)).Text(LTx(TEXT("PRESS  CROSS / A"))) ]
+				+ SVerticalBox::Slot().AutoHeight()[ SNew(STextBlock).Font(TagTheme::Font(11, "BoldCondensed", 120)).ColorAndOpacity(LDim * FLinearColor(1, 1, 1, 0.7f)).Text(LTx(TEXT("OR  ENTER  TO JOIN"))) ]
+			]
+		];
 	};
 	auto Header = [&](const FString& Big, const FString& Small, const FLinearColor& C) -> TSharedRef<SWidget>
 	{
 		return SNew(SBox).WidthOverride(ColW)
 		[
-			SNew(SBorder).BorderImage(LWhite()).BorderBackgroundColor(C).Padding(FMargin(12, 8)).HAlign(HAlign_Center)
+			SNew(TagTheme::SPanel).Fill(FLinearColor(C.R * 0.35f, C.G * 0.35f, C.B * 0.35f, 0.95f)).AccentTop(C).Radius(6.f).Padding(FMargin(12, 12, 12, 10))
 			[
 				SNew(SVerticalBox)
-				+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center)[ SNew(STextBlock).Font(LFont(22, "Bold")).ColorAndOpacity(FLinearColor::White).Text(LTx(Big)) ]
-				+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center)[ SNew(STextBlock).Font(LFont(10)).ColorAndOpacity(LDim).Text(LTx(Small)) ]
+				+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center)[ SNew(STextBlock).Font(TagTheme::Font(26, "Black", 40)).ColorAndOpacity(FLinearColor::White).Text(LTx(Big)) ]
+				+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center)[ SNew(STextBlock).Font(TagTheme::Font(11, "BoldCondensed", 140)).ColorAndOpacity(FLinearColor(1, 1, 1, 0.7f)).Text(LTx(Small)) ]
 			]
 		];
 	};
@@ -101,12 +117,12 @@ void SGridironOverlay::ShowLobby()
 	};
 
 	TSharedRef<SVerticalBox> Rows = SNew(SVerticalBox);
-	Rows->AddSlot().AutoHeight().Padding(0, 0, 0, 10)
+	Rows->AddSlot().AutoHeight().Padding(0, 0, 0, 12)
 	[
 		SNew(SHorizontalBox)
-		+ SHorizontalBox::Slot().AutoWidth()[ Header(TEXT("AWAY"), SideNote(0), FLinearColor(0.55f, 0.12f, 0.12f, 0.95f)) ]
-		+ SHorizontalBox::Slot().AutoWidth().Padding(12, 0)[ Header(TEXT("WATCHING"), TEXT("NOT ON A SIDE YET"), FLinearColor(0.16f, 0.17f, 0.22f, 0.95f)) ]
-		+ SHorizontalBox::Slot().AutoWidth()[ Header(TEXT("HOME"), SideNote(1), FLinearColor(0.1f, 0.25f, 0.55f, 0.95f)) ]
+		+ SHorizontalBox::Slot().AutoWidth()[ Header(TEXT("AWAY"), SideNote(0), FLinearColor(0.85f, 0.22f, 0.2f, 1.f)) ]
+		+ SHorizontalBox::Slot().AutoWidth().Padding(14, 0)[ Header(TEXT("WATCHING"), TEXT("NOT ON A SIDE YET"), FLinearColor(0.42f, 0.45f, 0.52f, 1.f)) ]
+		+ SHorizontalBox::Slot().AutoWidth()[ Header(TEXT("HOME"), SideNote(1), FLinearColor(0.2f, 0.45f, 0.95f, 1.f)) ]
 	];
 	for (int32 i = 0; i < 4; ++i)
 	{
@@ -115,38 +131,44 @@ void SGridironOverlay::ShowLobby()
 		{
 			TSharedRef<SWidget> In = SNullWidget::NullWidget;
 			if (C == Col) In = i < Hs.Num() ? Card(i) : Empty(i);
-			return SNew(SBox).WidthOverride(ColW).HeightOverride(78.f)[ In ];
+			return SNew(SBox).WidthOverride(ColW).HeightOverride(80.f)[ In ];
 		};
 		Rows->AddSlot().AutoHeight().Padding(0, 4)
 		[
 			SNew(SHorizontalBox)
 			+ SHorizontalBox::Slot().AutoWidth()[ Cell(0) ]
-			+ SHorizontalBox::Slot().AutoWidth().Padding(12, 0)[ Cell(1) ]
+			+ SHorizontalBox::Slot().AutoWidth().Padding(14, 0)[ Cell(1) ]
 			+ SHorizontalBox::Slot().AutoWidth()[ Cell(2) ]
 		];
 	}
 	const bool bReady = Director->LobbyReady();
 	const FString Status = Hs.Num() == 0 ? FString(TEXT("Up to four players: every controller and the keyboard is its own player"))
 		: !bReady ? FString(TEXT("Move to a side to play: left for the away team, right for the home team"))
-		: FString(TEXT("OPTIONS / MENU  or  ENTER   -   on to the teams"));
-	const FString Keys = TEXT("JOIN  CROSS / A  -  ENTER        SIDE  D-PAD  -  A / D        CALL THE PLAYS  TRIANGLE / Y  -  C        BACK  CIRCLE / B  -  BACKSPACE");
+		: FString(TEXT("Ready  -  OPTIONS / MENU  or  ENTER  for the teams"));
+	TSharedRef<SWidget> Keys = SNew(SHorizontalBox)
+		+ SHorizontalBox::Slot().AutoWidth()[ HintItem(EPadGlyph::Cross, TEXT("Enter"), TEXT("Join"), 22.f) ]
+		+ SHorizontalBox::Slot().AutoWidth()[ HintItem(EPadGlyph::DLeftRight, TEXT("A / D"), TEXT("Side"), 22.f) ]
+		+ SHorizontalBox::Slot().AutoWidth()[ HintItem(EPadGlyph::Triangle, TEXT("C"), TEXT("Call the plays"), 22.f) ]
+		+ SHorizontalBox::Slot().AutoWidth()[ HintItem(EPadGlyph::Circle, TEXT("Bksp"), TEXT("Back"), 22.f) ];
 
 	TSharedRef<SWidget> Page = SNew(SVerticalBox)
-		+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center)[ SNew(STextBlock).Font(LFont(40, "Bold")).ColorAndOpacity(LGold).Text(LTx(TEXT("LOCAL MULTIPLAYER"))) ]
-		+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(0, 0, 0, 22)
-		[ SNew(STextBlock).Font(LFont(12)).ColorAndOpacity(LDim).Text(LTx(TEXT("UP TO 4 PLAYERS  -  CONTROLLERS AND KEYBOARD  -  EACH PLAYER CONTROLS ONE MAN AT A TIME"))) ]
+		+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center)[ TagTheme::Title(TEXT("Couch play  -  up to 4 players"), TEXT("Local multiplayer"), 44) ]
+		+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(0, 8, 0, 24)
+		[ SNew(STextBlock).Font(TagTheme::Font(13, "BoldCondensed", 120)).ColorAndOpacity(LDim).Text(LTx(TEXT("CONTROLLERS AND KEYBOARD  -  EACH PLAYER CONTROLS ONE MAN AT A TIME"))) ]
 		+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center)[ Rows ]
-		+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(0, 18, 0, 6)
+		+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(0, 20, 0, 10)
 		[
-			SNew(SBorder).BorderImage(LWhite()).BorderBackgroundColor(bReady ? LGold : FLinearColor(1, 1, 1, 0.08f)).Padding(FMargin(18, 7))
-			[ SNew(STextBlock).Font(LFont(14, "Bold")).ColorAndOpacity(bReady ? LInk : FLinearColor::White).Text(LTx(Status)) ]
+			SNew(SBorder).BorderImage(TagTheme::Round(6.f)).BorderBackgroundColor(bReady ? LGold : FLinearColor(1, 1, 1, 0.07f)).Padding(FMargin(20, 8))
+			[ SNew(STextBlock).Font(TagTheme::Font(15, "BoldCondensed", 60)).ColorAndOpacity(bReady ? LInk : FLinearColor::White).Text(LTx(Status.ToUpper())) ]
 		]
-		+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(0, 6, 0, 0)[ SNew(STextBlock).Font(LFont(10)).ColorAndOpacity(LDim).Text(LTx(Keys)) ];
+		+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(0, 6, 0, 0)[ TagTheme::HintBar(Keys) ];
 
 	TSharedRef<SWidget> Root = SNew(SLobbyRoot)
 	[
-		SNew(SBorder).BorderImage(LWhite()).BorderBackgroundColor(FLinearColor(0.01f, 0.015f, 0.025f, 0.86f)).HAlign(HAlign_Center).VAlign(VAlign_Center)
-		[ SNew(SBorder).BorderImage(LWhite()).BorderBackgroundColor(LPanel).Padding(FMargin(28, 24))[ Page ] ]
+		SNew(SOverlay)
+		+ SOverlay::Slot()[ SNew(TagTheme::SBackdrop).Strength(1.2f) ]
+		+ SOverlay::Slot().HAlign(HAlign_Center).VAlign(VAlign_Center)
+		[ SNew(TagTheme::SPanel).Fill(FLinearColor(0.02f, 0.026f, 0.044f, 0.9f)).Padding(FMargin(32, 28))[ Page ] ]
 	];
 	// (no focus frame: the screen draws its own state, as the play call does)
 	CallRoot = Root;

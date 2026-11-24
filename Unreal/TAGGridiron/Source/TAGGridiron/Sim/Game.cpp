@@ -429,12 +429,16 @@ const OffPlay* Game::cpuOffense() {
   const Team& t = offense();
   // spike to stop the clock
   if (tp == Tempo::Hurry && clockRunning && timeouts[poss] == 0 && clock < 30 && clock > 4 && down < 3) return playById("spike");
-  double pPass = t.passLean - 0.04;
+  double pPass = t.passLean - 0.05;  // (-0.04 before the 2026-11-22 playbook expansion: RPOs the quarterback throws turn a run call into a pass)
   const int d = down;
   const double tg = toGo;
-  if (d == 1) pPass += tg > 10 ? 0.15 : -0.03;
-  if (d == 2) pPass += tg >= 7 ? 0.1 : tg <= 3 ? -0.18 : 0;
-  if (d == 3) pPass += tg >= 4 ? 0.3 : tg <= 2 ? -0.18 : 0.1;
+  // by down and distance, on the league's own curve (2023 nflverse play-by-play, neutral situations: Q1-Q3, within 10,
+  // outside the 5): 1st & 10 50 %, 1st & 15+ 71; 2nd & 1-2 34, 3 40, 4-6 52, 7-9 70, 10 63, 11+ 83; 3rd & 1-2 43,
+  // 3 85, 4-6 93, 7+ 96. (The offsets are from the average lean, 0.51; 2nd and long was called a pass 61 % of the time
+  // against 83, and 3rd and 3 61 % against 85.)
+  if (d == 1) pPass += tg >= 15 ? 0.2 : tg > 10 ? 0.0 : -0.01;
+  if (d == 2) pPass += tg <= 2 ? -0.17 : tg <= 3 ? -0.11 : tg <= 6 ? 0.01 : tg <= 9 ? 0.19 : tg <= 10 ? 0.12 : 0.32;
+  if (d == 3) pPass += tg <= 2 ? -0.08 : tg <= 3 ? 0.34 : tg <= 6 ? 0.42 : 0.45;
   if (d == 4) pPass += tg >= 3 ? 0.3 : -0.25;
   const int m = margin();
   if (q >= 3) pPass += clamp(-m * 0.012, -0.25, 0.3);
@@ -455,7 +459,7 @@ const OffPlay* Game::cpuOffense() {
     if (isPass != pass) continue;
     if (goal && p.hasTag("deep")) continue;
     const Formation* f = formationById(p.formation);
-    if (!goal && f && f->personnel == "22" && !shortY) continue;  // the heavy sets come out for short yardage
+    if (!goal && f && (f->personnel == "22" || f->personnel == "23") && !shortY) continue;  // the heavy sets come out for short yardage
     if (p.run && p.run->style == RunStyle::Sneak && !(shortY && tg <= 1)) continue;
     pool.push_back(&p);
   }
@@ -466,11 +470,33 @@ const OffPlay* Game::cpuOffense() {
   // often for it, so each play is weighted by 1 / sqrt(plays in its formation)
   std::map<std::string, int> perForm;
   for (const OffPlay* pp : pool) perForm[pp->formation]++;
+  // (the quarterback's legs: designed runs and read keeps are called for the mobile ones)
+  const std::vector<Player*> qbs = depth(t, Pos::QB);
+  const double qbLegs = qbs.empty() ? 0.5 : clamp((qbs[0]->r.speed - 62) / 18.0, 0.15, 1.3);
   std::vector<double> w;
   w.reserve(pool.size());
   for (const OffPlay* pp : pool) {
     const OffPlay& p = *pp;
     double x = 1;
+    // the league's personnel on the field (2023: 11 ~60 %, 12 ~20 %, 21 / 13 a few percent each): a book's many sets of
+    // one grouping must not call it more for having them
+    if (const Formation* fp = formationById(p.formation)) {
+      const std::string& pe = fp->personnel;
+      x *= pe == "11" ? 1.0 : pe == "12" ? 0.75 : pe == "10" ? 0.55 : pe == "13" ? 0.45 : pe == "21" ? 0.65 : pe == "20" ? 0.5 : pe == "31" ? 0.3 : 1.0;
+      if (fp->family == "Wildcat") x *= 0.25;
+    }
+    // (an RPO is a run call the quarterback may throw; trick plays are a once-a-game call)
+    if (p.cat == PlayCat::RPO) x *= 0.35;
+    if (p.cat == PlayCat::Trick) x *= 0.12;
+    // the run game's mix by scheme: zone and stretch are the base of every modern run game, the gap schemes a
+    // complement (2023: ~55 % of NFL runs are zone, ~35 % gap)
+    if (p.type == PlayType::Run && p.run && p.cat == PlayCat::Run) {
+      const RunStyle st = p.run->style;
+      if (st == RunStyle::Gap && !p.run->jobs.empty()) x *= 0.65;
+    }
+    if (p.run && (p.run->carrier == "QB" || p.run->read == "end") && p.run->style != RunStyle::Sneak &&
+        !(formationById(p.formation) && formationById(p.formation)->family == "Wildcat"))
+      x *= 0.6 * qbLegs;
     if (shortY && p.hasTag("shortyard")) x += 2.5;
     x /= std::sqrt(static_cast<double>((std::max)(1, perForm[p.formation])) / 6.0);
     if (goal && p.hasTag("goalline")) x += 2;
@@ -478,9 +504,11 @@ const OffPlay* Game::cpuOffense() {
     if (longY && p.hasTag("quick")) x *= 0.5;
     if (tp == Tempo::Hurry && (p.hasTag("quick") || p.hasTag("short"))) x += 0.8;
     if (p.type == PlayType::PlayAction && d == 1) x += 0.6;
+    if (p.type == PlayType::PlayAction) x *= tune().paCallW;
     // from under center a team throws mostly off play action; the straight dropbacks come from the gun
     if (const Formation* fp = formationById(p.formation); fp && fp->qbDepth <= 1.5 && p.type == PlayType::Pass && !p.hasTag("quick")) x *= 0.4;
     if (p.type == PlayType::Screen && longY) x += 0.6;
+    if (p.type == PlayType::Screen) x *= tune().screenW;
     if (std::find(recent.begin(), recent.end(), p.id) != recent.end()) x *= 0.4;
     // money downs: favor concepts with a route that settles at/just past the sticks
     if (d >= 3 && p.type != PlayType::Run) {
@@ -510,15 +538,24 @@ const DefCall* Game::cpuDefense(const OffPlay& offPlay) {
   const bool longY = toGo >= 8 && down >= 2;
   const DefBook& book = defBookFor(t);
   Front front;
-  if (goal || (shortY && (pers == "22" || pers == "21"))) front = Front::Goalline;
-  else if (pers == "21" || pers == "12" || pers == "22" || pers == "13") front = book.base;
+  if (goal || (shortY && (pers == "22" || pers == "21" || pers == "23" || pers == "31"))) front = Front::Goalline;
+  else if (pers == "21" || pers == "12" || pers == "22" || pers == "13" || pers == "23" || pers == "31") front = book.base;
   else front = (longY && down == 3 && rng.chance(0.5)) ? Front::Dime : Front::Nickel;
+  // the family of fronts: the book's base sets (4-3 or 3-4), its nickel packages (4-2-5, 3-3-5, 2-4-5), its dime ones
+  auto fam = [](Front f) {
+    switch (f) {
+      case Front::Nickel33:
+      case Front::Nickel24: return Front::Nickel;
+      case Front::Dime32: return Front::Dime;
+      default: return f;
+    }
+  };
   std::vector<const DefCall*> pool;
   for (const DefCall* d : book.calls)
-    if (d->front == front) pool.push_back(d);
+    if (fam(d->front) == front) pool.push_back(d);
   if (pool.empty())
     for (const DefCall& d : DEF_PLAYS())
-      if (d.front == front && d.set.empty()) pool.push_back(&d);
+      if (fam(d.front) == front && d.set.empty()) pool.push_back(&d);
   std::vector<double> w;
   for (const DefCall* dp : pool) {
     const DefCall& d = *dp;
@@ -561,13 +598,16 @@ std::optional<Penalty> Game::rollPresnap() {
   if (r < (0.014 + road) * ps)
     return mkPen(onWho("False Start", jumper(rng, offense(), {Pos::OT, Pos::OG, Pos::C, Pos::TE, Pos::WR}, 2)), Side::Off, 5, false, PenaltySpot::Los, true);
   if (r < (0.018 + road) * ps) return mkPen("Delay of Game", Side::Off, 5, false, PenaltySpot::Los, true);
-  if (r < (0.028 + road) * ps) {
-    static const std::vector<std::string> kNames = {"Neutral Zone Infraction", "Offside", "Encroachment"};
-    return mkPen(onWho(rng.pick(kNames), jumper(rng, defense(), {Pos::DE, Pos::DT, Pos::LB}, 2)), Side::Def, 5, false, PenaltySpot::Los, true);
+  // (the rates from here on: accepted flags per team game in 2023, nflverse play-by-play - defensive jumps 0.50: offside
+  // 0.26, neutral zone 0.17, encroachment 0.07; they were 0.80, a third of them encroachment)
+  if (r < (0.0243 + road) * ps) {
+    const double k = rng.next();
+    const char* nm = k < 0.52 ? "Offside" : k < 0.86 ? "Neutral Zone Infraction" : "Encroachment";
+    return mkPen(onWho(nm, jumper(rng, defense(), {Pos::DE, Pos::DT, Pos::LB}, 2)), Side::Def, 5, false, PenaltySpot::Los, true);
   }
   // the rest of a Sunday's pre-snap flags: a formation or shift foul (~0.2 a team game), twelve on defense (~0.15)
-  if (r < (0.031 + road) * ps) return mkPen(rng.chance(0.6) ? "Illegal Formation" : "Illegal Shift", Side::Off, 5, false, PenaltySpot::Los, true);
-  if (r < (0.0335 + road) * ps) return mkPen("Too Many Men on the Field", Side::Def, 5, false, PenaltySpot::Los, true);
+  if (r < (0.0268 + road) * ps) return mkPen(rng.chance(0.56) ? "Illegal Formation" : "Illegal Shift", Side::Off, 5, false, PenaltySpot::Los, true);
+  if (r < (0.0278 + road) * ps) return mkPen("Too Many Men on the Field", Side::Def, 5, false, PenaltySpot::Los, true);
   return std::nullopt;
 }
 
@@ -583,29 +623,38 @@ std::optional<Penalty> Game::rollPostsnap(const PlayResult& res, const OffPlay& 
   // defensive holding and illegal contact ~0.45 - holding was called 1.8 times a game and coverage fouls half as often
   // as on Sundays, which put offenses in 2nd and 20 far too much)
   auto call = [&](const FoulRisk& f, double k = 1.0) { return f.p > 0 && roll(f.p * k); };
-  if (call(res.foulHold, 0.54)) return mkPen(onWho("Offensive Holding", res.foulHold.by), Side::Off, 10, false, PenaltySpot::Los, true);
-  if (isPass && res.incomplete && res.airYards >= 5 && call(res.foulDpi, 1.8))
+  if (call(res.foulHold, tune().holdCall)) return mkPen(onWho("Offensive Holding", res.foulHold.by), Side::Off, 10, false, PenaltySpot::Los, true);
+  if (isPass && res.incomplete && res.airYards >= 5 && call(res.foulDpi, 2.2))
     return mkPen(onWho("Defensive Pass Interference", res.foulDpi.by), Side::Def, 0, true, PenaltySpot::Spot, false, static_cast<double>(res.airYards));
   if (isPass && call(res.foulDhold, 1.5))
     return mkPen(onWho(rng.chance(0.6) ? "Defensive Holding" : "Illegal Contact", res.foulDhold.by), Side::Def, 5, true, PenaltySpot::Los, false);
-  if (isPass && call(res.foulRough)) return mkPen(onWho("Roughing the Passer", res.foulRough.by), Side::Def, 15, true, PenaltySpot::End, false);
-  if (isPass && res.complete && res.airYards >= 8 && call(res.foulOpi))
+  if (isPass && call(res.foulRough, 0.5)) return mkPen(onWho("Roughing the Passer", res.foulRough.by), Side::Def, 15, true, PenaltySpot::End, false);
+  if (isPass && res.complete && res.airYards >= 8 && call(res.foulOpi, 2.5))
     return mkPen(onWho("Offensive Pass Interference", res.foulOpi.by), Side::Off, 10, false, PenaltySpot::Los, true);
   if (call(res.foulMask)) return mkPen(onWho("Face Mask", res.foulMask.by), Side::Def, 15, true, PenaltySpot::End, false);
-  if (roll(0.003)) return mkPen("Unnecessary Roughness", Side::Def, 15, true, PenaltySpot::End, false);
-  if (roll(0.0015)) return mkPen("Illegal Use of Hands", Side::Def, 5, true, PenaltySpot::Los, false);
-  if (roll(0.002)) return mkPen("Illegal Block in the Back", Side::Off, 10, false, PenaltySpot::Los, true);
+  // a ball thrown away from the pocket with the rush on him and nobody near it: loss of down and ten yards (nflverse
+  // 2023: 0.10 a team game - it was never called, and every throwaway was a free incompletion)
+  if (isPass && res.thrownAway && res.pressured && roll(0.06)) return mkPen("Intentional Grounding", Side::Off, 10, false, PenaltySpot::Los, false);
+  // the rest, at the 2023 rates (accepted flags a team game: unnecessary roughness 0.24 on the defense and 0.06 on the
+  // offense, illegal use of hands 0.08; an illegal block on a scrimmage play is rare - 0.002 a play made it 0.13 a game
+  // on top of the returns' own)
+  if (roll(0.0037)) return mkPen("Unnecessary Roughness", Side::Def, 15, true, PenaltySpot::End, false);
+  if (roll(0.001)) return mkPen("Unnecessary Roughness", Side::Off, 15, false, PenaltySpot::Los, true);
+  if (roll(0.0013)) return mkPen("Illegal Use of Hands", Side::Def, 5, true, PenaltySpot::Los, false);
+  if (roll(0.0005)) return mkPen("Illegal Block in the Back", Side::Off, 10, false, PenaltySpot::Los, true);
   return std::nullopt;
 }
 
 bool Game::returnFoul(TeamKey rt, double& spot, std::string& desc) {
-  // about one return in eight draws a flag on the return team, marked off from where the return ended
-  if (!rng.chance(0.13)) return false;
+  // about one return in eighteen draws a flag on the return team, marked off from where the return ended (nflverse
+  // 2023: ~0.24 a team game on the return team, holding 0.14, blocks above the waist / in the back 0.06; one in eight,
+  // 60 % in the back, made illegal blocks 0.56 a game - ten times a Sunday's)
+  if (!rng.chance(0.056)) return false;
   const double y = (std::min)(10.0, spot / 2);
   spot -= y;
   team[rt].penalties++;
   team[rt].penYds += jsRoundI(y);
-  desc += " PENALTY on " + teamOf(rt).abbr + ": " + (rng.chance(0.6) ? "Illegal Block in the Back" : "Holding") + ", " + S(jsRoundI(y)) +
+  desc += " PENALTY on " + teamOf(rt).abbr + ": " + (rng.chance(0.3) ? "Illegal Block in the Back" : "Holding") + ", " + S(jsRoundI(y)) +
           " yards from the end of the return.";
   return true;
 }
@@ -983,8 +1032,11 @@ std::string Game::describe(const PlayResult& res, const OffPlay& play, const Pla
         f = std::string(" FUMBLE") + (res.fumbleLost ? ", recovered by " + defense().abbr + " " + nm(res.fumbleRecBy) : std::string(", recovered by offense")) + ".";
       return qbN + " SACKED by " + nm(res.sackedBy) + " for " + yd(y) + "." + f;
     }
-    case PlayKind::Scramble:
-      return qbN + " scrambles for " + yd(y) + oob + ".";
+    case PlayKind::Scramble: {
+      bool slid = false;
+      for (const PlayEvent& e : res.events) slid = slid || e.type == "slide";
+      return qbN + " scrambles for " + yd(y) + oob + (slid ? " and slides" : "") + ".";
+    }
     case PlayKind::Run: {
       const std::string r = nm(res.rusher);
       std::string f;
@@ -1500,7 +1552,9 @@ Game::PlaceKick Game::placeKick(double fromX, double p, const Player& k, TeamKey
     const double latWind = -weather.windY * worldDir(kt);  // yd/s toward the kicking team's left
     o.miss = clamp(plane * std::tan((u.aimDeg + accDeg) * kPi / 180) + 0.25 * latWind * plane / 20.0, -14, 14);
   }
-  double elev = clamp(40 - 0.22 * plane, 27.0, 36.0), v = 0;
+  // (the launch angle about the kicker's line for this length: a low one is the one a hand at the line gets to -
+  // Sim/PlaceKick.cpp plays the rush against it; the leg and the line above decide the make, whatever the angle)
+  double elev = tune().fgPlay > 0 ? clamp(40 - 0.22 * plane + rng.normal(0, tune().fgElevSd), 23.0, 39.0) : clamp(40 - 0.22 * plane, 27.0, 36.0), v = 0;
   if (o.blocked) {
     // off a hand at the line: the ball pops up and dies
     elev = 52;
@@ -1518,6 +1572,10 @@ Game::PlaceKick Game::placeKick(double fromX, double p, const Player& k, TeamKey
   const PlaceFly at = flyPlace(v, elev, plane, drag);
   o.isShort = !o.blocked && at.z < kCrossbar + 0.1;
   o.good = !o.blocked && !o.isShort && std::fabs(o.miss) < kUprightHalf;
+  o.v = v;
+  o.elevDeg = elev;
+  o.drag = drag;
+  o.plane = plane;
   KickFlight& f = o.flight;
   f.fromX = fromX;
   f.y = FIELD_W / 2;
@@ -1536,7 +1594,17 @@ Game::PlaceKick Game::placeKick(double fromX, double p, const Player& k, TeamKey
   return o;
 }
 
+// A field goal is a play (Sim/PlaceKick.cpp): the snap, the hold, the protection against the rush, and the strike
+// placeKick draws, flown from the spot - blocked only when a rusher gets a hand into its path.
 SpecialResult Game::fieldGoal() {
+  if (tune().fgPlay <= 0) return legacyFieldGoal();
+  std::unique_ptr<PlaySim> sim = placeKickSim(false);
+  sim->runToEnd(30);
+  return finishPlaceKick(*sim);
+}
+
+// (the roll field goals were before they were played: Tune::fgPlay = 0, for A/B)
+SpecialResult Game::legacyFieldGoal() {
   const TeamKey kt = poss;
   const Player* k = kicker(kt);
   const int dist = jsRoundI(100 - ballOn + 17);
@@ -1570,18 +1638,7 @@ SpecialResult Game::fieldGoal() {
   return SpecialResult{log.back().desc, flight};
 }
 
-bool Game::goForTwo() {
-  const int m = margin();  // after the 6
-  const bool late = q >= 4 || (q == 3 && clock < 300);
-  if (q == 5) return false;
-  if (late) {
-    for (int v : {-2, -5, -10, -13, -16, 1, 5, 12, -9})
-      if (m == v) return true;
-  }
-  return rng.chance(0.04 + offense().aggression * 0.04);
-}
-
-SpecialResult Game::extraPoint() {
+SpecialResult Game::legacyExtraPoint() {
   const TeamKey kt = poss;
   const Player* k = kicker(kt);
   PlayerLine& l = stats.line(*k, offense().abbr);
@@ -1597,6 +1654,320 @@ SpecialResult Game::extraPoint() {
   addLog(nm(k) + " extra point is " + (good ? "GOOD" : "NO GOOD") + ".", good ? LogTag::None : LogTag::Info);
   afterPAT(kt);
   return SpecialResult{log.back().desc, pk.flight};
+}
+
+double Game::placeBlockRate(double dist, bool pat) {
+  // nflverse 2023: 19 of 1,107 field goals blocked (0.4 % at 18-29 yd, 1.3 % 30-39, 2.4 % 40-49, 2.9 % 50+: the longer
+  // the kick, the flatter it comes off the foot), 8 of 1,238 extra points (0.65 %)
+  if (pat) return 0.0065;
+  return clamp(0.004 + (dist - 25) * 0.001, 0.003, 0.032);
+}
+
+std::vector<Player*> Game::fgUnit(TeamKey key, bool kickTeam) const {
+  // (the director's Pick11 for "K" and "D", for a game with nobody to show it to)
+  const Team& T = teamOf(key);
+  std::vector<Player*> healthy;
+  for (const auto& p : T.roster)
+    if (p->injuredWeeks <= 0) healthy.push_back(p.get());
+  auto by = [&](std::initializer_list<Pos> ps) {
+    std::vector<Player*> out;
+    for (Player* p : healthy)
+      for (Pos q2 : ps)
+        if (p->pos == q2) {
+          out.push_back(p);
+          break;
+        }
+    std::stable_sort(out.begin(), out.end(), [](const Player* a, const Player* b) { return a->r.speed > b->r.speed; });
+    return out;
+  };
+  std::vector<Player*> out;
+  auto add1 = [&](Player* p) {
+    if (p && out.size() < 11 && std::find(out.begin(), out.end(), p) == out.end() && p->injuredWeeks <= 0) out.push_back(p);
+  };
+  if (kickTeam) {
+    add1(kicker(key));
+    add1(punter(key));  // (the holder, as on most teams)
+    add1(chartSpecialist(T, DSlot::LS));
+    for (Player* p : by({Pos::C, Pos::OT, Pos::OG, Pos::TE}))
+      if (out.size() < 9) add1(p);
+    for (Player* p : by({Pos::TE, Pos::LB, Pos::FB, Pos::DE, Pos::OT, Pos::OG, Pos::RB, Pos::S})) add1(p);
+  } else {
+    for (Player* p : by({Pos::DT, Pos::DE})) add1(p);
+    for (Player* p : by({Pos::LB, Pos::DE, Pos::S, Pos::CB, Pos::DT})) add1(p);
+  }
+  for (Player* p : healthy) add1(p);
+  return out;
+}
+
+void Game::orderPlaceUnits(TeamKey kt, std::vector<Player*>& kick, std::vector<Player*>& block) const {
+  Player* k = kicker(kt);
+  // the eleven in their jobs (PlaySim::setupPlace): K, H, LS, LG, RG, LT, RT, TE, TE2, LW, RW
+  std::vector<Player*> ku;
+  {
+    std::vector<Player*> pool = kick;
+    auto takeIf = [&](auto pred) -> Player* {
+      for (size_t i = 0; i < pool.size(); ++i)
+        if (pred(pool[i])) {
+          Player* p = pool[i];
+          pool.erase(pool.begin() + static_cast<std::ptrdiff_t>(i));
+          return p;
+        }
+      return nullptr;
+    };
+    Player* kk = takeIf([&](const Player* p) { return p == k; });
+    if (!kk) kk = takeIf([](const Player* p) { return p->pos == Pos::K; });
+    if (!kk && !pool.empty()) kk = takeIf([](const Player*) { return true; });
+    Player* pn = punter(kt);
+    Player* h = takeIf([&](const Player* p) { return p == pn; });
+    for (Pos hp : {Pos::P, Pos::QB, Pos::WR, Pos::CB, Pos::RB, Pos::S})
+      if (!h) h = takeIf([hp](const Player* p) { return p->pos == hp; });
+    const Player* lsChart = chartSpecialist(teamOf(kt), DSlot::LS);
+    Player* ls = takeIf([&](const Player* p) { return p == lsChart; });
+    if (!ls) ls = takeIf([](const Player* p) { return p->pos == Pos::C; });
+    // the line heaviest first (guards, tackles), the ends tight ends where there are any, the wings what is left
+    auto isLine = [](const Player* p) { return p->pos == Pos::OT || p->pos == Pos::OG || p->pos == Pos::C; };
+    std::stable_sort(pool.begin(), pool.end(), [&](const Player* a, const Player* b) {
+      if (isLine(a) != isLine(b)) return isLine(a);
+      return a->weightLb > b->weightLb;
+    });
+    if (!ls && !pool.empty()) ls = takeIf([](const Player*) { return true; });
+    if (!h && !pool.empty()) {
+      h = pool.back();
+      pool.pop_back();
+    }
+    std::vector<Player*> line;
+    for (int i = 0; i < 4 && !pool.empty(); ++i) line.push_back(takeIf([](const Player*) { return true; }));
+    // (both sides as good: the best two pass blockers at guard, then snaked - LG 1st, RG 2nd, RT 3rd, LT 4th)
+    std::stable_sort(line.begin(), line.end(), [](const Player* a, const Player* b) { return a->r.passBlock > b->r.passBlock; });
+    if (line.size() == 4) std::swap(line[2], line[3]);
+    std::vector<Player*> ends;
+    for (int i = 0; i < 2; ++i) {
+      Player* te = takeIf([](const Player* p) { return p->pos == Pos::TE; });
+      if (!te && !pool.empty()) te = takeIf([](const Player*) { return true; });
+      if (te) ends.push_back(te);
+    }
+    for (Player* p : {kk, h, ls}) ku.push_back(p);
+    for (Player* p : line) ku.push_back(p);
+    for (Player* p : ends) ku.push_back(p);
+    for (Player* p : pool) ku.push_back(p);
+    ku.erase(std::remove(ku.begin(), ku.end(), nullptr), ku.end());
+    if (ku.size() > 11) ku.resize(11);
+  }
+  // AL, AR, BL, BR, CL, CR (the six heaviest), EL, ER (the quickest of the rest), J (the tallest), SP, FL
+  std::vector<Player*> bu = block;
+  if (bu.size() > 11) bu.resize(11);
+  std::stable_sort(bu.begin(), bu.end(), [](const Player* a, const Player* b) { return a->weightLb > b->weightLb; });
+  if (bu.size() >= 6) {
+    // (the six inside, the best rushers in the A gaps, snaked so neither side is the soft one: AL 1st, AR 2nd, BR 3rd,
+    // BL 4th, CL 5th, CR 6th)
+    std::stable_sort(bu.begin(), bu.begin() + 6, [](const Player* a, const Player* b) { return a->r.passRush + a->r.strength > b->r.passRush + b->r.strength; });
+    std::swap(bu[2], bu[3]);
+  }
+  if (bu.size() > 6) {
+    std::stable_sort(bu.begin() + 6, bu.end(), [](const Player* a, const Player* b) { return a->r.speed > b->r.speed; });
+    if (bu.size() > 9) {
+      std::stable_sort(bu.begin() + 8, bu.end(), [](const Player* a, const Player* b) { return a->heightIn > b->heightIn; });
+    }
+  }
+  kick = ku;
+  block = bu;
+}
+
+std::unique_ptr<PlaySim> Game::placeKickSim(bool pat, std::vector<Player*> kick, std::vector<Player*> block, std::optional<Side> userSide,
+                                           double setT, int look) {
+  static OffPlay place;
+  if (place.id.empty()) {
+    place.id = "place_kick";
+    place.name = "Field goal";
+    place.formation = FORMATIONS()[0].id;
+    place.type = PlayType::Run;
+  }
+  const TeamKey kt = poss;
+  if (kick.empty()) kick = fgUnit(kt, true);
+  if (block.empty()) block = fgUnit(other(kt), false);
+  Player* k = kicker(kt);
+  std::vector<Player*> ku = kick, bu = block;
+  orderPlaceUnits(kt, ku, bu);
+  // the strike: the make rate is the game's (fgProb, for the length, the kicker, the weather) with the blocks the rush
+  // makes in it
+  const double los = pat ? 85.0 : ballOn;
+  const double spotX = los - 7;
+  const int dist = jsRoundI(100 - los + 17);
+  const double pMake = pat ? clamp(fgProb(33, *k, kt) - 0.03, 0.8, 0.99) : fgProb(dist, *k, kt);
+  const PlaceKick pk = placeKick(spotX, pMake / (1 - placeBlockRate(dist, pat)), *k, kt, 0.0);
+  placeFlight_ = pk.flight;
+  PlaceKickSpec s;
+  s.pat = pat;
+  s.spotX = spotX;
+  s.setT = setT;
+  // the operation: the snap, the hold and the foot, NFL-quick (1.25-1.35 s); now and then a snap off the holder's
+  // hands that he has to dig out, and the rush has a tenth or two longer
+  double op = clamp(tune().fgOpT + rng.normal(0, 0.04), tune().fgOpT - 0.1, tune().fgOpT + 0.12);
+  if (rng.chance(0.03)) op += rng.range(0.1, 0.28);
+  s.opT = op;
+  s.catchT = 0.42 * op / 1.30;
+  s.placeT = 0.78 * op / 1.30;
+  s.v = pk.v;
+  s.elevDeg = pk.elevDeg;
+  s.drag = pk.drag;
+  s.miss = pk.miss;
+  s.plane = pk.plane;
+  s.good = pk.good;
+  s.isShort = pk.isShort;
+  s.forceBlock = tune().kickBlock > 0 && rng.chance(tune().kickBlock);
+  s.look = look;
+  PlayConfig cfg;
+  cfg.off = &offense();
+  cfg.def = &defense();
+  cfg.offPlay = &place;
+  cfg.defCall = nullptr;
+  cfg.los = los;
+  cfg.ballY = FIELD_W / 2;
+  cfg.weather = weather;
+  cfg.worldDir = worldDir();
+  cfg.rng = rng.fork();
+  cfg.userSide = userSide;
+  cfg.place = s;
+  cfg.offUnit = ku;
+  cfg.defUnit = bu;
+  cfg.abil = abilCtx();
+  return std::make_unique<PlaySim>(cfg);
+}
+
+SpecialResult Game::finishPlaceKick(PlaySim& sim) {
+  const PlaceKickSpec& s = *sim.cfg.place;
+  const PlayResult& r = *sim.result;
+  const TeamKey kt = poss, dt = other(kt);
+  Player* k = sim.placeKicker ? sim.placeKicker->p : kicker(kt);
+  const double los = sim.los;
+  const int dist = jsRoundI(100 - los + 17);
+  const std::optional<KickFlight> flight = sim.placeBlocked ? std::nullopt : placeFlight_;
+  placeFlight_.reset();
+  PlayerLine& l = stats.line(*k, offense().abbr);
+  if (s.pat) l.xpa++;
+  else {
+    l.fga++;
+    team[kt].fga++;
+    runClock((std::max)(rng.range(4, 6), r.duration - s.setT), true);
+  }
+  for (Ent* e : sim.ents)
+    if (e->p) e->p->fatigue = clamp(e->p->fatigue + 0.01 * (1.25 - e->p->r.stamina / 120), 0, 1);
+  const std::string what = s.pat ? nm(k) + " extra point" : nm(k) + " " + S(dist) + "-yard field goal";
+  if (!sim.placeBlocked) {
+    const bool good = sim.placeGood;
+    const std::string tip = sim.placeTipped ? ", tipped at the line" : "";
+    if (abilOn()) abil.afterKick(*k, good, !s.pat, offense().abbr);
+    if (s.pat) {
+      if (good) {
+        l.xpm++;
+        score[kt] += 1;
+      }
+      addLog(what + " is " + (good ? "GOOD" : "NO GOOD") + tip + ".", good ? LogTag::None : LogTag::Info);
+      afterPAT(kt);
+      return SpecialResult{log.back().desc, flight};
+    }
+    if (good) {
+      l.fgm++;
+      team[kt].fgm++;
+      score[kt] += 3;
+      addLog(what + " is GOOD" + tip + ".", LogTag::Fg);
+      kicking = kt;
+      phase = GamePhase::Kickoff;
+      clockRunning = false;
+      if (q == 5) otDriveEnded();
+      return SpecialResult{log.back().desc, flight};
+    }
+    const double miss = sim.placeTipped ? sim.placeCrossY : s.miss;
+    const bool post = std::fabs(miss) < kUprightHalf + 0.25;
+    const std::string how = sim.placeShort ? "NO GOOD, short" : miss < 0 ? (post ? "NO GOOD, off the right upright" : "NO GOOD, wide right")
+                                                                         : (post ? "NO GOOD, off the left upright" : "NO GOOD, wide left");
+    addLog(what + " is " + how + tip + ".", LogTag::Turnover);
+    if (q == 5) otDriveEnded();
+    if (phase != GamePhase::Final) changePossessionRaw(100 - (std::max)(s.spotX, 20.0));
+    return SpecialResult{log.back().desc, flight};
+  }
+  // blocked: off a rusher's hands, then a loose ball - whoever came up with it, wherever it ended
+  if (abilOn()) abil.afterKick(*k, false, !s.pat, offense().abbr);
+  std::string desc = what + " is BLOCKED";
+  if (sim.placeBlockBy && sim.placeBlockBy->p) desc += " by " + nm(sim.placeBlockBy->p);
+  Ent* rec = sim.recoveredBy;
+  const Ent* holder = sim.ball.holder;
+  const bool defBall = holder ? holder->side == Side::Def : true;
+  const double endX = holder ? r.endX : clamp(sim.ball.pos.x, 0.5, 99.5);  // (nobody came up with it: where it lies)
+  if (rec && rec->p) desc += std::string(", ") + (rec->side == Side::Def ? "recovered by " + teamOf(dt).abbr + " " : "recovered by ") + nm(rec->p);
+  if (r.td) {
+    const TeamKey scorer = *r.td == Side::Off ? kt : dt;
+    if (holder && holder->p && scorer == dt) stats.line(*holder->p, teamOf(dt).abbr).defTD++;
+    if (s.pat) {
+      // a try: a blocked kick run back is two points for the defense (and two for a kick unit that ran it in)
+      score[scorer] += 2;
+      addLog(desc + " and returned for a DEFENSIVE TWO-POINT CONVERSION " + teamOf(scorer).abbr + "!", LogTag::Td);
+      afterPAT(kt);
+      return SpecialResult{log.back().desc, std::nullopt};
+    }
+    addLog(desc + (scorer == dt ? " and returned " + SR(los - endX) + " yards for a TOUCHDOWN " : ", TOUCHDOWN ") + teamOf(scorer).abbr + "!", LogTag::Td);
+    scoreTD(scorer);
+    return SpecialResult{log.back().desc, std::nullopt};
+  }
+  if (s.pat) {
+    addLog(desc + ".", LogTag::Info);
+    afterPAT(kt);
+    return SpecialResult{log.back().desc, std::nullopt};
+  }
+  if (r.safety) {
+    score[dt] += 2;
+    addLog(desc + ", downed in the end zone. SAFETY! " + teamOf(dt).abbr + " +2.", LogTag::Safety);
+    kicking = kt;
+    poss = dt;
+    phase = GamePhase::Kickoff;
+    safetyKick = true;
+    clockRunning = false;
+    if (q == 5) finish();
+    return SpecialResult{log.back().desc, std::nullopt};
+  }
+  if (!defBall && endX >= los + toGo) {
+    // the kick unit fell on it and ran it past the sticks: a first down
+    ballOn = clamp(endX, 1, 99);
+    down = 1;
+    toGo = (std::min)(10.0, 100 - ballOn);
+    ballY = FIELD_W / 2;
+    addLog(desc + " at the " + ydLine(ballOn, kt) + ". FIRST DOWN!");
+    return SpecialResult{log.back().desc, std::nullopt};
+  }
+  if (!defBall && down < 4) {
+    // (a field goal on an earlier down - the end of a half: the next down from where it ended)
+    const double tg = toGo - (endX - los);
+    ballOn = clamp(endX, 1, 99);
+    down++;
+    toGo = (std::max)(1.0, tg);
+    ballY = FIELD_W / 2;
+    addLog(desc + " at the " + ydLine(ballOn, kt) + ".");
+    return SpecialResult{log.back().desc, std::nullopt};
+  }
+  const double at = clamp(endX, 0.5, 99.5);
+  addLog(desc + (rec ? " at the " : ", dead at the ") + ydLine(at, kt) + ".", LogTag::Turnover);
+  if (q == 5) otDriveEnded();
+  if (phase != GamePhase::Final) changePossessionRaw(r.touchback ? 20.0 : 100 - at);
+  return SpecialResult{log.back().desc, std::nullopt};
+}
+
+bool Game::goForTwo() {
+  const int m = margin();  // after the 6
+  const bool late = q >= 4 || (q == 3 && clock < 300);
+  if (q == 5) return false;
+  if (late) {
+    for (int v : {-2, -5, -10, -13, -16, 1, 5, 12, -9})
+      if (m == v) return true;
+  }
+  return rng.chance(0.04 + offense().aggression * 0.04);
+}
+
+SpecialResult Game::extraPoint() {
+  // (played as a field goal from the 15: Sim/PlaceKick.cpp)
+  if (tune().fgPlay <= 0) return legacyExtraPoint();
+  std::unique_ptr<PlaySim> sim = placeKickSim(true);
+  sim->runToEnd(30);
+  return finishPlaceKick(*sim);
 }
 
 std::unique_ptr<PlaySim> Game::twoPointSim(const OffPlay& offPlay, const DefCall& defCall, std::optional<Side> userSide,

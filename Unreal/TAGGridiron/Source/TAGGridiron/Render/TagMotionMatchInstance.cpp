@@ -8,6 +8,42 @@
 void FTagRootTapNode::Evaluate_AnyThread(FPoseContext& Output)
 {
 	Source.Evaluate(Output);
+	// pelvis continuity: on a new pick the blend stack's first evaluations put the pelvis (and the whole body under it,
+	// feet too) up to a step of travel behind where it was, then back within 2-3 frames - a runner frozen for a frame
+	// and catching up (0.3 % of running frames, to10; -TagStallTrace: srcPel -10 -> -25 -> -16 -> -7 cm on the frames a
+	// Bruiser sprint was picked at 0.000, the root steady). A matched locomotion pose moves its pelvis under a centimetre a
+	// frame in component space, so a jump of more than 10 cm in one evaluation is that: it is cancelled through the root
+	// (the body stays where it was shown) and the correction eased off over ~0.1 s. (-TagMMNoPelvisFix: as before.)
+	static const bool bNoPelvisFix = FParse::Param(FCommandLine::Get(), TEXT("TagMMNoPelvisFix"));
+	if (!bNoPelvisFix && Output.Pose.GetNumBones() > 1)
+	{
+		const FBoneContainer& BC = Output.Pose.GetBoneContainer();
+		const int32 Mesh = BC.GetPoseBoneIndexForBoneName(TEXT("pelvis"));
+		const FCompactPoseBoneIndex Pel = Mesh != INDEX_NONE ? BC.MakeCompactPoseIndex(FMeshPoseBoneIndex(Mesh)) : FCompactPoseBoneIndex(INDEX_NONE);
+		if (Pel.IsValid())
+		{
+			FTransform T = Output.Pose[Pel];
+			for (FCompactPoseBoneIndex P = BC.GetParentBoneIndex(Pel); P.IsValid(); P = BC.GetParentBoneIndex(P)) T = T * Output.Pose[P];
+			const FVector Now = T.GetLocation();
+			// the last correction eases off (0.05 s half-life: the blend stack's own 2-3 frame recovery plays through it),
+			// then this evaluation's jump, if any, is taken out whole
+			PelvisFix *= FMath::Exp(-0.693f * FMath::Max(LastDt, 0.f) / 0.05f);
+			if (bPrevPelvis)
+			{
+				FVector D = Now - PrevPelvis;
+				D.Z = 0.f;
+				if (D.SizeSquared() > 10.f * 10.f) PelvisFix -= D;
+			}
+			PrevPelvis = Now;
+			bPrevPelvis = true;
+			PelvisFix = PelvisFix.GetClampedToMaxSize(40.f);
+			if (!PelvisFix.IsNearlyZero(0.05f))
+			{
+				const FCompactPoseBoneIndex Root(0);
+				Output.Pose[Root].AddToTranslation(PelvisFix);
+			}
+		}
+	}
 	bHave = false;
 	if (const UE::Anim::IAnimRootMotionProvider* P = UE::Anim::IAnimRootMotionProvider::Get())
 	{

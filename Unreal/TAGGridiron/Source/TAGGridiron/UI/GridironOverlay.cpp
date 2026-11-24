@@ -4,6 +4,9 @@
 #include "Audio/TagAudio.h"
 #include "Game/PlayArtStrokes.h"
 #include "UI/PlayDiagram.h"
+#include "UI/RosterUI.h"
+#include "UI/TagTheme.h"
+#include "Game/TagBindings.h"
 #include "Render/Coords.h"
 #include "Sim/Playbook.h"
 #include "Sim/Stats.h"
@@ -20,6 +23,7 @@
 #include "Widgets/Layout/SGridPanel.h"
 #include "Widgets/Layout/SBackgroundBlur.h"
 #include "Widgets/Input/SButton.h"
+#include "Widgets/Images/SImage.h"
 #include "Widgets/Text/STextBlock.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Framework/Application/SlateApplication.h"
@@ -27,6 +31,8 @@
 #include "Rendering/SlateRenderer.h"
 #include "Misc/App.h"
 #include "Misc/CommandLine.h"
+#include <concepts>
+#include <string>
 
 using namespace TagCoords;
 
@@ -52,8 +58,8 @@ void SGridironOverlay::Construct(const FArguments& InArgs)
 		// ticker (top-left)
 		+ SOverlay::Slot().HAlign(HAlign_Left).VAlign(VAlign_Top).Padding(24)
 		[
-			SNew(SBorder).BorderImage(White()).BorderBackgroundColor(Panel).Padding(FMargin(14, 10))
-			.Visibility_Lambda([this] { return bHud && !bBroadcastOnly && !bModal ? EVisibility::HitTestInvisible : EVisibility::Collapsed; })
+			SNew(SBorder).BorderImage(TagTheme::Round(6.f)).BorderBackgroundColor(Panel).Padding(FMargin(14, 10))
+			.Visibility_Lambda([this] { return bHud && !bBroadcastOnly && !bModal && !TickerText().IsEmpty() ? EVisibility::HitTestInvisible : EVisibility::Collapsed; })
 			[
 				SNew(SBox).WidthOverride(560)
 				[ SNew(STextBlock).Font(Font(12)).ColorAndOpacity(FLinearColor(0.92f, 0.94f, 0.97f)).AutoWrapText(true).Text_Lambda([this] { return TickerText(); }) ]
@@ -62,7 +68,7 @@ void SGridironOverlay::Construct(const FArguments& InArgs)
 		// weather (top-right)
 		+ SOverlay::Slot().HAlign(HAlign_Right).VAlign(VAlign_Top).Padding(24)
 		[
-			SNew(SBorder).BorderImage(White()).BorderBackgroundColor(Panel).Padding(FMargin(14, 8))
+			SNew(SBorder).BorderImage(TagTheme::Round(6.f)).BorderBackgroundColor(Panel).Padding(FMargin(14, 8))
 			.Visibility_Lambda([this] { return bHud && !bBroadcastOnly && !bModal ? EVisibility::HitTestInvisible : EVisibility::Collapsed; })
 			[ SNew(STextBlock).Font(Font(12)).ColorAndOpacity(Dim).Text_Lambda([this] { return WeatherText(); }) ]
 		]
@@ -87,9 +93,14 @@ void SGridironOverlay::Construct(const FArguments& InArgs)
 			]
 			+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(0, 24, 0, 0)
 			[
-				SNew(SBorder).BorderImage(White()).BorderBackgroundColor(FLinearColor(0.07f, 0.09f, 0.13f, 0.9f)).Padding(FMargin(18, 8))
-				.Visibility_Lambda([this] { return !IsStatLine() && ToastT < (ToastText.Len() > 14 ? 3.2f : 1.3f) ? EVisibility::HitTestInvisible : EVisibility::Collapsed; })
-				[ SNew(STextBlock).Font(Font(16, "Bold")).ColorAndOpacity(Accent).Text_Lambda([this] { return T(ToastText); }) ]
+				SNew(SBorder).BorderImage(TagTheme::Round(6.f)).BorderBackgroundColor(FLinearColor(0.03f, 0.04f, 0.065f, 0.92f)).Padding(FMargin(0))
+				.Visibility_Lambda([this] { return !bModal && !IsStatLine() && ToastT < (ToastText.Len() > 14 ? 3.2f : 1.3f) ? EVisibility::HitTestInvisible : EVisibility::Collapsed; })
+				[
+					SNew(SHorizontalBox)
+					+ SHorizontalBox::Slot().AutoWidth()[ SNew(SBox).WidthOverride(5)[ SNew(SBorder).BorderImage(TagTheme::Round(2.f)).BorderBackgroundColor(Accent) ] ]
+					+ SHorizontalBox::Slot().AutoWidth().Padding(FMargin(16, 8, 20, 8))
+					[ SNew(STextBlock).Font(TagTheme::Font(18, "BoldCondensed", 40)).ColorAndOpacity(Accent).Text_Lambda([this] { return T(ToastText.ToUpper()); }) ]
+				]
 			]
 		]
 		// a big play's stat line: the broadcast's lower third, above the score bar (over the field it sat on the
@@ -112,7 +123,7 @@ void SGridironOverlay::Construct(const FArguments& InArgs)
 		// hint
 		+ SOverlay::Slot().HAlign(HAlign_Center).VAlign(VAlign_Bottom).Padding(FMargin(0, 0, 0, 110))
 		[
-			SNew(SBorder).BorderImage(White()).BorderBackgroundColor(Panel).Padding(FMargin(16, 8))
+			SNew(SBorder).BorderImage(TagTheme::Round(6.f)).BorderBackgroundColor(Panel).Padding(FMargin(16, 8))
 			.Visibility_Lambda([this] { return (bHud && !HintText.IsEmpty() && !bModal) ? EVisibility::HitTestInvisible : EVisibility::Collapsed; })
 			[ SNew(STextBlock).Font(Font(13)).ColorAndOpacity(FLinearColor(0.85f, 0.88f, 0.92f)).Text_Lambda([this] { return T(HintText); }) ]
 		]
@@ -122,6 +133,18 @@ void SGridironOverlay::Construct(const FArguments& InArgs)
 		// modal content
 		+ SOverlay::Slot().HAlign(HAlign_Fill).VAlign(VAlign_Fill)
 		[ SAssignNew(ModalBox, SBox).Visibility_Lambda([this] { return bModal ? EVisibility::Visible : EVisibility::Collapsed; }) ]
+		// over a menu the toast is a notification card at the top right (it sat on the menu's middle)
+		+ SOverlay::Slot().HAlign(HAlign_Right).VAlign(VAlign_Top).Padding(FMargin(0, 36, 40, 0))
+		[
+			SNew(SBorder).BorderImage(TagTheme::Round(6.f)).BorderBackgroundColor(FLinearColor(0.03f, 0.04f, 0.065f, 0.94f)).Padding(FMargin(0))
+			.Visibility_Lambda([this] { return bModal && !IsStatLine() && ToastT < 3.2f ? EVisibility::HitTestInvisible : EVisibility::Collapsed; })
+			[
+				SNew(SHorizontalBox)
+				+ SHorizontalBox::Slot().AutoWidth()[ SNew(SBox).WidthOverride(5)[ SNew(SBorder).BorderImage(TagTheme::Round(2.f)).BorderBackgroundColor(Accent) ] ]
+				+ SHorizontalBox::Slot().AutoWidth().Padding(FMargin(14, 10, 20, 10))
+				[ SNew(STextBlock).Font(TagTheme::Font(15, "BoldCondensed", 40)).ColorAndOpacity(FLinearColor::White).Text_Lambda([this] { return T(ToastText.ToUpper()); }) ]
+			]
+		]
 	];
 }
 
@@ -137,6 +160,20 @@ void SGridironOverlay::Tick(const FGeometry& G, const double Now, const float Dt
 	BannerT += GameDt;
 	ToastT += GameDt;
 	PumpAbilities();  // (the zone: banners, the badges over the X-Factor men)
+	// the play call sizes its cards to the screen: a window resized (or the first layout, if it was built before the
+	// overlay had a size) lays it out again
+	if (IsPlayCall() && CallRoot.IsValid() && ModalContent == CallRoot) // (not under the pause menu)
+	{
+		const FVector2D Now2 = G.GetLocalSize();
+		if (Now2.X >= 640.0 && Now2.Y >= 360.0 && !Now2.Equals(CallBuiltAvail, 2.0)) BuildPlayCall();
+	}
+	// a screen coming in: it fades up and rises 16 px into place
+	if (ModalBox.IsValid())
+	{
+		const float E = TagTheme::EaseOut(static_cast<float>((TagTheme::Now() - ModalInT) / 0.22));
+		ModalBox->SetRenderOpacity(0.15f + 0.85f * E);
+		ModalBox->SetRenderTransform(FSlateRenderTransform(FVector2f(0.f, 16.f * (1.f - E))));
+	}
 	// a menu just opened (laid out by now): give its button focus so the gamepad can drive it
 	if (PendingFocus >= 0 && bModal && ModalBox.IsValid() && FSlateApplication::IsInitialized())
 	{
@@ -178,6 +215,8 @@ int32 SGridironOverlay::FocusedIndex() const
 void SGridironOverlay::ShowModal(TSharedRef<SWidget> W, bool bKeepFocus)
 {
 	const int32 Was = bKeepFocus ? FocusedIndex() : -1;
+	// a new screen comes in (fades up); the same screen rebuilt in place (a selection moved) just changes
+	if (!bModal || !ModalContent.IsValid() || ModalContent->GetType() != W->GetType()) ModalInT = TagTheme::Now();
 	ModalBox->SetContent(W);
 	ModalContent = W;
 	bModal = true;
@@ -206,7 +245,8 @@ int32 SGridironOverlay::OnPaint(const FPaintArgs& Args, const FGeometry& Allotte
 	if (bModal && FSlateApplication::IsInitialized())
 	{
 		const TSharedPtr<SWidget> F = FSlateApplication::Get().GetUserFocusedWidget(0);
-		if (F.IsValid() && F != ModalBox && F != CallRoot) // (the play call is driven by its buttons, not a focus frame)
+		// (the play call is driven by its buttons, not a focus frame; a menu tile draws its own)
+		if (F.IsValid() && F != ModalBox && F != CallRoot && !F->GetTypeAsString().Contains(TEXT("STile")))
 		{
 			FWidgetPath Path;
 			if (FSlateApplication::Get().GeneratePathToWidgetUnchecked(F.ToSharedRef(), Path) && Path.IsValid())
@@ -218,18 +258,7 @@ int32 SGridironOverlay::OnPaint(const FPaintArgs& Args, const FGeometry& Allotte
 				const FVector2D TL = AllottedGeometry.AbsoluteToLocal(G.GetAbsolutePosition() - Win);
 				const FVector2D BR = AllottedGeometry.AbsoluteToLocal(G.GetAbsolutePosition() + G.GetAbsoluteSize() - Win);
 				const FVector2D Size = BR - TL;
-				const float Tk = 3.f;
-				const FSlateBrush* B = FCoreStyle::Get().GetBrush("WhiteBrush");
-				auto Edge = [&](const FVector2D& At, const FVector2D& Sz)
-				{
-					FSlateDrawElement::MakeBox(OutDrawElements, Layer + 1,
-						AllottedGeometry.ToPaintGeometry(FVector2f(Sz), FSlateLayoutTransform(FVector2f(TL + At))), B, ESlateDrawEffect::None, Accent);
-				};
-				Edge(FVector2D(-Tk, -Tk), FVector2D(Size.X + 2 * Tk, Tk));
-				Edge(FVector2D(-Tk, Size.Y), FVector2D(Size.X + 2 * Tk, Tk));
-				Edge(FVector2D(-Tk, 0), FVector2D(Tk, Size.Y));
-				Edge(FVector2D(Size.X, 0), FVector2D(Tk, Size.Y));
-				++Layer;
+				Layer = TagTheme::PaintSelection(OutDrawElements, Layer + 1, AllottedGeometry, TL, Size, true, false, 4.f);
 			}
 		}
 	}
@@ -254,6 +283,8 @@ namespace
 		case EPadGlyph::DDown: return TEXT("↓");
 		case EPadGlyph::DLeft: return TEXT("←");
 		case EPadGlyph::DRight: return TEXT("→");
+		case EPadGlyph::DUpDown: return TEXT("↑↓");
+		case EPadGlyph::DLeftRight: return TEXT("←→");
 		default: return TEXT("");
 		}
 	}
@@ -291,7 +322,7 @@ void SGridironOverlay::PaintGlyph(FSlateWindowElementList& Out, int32 Layer, con
 	};
 	auto Box = [&](const FVector2D& Sz, const FLinearColor& Cl)
 	{
-		FSlateDrawElement::MakeBox(Out, Layer, G.ToPaintGeometry(FVector2f(Sz), FSlateLayoutTransform(FVector2f(C - Sz * 0.5))), White(),
+		FSlateDrawElement::MakeBox(Out, Layer, G.ToPaintGeometry(FVector2f(Sz), FSlateLayoutTransform(FVector2f(C - Sz * 0.5))), TagTheme::Round(FMath::Min(5.f, Size * 0.18f)),
 			ESlateDrawEffect::None, Col(Cl));
 	};
 	const float R = Size * 0.5f;
@@ -342,23 +373,68 @@ void SGridironOverlay::PaintGlyph(FSlateWindowElementList& Out, int32 Layer, con
 	case EPadGlyph::L1:
 	case EPadGlyph::R2:
 	case EPadGlyph::L2:
-		Box(FVector2D(Size * 1.36f + 3, Size * 0.8f + 3), Tint * FLinearColor(0.6f, 0.6f, 0.6f, 1.f));
-		Box(FVector2D(Size * 1.36f, Size * 0.8f), Dark);
+	{
+		// a shoulder button / trigger: a pill (a trigger's top edge rounder), its name on it
+		const bool bTrig = Gl == EPadGlyph::R2 || Gl == EPadGlyph::L2;
+		const FVector2D Sz(Size * 1.36f, Size * 0.8f);
+		const float Rad = Sz.Y * (bTrig ? 0.42f : 0.3f);
+		auto RBox = [&](const FVector2D& S2, const FLinearColor& Cl, int32 L)
+		{
+			FSlateDrawElement::MakeBox(Out, Layer + L, G.ToPaintGeometry(FVector2f(S2), FSlateLayoutTransform(FVector2f(C - S2 * 0.5))), TagTheme::Round(Rad),
+				ESlateDrawEffect::None, Col(Cl));
+		};
+		RBox(Sz + FVector2D(3, 3), Tint * FLinearColor(0.62f, 0.64f, 0.7f, 0.95f), 0);
+		RBox(Sz, FLinearColor(0.045f, 0.05f, 0.07f, 0.97f), 1);
 		Text(bSonyPad ? (Gl == EPadGlyph::R1 ? TEXT("R1") : Gl == EPadGlyph::L1 ? TEXT("L1") : Gl == EPadGlyph::L2 ? TEXT("L2") : TEXT("R2"))
 			: (Gl == EPadGlyph::R1 ? TEXT("RB") : Gl == EPadGlyph::L1 ? TEXT("LB") : Gl == EPadGlyph::L2 ? TEXT("LT") : TEXT("RT")), FMath::RoundToInt(Size * 0.36f), Tint);
 		break;
+	}
+	case EPadGlyph::L3:
+	case EPadGlyph::R3:
+		// a stick click: the stick's cap, ringed, its name on it
+		Lines(Poly(R * 0.5f, 28, 0.f), Dark, R, 0);
+		Lines(Poly(R - 0.8f, 28, 0.f), Tint * FLinearColor(1, 1, 1, 0.55f), 1.6f);
+		Lines(Poly(R * 0.62f, 24, 0.f), Tint * FLinearColor(1, 1, 1, 0.22f), 1.f);
+		Text(bSonyPad ? (Gl == EPadGlyph::L3 ? TEXT("L3") : TEXT("R3")) : (Gl == EPadGlyph::L3 ? TEXT("LS") : TEXT("RS")), FMath::RoundToInt(Size * 0.32f), Tint);
+		break;
 	default:
 	{
-		// the D-pad, the pressed arm lit
-		const FLinearColor Arm(0.32f, 0.34f, 0.4f, 1.f);
-		const float A = R * 0.86f, W = R * 0.52f;
-		Lines({P2(-A, 0), P2(A, 0)}, Arm, W, 0);
-		Lines({P2(0, -A), P2(0, A)}, Arm, W, 0);
-		const FVector2f D = Gl == EPadGlyph::DUp ? FVector2f(0, -1) : Gl == EPadGlyph::DDown ? FVector2f(0, 1) : Gl == EPadGlyph::DLeft ? FVector2f(-1, 0) : FVector2f(1, 0);
-		Lines({P2(D.X * R * 0.18f, D.Y * R * 0.18f), P2(D.X * A, D.Y * A)}, Tint, W, 1);
+		// the D-pad on its dark plate: the arms grey, the pressed arm (or pair of arms) lit, with its arrowhead
+		const FLinearColor Arm(0.3f, 0.32f, 0.38f, 1.f);
+		const float A = R * 0.88f, W = R * 0.5f;
+		FSlateDrawElement::MakeBox(Out, Layer, G.ToPaintGeometry(FVector2f(Size, Size), FSlateLayoutTransform(FVector2f(C - FVector2D(R, R)))), TagTheme::Round(R * 0.45f),
+			ESlateDrawEffect::None, Col(FLinearColor(0.03f, 0.035f, 0.05f, 0.85f)));
+		Lines({P2(-A, 0), P2(A, 0)}, Arm, W, 1);
+		Lines({P2(0, -A), P2(0, A)}, Arm, W, 1);
+		TArray<FVector2f> Lit;
+		if (Gl == EPadGlyph::DUp || Gl == EPadGlyph::DUpDown) Lit.Add(FVector2f(0, -1));
+		if (Gl == EPadGlyph::DDown || Gl == EPadGlyph::DUpDown) Lit.Add(FVector2f(0, 1));
+		if (Gl == EPadGlyph::DLeft || Gl == EPadGlyph::DLeftRight) Lit.Add(FVector2f(-1, 0));
+		if (Gl == EPadGlyph::DRight || Gl == EPadGlyph::DLeftRight) Lit.Add(FVector2f(1, 0));
+		for (const FVector2f& D : Lit)
+		{
+			Lines({P2(D.X * R * 0.16f, D.Y * R * 0.16f), P2(D.X * A, D.Y * A)}, Tint, W, 2);
+			// the arrowhead, dark on the lit arm
+			const FVector2f Tip = P2(D.X * A * 0.86f, D.Y * A * 0.86f), Bk = P2(D.X * A * 0.42f, D.Y * A * 0.42f);
+			const FVector2f Side(-D.Y * W * 0.32f, D.X * W * 0.32f);
+			Lines({Bk + Side, Tip, Bk - Side}, Dark, FMath::Max(1.5f, W * 0.2f), 3);
+		}
 		break;
 	}
 	}
+}
+
+FVector2D SGridironOverlay::GlyphExtent(EPadGlyph Gl, const FString& Key, float Size, bool bPad) const
+{
+	if (bPad && Gl != EPadGlyph::None)
+	{
+		const bool bShoulder = Gl == EPadGlyph::R1 || Gl == EPadGlyph::L1 || Gl == EPadGlyph::R2 || Gl == EPadGlyph::L2;
+		return FVector2D((bShoulder ? Size * 1.36f + 3.f : Size) + 6.f, Size + 4.f);
+	}
+	const FString K = Key.IsEmpty() ? FString(DefaultKey(Gl)) : Key;
+	if (K.Len() <= 1 || !FSlateApplication::IsInitialized()) return FVector2D(Size + 6.f, Size + 4.f);
+	const FVector2D M = Measure(K, Font(FMath::RoundToInt(Size * 0.42f), "Bold"));
+	return FVector2D(FMath::Max<double>(Size, M.X + 12) + 7.f, Size + 4.f);
 }
 
 int32 SGridironOverlay::PaintPresnap(FSlateWindowElementList& Out, int32 Layer, const FGeometry& G) const
@@ -400,7 +476,7 @@ int32 SGridironOverlay::PaintPresnap(FSlateWindowElementList& Out, int32 Layer, 
 		for (const FArtIcon& I : Icons)
 		{
 			const FVector2D C = I.Screen * Scale;
-			const float Sz = 30.f;
+			const float Sz = 38.f; // (Madden's over-the-head buttons read at a glance; at 30 they were specks over a deep receiver)
 			if (I.bPrimary || I.bPicked)
 			{
 				TArray<FVector2f> P;
@@ -408,7 +484,10 @@ int32 SGridironOverlay::PaintPresnap(FSlateWindowElementList& Out, int32 Layer, 
 					P.Add(FVector2f(C.X + FMath::Cos(2.f * PI * k / 32) * (Sz * 0.62f), C.Y + FMath::Sin(2.f * PI * k / 32) * (Sz * 0.62f)));
 				FSlateDrawElement::MakeLines(Out, Layer, G.ToPaintGeometry(), P, ESlateDrawEffect::None, I.bPicked ? FLinearColor::White : Accent, true, 3.f);
 			}
-			PaintGlyph(Out, Layer, G, C, Sz, Face[FMath::Clamp(I.Button, 0, 4)], FString::FromInt(I.Button + 1), bIconPad, ButtonColor(I.Button));
+			// (on the button the player put that receiver on: Settings > Controls, passing in the play, the pre-snap
+			// offense before it)
+			const TagBind::ECtx IcCtx = Director && Director->State == EMatchState::Presnap ? TagBind::ECtx::PreOff : TagBind::ECtx::Passing;
+			PaintGlyph(Out, Layer, G, C, Sz, TagBind::PhysGlyph(IcCtx, Face[FMath::Clamp(I.Button, 0, 4)]), TagBind::PhysKeyLabel(IcCtx, FString::FromInt(I.Button + 1)), bIconPad, ButtonColor(I.Button));
 			if (I.bHot)
 			{
 				const FSlateFontInfo F = Font(9, "Bold");
@@ -427,8 +506,8 @@ int32 SGridironOverlay::PaintPresnap(FSlateWindowElementList& Out, int32 Layer, 
 		const float SubY = Who.IsEmpty() ? 36.f : 42.f; // (below the tag chip)
 		const float H = Head + Rows.Num() * RowH + 12.f;
 		const FVector2D TL(bLeft ? 30.f : Local.X - W - 30.f, Local.Y - H - 128.f);
-		FSlateDrawElement::MakeBox(Out, Layer, G.ToPaintGeometry(FVector2f(W, H), FSlateLayoutTransform(FVector2f(TL))), White(), ESlateDrawEffect::None, Panel);
-		FSlateDrawElement::MakeBox(Out, Layer + 1, G.ToPaintGeometry(FVector2f(4.f, H), FSlateLayoutTransform(FVector2f(TL))), White(), ESlateDrawEffect::None, Who.IsEmpty() ? Accent : WhoC);
+		TagTheme::PaintPanel(Out, Layer - 3, G, TL, FVector2D(W, H), Panel, 7.f);
+		TagTheme::Box(Out, Layer + 1, G, TL + FVector2D(0, 6), FVector2D(4.f, H - 12), Who.IsEmpty() ? Accent : WhoC, 2.f);
 		float TitleX = 20.f;
 		if (!Who.IsEmpty())
 		{
@@ -451,10 +530,12 @@ int32 SGridironOverlay::PaintPresnap(FSlateWindowElementList& Out, int32 Layer, 
 			const FPreRow& Rw = Rows[i];
 			const FVector2D RowTL = TL + FVector2D(8, Head + i * RowH);
 			if (Rw.bOn)
-				FSlateDrawElement::MakeBox(Out, Layer + 1, G.ToPaintGeometry(FVector2f(W - 16, RowH - 4), FSlateLayoutTransform(FVector2f(RowTL))), White(),
-					ESlateDrawEffect::None, FLinearColor(1.f, 0.83f, 0.f, 0.13f));
-			PaintGlyph(Out, Layer + 1, G, RowTL + FVector2D(30, (RowH - 4) * 0.5f), 26.f, Rw.Glyph, Rw.Key, bPad, Rw.Tint);
-			FSlateDrawElement::MakeText(Out, Layer + 4, G.ToPaintGeometry(FVector2f(W - 90, RowH), FSlateLayoutTransform(FVector2f(RowTL + FVector2D(64, 6)))), Rw.Label,
+				TagTheme::Gradient(Out, Layer + 1, G, RowTL, FVector2D(W - 16, RowH - 4), FLinearColor(1.f, 0.83f, 0.f, 0.22f), FLinearColor(1.f, 0.83f, 0.f, 0.04f), true, 4.f);
+			// (a wide keycap - "L-STICK" - moves its label over instead of running past the panel's edge into it)
+			const float GW = static_cast<float>(GlyphExtent(Rw.Glyph, Rw.Key, 26.f, bPad && Rw.Glyph != EPadGlyph::None).X);
+			const float GX = FMath::Max(30.f, 10.f + GW * 0.5f), LabelX = FMath::Max(64.f, GX + GW * 0.5f + 10.f);
+			PaintGlyph(Out, Layer + 1, G, RowTL + FVector2D(GX, (RowH - 4) * 0.5f), 26.f, Rw.Glyph, Rw.Key, bPad, Rw.Tint);
+			FSlateDrawElement::MakeText(Out, Layer + 4, G.ToPaintGeometry(FVector2f(W - 26 - LabelX, RowH), FSlateLayoutTransform(FVector2f(RowTL + FVector2D(LabelX, 6)))), Rw.Label,
 				Font(13, Rw.bOn ? "Bold" : "Regular"), ESlateDrawEffect::None, Rw.bOn ? Accent : FLinearColor(0.9f, 0.92f, 0.95f));
 		}
 	};
@@ -481,18 +562,12 @@ void SGridironOverlay::Toast(const FString& Text)
 
 TSharedRef<SWidget> SGridironOverlay::MakeButton(const FString& Label, const FString& Sub, std::function<void()> OnClick, float Width)
 {
-	return SNew(SBox).WidthOverride(Width).Padding(FMargin(0, 4))
+	// a menu tile (UI/TagTheme.h): "Name: Value" labels show their value on the right
+	FString L = Label, V;
+	if (Label.Split(TEXT(": "), &L, &V) && V.Len() > 18) { L = Label; V.Reset(); }
+	return SNew(SBox).Padding(FMargin(0, 3))
 	[
-		SNew(SButton)
-		.ButtonColorAndOpacity(PanelLight)
-		.ContentPadding(FMargin(16, 10))
-		.OnClicked_Lambda([OnClick] { ATagAudio::Ui(TEXT("UiSelect")); OnClick(); return FReply::Handled(); })
-		.OnHovered_Lambda([] { ATagAudio::Ui(TEXT("UiMove"), 0.7f); })
-		[
-			SNew(SVerticalBox)
-			+ SVerticalBox::Slot().AutoHeight()[ SNew(STextBlock).Font(Font(16, "Bold")).ColorAndOpacity(FLinearColor::White).Text(T(Label)) ]
-			+ SVerticalBox::Slot().AutoHeight()[ SNew(STextBlock).Font(Font(10)).ColorAndOpacity(Dim).AutoWrapText(true).Text(T(Sub)).Visibility(Sub.IsEmpty() ? EVisibility::Collapsed : EVisibility::Visible) ]
-		]
+		SNew(TagTheme::STile).Label(L).Value(V).Sub(Sub).Width(Width).LabelSize(Sub.IsEmpty() ? 19 : 18).OnClick(OnClick)
 	];
 }
 
@@ -598,34 +673,180 @@ FText SGridironOverlay::WeatherText() const
 }
 
 // ------------------------------------------------------------------ screens
-static TSharedRef<SWidget> Centered(TSharedRef<SWidget> Inner, float BgAlpha = 0.82f)
-{
-	return SNew(SBorder).BorderImage(White()).BorderBackgroundColor(FLinearColor(0.01f, 0.015f, 0.025f, BgAlpha)).HAlign(HAlign_Center).VAlign(VAlign_Center)[Inner];
-}
 
 void SGridironOverlay::ShowMainMenu()
 {
 	bHud = false;
 	bSelMulti = false;
-	TSharedRef<SVerticalBox> Menu = SNew(SVerticalBox)
-		+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center)[ SNew(STextBlock).Font(Font(72, "Bold")).ColorAndOpacity(Accent).ShadowOffset(FVector2D(3, 3)).Text(T(TEXT("TAG GRIDIRON"))) ]
-		+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(0, 0, 0, 36)[ SNew(STextBlock).Font(Font(14)).ColorAndOpacity(Dim).Text(T(TEXT("SIMULATION-FIRST PRO FOOTBALL"))) ];
-	Menu->AddSlot().AutoHeight().HAlign(HAlign_Center)[ MakeButton(TEXT("Play Now"), TEXT("You vs CPU. Call plays, control the QB, ball carrier or any defender."), [this] { ShowTeamSelect(true); }) ];
-	Menu->AddSlot().AutoHeight().HAlign(HAlign_Center)[ MakeButton(TEXT("Multiplayer"), TEXT("Up to 4 players on one screen, pads and keyboard. Pick sides, share a team, choose who calls the plays."), [this] { if (Director) Director->ShowLobby(); }) ];
-	Menu->AddSlot().AutoHeight().HAlign(HAlign_Center)[ MakeButton(TEXT("Watch a Game"), TEXT("CPU vs CPU broadcast. Speed up with 1/2/4."), [this] { ShowTeamSelect(false); }) ];
-	Menu->AddSlot().AutoHeight().HAlign(HAlign_Center)[ MakeButton(TEXT("Superstars & X-Factors"), TEXT("Pick the abilities your stars carry into the game."), [this] { ShowAbilities(SelHome, [this] { ShowMainMenu(); }); }) ];
-	Menu->AddSlot().AutoHeight().HAlign(HAlign_Center)[ MakeButton(TEXT("Depth Chart"), TEXT("Every slot on every team: starters, specialists, situational subs. Your order is the one the game plays."), [this] { ShowDepthChart(SelHome, [this] { ShowMainMenu(); }); }) ];
-	Menu->AddSlot().AutoHeight().HAlign(HAlign_Center)[ MakeButton(TEXT("Create a Player"), TEXT("Build a player at any position, from archetype to every rating, and sign him to any team."), [this] { ShowCreatePlayer(SelHome, [this] { ShowMainMenu(); }); }) ];
-	Menu->AddSlot().AutoHeight().HAlign(HAlign_Center)[ MakeButton(TEXT("Settings"), TEXT("Commentary captions."), [this] { ShowSettings([this] { ShowMainMenu(); }); }) ];
-	Menu->AddSlot().AutoHeight().HAlign(HAlign_Center)[ MakeButton(TEXT("Quit"), TEXT(""), [] { FPlatformMisc::RequestExit(false); }) ];
-	Menu->AddSlot().AutoHeight().HAlign(HAlign_Center).Padding(0, 30, 0, 0)[ SNew(STextBlock).Font(Font(10)).ColorAndOpacity(Dim).Text(T(TEXT("An original football game. All teams, players and names are fictional."))) ];
-	ShowModal(Centered(Menu, 0.35f));
+	ATagAudio::Screen(TEXT("Main"));
+	// the menu (Madden's front end): the title and the tiles on the left over a darkened stadium, a card on the right
+	// that tells what the tile under the cursor is, the button bar at the foot
+	struct FItem { FString Label, Kicker, Desc; TArray<FString> Points; std::function<void()> Go; bool bGapBefore = false; };
+	const TSharedRef<TArray<FItem>> Items = MakeShared<TArray<FItem>>();
+	Items->Reserve(16); // (a TArray moves its items bytewise when it grows, which a std::function does not survive)
+	Items->Add({TEXT("Play Now"), TEXT("Exhibition"), TEXT("You against the CPU. Call every play, then take the quarterback, the ball carrier or any man on defense."),
+		{TEXT("Madden-style play call: formations, families, coach's pick"), TEXT("Hot routes, audibles, line shifts before the snap"), TEXT("Hit stick, truck, spin, stiff arm and the kick meter")},
+		[this] { ShowTeamSelect(true); }});
+	Items->Add({TEXT("Multiplayer"), TEXT("Couch play"), TEXT("Up to four players on one screen, pads and keyboard together. Pick sides, share a team and choose who calls the plays."),
+		{TEXT("Every pad and the keyboard read on their own"), TEXT("Head to head or co-op against the CPU"), TEXT("Each player keeps his own man, marker and sprint")},
+		[this] { if (Director) Director->ShowLobby(); }});
+	Items->Add({TEXT("Watch a Game"), TEXT("Broadcast"), TEXT("CPU against CPU, shown the way TV shows it: the sideline camera, the booth, the replays. Speed it up with 1 / 2 / 4."),
+		{TEXT("Two-man booth with live commentary"), TEXT("TV game camera and replays"), TEXT("Every team, every scheme")},
+		[this] { ShowTeamSelect(false); }});
+	Items->Add({TEXT("Superstars & X-Factors"), TEXT("Team"), TEXT("Pick the abilities your stars carry into the game. X-Factors earn the zone in the game and keep it until they are knocked out."),
+		{TEXT("Graded by their standing at their position"), TEXT("Slots and ability points by grade"), TEXT("Loadouts saved for every game")},
+		[this] { ShowAbilities(SelHome, [this] { ShowMainMenu(); }); }, true});
+	Items->Add({TEXT("Depth Chart"), TEXT("Team"), TEXT("Every slot on every team: starters, specialists and situational subs. Your order is the one the game plays."),
+		{TEXT("34 slots a team"), TEXT("Coach's order wherever you leave a slot alone"), TEXT("Change it at the pause menu mid-game")},
+		[this] { ShowDepthChart(SelHome, [this] { ShowMainMenu(); }); }});
+	Items->Add({TEXT("Create a Player"), TEXT("Team"), TEXT("Build a player at any position, from his archetype to every rating, and sign him to any team."),
+		{TEXT("Archetypes for every position"), TEXT("A 3D turntable of the man you build"), TEXT("He plays, grades and saves like anyone")},
+		[this] { ShowCreatePlayer(SelHome, [this] { ShowMainMenu(); }); }});
+	Items->Add({TEXT("Controls"), TEXT("Options"), TEXT("Every button on offense, on defense and before the snap, shown on the controller you have plugged in. Put any action on any button."),
+		{TEXT("A DualSense or an Xbox pad, drawn as it is in your hands"), TEXT("Your own layout for each part of the game, keyboard too"), TEXT("The game's prompts name the buttons you chose")},
+		[this] { ShowControls([this] { ShowMainMenu(); }); }, true});
+	Items->Add({TEXT("Settings"), TEXT("Options"), TEXT("Commentary captions, the right stick's up and down, and the volume of the music and the stadium."),
+		{}, [this] { ShowSettings([this] { ShowMainMenu(); }); }});
+	Items->Add({TEXT("Quit"), TEXT(""), TEXT("Back to the desktop."), {}, [] { FPlatformMisc::RequestExit(false); }});
+
+	TSharedRef<SVerticalBox> List = SNew(SVerticalBox);
+	for (const FItem& It : *Items)
+	{
+		if (It.bGapBefore) List->AddSlot().AutoHeight()[ SNew(SBox).HeightOverride(14) ];
+		const std::function<void()> Go = It.Go;
+		List->AddSlot().AutoHeight().Padding(0, 3)[ SNew(TagTheme::STile).Label(It.Label).Width(440).Height(50).LabelSize(21).OnClick(Go) ];
+	}
+	// the card: what the tile under the cursor is (it fades over when the cursor moves)
+	MenuCardIdx = -1;
+	auto CardIdx = [this, Items]() { const int32 I = FocusedIndex(); return Items->IsValidIndex(I) ? I : 0; };
+	auto CardFade = [this, CardIdx]()
+	{
+		const int32 I = CardIdx();
+		if (I != MenuCardIdx) { MenuCardIdx = I; MenuCardT = TagTheme::Now(); }
+		return TagTheme::EaseOut(static_cast<float>((TagTheme::Now() - MenuCardT) / 0.2));
+	};
+	TSharedRef<SVerticalBox> Points = SNew(SVerticalBox);
+	for (int32 p = 0; p < 3; ++p)
+		Points->AddSlot().AutoHeight().Padding(0, 6, 0, 0)
+		[
+			SNew(SHorizontalBox)
+			.Visibility_Lambda([Items, CardIdx, p] { return (*Items)[CardIdx()].Points.IsValidIndex(p) ? EVisibility::Visible : EVisibility::Collapsed; })
+			+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(0, 0, 12, 0)
+			[ SNew(SBox).WidthOverride(8).HeightOverride(8)[ SNew(SBorder).BorderImage(TagTheme::Round(4.f)).BorderBackgroundColor(TagTheme::Gold) ] ]
+			+ SHorizontalBox::Slot().FillWidth(1).VAlign(VAlign_Center)
+			[
+				SNew(STextBlock).Font(Font(14)).AutoWrapText(true)
+				.ColorAndOpacity_Lambda([CardFade] { return FSlateColor(FLinearColor(0.86f, 0.88f, 0.92f, CardFade())); })
+				.Text_Lambda([Items, CardIdx, p] { const FItem& It = (*Items)[CardIdx()]; return T(It.Points.IsValidIndex(p) ? It.Points[p] : FString()); })
+			]
+		];
+	TSharedRef<SWidget> Card = SNew(SBox).WidthOverride(560)
+	[
+		SNew(TagTheme::SPanel).Fill(FLinearColor(0.02f, 0.026f, 0.044f, 0.86f)).AccentTop(TagTheme::Gold).Padding(FMargin(34, 30, 34, 32))
+		[
+			SNew(SVerticalBox)
+			+ SVerticalBox::Slot().AutoHeight()
+			[
+				SNew(STextBlock).Font(TagTheme::Font(13, "BoldCondensed", 260))
+				.ColorAndOpacity_Lambda([CardFade] { return FSlateColor(TagTheme::Gold * FLinearColor(1, 1, 1, CardFade())); })
+				.Text_Lambda([Items, CardIdx] { return T((*Items)[CardIdx()].Kicker.ToUpper()); })
+			]
+			+ SVerticalBox::Slot().AutoHeight().Padding(0, 2, 0, 10)
+			[
+				SNew(SBox).Padding_Lambda([CardFade] { return FMargin(14.f * (1.f - CardFade()), 0, 0, 0); })
+				[
+					SNew(STextBlock).Font(TagTheme::Font(40, "Black", 10))
+					.ColorAndOpacity_Lambda([CardFade] { return FSlateColor(FLinearColor(1, 1, 1, CardFade())); })
+					.Text_Lambda([Items, CardIdx] { return T((*Items)[CardIdx()].Label.ToUpper()); })
+				]
+			]
+			+ SVerticalBox::Slot().AutoHeight()
+			[
+				SNew(STextBlock).Font(Font(16)).AutoWrapText(true).LineHeightPercentage(1.1f)
+				.ColorAndOpacity_Lambda([CardFade] { return FSlateColor(FLinearColor(0.93f, 0.94f, 0.97f, CardFade())); })
+				.Text_Lambda([Items, CardIdx] { return T((*Items)[CardIdx()].Desc); })
+			]
+			+ SVerticalBox::Slot().AutoHeight().Padding(0, 10, 0, 0)[ Points ]
+		]
+	];
+	// the title lockup
+	TSharedRef<SWidget> Lockup = SNew(SVerticalBox)
+		+ SVerticalBox::Slot().AutoHeight().Padding(4, 0, 0, 0)
+		[ SNew(STextBlock).Font(TagTheme::Font(14, "BoldCondensed", 420)).ColorAndOpacity(TagTheme::Gold).Text(T(TEXT("SIMULATION-FIRST PRO FOOTBALL"))) ]
+		+ SVerticalBox::Slot().AutoHeight().Padding(0, -6, 0, 0)
+		[
+			SNew(SHorizontalBox)
+			+ SHorizontalBox::Slot().AutoWidth()
+			[ SNew(STextBlock).Font(TagTheme::Font(92, "Black", -10)).ColorAndOpacity(FLinearColor::White).ShadowOffset(FVector2D(0, 4)).ShadowColorAndOpacity(FLinearColor(0, 0, 0, 0.5f)).Text(T(TEXT("TAG "))) ]
+			+ SHorizontalBox::Slot().AutoWidth()
+			[ SNew(STextBlock).Font(TagTheme::Font(92, "Black", -10)).ColorAndOpacity(TagTheme::Gold).ShadowOffset(FVector2D(0, 4)).ShadowColorAndOpacity(FLinearColor(0, 0, 0, 0.5f)).Text(T(TEXT("GRIDIRON"))) ]
+		]
+		+ SVerticalBox::Slot().AutoHeight().Padding(4, 2, 0, 0)
+		[
+			SNew(SHorizontalBox)
+			+ SHorizontalBox::Slot().AutoWidth()[ SNew(SBox).WidthOverride(96).HeightOverride(5)[ SNew(SBorder).BorderImage(TagTheme::Round(2.f)).BorderBackgroundColor(TagTheme::Gold) ] ]
+			+ SHorizontalBox::Slot().AutoWidth().Padding(8, 0, 0, 0)[ SNew(SBox).WidthOverride(28).HeightOverride(5)[ SNew(SBorder).BorderImage(TagTheme::Round(2.f)).BorderBackgroundColor(TagTheme::Gold * FLinearColor(1, 1, 1, 0.45f)) ] ]
+		];
+	// the button bar
+	TSharedRef<SWidget> Footer = SNew(SBorder).BorderImage(White()).BorderBackgroundColor(FLinearColor(0.006f, 0.008f, 0.014f, 0.86f)).Padding(FMargin(110, 14, 110, 14))
+	[
+		SNew(SHorizontalBox)
+		+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)[ HintItem(EPadGlyph::DUpDown, TEXT("↑↓"), TEXT("Move")) ]
+		+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)[ HintItem(EPadGlyph::Cross, TEXT("Enter"), TEXT("Select")) ]
+		+ SHorizontalBox::Slot().FillWidth(1)
+		+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)
+		[ SNew(STextBlock).Font(Font(11)).ColorAndOpacity(TagTheme::Faint).Text(T(TEXT("An original football game. All teams, players and names are fictional."))) ]
+	];
+	ShowModal(SNew(SOverlay)
+		+ SOverlay::Slot()[ SNew(TagTheme::SBackdrop).LeftWeighted(true) ]
+		+ SOverlay::Slot().HAlign(HAlign_Left).VAlign(VAlign_Fill).Padding(FMargin(110, 84, 0, 96))
+		[
+			SNew(SVerticalBox)
+			+ SVerticalBox::Slot().AutoHeight()[ Lockup ]
+			+ SVerticalBox::Slot().FillHeight(1).VAlign(VAlign_Center).Padding(0, 24, 0, 0)[ List ]
+		]
+		+ SOverlay::Slot().HAlign(HAlign_Right).VAlign(VAlign_Center).Padding(FMargin(0, 120, 110, 40))[ Card ]
+		+ SOverlay::Slot().HAlign(HAlign_Fill).VAlign(VAlign_Bottom)[ Footer ]);
 	// -TagTeamSelect: straight on to the Play Now team select, once (screen checks)
 	static bool bTeamSelectShot = FParse::Param(FCommandLine::Get(), TEXT("TagTeamSelect"));
 	if (bTeamSelectShot)
 	{
 		bTeamSelectShot = false;
 		ShowTeamSelect(true);
+	}
+	// -TagInputTest: every press sent twice, as an Xbox pad's comes, must move the menus once (UI/InputTest.cpp)
+	static bool bUiShots = FParse::Param(FCommandLine::Get(), TEXT("TagUiShots"));
+	if (bUiShots)
+	{
+		bUiShots = false;
+		StartUiShots();
+	}
+	// -TagCallTour: the play-call screens walked and pictured (families, formations, type tabs, pages; the defense's;
+	// the team select's signature play), then the game exits (UI/InputTest.cpp)
+	static bool bCallTour = FParse::Param(FCommandLine::Get(), TEXT("TagCallTour"));
+	if (bCallTour)
+	{
+		bCallTour = false;
+		StartCallTour();
+	}
+	// -TagControlsTest: the controls screen and a remapped button in a game (UI/ControlsScreen.cpp)
+	static bool bControlsTest = FParse::Param(FCommandLine::Get(), TEXT("TagControlsTest"));
+	if (bControlsTest)
+	{
+		bControlsTest = false;
+		StartControlsTest();
+	}
+	static bool bMenuAudio = FParse::Param(FCommandLine::Get(), TEXT("TagMenuAudio"));
+	if (bMenuAudio)
+	{
+		bMenuAudio = false;
+		StartMenuAudioTest();
+	}
+	static bool bInputTest = FParse::Param(FCommandLine::Get(), TEXT("TagInputTest"));
+	if (bInputTest)
+	{
+		bInputTest = false;
+		StartInputTest();
 	}
 	// -TagRosterShots: the depth chart and Create-a-Player, scripted (pictures, nothing saved), then the game exits
 	static bool bRosterShot = FParse::Param(FCommandLine::Get(), TEXT("TagRosterShots"));
@@ -699,10 +920,7 @@ namespace
 		}
 		virtual FVector2D ComputeDesiredSize(float) const override
 		{
-			const bool bPad = Owner && Owner->PadGlyphs();
-			if (bPad || Key.Len() <= 1 || !FSlateApplication::IsInitialized()) return FVector2D(Size + 4, Size + 4);
-			const FVector2D M = Measure(Key, Font(FMath::RoundToInt(Size * 0.42f), "Bold"));
-			return FVector2D(FMath::Max<double>(Size, M.X + 12) + 4, Size + 4);
+			return Owner ? Owner->GlyphExtent(Glyph, Key, Size, Owner->PadGlyphs()) : FVector2D(Size + 4, Size + 4);
 		}
 		virtual int32 OnPaint(const FPaintArgs&, const FGeometry& G, const FSlateRect&, FSlateWindowElementList& Out, int32 Layer,
 			const FWidgetStyle&, bool) const override
@@ -720,9 +938,185 @@ namespace
 
 	const EPadGlyph CallButtons[3] = {EPadGlyph::Square, EPadGlyph::Cross, EPadGlyph::Circle};
 	const TCHAR* CallKeys[3] = {TEXT("1"), TEXT("2"), TEXT("3")};
+
+	// ---- what the call screen says about a play: its type tab (Madden's "Play Type"), its concept line
+	/** A string field the playbook may carry on its plays (the concept a play was built from, its category): read when
+	 *  it is there, so the screen picks up the playbook's own words without waiting on them. */
+	template <class TPlay>
+	FString PlayConceptField(const TPlay& P)
+	{
+		if constexpr (requires { { P.conceptName } -> std::convertible_to<std::string>; }) return FString(UTF8_TO_TCHAR(std::string(P.conceptName).c_str()));
+		else if constexpr (requires { { P.concept_ } -> std::convertible_to<std::string>; }) return FString(UTF8_TO_TCHAR(std::string(P.concept_).c_str()));
+		else if constexpr (requires { { P.conceptId } -> std::convertible_to<std::string>; }) return FString(UTF8_TO_TCHAR(std::string(P.conceptId).c_str()));
+		else return FString();
+	}
+	template <class TPlay>
+	FString PlayCategoryField(const TPlay& P)
+	{
+		if constexpr (requires { { P.category } -> std::convertible_to<std::string>; }) return FString(UTF8_TO_TCHAR(std::string(P.category).c_str())).ToLower();
+		else return FString();
+	}
+
+	/** An offensive play's type tab: "RUN", "PASS", "PA", "SCREEN", "RPO", "TRICK". The playbook's own words for it
+	 *  first (a category, a "trick" / "rpo" / "screen" / "playaction" tag, the play type's name), then its type. */
+	FString OffCategory(const tag::OffPlay& P)
+	{
+		// the playbook's own kind of play (OffPlay::cat); its default, Pass, is checked against the play below (a
+		// book built before the kinds were set reads every play as a pass)
+		switch (P.cat)
+		{
+		case tag::PlayCat::RPO: return TEXT("RPO");
+		case tag::PlayCat::Trick: return TEXT("TRICK");
+		case tag::PlayCat::Screen: return TEXT("SCREEN");
+		case tag::PlayCat::PlayAction: return TEXT("PA");
+		case tag::PlayCat::Run: return TEXT("RUN");
+		default: break;
+		}
+		const FString Type = FString(UTF8_TO_TCHAR(tag::playTypeName(P.type))).ToLower() + TEXT(" ") + PlayCategoryField(P);
+		const FString Id = FString(UTF8_TO_TCHAR(P.id.c_str())).ToLower();
+		if (P.hasTag("trick") || Type.Contains(TEXT("trick")) || Id.Contains(TEXT("trick")) || Id.Contains(TEXT("flea")) || Id.Contains(TEXT("reverse"))
+			|| Id.Contains(TEXT("philly")) || Id.Contains(TEXT("hbpass"))) return TEXT("TRICK");
+		if (P.hasTag("rpo") || Type.Contains(TEXT("rpo")) || Id.Contains(TEXT("rpo"))) return TEXT("RPO");
+		if (P.type == tag::PlayType::Screen || P.hasTag("screen") || Type.Contains(TEXT("screen"))) return TEXT("SCREEN");
+		if (P.type == tag::PlayType::PlayAction || P.hasTag("playaction") || Type.Contains(TEXT("playaction")) || Type.Contains(TEXT("play action"))) return TEXT("PA");
+		if (P.type == tag::PlayType::Run || P.run.has_value() || Type.Contains(TEXT("run")) || Type.Contains(TEXT("option"))) return TEXT("RUN");
+		return TEXT("PASS");
+	}
+
+	/** The concept line on an offensive card ("INSIDE ZONE", "QUICK GAME", "SHOT"): the playbook's concept when it names
+	 *  one the play's name does not already say, else the run's scheme or the pass's depth. */
+	FString OffConcept(const tag::OffPlay& P, const FString& Cat)
+	{
+		const FString Named = PlayConceptField(P);
+		if (!Named.IsEmpty() && !Named.Equals(FString(UTF8_TO_TCHAR(P.name.c_str())), ESearchCase::IgnoreCase)) return Named;
+		FString Out;
+		if (P.run && (Cat == TEXT("RUN") || Cat == TEXT("RPO")))
+		{
+			const double Wide = FMath::Abs(P.run->aimDy);
+			switch (P.run->style)
+			{
+			case tag::RunStyle::Zone: Out = Wide >= 3.0 ? TEXT("Outside zone") : TEXT("Inside zone"); break;
+			case tag::RunStyle::Gap: Out = TEXT("Gap scheme"); break;
+			case tag::RunStyle::Stretch: Out = TEXT("Stretch"); break;
+			case tag::RunStyle::Draw: Out = TEXT("Draw"); break;
+			case tag::RunStyle::Sneak: Out = TEXT("Sneak"); break;
+			default: break;
+			}
+			const FString Car = FString(UTF8_TO_TCHAR(P.run->carrier.c_str()));
+			if (!Car.IsEmpty() && Car != TEXT("RB") && Car != TEXT("HB")) Out += TEXT("  -  ") + Car;
+		}
+		else if (Cat == TEXT("SCREEN")) Out = TEXT("Screen");
+		else
+		{
+			if (P.hasTag("deep")) Out = TEXT("Shot");
+			else if (P.hasTag("quick")) Out = TEXT("Quick game");
+			else if (P.hasTag("mid")) Out = TEXT("Intermediate");
+			else if (P.hasTag("short")) Out = TEXT("Short");
+			if (Cat == TEXT("PA") && FString(UTF8_TO_TCHAR(P.name.c_str())).Contains(TEXT("Boot"))) Out = TEXT("Boot") + FString(Out.IsEmpty() ? TEXT("") : TEXT("  -  ")) + Out;
+		}
+		if (P.hasTag("goalline")) Out += FString(Out.IsEmpty() ? TEXT("") : TEXT("  -  ")) + TEXT("Short yardage");
+		return Out;
+	}
+
+	bool ManCoverage(tag::Coverage C)
+	{
+		const FString N = FString(UTF8_TO_TCHAR(tag::coverageName(C))).ToLower();
+		return N == TEXT("c0") || N == TEXT("c1") || N == TEXT("c2m");
+	}
+	/** A defensive call's type tab: "BLITZ" (a man blitz, a DB blitz, a mug; five or more at the snap), "PRESSURE" (a
+	 *  zone blitz or a simulated pressure), "PREVENT", else its coverage's "MAN" or "ZONE". The playbook's own word for
+	 *  its pressure (DefCall::pressure) first. */
+	FString DefCategory(const tag::DefCall& D)
+	{
+		const FString Pr = FString(UTF8_TO_TCHAR(D.pressure.c_str())).ToLower();
+		if (Pr.Contains(TEXT("prevent")) || D.tech == tag::CoverTech::Prevent) return TEXT("PREVENT");
+		if (Pr.Contains(TEXT("zone blitz")) || Pr.Contains(TEXT("sim"))) return TEXT("PRESSURE");
+		if (Pr.Contains(TEXT("blitz")) || Pr.Contains(TEXT("mug"))) return TEXT("BLITZ");
+		if (Pr.IsEmpty() && D.rushers() >= 5) return D.coverage == tag::Coverage::C3Fire ? TEXT("PRESSURE") : TEXT("BLITZ");
+		return ManCoverage(D.coverage) ? TEXT("MAN") : TEXT("ZONE");
+	}
+	FString CoverageShort(tag::Coverage C)
+	{
+		static const TMap<FString, FString> Names = {
+			{TEXT("c0"), TEXT("Cover 0")}, {TEXT("c1"), TEXT("Cover 1")}, {TEXT("c2"), TEXT("Cover 2")}, {TEXT("c2m"), TEXT("2-Man")},
+			{TEXT("c3"), TEXT("Cover 3")}, {TEXT("c3fire"), TEXT("Fire zone")}, {TEXT("c4"), TEXT("Quarters")}, {TEXT("c2t"), TEXT("Tampa 2")}, {TEXT("c6"), TEXT("Cover 6")}};
+		const FString* N = Names.Find(FString(UTF8_TO_TCHAR(tag::coverageName(C))).ToLower());
+		return N ? *N : FString(UTF8_TO_TCHAR(tag::coverageName(C))).ToUpper();
+	}
+
+	/** A defensive call's name without its set ("3-4 Odd Cover 1 Robber" in the 3-4 Odd set: "Cover 1 Robber"): the
+	 *  header and the set list already say the set. */
+	FString DefShortName(const tag::DefCall& D)
+	{
+		const FString Name = FString(UTF8_TO_TCHAR(D.name.c_str()));
+		for (const std::string& Pre : {tag::defSet(D), D.frontLabel, std::string(tag::frontFamily(D.front))})
+		{
+			const FString P = FString(UTF8_TO_TCHAR(Pre.c_str())) + TEXT(" ");
+			if (P.Len() > 1 && Name.StartsWith(P) && Name.Len() > P.Len()) return Name.RightChop(P.Len());
+		}
+		return Name;
+	}
+
+	/** A type tab's colour (its chip, the card's type badge). */
+	FLinearColor CatColor(const FString& C)
+	{
+		if (C == TEXT("RUN")) return FLinearColor(0.30f, 0.85f, 0.42f);
+		if (C == TEXT("PASS")) return FLinearColor(0.38f, 0.64f, 1.f);
+		if (C == TEXT("PA")) return FLinearColor(0.74f, 0.50f, 1.f);
+		if (C == TEXT("SCREEN")) return FLinearColor(0.20f, 0.85f, 0.88f);
+		if (C == TEXT("RPO")) return FLinearColor(1.f, 0.60f, 0.20f);
+		if (C == TEXT("TRICK")) return FLinearColor(1.f, 0.38f, 0.64f);
+		if (C == TEXT("ZONE")) return FLinearColor(0.34f, 0.62f, 1.f);
+		if (C == TEXT("MAN")) return FLinearColor(1.f, 0.42f, 0.40f);
+		if (C == TEXT("BLITZ")) return FLinearColor(1.f, 0.56f, 0.14f);
+		if (C == TEXT("PRESSURE")) return FLinearColor(1.f, 0.80f, 0.22f);
+		if (C == TEXT("PREVENT")) return FLinearColor(0.62f, 0.72f, 0.84f);
+		return FLinearColor(0.6f, 0.65f, 0.72f);
+	}
+	FString CatLabel(const FString& C)
+	{
+		if (C.IsEmpty()) return TEXT("ALL");
+		if (C == TEXT("PA")) return TEXT("PLAY ACTION");
+		if (C == TEXT("PRESSURE")) return TEXT("ZONE PRESSURE");
+		return C;
+	}
+
+	/** "11 PERSONNEL  ·  1 RB  1 TE  3 WR": the formation's men by position (its slots' first choices). */
+	FString PersonnelText(const tag::Formation& F)
+	{
+		int32 Rb = 0, Te = 0, Wr = 0;
+		for (const tag::FormationSlot& Sl : F.slots)
+		{
+			if (Sl.pos.empty()) continue;
+			const tag::Pos Ps = Sl.pos.front();
+			if (Ps == tag::Pos::RB || Ps == tag::Pos::FB) ++Rb;
+			else if (Ps == tag::Pos::TE) ++Te;
+			else if (Ps == tag::Pos::WR) ++Wr;
+		}
+		return FString::Printf(TEXT("%s PERSONNEL  ·  %d RB  %d TE  %d WR"), UTF8_TO_TCHAR(F.personnel.c_str()), Rb, Te, Wr);
+	}
 }
 
+/** The call screen's card pictures by play and call (the ball does not move while the screen is up). */
+struct FCallPicCache
+{
+	TMap<FString, FArtPicture> Pics;
+};
+
 bool SGridironOverlay::PadGlyphs() const { return Director && Director->PadUI(); }
+
+TSharedRef<SWidget> SGridironOverlay::GlyphWidget(EPadGlyph Gl, const FString& Key, float Size, const FLinearColor& Tint) const
+{
+	return SNew(SCallGlyph).Owner(this).Glyph(Gl).Key(Key).Size(Size).Tint(Tint);
+}
+
+TSharedRef<SWidget> SGridironOverlay::HintItem(EPadGlyph Gl, const FString& Key, const FString& What, float Size) const
+{
+	return SNew(SHorizontalBox)
+		+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)[ GlyphWidget(Gl, Key, Size) ]
+		+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(6, 0, 20, 0)
+		[ SNew(STextBlock).Font(TagTheme::Font(13, "BoldCondensed", 30)).ColorAndOpacity(FLinearColor(0.88f, 0.9f, 0.94f)).Text(T(What.ToUpper())) ];
+}
 
 void SGridironOverlay::ShowPlayCall(bool bOffense, bool bFourthDown, bool bTwoPoint, std::function<void(FCallChoice)> Done)
 {
@@ -731,6 +1125,7 @@ void SGridironOverlay::ShowPlayCall(bool bOffense, bool bFourthDown, bool bTwoPo
 	bCallTwo = bTwoPoint;
 	CallDone = Done;
 	CallPage = 0;
+	CallPics = MakeShared<FCallPicCache>(); // (a new snap: the ball has moved)
 	CallTabs.Reset();
 	const tag::Game& G = *Director->Game;
 	auto AddTab = [this](const FString& Id, const FString& Label)
@@ -774,16 +1169,73 @@ void SGridironOverlay::CallPick(FCallChoice C)
 	std::function<void(FCallChoice)> Done = CallDone;
 	CallDone = nullptr;
 	ATagAudio::Ui(TEXT("UiSelect"));
+	// what this side called (R3 on its next call screen calls it again)
+	if (C.Kind == FCallChoice::Off && C.Play && C.Play->type != tag::PlayType::Kneel && C.Play->type != tag::PlayType::Spike) CallLastOff = C.Play;
+	if (C.Kind == FCallChoice::Def && C.Call) CallLastDef = C.Call;
 	CallRoot.Reset();
+	CallPics.Reset();
 	ClearModal();
 	if (Done) Done(C);
+}
+
+FCallChoice SGridironOverlay::CallRepeat() const
+{
+	FCallChoice C; // (Auto: nothing to repeat)
+	if (!Director || !Director->Game) return C;
+	const tag::Game& G = *Director->Game;
+	if (bCallOffense)
+	{
+		// this screen's last offensive call, else the director's (the hurry-up's) - if it is in the book of the team
+		// with the ball (a multiplayer game: the other side's offense called last)
+		const tag::OffBook& Book = tag::offBookFor(G.offense());
+		const tag::OffPlay* P = CallLastOff && Book.has(CallLastOff) ? CallLastOff : Director->LastUserPlay;
+		if (P && Book.has(P) && P->type != tag::PlayType::Kneel && P->type != tag::PlayType::Spike)
+		{
+			C.Kind = FCallChoice::Off;
+			C.Play = P;
+		}
+	}
+	else if (CallLastDef && tag::defBookFor(G.defense()).has(CallLastDef))
+	{
+		C.Kind = FCallChoice::Def;
+		C.Call = CallLastDef;
+	}
+	return C;
 }
 
 bool SGridironOverlay::CallKey(const FKey& K, bool bRepeat)
 {
 	if (!CallDone) return false;
 	auto Is = [&K](std::initializer_list<FKey> Ks) { for (const FKey& X : Ks) if (K == X) return true; return false; };
-	const int32 Pages = FMath::Max(1, FMath::DivideAndRoundUp(CallCards.Num(), 3));
+	const int32 Pages = FMath::Max(1, FMath::DivideAndRoundUp(CallCards.Num(), CallPerPage));
+	// R3 (keyboard R): the last play called again
+	if (Is({EKeys::Gamepad_RightThumbstick, EKeys::R}))
+	{
+		if (!bRepeat)
+		{
+			const FCallChoice Again = CallRepeat();
+			if (Again.Kind != FCallChoice::Auto) CallPick(Again);
+		}
+		return true;
+	}
+	// L2 / R2 (keyboard Z / C): the play type tabs (all, run, pass, play action, screen, ...; the defense's zone, man,
+	// blitz)
+	const bool bPrevCat = Is({EKeys::Gamepad_LeftTrigger, EKeys::Z});
+	const bool bNextCat = Is({EKeys::Gamepad_RightTrigger, EKeys::C});
+	if (bPrevCat || bNextCat)
+	{
+		if (bRepeat) return true;
+		const int32 N = CallCats.Num();
+		if (N > 1)
+		{
+			const int32 At = FMath::Max(0, CallCats.IndexOfByKey(CallFilter()));
+			CallFilter() = CallCats[(At + (bNextCat ? 1 : -1) + N) % N];
+			CallPage = 0;
+			ATagAudio::Ui(TEXT("UiTab"));
+			BuildPlayCall();
+		}
+		return true;
+	}
 	int32 Slot = -1;
 	if (Is({EKeys::Gamepad_FaceButton_Left, EKeys::One, EKeys::NumPadOne})) Slot = 0;
 	else if (Is({EKeys::Gamepad_FaceButton_Bottom, EKeys::Two, EKeys::NumPadTwo, EKeys::SpaceBar, EKeys::Enter})) Slot = 1;
@@ -791,7 +1243,7 @@ bool SGridironOverlay::CallKey(const FKey& K, bool bRepeat)
 	if (Slot >= 0)
 	{
 		if (bRepeat) return true;
-		const int32 I = CallPage * 3 + Slot;
+		const int32 I = CallPage * CallPerPage + Slot;
 		if (CallCards.IsValidIndex(I)) CallPick(CallCards[I].Choice);
 		return true;
 	}
@@ -821,12 +1273,33 @@ bool SGridironOverlay::CallKey(const FKey& K, bool bRepeat)
 	const bool bNextPage = Is({EKeys::Gamepad_DPad_Right, EKeys::Right, EKeys::D});
 	if (bPrevPage || bNextPage)
 	{
-		if (bRepeat) return true;
+		// a press turns one page (round from the last to the first); held, the pages run on to the end and stop there
 		if (Pages > 1)
 		{
-			CallPage = (CallPage + (bNextPage ? 1 : -1) + Pages) % Pages;
-			ATagAudio::Ui(TEXT("UiMove"));
-			BuildPlayCall();
+			const int32 To = bRepeat ? FMath::Clamp(CallPage + (bNextPage ? 1 : -1), 0, Pages - 1) : (CallPage + (bNextPage ? 1 : -1) + Pages) % Pages;
+			if (To != CallPage)
+			{
+				CallPage = To;
+				ATagAudio::Ui(TEXT("UiMove"));
+				BuildPlayCall();
+			}
+		}
+		return true;
+	}
+	// the right stick left / right (keyboard Page Up / Page Down): five pages at a time through a big list
+	const bool bJumpBack = Is({EKeys::Gamepad_RightStick_Left, EKeys::PageUp});
+	const bool bJumpOn = Is({EKeys::Gamepad_RightStick_Right, EKeys::PageDown});
+	if (bJumpBack || bJumpOn)
+	{
+		if (Pages > 1)
+		{
+			const int32 To = FMath::Clamp(CallPage + (bJumpOn ? 5 : -5), 0, Pages - 1);
+			if (To != CallPage)
+			{
+				CallPage = To;
+				ATagAudio::Ui(TEXT("UiMove"));
+				BuildPlayCall();
+			}
 		}
 		return true;
 	}
@@ -856,7 +1329,8 @@ void SGridironOverlay::BuildPlayCall()
 	const bool bOffense = bCallOffense, bTwoPoint = bCallTwo;
 	// the plays of the tab
 	CallCards.Reset();
-	auto Add = [this](const FString& Kind, const FString& Name, const FString& Note, const tag::OffPlay* Op, const tag::DefCall* Dc, FCallChoice C)
+	CallCats.Reset();
+	auto Add = [this](const FString& Kind, const FString& Name, const FString& Note, const tag::OffPlay* Op, const tag::DefCall* Dc, FCallChoice C) -> FCallCard&
 	{
 		FCallCard& K = CallCards.AddDefaulted_GetRef();
 		K.Kind = Kind;
@@ -865,7 +1339,18 @@ void SGridironOverlay::BuildPlayCall()
 		K.Op = Op;
 		K.Dc = Dc;
 		K.Choice = C;
+		return K;
 	};
+	const bool bSpecial = CallTab == TEXT("special") || CallTab == TEXT("clock");
+	// the formations (sets) of the tab's family and, per type tab, how many plays the family has (which tabs there
+	// are) and how many of them are listed (their counts); each formation's count under the type tab
+	TMap<FString, int32> CatShown;
+	TSet<FString> CatInFamily;
+	TArray<int32> SetCount;
+	int32 ShownAll = 0, NForms = 0;
+	// (the scope: one formation, or every one in the family - CallAllSet)
+	struct FScoped { const tag::OffPlay* Op = nullptr; const tag::DefCall* Dc = nullptr; int32 Set = 0; FString Cat; };
+	TArray<FScoped> Scoped;
 	if (bOffense && CallTab == TEXT("special"))
 	{
 		const tag::Player* K = G.kicker(G.poss);
@@ -885,24 +1370,65 @@ void SGridironOverlay::BuildPlayCall()
 	}
 	else if (bOffense)
 	{
-		// the family's formations in the book, the one shown, and its plays
+		// the family's formations in the book (and, with two or more, the whole family as one list), the one shown,
+		// and its plays under the type tab
 		const tag::OffBook& Book = tag::offBookFor(G.offense());
 		CallSets.Reset();
 		for (const std::string& Fid : Book.formations)
 			if (const tag::Formation* F = tag::formationById(Fid); F && S(tag::formationFamily(*F)) == CallTab) CallSets.Add(S(Fid));
+		NForms = CallSets.Num();
+		if (NForms > 1) CallSets.Add(CallAllSet());
 		if (!CallSets.Contains(CallSet)) CallSet = CallSets.Num() ? CallSets[0] : FString();
-		for (const tag::OffPlay* PP : Book.playsIn(TCHAR_TO_UTF8(*CallSet)))
+		const bool bAll = CallSet == CallAllSet();
+		for (int32 f = 0; f < NForms; ++f)
+			for (const tag::OffPlay* PP : Book.playsIn(TCHAR_TO_UTF8(*CallSets[f])))
+			{
+				if (PP->type == tag::PlayType::Kneel || PP->type == tag::PlayType::Spike) continue;
+				FScoped& Sc = Scoped.AddDefaulted_GetRef();
+				Sc.Op = PP;
+				Sc.Set = f;
+				Sc.Cat = OffCategory(*PP);
+				CatInFamily.Add(Sc.Cat);
+			}
+		for (const TCHAR* Cn : {TEXT("RUN"), TEXT("PASS"), TEXT("PA"), TEXT("SCREEN"), TEXT("RPO"), TEXT("TRICK")})
+			if (CatInFamily.Contains(Cn)) CallCats.Add(Cn);
+		if (!CallFilter().IsEmpty() && !CallCats.Contains(CallFilter())) CallFilter().Reset(); // (a family without it: all)
+		SetCount.SetNumZeroed(CallSets.Num());
+		// (the whole family lists each play once - its first formation, the others counted on the card: "Mesh" from
+		// sixteen shotgun sets was sixteen cards, and the family ninety pages)
+		TMap<FString, int32> Seen;
+		TSet<FString> Uniq;
+		for (const FScoped& Sc : Scoped)
 		{
-			const tag::OffPlay& P = *PP;
-			if (P.type == tag::PlayType::Kneel || P.type == tag::PlayType::Spike) continue;
-			FString Kind = P.type == tag::PlayType::Run ? TEXT("Run") : P.type == tag::PlayType::PlayAction ? TEXT("Play action") : P.type == tag::PlayType::Screen ? TEXT("Screen") : TEXT("Pass");
-			if (P.hasTag("quick")) Kind += TEXT("  -  quick");
-			if (P.hasTag("deep")) Kind += TEXT("  -  shot");
+			const bool bPass = CallFilter().IsEmpty() || CallFilter() == Sc.Cat;
+			const FString Same = Sc.Cat + TEXT("|") + S(Sc.Op->name);
+			if (bPass) ++SetCount[Sc.Set];
+			if (bPass) Uniq.Add(Same);
+			if (!bAll && CallSets[Sc.Set] != CallSet) continue;
+			if (bAll)
+			{
+				if (const int32* Was = Seen.Find(Same))
+				{
+					if (CallCards.IsValidIndex(*Was)) ++CallCards[*Was].Alt;
+					continue;
+				}
+				Seen.Add(Same, bPass ? CallCards.Num() : INDEX_NONE);
+			}
+			CatShown.FindOrAdd(Sc.Cat)++;
+			++ShownAll;
+			if (!bPass) continue;
+			const tag::OffPlay& P = *Sc.Op;
+			// the note: the playbook's line on the play, else the quarterback's reads
 			FString Note;
 			for (const std::string& R : P.reads) Note += (Note.IsEmpty() ? TEXT("") : TEXT("  ")) + S(R);
+			Note = !P.desc.empty() ? S(P.desc) : Note.IsEmpty() ? FString() : TEXT("READS  ") + Note;
 			FCallChoice C; C.Kind = FCallChoice::Off; C.Play = &P;
-			Add(Kind, S(P.name), Note.IsEmpty() ? FString() : TEXT("Reads  ") + Note, &P, nullptr, C);
+			FCallCard& Cd = Add(Sc.Cat, S(P.name), Note, &P, nullptr, C);
+			Cd.Cat = Sc.Cat;
+			Cd.Concept = OffConcept(P, Sc.Cat);
+			if (const tag::Formation* Fm = tag::formationById(P.formation)) Cd.Form = S(Fm->name);
 		}
+		if (NForms > 1) SetCount.Last() = Uniq.Num();
 	}
 	else
 	{
@@ -918,17 +1444,61 @@ void SGridironOverlay::BuildPlayCall()
 			const std::vector<const tag::DefCall*> In = Book.callsIn(St);
 			if (!In.empty() && S(tag::frontFamily(In[0]->front)) == CallTab) CallSets.Add(S(St));
 		}
+		NForms = CallSets.Num();
+		if (NForms > 1) CallSets.Add(CallAllSet());
 		if (!CallSets.Contains(CallSet)) CallSet = CallSets.Num() ? CallSets[0] : FString();
-		for (const tag::DefCall* DP : Book.callsIn(TCHAR_TO_UTF8(*CallSet)))
+		const bool bAll = CallSet == CallAllSet();
+		for (int32 f = 0; f < NForms; ++f)
+			for (const tag::DefCall* DP : Book.callsIn(TCHAR_TO_UTF8(*CallSets[f])))
+			{
+				FScoped& Sc = Scoped.AddDefaulted_GetRef();
+				Sc.Dc = DP;
+				Sc.Set = f;
+				Sc.Cat = DefCategory(*DP);
+				CatInFamily.Add(Sc.Cat);
+			}
+		for (const TCHAR* Cn : {TEXT("ZONE"), TEXT("MAN"), TEXT("PRESSURE"), TEXT("BLITZ"), TEXT("PREVENT")})
+			if (CatInFamily.Contains(Cn)) CallCats.Add(Cn);
+		if (!CallFilter().IsEmpty() && !CallCats.Contains(CallFilter())) CallFilter().Reset();
+		SetCount.SetNumZeroed(CallSets.Num());
+		TMap<FString, int32> Seen;
+		TSet<FString> Uniq;
+		for (const FScoped& Sc : Scoped)
 		{
-			const tag::DefCall& D = *DP;
+			const bool bPass = CallFilter().IsEmpty() || CallFilter() == Sc.Cat;
+			const FString Same = Sc.Cat + TEXT("|") + DefShortName(*Sc.Dc);
+			if (bPass) ++SetCount[Sc.Set];
+			if (bPass) Uniq.Add(Same);
+			if (!bAll && CallSets[Sc.Set] != CallSet) continue;
+			if (bAll)
+			{
+				if (const int32* Was = Seen.Find(Same))
+				{
+					if (CallCards.IsValidIndex(*Was)) ++CallCards[*Was].Alt;
+					continue;
+				}
+				Seen.Add(Same, bPass ? CallCards.Num() : INDEX_NONE);
+			}
+			CatShown.FindOrAdd(Sc.Cat)++;
+			++ShownAll;
+			if (!bPass) continue;
+			const tag::DefCall& D = *Sc.Dc;
 			const FString* Desc = Cov.Find(FString(tag::coverageName(D.coverage)));
 			FCallChoice C; C.Kind = FCallChoice::Def; C.Call = &D;
-			Add(D.rushers() <= 4 ? FString::Printf(TEXT("Coverage  -  %d rush"), D.rushers()) : FString::Printf(TEXT("%d-man pressure"), D.rushers()), S(D.name),
-				Desc ? *Desc : FString(), nullptr, &D, C);
+			// (the playbook's own words where it has them: the coverage as called, the pressure, a line on the call)
+			FCallCard& Cd = Add(D.rushers() <= 4 ? FString::Printf(TEXT("Coverage  -  %d rush"), D.rushers()) : FString::Printf(TEXT("%d-man pressure"), D.rushers()), DefShortName(D),
+				!D.desc.empty() ? S(D.desc) : Desc ? *Desc : FString(), nullptr, &D, C);
+			Cd.Cat = Sc.Cat;
+			const FString Cover = D.coverLabel.empty() ? CoverageShort(D.coverage) : S(D.coverLabel);
+			const FString Press = D.pressure.empty() || D.pressure == "Base" ? FString() : TEXT("  -  ") + S(D.pressure);
+			Cd.Concept = FString::Printf(TEXT("%s%s  -  %d rush"), *Cover, *Press, D.rushers());
+			Cd.Form = D.frontLabel.empty() ? S(tag::defSet(D)) : S(D.frontLabel);
 		}
+		if (NForms > 1) SetCount.Last() = Uniq.Num();
 	}
-	const int32 Pages = FMath::Max(1, FMath::DivideAndRoundUp(CallCards.Num(), 3));
+	// the type tabs: ALL first (only when there is more than one kind to tell apart)
+	if (CallCats.Num() > 0) CallCats.Insert(FString(), 0);
+	const int32 Pages = FMath::Max(1, FMath::DivideAndRoundUp(CallCards.Num(), CallPerPage));
 	CallPage = FMath::Clamp(CallPage, 0, Pages - 1);
 
 	const FLinearColor White90(0.93f, 0.95f, 0.98f);
@@ -942,12 +1512,25 @@ void SGridironOverlay::BuildPlayCall()
 
 	// the header: what is being called, the formation, and the situation with the clocks running
 	FString TabLabel = [&]() -> FString { for (const TPair<FString, FString>& Tb : CallTabs) if (Tb.Key == CallTab) return Tb.Value; return FString(); }();
-	if (!CallSet.IsEmpty() && CallTab != TEXT("special") && CallTab != TEXT("clock"))
+	// under the title: the formation's personnel (and the plays listed), or how many formations the family list holds
+	FString FormLine, FormDesc;
+	const bool bAllView = CallSet == CallAllSet();
+	if (!CallSet.IsEmpty() && !bSpecial)
 	{
-		// the formation (set) shown, and where it sits in its family
-		const tag::Formation* F = bOffense ? tag::formationById(TCHAR_TO_UTF8(*CallSet)) : nullptr;
-		TabLabel = (F ? S(F->name) : CallSet).ToUpper();
-		if (CallSets.Num() > 1) TabLabel += FString::Printf(TEXT("   %d / %d"), CallSets.IndexOfByKey(CallSet) + 1, CallSets.Num());
+		// the formation (set) shown
+		if (bAllView)
+		{
+			TabLabel = TEXT("ALL ") + TabLabel;
+			FormLine = FString::Printf(TEXT("%d %s  ·  %d %s"), NForms, bOffense ? TEXT("FORMATIONS") : TEXT("SETS"), ShownAll, bOffense ? TEXT("PLAYS") : TEXT("CALLS"));
+		}
+		else
+		{
+			const tag::Formation* F = bOffense ? tag::formationById(TCHAR_TO_UTF8(*CallSet)) : nullptr;
+			TabLabel = (F ? S(F->name) : CallSet).ToUpper();
+			if (F) FormDesc = S(F->desc);
+			FormLine = F ? PersonnelText(*F) + TEXT("  ·  ") : FString();
+			FormLine += FString::Printf(TEXT("%d %s"), ShownAll, bOffense ? TEXT("PLAYS") : TEXT("CALLS"));
+		}
 	}
 	const FString BookLine = bOffense ? FString::Printf(TEXT("%s PLAYBOOK  -  %s"), *S(tag::offBookFor(G.offense()).name).ToUpper(), *S(tag::offBookFor(G.offense()).scheme).ToUpper())
 		: FString::Printf(TEXT("%s PLAYBOOK  -  %s"), *S(tag::defBookFor(G.defense()).name).ToUpper(), *S(tag::defBookFor(G.defense()).scheme).ToUpper());
@@ -966,7 +1549,19 @@ void SGridironOverlay::BuildPlayCall()
 			]
 			+ SVerticalBox::Slot().AutoHeight()[ SNew(STextBlock).Font(Font(12, "Bold")).ColorAndOpacity(Accent)
 				.Text(T(FString(bOffense ? (bTwoPoint ? TEXT("TWO-POINT TRY  -  CALL OFFENSE") : TEXT("CALL OFFENSE")) : TEXT("CALL DEFENSE")) + TEXT("     ") + BookLine)) ]
-			+ SVerticalBox::Slot().AutoHeight()[ SNew(STextBlock).Font(Font(30, "Bold")).ColorAndOpacity(White90).Text(T(TabLabel)) ]
+			+ SVerticalBox::Slot().AutoHeight()
+			[
+				SNew(SHorizontalBox)
+				+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Bottom)[ SNew(STextBlock).Font(Font(30, "Bold")).ColorAndOpacity(White90).Text(T(TabLabel)) ]
+				+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Bottom).Padding(18, 0, 0, 6)
+				[ SNew(STextBlock).Font(TagTheme::Font(13, "BoldCondensed", 40)).ColorAndOpacity(Dim).Text(T(FormLine)) ]
+			]
+			// the playbook's line on the formation
+			+ SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 2)
+			[
+				SNew(STextBlock).Font(Font(11)).ColorAndOpacity(TagTheme::Faint).Text(T(FormDesc))
+				.Visibility(FormDesc.IsEmpty() ? EVisibility::Collapsed : EVisibility::HitTestInvisible)
+			]
 			// calling defense: what the offense has come out in
 			+ SVerticalBox::Slot().AutoHeight().Padding(0, 2, 0, 2)
 			[
@@ -1008,8 +1603,32 @@ void SGridironOverlay::BuildPlayCall()
 	// the formation tabs between their shoulder buttons; the one shown is white with a gold bar under it
 	TSharedRef<SHorizontalBox> Tabs = SNew(SHorizontalBox);
 	Tabs->AddSlot().AutoWidth().VAlign(VAlign_Center).Padding(0, 0, 10, 0)[ Glyph(EPadGlyph::L1, TEXT("Q"), 30.f) ];
-	for (const TPair<FString, FString>& Tb : CallTabs)
+	// (a book with more families than the row holds shows a window of them round the one up, the rest counted at the
+	// ends: the shoulder buttons still step through all of them)
+	const double RowW = FMath::Max(640.0, static_cast<double>(GetTickSpaceGeometry().GetLocalSize().X)) - 2.0 * 34.0 - 140.0;
+	int32 TabFirst = 0, TabLast = CallTabs.Num() - 1;
 	{
+		auto TabW = [](const FString& L) { return 30.0 + 10.5 * L.Len(); };
+		double Used = 0;
+		for (const TPair<FString, FString>& Tb : CallTabs) Used += TabW(Tb.Value);
+		if (Used > RowW && CallTabs.Num() > 1)
+		{
+			const int32 At = FMath::Max(0, CallTabs.IndexOfByPredicate([this](const TPair<FString, FString>& Tb) { return Tb.Key == CallTab; }));
+			TabFirst = TabLast = At;
+			Used = TabW(CallTabs[At].Value) + 120.0;
+			for (bool bGrew = true; bGrew;)
+			{
+				bGrew = false;
+				if (TabLast + 1 < CallTabs.Num() && Used + TabW(CallTabs[TabLast + 1].Value) <= RowW) { Used += TabW(CallTabs[++TabLast].Value); bGrew = true; }
+				if (TabFirst > 0 && Used + TabW(CallTabs[TabFirst - 1].Value) <= RowW) { Used += TabW(CallTabs[--TabFirst].Value); bGrew = true; }
+			}
+		}
+	}
+	if (TabFirst > 0)
+		Tabs->AddSlot().AutoWidth().VAlign(VAlign_Center).Padding(4, 0, 8, 0)[ SNew(STextBlock).Font(Font(12, "Bold")).ColorAndOpacity(TagTheme::Faint).Text(T(FString::Printf(TEXT("‹ %d"), TabFirst))) ];
+	for (int32 Ti = TabFirst; Ti <= TabLast && CallTabs.IsValidIndex(Ti); ++Ti)
+	{
+		const TPair<FString, FString>& Tb = CallTabs[Ti];
 		const bool bOn = Tb.Key == CallTab;
 		const FString Id = Tb.Key;
 		Tabs->AddSlot().AutoWidth().Padding(2, 0)
@@ -1024,63 +1643,333 @@ void SGridironOverlay::BuildPlayCall()
 			]
 		];
 	}
+	if (TabLast < CallTabs.Num() - 1)
+		Tabs->AddSlot().AutoWidth().VAlign(VAlign_Center).Padding(8, 0, 4, 0)[ SNew(STextBlock).Font(Font(12, "Bold")).ColorAndOpacity(TagTheme::Faint).Text(T(FString::Printf(TEXT("%d ›"), CallTabs.Num() - 1 - TabLast))) ];
 	Tabs->AddSlot().AutoWidth().VAlign(VAlign_Center).Padding(10, 0, 0, 0)[ Glyph(EPadGlyph::R1, TEXT("E"), 30.f) ];
 
-	// three plays, each over its button
+	// ---- the sizes: the cards as large as the screen allows, their art about 1.25 : 1 (a spread play's width by its
+	// backfield and its deep routes); what height is left over shows the stadium above the call. (In Slate units: the
+	// overlay's own size, after the DPI scale - 1920 x 1080 at 1080p and 1440p alike, narrower on a 16:10 screen.)
+	FVector2D Avail = GetTickSpaceGeometry().GetLocalSize();
+	if (Avail.X < 640.0 || Avail.Y < 360.0) Avail = FVector2D(1920.0, 1080.0);
+	CallBuiltAvail = Avail;
+	constexpr float PanelPadX = 34.f, LeftColW = 270.f, ColGap = 20.f, ArrowW = 44.f, CardPad = 8.f;
+	const bool bTypes = CallCats.Num() > 1;
+	const bool bStrip = Pages > 1;
+	const float CardW = FMath::Max(160.f, (static_cast<float>(Avail.X) - 2.f * PanelPadX - LeftColW - ColGap - 2.f * ArrowW - 6.f * CardPad) / CallPerPage);
+	const float HeaderH = 64.f + (CallWho.IsEmpty() ? 0.f : 28.f) + (!bOffense && !CallOffLook.IsEmpty() ? 32.f : 0.f) + (FormDesc.IsEmpty() ? 0.f : 18.f);
+	// (top to bottom: the stadium's least, the scorebug's room, the panel's padding, the header, the family tabs, the
+	// type tabs, a card's name block and its button, the page strip, the button bar)
+	constexpr float CardInfoH = 146.f;
+	const float FixedH = 16.f + 104.f + 26.f + HeaderH + 8.f + 46.f + (bTypes ? 44.f : 0.f) + CardInfoH + (bStrip ? 84.f : 0.f) + 40.f;
+	const float ArtH = FMath::Clamp(FMath::Min(CardW / 1.25f, static_cast<float>(Avail.Y) - FixedH), 140.f, 620.f);
+
+	// ---- the type tabs (L2 / R2): every kind the family has, each with how many of its plays are listed
+	TSharedRef<SHorizontalBox> Types = SNew(SHorizontalBox);
+	if (bTypes)
+	{
+		Types->AddSlot().AutoWidth().VAlign(VAlign_Center).Padding(0, 0, 8, 0)[ Glyph(EPadGlyph::L2, TEXT("Z"), 26.f) ];
+		for (const FString& Cn : CallCats)
+		{
+			const bool bOn = Cn == CallFilter();
+			const int32 Num = Cn.IsEmpty() ? ShownAll : CatShown.FindRef(Cn);
+			const FLinearColor Cc = Cn.IsEmpty() ? Accent : CatColor(Cn);
+			const FLinearColor Fg = bOn ? FLinearColor(0.02f, 0.025f, 0.04f) : Num > 0 ? Cc : TagTheme::Faint;
+			Types->AddSlot().AutoWidth().VAlign(VAlign_Center).Padding(3, 0)
+			[
+				SNew(SButton).IsFocusable(false).ButtonColorAndOpacity(FLinearColor::Transparent).ContentPadding(FMargin(0))
+				.OnClicked_Lambda([this, Cn] { CallFilter() = Cn; CallPage = 0; ATagAudio::Ui(TEXT("UiTab")); BuildPlayCall(); return FReply::Handled(); })
+				[
+					SNew(SBorder).BorderImage(TagTheme::Round(4.f)).BorderBackgroundColor(bOn ? FLinearColor(Cc.R, Cc.G, Cc.B, 0.95f) : FLinearColor(1.f, 1.f, 1.f, 0.05f))
+					.Padding(FMargin(12, 5, 12, 5))
+					[
+						SNew(SHorizontalBox)
+						+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)
+						[ SNew(STextBlock).Font(TagTheme::Font(13, "BoldCondensed", 40)).ColorAndOpacity(Fg).Text(T(CatLabel(Cn))) ]
+						+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(8, 0, 0, 0)
+						[ SNew(STextBlock).Font(TagTheme::Font(12, "Bold")).ColorAndOpacity(Fg * FLinearColor(1, 1, 1, bOn ? 0.75f : 0.7f)).Text(T(FString::FromInt(Num))) ]
+					]
+				]
+			];
+		}
+		Types->AddSlot().AutoWidth().VAlign(VAlign_Center).Padding(8, 0, 0, 0)[ Glyph(EPadGlyph::R2, TEXT("C"), 26.f) ];
+	}
+
+	// ---- the cards: three a page, each over its button - the art fitted to the card (UI/PlayDiagram.cpp), the play's
+	// type badge and concept, its name, its reads (and in the family list its formation); the pointer lights a card's
+	// edge gold, and the play called last carries a tag
 	const double Los = bTwoPoint ? 98.0 : G.ballOn;
 	const double FirstDown = bTwoPoint ? -1.0 : FMath::Min(100.0, G.ballOn + G.toGo);
-	constexpr float ArtW = 430.f, ArtH = 236.f;
+	const FCallChoice Rep = CallRepeat();
 	TSharedRef<SHorizontalBox> Row = SNew(SHorizontalBox);
 	auto Arrow = [&](EPadGlyph Gl, const TCHAR* Key, bool bShow) -> TSharedRef<SWidget>
 	{
-		return SNew(SBox).WidthOverride(56).VAlign(VAlign_Center).HAlign(HAlign_Center)
-			[ bShow ? Glyph(Gl, Key, 34.f) : SNullWidget::NullWidget ];
+		return SNew(SBox).WidthOverride(ArrowW).VAlign(VAlign_Center).HAlign(HAlign_Center)
+			[ bShow ? Glyph(Gl, Key, 32.f) : SNullWidget::NullWidget ];
 	};
 	Row->AddSlot().AutoWidth()[ Arrow(EPadGlyph::DLeft, TEXT("←"), Pages > 1) ];
-	for (int32 k = 0; k < 3; ++k)
+	if (CallCards.IsEmpty())
 	{
-		const int32 I = CallPage * 3 + k;
+		// (a formation with none of this type: say so, and how to find some)
+		const FString Why = CallFilter().IsEmpty() ? FString(TEXT("NO PLAYS HERE"))
+			: FString::Printf(TEXT("NO %s %s IN %s"), *CatLabel(CallFilter()), bOffense ? TEXT("PLAYS") : TEXT("CALLS"), *TabLabel);
+		Row->AddSlot().FillWidth(1.f).Padding(CardPad, 0)
+		[
+			SNew(SBox).HeightOverride(ArtH + CardInfoH - 50.f).HAlign(HAlign_Center).VAlign(VAlign_Center)
+			[
+				SNew(SVerticalBox)
+				+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center)[ SNew(STextBlock).Font(TagTheme::Font(22, "BoldCondensed", 40)).ColorAndOpacity(TagTheme::Dim).Text(T(Why)) ]
+				+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(0, 6, 0, 0)
+				[ SNew(STextBlock).Font(Font(12, "Bold")).ColorAndOpacity(TagTheme::Faint).Text(T(bOffense ? TEXT("D-PAD UP / DOWN FOR ANOTHER FORMATION  ·  L2 / R2 FOR ANOTHER TYPE") : TEXT("D-PAD UP / DOWN FOR ANOTHER SET  ·  L2 / R2 FOR ANOTHER TYPE"))) ]
+			]
+		];
+	}
+	for (int32 k = 0; k < CallPerPage && !CallCards.IsEmpty(); ++k)
+	{
+		const int32 I = CallPage * CallPerPage + k;
 		if (!CallCards.IsValidIndex(I))
 		{
-			Row->AddSlot().AutoWidth().Padding(8, 0)[ SNew(SBox).WidthOverride(ArtW + 16) ];
+			Row->AddSlot().FillWidth(1.f).Padding(CardPad, 0)[ SNew(SBox).HeightOverride(ArtH) ];
 			continue;
 		}
 		const FCallCard& Cd = CallCards[I];
 		TSharedRef<SWidget> Art = SNullWidget::NullWidget;
 		if (Cd.Op || Cd.Dc)
 		{
+			// (the picture once per play while the screen is up: a page turned back costs no sim)
+			const FString Key = FString::Printf(TEXT("%p|%p|%d"), Cd.Op, Cd.Dc, bOffense ? 1 : 0);
 			FArtPicture Pic;
-			BuildCardPicture(*Director->Game, Cd.Op, Cd.Dc, bOffense, Los, G.ballY, Pic);
+			if (const FArtPicture* Hit = CallPics.IsValid() ? CallPics->Pics.Find(Key) : nullptr) Pic = *Hit;
+			else
+			{
+				BuildCardPicture(*Director->Game, Cd.Op, Cd.Dc, bOffense, Los, G.ballY, Pic);
+				if (CallPics.IsValid()) CallPics->Pics.Add(Key, Pic);
+			}
 			if (!Pic.Marks.IsEmpty()) Art = SNew(SPlayDiagram).Picture(Pic).Offense(bOffense).FirstDown(FirstDown);
 		}
 		if (Art == SNullWidget::NullWidget)
 			Art = SNew(SBorder).BorderImage(White()).BorderBackgroundColor(FLinearColor(0.025f, 0.032f, 0.045f, 1.f)).HAlign(HAlign_Center).VAlign(VAlign_Center)
 				[ SNew(STextBlock).Font(Font(26, "Bold")).ColorAndOpacity(FLinearColor(1, 1, 1, 0.22f)).Text(T(Cd.Kind.ToUpper())) ];
 		const FCallChoice Choice = Cd.Choice;
-		Row->AddSlot().AutoWidth().Padding(8, 0)
+		const bool bLastCalled = (Cd.Op && Cd.Op == Rep.Play) || (Cd.Dc && Cd.Dc == Rep.Call);
+		const FLinearColor Cc = CatColor(Cd.Cat);
+		// (the whole family's list: the formation it is called from, and how many more run it)
+		const FString FormTag = Cd.Form.ToUpper() + (Cd.Alt > 0 ? FString::Printf(TEXT(" +%d"), Cd.Alt) : FString());
+		const FString NoteLine = bAllView && !Cd.Form.IsEmpty() ? FormTag + (Cd.Note.IsEmpty() ? FString() : TEXT("  ·  ") + Cd.Note) : Cd.Note;
+		// (the card's edge: gold under the pointer)
+		const TSharedRef<TWeakPtr<SButton>> Hold = MakeShared<TWeakPtr<SButton>>();
+		TSharedPtr<SButton> Btn;
+		Row->AddSlot().FillWidth(1.f).Padding(CardPad, 0)
 		[
 			SNew(SVerticalBox)
 			+ SVerticalBox::Slot().AutoHeight()
 			[
-				SNew(SButton).IsFocusable(false).ButtonColorAndOpacity(CardEdge).ContentPadding(FMargin(2))
+				SAssignNew(Btn, SButton).IsFocusable(false).ContentPadding(FMargin(2))
+				.ButtonColorAndOpacity_Lambda([Hold, CardEdge]
+				{
+					const TSharedPtr<SButton> B = Hold->Pin();
+					return FSlateColor(B.IsValid() && B->IsHovered() ? Accent : CardEdge);
+				})
 				.OnClicked_Lambda([this, Choice] { CallPick(Choice); return FReply::Handled(); })
 				[
-					SNew(SBorder).BorderImage(White()).BorderBackgroundColor(Card).Padding(FMargin(6, 6, 6, 10))
+					SNew(SBorder).BorderImage(White()).BorderBackgroundColor(Card).Padding(FMargin(0))
 					[
 						SNew(SVerticalBox)
-						+ SVerticalBox::Slot().AutoHeight()[ SNew(SBox).WidthOverride(ArtW).HeightOverride(ArtH)[ Art ] ]
-						+ SVerticalBox::Slot().AutoHeight().Padding(6, 8, 6, 0)[ SNew(STextBlock).Font(Font(10, "Bold")).ColorAndOpacity(Dim).Text(T(Cd.Kind.ToUpper())) ]
-						+ SVerticalBox::Slot().AutoHeight().Padding(6, 0)[ SNew(STextBlock).Font(Font(19, "Bold")).ColorAndOpacity(White90).Text(T(Cd.Name)) ]
-						+ SVerticalBox::Slot().AutoHeight().Padding(6, 2, 6, 0)
-						[ SNew(SBox).HeightOverride(16)[ SNew(STextBlock).Font(Font(10)).ColorAndOpacity(Accent).Text(T(Cd.Note)) ] ]
+						+ SVerticalBox::Slot().AutoHeight()[ SNew(SBox).HeightOverride(ArtH)[ Art ] ]
+						// the type badge and the concept, the last-called tag on the right
+						+ SVerticalBox::Slot().AutoHeight().Padding(12, 9, 12, 0)
+						[
+							SNew(SBox).HeightOverride(20)
+							[
+								SNew(SHorizontalBox)
+								+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)
+								[
+									SNew(SBorder).BorderImage(TagTheme::Round(3.f)).BorderBackgroundColor(Cc).Padding(FMargin(7, 1, 7, 1))
+									.Visibility(Cd.Cat.IsEmpty() ? EVisibility::Collapsed : EVisibility::HitTestInvisible)
+									[ SNew(STextBlock).Font(TagTheme::Font(11, "BoldCondensed", 60)).ColorAndOpacity(FLinearColor(0.02f, 0.025f, 0.04f)).Text(T(Cd.Cat)) ]
+								]
+								+ SHorizontalBox::Slot().FillWidth(1.f).VAlign(VAlign_Center).Padding(9, 0, 0, 0)
+								[ SNew(STextBlock).Font(TagTheme::Font(12, "BoldCondensed", 40)).ColorAndOpacity(Dim).Text(T(Cd.Concept.ToUpper())).Clipping(EWidgetClipping::ClipToBounds) ]
+								+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(8, 0, 0, 0)
+								[
+									SNew(STextBlock).Font(TagTheme::Font(10, "BoldCondensed", 80)).ColorAndOpacity(Accent).Text(T(TEXT("LAST CALLED")))
+									.Visibility(bLastCalled ? EVisibility::HitTestInvisible : EVisibility::Collapsed)
+								]
+							]
+						]
+						+ SVerticalBox::Slot().AutoHeight().Padding(12, 3, 12, 0)
+						[ SNew(STextBlock).Font(Font(21, "Bold")).ColorAndOpacity(White90).Text(T(Cd.Name)).Clipping(EWidgetClipping::ClipToBounds) ]
+						+ SVerticalBox::Slot().AutoHeight().Padding(12, 2, 12, 10)
+						[ SNew(SBox).HeightOverride(16)[ SNew(STextBlock).Font(Font(10)).ColorAndOpacity(Accent).Text(T(NoteLine)).Clipping(EWidgetClipping::ClipToBounds) ] ]
 					]
 				]
 			]
 			// the button that calls it, under the card
 			+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(0, 8, 0, 0)[ Glyph(CallButtons[k], CallKeys[k], 38.f) ]
 		];
+		*Hold = Btn;
 	}
 	Row->AddSlot().AutoWidth()[ Arrow(EPadGlyph::DRight, TEXT("→"), Pages > 1) ];
+
+	// ---- the pages (D-pad left / right): a window of them, each with its three plays named, the one up in gold; a
+	// click turns to it
+	TSharedRef<SHorizontalBox> Strip = SNew(SHorizontalBox);
+	if (bStrip)
+	{
+		// (as many page boxes as fit beside the "PAGE n / N" count)
+		const float MainW = static_cast<float>(Avail.X) - 2.f * PanelPadX - LeftColW - ColGap;
+		const int32 Win = FMath::Clamp(static_cast<int32>((MainW - 2.f * ArrowW - 330.f) / 202.f), 2, 6);
+		const int32 First = FMath::Clamp(CallPage - Win / 2, 0, FMath::Max(0, Pages - Win));
+		Strip->AddSlot().AutoWidth().VAlign(VAlign_Center).Padding(ArrowW, 0, 6, 0)
+		[ SNew(STextBlock).Font(Font(14, "Bold")).ColorAndOpacity(TagTheme::Faint).Text(T(First > 0 ? TEXT("…") : TEXT(" "))) ];
+		for (int32 Pg = First; Pg < Pages && Pg < First + Win; ++Pg)
+		{
+			const bool bOn = Pg == CallPage;
+			TSharedRef<SVerticalBox> Names = SNew(SVerticalBox);
+			for (int32 j = 0; j < CallPerPage; ++j)
+			{
+				const int32 I = Pg * CallPerPage + j;
+				if (!CallCards.IsValidIndex(I)) break;
+				Names->AddSlot().AutoHeight()
+				[
+					SNew(SHorizontalBox)
+					+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(0, 0, 6, 0)
+					[ SNew(SBox).WidthOverride(6).HeightOverride(6)[ SNew(SBorder).BorderImage(TagTheme::Round(3.f)).BorderBackgroundColor(CatColor(CallCards[I].Cat)) ] ]
+					+ SHorizontalBox::Slot().FillWidth(1.f).VAlign(VAlign_Center)
+					[ SNew(STextBlock).Font(Font(10, bOn ? "Bold" : "Regular")).ColorAndOpacity(bOn ? White90 : Dim).Text(T(CallCards[I].Name)).Clipping(EWidgetClipping::ClipToBounds) ]
+				];
+			}
+			Strip->AddSlot().AutoWidth().Padding(3, 0)
+			[
+				SNew(SBox).WidthOverride(196)
+				[
+					SNew(SButton).IsFocusable(false).ButtonColorAndOpacity(FLinearColor::Transparent).ContentPadding(FMargin(0))
+					.OnClicked_Lambda([this, Pg] { CallPage = Pg; ATagAudio::Ui(TEXT("UiMove")); BuildPlayCall(); return FReply::Handled(); })
+					[
+						SNew(TagTheme::SSelect).Selected(bOn).Fill(FLinearColor(1.f, 1.f, 1.f, 0.035f)).Padding(FMargin(10, 5, 8, 6))
+						[
+							SNew(SVerticalBox)
+							+ SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 2)
+							[ SNew(STextBlock).Font(TagTheme::Font(10, "BoldCondensed", 80)).ColorAndOpacity(bOn ? Accent : TagTheme::Faint).Text(T(FString::Printf(TEXT("PAGE %d"), Pg + 1))) ]
+							+ SVerticalBox::Slot().AutoHeight()[ Names ]
+						]
+					]
+				]
+			];
+		}
+		Strip->AddSlot().AutoWidth().VAlign(VAlign_Center).Padding(6, 0, 0, 0)
+		[ SNew(STextBlock).Font(Font(14, "Bold")).ColorAndOpacity(TagTheme::Faint).Text(T(First + Win < Pages ? TEXT("…") : TEXT(" "))) ];
+	}
+	Strip->AddSlot().FillWidth(1.f)[ SNullWidget::NullWidget ];
+	Strip->AddSlot().AutoWidth().VAlign(VAlign_Center).Padding(0, 0, ArrowW, 0)
+	[
+		SNew(STextBlock).Font(TagTheme::Font(13, "BoldCondensed", 40)).ColorAndOpacity(Dim)
+		.Text(T(FString::Printf(TEXT("PAGE %d / %d   ·   %d %s"), CallPage + 1, Pages, CallCards.Num(), bOffense ? TEXT("PLAYS") : TEXT("CALLS"))))
+		.Visibility(bSpecial ? EVisibility::Collapsed : EVisibility::HitTestInvisible)
+	];
+
+	// ---- the left column: the family's formations (sets) with their personnel and how many plays each lists, the one
+	// shown in gold (D-pad up / down; a click picks one); under them the repeat call (R3) and the coach's pick (triangle)
+	TSharedRef<SVerticalBox> Forms = SNew(SVerticalBox);
+	Forms->AddSlot().AutoHeight().Padding(4, 0, 0, 6)
+	[
+		SNew(SHorizontalBox)
+		+ SHorizontalBox::Slot().FillWidth(1.f).VAlign(VAlign_Center)
+		[ SNew(STextBlock).Font(TagTheme::Font(12, "BoldCondensed", 80)).ColorAndOpacity(Dim).Text(T(bSpecial ? TEXT("SITUATION") : bOffense ? TEXT("FORMATIONS") : TEXT("SETS"))) ]
+		+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)[ CallSets.Num() > 1 && !bSpecial ? Glyph(EPadGlyph::DUpDown, TEXT("↑↓"), 22.f) : SNullWidget::NullWidget ]
+	];
+	if (bSpecial)
+	{
+		Forms->AddSlot().AutoHeight().Padding(4, 0)
+		[ SNew(STextBlock).Font(Font(12)).ColorAndOpacity(TagTheme::Faint).AutoWrapText(true).Text(T(CallTab == TEXT("special") ? TEXT("Punt it away or try the kick.") : TEXT("Kneel to run the clock, spike to stop it."))) ];
+	}
+	else
+	{
+		const int32 At = FMath::Max(0, CallSets.IndexOfByKey(CallSet));
+		// (as many rows as the cards' height leaves room for beside them, the two boxes under them)
+		const int32 MaxRows = FMath::Clamp(static_cast<int32>((ArtH + CardInfoH + (bTypes ? 44.f : 0.f) + (bStrip ? 84.f : 0.f) - 200.f) / 36.f), 4, 14);
+		const int32 FirstRow = FMath::Clamp(At - MaxRows / 2, 0, FMath::Max(0, CallSets.Num() - MaxRows));
+		if (FirstRow > 0)
+			Forms->AddSlot().AutoHeight().Padding(12, 0, 0, 2)[ SNew(STextBlock).Font(Font(10, "Bold")).ColorAndOpacity(TagTheme::Faint).Text(T(FString::Printf(TEXT("▲  %d MORE"), FirstRow))) ];
+		for (int32 Ri = FirstRow; Ri < CallSets.Num() && Ri < FirstRow + MaxRows; ++Ri)
+		{
+			const FString Id = CallSets[Ri];
+			const bool bOn = Id == CallSet;
+			const bool bAllRow = Id == CallAllSet();
+			const tag::Formation* Fm = bOffense && !bAllRow ? tag::formationById(TCHAR_TO_UTF8(*Id)) : nullptr;
+			FString RowName = bAllRow ? FString::Printf(TEXT("All %s"), *CallTab) : Fm ? S(Fm->name) : Id;
+			// (the family is the tab: "Singleback Trey Open" under SINGLEBACK is "Trey Open", "Gun Bunch" under
+			// SHOTGUN "Bunch", "3-4 Okie" under 3-4 "Okie")
+			if (!bAllRow)
+				for (const FString& Pre : {CallTab + TEXT(" "), FString(TEXT("Gun ")), FString(TEXT("Singleback "))})
+					if (RowName.StartsWith(Pre) && RowName.Len() > Pre.Len()) { RowName = RowName.RightChop(Pre.Len()); break; }
+			const FString Pers = Fm ? S(Fm->personnel) : FString();
+			const int32 Num = SetCount.IsValidIndex(Ri) ? SetCount[Ri] : 0;
+			Forms->AddSlot().AutoHeight().Padding(0, 1)
+			[
+				SNew(SButton).IsFocusable(false).ButtonColorAndOpacity(FLinearColor::Transparent).ContentPadding(FMargin(0))
+				.OnClicked_Lambda([this, Id] { CallSet = Id; CallPage = 0; ATagAudio::Ui(TEXT("UiMove")); BuildPlayCall(); return FReply::Handled(); })
+				[
+					SNew(TagTheme::SSelect).Selected(bOn).Padding(FMargin(12, 7, 10, 7))
+					[
+						SNew(SHorizontalBox)
+						+ SHorizontalBox::Slot().FillWidth(1.f).VAlign(VAlign_Center)
+						[ SNew(STextBlock).Font(Font(14, "Bold")).ColorAndOpacity(bOn ? White90 : bAllRow ? Accent * FLinearColor(1, 1, 1, 0.8f) : Dim).Text(T(RowName)).Clipping(EWidgetClipping::ClipToBounds) ]
+						+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(8, 0, 0, 0)
+						[ SNew(STextBlock).Font(TagTheme::Font(11, "BoldCondensed", 40)).ColorAndOpacity(TagTheme::Faint).Text(T(Pers)) ]
+						+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(10, 0, 0, 0)
+						[ SNew(SBox).WidthOverride(26).HAlign(HAlign_Right)[ SNew(STextBlock).Font(Font(12, "Bold")).ColorAndOpacity(Num > 0 ? (bOn ? Accent : Dim) : TagTheme::Faint).Text(T(FString::FromInt(Num))) ] ]
+					]
+				]
+			];
+		}
+		if (FirstRow + MaxRows < CallSets.Num())
+			Forms->AddSlot().AutoHeight().Padding(12, 2, 0, 0)[ SNew(STextBlock).Font(Font(10, "Bold")).ColorAndOpacity(TagTheme::Faint).Text(T(FString::Printf(TEXT("▼  %d MORE"), CallSets.Num() - FirstRow - MaxRows))) ];
+	}
+	auto SideBox = [&](EPadGlyph Gl, const TCHAR* Key, const FString& Kicker, const FString& Line, const FString& Sub, FCallChoice Pick) -> TSharedRef<SWidget>
+	{
+		return SNew(SButton).IsFocusable(false).ButtonColorAndOpacity(FLinearColor::Transparent).ContentPadding(FMargin(0))
+			.OnClicked_Lambda([this, Pick] { CallPick(Pick); return FReply::Handled(); })
+			[
+				SNew(SBorder).BorderImage(TagTheme::Round(6.f)).BorderBackgroundColor(PanelLight).Padding(FMargin(12, 8, 12, 8))
+				[
+					SNew(SHorizontalBox)
+					+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(0, 0, 12, 0)[ Glyph(Gl, Key, 30.f) ]
+					+ SHorizontalBox::Slot().FillWidth(1.f).VAlign(VAlign_Center)
+					[
+						SNew(SVerticalBox)
+						+ SVerticalBox::Slot().AutoHeight()[ SNew(STextBlock).Font(TagTheme::Font(10, "BoldCondensed", 80)).ColorAndOpacity(Accent).Text(T(Kicker)) ]
+						+ SVerticalBox::Slot().AutoHeight()[ SNew(STextBlock).Font(Font(14, "Bold")).ColorAndOpacity(White90).Text(T(Line)).Clipping(EWidgetClipping::ClipToBounds) ]
+						+ SVerticalBox::Slot().AutoHeight()
+						[ SNew(STextBlock).Font(Font(10)).ColorAndOpacity(Dim).Text(T(Sub)).Clipping(EWidgetClipping::ClipToBounds).Visibility(Sub.IsEmpty() ? EVisibility::Collapsed : EVisibility::HitTestInvisible) ]
+					]
+				]
+			];
+	};
+	FString RepName, RepSub;
+	if (Rep.Play)
+	{
+		RepName = S(Rep.Play->name);
+		if (const tag::Formation* Fm = tag::formationById(Rep.Play->formation)) RepSub = S(Fm->name);
+	}
+	else if (Rep.Call)
+	{
+		RepName = S(Rep.Call->name);
+		RepSub = S(tag::defSet(*Rep.Call));
+	}
+	TSharedRef<SWidget> LeftCol = SNew(SBox).WidthOverride(LeftColW)
+	[
+		SNew(SVerticalBox)
+		+ SVerticalBox::Slot().AutoHeight()[ Forms ]
+		+ SVerticalBox::Slot().FillHeight(1.f)[ SNullWidget::NullWidget ]
+		+ SVerticalBox::Slot().AutoHeight().Padding(0, 8, 0, 0)
+		[
+			SNew(SBox).Visibility(RepName.IsEmpty() ? EVisibility::Collapsed : EVisibility::Visible)
+			[ SideBox(EPadGlyph::R3, TEXT("R"), bOffense ? TEXT("LAST PLAY") : TEXT("LAST CALL"), RepName, RepSub, Rep) ]
+		]
+		+ SVerticalBox::Slot().AutoHeight().Padding(0, 8, 0, 0)
+		[ SideBox(EPadGlyph::Triangle, TEXT("H"), TEXT("COACH'S PICK"), bOffense ? TEXT("Coach calls it") : TEXT("Coordinator calls it"), FString(), FCallChoice()) ]
+	];
 
 	// the legend: what the buttons do
 	auto Legend = [&](std::initializer_list<std::pair<EPadGlyph, const TCHAR*>> Gs, const FString& Label) -> TSharedRef<SWidget>
@@ -1093,22 +1982,37 @@ void SGridironOverlay::BuildPlayCall()
 	TSharedRef<SHorizontalBox> Foot = SNew(SHorizontalBox)
 		+ SHorizontalBox::Slot().AutoWidth()[ Legend({{EPadGlyph::Square, TEXT("1")}, {EPadGlyph::Cross, TEXT("2")}, {EPadGlyph::Circle, TEXT("3")}}, TEXT("CALL PLAY")) ]
 		+ SHorizontalBox::Slot().AutoWidth()[ Legend({{EPadGlyph::L1, TEXT("Q")}, {EPadGlyph::R1, TEXT("E")}}, bOffense ? TEXT("FAMILY") : TEXT("FRONT")) ]
-		+ SHorizontalBox::Slot().AutoWidth()[ Legend({{EPadGlyph::DUp, TEXT("\u2191")}, {EPadGlyph::DDown, TEXT("\u2193")}}, bOffense ? TEXT("FORMATION") : TEXT("SET")) ]
-		+ SHorizontalBox::Slot().AutoWidth()[ Legend({{EPadGlyph::DLeft, TEXT("←")}, {EPadGlyph::DRight, TEXT("→")}}, FString::Printf(TEXT("MORE PLAYS  %d / %d"), CallPage + 1, Pages)) ]
-		+ SHorizontalBox::Slot().AutoWidth()[ Legend({{EPadGlyph::Triangle, TEXT("H")}}, TEXT("COACH'S PICK")) ];
+		+ SHorizontalBox::Slot().AutoWidth()[ Legend({{EPadGlyph::DUpDown, TEXT("\u2191\u2193")}}, bOffense ? TEXT("FORMATION") : TEXT("SET")) ]
+		+ SHorizontalBox::Slot().AutoWidth()[ Legend({{EPadGlyph::DLeftRight, TEXT("←→")}}, FString::Printf(TEXT("MORE PLAYS  %d / %d"), CallPage + 1, Pages)) ];
+	if (Pages > 5) Foot->AddSlot().AutoWidth()[ Legend({{EPadGlyph::R3, TEXT("PgDn")}}, TEXT("R-STICK ←→  5 PAGES")) ];
+	if (bTypes) Foot->AddSlot().AutoWidth()[ Legend({{EPadGlyph::L2, TEXT("Z")}, {EPadGlyph::R2, TEXT("C")}}, TEXT("PLAY TYPE")) ];
+	if (!RepName.IsEmpty()) Foot->AddSlot().AutoWidth()[ Legend({{EPadGlyph::R3, TEXT("R")}}, bOffense ? TEXT("LAST PLAY") : TEXT("LAST CALL")) ];
+	Foot->AddSlot().AutoWidth()[ Legend({{EPadGlyph::Triangle, TEXT("H")}}, TEXT("COACH'S PICK")) ];
 
-	TSharedRef<SWidget> CallPanel = SNew(SBorder).BorderImage(White()).BorderBackgroundColor(FLinearColor(0.012f, 0.016f, 0.026f, 0.93f)).Padding(FMargin(40, 16, 40, 14))
+	// the call: the header and the family tabs across the top; the formations down the left; the type tabs, the three
+	// cards between the page arrows and the page strip on the right; the buttons along the foot
+	TSharedRef<SWidget> Main = SNew(SVerticalBox)
+		+ SVerticalBox::Slot().AutoHeight().Padding(ArrowW + CardPad, 0, 0, 12)[ Types ]
+		+ SVerticalBox::Slot().AutoHeight()[ Row ]
+		+ SVerticalBox::Slot().AutoHeight().Padding(0, 12, 0, 0)[ Strip ];
+	TSharedRef<SWidget> CallPanel = SNew(SBorder).BorderImage(White()).BorderBackgroundColor(FLinearColor(0.012f, 0.016f, 0.026f, 0.95f)).Padding(FMargin(PanelPadX, 14, PanelPadX, 12))
 	[
 		SNew(SVerticalBox)
-		+ SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 10)[ Header ]
-		+ SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 14)[ Tabs ]
-		+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center)[ Row ]
-		+ SVerticalBox::Slot().AutoHeight().Padding(0, 14, 0, 0)[ Foot ]
+		+ SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 8)[ Header ]
+		+ SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 10)[ Tabs ]
+		+ SVerticalBox::Slot().AutoHeight()
+		[
+			SNew(SHorizontalBox)
+			+ SHorizontalBox::Slot().AutoWidth()[ LeftCol ]
+			+ SHorizontalBox::Slot().FillWidth(1.f).Padding(ColGap, 0, 0, 0)[ Main ]
+		]
+		+ SVerticalBox::Slot().AutoHeight().Padding(0, 12, 0, 0)[ Foot ]
 	];
 	TSharedRef<SWidget> Root = SAssignNew(CallRoot, SCallRoot).OnKey([this](const FKey& K, bool bRep) { return CallKey(K, bRep); })
 	[
 		SNew(SVerticalBox)
-		// the field stays in view over the top (lightly shaded), the call across the bottom above the scorebug
+		// the field stays in view over the top (lightly shaded) in what height the cards leave, the call across the rest
+		// above the scorebug
 		+ SVerticalBox::Slot().FillHeight(1.f)[ SNew(SBorder).BorderImage(White()).BorderBackgroundColor(FLinearColor(0, 0, 0, 0.18f)) ]
 		+ SVerticalBox::Slot().AutoHeight()[ CallPanel ]
 		+ SVerticalBox::Slot().AutoHeight()[ SNew(SBorder).BorderImage(White()).BorderBackgroundColor(FLinearColor(0, 0, 0, 0.18f)).Padding(0)[ SNew(SBox).HeightOverride(104) ] ] // (the scorebug)
@@ -1120,10 +2024,12 @@ void SGridironOverlay::BuildPlayCall()
 void SGridironOverlay::ShowPatChoice(std::function<void(bool)> Done)
 {
 	TSharedRef<SVerticalBox> V = SNew(SVerticalBox)
-		+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(0, 0, 0, 10)[ SNew(STextBlock).Font(Font(22, "Bold")).Text(T(TEXT("TRY AFTER TOUCHDOWN"))) ];
-	V->AddSlot().AutoHeight()[ MakeButton(TEXT("Kick Extra Point"), TEXT("33-yard attempt, ~94% league-wide"), [this, Done] { ClearModal(); Done(false); }) ];
-	V->AddSlot().AutoHeight()[ MakeButton(TEXT("Go for Two"), TEXT("Run a play from the 2, ~48% league-wide"), [this, Done] { ClearModal(); Done(true); }) ];
-	ShowModal(Centered(SNew(SBorder).BorderImage(White()).BorderBackgroundColor(Panel).Padding(20)[V], 0.4f));
+		+ SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 18)[ TagTheme::Title(TEXT("Touchdown"), TEXT("Try after touchdown"), 32) ];
+	V->AddSlot().AutoHeight()[ MakeButton(TEXT("Kick Extra Point"), TEXT("33-yard attempt, ~94% league-wide"), [this, Done] { ClearModal(); Done(false); }, 480) ];
+	V->AddSlot().AutoHeight()[ MakeButton(TEXT("Go for Two"), TEXT("Run a play from the 2, ~48% league-wide"), [this, Done] { ClearModal(); Done(true); }, 480) ];
+	ShowModal(SNew(SOverlay)
+		+ SOverlay::Slot()[ SNew(TagTheme::SBackdrop).Strength(0.6f) ]
+		+ SOverlay::Slot().HAlign(HAlign_Center).VAlign(VAlign_Center)[ SNew(TagTheme::SPanel).AccentTop(TagTheme::Gold).Padding(FMargin(32, 28))[V] ]);
 }
 
 void SGridironOverlay::RestoreSuspended()
@@ -1142,6 +2048,7 @@ void SGridironOverlay::ShowPause(std::function<void()> Resume, std::function<voi
 	// the screen the pause comes over (the play call, the try choice) waits underneath and comes back with Resume
 	Suspended = bModal ? ModalContent : nullptr;
 	SuspendedFocus = bModal ? FocusedIndex() : -1;
+	ATagAudio::Screen(TEXT("Pause"));
 	// the game as it stands: the score, the quarter and clock, the down
 	FString Score, Situation;
 	if (Director && Director->Game)
@@ -1153,10 +2060,15 @@ void SGridironOverlay::ShowPause(std::function<void()> Resume, std::function<voi
 		Situation = FString::Printf(TEXT("%s   %d:%02d   -   %s  %s"), *Qt, Sec / 60, Sec % 60, UTF8_TO_TCHAR(G.downText().c_str()), UTF8_TO_TCHAR(G.ydLine().c_str()));
 	}
 	TSharedRef<SVerticalBox> V = SNew(SVerticalBox)
-		+ SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 2)[ SNew(STextBlock).Font(Font(12, "Bold")).ColorAndOpacity(Accent).Text(T(TEXT("GAME PAUSED"))) ]
-		+ SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 2)[ SNew(STextBlock).Font(Font(30, "Bold")).ColorAndOpacity(FLinearColor::White).Text(T(Score)) ]
-		+ SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 14)[ SNew(STextBlock).Font(Font(12)).ColorAndOpacity(Dim).Text(T(Situation)) ]
-		+ SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 14)[ SNew(SBox).HeightOverride(3).WidthOverride(400)[ SNew(SBorder).BorderImage(White()).BorderBackgroundColor(Accent) ] ];
+		+ SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 2)[ SNew(STextBlock).Font(TagTheme::Font(13, "BoldCondensed", 300)).ColorAndOpacity(TagTheme::Gold).Text(T(TEXT("GAME PAUSED"))) ]
+		+ SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 2)[ SNew(STextBlock).Font(TagTheme::Font(34, "Black", 10)).ColorAndOpacity(FLinearColor::White).Text(T(Score)) ]
+		+ SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 14)[ SNew(STextBlock).Font(TagTheme::Font(13, "BoldCondensed", 60)).ColorAndOpacity(TagTheme::Dim).Text(T(Situation)) ]
+		+ SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 16)
+		[
+			SNew(SHorizontalBox)
+			+ SHorizontalBox::Slot().AutoWidth()[ SNew(SBox).WidthOverride(96).HeightOverride(4)[ SNew(SBorder).BorderImage(TagTheme::Round(2.f)).BorderBackgroundColor(TagTheme::Gold) ] ]
+			+ SHorizontalBox::Slot().AutoWidth().Padding(6, 0, 0, 0)[ SNew(SBox).WidthOverride(24).HeightOverride(4)[ SNew(SBorder).BorderImage(TagTheme::Round(2.f)).BorderBackgroundColor(TagTheme::Gold * FLinearColor(1, 1, 1, 0.45f)) ] ]
+		];
 	V->AddSlot().AutoHeight()[ MakeButton(TEXT("Resume"), TEXT(""), [this, Resume] { ClearModal(); Resume(); }) ]; // the director restores the suspended screen
 	V->AddSlot().AutoHeight()[ MakeButton(TEXT("Box Score"), TEXT(""), [this, Resume] { ShowBoxScore(TEXT("Box Score"), TEXT("Resume"), [Resume] { Resume(); }); }) ];
 	V->AddSlot().AutoHeight()[ MakeButton(TEXT("Settings"), TEXT(""), [this, Resume, SimToEnd, Quit]
@@ -1164,6 +2076,17 @@ void SGridironOverlay::ShowPause(std::function<void()> Resume, std::function<voi
 		ShowSettings([this, Resume, SimToEnd, Quit]
 		{
 			// back to the pause menu, over the same suspended screen
+			const TSharedPtr<SWidget> Keep = Suspended;
+			const int32 KeepFocus = SuspendedFocus;
+			ShowPause(Resume, SimToEnd, Quit);
+			Suspended = Keep;
+			SuspendedFocus = KeepFocus;
+		});
+	}) ];
+	V->AddSlot().AutoHeight()[ MakeButton(TEXT("Controls"), TEXT(""), [this, Resume, SimToEnd, Quit]
+	{
+		ShowControls([this, Resume, SimToEnd, Quit]
+		{
 			const TSharedPtr<SWidget> Keep = Suspended;
 			const int32 KeepFocus = SuspendedFocus;
 			ShowPause(Resume, SimToEnd, Quit);
@@ -1189,26 +2112,30 @@ void SGridironOverlay::ShowPause(std::function<void()> Resume, std::function<voi
 	}) ];
 	V->AddSlot().AutoHeight()[ MakeButton(TEXT("Sim to End of Game"), TEXT(""), [this, SimToEnd] { ClearModal(); SimToEnd(); }) ];
 	V->AddSlot().AutoHeight()[ MakeButton(TEXT("Quit to Main Menu"), TEXT(""), [this, Quit] { ClearModal(); Quit(); }) ];
-	V->AddSlot().AutoHeight().Padding(0, 14, 0, 0)[ SNew(STextBlock).Font(Font(11)).ColorAndOpacity(Dim)
-		.Text(T(bSonyPad ? TEXT("OPTIONS  resume") : TEXT("MENU / ESC  resume"))) ];
 	// the frozen picture behind it, blurred and darkened (the field stays readable as a backdrop, the menu card on
-	// the left, as a broadcast game's pause is laid out)
+	// the left, as a broadcast game's pause is laid out), the button bar at the foot
+	TSharedRef<SWidget> Footer = SNew(SBorder).BorderImage(White()).BorderBackgroundColor(FLinearColor(0.006f, 0.008f, 0.014f, 0.86f)).Padding(FMargin(96, 14, 96, 14))
+	[
+		SNew(SHorizontalBox)
+		+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)[ HintItem(EPadGlyph::DUpDown, TEXT("↑↓"), TEXT("Move")) ]
+		+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)[ HintItem(EPadGlyph::Cross, TEXT("Enter"), TEXT("Select")) ]
+		+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)[ HintItem(EPadGlyph::None, PadGlyphs() ? (bSonyPad ? TEXT("OPTIONS") : TEXT("MENU")) : TEXT("Esc"), TEXT("Resume")) ]
+	];
 	ShowModal(SNew(SOverlay)
 		+ SOverlay::Slot()[ SNew(SBackgroundBlur).BlurStrength(14.f) ]
-		+ SOverlay::Slot()[ SNew(SBorder).BorderImage(White()).BorderBackgroundColor(FLinearColor(0.01f, 0.015f, 0.03f, 0.55f)) ]
-		+ SOverlay::Slot().HAlign(HAlign_Left).VAlign(VAlign_Center).Padding(FMargin(96, 0, 0, 0))
-		[
-			SNew(SHorizontalBox)
-			+ SHorizontalBox::Slot().AutoWidth()[ SNew(SBox).WidthOverride(5)[ SNew(SBorder).BorderImage(White()).BorderBackgroundColor(Accent) ] ]
-			+ SHorizontalBox::Slot().AutoWidth()
-			[ SNew(SBorder).BorderImage(White()).BorderBackgroundColor(FLinearColor(0.025f, 0.03f, 0.05f, 0.92f)).Padding(FMargin(28, 24))[V] ]
-		]);
+		+ SOverlay::Slot()[ SNew(TagTheme::SBackdrop).LeftWeighted(true).Strength(0.8f) ]
+		+ SOverlay::Slot().HAlign(HAlign_Left).VAlign(VAlign_Center).Padding(FMargin(96, 0, 0, 40))
+		[ SNew(TagTheme::SPanel).Fill(FLinearColor(0.02f, 0.026f, 0.044f, 0.9f)).AccentTop(TagTheme::Gold).Padding(FMargin(30, 26))[V] ]
+		+ SOverlay::Slot().HAlign(HAlign_Fill).VAlign(VAlign_Bottom)[ Footer ]);
 }
 
 void SGridironOverlay::ShowSettings(std::function<void()> Back)
 {
+	ATagAudio::Screen(TEXT("Settings"));
 	TSharedRef<SVerticalBox> V = SNew(SVerticalBox)
-		+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(0, 0, 0, 10)[ SNew(STextBlock).Font(Font(26, "Bold")).Text(T(TEXT("SETTINGS"))) ];
+		+ SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 18)[ TagTheme::Title(TEXT("Options"), TEXT("Settings"), 34) ];
+	V->AddSlot().AutoHeight()[ MakeButton(TEXT("Controls"), TEXT("Every button in the game on your controller; move any action to any button."),
+		[this, Back] { ShowControls([this, Back] { ShowSettings(Back); }); }) ];
 	const bool bCc = Director && Director->CaptionsOn();
 	V->AddSlot().AutoHeight()[ MakeButton(FString::Printf(TEXT("Commentary captions: %s"), bCc ? TEXT("On") : TEXT("Off")),
 		TEXT("The booth's words as text at the bottom of the screen."), [this, Back, bCc] { if (Director) Director->SetCaptionsOn(!bCc); ShowSettings(Back); }) ];
@@ -1220,8 +2147,10 @@ void SGridironOverlay::ShowSettings(std::function<void()> Back)
 	for (int32 W = 0; W < 3; ++W)
 		V->AddSlot().AutoHeight()[ MakeButton(FString::Printf(TEXT("%s: %d%%"), VolName[W], ATagAudio::Level(W) * 25), VolSub[W],
 			[this, Back, W] { ATagAudio::StepLevel(W); ShowSettings(Back); }) ];
-	V->AddSlot().AutoHeight()[ MakeButton(TEXT("Back"), TEXT(""), [Back] { Back(); }) ];
-	ShowModal(Centered(SNew(SBorder).BorderImage(White()).BorderBackgroundColor(Panel).Padding(20)[V], 0.6f));
+	V->AddSlot().AutoHeight().Padding(0, 10, 0, 0)[ MakeButton(TEXT("Back"), TEXT(""), [Back] { Back(); }) ];
+	ShowModal(SNew(SOverlay)
+		+ SOverlay::Slot()[ SNew(TagTheme::SBackdrop).Strength(0.9f) ]
+		+ SOverlay::Slot().HAlign(HAlign_Center).VAlign(VAlign_Center)[ SNew(TagTheme::SPanel).AccentTop(TagTheme::Gold).Padding(FMargin(32, 28))[V] ]);
 }
 
 void SGridironOverlay::ShowBoxScore(const FString& Title, const FString& Button, std::function<void()> Done)
@@ -1243,15 +2172,19 @@ void SGridironOverlay::ShowBoxScore(const FString& Title, const FString& Button,
 		{TEXT("Penalties"), FString::Printf(TEXT("%d-%d"), A.penalties, A.penYds), FString::Printf(TEXT("%d-%d"), H.penalties, H.penYds)},
 		{TEXT("Time of poss."), Top(A.top), Top(H.top)},
 	};
-	TSharedRef<SGridPanel> Grid = SNew(SGridPanel).FillColumn(0, 1);
-	Grid->AddSlot(1, 0).Padding(16, 2)[ SNew(STextBlock).Font(Font(12, "Bold")).ColorAndOpacity(Dim).Text(T(S(G.away->abbr))) ];
-	Grid->AddSlot(2, 0).Padding(16, 2)[ SNew(STextBlock).Font(Font(12, "Bold")).ColorAndOpacity(Dim).Text(T(S(G.home->abbr))) ];
+	// the broadcast's stat table: the away team's number, the stat, the home team's number; banded rows
+	TSharedRef<SVerticalBox> Grid = SNew(SVerticalBox);
 	for (int i = 0; i < Rows.Num(); ++i)
-	{
-		Grid->AddSlot(0, i + 1).Padding(0, 2)[ SNew(STextBlock).Font(Font(12)).Text(T(Rows[i].L)) ];
-		Grid->AddSlot(1, i + 1).Padding(16, 2).HAlign(HAlign_Right)[ SNew(STextBlock).Font(Font(12, "Bold")).Text(T(Rows[i].A)) ];
-		Grid->AddSlot(2, i + 1).Padding(16, 2).HAlign(HAlign_Right)[ SNew(STextBlock).Font(Font(12, "Bold")).Text(T(Rows[i].H)) ];
-	}
+		Grid->AddSlot().AutoHeight()
+		[
+			SNew(SBorder).BorderImage(TagTheme::Round(3.f)).BorderBackgroundColor(FLinearColor(1, 1, 1, i % 2 ? 0.f : 0.035f)).Padding(FMargin(18, 5))
+			[
+				SNew(SHorizontalBox)
+				+ SHorizontalBox::Slot().FillWidth(1).HAlign(HAlign_Left)[ SNew(STextBlock).Font(TagTheme::Font(16, "BoldCondensed", 20)).ColorAndOpacity(FLinearColor::White).Text(T(Rows[i].A)) ]
+				+ SHorizontalBox::Slot().FillWidth(1.4f).HAlign(HAlign_Center)[ SNew(STextBlock).Font(TagTheme::Font(12, "BoldCondensed", 160)).ColorAndOpacity(TagTheme::Dim).Text(T(Rows[i].L.ToUpper())) ]
+				+ SHorizontalBox::Slot().FillWidth(1).HAlign(HAlign_Right)[ SNew(STextBlock).Font(TagTheme::Font(16, "BoldCondensed", 20)).ColorAndOpacity(FLinearColor::White).Text(T(Rows[i].H)) ]
+			]
+		];
 	// individual leaders
 	auto Leaders = [&](const tag::Team& Tm) -> FString
 	{
@@ -1271,19 +2204,67 @@ void SGridironOverlay::ShowBoxScore(const FString& Title, const FString& Button,
 		if (DF) Out += FString::Printf(TEXT("%s  %d tkl, %.1f sck, %d INT"), *S(DF->name), DF->tackles, static_cast<double>(DF->sacks), DF->ints);
 		return Out;
 	};
+	// each team: its mark on its colour, its name, its score (the winner's score in white, the loser's dimmed at a final)
+	const bool bFinal = G.isFinal();
+	auto TeamBlock = [&](const tag::Team& Tm, int32 Pts, int32 OppPts, bool bRight) -> TSharedRef<SWidget>
+	{
+		const FLinearColor Pri = RosterUI::TeamInk(Tm);
+		const FSlateBrush* LogoB = RosterUI::Logo(Tm);
+		TSharedRef<SWidget> Mark = SNew(SBox).WidthOverride(76).HeightOverride(76)
+			[ LogoB ? StaticCastSharedRef<SWidget>(SNew(SImage).Image(LogoB)) : StaticCastSharedRef<SWidget>(SNew(SBorder).BorderImage(TagTheme::Round(6.f)).BorderBackgroundColor(Pri)) ];
+		TSharedRef<SWidget> Name = SNew(SVerticalBox)
+			+ SVerticalBox::Slot().AutoHeight()[ SNew(STextBlock).Font(TagTheme::Font(14, "BoldCondensed", 120)).ColorAndOpacity(FLinearColor(1, 1, 1, 0.75f)).Text(T(S(Tm.city).ToUpper())) ]
+			+ SVerticalBox::Slot().AutoHeight()[ SNew(STextBlock).Font(TagTheme::Font(28, "Black")).ColorAndOpacity(FLinearColor::White).Text(T(S(Tm.name).ToUpper())) ];
+		TSharedRef<SWidget> Score = SNew(STextBlock).Font(TagTheme::Font(58, "Black")).Text(FText::AsNumber(Pts))
+			.ColorAndOpacity(bFinal && Pts < OppPts ? FLinearColor(1, 1, 1, 0.55f) : FLinearColor::White).ShadowOffset(FVector2D(0, 2)).ShadowColorAndOpacity(FLinearColor(0, 0, 0, 0.4f));
+		TSharedRef<SHorizontalBox> Row = SNew(SHorizontalBox);
+		if (!bRight)
+		{
+			Row->AddSlot().AutoWidth().VAlign(VAlign_Center)[ Mark ];
+			Row->AddSlot().FillWidth(1).VAlign(VAlign_Center).Padding(14, 0)[ Name ];
+			Row->AddSlot().AutoWidth().VAlign(VAlign_Center)[ Score ];
+		}
+		else
+		{
+			Row->AddSlot().AutoWidth().VAlign(VAlign_Center)[ Score ];
+			Row->AddSlot().FillWidth(1).VAlign(VAlign_Center).HAlign(HAlign_Right).Padding(14, 0)[ Name ];
+			Row->AddSlot().AutoWidth().VAlign(VAlign_Center)[ Mark ];
+		}
+		return SNew(SBorder).BorderImage(TagTheme::Round(6.f)).BorderBackgroundColor(Pri * FLinearColor(0.78f, 0.78f, 0.78f, 0.95f)).Padding(FMargin(16, 10))[ Row ];
+	};
+	auto LeaderCol = [&](const tag::Team& Tm) -> TSharedRef<SWidget>
+	{
+		return SNew(SVerticalBox)
+			+ SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 6)
+			[
+				SNew(SHorizontalBox)
+				+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(0, 0, 8, 0)[ SNew(SBox).WidthOverride(4).HeightOverride(16)[ SNew(SBorder).BorderImage(TagTheme::Round(2.f)).BorderBackgroundColor(RosterUI::TeamInk(Tm)) ] ]
+				+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)[ SNew(STextBlock).Font(TagTheme::Font(13, "BoldCondensed", 160)).ColorAndOpacity(TagTheme::Gold).Text(T(S(Tm.abbr) + TEXT("  LEADERS"))) ]
+			]
+			+ SVerticalBox::Slot().AutoHeight()[ SNew(STextBlock).Font(Font(13)).LineHeightPercentage(1.15f).ColorAndOpacity(FLinearColor(0.88f, 0.9f, 0.94f)).Text(T(Leaders(Tm))) ];
+	};
 	TSharedRef<SVerticalBox> V = SNew(SVerticalBox)
-		+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center)[ SNew(STextBlock).Font(Font(11)).ColorAndOpacity(Dim).Text(T(Title.ToUpper())) ]
-		+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(0, 4, 0, 14)
-		[ SNew(STextBlock).Font(Font(34, "Bold")).Text(T(FString::Printf(TEXT("%s %s %d   -   %d %s %s"), *S(G.away->city), *S(G.away->name), G.score[tag::TeamKey::Away], G.score[tag::TeamKey::Home], *S(G.home->city), *S(G.home->name)))) ]
+		+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(0, 0, 0, 12)
+		[ SNew(STextBlock).Font(TagTheme::Font(14, "BoldCondensed", 360)).ColorAndOpacity(TagTheme::Gold).Text(T(Title.ToUpper())) ]
+		+ SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 16)
+		[
+			SNew(SHorizontalBox)
+			+ SHorizontalBox::Slot().FillWidth(1).Padding(0, 0, 6, 0)[ TeamBlock(*G.away, G.score[tag::TeamKey::Away], G.score[tag::TeamKey::Home], false) ]
+			+ SHorizontalBox::Slot().FillWidth(1).Padding(6, 0, 0, 0)[ TeamBlock(*G.home, G.score[tag::TeamKey::Home], G.score[tag::TeamKey::Away], true) ]
+		]
 		+ SVerticalBox::Slot().AutoHeight()[ Grid ]
+		+ SVerticalBox::Slot().AutoHeight().Padding(0, 16, 0, 0)[ RosterUI::Fill(FLinearColor(1, 1, 1, 0.08f)) ]
 		+ SVerticalBox::Slot().AutoHeight().Padding(0, 14, 0, 0)
 		[
 			SNew(SHorizontalBox)
-			+ SHorizontalBox::Slot().FillWidth(1).Padding(0, 0, 12, 0)[ SNew(STextBlock).Font(Font(11)).ColorAndOpacity(FLinearColor(0.85f, 0.88f, 0.92f)).Text(T(S(G.away->abbr) + TEXT(" leaders\n") + Leaders(*G.away))) ]
-			+ SHorizontalBox::Slot().FillWidth(1)[ SNew(STextBlock).Font(Font(11)).ColorAndOpacity(FLinearColor(0.85f, 0.88f, 0.92f)).Text(T(S(G.home->abbr) + TEXT(" leaders\n") + Leaders(*G.home))) ]
+			+ SHorizontalBox::Slot().FillWidth(1).Padding(0, 0, 16, 0)[ LeaderCol(*G.away) ]
+			+ SHorizontalBox::Slot().FillWidth(1)[ LeaderCol(*G.home) ]
 		]
-		+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(0, 16, 0, 0)[ MakeButton(Button, TEXT(""), [this, Done] { ClearModal(); Done(); }, 220) ];
-	ShowModal(Centered(SNew(SBox).WidthOverride(900)[ SNew(SBorder).BorderImage(White()).BorderBackgroundColor(Panel).Padding(24)[V] ], 0.75f));
+		+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(0, 18, 0, 0)[ MakeButton(Button, TEXT(""), [this, Done] { ClearModal(); Done(); }, 300) ];
+	ShowModal(SNew(SOverlay)
+		+ SOverlay::Slot()[ SNew(TagTheme::SBackdrop).Strength(1.1f) ]
+		+ SOverlay::Slot().HAlign(HAlign_Center).VAlign(VAlign_Center)
+		[ SNew(SBox).WidthOverride(1000)[ SNew(TagTheme::SPanel).AccentTop(TagTheme::Gold).Padding(FMargin(28, 24))[V] ] ]);
 }
 
 int32 SGridironOverlay::PaintKickMeter(FSlateWindowElementList& Out, int32 Layer, const FGeometry& G) const
@@ -1308,20 +2289,18 @@ int32 SGridironOverlay::PaintKickMeter(FSlateWindowElementList& Out, int32 Layer
 		FSlateDrawElement::MakeLines(Out, Layer + 1, G.ToPaintGeometry(), {E - D * 18.f + N * 10.f, E, E - D * 18.f - N * 10.f}, ESlateDrawEffect::None, Accent, true, 3.5f);
 	}
 	// the meter: bottom centre
-	const float W = 460.f, H = 118.f;
+	// (the title on its own line, the kind of kick under it: side by side they ran into each other)
+	const float W = 540.f, H = 146.f;
 	const FVector2D TL((Local.X - W) * 0.5f, Local.Y - H - 150.f); // (above the score bug and the hint line)
-	Box(TL, FVector2D(W, H), FLinearColor(0.02f, 0.025f, 0.035f, 0.88f), Layer + 2);
-	Box(TL + FVector2D(0, H - 3), FVector2D(W, 3), Accent, Layer + 3);
-	const FSlateFontInfo Ft = Font(14, "Bold"), Fs = Font(10);
-	FSlateDrawElement::MakeText(Out, Layer + 3, G.ToPaintGeometry(FVector2f(W - 28, 20), FSlateLayoutTransform(FVector2f(TL + FVector2D(14, 8)))), K.Title, Ft, ESlateDrawEffect::None, FLinearColor::White);
+	TagTheme::PaintPanel(Out, Layer + 1, G, TL, FVector2D(W, H), FLinearColor(0.02f, 0.025f, 0.04f, 0.9f), 7.f);
+	TagTheme::Box(Out, Layer + 3, G, TL + FVector2D(0, H - 4), FVector2D(W, 4), Accent, 2.f);
+	const FSlateFontInfo Ft = TagTheme::Font(17, "BoldCondensed", 40), Fs = TagTheme::Font(10, "BoldCondensed", 120);
+	FSlateDrawElement::MakeText(Out, Layer + 3, G.ToPaintGeometry(FVector2f(W - 28, 22), FSlateLayoutTransform(FVector2f(TL + FVector2D(16, 9)))), K.Title.ToUpper(), Ft, ESlateDrawEffect::None, FLinearColor::White);
 	if (!K.Sub.IsEmpty())
-	{
-		const FVector2D M = Measure(K.Sub, Fs);
-		FSlateDrawElement::MakeText(Out, Layer + 3, G.ToPaintGeometry(FVector2f(M), FSlateLayoutTransform(FVector2f(TL + FVector2D(W - 14 - M.X, 12)))), K.Sub, Fs, ESlateDrawEffect::None, Dim);
-	}
+		FSlateDrawElement::MakeText(Out, Layer + 3, G.ToPaintGeometry(FVector2f(W - 28, 16), FSlateLayoutTransform(FVector2f(TL + FVector2D(16, 33)))), K.Sub.ToUpper(), Fs, ESlateDrawEffect::None, Accent);
 	// power: 0..1.15 across, the last 13% red
-	const FVector2D PB = TL + FVector2D(14, 40);
-	const float PW = W - 28, Red = PW * (1.f / 1.15f);
+	const FVector2D PB = TL + FVector2D(16, 70);
+	const float PW = W - 32, Red = PW * (1.f / 1.15f);
 	Box(PB, FVector2D(PW, 20), FLinearColor(0.12f, 0.13f, 0.16f, 1.f), Layer + 3);
 	Box(PB + FVector2D(Red, 0), FVector2D(PW - Red, 20), FLinearColor(0.45f, 0.06f, 0.05f, 1.f), Layer + 3);
 	Box(PB + FVector2D(Red * 0.9f, 0), FVector2D(Red * 0.1f, 20), FLinearColor(0.07f, 0.3f, 0.12f, 1.f), Layer + 3);
@@ -1330,7 +2309,7 @@ int32 SGridironOverlay::PaintKickMeter(FSlateWindowElementList& Out, int32 Layer
 	Box(PB + FVector2D(0, 4), FVector2D(Fill, 12), FillC, Layer + 4);
 	FSlateDrawElement::MakeText(Out, Layer + 4, G.ToPaintGeometry(FVector2f(60, 14), FSlateLayoutTransform(FVector2f(PB + FVector2D(0, -15)))), FString(TEXT("POWER")), Fs, ESlateDrawEffect::None, Dim);
 	// accuracy: the needle across, the centre band green
-	const FVector2D AB = TL + FVector2D(14, 84);
+	const FVector2D AB = TL + FVector2D(16, 116);
 	Box(AB, FVector2D(PW, 12), FLinearColor(0.12f, 0.13f, 0.16f, 1.f), Layer + 3);
 	Box(AB + FVector2D(PW * 0.5f - PW * 0.075f, 0), FVector2D(PW * 0.15f, 12), FLinearColor(0.07f, 0.35f, 0.14f, 1.f), Layer + 3);
 	FSlateDrawElement::MakeText(Out, Layer + 4, G.ToPaintGeometry(FVector2f(90, 14), FSlateLayoutTransform(FVector2f(AB + FVector2D(0, -15)))), FString(TEXT("ACCURACY")), Fs, ESlateDrawEffect::None, Dim);

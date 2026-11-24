@@ -1,8 +1,12 @@
 // Port of tools/test.ts (+ a few C++-side API checks).
 // Invariant / regression tests for the simulation. Exit code 1 on any failure.
 #include <cmath>
+#include <cstdlib>
+#include <cstring>
 #include <cstdio>
 #include <functional>
+#include <map>
+#include <memory>
 #include <set>
 #include <sstream>
 #include <stdexcept>
@@ -23,6 +27,8 @@ int passCount = 0;
 int failCount = 0;
 
 void t(const char* name, const std::function<void()>& fn) {
+  // TAG_TEST=<text>: run only the tests whose name holds it
+  if (const char* only = std::getenv("TAG_TEST"); only && !std::strstr(name, only)) return;
   try {
     fn();
     passCount++;
@@ -113,8 +119,18 @@ int main() {
     Rng rng(5);
     const std::vector<double> ys = {FIELD_W / 2 - 3.08, FIELD_W / 2, FIELD_W / 2 + 3.08};
     const std::vector<Precip> precs = {Precip::None, Precip::Rain, Precip::Snow};
-    for (const OffPlay& op : OFF_PLAYS()) {
-      for (const DefCall& dc : DEF_PLAYS()) {
+    // (the expanded books: 3,700 plays x 590 calls is two million snaps - every play against three calls and every call
+    // against three plays, rotating, covers each of them and every front and coverage against every kind of play)
+    const size_t nO = OFF_PLAYS().size(), nD = DEF_PLAYS().size();
+    std::vector<std::pair<size_t, size_t>> pairs;
+    for (size_t i = 0; i < nO; i++)
+      for (size_t k = 0; k < 3; k++) pairs.emplace_back(i, (i * 7 + k * 131) % nD);
+    for (size_t j = 0; j < nD; j++)
+      for (size_t k = 0; k < 3; k++) pairs.emplace_back((j * 11 + k * 977) % nO, j);
+    for (const auto& pr : pairs) {
+      const OffPlay& op = OFF_PLAYS()[pr.first];
+      {
+        const DefCall& dc = DEF_PLAYS()[pr.second];
         PlayConfig cfg;
         cfg.off = league[1].get();
         cfg.def = league[2].get();
@@ -137,6 +153,76 @@ int main() {
         check(r.duration < 30, op.id + " lasted " + fx(r.duration) + "s");
       }
     }
+  });
+
+  t("football: a dropped ball bounces off its ends, rolls on, and comes to rest on its belly (BallPhysics.h)", [&] {
+    Rng rng(11);
+    double sumX = 0, sumY = 0, sumSq = 0;
+    for (int k = 0; k < 60; ++k) {
+      BallBody b;
+      b.pos = V3{0, 0, 1.0};
+      b.vel = V3{rng.range(1, 4), rng.range(-2, 2), rng.range(1, 3)};
+      b.q = qnorm(Quat{rng.range(-1, 1), rng.range(-1, 1), rng.range(-1, 1), rng.range(-1, 1)});
+      b.w = V3{rng.range(-12, 12), rng.range(-12, 12), rng.range(-12, 12)};
+      double t = 0, peakAfter = 0;
+      bool bounced = false;
+      while (!b.rest && t < 8) {
+        b.step(1.0 / 60, G);
+        t += 1.0 / 60;
+        check(std::isfinite(b.pos.x) && std::isfinite(b.pos.z) && std::isfinite(b.w.x), "ball NaN");
+        check(b.pos.z + b.lowPoint().z > -0.02, "ball through the turf " + fx(b.pos.z + b.lowPoint().z));
+        bounced = bounced || b.bounces > 0;
+        if (bounced) peakAfter = (std::max)(peakAfter, b.pos.z);
+      }
+      check(b.rest, "ball never came to rest (" + fx(t) + " s)");
+      check(std::fabs(b.pos.z - BallBody::B) < 1e-6 && std::fabs(b.axis().z) < 1e-3, "ball not lying on its belly");
+      check(peakAfter < 1.6, "a bounce went higher than the drop could give: " + fx(peakAfter));
+      // where it ends up off its line of flight: a football's bounce sends it off at an angle
+      const double ang = std::atan2(b.pos.y, b.pos.x);
+      sumX += std::cos(ang), sumY += std::sin(ang), sumSq += 1;
+    }
+    const double R = std::sqrt(sumX * sumX + sumY * sumY) / sumSq;  // 1 = always the same way
+    check(R < 0.85, "the bounces all go one way (resultant " + fx(R) + ")");
+  });
+
+  t("fumbles: no more than two men leave their feet at once for a loose ball, and every fumble ends", [&] {
+    const double keep = tune().fumbleK;
+    setTune("fumbleK", 60);
+    Rng rng(23);
+    int fumbles = 0, maxDiving = 0, dives = 0, squirts = 0, misses = 0, recs = 0, oob = 0;
+    for (int k = 0; k < 120; ++k) {
+      PlayConfig cfg;
+      cfg.off = league[4].get();
+      cfg.def = league[9].get();
+      cfg.offPlay = &OFF_PLAYS()[k % OFF_PLAYS().size()];
+      cfg.defCall = &DEF_PLAYS()[k % DEF_PLAYS().size()];
+      cfg.los = rng.range(20, 80);
+      cfg.ballY = FIELD_W / 2;
+      cfg.worldDir = 1;
+      cfg.weather.tempF = 60;
+      cfg.rng = rng.fork();
+      PlaySim sim(cfg);
+      sim.onStep = [&](const PlaySim& s) {
+        int n = 0;
+        for (const Ent* e : s.ents) n += e->looseDiveT >= 0;
+        maxDiving = (std::max)(maxDiving, n);
+      };
+      const PlayResult& r = sim.runToEnd();
+      check(sim.phase == SimPhase::Dead, "a fumbled play never ended");
+      if (r.fumbleBy) ++fumbles;
+      for (const PlayEvent& e : sim.events) {
+        dives += e.type == "dive";
+        squirts += e.type == "squirt";
+        misses += e.type == "divemiss";
+        recs += e.type == "recover";
+        oob += r.fumbleBy && r.outOfBounds && &e == &sim.events.front();
+      }
+    }
+    setTune("fumbleK", keep);
+    check(fumbles >= 10, "too few fumbles to judge: " + std::to_string(fumbles));
+    check(maxDiving <= 2, std::to_string(maxDiving) + " men in the air at once");
+    std::printf("       (fumbles %d: dives %d, knocked on %d, dived and missed %d, recovered %d, out of bounds %d)\n", fumbles, dives, squirts, misses, recs, oob);
+    check(dives <= fumbles * 3, std::to_string(dives) + " dives for " + std::to_string(fumbles) + " fumbles");
   });
 
   t("physics: 99-speed player runs a ~4.3 forty, lineman ~5.2", [&] {
@@ -244,12 +330,13 @@ int main() {
   });
 
   t("cross-language: createLeague(2027) matches the TS league", [&] {
-    // spot values from the TS createLeague(2027) (identical RNG consumption order)
+    // spot values from the TS createLeague(2027) (identical RNG consumption order; the C++ league draws the franchise
+    // talent at half the TS spread since 2026-11-19, so the AUS QB's throw power is 78 where the TS has 77)
     const Player& p0 = *league[0]->roster[0];
     check(league[0]->abbr == "AUS" && p0.id == 1, "team order / player ids");
     check(p0.first == "Jamal" && p0.last == "Sorensen" && p0.pos == Pos::QB && p0.number == 8 && p0.age == 26, "AUS QB1 identity");
     check(p0.heightIn == 77 && p0.weightLb == 221 && p0.ovr == 70, "AUS QB1 measurables");
-    check(p0.r.speed == 66 && p0.r.throwPower == 77 && p0.r.decision == 79 && p0.r.kickAcc == 27, "AUS QB1 ratings");
+    check(p0.r.speed == 66 && p0.r.throwPower == 78 && p0.r.decision == 79 && p0.r.kickAcc == 27, "AUS QB1 ratings");
     const Player& wr = *league[0]->roster[7];
     check(wr.first == "Keon" && wr.last == "Whitfield" && wr.r.speed == 99 && wr.ovr == 84, "AUS WR1");
     check(std::fabs(league[0]->passLean - 0.5768404039069508) < 1e-15, "AUS passLean");
@@ -484,13 +571,26 @@ int main() {
       Game g(*league[gi], *league[gi + 10], o);
       int lastQb = -1, lastPoss = -1;
       g.onPlayResult = [&](const PlaySim& sim, const PlayResult&) {
+        if (sim.qb->p->pos != Pos::QB) return;  // (a wildcat snap: the back took it)
         const int qid = sim.qb->p->id;
         const bool hurt = lastQb >= 0 && sim.qb->p->id != lastQb;
         if (hurt && lastPoss == static_cast<int>(g.poss)) {
           bool starterHurt = false;
           for (const auto& p : g.offense().roster)
             if (p->id == lastQb && p->injuredWeeks > 0) starterHurt = true;
-          if (!starterHurt) swaps++;
+          if (!starterHurt) {
+            swaps++;
+            const Player* was = nullptr;
+            for (const auto& p : g.offense().roster)
+              if (p->id == lastQb) was = p.get();
+            std::printf("       (swap: game %d q%d clock %.0f score %d-%d, QB %d -> %d, the starter: injured %d fatigue %.2f)\n", gi, g.q, g.clock, g.score.home,
+                        g.score.away, lastQb, qid, was ? was->injuredWeeks : -1, was ? was->fatigue : -1.0);
+            for (const auto& p : g.offense().roster)
+              if (p->pos == Pos::QB)
+                std::printf("         QB %d ovr %d injured %.1f onFieldLast %d fatigue %.2f\n", p->id, p->ovr, static_cast<double>(p->injuredWeeks), p->onFieldLast ? 1 : 0, p->fatigue);
+            std::printf("         this play: %s (formation %s)\n", sim.cfg.offPlay->id.c_str(), sim.cfg.offPlay->formation.c_str());
+            std::printf("         last plays: %s | %s\n", g.log.size() > 1 ? g.log[g.log.size() - 2].desc.c_str() : "", g.log.empty() ? "" : g.log.back().desc.c_str());
+          }
         }
         lastQb = qid;
         lastPoss = static_cast<int>(g.poss);
@@ -543,8 +643,27 @@ int main() {
       defSchemes.insert(db.scheme);
       sizes.insert(std::to_string(ob.plays.size()) + "/" + std::to_string(db.calls.size()));
       check(ob.formations.size() >= 9, tm->abbr + " offense has " + std::to_string(ob.formations.size()) + " formations");
-      check(ob.plays.size() >= 150, tm->abbr + " offense has " + std::to_string(ob.plays.size()) + " plays");
-      check(db.sets.size() >= 5 && db.calls.size() >= 50, tm->abbr + " defense has " + std::to_string(db.calls.size()) + " calls");
+      // (an NFL / Madden-sized book: 250-400 offensive plays from 25-35 sets, 250-350 defensive calls)
+      check(ob.plays.size() >= 300, tm->abbr + " offense has " + std::to_string(ob.plays.size()) + " plays");
+      check(ob.formations.size() >= 20, tm->abbr + " offense has only " + std::to_string(ob.formations.size()) + " sets");
+      check(db.sets.size() >= 10 && db.calls.size() >= 240, tm->abbr + " defense has " + std::to_string(db.calls.size()) + " calls");
+      {
+        std::set<std::string> concepts, kinds;
+        for (const OffPlay* p : ob.plays) {
+          concepts.insert(p->conceptName);
+          kinds.insert(playCatName(p->cat));
+          check(!p->conceptName.empty() && !p->desc.empty() && !p->personnel.empty(), p->id + " lacks its play-call screen info");
+        }
+        check(concepts.size() >= 45, tm->abbr + " book has only " + std::to_string(concepts.size()) + " distinct concepts");
+        check(kinds.count("Run") && kinds.count("Pass") && kinds.count("PA") && kinds.count("Screen"), tm->abbr + " book lacks a kind of play");
+        std::set<std::string> covers, pressures;
+        for (const DefCall* d : db.calls) {
+          covers.insert(d->coverLabel);
+          pressures.insert(d->pressure);
+          check(!d->frontLabel.empty() && !d->coverLabel.empty() && !d->pressure.empty() && !d->desc.empty(), d->id + " lacks its play-call screen info");
+        }
+        check(covers.size() >= 14 && pressures.size() >= 5, tm->abbr + " defense: " + std::to_string(covers.size()) + " coverages, " + std::to_string(pressures.size()) + " pressure kinds");
+      }
       bool goalLine = false, runs = false, pa = false;
       for (const std::string& f : ob.formations) check(ob.playsIn(f).size() >= 6, tm->abbr + " " + f + " has too few plays");
       for (const OffPlay* p : ob.plays) {
@@ -593,6 +712,144 @@ int main() {
       check(dl == 3 && olb == 2, d.id + " has " + std::to_string(dl) + " down linemen");
       sim->runToEnd();
       break;
+    }
+  });
+
+  // ---- the expanded playbook's mechanics (2026-11-22)
+  auto findPlay = [&](const std::function<bool(const OffPlay&)>& f) -> const OffPlay* {
+    for (const OffPlay& p : OFF_PLAYS())
+      if (f(p)) return &p;
+    return nullptr;
+  };
+  t("playbook mechanics: a gap run's pullers pull and kick out / wrap; a lead back leads", [&] {
+    const OffPlay* ctr = findPlay([](const OffPlay& p) { return p.conceptName == "Counter GT" && !p.stock && formationById(p.formation)->qbDepth < 2; });
+    check(ctr != nullptr, "no counter play");
+    if (!ctr) return;
+    int pulls = 0, snaps = 0, onMan = 0;
+    for (int i = 0; i < 60; i++) {
+      auto g = scrimmage(9100 + i, i % 32, (i + 5) % 32);
+      auto sim = g->makePlay(*ctr, *defById(i % 2 ? "base_c3" : "nk_c3"));
+      std::vector<Ent*> men;
+      std::vector<double> y0;
+      sim->step(SIM_DT);
+      for (Ent* e : sim->off)
+        if (std::string(sim->runJob(e)) != "" && e->isOL) men.push_back(e), y0.push_back(e->pos.y);
+      snaps++;
+      while (sim->isLive() && sim->t < 1.1) sim->step(SIM_DT);
+      for (size_t k = 0; k < men.size(); k++) {
+        if (std::fabs(men[k]->pos.y - y0[k]) > 1.8 && men[k]->pos.x < sim->los + 1.5) pulls++;
+        if (men[k]->engaged) onMan++;
+      }
+      if (sim->isLive()) sim->runToEnd();
+    }
+    std::printf("       (%d snaps: %d linemen pulled 1.8+ yd down the line in 1.1 s, %d were on their man)\n", snaps, pulls, onMan);
+    check(pulls >= snaps / 2, "counter GT: only " + std::to_string(pulls) + " pulls in " + std::to_string(snaps) + " snaps");
+    auto g = scrimmage(9200, 3, 4);
+    auto sim = g->makePlay(*playById("i_iso"), *defById("base_c3"));
+    sim->step(SIM_DT);
+    Ent* fb = sim->offRole("FB");
+    check(fb && std::string(sim->runJob(fb)) == "lead" && fb->blockTarget && !fb->blockTarget->isDL, "iso: the fullback leads for a linebacker");
+  });
+
+  t("playbook mechanics: the zone read leaves the end unblocked and the quarterback keeps it when he squeezes", [&] {
+    const OffPlay* zr = findPlay([](const OffPlay& p) { return p.run && p.run->read == "end"; });
+    check(zr != nullptr, "no zone read");
+    if (!zr) return;
+    int keeps = 0, gives = 0, blocked = 0, qbRush = 0;
+    for (int i = 0; i < 80; i++) {
+      auto g = scrimmage(9300 + i, i % 32, (i + 9) % 32);
+      auto sim = g->makePlay(*zr, *defById(i % 2 ? "base_c3" : "nk_c1"));
+      while (sim->isLive() && sim->t < 0.6) sim->step(SIM_DT);
+      if (sim->readEnt && !sim->readEnt->engagedBy.empty()) blocked++;
+      const PlayResult& r = sim->runToEnd();
+      if (sim->qbKept) {
+        keeps++;
+        qbRush += r.rusher == sim->qb->p;
+      } else gives++;
+    }
+    check(blocked == 0, std::to_string(blocked) + " read ends blocked before the mesh");
+    check(keeps >= 15 && gives >= 15, "zone read: " + std::to_string(keeps) + " keeps, " + std::to_string(gives) + " gives");
+    check(qbRush == keeps, "a keep is the quarterback's run");
+  });
+
+  t("playbook mechanics: an RPO is thrown when the conflict defender is out of the play, and then it is a pass", [&] {
+    const OffPlay* rp = findPlay([](const OffPlay& p) { return p.run && p.run->read == "rpo" && !p.run->rpo.empty(); });
+    check(rp != nullptr, "no RPO");
+    if (!rp) return;
+    int thrown = 0, passes = 0, n = 0;
+    for (int i = 0; i < 80; i++) {
+      auto g = scrimmage(9400 + i, i % 32, (i + 3) % 32);
+      auto sim = g->makePlay(*rp, *defById(i % 3 == 0 ? "nk_c1" : i % 3 == 1 ? "nk_c3" : "base_c2"));
+      const PlayResult& r = sim->runToEnd();
+      n++;
+      if (sim->rpoThrow) {
+        thrown++;
+        passes += r.kind == PlayKind::Pass || r.interception;
+        check(r.passer == sim->qb->p, "an RPO throw has a passer");
+      } else check(r.kind == PlayKind::Run, "an RPO handed off is a run");
+    }
+    check(thrown > 5 && thrown < n - 5, "RPO thrown " + std::to_string(thrown) + " of " + std::to_string(n));
+    check(passes == thrown, "every RPO throw is scored a pass");
+  });
+
+  t("playbook mechanics: the jet man is snapped at full speed and takes the sweep on the move", [&] {
+    const OffPlay* js = findPlay([](const OffPlay& p) { return p.run && p.run->jet && p.motion; });
+    check(js != nullptr, "no jet sweep");
+    if (!js) return;
+    double vSum = 0, tSum = 0;
+    int got = 0;
+    for (int i = 0; i < 40; i++) {
+      auto g = scrimmage(9500 + i, i % 32, (i + 7) % 32);
+      auto sim = g->makePlay(*js, *defById("base_c3"));
+      Ent* jm = sim->offRole(js->motion->role);
+      sim->step(SIM_DT);
+      vSum += jm->speed();
+      while (sim->isLive() && sim->t < 3 && sim->ball.holder != jm) sim->step(SIM_DT);
+      if (sim->ball.holder == jm) got++, tSum += sim->t;
+      if (sim->isLive()) sim->runToEnd();
+    }
+    check(vSum / 40 > 5.0, "the jet man is at " + fx(vSum / 40) + " yd/s at the snap");
+    check(got >= 36, "the jet man got the ball on " + std::to_string(got) + " of 40");
+    check(got == 0 || tSum / got < 1.6, "the jet handoff at " + fx(tSum / (std::max)(1, got)) + " s");
+  });
+
+  t("playbook mechanics: zone blitzes drop a lineman, fire zones keep three deep, disguises show the other shell", [&] {
+    auto g = scrimmage(9600, 2, 6);
+    int checked = 0;
+    for (const DefCall& d : DEF_PLAYS()) {
+      if (d.front == Front::Goalline) continue;
+      auto sim = g->makePlay(*playById("dbl_mesh"), d);
+      int rush = 0, deep = 0;
+      for (const Ent* e : sim->def) {
+        rush += e->state == EntState::Rush;
+        deep += e->deepRole;
+        if (std::find(d.drop.begin(), d.drop.end(), e->role) != d.drop.end())
+          check(e->state == EntState::Zone || e->state == EntState::Man, d.id + ": the dropping " + e->role + " is not in coverage");
+      }
+      check(rush == d.rushers(), d.id + " rushes " + std::to_string(rush) + ", rushers() says " + std::to_string(d.rushers()));
+      if (d.coverage == Coverage::C3Fire || d.coverage == Coverage::C3) check(deep == 3, d.id + " has " + std::to_string(deep) + " deep");
+      if (d.coverage == Coverage::C4 && d.tech != CoverTech::Prevent) check(deep == 4, d.id + " has " + std::to_string(deep) + " deep in quarters");
+      if (d.rotate && d.coverage == Coverage::C3) {
+        const Ent* fs = sim->defRole("FS");
+        const Ent* ss = sim->defRole("SS");
+        check(fs && ss && fs->pos.x > sim->los + 10 && ss->pos.x > sim->los + 10, d.id + ": a Cover 3 rotate shows two high");
+      }
+      checked++;
+    }
+    check(checked > 500, "only " + std::to_string(checked) + " calls checked");
+  });
+
+  t("playbook mechanics: a new play type gives the same result twice from the same seed", [&] {
+    for (const char* kind : {"rpo", "end", "jet"}) {
+      const OffPlay* p = findPlay([&](const OffPlay& x) { return x.run && (std::string(kind) == "jet" ? x.run->jet : x.run->read == kind); });
+      if (!p) continue;
+      auto run = [&]() {
+        auto g = scrimmage(9700, 1, 2);
+        auto sim = g->makePlay(*p, *defById("nk_c3"));
+        const PlayResult& r = sim->runToEnd();
+        return std::to_string(r.yards) + "/" + fx(r.duration, 4) + "/" + std::to_string(static_cast<int>(r.kind));
+      };
+      check(run() == run(), std::string(kind) + " play is not deterministic");
     }
   });
 
@@ -663,6 +920,62 @@ int main() {
       for (const Ent* e : s2->ents) check(std::isfinite(e->pos.x) && std::isfinite(e->pos.y), "NaN after a move");
     }
     check(started > 60, "only " + std::to_string(started) + " user moves started in 200 carries");
+  });
+
+  t("R1 / L2: covering up keeps the ball, the strip knocks it out, the strafe stays square", [&] {
+    // fumbles made common for the count (x20), then the three cases over the same 240 runs: as played, every defender
+    // going for the ball (R1 on defense), every carrier covered up (R1 with the ball)
+    const double keepF = tune().fumbleK;
+    setTune("fumbleK", 20);
+    auto run = [&](int mode, int& fum, int& broken, int& tackles) {
+      fum = broken = tackles = 0;
+      for (int i = 0; i < 240; i++) {
+        auto g2 = scrimmage(5100 + i, i % 32, (i + 9) % 32);
+        auto s2 = g2->makePlay(*playById(i % 2 ? "i_power" : "dbl_iz"), *defById("base_c3"));
+        while (s2->isLive() && s2->t < 12) {
+          if (mode == 1)
+            for (Ent* d : s2->def) d->stripT = 0.8;
+          if (mode == 2)
+            if (Ent* h = s2->ball.holder) h->protecting = h->hasBall && h != s2->qb;
+          s2->step();
+        }
+        if (s2->isLive()) s2->runToEnd();
+        for (const PlayEvent& e : s2->events) {
+          fum += e.type == "fumble";
+          broken += e.type == "broken" || e.type == "divemiss";
+          tackles += e.type == "tackle" || e.type == "wrap";
+        }
+      }
+    };
+    int f0, b0, t0, f1, b1, t1, f2, b2, t2;
+    run(0, f0, b0, t0);
+    run(1, f1, b1, t1);
+    run(2, f2, b2, t2);
+    setTune("fumbleK", keepF);
+    check(f1 > f0 * 2, "the strip: " + std::to_string(f1) + " fumbles against " + std::to_string(f0) + " as played");
+    check(b1 > b0, "the strip misses more tackles: " + std::to_string(b1) + " broken against " + std::to_string(b0));
+    check(f2 * 2 < f0 + 1, "covered up: " + std::to_string(f2) + " fumbles against " + std::to_string(f0) + " as played");
+    // the strafe: square to the ball (his facing on it) and held to 70 % of his speed, flat out on the stick
+    auto g3 = scrimmage(5400, 3, 6);
+    auto s3 = g3->makePlay(*playById("trips_flood"), *defById("base_c3"), Side::Def);  // (a pass: nobody blocks him)
+    Ent* u = s3->user;
+    double maxSp = 0, offFace = 0;
+    int n = 0;
+    while (s3->isLive() && s3->t < 2.0) {
+      s3->input.strafe = true;
+      s3->input.move = V2{0, 1};
+      s3->input.sprint = true;
+      s3->step();
+      if (s3->t > 1.0 && s3->ball.holder) {
+        maxSp = (std::max)(maxSp, len(u->vel));
+        const double want = std::atan2(s3->ball.holder->pos.y - u->pos.y, s3->ball.holder->pos.x - u->pos.x);
+        offFace = (std::max)(offFace, std::fabs(std::remainder(u->face - want, 2 * kPi)));
+        n++;
+      }
+    }
+    check(n > 0 && u->strafing, "the user's man strafes while L2 is held");
+    check(maxSp <= u->vmax * 0.72 + 0.05, "strafing speed " + fx(maxSp) + " of " + fx(u->vmax));
+    check(offFace < 0.35, "strafing, he faces the ball (off by " + fx(offFace) + " rad)");
   });
 
   // ------------------------------------------------------------------ Superstar / X-Factor abilities (Abilities.h)
@@ -970,6 +1283,189 @@ int main() {
     t0.roster.push_back(std::move(p));
     check(chartOrder(t0, DSlot::WR).back()->id == 700001, "the new man at the bottom of the set slot");
     check(depth(t0, Pos::WR).size() == wr.size() + 1, "and in the position's depth");
+  });
+
+  t("run exchange: the back takes the ball at a run, within reach, the quarterback turned to him, on every handoff play", [&] {
+    // every run play with an exchange, three snaps each (Tools/HandoffCal prints the same numbers by play)
+    int n = 0, none = 0, tosses = 0;
+    double tSum = 0, vSum = 0, qbMove = 0;
+    for (const OffPlay& play : OFF_PLAYS()) {
+      // (option plays - a zone read the quarterback keeps, an RPO he throws - have their own test)
+      if (play.type != PlayType::Run || !play.run || play.run->carrier == "QB" || !play.run->read.empty() || !formationById(play.formation)) continue;
+      for (int rep = 0; rep < 3; rep++) {
+        auto g = scrimmage(9000 + static_cast<uint32_t>(n), (n * 2) % 32, (n * 2 + 1) % 32);
+        auto sim = g->makePlay(play, *defById(n % 3 ? "base_c3" : "nk_c3"));
+        Ent* rb = sim->offRole(play.run->carrier);
+        Ent* qb = sim->qb;
+        n++;
+        if (!rb || !qb) continue;
+        const bool toss = sim->mesh().toss;
+        tosses += toss;
+        double tAt = -1, faceOff = 0, apart = 0, v = 0;
+        V2 qbAt{0, 0};
+        while (sim->isLive() && sim->t < 6) {
+          const double face = qb->face, d = dist(rb->pos, qb->pos);
+          const V2 qp = qb->pos, bp = rb->pos;
+          sim->step(SIM_DT);
+          if (tAt < 0 && sim->ball.holder == rb) {
+            tAt = sim->t, apart = d, v = rb->speed(), qbAt = qb->pos;
+            faceOff = std::fabs(std::remainder(std::atan2(bp.y - qp.y, bp.x - qp.x) - face, 2 * kPi)) * 180 / kPi;
+          }
+          if (tAt >= 0 && sim->t >= tAt + 1.2) break;
+        }
+        if (tAt < 0) {  // (the quarterback run down before the mesh: rare, and never the rule)
+          none++;
+          continue;
+        }
+        tSum += tAt, vSum += v, qbMove += dist(qb->pos, qbAt);
+        check(tAt > 0.5 && tAt < 2.2, play.id + ": the ball changed hands " + std::to_string(tAt) + " s after the snap");
+        check(toss ? apart < 6.5 : apart < 2.05, play.id + ": changed hands " + std::to_string(apart) + " yd apart");
+        if (!toss) check(faceOff < 60 || tAt > sim->mesh().T + 0.3, play.id + ": the quarterback " + std::to_string(faceOff) + " deg off his back at the exchange");
+        if (sim->isLive()) sim->runToEnd();
+      }
+    }
+    check(n > 300, "too few handoff plays: " + std::to_string(n));
+    check(none * 100 < n, std::to_string(none) + " of " + std::to_string(n) + " snaps without an exchange");
+    const int got = (std::max)(1, n - none);
+    std::printf("       (%d snaps, %d tosses: the ball changes hands %.2f s after the snap on average, the back at %.1f yd/s; the quarterback carries his fake %.1f yd)\n", n, tosses,
+                tSum / got, vSum / got, qbMove / got);
+    check(tSum / got > 0.8 && tSum / got < 1.25, "mean exchange time " + std::to_string(tSum / got));
+    check(vSum / got > 4.0, "the back takes it at " + std::to_string(vSum / got) + " yd/s on average (he stood for it at 1.4 from the gun)");
+    check(qbMove / got > 1.0, "the quarterback stands after the exchange (" + std::to_string(qbMove / got) + " yd in 1.2 s)");
+  });
+
+  t("run exchange: a user on the quarterback is carried through the mesh and has the back the tick the ball is his", [&] {
+    for (const char* id : {"dbl_iz", "ace_iz", "gun_trips__counter"}) {
+      const OffPlay* play = playById(id);
+      check(play != nullptr, std::string("no play ") + id);
+      if (!play) continue;
+      auto g = scrimmage(9700, 4, 5);
+      auto sim = g->makePlay(*play, *defById("base_c3"), Side::Off, false);
+      Ent* qb = sim->qb;
+      Ent* rb = sim->offRole(play->run->carrier);
+      check(sim->user == qb, std::string(id) + ": the user starts on the quarterback");
+      // the stick held hard toward the sideline the whole way: it must not walk him off the mesh
+      sim->input.move = V2{0, 1};
+      // (stepped until the tick the ball changes hands: the user must be on the back at the end of that same tick)
+      while (sim->isLive() && sim->t < 3 && !sim->handedOff) sim->step(SIM_DT);
+      const bool switched = sim->user == rb && rb->userControlled && !qb->userControlled;
+      check(sim->ball.holder == rb, std::string(id) + ": the back did not get the ball with a user on the quarterback");
+      check(switched, std::string(id) + ": the user is not on the back in the tick he has the ball");
+      // and the stick has him at once: the next ticks go the stick's way
+      const double y0 = rb->pos.y;
+      for (int k = 0; k < 20 && sim->isLive(); k++) sim->step(SIM_DT);
+      check(!sim->isLive() || rb->vel.y > 0.5 || rb->pos.y > y0 + 0.1, std::string(id) + ": the back ignores the stick after the handoff");
+    }
+  });
+
+  // place kicks (Sim/PlaceKick.cpp): a kick from `dist` yd (33: an extra point) in a fresh game, played to its end
+  auto placeKick = [&](int dist, uint32_t seed, Game*& gOut) {
+    static std::unique_ptr<Game> g;
+    GameOptions o;
+    o.seed = seed;
+    g = std::make_unique<Game>(*league[seed % 32], *league[(seed * 7 + 3) % 32 == seed % 32 ? (seed + 1) % 32 : (seed * 7 + 3) % 32], o);
+    const bool pat = dist == 33;
+    g->phase = pat ? GamePhase::Pat : GamePhase::Scrimmage;
+    g->ballOn = pat ? 85 : 100 - (dist - 17);
+    g->down = 4;
+    g->toGo = 4;
+    gOut = g.get();
+    return g->placeKickSim(pat);
+  };
+
+  t("place kicks: the snap, the hold and the foot on time, the line engaged, nobody standing still", [&] {
+    int kicks = 0, early = 0, lineMen = 0, lineEngaged = 0, idle = 0, men = 0;
+    for (uint32_t s = 1; s <= 300; s++) {
+      Game* g = nullptr;
+      auto sim = placeKick(s % 3 == 0 ? 33 : 25 + static_cast<int>(s % 30), s, g);
+      std::map<const Ent*, double> firstEng, moved;
+      double snapAt = -1, kickAt = -1;
+      while (sim->isLive() && sim->t < 30) {
+        sim->step(SIM_DT);
+        for (Ent* e : sim->ents) {
+          if ((e->engaged || !e->engagedBy.empty()) && !firstEng.count(e)) firstEng[e] = sim->t;
+          if (sim->t > sim->placeSnapT() + 0.2 && sim->t < sim->placeKickT()) moved[e] += e->speed() * SIM_DT;
+        }
+      }
+      for (const PlayEvent& ev : sim->events) {
+        if (ev.type == "snap" && snapAt < 0) snapAt = ev.t;
+        if (ev.type == "fgkick" && kickAt < 0) kickAt = ev.t;
+      }
+      check(snapAt > 0 && std::fabs(snapAt - sim->placeSnapT()) < 0.02, "no snap at its time (" + fx(snapAt) + ")");
+      check(kickAt > 0, "the ball was never kicked");
+      const double op = kickAt - snapAt;
+      check(op > 1.15 && op < 1.62, "snap to foot " + fx(op) + " s");
+      early += op < 1.2;
+      check(sim->phase == SimPhase::Dead && sim->result, "the kick never ended");
+      if (!sim->placeBlocked) {
+        check(sim->t < sim->placeKickT() + 4.5, "an unblocked kick ran " + fx(sim->t) + " s");
+        // untouched, the sim's flight is the game's kick
+        if (!sim->placeTipped) check(sim->placeGood == sim->cfg.place->good, "the flown kick and the game's call disagree");
+      }
+      for (Ent* e : sim->ents) {
+        const PlaceMan* m = sim->placeMan(e);
+        check(m != nullptr, "a man with no job");
+        if (m->job == PlaceJob::Guard || m->job == PlaceJob::Tackle || m->job == PlaceJob::End) {
+          lineMen++;
+          lineEngaged += firstEng.count(e) && firstEng[e] - snapAt <= 0.45;
+        }
+        if (m->job != PlaceJob::Hold && m->job != PlaceJob::Snap) {
+          men++;
+          idle += moved[e] < 0.15 && !firstEng.count(e);
+        }
+      }
+      g->finishPlaceKick(*sim);
+      kicks++;
+    }
+    check(lineEngaged >= 0.97 * lineMen, "the line engaged within 0.45 s of the snap on " + fx(100.0 * lineEngaged / lineMen, 1) + "% of its reps");
+    check(idle <= 0.01 * men, fx(100.0 * idle / men, 1) + "% of the men never moved between the snap and the kick");
+    check(kicks == 300 && early < 60, "operation times");
+  });
+
+  t("place kicks: blocked at NFL rates, by a hand where the ball is, the ball then loose", [&] {
+    int fg = 0, fgB = 0, xp = 0, xpB = 0, defTD = 0;
+    std::string firstEvents;
+    for (uint32_t s = 1; s <= 6000; s++) {
+      const bool pat = s % 2 == 0;
+      Game* g = nullptr;
+      auto sim = placeKick(pat ? 33 : 40 + static_cast<int>(s % 15), 1000 + s, g);
+      bool looseSeen = false;
+      while (sim->isLive() && sim->t < 30) {
+        sim->step(SIM_DT);
+        looseSeen = looseSeen || sim->ball.mode == BallMode::Loose;
+      }
+      (pat ? xp : fg)++;
+      if (sim->placeBlocked) {
+        (pat ? xpB : fgB)++;
+        check(sim->placeBlockBy && sim->placeBlockBy->side == Side::Def, "a block by nobody on the defense");
+        check(looseSeen, "a blocked kick that never came loose");
+        check(sim->placeBlockX >= 0 && sim->placeBlockX < 10.5, "blocked " + fx(sim->placeBlockX, 1) + " yd past the spot");
+        const SpecialResult r = g->finishPlaceKick(*sim);
+        check(r.desc.find("BLOCKED") != std::string::npos, "the log does not say blocked: " + r.desc);
+        defTD += r.desc.find("TOUCHDOWN") != std::string::npos || r.desc.find("TWO-POINT") != std::string::npos;
+      } else {
+        g->finishPlaceKick(*sim);
+      }
+    }
+    const double fgR = 100.0 * fgB / fg, xpR = 100.0 * xpB / xp;
+    // (NFL 2023: 40-54 yd ~2.6 %, extra points 0.65 %)
+    check(fgR >= 1.2 && fgR <= 4.5, "40-54 yd field goals blocked " + fx(fgR) + "%");
+    check(xpR >= 0.15 && xpR <= 1.5, "extra points blocked " + fx(xpR) + "%");
+    std::printf("       (40-54 yd FG blocked %.2f%%, XP %.2f%%, %d run back for a score)\n", fgR, xpR, defTD);
+  });
+
+  t("place kicks: deterministic (the same game seed plays the same kick)", [&] {
+    for (uint32_t s : {7u, 77u, 777u}) {
+      std::string a, b;
+      for (std::string* out : {&a, &b}) {
+        Game* g = nullptr;
+        auto sim = placeKick(44, s, g);
+        sim->runToEnd(30);
+        for (const PlayEvent& ev : sim->events) *out += ev.type + "@" + fx(ev.t, 3) + " ";
+        *out += fx(sim->ball.pos.x, 4) + "," + fx(sim->ball.pos.y, 4);
+      }
+      check(a == b, "seed " + std::to_string(s) + " played two different kicks");
+    }
   });
 
   std::printf("\n%d passed, %d failed\n", passCount, failCount);

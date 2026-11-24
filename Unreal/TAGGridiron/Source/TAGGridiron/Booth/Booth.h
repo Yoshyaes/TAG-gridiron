@@ -97,6 +97,8 @@ class Booth {
   double curEnd() const { return curEnd_; }
   /** Lines the next seconds may need (queued, then the planned live calls); for speech prewarm. */
   std::vector<Line> forecast() const;
+  /** A fingerprint of what forecast() would return, without building it: the same stamp, the same lines. */
+  uint64_t forecastStamp() const;
   /** Every live call that names nobody (yard lines, "Touchdown!", "Dropped!"...): synthesize once, keep. */
   static std::vector<std::pair<std::string, int>> genericCalls();
   /** The live calls this match's regulars can get (each man's planned variants), to synthesize at the kickoff. */

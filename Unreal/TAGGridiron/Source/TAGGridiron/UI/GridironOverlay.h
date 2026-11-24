@@ -3,10 +3,13 @@
 
 #include "CoreMinimal.h"
 #include "Widgets/SCompoundWidget.h"
+#include "InputCoreTypes.h"
 #include <functional>
 
 class AMatchDirector;
 class SBox;
+struct FCtlState;
+struct FCallPicCache;
 namespace tag { struct OffPlay; struct DefCall; }
 
 struct FCallChoice
@@ -17,7 +20,8 @@ struct FCallChoice
 };
 
 /** Controller glyphs (drawn as shapes; keyboard players see the key instead). */
-enum class EPadGlyph : uint8 { None, Cross, Circle, Square, Triangle, R1, L1, R2, L2, DUp, DDown, DLeft, DRight };
+/** (DUpDown / DLeftRight: the d-pad with both arms of the pair lit, one glyph for "move" hints; L3 / R3: a stick click) */
+enum class EPadGlyph : uint8 { None, Cross, Circle, Square, Triangle, R1, L1, R2, L2, DUp, DDown, DLeft, DRight, DUpDown, DLeftRight, L3, R3 };
 
 /** A row of the pre-snap panel: the button, what it does, and whether it is the current choice. */
 struct FPreRow
@@ -192,6 +196,15 @@ public:
 	void ShowPause(std::function<void()> Resume, std::function<void()> SimToEnd, std::function<void()> Quit);
 	/** The settings screen (commentary captions, ...); Back returns to whatever opened it. */
 	void ShowSettings(std::function<void()> Back);
+	/** Settings > Controls (UI/ControlsScreen.cpp): every button in every part of the game on the pad plugged in (a
+	 *  DualSense or an Xbox pad, drawn) or the keyboard, each action movable to any button (Game/TagBindings.h). */
+	void ShowControls(std::function<void()> Back);
+	/** -TagControlsTest: the controls screen driven by its buttons, a swap read back in a game (UI/ControlsScreen.cpp). */
+	void StartControlsTest();
+	/** The glyphs drawn are PlayStation's (else Xbox's). */
+	bool SonyPad() const { return bSonyPad; }
+	/** A pad is plugged in (or the player is on one). */
+	bool CtlHasPad() const;
 	void ShowBoxScore(const FString& Title, const FString& Button, std::function<void()> Done);
 	/** Superstars & X-Factors (UI/AbilityScreen.cpp): a team's graded players and their ability loadouts; Back returns
 	 *  to whatever opened it. The saved loadouts are laid over the coach's picks at startup (LoadAbilityLoadouts). */
@@ -213,6 +226,15 @@ public:
 	static void LoadRosterEdits(AMatchDirector* D);
 	/** -TagRosterShots: the scripted pictures of the depth chart and Create-a-Player (nothing saved), then exit. */
 	void StartRosterShots();
+	/** -TagInputTest: one press sent twice (an Xbox pad read through two interfaces) moves the menus once (UI/InputTest.cpp). */
+	void StartInputTest();
+	/** -TagUiShots: a picture of every menu screen, then exit (UI/InputTest.cpp). */
+	void StartUiShots();
+	/** -TagCallTour: pictures of the play-call screens (tag_call_NN_*.png: offense families, formations, type tabs and
+	 *  pages, the whole-family list, the defense's), then the team select's signature play; then exit (UI/InputTest.cpp). */
+	void StartCallTour();
+	/** -TagMenuAudio: a walk through every screen before the kickoff by the pad, for the menus' sound (UI/MenuAudioTest.cpp). */
+	void StartMenuAudioTest();
 	/** -TagChartTest: at the end of a soak, who played (the passers, the runners, the returner) against the chart. */
 	static void LogChartTest(AMatchDirector* D);
 
@@ -221,6 +243,12 @@ public:
 	void PaintGlyph(FSlateWindowElementList& Out, int32 Layer, const FGeometry& G, const FVector2D& C, float Size, EPadGlyph Gl,
 		const FString& Key, bool bPad, const FLinearColor& Tint, float Alpha = 1.f) const;
 	bool PadGlyphs() const;
+	/** How much room a glyph takes (its widget's size): a shoulder button is wider than a face button, a keycap as wide as
+	 *  its key. Every screen's glyph widget sizes itself by this, so a label never runs into its button. */
+	FVector2D GlyphExtent(EPadGlyph Gl, const FString& Key, float Size, bool bPad) const;
+	/** A glyph as a widget, and a hint (the glyph and what it does) for a screen's button bar. */
+	TSharedRef<SWidget> GlyphWidget(EPadGlyph Gl, const FString& Key, float Size, const FLinearColor& Tint = FLinearColor::White) const;
+	TSharedRef<SWidget> HintItem(EPadGlyph Gl, const FString& Key, const FString& What, float Size = 24.f) const;
 	virtual int32 OnPaint(const FPaintArgs& Args, const FGeometry& AllottedGeometry, const FSlateRect& MyCullingRect,
 		FSlateWindowElementList& OutDrawElements, int32 LayerId, const FWidgetStyle& InWidgetStyle, bool bParentEnabled) const override;
 
@@ -309,10 +337,36 @@ private:
 		const tag::OffPlay* Op = nullptr;
 		const tag::DefCall* Dc = nullptr;
 		FCallChoice Choice;
+		/** Its play type tab ("RUN", "PASS", "PA", "SCREEN", "RPO", "TRICK"; defense "ZONE", "MAN", "BLITZ"); empty: none. */
+		FString Cat;
+		/** The concept line under the type ("Inside Zone", "Quick", "Cover 3  -  4 rush"). */
+		FString Concept;
+		/** The formation (set) it is in: shown on the card when the tab's whole family is listed. */
+		FString Form;
+		/** The whole family's list: how many other formations (sets) run the same play. */
+		int32 Alt = 0;
 	};
 	TArray<FCallCard> CallCards;
 	TArray<TPair<FString, FString>> CallTabs; // id, label
 	int32 CallPage = 0;
+	/** Plays a page: the three face buttons (square, cross, circle). */
+	static constexpr int32 CallPerPage = 3;
+	/** CallSets' entry for the whole family (every formation of the tab in one list). */
+	static const TCHAR* CallAllSet() { return TEXT("*all"); }
+	/** The play type tab (L2 / R2) of each side's call: "" every play, else a FCallCard::Cat. Kept between calls. */
+	FString CallFilters[2];
+	FString& CallFilter() { return CallFilters[bCallOffense ? 1 : 0]; }
+	/** The type tabs the tab's family has (the first, "", is ALL), in the order L2 / R2 step through them. */
+	TArray<FString> CallCats;
+	/** The last play each side called on this screen (R3 calls it again). */
+	const tag::OffPlay* CallLastOff = nullptr;
+	const tag::DefCall* CallLastDef = nullptr;
+	/** The repeat call for this screen, if there is one (Kind Auto: none). */
+	FCallChoice CallRepeat() const;
+	/** The cards' pictures while the screen is up (a page turned back costs no sim). */
+	TSharedPtr<FCallPicCache> CallPics;
+	/** The overlay's size (Slate units) the screen was laid out for: a window resized under it lays it out again. */
+	FVector2D CallBuiltAvail = FVector2D::ZeroVector;
 	bool bCallOffense = false, bCallFourth = false, bCallTwo = false;
 	std::function<void(FCallChoice)> CallDone;
 	TSharedPtr<SWidget> CallRoot;
@@ -321,6 +375,16 @@ private:
 	void CallPick(FCallChoice C);
 	// gamepad navigation: focus the menu's button (by its order in the menu) once the menu is laid out
 	int32 PendingFocus = -1;
+	/** When the screen now up came in (it fades and rises in over 0.22 s; a screen rebuilt in place does not). */
+	double ModalInT = -10.0;
+	/** The main menu: the tile the detail card shows, and when it changed (the card fades over to the new one). */
+	int32 MenuCardIdx = -1;
+	double MenuCardT = -10.0;
 	static void Focusables(const TSharedRef<SWidget>& W, TArray<TSharedRef<SWidget>>& Out);
+	// the controls screen (UI/ControlsScreen.cpp)
+	TSharedPtr<FCtlState> Ctl;
+	bool CtlKey(const FKey& K, bool bRepeat);
+	void CtlTick();
+	void CtlSay(const FString& Msg, const FLinearColor& C);
 	int32 FocusedIndex() const;
 };

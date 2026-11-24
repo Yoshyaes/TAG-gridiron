@@ -10,6 +10,7 @@
 // change is saved at once (GameUserSettings.ini [TAG.Abilities]: one line a team, by jersey number), and loaded over
 // the coach's picks when the game starts.
 #include "UI/GridironOverlay.h"
+#include "UI/TagTheme.h"
 
 #include "Game/MatchDirector.h"
 #include "Audio/TagAudio.h"
@@ -187,10 +188,7 @@ namespace AbilUI
 		}
 		virtual FVector2D ComputeDesiredSize(float) const override
 		{
-			const bool bPad = Owner && Owner->PadGlyphs();
-			if (bPad || Key.Len() <= 1 || !FSlateApplication::IsInitialized()) return FVector2D(Size + 4, Size + 4);
-			const FVector2D M = FSlateApplication::Get().GetRenderer()->GetFontMeasureService()->Measure(Key, Font(FMath::RoundToInt(Size * 0.42f), "Bold"));
-			return FVector2D(FMath::Max<double>(Size, M.X + 12) + 4, Size + 4);
+			return Owner ? Owner->GlyphExtent(Glyph, Key, Size, Owner->PadGlyphs()) : FVector2D(Size + 4, Size + 4);
 		}
 		virtual int32 OnPaint(const FPaintArgs&, const FGeometry& G, const FSlateRect&, FSlateWindowElementList& Out, int32 Layer,
 			const FWidgetStyle&, bool) const override
@@ -238,7 +236,7 @@ namespace AbilUI
 		return S;
 	}
 	/** The scripted screen checks never touch the user's saved loadouts. */
-	bool NoSave() { static const bool b = FParse::Param(FCommandLine::Get(), TEXT("TagAbilityShots")); return b; }
+	bool NoSave() { static const bool b = FParse::Param(FCommandLine::Get(), TEXT("TagAbilityShots")) || FParse::Param(FCommandLine::Get(), TEXT("TagMenuAudio")); return b; }
 	void Save(const tag::Team& T)
 	{
 		if (!GConfig || NoSave()) return;
@@ -309,6 +307,7 @@ void SGridironOverlay::LoadAbilityLoadouts(AMatchDirector* D)
 void SGridironOverlay::ShowAbilities(int32 TeamIdx, std::function<void()> Back)
 {
 	if (!Director || Director->League.empty()) return;
+	ATagAudio::Screen(TEXT("Abilities"));
 	const int32 NTeams = static_cast<int32>(Director->League.size());
 	TeamIdx = FMath::Clamp(TeamIdx, 0, NTeams - 1);
 	if (TeamIdx != AbTeam || !AbBack)
@@ -342,9 +341,9 @@ void SGridironOverlay::ShowAbilities(int32 TeamIdx, std::function<void()> Back)
 		for (tag::AbilityId Id : M.abilities) Carried->AddSlot().AutoWidth().Padding(0, 0, 3, 0)[ Badge(tag::abilityDef(Id), true, 24.f) ];
 		List->AddSlot().AutoHeight().Padding(0, 0, 0, 3)
 		[
-			Click(SNew(SBorder).BorderImage(WhiteBrush()).BorderBackgroundColor(bSel ? (AbCol == 0 ? Gold : Gold * FLinearColor(1, 1, 1, 0.45f)) : FLinearColor::Transparent).Padding(bSel ? 2.f : 0.f)
+			Click(SNew(SBox).Padding(0)
 			[
-				SNew(SBorder).BorderImage(WhiteBrush()).BorderBackgroundColor(bSel ? CardHi : Card).Padding(FMargin(0))
+				SNew(TagTheme::SSelect).Selected(bSel).Active(AbCol == 0).Fill(Card).Padding(FMargin(0))
 				[
 					SNew(SHorizontalBox)
 					+ SHorizontalBox::Slot().AutoWidth()[ SNew(SBox).WidthOverride(4)[ SNew(SBorder).BorderImage(WhiteBrush()).BorderBackgroundColor(Gc) ] ]
@@ -467,9 +466,9 @@ void SGridironOverlay::ShowAbilities(int32 TeamIdx, std::function<void()> Back)
 		[ Label(FString::Printf(TEXT("NEEDS  %s   ·   %s+"), *Req, *GradeWord(A.minGrade)), 8, Faint) ];
 		Abil->AddSlot().AutoHeight().Padding(0, 0, 0, 4)
 		[
-			Click(SNew(SBorder).BorderImage(WhiteBrush()).BorderBackgroundColor(bSel ? Gold : FLinearColor::Transparent).Padding(bSel ? 2.f : 0.f)
+			Click(SNew(SBox).Padding(0)
 			[
-				SNew(SBorder).BorderImage(WhiteBrush()).BorderBackgroundColor(bSel ? CardHi : Card).Padding(FMargin(0))
+				SNew(TagTheme::SSelect).Selected(bSel).Active(AbCol == 1).Fill(Card).Padding(FMargin(0))
 				[
 					SNew(SHorizontalBox)
 					+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(10, 6, 10, 6)[ Badge(A, bOn, 44.f, bLocked) ]
@@ -495,11 +494,11 @@ void SGridironOverlay::ShowAbilities(int32 TeamIdx, std::function<void()> Back)
 	{
 		return SNew(SHorizontalBox)
 			+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)[ SNew(AbilUI::SGlyph).Owner(this).Glyph(G).Key(Key).Size(22.f) ]
-			+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(4, 0, 18, 0)[ Label(What, 11, White90, "Regular") ];
+			+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(*What ? 6.f : 1.f, 0, *What ? 20.f : 1.f, 0)[ Label(What, 11, White90, "Regular") ];
 	};
 	TSharedRef<SWidget> Hints = SNew(SHorizontalBox)
-		+ SHorizontalBox::Slot().AutoWidth()[ Hint(EPadGlyph::DUp, TEXT("↑↓"), TEXT("Move")) ]
-		+ SHorizontalBox::Slot().AutoWidth()[ Hint(EPadGlyph::DRight, TEXT("←→"), TEXT("Players / Abilities")) ]
+		+ SHorizontalBox::Slot().AutoWidth()[ Hint(EPadGlyph::DUpDown, TEXT("↑↓"), TEXT("Move")) ]
+		+ SHorizontalBox::Slot().AutoWidth()[ Hint(EPadGlyph::DLeftRight, TEXT("←→"), TEXT("Players / Abilities")) ]
 		+ SHorizontalBox::Slot().AutoWidth()[ Hint(EPadGlyph::L1, TEXT("Q"), TEXT("")) ]
 		+ SHorizontalBox::Slot().AutoWidth()[ Hint(EPadGlyph::R1, TEXT("E"), TEXT("Player")) ]
 		+ SHorizontalBox::Slot().AutoWidth()[ Hint(EPadGlyph::L2, TEXT("Z"), TEXT("")) ]
@@ -527,9 +526,9 @@ void SGridironOverlay::ShowAbilities(int32 TeamIdx, std::function<void()> Back)
 			[
 				SNew(SBox).WidthOverride(560)
 				[
-					SNew(SBorder).BorderImage(WhiteBrush()).BorderBackgroundColor(AbCol == 0 ? Gold * FLinearColor(1, 1, 1, 0.5f) : FLinearColor(1, 1, 1, 0.07f)).Padding(1)
+					SNew(TagTheme::SPanel).Fill(Card).Radius(6.f).AccentTop(AbCol == 0 ? Gold : FLinearColor(1, 1, 1, 0.1f)).Padding(FMargin(0))
 					[
-						SNew(SBorder).BorderImage(WhiteBrush()).BorderBackgroundColor(Card).Padding(FMargin(12, 10))
+						SNew(SBox).Padding(FMargin(12, 12, 12, 10))
 						[
 							SNew(SVerticalBox)
 							+ SVerticalBox::Slot().AutoHeight()[ Heading(TEXT("Graded players  ·  by their standing at their position league-wide")) ]
@@ -545,9 +544,9 @@ void SGridironOverlay::ShowAbilities(int32 TeamIdx, std::function<void()> Back)
 			[
 				SNew(SBox).WidthOverride(760)
 				[
-					SNew(SBorder).BorderImage(WhiteBrush()).BorderBackgroundColor(AbCol == 1 ? Gold * FLinearColor(1, 1, 1, 0.5f) : FLinearColor(1, 1, 1, 0.07f)).Padding(1)
+					SNew(TagTheme::SPanel).Fill(Card).Radius(6.f).AccentTop(AbCol == 1 ? Gold : FLinearColor(1, 1, 1, 0.1f)).Padding(FMargin(0))
 					[
-						SNew(SBorder).BorderImage(WhiteBrush()).BorderBackgroundColor(Card).Padding(FMargin(12, 10))
+						SNew(SBox).Padding(FMargin(12, 12, 12, 10))
 						[
 							SNew(SVerticalBox)
 							+ SVerticalBox::Slot().AutoHeight()[ CardW ]
@@ -559,7 +558,7 @@ void SGridironOverlay::ShowAbilities(int32 TeamIdx, std::function<void()> Back)
 		]
 		+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(FMargin(0, 10, 0, 0))
 		[ SNew(SBox).HeightOverride(18)[ Label(Msg.IsEmpty() ? FString(TEXT("Cross equips or removes the ability under the cursor; locked ones say what they need.")) : Msg, 11, Msg.IsEmpty() ? Faint : MsgColor) ] ]
-		+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(FMargin(0, 6, 0, 0))[ Hints ];
+		+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(FMargin(0, 6, 0, 0))[ TagTheme::HintBar(Hints) ];
 
 	// ---- the pad and the keys
 	const int32 NMen = static_cast<int32>(Men.size());
@@ -608,17 +607,17 @@ void SGridironOverlay::ShowAbilities(int32 TeamIdx, std::function<void()> Back)
 			if (tag::hasAbility(Me, A.id))
 			{
 				tag::unequipAbility(Me, A.id);
-				ATagAudio::Ui(TEXT("UiBack"));
+				ATagAudio::Ui(TEXT("UiUnequip"));
 				Say(FString::Printf(TEXT("%s: %s removed"), *Name(Me), *Str(A.name)), Dim);
 			}
 			else if (tag::equipAbility(Me, A.id, &Why))
 			{
-				ATagAudio::Ui(TEXT("UiSelect"));
+				ATagAudio::Ui(TEXT("UiEquip"));
 				Say(FString::Printf(TEXT("%s: %s equipped"), *Name(Me), *Str(A.name)), Open);
 			}
 			else
 			{
-				ATagAudio::Ui(TEXT("UiBack"));
+				ATagAudio::Ui(TEXT("UiError"));
 				Say(FString::Printf(TEXT("%s: %s"), *Str(A.name), *Str(Why)), Lock);
 			}
 			Save(T);

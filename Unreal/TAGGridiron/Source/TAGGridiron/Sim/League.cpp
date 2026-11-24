@@ -1,10 +1,12 @@
 // Port of src/sim/league.ts
 // Fictional league generation. Every team, name and player here is original.
-// RNG call order matches the TS exactly, so createLeague(2027) yields the same league.
+// RNG call order matches the TS exactly, so createLeague(2027) yields the same league (names, measurables; the
+// franchise talent spread is half the TS one, so some ratings differ by a point or two).
 #include "League.h"
 #include "Roster.h"
 
 #include <algorithm>
+#include <cstdlib>
 #include <numeric>
 #include <set>
 
@@ -195,7 +197,11 @@ const Ranges& numberRanges(Pos pos) {
 std::unique_ptr<Team> makeTeam(Rng& rng, int id, const TeamSeed& seed, int idx) {
   auto team = std::make_unique<Team>();
   std::set<int> used;
-  const double teamTalent = rng.normal(0, 2.4);  // franchise-level talent spread
+  // franchise-level talent spread: team overalls 72-77. At 2.4 (overalls 69-79) the best team won by 35 a game and the
+  // worst lost by 18 - point differentials twice the NFL's (+12 to -10) and a score spread of 12 points against ~10
+  // (the sim turns a rating gap into points faster than a Sunday does). TAG_TEAM_SPREAD scales it for calibration.
+  static const double kSpread = std::getenv("TAG_TEAM_SPREAD") ? std::atof(std::getenv("TAG_TEAM_SPREAD")) : 1.0;
+  const double teamTalent = rng.normal(0, 1.2) * kSpread;
   for (const auto& pc : ROSTER_COUNTS) {
     const Pos pos = pc.first;
     for (int i = 0; i < pc.second; i++) {

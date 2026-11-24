@@ -188,7 +188,7 @@ bool RosterUI::NoSave()
 {
 	// (-TagRosterSave: the scripted visit saves for real - the save / load check)
 	static const bool b = (FParse::Param(FCommandLine::Get(), TEXT("TagRosterShots")) && !FParse::Param(FCommandLine::Get(), TEXT("TagRosterSave")))
-		|| FParse::Param(FCommandLine::Get(), TEXT("TagChartTest"));
+		|| FParse::Param(FCommandLine::Get(), TEXT("TagChartTest")) || FParse::Param(FCommandLine::Get(), TEXT("TagMenuAudio"));
 	return b;
 }
 
@@ -820,6 +820,7 @@ void SGridironOverlay::ShowCreatePlayer(int32 InTeam, std::function<void()> InBa
 {
 	if (!Director || Director->League.empty()) return;
 	AMatchDirector* Dir = Director;
+	ATagAudio::Screen(TEXT("CreatePlayer"));
 	const int32 NTeams = static_cast<int32>(Dir->League.size());
 	if (InBack)
 	{
@@ -836,7 +837,7 @@ void SGridironOverlay::ShowCreatePlayer(int32 InTeam, std::function<void()> InBa
 	{
 		return SNew(SHorizontalBox)
 			+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)[ SNew(SPadGlyph).Owner(this).Glyph(Gl).Key(Key).Size(22.f) ]
-			+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(4, 0, 14, 0)[ Label(What, 10, White90, "Regular") ];
+			+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(*What ? 6.f : 1.f, 0, *What ? 18.f : 1.f, 0)[ Label(What, 10, White90, "Regular") ];
 	};
 	auto OpenForm = [this, Dir, Rebuild](tag::Player* Edit, int32 TeamIdx)
 	{
@@ -942,7 +943,7 @@ void SGridironOverlay::ShowCreatePlayer(int32 InTeam, std::function<void()> InBa
 		int32 NMade = 0;
 		for (const FHubRow& H : Rows) NMade += H.Kind == 1;
 		TSharedRef<SWidget> Hints = SNew(SHorizontalBox)
-			+ SHorizontalBox::Slot().AutoWidth()[ Hint(EPadGlyph::DUp, TEXT("↑↓"), TEXT("Move")) ]
+			+ SHorizontalBox::Slot().AutoWidth()[ Hint(EPadGlyph::DUpDown, TEXT("↑↓"), TEXT("Move")) ]
 			+ SHorizontalBox::Slot().AutoWidth()[ Hint(EPadGlyph::L2, TEXT("Z"), TEXT("")) ]
 			+ SHorizontalBox::Slot().AutoWidth()[ Hint(EPadGlyph::R2, TEXT("C"), TEXT("New player's team")) ]
 			+ SHorizontalBox::Slot().AutoWidth()[ Hint(EPadGlyph::Cross, TEXT("Enter"), TEXT("Create / edit / re-sign")) ]
@@ -955,15 +956,15 @@ void SGridironOverlay::ShowCreatePlayer(int32 InTeam, std::function<void()> InBa
 				+ SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 10)
 				[
 					SNew(SHorizontalBox)
-					+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Bottom)[ Label(TEXT("CREATE A PLAYER"), 30, FLinearColor::White) ]
+					+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Bottom)[ TagTheme::Title(TEXT("Roster"), TEXT("Create a Player"), 36) ]
 					+ SHorizontalBox::Slot().FillWidth(1)
 					+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Bottom).Padding(0, 0, 0, 5)[ Label(FString::Printf(TEXT("%d CREATED  ·  ROSTERS UP TO %d"), NMade, static_cast<int32>(tag::ROSTER_MAX)), 10, Dim) ]
 				]
 				+ SVerticalBox::Slot().AutoHeight()
-				[ SNew(SBorder).BorderImage(WhiteBrush()).BorderBackgroundColor(Card).Padding(FMargin(12, 10))[ List ] ]
+				[ SNew(TagTheme::SPanel).Fill(Card).Radius(6.f).Padding(FMargin(12, 10))[ List ] ]
 				+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(0, 10, 0, 0)
 				[ SNew(SBox).HeightOverride(18)[ Label(Msg.IsEmpty() ? FString(TEXT("A created player plays like anyone: he is on the depth chart, graded for abilities, saved for every game.")) : Msg, 11, Msg.IsEmpty() ? Faint : MsgColor) ] ]
-				+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(0, 6, 0, 0)[ Hints ]
+				+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(0, 6, 0, 0)[ TagTheme::HintBar(Hints) ]
 			];
 		OnKey = [this, Dir, Rebuild, OpenForm](const FKey& K) -> bool
 		{
@@ -984,7 +985,7 @@ void SGridironOverlay::ShowCreatePlayer(int32 InTeam, std::function<void()> InBa
 			}
 			if (N.bOk)
 			{
-				ATagAudio::Ui(TEXT("UiSelect"));
+				if (H.Kind <= 1) ATagAudio::Ui(TEXT("UiSelect"));
 				if (H.Kind == 0) OpenForm(nullptr, Draft.TeamIdx);
 				else if (H.Kind == 1) OpenForm(H.P, 0);
 				else
@@ -997,9 +998,10 @@ void SGridironOverlay::ShowCreatePlayer(int32 InTeam, std::function<void()> InBa
 						SaveCuts(Dir);
 						SaveCreated(Dir);
 						Regrade(Dir);
+						ATagAudio::Ui(TEXT("UiSave"));
 						Say(FString::Printf(TEXT("%s re-signed with %s (#%d)"), *Full(*H.P), *Str(T->abbr), H.P->number), Good);
 					}
-					else Say(FString::Printf(TEXT("%s is full: release someone first"), T ? *Str(T->abbr) : TEXT("The team")), Warn);
+					else { ATagAudio::Ui(TEXT("UiError")); Say(FString::Printf(TEXT("%s is full: release someone first"), T ? *Str(T->abbr) : TEXT("The team")), Warn); }
 					Rebuild();
 				}
 				return true;
@@ -1028,7 +1030,7 @@ void SGridironOverlay::ShowCreatePlayer(int32 InTeam, std::function<void()> InBa
 					Rebuild();
 					return true;
 				}
-				ATagAudio::Ui(TEXT("UiBack"));
+				ATagAudio::Ui(TEXT("UiDelete"));
 				DeleteArm = -1;
 				if (tag::Team* T = CapStore::TeamOf(Dir, H.P))
 				{
@@ -1106,11 +1108,13 @@ void SGridironOverlay::ShowCreatePlayer(int32 InTeam, std::function<void()> InBa
 		{
 			TSharedRef<SEditableTextBox> Box = SAssignNew(TypeBox, SEditableTextBox).Font(Font(12, "Bold")).Text(Tx(Cur == RFirst ? D.First : D.Last))
 				.SelectAllTextWhenFocused(true).ClearKeyboardFocusOnCommit(false)
+				.OnTextChanged_Lambda([this](const FText&) { if (bTyping) ATagAudio::Ui(TEXT("UiType")); })
 				.OnTextCommitted_Lambda([this, Rebuild, Cur](const FText& Tt, ETextCommit::Type How)
 				{
 					if (!bTyping) return;
 					bTyping = false;
 					const FString S = CapStore::Clean(Tt.ToString());
+					ATagAudio::Ui(How == ETextCommit::OnEnter && !S.IsEmpty() ? TEXT("UiSelect") : TEXT("UiBack"));
 					if (How == ETextCommit::OnEnter && !S.IsEmpty()) (Cur == RFirst ? Draft.First : Draft.Last) = S;
 					// (the rebuild comes a frame later: not inside the text box's own commit)
 					TWeakPtr<SGridironOverlay> W = StaticCastSharedRef<SGridironOverlay>(AsShared());
@@ -1293,8 +1297,8 @@ void SGridironOverlay::ShowCreatePlayer(int32 InTeam, std::function<void()> InBa
 			];
 
 		TSharedRef<SWidget> Hints = SNew(SHorizontalBox)
-			+ SHorizontalBox::Slot().AutoWidth()[ Hint(EPadGlyph::DUp, TEXT("↑↓"), TEXT("Row")) ]
-			+ SHorizontalBox::Slot().AutoWidth()[ Hint(EPadGlyph::DRight, TEXT("←→"), TEXT("Change")) ]
+			+ SHorizontalBox::Slot().AutoWidth()[ Hint(EPadGlyph::DUpDown, TEXT("↑↓"), TEXT("Row")) ]
+			+ SHorizontalBox::Slot().AutoWidth()[ Hint(EPadGlyph::DLeftRight, TEXT("←→"), TEXT("Change")) ]
 			+ SHorizontalBox::Slot().AutoWidth()[ Hint(EPadGlyph::L1, TEXT("Q"), TEXT("")) ]
 			+ SHorizontalBox::Slot().AutoWidth()[ Hint(EPadGlyph::R1, TEXT("E"), TEXT("By 5")) ]
 			+ SHorizontalBox::Slot().AutoWidth()[ Hint(EPadGlyph::L2, TEXT("Z"), TEXT("")) ]
@@ -1317,13 +1321,13 @@ void SGridironOverlay::ShowCreatePlayer(int32 InTeam, std::function<void()> InBa
 			+ SVerticalBox::Slot().AutoHeight()
 			[
 				SNew(SHorizontalBox)
-				+ SHorizontalBox::Slot().AutoWidth()[ SNew(SBox).WidthOverride(540)[ SNew(SBorder).BorderImage(WhiteBrush()).BorderBackgroundColor(Card).Padding(FMargin(12, 10))[ Left ] ] ]
-				+ SHorizontalBox::Slot().AutoWidth().Padding(12, 0, 0, 0)[ SNew(SBox).WidthOverride(600)[ SNew(SBorder).BorderImage(WhiteBrush()).BorderBackgroundColor(Card).Padding(FMargin(12, 10))[ Mid ] ] ]
-				+ SHorizontalBox::Slot().AutoWidth().Padding(12, 0, 0, 0)[ SNew(SBox).WidthOverride(700)[ SNew(SBorder).BorderImage(WhiteBrush()).BorderBackgroundColor(Card).Padding(FMargin(12, 10))[ CardW ] ] ]
+				+ SHorizontalBox::Slot().AutoWidth()[ SNew(SBox).WidthOverride(540)[ SNew(TagTheme::SPanel).Fill(Card).Radius(6.f).Padding(FMargin(12, 10))[ Left ] ] ]
+				+ SHorizontalBox::Slot().AutoWidth().Padding(12, 0, 0, 0)[ SNew(SBox).WidthOverride(600)[ SNew(TagTheme::SPanel).Fill(Card).Radius(6.f).Padding(FMargin(12, 10))[ Mid ] ] ]
+				+ SHorizontalBox::Slot().AutoWidth().Padding(12, 0, 0, 0)[ SNew(SBox).WidthOverride(700)[ SNew(TagTheme::SPanel).Fill(Card).Radius(6.f).Padding(FMargin(12, 10))[ CardW ] ] ]
 			]
 			+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(0, 10, 0, 0)
 			[ SNew(SBox).HeightOverride(18)[ Label(Msg.IsEmpty() ? FString(TEXT("The archetype and talent set his ratings; change any of them after. His OVR is his position's formula over them.")) : Msg, 11, Msg.IsEmpty() ? Faint : MsgColor) ] ]
-			+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(0, 6, 0, 0)[ Hints ];
+			+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(0, 6, 0, 0)[ TagTheme::HintBar(Hints) ];
 		Wash = Pri;
 
 		OnKey = [this, Dir, Rebuild](const FKey& K) -> bool
@@ -1335,17 +1339,19 @@ void SGridironOverlay::ShowCreatePlayer(int32 InTeam, std::function<void()> InBa
 			const TArray<int32> Rs = FormRows(Dir);
 			FormRow = FMath::Clamp(FormRow, 0, Rs.Num() - 1);
 			const int32 Id = Rs[FormRow];
-			if (N.Moves() || N.bPrevT || N.bNextT) ATagAudio::Ui(TEXT("UiMove"));
+			// the cursor clicks; a value stepped ticks, up or down
+			if (N.bUp || N.bDown || N.bPrevT || N.bNextT) ATagAudio::Ui(TEXT("UiMove"));
+			else if (N.Moves()) ATagAudio::Ui(TEXT("UiValue"), 1.f, (N.bRight || N.bNext) ? 1.06f : 0.94f);
 			auto Save = [&]() -> bool
 			{
-				if (Dr.First.IsEmpty() || Dr.Last.IsEmpty()) { Say(TEXT("He needs a first and a last name"), Warn); return false; }
+				if (Dr.First.IsEmpty() || Dr.Last.IsEmpty()) { ATagAudio::Ui(TEXT("UiError")); Say(TEXT("He needs a first and a last name"), Warn); return false; }
 				tag::Team& To = *Dir->League[Dr.TeamIdx];
 				tag::Player* Rel = nullptr;
 				if (NeedsRelease(Dir, Dr))
 				{
 					for (auto& P : To.roster)
 						if (P->id == Dr.ReleaseId) Rel = P.get();
-					if (!Rel) { Say(TEXT("The team is full: pick a man to release"), Warn); return false; }
+					if (!Rel) { ATagAudio::Ui(TEXT("UiError")); Say(TEXT("The team is full: pick a man to release"), Warn); return false; }
 				}
 				tag::Player* P = Dr.Editing;
 				tag::Team* From = P ? CapStore::TeamOf(Dir, P) : nullptr;
@@ -1392,7 +1398,7 @@ void SGridironOverlay::ShowCreatePlayer(int32 InTeam, std::function<void()> InBa
 				}
 				SaveCreated(Dir);
 				Regrade(Dir);
-				ATagAudio::Ui(TEXT("UiSelect"));
+				ATagAudio::Ui(TEXT("UiSave"));
 				const tag::DSlot BS = BaseSlot(P->pos);
 				int32 Depth = 1;
 				for (tag::Player* Q : tag::chartOrder(To, BS))
@@ -1534,7 +1540,7 @@ void SGridironOverlay::ShowCreatePlayer(int32 InTeam, std::function<void()> InBa
 						Regrade(Dir);
 						Say(FString::Printf(TEXT("%s deleted"), *Who), Dim);
 					}
-					ATagAudio::Ui(TEXT("UiBack"));
+					ATagAudio::Ui(TEXT("UiDelete"));
 					Mode = EMode::Hub;
 					Rebuild();
 					return true;
@@ -1547,7 +1553,7 @@ void SGridironOverlay::ShowCreatePlayer(int32 InTeam, std::function<void()> InBa
 			if (N.bStart) { Save(); Rebuild(); return true; }
 			if (N.bSquare)
 			{
-				ATagAudio::Ui(TEXT("UiTab"));
+				ATagAudio::Ui(TEXT("UiRandom"));
 				Roll(Dr, T);
 				Say(TEXT("A new profile: name, number, face, age"), Gold);
 				Rebuild();

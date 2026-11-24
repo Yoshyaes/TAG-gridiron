@@ -24,7 +24,14 @@ struct FTagDevice
 	double LastInput = 0.0;
 	/** What the engine calls it ("XInputController", "XboxOne", "Hid"...): the lobby's name for it. */
 	FString Hardware;
+	/** This pad is another pad seen again through a second interface (an Xbox pad: XInput and GameInput): its buttons are
+	 *  kept here but never passed on to the menus and the game, which would take every press twice. -1: its own pad. */
+	int32 TwinOf = -1;
+	/** Keys whose press was swallowed (a second copy): their release is swallowed too. */
+	TSet<FKey> Swallowed;
 	bool IsSony() const { return bPad && Hardware.Contains(TEXT("Hid")); }
+	/** The interface it came through ("XInputInterface", "GameInput"; empty if not known yet). */
+	FString Interface() const { FString L; return Hardware.Split(TEXT("/"), &L, nullptr) ? L : Hardware; }
 	FString Label() const;
 };
 
@@ -36,7 +43,7 @@ public:
 	static void Shutdown();
 
 	// IInputProcessor
-	virtual void Tick(const float DeltaTime, FSlateApplication& SlateApp, TSharedRef<ICursor> Cursor) override {}
+	virtual void Tick(const float DeltaTime, FSlateApplication& SlateApp, TSharedRef<ICursor> Cursor) override;
 	virtual bool HandleKeyDownEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent) override;
 	virtual bool HandleKeyUpEvent(FSlateApplication& SlateApp, const FKeyEvent& InKeyEvent) override;
 	virtual bool HandleAnalogInputEvent(FSlateApplication& SlateApp, const FAnalogInputEvent& InAnalogInputEvent) override;
@@ -66,12 +73,23 @@ public:
 	int32 AddFake(bool bPad, const FString& Name);
 	void SetAxis(int32 D, const FKey& K, float V);
 
+	/** How many second copies were swallowed (the -TagInputTest check). */
+	int32 SwallowedCount() const { return NumSwallowed; }
+
 private:
 	int32 Touch(FInputDeviceId Id, bool bPad);
 	bool Filtered(int32 D, const FKey& K) const;
+	/** A press of K on pad D that is a second copy of one another interface's pad just sent: swallow it. */
+	bool SecondCopy(int32 D, const FKey& K);
 	TArray<FTagDevice> Devs;
 	TArray<int32> MenuOwners;
 	uint64 Gen = 1;
+	/** Pairs of pads (lo << 32 | hi) seen pressing together, and how often. */
+	TMap<uint64, int32> PairHits;
+	/** A twin's presses waiting for its pad's own (none: it is a pad of its own after all). */
+	struct FPend { int32 D; FKey K; double T; };
+	TArray<FPend> Pending;
+	int32 NumSwallowed = 0;
 };
 
 /** One player's controls: the device(s) he plays on (multiplayer) or the player controller (one player). */

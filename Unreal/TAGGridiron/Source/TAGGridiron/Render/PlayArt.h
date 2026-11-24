@@ -30,6 +30,8 @@ public:
 	/** A zone: a filled ellipse with a bright rim (radii in cm, along the world axes). */
 	void Zone(const FVector& Center, float RadiusX, float RadiusY, const FLinearColor& Color);
 	void Commit();
+	/** The material loaded and made now (under the loading screen) rather than on the first frame the art is up. */
+	void Warm();
 	/** Shown or hidden: the art fades in and out over a few frames. */
 	void SetShown(bool bShow) { bShown = bShow; }
 	bool IsShown() const { return bShown; }
@@ -50,6 +52,10 @@ private:
 	void Ring(FLayer& L, const FVector2D& C, float RX, float RY, float W, const FLinearColor& Col, float Z);
 	void EndCap(FLayer& L, const FVector2D& At, const FVector2D& Dir, EArtEnd End, float W, float Grow, const FLinearColor& Col, float Z);
 	FLayer Layers[3];
+	/** What each layer's mesh was last built from (a checksum of its vertices, colours and triangles): the picture is
+	 *  drawn again every frame it is up, and Commit leaves a mesh alone whose layer has not changed. */
+	uint32 LayerSig[3] = {0, 0, 0};
+	bool bLayerBuilt[3] = {false, false, false};
 
 	UPROPERTY()
 	TArray<TObjectPtr<UProceduralMeshComponent>> Meshes;

@@ -16,7 +16,12 @@ namespace
 	const FLinearColor Ink(0.035f, 0.045f, 0.07f);
 	const float BarW = 340.f, BarH = 6.f, SweepW = 90.f;
 
-	FSlateFontInfo Font(int32 Size, const char* Weight = "Regular") { return FCoreStyle::GetDefaultFontStyle(Weight, Size); }
+	FSlateFontInfo Font(int32 Size, const char* Weight = "Regular", int32 Spacing = 0)
+	{
+		FSlateFontInfo F = FCoreStyle::GetDefaultFontStyle(Weight, Size);
+		F.LetterSpacing = Spacing;
+		return F;
+	}
 	const FSlateBrush* White() { return FCoreStyle::Get().GetBrush("WhiteBrush"); }
 	FText Tx(const FString& S) { return FText::FromString(S); }
 
@@ -26,9 +31,9 @@ namespace
 			[ SNew(SBorder).BorderImage(White()).BorderBackgroundColor(Tm.Color).Padding(0) ];
 		TSharedRef<SWidget> Words = SNew(SVerticalBox)
 			+ SVerticalBox::Slot().AutoHeight().HAlign(bRight ? HAlign_Right : HAlign_Left)
-			[ SNew(STextBlock).Font(Font(13, "Bold")).ColorAndOpacity(Dim).Text(Tx(Tm.City.ToUpper())) ]
+			[ SNew(STextBlock).Font(Font(14, "BoldCondensed", 140)).ColorAndOpacity(Dim).Text(Tx(Tm.City.ToUpper())) ]
 			+ SVerticalBox::Slot().AutoHeight().HAlign(bRight ? HAlign_Right : HAlign_Left)
-			[ SNew(STextBlock).Font(Font(30, "Bold")).ColorAndOpacity(FLinearColor::White).ShadowOffset(FVector2D(2, 2)).Text(Tx(Tm.Name.ToUpper())) ];
+			[ SNew(STextBlock).Font(Font(34, "Black")).ColorAndOpacity(FLinearColor::White).ShadowOffset(FVector2D(0, 2)).Text(Tx(Tm.Name.ToUpper())) ];
 		TSharedRef<SHorizontalBox> H = SNew(SHorizontalBox);
 		if (bRight)
 		{
@@ -59,13 +64,13 @@ void SLoadingScreen::Construct(const FArguments& InArgs)
 			[
 				SNew(SVerticalBox)
 				+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(0, 0, 0, 8)
-				[ SNew(STextBlock).Font(Font(11, "Bold")).ColorAndOpacity(Accent).Text(Tx(TEXT("TONIGHT'S MATCHUP"))) ]
+				[ SNew(STextBlock).Font(Font(13, "BoldCondensed", 320)).ColorAndOpacity(Accent).Text(Tx(TEXT("TONIGHT'S MATCHUP"))) ]
 				+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center)
 				[
 					SNew(SHorizontalBox)
 					+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)[ TeamLine(Away, true) ]
 					+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(26, 0)
-					[ SNew(STextBlock).Font(Font(16, "Bold")).ColorAndOpacity(Dim).Text(Tx(TEXT("AT"))) ]
+					[ SNew(STextBlock).Font(Font(20, "Black")).ColorAndOpacity(Accent).Text(Tx(TEXT("AT"))) ]
 					+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)[ TeamLine(Home, false) ]
 				]
 				+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(0, 8, 0, 0)
@@ -81,7 +86,7 @@ void SLoadingScreen::Construct(const FArguments& InArgs)
 				+ SHorizontalBox::Slot().FillWidth(1.f).VAlign(VAlign_Center)
 				[
 					SNew(SVerticalBox)
-					+ SVerticalBox::Slot().AutoHeight()[ SNew(STextBlock).Font(Font(10, "Bold")).ColorAndOpacity(Accent).Text(Tx(TEXT("TIP"))) ]
+					+ SVerticalBox::Slot().AutoHeight()[ SNew(STextBlock).Font(Font(12, "BoldCondensed", 300)).ColorAndOpacity(Accent).Text(Tx(TEXT("TIP"))) ]
 					+ SVerticalBox::Slot().AutoHeight().Padding(0, 4, 0, 0)
 					[ SNew(SBox).MaxDesiredWidth(760)[ SNew(STextBlock).Font(Font(15)).AutoWrapText(true).ColorAndOpacity_Lambda([this] { return TipColor(); }).Text_Lambda([this] { return TipText(); }) ] ]
 				]
@@ -89,7 +94,7 @@ void SLoadingScreen::Construct(const FArguments& InArgs)
 				[
 					SNew(SVerticalBox)
 					+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Right)
-					[ SNew(STextBlock).Font(Font(12, "Bold")).ColorAndOpacity(FLinearColor::White).Text(Tx(TEXT("LOADING THE STADIUM"))) ]
+					[ SNew(STextBlock).Font(Font(14, "BoldCondensed", 160)).ColorAndOpacity(FLinearColor::White).Text(Tx(TEXT("LOADING THE STADIUM"))) ]
 					+ SVerticalBox::Slot().AutoHeight().Padding(0, 8, 0, 0)
 					[
 						SNew(SBox).WidthOverride(BarW).HeightOverride(BarH)
@@ -107,9 +112,14 @@ void SLoadingScreen::Construct(const FArguments& InArgs)
 				[
 					SNew(SVerticalBox)
 					+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Right)
-					[ SNew(STextBlock).Font(Font(26, "Bold")).ColorAndOpacity(Accent).ShadowOffset(FVector2D(2, 2)).Text(Tx(TEXT("TAG GRIDIRON"))) ]
+					[
+						// the menu's lockup, small: TAG in white, GRIDIRON in gold
+						SNew(SHorizontalBox)
+						+ SHorizontalBox::Slot().AutoWidth()[ SNew(STextBlock).Font(Font(30, "Black")).ColorAndOpacity(FLinearColor::White).Text(Tx(TEXT("TAG "))) ]
+						+ SHorizontalBox::Slot().AutoWidth()[ SNew(STextBlock).Font(Font(30, "Black")).ColorAndOpacity(Accent).Text(Tx(TEXT("GRIDIRON"))) ]
+					]
 					+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Right)
-					[ SNew(STextBlock).Font(Font(9)).ColorAndOpacity(Dim).Text(Tx(TEXT("SIMULATION-FIRST PRO FOOTBALL"))) ]
+					[ SNew(STextBlock).Font(Font(10, "BoldCondensed", 240)).ColorAndOpacity(Dim).Text(Tx(TEXT("SIMULATION-FIRST PRO FOOTBALL"))) ]
 				]
 			]
 		]

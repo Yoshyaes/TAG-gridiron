@@ -11,6 +11,10 @@
 #include "AudioDevice.h"
 #include "Misc/CommandLine.h"
 #include "Misc/Paths.h"
+#include "Misc/PackageName.h"
+#include "HAL/FileManager.h"
+#include "Engine/AssetManager.h"
+#include "Engine/StreamableManager.h"
 #include "Engine/World.h"
 
 namespace
@@ -31,7 +35,11 @@ namespace
 	const FName NHorn("Horn"), NFireworks("Fireworks"), NHouseMusic("HouseMusic"), NPaThird("PaThirdDown"), NPaNoise("PaMakeNoise");
 	const FName NMusMenu("MusMenu"), NMusIntro("MusIntro"), NMusOut("MusBumperOut"), NMusIn("MusBumperIn"), NMusHalf("MusHalftime"), NMusFinal("MusFinal"),
 		NMusScore("MusScore");
-	const FName NUiWhoosh("UiWhoosh"), NUiPause("UiPause");
+	const FName NUiWhoosh("UiWhoosh"), NUiPause("UiPause"), NUiOpen("UiOpen"), NUiClose("UiClose"), NUiTitle("UiTitle"), NUiStart("UiStart"), NUiValue("UiValue");
+	const FName NScrMain("Main"), NScrLobby("Lobby"), NScrTeams("TeamSelect"), NScrPause("Pause"), NScrControls("Controls");
+	FName GScreen; // the screen the menus say is up (they may say so before the sound exists)
+	// how far into the menus a screen is: forward is heard as one thing, back as another
+	int32 ScreenDepth(FName S) { return S.IsNone() ? -1 : S == NScrMain ? 0 : S == NScrLobby || S == NScrPause ? 1 : S == NScrTeams ? 2 : S == NScrControls ? 4 : 3; }
 
 	bool In(const std::string& S, const char* Sub) { return S.find(Sub) != std::string::npos; }
 }
@@ -65,17 +73,47 @@ void ATagAudio::StepLevel(int32 Which)
 {
 	Which = FMath::Clamp(Which, 0, 2);
 	GLevels[Which] = (GLevels[Which] + 4) % 5; // down a quarter a press, round to full again
-	if (GConfig)
+	if (GConfig && !FParse::Param(FCommandLine::Get(), TEXT("TagMenuAudio"))) // (the scripted walk through the menus keeps nothing)
 	{
 		GConfig->SetInt(TEXT("TAG.Settings"), kLevelKeys[Which], GLevels[Which], GGameUserSettingsIni);
 		GConfig->Flush(false, GGameUserSettingsIni);
 	}
-	if (ATagAudio* A = GTagAudio.Get()) A->SetLevels(GLevels[0] / 4.f, GLevels[1] / 4.f, GLevels[2] / 4.f);
+	if (ATagAudio* A = GTagAudio.Get())
+	{
+		A->SetLevels(GLevels[0] / 4.f, GLevels[1] / 4.f, GLevels[2] / 4.f);
+		// what the new level sounds like: a click at it (the music is its own example); the stadium's, a crowd
+		if (Which != 1) A->PlayNow(FLater{0.f, NUiValue, FVector::ZeroVector, 1.f, 0.9f + 0.05f * GLevels[Which], ECat::Ui});
+		if (Which == 2 && !A->Game) A->Crowd(NCheerSmall, 0.7f);
+	}
 }
 
-void ATagAudio::Ui(const TCHAR* Bank, float Vol)
+void ATagAudio::Ui(const TCHAR* Bank, float Vol, float Pitch)
 {
-	if (ATagAudio* A = GTagAudio.Get()) A->PlayNow(FLater{0.f, FName(Bank), FVector::ZeroVector, Vol, 1.f, ECat::Ui});
+	if (ATagAudio* A = GTagAudio.Get()) A->PlayNow(FLater{0.f, FName(Bank), FVector::ZeroVector, Vol, Pitch, ECat::Ui});
+}
+
+void ATagAudio::Screen(const TCHAR* Id)
+{
+	GScreen = FName(Id);
+	if (ATagAudio* A = GTagAudio.Get(); A && A->Fed > 3) A->ScreenChanged();
+}
+
+void ATagAudio::ScreenChanged()
+{
+	if (ScreenNow == GScreen) return;
+	const FName Was = ScreenNow;
+	ScreenNow = GScreen;
+	if (ScreenNow.IsNone() || (Was.IsNone() && ScreenNow == NScrPause)) return; // (the pause has its own sound)
+	if (ScreenNow == NScrMain && !bTitled && !Game)
+	{
+		// the game arrives: the title's hit, and the playlist comes in as it lands
+		bTitled = true;
+		MenuHold = 1.3f;
+		PlayNow(FLater{0.f, NUiTitle, FVector::ZeroVector, 1.f, 1.f, ECat::Ui});
+		return;
+	}
+	const bool bForward = ScreenDepth(ScreenNow) > ScreenDepth(Was);
+	PlayNow(FLater{0.f, bForward ? NUiOpen : NUiClose, FVector::ZeroVector, bForward ? 0.8f : 0.7f, 1.f, ECat::Ui});
 }
 
 void ATagAudio::BeginPlay()
@@ -94,6 +132,11 @@ void ATagAudio::BeginPlay()
 	Rand.Initialize(static_cast<int32>(FPlatformTime::Cycles64() & 0x7fffffff));
 	T0 = FPlatformTime::Seconds();
 	FindBanks();
+	// the menus' sounds, their playlist and the building's bed behind them: loaded in the background from here (one
+	// needed before it lands is loaded on the spot, as before: Pick)
+	for (const TPair<FName, FBank>& It : Banks)
+		if (It.Key.ToString().StartsWith(TEXT("Ui"))) PreloadBank(It.Key);
+	for (const FName B : {NMusMenu, NCalm, NBuzz, NCheerSmall}) PreloadBank(B);
 	// the field: heard from the broadcast's field microphones more than from the camera, so distance takes little off
 	FieldAtt = NewObject<USoundAttenuation>(this);
 	FSoundAttenuationSettings& S = FieldAtt->Attenuation;
@@ -123,10 +166,7 @@ void ATagAudio::BeginPlay()
 	float Rec = 0.f;
 	if (FParse::Value(Cmd, TEXT("TagAudioRec="), Rec) && Rec > 0.f)
 	{
-		RecLeft = Rec;
-		bRec = true;
-		UAudioMixerBlueprintLibrary::StartRecordingOutput(this, Rec + 5.f);
-		UE_LOG(LogTemp, Display, TEXT("TAG audio: recording the output for %.0f s"), Rec);
+		RecLeft = Rec; // (it starts with the first frame: Feed)
 	}
 	// -TagAudioSilent: nothing reaches the speakers (the recording is taken before the main mix's output level): for
 	// test runs on a machine somebody is sitting at
@@ -148,6 +188,9 @@ void ATagAudio::EndPlay(const EEndPlayReason::Type Reason)
 		UAudioMixerBlueprintLibrary::StopRecordingOutput(this, EAudioRecordingExportType::WavFile, TEXT("tag_audio"), FPaths::ConvertRelativePathToFull(FPaths::ProjectSavedDir() / TEXT("AudioRec")));
 	}
 	MatchEnd();
+	for (const TSharedPtr<FStreamableHandle>& H : Preloads)
+		if (H.IsValid()) H->CancelHandle(); // (a load still out is dropped; one that landed lets go of its waves)
+	Preloads.Reset();
 	if (GTagAudio.Get() == this) GTagAudio = nullptr;
 	Super::EndPlay(Reason);
 }
@@ -169,6 +212,32 @@ UAudioComponent* ATagAudio::MakeComp(bool bUi)
 
 void ATagAudio::FindBanks()
 {
+	// A run on loose files (the launcher's -game): the folders themselves say what is there - a bank is a folder, a
+	// take is a .uasset in it - which costs a directory listing, where making the asset registry read every package
+	// under /Game/TAG/Audio right now cost most of a second at launch. (No class check this way: anything in a bank's
+	// folder that is not a sound wave is dropped when the bank loads, in Pick / BankLanded.) A cooked build, or a
+	// listing that finds nothing, asks the registry as before.
+	if (!FPlatformProperties::RequiresCookedData())
+	{
+		struct FTake { FName Name; FString Package; };
+		TArray<FString> Files;
+		IFileManager::Get().FindFilesRecursive(Files, *(FPaths::ProjectContentDir() / TEXT("TAG/Audio")), TEXT("*.uasset"), true, false);
+		TArray<FTake> Takes;
+		Takes.Reserve(Files.Num());
+		for (const FString& File : Files)
+		{
+			FString Package;
+			if (!FPackageName::TryConvertFilenameToLongPackageName(File, Package)) continue;
+			Takes.Add(FTake{FName(*FPackageName::GetShortName(Package)), Package});
+		}
+		Takes.Sort([](const FTake& A, const FTake& B) { return A.Name.LexicalLess(B.Name); }); // (the registry path's order)
+		for (const FTake& Take : Takes)
+		{
+			const FString Folder = FPaths::GetCleanFilename(FPaths::GetPath(Take.Package));
+			Banks.FindOrAdd(FName(*Folder)).Paths.Add(FSoftObjectPath(FTopLevelAssetPath(FName(*Take.Package), Take.Name)));
+		}
+		if (Banks.Num() > 0) return;
+	}
 	IAssetRegistry& AR = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry").Get();
 	AR.ScanPathsSynchronous({TEXT("/Game/TAG/Audio")}, false);
 	TArray<FAssetData> Assets;
@@ -179,6 +248,44 @@ void ATagAudio::FindBanks()
 		if (A.AssetClassPath != USoundWave::StaticClass()->GetClassPathName()) continue;
 		const FString Folder = FPaths::GetCleanFilename(A.PackagePath.ToString());
 		Banks.FindOrAdd(FName(*Folder)).Paths.Add(A.GetSoftObjectPath());
+	}
+}
+
+void ATagAudio::PreloadBank(FName Bank)
+{
+	FBank* B = Banks.Find(Bank);
+	if (!B || B->bLoaded || B->bAsync || B->Paths.Num() == 0 || !UAssetManager::IsInitialized()) return;
+	B->bAsync = true;
+	const TSharedPtr<FStreamableHandle> H = UAssetManager::GetStreamableManager().RequestAsyncLoad(B->Paths,
+		FStreamableDelegate::CreateWeakLambda(this, [this, Bank]() { BankLanded(Bank); }));
+	if (H.IsValid()) Preloads.Add(H);
+}
+
+void ATagAudio::BankLanded(FName Bank)
+{
+	FBank* B = Banks.Find(Bank);
+	if (!B || B->bLoaded) return; // (it was needed before it landed: Pick loaded it there and then)
+	B->bLoaded = true;
+	for (const FSoftObjectPath& Path : B->Paths)
+		if (USoundWave* W = Cast<USoundWave>(Path.ResolveObject()))
+		{
+			B->Waves.Add(W);
+			Loaded.Add(W);
+		}
+}
+
+void ATagAudio::PreloadMatchBanks()
+{
+	// what a play needs first, first; then everything else a match can play. The PA's "touchdown" and "first down" are
+	// one pair a team (32 of them): MatchStart asks for the home side's
+	for (const FName B : {NCalm, NBuzz, NRoar, NNoise, NCheerBig, NCheerMed, NCheerSmall, NGroan, NGasp, NBoo, NHitLight, NHitMed, NHitHeavy, NHitHuge, NLineCrash,
+		NBodyFall, NCatch, NSnap, NThrow, NWhistle, NKickPlace, NKickPunt, NStep, NGrunt})
+		PreloadBank(B);
+	for (const TPair<FName, FBank>& It : Banks)
+	{
+		const FString Name = It.Key.ToString();
+		if (Name.StartsWith(TEXT("PaTouchdown_")) || Name.StartsWith(TEXT("PaFirstDown_"))) continue;
+		PreloadBank(It.Key);
 	}
 }
 
@@ -217,16 +324,15 @@ void ATagAudio::PlayNow(const FLater& L)
 	switch (L.Cat)
 	{
 	case ECat::Field:
-		UGameplayStatics::SpawnSoundAtLocation(this, W, L.Pos, FRotator::ZeroRotator, L.Vol * kField * LevelMaster * LevelStadium, L.Pitch, 0.f, FieldAtt, nullptr, true);
+		// (one-shots nobody holds on to: played straight on the audio device, with no audio component made and
+		// collected for each - the footsteps alone were some thirty a second)
+		UGameplayStatics::PlaySoundAtLocation(this, W, L.Pos, FRotator::ZeroRotator, L.Vol * kField * LevelMaster * LevelStadium, L.Pitch, 0.f, FieldAtt);
 		Note(TEXT("field"), L.Bank, L.Vol);
 		break;
 	case ECat::Crowd:
 	case ECat::Stadium:
-		if (UAudioComponent* C = UGameplayStatics::CreateSound2D(this, W, L.Vol * (L.Cat == ECat::Crowd ? kCrowdShot : kPa) * LevelMaster * LevelStadium, L.Pitch, 0.f, nullptr, false, true))
-		{
-			C->bIsUISound = false; // held with the world by the pause menu
-			C->Play();
-		}
+		// (not a UI sound: held with the world by the pause menu)
+		UGameplayStatics::PlaySound2D(this, W, L.Vol * (L.Cat == ECat::Crowd ? kCrowdShot : kPa) * LevelMaster * LevelStadium, L.Pitch, 0.f, nullptr, nullptr, false);
 		Note(L.Cat == ECat::Crowd ? TEXT("crowd") : TEXT("stadium"), L.Bank, L.Vol);
 		break;
 	case ECat::Ui:
@@ -398,13 +504,18 @@ void ATagAudio::MatchStart(const tag::Game& G)
 	Queue.Reset();
 	Counts.Reset();
 	T0 = FPlatformTime::Seconds();
-	for (const FName B : {NCalm, NBuzz, NRoar, NNoise, NCheerBig, NCheerMed, NCheerSmall, NGroan, NGasp, NBoo, NHitLight, NHitMed, NHitHeavy, NHitHuge, NLineCrash,
-		NBodyFall, NCatch, NSnap, NThrow, NWhistle, NKickPlace, NKickPunt, NStep, NGrunt})
+	// the crowd's beds are heard on the first frame: here now if they are not already. Everything else the match can
+	// play loads in the background (PreloadMatchBanks: the PA, the referee, the cadences and the music with it), and a
+	// sound needed before its load lands is loaded on the spot, as it always was (Pick)
+	for (const FName B : {NCalm, NBuzz, NRoar})
 	{
 		FBank* Bk = Banks.Find(B);
 		if (Bk && !Bk->bLoaded) { Pick(B); Bk->Last = -1; }
 	}
 	Music(NMusIntro, 0.9f, 0.05f, 1.2f);
+	PreloadMatchBanks();
+	PreloadBank(FName(*FString::Printf(TEXT("PaTouchdown_%hs"), HomeAbbr.c_str())));
+	PreloadBank(FName(*FString::Printf(TEXT("PaFirstDown_%hs"), HomeAbbr.c_str())));
 	UE_LOG(LogTemp, Display, TEXT("TAG audio: match start, home %hs"), HomeAbbr.c_str());
 }
 
@@ -425,17 +536,29 @@ void ATagAudio::MatchEnd()
 	StopLoops();
 	HouseStop(0.3f);
 	if (MusicNow != NMusMenu) MusicStop(1.f);
+	GScreen = ScreenNow = NAME_None; // (the menu that comes next comes forward)
 	bPauseMusic = false;
 }
 
 void ATagAudio::Hush()
 {
+	// (the game thread is about to be busy loading: these fades are the audio thread's own, they need no tick)
 	for (FDeck& D : Decks)
 	{
-		if (D.C) D.C->Stop();
+		if (D.C && D.bOn) D.C->FadeOut(0.5f, 0.f);
+		else if (D.C) D.C->Stop();
 		D.bOn = false;
 		D.Vol = D.Target = 0.f;
 	}
+	for (FLoop& L : Loops)
+	{
+		if (L.C && L.bStarted) L.C->FadeOut(0.8f, 0.f);
+		L.bStarted = false;
+		L.Vol = L.Target = 0.f;
+	}
+	// kick off, from the menus: the hit, and the crowd coming up as the teams take the field
+	if (!bHushed && !Game && !ScreenNow.IsNone()) PlayNow(FLater{0.f, NUiStart, FVector::ZeroVector, 1.f, 1.f, ECat::Ui});
+	GScreen = ScreenNow = NAME_None;
 	MusicNow = NAME_None;
 	bHushed = true; // (the menus do not start their music again before the match does)
 }
@@ -551,6 +674,7 @@ void ATagAudio::OnEvent(const FTagAudioView& V, const tag::PlayEvent& Ev)
 	const bool bAHome = Ev.a && IsHome(Ev.a->p);
 	if (T == "snap") Field(NSnap, A, 0.7f);
 	else if (T == "handoff") Field(NSnap, B, 0.4f, 0.85f);
+	else if (T == "slide") Field(NBodyFall, A, 0.5f, 1.f, 0.45f);  // (the quarterback's slide: the turf a beat in)
 	else if (T == "throw")
 	{
 		Field(NThrow, A, 0.55f);
@@ -849,7 +973,9 @@ void ATagAudio::TickKick(const FTagAudioView& V)
 void ATagAudio::Cue(FName What, const FVector& AtPos)
 {
 	static const FName NHard("hardcount"), NAud("audible"), NFlag("flag"), NReplay("replay"), NBanner("banner"), NDef("defcall");
-	const int32 Vc = 1 + (P.Sim && P.Sim->qb && P.Sim->qb->p ? P.Sim->qb->p->id : 0) % 4;
+	// (the quarterback's voice is read only for his own calls: the last fed view's sim is gone by a dead-ball flag such
+	// as delay of game, and reading it there crashed)
+	const int32 Vc = (What == NHard || What == NAud) ? 1 + (P.Sim && P.Sim->qb && P.Sim->qb->p ? P.Sim->qb->p->id : 0) % 4 : 1;
 	if (What == NHard) { Field(FName(*FString::Printf(TEXT("Cad%d_Hut"), Vc)), AtPos, 1.f); Field(FName(*FString::Printf(TEXT("Cad%d_Hut"), Vc)), AtPos, 1.f, 1.03f, 0.42f); }
 	else if (What == NAud) Field(FName(*FString::Printf(TEXT("Cad%d_Audible"), Vc)), AtPos, 0.95f);
 	else if (What == NDef) Field(NDefCall, AtPos, 0.8f);
@@ -861,6 +987,13 @@ void ATagAudio::Cue(FName What, const FVector& AtPos)
 void ATagAudio::Feed(float Dt, const FTagAudioView& V)
 {
 	Dt = FMath::Min(Dt, 0.1f);
+	if (Fed < 100) ++Fed;
+	if (!bRec && RecLeft > 0.f)
+	{
+		bRec = true;
+		UAudioMixerBlueprintLibrary::StartRecordingOutput(this, RecLeft + 5.f);
+		UE_LOG(LogTemp, Display, TEXT("TAG audio: recording the output for %.0f s"), RecLeft);
+	}
 	if (bRec)
 	{
 		RecLeft -= Dt;
@@ -896,9 +1029,18 @@ void ATagAudio::Feed(float Dt, const FTagAudioView& V)
 	const bool bMatch = Game && V.G == Game && V.Stage != EStage::Menu;
 	if (!bMatch)
 	{
-		// the menus
-		if (!V.bQuiet && MusicNow != NMusMenu && !Game && !bHushed) Music(NMusMenu, 0.85f, 1.2f);
+		// the menus: the playlist, and under it the building itself - near empty behind the main menu, filling up on
+		// the way to the kickoff (the lobby, then the matchup)
+		if (Fed > 3) ScreenChanged();
+		MenuHold = FMath::Max(0.f, MenuHold - Dt);
+		const bool bFront = !V.bQuiet && !Game && !bHushed && Fed > 3;
+		if (bFront && MusicNow != NMusMenu && MenuHold <= 0.f) Music(NMusMenu, 0.85f, 1.2f);
 		for (FLoop& L : Loops) L.Target = 0.f;
+		if (bFront && !ScreenNow.IsNone())
+		{
+			Loops[LCalm].Target = ScreenNow == NScrTeams ? 0.30f : ScreenNow == NScrLobby ? 0.22f : ScreenNow == NScrMain ? 0.12f : 0.06f;
+			Loops[LBuzz].Target = ScreenNow == NScrTeams ? 0.10f : 0.f;
+		}
 		TickLoops(Dt, LevelMaster * LevelStadium);
 		TickMusic(Dt, 1.f);
 		LastStage = V.Stage;

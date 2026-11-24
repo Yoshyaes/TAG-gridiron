@@ -42,10 +42,16 @@ struct FTagRootTapNode : public FAnimNode_Base
 	FPoseLink Source;
 	FTransform Delta = FTransform::Identity;
 	bool bHave = false;
+	// pelvis continuity (see Evaluate): the pelvis as the blend stack gave it last evaluation, in component space, and the
+	// correction being eased off
+	FVector PrevPelvis = FVector::ZeroVector;
+	FVector PelvisFix = FVector::ZeroVector;
+	bool bPrevPelvis = false;
+	float LastDt = 0.f;
 
-	virtual void Initialize_AnyThread(const FAnimationInitializeContext& Context) override { Source.Initialize(Context); }
+	virtual void Initialize_AnyThread(const FAnimationInitializeContext& Context) override { Source.Initialize(Context); bPrevPelvis = false; PelvisFix = FVector::ZeroVector; }
 	virtual void CacheBones_AnyThread(const FAnimationCacheBonesContext& Context) override { Source.CacheBones(Context); }
-	virtual void Update_AnyThread(const FAnimationUpdateContext& Context) override { Source.Update(Context); }
+	virtual void Update_AnyThread(const FAnimationUpdateContext& Context) override { LastDt = Context.GetDeltaTime(); Source.Update(Context); }
 	virtual void Evaluate_AnyThread(FPoseContext& Output) override;
 };
 

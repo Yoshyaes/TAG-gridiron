@@ -3,6 +3,7 @@
 #pragma once
 
 #include "UI/GridironOverlay.h"
+#include "UI/TagTheme.h"
 
 #include "Brushes/SlateDynamicImageBrush.h"
 #include "Fonts/FontMeasure.h"
@@ -106,9 +107,8 @@ namespace RosterUI
 	/** The selection frame the screens draw themselves (gold round the row under the cursor). */
 	inline TSharedRef<SWidget> Frame(bool bSel, bool bActive, TSharedRef<SWidget> In, const FLinearColor& Bg = Card)
 	{
-		return SNew(SBorder).BorderImage(WhiteBrush())
-			.BorderBackgroundColor(bSel ? (bActive ? Gold : Gold * FLinearColor(1, 1, 1, 0.4f)) : FLinearColor::Transparent).Padding(bSel ? 2.f : 0.f)
-			[ SNew(SBorder).BorderImage(WhiteBrush()).BorderBackgroundColor(bSel ? CardHi : Bg).Padding(0)[ In ] ];
+		// (the theme's selection: glow, lifted card, gold edge and bar; UI/TagTheme.h)
+		return SNew(TagTheme::SSelect).Selected(bSel).Active(bActive).Fill(Bg).Radius(4.f)[ In ];
 	}
 
 	/** The team's mark (Content/Slate/TeamLogos/<ABBR>.png), or null when it is missing. */
@@ -176,10 +176,7 @@ namespace RosterUI
 		}
 		virtual FVector2D ComputeDesiredSize(float) const override
 		{
-			const bool bPad = Owner && Owner->PadGlyphs() && Glyph != EPadGlyph::None;
-			if (bPad || Key.Len() <= 1 || !FSlateApplication::IsInitialized()) return FVector2D(Size + 4, Size + 4);
-			const FVector2D M = FSlateApplication::Get().GetRenderer()->GetFontMeasureService()->Measure(Key, Font(FMath::RoundToInt(Size * 0.42f), "Bold"));
-			return FVector2D(FMath::Max<double>(Size, M.X + 12) + 4, Size + 4);
+			return Owner ? Owner->GlyphExtent(Glyph, Key, Size, Owner->PadGlyphs() && Glyph != EPadGlyph::None) : FVector2D(Size + 4, Size + 4);
 		}
 		virtual int32 OnPaint(const FPaintArgs&, const FGeometry& G, const FSlateRect&, FSlateWindowElementList& Out, int32 Layer,
 			const FWidgetStyle&, bool) const override

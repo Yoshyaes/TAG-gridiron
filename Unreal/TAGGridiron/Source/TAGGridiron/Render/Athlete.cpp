@@ -56,6 +56,16 @@ static T* LoadAsset(const TCHAR* Path, bool bWarn = true)
 	return Obj;
 }
 
+/** Statistics nobody plays by (which clips motion matching picks, where set linemen look, a sprinter's hip and head
+ *  height): gathered with -TagAnimStats, and in the test modes whose reports read them (-TagMoveTest, -TagGapTest,
+ *  -TagLineTest, -TagLineup). They cost names, string maps and bone lookups per man per frame. */
+static bool TagAnimStats()
+{
+	static const bool bOn = FParse::Param(FCommandLine::Get(), TEXT("TagAnimStats")) || FParse::Param(FCommandLine::Get(), TEXT("TagMoveTest")) ||
+		FParse::Param(FCommandLine::Get(), TEXT("TagGapTest")) || FParse::Param(FCommandLine::Get(), TEXT("TagLineTest")) || FParse::Param(FCommandLine::Get(), TEXT("TagLineup"));
+	return bOn;
+}
+
 void FAthleteAssets::Load()
 {
 	if (bLoaded) return;
@@ -189,6 +199,24 @@ void FAthleteAssets::Load()
 				QbRun(TEXT("MG_Loco_QB_Scramble_Jog__P01"), QBScramble, QBScrambleSpeed);
 				QbRun(TEXT("MG_Loco_QB_Run_ShortStride__P01"), QBRun, QBRunSpeed);
 				UE_LOG(LogTemp, Display, TEXT("TAG qb scramble: jog %d (%.0f cm/s), run %d (%.0f cm/s)"), QBScramble.IsValid(), QBScrambleSpeed, QBRun.IsValid(), QBRunSpeed);
+				{
+					// the ball covered up (R1): the pack's carries with both arms on it
+					auto Cover = [&](const TCHAR* N, TStrongObjectPtr<UAnimSequence>& Out, float* Speed)
+					{
+						UAnimSequence* Sq = LoadObject<UAnimSequence>(nullptr, *FString::Printf(TEXT("%s/Pack/BallCarrier/A_TAG_Pack_%s.A_TAG_Pack_%s"), *AnimRoot, N, N), nullptr, LOAD_NoWarn | LOAD_Quiet);
+						if (!Sq) return;
+						Out.Reset(Sq);
+						FVector T = Sq->ExtractRootMotionFromRange(0.0, Sq->GetPlayLength(), FAnimExtractContext(0.0, true)).GetTranslation();
+						T.Z = 0.f;
+						if (Speed && T.Size() > 50.f) *Speed = static_cast<float>(T.Size() / Sq->GetPlayLength());
+					};
+					Cover(TEXT("MG_BC_Coverball_Idle__P01"), CoverIdle, nullptr);
+					Cover(TEXT("MG_BC_Coverball_Jog_D1__P01"), CoverJog, &CoverJogSpeed);
+					Cover(TEXT("MG_BC_Coverball_Run_D1_s50__P01"), CoverRun, &CoverRunSpeed);
+					Cover(TEXT("MG_BC_Coverball_Sprint_D1_s99__P01"), CoverSprint, &CoverSprintSpeed);
+					UE_LOG(LogTemp, Display, TEXT("TAG cover-ball carries: idle %d, jog %d (%.0f cm/s), run %d (%.0f), sprint %d (%.0f)"), CoverIdle.IsValid(), CoverJog.IsValid(), CoverJogSpeed,
+						CoverRun.IsValid(), CoverRunSpeed, CoverSprint.IsValid(), CoverSprintSpeed);
+				}
 				UE_LOG(LogTemp, Display, TEXT("TAG qb pocket set: %d walks, %d jogs"), QBWalks.Clips.Num(), QBJogs.Clips.Num());
 				auto KickClip = [&](const TCHAR* N) -> UAnimSequence*
 				{
@@ -302,7 +330,21 @@ void FAthleteAssets::Load()
 		{
 			PackSeed = FDateTime::Now().GetDayOfYear();
 			FParse::Value(FCommandLine::Get(), TEXT("TagPackSeed="), PackSeed);
-			FParse::Value(FCommandLine::Get(), TEXT("TagPackScale="), PackScale);
+			if (!FParse::Value(FCommandLine::Get(), TEXT("TagPackScale="), PackScale))
+			{
+				// the draw fits the memory the machine has free, not the machine: the uncooked game grows to ~15 GB and a
+				// full draw (scale 8, ~3.5 GB of library) on a PC with other programs open ran it out of RAM (2026-11-22:
+				// 15 GB free at launch, 0 at kickoff, the game paged at a few frames a second). ~20 GB free keeps 8.
+				// (what the game can have = free now + what it already holds: by here the engine has taken ~4 GB)
+				const FPlatformMemoryStats LaunchMem = FPlatformMemory::GetStats();
+				const double FreeGB = (LaunchMem.AvailablePhysical + LaunchMem.UsedPhysical) / (1024.0 * 1024.0 * 1024.0);
+				const int32 FitScale = FMath::Clamp(FMath::RoundToInt(FreeGB - 13.0), 2, PackScale);
+				if (FitScale < PackScale)
+				{
+					UE_LOG(LogTemp, Display, TEXT("TAG: pack scale %d -> %d (%.1f GB of memory for the game at launch; -TagPackScale= overrides)"), PackScale, FitScale, FreeGB);
+					PackScale = FitScale;
+				}
+			}
 			PackScale = FMath::Clamp(PackScale, 1, 20);
 			LoadPackIndex();
 			ReseedPack(PackSeed);
@@ -441,6 +483,109 @@ bool FAthleteAssets::LoopsCleanly(const UAnimSequence* Seq)
 	return true;
 }
 
+float FAthleteAssets::CarryScore(const UAnimSequence* Seq, float T0, float T1)
+{
+	if (!Seq || !Seq->GetSkeleton()) return -1.f;
+	static TMap<FString, float> GCarrySeen;
+	const FString Key = FString::Printf(TEXT("%s@%d@%d"), *Seq->GetPathName(), FMath::RoundToInt(T0 * 1000.f), FMath::RoundToInt(T1 * 1000.f));
+	if (const float* Hit = GCarrySeen.Find(Key)) return *Hit;
+	const FReferenceSkeleton& Sk = Seq->GetSkeleton()->GetReferenceSkeleton();
+	const int32 ChestB = Sk.FindBoneIndex(TEXT("spine_05"));
+	const int32 SockB[2] = {Sk.FindBoneIndex(TEXT("RightFootball")), Sk.FindBoneIndex(TEXT("LeftFootball"))};
+	float Score = -1.f;
+	if (ChestB != INDEX_NONE && SockB[0] != INDEX_NONE && SockB[1] != INDEX_NONE)
+	{
+		const double ClipLen = Seq->GetPlayLength();
+		const double Ta = FMath::Clamp<double>(T0, 0.0, ClipLen), Tb = FMath::Clamp<double>(T1, Ta, ClipLen);
+		const int32 NS = FMath::Clamp(static_cast<int32>((Tb - Ta) * 15.0 + 0.999) + 1, 4, 16);
+		// a bone's transform up the chain to (not including) Stop: the socket in the chest's frame when the arm hangs off
+		// spine_05 (the distance needs nothing above it), else each up to the root
+		auto UpTo = [Seq, &Sk](int32 Bone, int32 Stop, double At)
+		{
+			FTransform Acc = FTransform::Identity;
+			for (int32 Bi = Bone; Bi != INDEX_NONE && Bi != Stop; Bi = Sk.GetParentIndex(Bi))
+			{
+				FTransform Loc;
+				Seq->GetBoneTransform(Loc, FSkeletonPoseBoneIndex(Bi), At, false);
+				Acc = Acc * Loc;
+			}
+			return Acc;
+		};
+		auto UnderChest = [&Sk, ChestB](int32 Bone)
+		{
+			for (int32 Bi = Bone; Bi != INDEX_NONE; Bi = Sk.GetParentIndex(Bi))
+				if (Bi == ChestB) return true;
+			return false;
+		};
+		const bool bArmOnChest = UnderChest(SockB[0]) && UnderChest(SockB[1]);
+		Score = 1e9f;
+		for (int32 h = 0; h < 2; ++h)
+		{
+			double Sum = 0.0, Sum2 = 0.0;
+			for (int32 i = 0; i < NS; ++i)
+			{
+				const double At = Ta + (Tb - Ta) * i / (NS - 1);
+				const double Dcm = bArmOnChest ? UpTo(SockB[h], ChestB, At).GetLocation().Size()
+					: FVector::Dist(UpTo(SockB[h], INDEX_NONE, At).GetLocation(), UpTo(ChestB, INDEX_NONE, At).GetLocation());
+				Sum += Dcm;
+				Sum2 += Dcm * Dcm;
+			}
+			const double Mu = Sum / NS, Sd = FMath::Sqrt(FMath::Max(0.0, Sum2 / NS - Mu * Mu));
+			Score = FMath::Min(Score, static_cast<float>(Mu + 1.5 * Sd));
+		}
+	}
+	GCarrySeen.Add(Key, Score);
+	return Score;
+}
+
+bool FAthleteAssets::CarrierHoldsBall(const UAnimSequence* CSeq, const UAnimSequence* TSeq, const UAnimSequence* ASeq, float Start, bool bBallLeaves, FString& OutWhy)
+{
+	static const bool bNoGuard = FParse::Param(FCommandLine::Get(), TEXT("TagNoRoleGuard"));
+	if (bNoGuard || !CSeq) return true;
+	// (the same test as Tools/Anim/pack_role_check.py: before the contact - at least its first 0.4 s - and through a
+	// second after it; the ball's end with another man over the last 0.67 s)
+	const float W0 = FMath::Max(Start, 0.4f), W1 = Start + 1.f;
+	const float Sc = CarryScore(CSeq, 0.f, W0);
+	if (Sc < 0.f) return true; // (no ball sockets on this skeleton: nothing to tell)
+	for (const UAnimSequence* Other : {TSeq, ASeq})
+	{
+		if (!Other) continue;
+		const float So = CarryScore(Other, 0.f, W0);
+		if (So >= 0.f && So < Sc - 12.f && So < 50.f && CarryScore(Other, 0.f, W1) <= CarryScore(CSeq, 0.f, W1))
+		{
+			OutWhy = FString::Printf(TEXT("the ball is %s's (carry %.0f cm, the carrier's capture %.0f cm)"), *Other->GetName(), So, Sc);
+			return false;
+		}
+		if (!bBallLeaves && Sc < 42.f)
+		{
+			const float Lc = static_cast<float>(CSeq->GetPlayLength()), Lo = static_cast<float>(Other->GetPlayLength());
+			const float Ec = CarryScore(CSeq, Lc - 0.67f, Lc), Eo = CarryScore(Other, Lo - 0.67f, Lo);
+			if (Eo >= 0.f && Eo < 38.f && Ec > 55.f)
+			{
+				OutWhy = FString::Printf(TEXT("the ball ends with %s (carry %.0f cm at the end, the carrier's %.0f cm)"), *Other->GetName(), Eo, Ec);
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
+bool FAthleteAssets::DefenderHoldsBall(const UAnimSequence* DSeq, const UAnimSequence* RSeq, float CatchT, FString& OutWhy)
+{
+	static const bool bNoGuard = FParse::Param(FCommandLine::Get(), TEXT("TagNoRoleGuard"));
+	if (bNoGuard || !DSeq || !RSeq) return true;
+	const float W0 = CatchT + 0.2f;
+	const float W1 = FMath::Min(CatchT + 1.2f, static_cast<float>(FMath::Min(DSeq->GetPlayLength(), RSeq->GetPlayLength())));
+	if (W1 - W0 < 0.27f) return true; // (the capture ends at the catch: nothing after it to tell by)
+	const float Sd = CarryScore(DSeq, W0, W1), Sr = CarryScore(RSeq, W0, W1);
+	if (Sd >= 0.f && Sr >= 0.f && Sr < Sd - 12.f && Sr < 50.f)
+	{
+		OutWhy = FString::Printf(TEXT("the receiver %s holds the ball after the catch (carry %.0f cm, the defender's %.0f cm)"), *RSeq->GetName(), Sr, Sd);
+		return false;
+	}
+	return true;
+}
+
 /**
  * The pack's assets under a category folder (recursive for the root), read from the registry once a run: a forced
  * rescan of the folders and a fresh registry query for every family at each quarter's re-draw held the game thread for
@@ -490,7 +635,8 @@ void FAthleteAssets::PackFamily(const TCHAR* Category, std::initializer_list<con
 	}
 	{
 		TArray<TObjectPtr<UAnimationAsset>>& S = Sink();
-		if (!SinkBase.Contains(&S)) SinkBase.Add(&S, S.Num());
+		// (a sink's own entries are only what it held before the first draw: one first seen later holds library clips)
+		if (!SinkBase.Contains(&S)) SinkBase.Add(&S, PackBatch == 0 && !bPackLoading ? S.Num() : 0);
 	}
 	PendingFamilies.Add(MoveTemp(F));
 }
@@ -499,6 +645,10 @@ void FAthleteAssets::PackFamily(const TCHAR* Category, std::initializer_list<con
  *  (the tables are keyed by asset name and hold capture times, the same on both skeletons). */
 static FString PackJson(const TCHAR* Name)
 {
+	// -TagPackJsonDir=<dir>: the tables from there where it has them (A/B films of two table versions side by side)
+	static FString OverDir;
+	static const bool bOver = FParse::Value(FCommandLine::Get(), TEXT("TagPackJsonDir="), OverDir) && !OverDir.IsEmpty();
+	if (bOver && FPaths::FileExists(OverDir / Name)) return OverDir / Name;
 	const FString Mine = FPaths::ProjectContentDir() / FAthleteAssets::Get().AnimRoot.RightChop(6) / TEXT("Pack") / Name; // "/Game/" -> Content
 	return FPaths::FileExists(Mine) ? Mine : FPaths::ProjectContentDir() / TEXT("TAG/Anim/Pack") / Name;
 }
@@ -555,6 +705,14 @@ void FAthleteAssets::PackTimed(const TCHAR* Category, std::initializer_list<cons
 			C.Start = FMath::Max(0.f, (static_cast<float>(Frame) - LeadFrames) / 30.f);
 		}
 		if (C.Len - C.Start < MinAfter) continue;
+		// the families the sim plays on men who stay on their feet (an engagement, a get-off, a rush move won or lost)
+		// take no capture that puts its man on the turf: "Block_Impact" also matched RunBlock_Impact_Force, a drive
+		// block both men finish on the ground (pelvis 14-20 cm), and an ordinary run block laid both linemen out with
+		// the sim's men still up (p87 clip 34). The knockdowns are the pancake family's, played when the sim calls one.
+		const bool bUpright = &Sink == &PackEngageOff || &Sink == &PackEngageDef || &Sink == &PackGetOffs || &Sink == &PackGetOffsPass ||
+			&Sink == &PackGetOffsRun || &Sink == &PackGetOffsDL || &Sink == &PackRushWinsL || &Sink == &PackRushWinsR || &Sink == &PackBeatenL || &Sink == &PackBeatenR;
+		double PzMin = 1.0;
+		if (bUpright && (*E)->TryGetNumberField(TEXT("pzmin"), PzMin) && PzMin < 0.45) continue;
 		double Speed = 0.0;
 		if ((*E)->TryGetNumberField(TEXT("speed"), Speed)) C.Speed = static_cast<float>(Speed);
 		C.Path = D.GetSoftObjectPath();
@@ -610,9 +768,64 @@ void FAthleteAssets::LoadPackDoubles()
 			R.T = static_cast<float>((*O)->GetNumberField(TEXT("T")));
 			R.bGun = (*O)->GetBoolField(TEXT("Gun"));
 			R.Bx = static_cast<float>((*O)->GetNumberField(TEXT("Bx")));
+			// the quarterback's place beside the back's path as the ball changes hands, from the back's place around him
+			// (the json's frame: x left, y back, yaw to the left): what a play is matched to (PlayRepHandoffFit)
+			double HBy = 0.0, HYaw = 0.0;
+			(*O)->TryGetNumberField(TEXT("By"), HBy);
+			(*O)->TryGetNumberField(TEXT("BYaw"), HYaw);
+			R.By = static_cast<float>(HBy);
+			R.BYaw = static_cast<float>(HYaw);
+			FString HKind;
+			if ((*O)->TryGetStringField(TEXT("Kind"), HKind)) R.Kind = HKind == TEXT("draw") ? 2 : HKind == TEXT("stretch") ? 1 : 0;
+			(*O)->TryGetBoolField(TEXT("Snap"), R.bSnap);
+			double HVq = -1.0, HVb = -1.0;
+			(*O)->TryGetNumberField(TEXT("Vq"), HVq);
+			(*O)->TryGetNumberField(TEXT("Vb"), HVb);
+			R.Vq = static_cast<float>(HVq);
+			R.Vb = static_cast<float>(HVb);
+			double HDc = -1.0, HSep = -1.0;
+			(*O)->TryGetNumberField(TEXT("Dc"), HDc);
+			(*O)->TryGetNumberField(TEXT("MinSep"), HSep);
+			R.Dc = static_cast<float>(HDc);
+			R.MinSep = static_cast<float>(HSep);
+			{
+				const FString HName = (*O)->GetStringField(TEXT("Name"));
+				const bool bBootL = HName.Contains(TEXT("BootLT"), ESearchCase::IgnoreCase) || HName.Contains(TEXT("Boot_Lt"), ESearchCase::IgnoreCase);
+				const bool bBootR = HName.Contains(TEXT("BootRT"), ESearchCase::IgnoreCase) || HName.Contains(TEXT("Boot_Rt"), ESearchCase::IgnoreCase);
+				R.Fake = bBootL ? 1 : bBootR ? -1 : 0;
+			}
+			{
+				const float Fw = -R.By, Lf = R.Bx, Hf = FMath::Cos(FMath::DegreesToRadians(R.BYaw)), Hl = FMath::Sin(FMath::DegreesToRadians(R.BYaw));
+				R.Lat = Fw * Hl - Lf * Hf;
+				R.Along = -Fw * Hf - Lf * Hl;
+			}
 			if (R.Q.IsValid() && R.B.IsValid()) RepHandoffs.Add(MoveTemp(R));
 		}
 	UE_LOG(LogTemp, Display, TEXT("TAG handoffs: %d captures"), RepHandoffs.Num());
+	// and the play-action fakes (Tools/Art/pack_pafakes.py)
+	FString PText;
+	TArray<TSharedPtr<FJsonValue>> PRows;
+	if (FFileHelper::LoadFileToString(PText, *PackJson(TEXT("pack_pafakes.json"))) && FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(PText), PRows))
+		for (const TSharedPtr<FJsonValue>& V : PRows)
+		{
+			const TSharedPtr<FJsonObject>* O = nullptr;
+			if (!V.IsValid() || !V->TryGetObject(O) || !O) continue;
+			const FString Cat = (*O)->GetStringField(TEXT("Cat"));
+			auto LoadP = [&Cat](const FString& N)
+			{
+				return LoadObject<UAnimSequence>(nullptr, *FString::Printf(TEXT("/Game/TAG/AnimH/Pack/%s/%s.%s"), *Cat, *N, *N), nullptr, LOAD_NoWarn | LOAD_Quiet);
+			};
+			FPaFakeRep R;
+			R.Q.Reset(LoadP((*O)->GetStringField(TEXT("Q"))));
+			R.B.Reset(LoadP((*O)->GetStringField(TEXT("B"))));
+			R.T = static_cast<float>((*O)->GetNumberField(TEXT("T")));
+			R.bGun = (*O)->GetBoolField(TEXT("Gun"));
+			R.bBoot = (*O)->GetBoolField(TEXT("Boot"));
+			R.Bx = static_cast<float>((*O)->GetNumberField(TEXT("Bx")));
+			R.Len = static_cast<float>((*O)->GetNumberField(TEXT("Len")));
+			if (R.Q.IsValid() && R.B.IsValid()) RepPaFakes.Add(MoveTemp(R));
+		}
+	UE_LOG(LogTemp, Display, TEXT("TAG play-action fakes: %d captures"), RepPaFakes.Num());
 }
 
 void FAthleteAssets::LoadPackPairs(int32 Seed)
@@ -650,6 +863,9 @@ void FAthleteAssets::LoadPackPairs(int32 Seed)
 				double CMinZ = 0.0;
 				if (O->TryGetNumberField(TEXT("CMinZ"), CMinZ) && CMinZ > 0.45) continue;
 			}
+			// a capture that is no carrier and his tackler (two linemen, no clear man with the ball, the ball ending with
+			// the tackler: Tools/Anim/pack_role_check.py --fix marks them; the ones whose __P01 was the tackler it swaps)
+			if (O->HasField(TEXT("RoleBad"))) continue;
 			FPendingPair Q;
 			Q.Kind = k;
 			Q.TP = FSoftObjectPath(FString::Printf(TEXT("%s/Pack/Tackles/%s.%s"), *AnimRoot, *TN, *TN));
@@ -665,6 +881,119 @@ void FAthleteAssets::LoadPackPairs(int32 Seed)
 			++Taken;
 		}
 	}
+}
+
+void FAthleteAssets::LoadPackTurnovers()
+{
+	if (bTurnoversRequested) return;
+	bTurnoversRequested = true;
+	FString Text;
+	if (!FFileHelper::LoadFileToString(Text, *PackJson(TEXT("pack_turnovers.json")))) return;
+	TSharedPtr<FJsonObject> Root;
+	if (!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Text), Root) || !Root.IsValid()) return;
+	auto Path = [this](const FString& Cat, const FString& N) { return FSoftObjectPath(FString::Printf(TEXT("%s/Pack/%s/%s.%s"), *AnimRoot, *Cat, *N, *N)); };
+	auto F = [](const TSharedPtr<FJsonObject>& O, const TCHAR* K) { double V = 0.0; O->TryGetNumberField(K, V); return static_cast<float>(V); };
+	// (paths kept beside the rows until the clips are in: the rows only go live with both men loaded)
+	struct FStripRow { FPackStrip S; FSoftObjectPath TP, CP; };
+	struct FIntRow { FPackInt I; FSoftObjectPath DP, RP; };
+	struct FDiveRow { FPackDive D; FSoftObjectPath P; };
+	TSharedRef<TArray<FStripRow>> Strips = MakeShared<TArray<FStripRow>>();
+	TSharedRef<TArray<FIntRow>> Ints = MakeShared<TArray<FIntRow>>();
+	TSharedRef<TArray<FDiveRow>> Dives = MakeShared<TArray<FDiveRow>>();
+	TArray<FSoftObjectPath> All;
+	const TArray<TSharedPtr<FJsonValue>>* L = nullptr;
+	if (Root->TryGetArrayField(TEXT("strips"), L))
+		for (const TSharedPtr<FJsonValue>& V : *L)
+		{
+			const TSharedPtr<FJsonObject>* O = nullptr;
+			if (!V.IsValid() || !V->TryGetObject(O) || !O) continue;
+			// the ball comes out in these: the carrier losing it, or punched out of a tackle that takes him down (the
+			// "keeps" / "breaks" / "misses" ones hold on to it, or the carrier stays on his feet: not a fumble's capture)
+			const FString Outcome = (*O)->GetStringField(TEXT("Outcome"));
+			if (Outcome != TEXT("loses") && Outcome != TEXT("tackled")) continue;
+			if (F(*O, TEXT("Out")) - F(*O, TEXT("Start")) > 1.1f) continue; // (a punch that comes a second after the contact: the sim's ball is long gone)
+			if ((*O)->HasField(TEXT("RoleBad"))) continue; // (the stripper taken for the carrier: Tools/Anim/pack_role_check.py)
+			FStripRow R;
+			const FString Cat = (*O)->GetStringField(TEXT("Cat"));
+			R.TP = Path(Cat, (*O)->GetStringField(TEXT("T")));
+			R.CP = Path(Cat, (*O)->GetStringField(TEXT("C")));
+			R.S.Name = (*O)->GetStringField(TEXT("Name"));
+			R.S.Outcome = Outcome;
+			R.S.Start = F(*O, TEXT("Start")); R.S.Out = F(*O, TEXT("Out"));
+			R.S.PopX = F(*O, TEXT("PopX")); R.S.PopY = F(*O, TEXT("PopY")); R.S.PopZ = F(*O, TEXT("PopZ"));
+			R.S.Ox = F(*O, TEXT("Ox")); R.S.Oy = F(*O, TEXT("Oy")); R.S.Yaw = F(*O, TEXT("Yaw")); R.S.CMinZ = F(*O, TEXT("CMinZ"));
+			R.S.bRightHand = (*O)->GetStringField(TEXT("Hand")) != TEXT("L");
+			R.S.bSack = (*O)->GetBoolField(TEXT("Sack"));
+			All.Add(R.TP);
+			All.Add(R.CP);
+			Strips->Add(MoveTemp(R));
+		}
+	if (Root->TryGetArrayField(TEXT("ints"), L))
+		for (const TSharedPtr<FJsonValue>& V : *L)
+		{
+			const TSharedPtr<FJsonObject>* O = nullptr;
+			if (!V.IsValid() || !V->TryGetObject(O) || !O) continue;
+			const FString N = (*O)->GetStringField(TEXT("Name"));
+			// (a defender's dropped interception is a breakup, not this; a catch more than 3 s in starts too far back)
+			if (N.Contains(TEXT("Drop")) || F(*O, TEXT("T")) > 3.f || F(*O, TEXT("Gap")) > 0.4f) continue;
+			if ((*O)->HasField(TEXT("RoleBad"))) continue; // (the receiver holds it after the catch: Tools/Anim/pack_role_check.py)
+			FIntRow R;
+			R.DP = Path(TEXT("Catching"), (*O)->GetStringField(TEXT("D")));
+			R.RP = Path(TEXT("Catching"), (*O)->GetStringField(TEXT("R")));
+			R.I.Name = N;
+			R.I.T = F(*O, TEXT("T")); R.I.Rx = F(*O, TEXT("Rx")); R.I.Ry = F(*O, TEXT("Ry")); R.I.RYaw = F(*O, TEXT("RYaw"));
+			R.I.Bz = F(*O, TEXT("Bz")); R.I.DSpeed = F(*O, TEXT("DSpeed")); R.I.RSpeed = F(*O, TEXT("RSpeed"));
+			All.Add(R.DP);
+			All.Add(R.RP);
+			Ints->Add(MoveTemp(R));
+		}
+	if (Root->TryGetArrayField(TEXT("dives"), L))
+		for (const TSharedPtr<FJsonValue>& V : *L)
+		{
+			const TSharedPtr<FJsonObject>* O = nullptr;
+			if (!V.IsValid() || !V->TryGetObject(O) || !O) continue;
+			FDiveRow R;
+			R.P = Path((*O)->GetStringField(TEXT("Cat")), (*O)->GetStringField(TEXT("Name")));
+			R.D.Name = (*O)->GetStringField(TEXT("Name"));
+			R.D.Touch = F(*O, TEXT("Touch")); R.D.Reach = F(*O, TEXT("Reach")); R.D.V0 = F(*O, TEXT("V0"));
+			All.Add(R.P);
+			Dives->Add(MoveTemp(R));
+		}
+	if (!All.Num()) return;
+	const double T0 = FPlatformTime::Seconds();
+	TurnoverHandle = TurnoverStreamer.RequestAsyncLoad(All, FStreamableDelegate::CreateLambda([this, Strips, Ints, Dives, T0]
+	{
+		auto Get = [](const FSoftObjectPath& P) { return Cast<UAnimSequence>(P.ResolveObject()); };
+		for (FStripRow& R : *Strips)
+		{
+			R.S.T = Get(R.TP);
+			R.S.C = Get(R.CP);
+			FString Why;
+			if (R.S.T && R.S.C && !CarrierHoldsBall(R.S.C, R.S.T, nullptr, R.S.Start, true, Why))
+			{
+				UE_LOG(LogTemp, Display, TEXT("TAG: strip %s left out: %s"), *R.S.Name, *Why);
+			}
+			else if (R.S.T && R.S.C) PackStrips.Add(R.S);
+		}
+		for (FIntRow& R : *Ints)
+		{
+			R.I.D = Get(R.DP);
+			R.I.R = Get(R.RP);
+			FString Why;
+			if (R.I.D && R.I.R && !DefenderHoldsBall(R.I.D, R.I.R, R.I.T, Why))
+			{
+				UE_LOG(LogTemp, Display, TEXT("TAG: interception %s left out: %s"), *R.I.Name, *Why);
+			}
+			else if (R.I.D && R.I.R) PackInts.Add(R.I);
+		}
+		for (FDiveRow& R : *Dives)
+		{
+			R.D.Anim = Get(R.P);
+			if (R.D.Anim && R.D.Anim->HasRootMotion()) PackDives.Add(R.D);
+		}
+		UE_LOG(LogTemp, Display, TEXT("TAG turnovers: %d strips, %d two-man interceptions, %d dives loaded in %.1f s"), PackStrips.Num(), PackInts.Num(), PackDives.Num(),
+			FPlatformTime::Seconds() - T0);
+	}), FStreamableManager::AsyncLoadHighPriority - 1);
 }
 
 void FAthleteAssets::LoadPackGangs()
@@ -683,6 +1012,8 @@ void FAthleteAssets::LoadPackGangs()
 			double CMinZ = 0.0;
 			if ((*O)->TryGetNumberField(TEXT("CMinZ"), CMinZ) && CMinZ > 0.45) continue;
 		}
+		// (no clear carrier, or the ball is the second man's: Tools/Anim/pack_role_check.py --fix)
+		if ((*O)->HasField(TEXT("RoleBad"))) continue;
 		FPendingGang Q;
 		Q.CP = Path((*O)->GetStringField(TEXT("C")));
 		Q.TP = Path((*O)->GetStringField(TEXT("T")));
@@ -700,6 +1031,10 @@ void FAthleteAssets::LoadPackGangs()
 
 void FAthleteAssets::SelectPack(int32 Seed)
 {
+	// the stance sinks live in a map: room up front, so adding a position never moves the others (SinkBase keys a sink by
+	// its address; a moved sink was registered again at the next draw with the last draw's clips as its own, which then
+	// outlived their batch's root - the access violation in StartBodyAsset on a stance after a quarter's re-draw)
+	PackStances.Reserve(64);
 	const std::initializer_list<const TCHAR*> Many = {TEXT("2Man"), TEXT("2man"), TEXT("3Man"), TEXT("4Man"), TEXT("Nman"), TEXT("NMan"), TEXT("Group"), TEXT("Mascot"), TEXT("Interaction"), TEXT("Avoid"), TEXT("Bump"), TEXT("Man0"), TEXT("Man1"), TEXT("Man2"), TEXT("Man3")};
 	PackFamily(TEXT("Celebrations"), {TEXT("Celeb")}, {}, {TEXT("2Man"), TEXT("2man"), TEXT("3Man"), TEXT("4Man"), TEXT("Nman"), TEXT("NMan"), TEXT("Group"), TEXT("Mascot"), TEXT("Interaction"), TEXT("Avoid"), TEXT("Bump"), TEXT("Man0"), TEXT("Man1"), TEXT("Man2"), TEXT("Man3"), TEXT("Loco"), TEXT("Walk"), TEXT("Jog"), TEXT("Run"), TEXT("on_Ground"), TEXT("Toss_Ball"), TEXT("Fan")}, 24, Seed + 1, false, [this]() -> TArray<TObjectPtr<UAnimationAsset>>& { return PackCelebrations; });
 	PackFamily(TEXT("PostPlay"), {TEXT("Idle"), TEXT("Fidget"), TEXT("Stand")}, {}, {TEXT("2Man"), TEXT("Man_"), TEXT("Interaction"), TEXT("Jog"), TEXT("Walk"), TEXT("Run"), TEXT("Avoid"), TEXT("Turn"), TEXT("Tackle"), TEXT("Getup"), TEXT("Injured"), TEXT("To_"), TEXT("Trans"),
@@ -734,6 +1069,13 @@ void FAthleteAssets::SelectPack(int32 Seed)
 	LoadPackPairs(Seed);
 	LoadPackDoubles();
 	LoadPackGangs();
+	LoadPackTurnovers();
+	// the turnovers' celebrations: the man with the recovered fumble holding it up, his teammates pointing the way it goes,
+	// the interception's (the general celebrations keep their own; these are only played for a takeaway)
+	PackFamily(TEXT("Celebrations"), {TEXT("FumbleRecovery")}, {TEXT("PostPlay_BC_")}, {}, 6, Seed + 7, false, [this]() -> TArray<TObjectPtr<UAnimationAsset>>& { return PackCelebFumbleBC; });
+	PackFamily(TEXT("Celebrations"), {TEXT("FumbleRecovery")}, {TEXT("NonBC")}, {}, 6, Seed + 8, false, [this]() -> TArray<TObjectPtr<UAnimationAsset>>& { return PackCelebFumblePoint; });
+	PackFamily(TEXT("Celebrations"), {TEXT("INT_Celeb")}, {TEXT("PostPlay_BC_")}, {}, 8, Seed + 9, false, [this]() -> TArray<TObjectPtr<UAnimationAsset>>& { return PackCelebInt; });
+	PackFamily(TEXT("Celebrations"), {TEXT("INT_Celeb")}, {TEXT("NonBC")}, {}, 8, Seed + 11, false, [this]() -> TArray<TObjectPtr<UAnimationAsset>>& { return PackCelebIntMates; });
 	if (PackIndex.Num())
 	{
 		const std::initializer_list<const TCHAR*> ThrowNone = {TEXT("Fake"), TEXT("Pump"), TEXT("Drop_"), TEXT("Handoff"), TEXT("Pitch"), TEXT("Scramble"), TEXT("Sack"), TEXT("Fumble"), TEXT("Kneel"), TEXT("Spike"), TEXT("Celeb"), TEXT("Idle"), TEXT("Walk"), TEXT("Jog"), TEXT("2man"), TEXT("Snap"), TEXT("Option"), TEXT("Toss"), TEXT("Lateral"), TEXT("UBRig")};
@@ -765,6 +1107,8 @@ void FAthleteAssets::SelectPack(int32 Seed)
 		PackTimed(TEXT("Catching"), {TEXT("Catch_Stand"), TEXT("Stand_"), TEXT("Strafe"), TEXT("Chest")}, {TEXT("Catch")}, CatchNoDive, 12, Seed + 75, TEXT("release"), 4, 0.7f, 0.f, PackCatchStand);
 		PackTimed(TEXT("Catching"), {TEXT("Bkpd"), TEXT("Comeback"), TEXT("Curl")}, {TEXT("Catch")}, CatchNoDive, 8, Seed + 76, TEXT("release"), 4, 0.7f, 0.f, PackCatchComeback);
 		PackTimed(TEXT("Catching"), {TEXT("Dive"), TEXT("Layout")}, {TEXT("Catch")}, CatchNone, 8, Seed + 77, TEXT("release"), 6, 0.9f, 0.f, PackCatchDive);
+		// the quarterback slide: from 0.45 s before its low point (still running in), through the slide and the get-up
+		PackTimed(TEXT("Quarterback"), {TEXT("QB_Slide")}, {}, {}, 2, Seed + 79, TEXT("pelvis_min"), 14, 1.0f, 0.f, PackQBSlide);
 		// (its own exclusions: CatchNoDive's "Tip" took every FingerTip; and these captures end a beat after the ball is
 		// in, 0.15-0.3 s, where the everyday catches run on 0.7 s: shorter ones only blend back into the run sooner)
 		{
@@ -783,6 +1127,9 @@ void FAthleteAssets::SelectPack(int32 Seed)
 			PackTimed(TEXT("Catching"), {TEXT("_INT"), TEXT("Interception"), TEXT("INT_")}, {},
 				{TEXT("2man"), TEXT("MPCI"), TEXT("Dive"), TEXT("Diving"), TEXT("Fall"), TEXT("Ground"), TEXT("Def_"), TEXT("Swat"), TEXT("Drop"), TEXT("2014_")}, 10, Seed + 123,
 				TEXT("release"), 4, 0.3f, 0.f, PackIntCatch);
+			// a pass the receiver gets his hands on and drops (the sim rolls it before the ball gets there)
+			PackTimed(TEXT("Catching"), {TEXT("Drop_Run"), TEXT("CatchDrop_"), TEXT("Drop_Stand")}, {},
+				{TEXT("2man"), TEXT("2an_"), TEXT("MPCI"), TEXT("Dropback"), TEXT("Def_"), TEXT("Ground"), TEXT("Dive")}, 8, Seed + 124, TEXT("release"), 4, 0.5f, 0.f, PackCatchDrops);
 		}
 		PackTimed(TEXT("Catching"), {TEXT("OneHand"), TEXT("One_Hand"), TEXT("one_hand"), TEXT("FingerTip"), TEXT("Fingertip"), TEXT("Leap")}, {TEXT("Catch")},
 			{TEXT("2man"), TEXT("Drop"), TEXT("Def_"), TEXT("INT"), TEXT("Int_"), TEXT("Swat"), TEXT("Knock"), TEXT("Bobble"), TEXT("Miss"), TEXT("Fumble"), TEXT("Juggl"),
@@ -913,20 +1260,26 @@ static void PackLoadBudget(bool bStreaming)
 
 void FAthleteAssets::LoadNextPackChunk()
 {
-	PackLoadBudget(true);
+	PackLoadBudget(!bMMLoading); // (the motion matching databases come in at the engine's own budget, not the pack's 1 ms a frame)
 	// the budget counts the clips themselves (their resource size), not the process, which grows with the world
 	// loading alongside; the process still gets a ceiling at 80 % of physical memory so a wrong estimate cannot swap
 	const FPlatformMemoryStats Mem = FPlatformMemory::GetStats();
 	const double UsedMB = Mem.UsedPhysical / (1024.0 * 1024.0), CeilingMB = Mem.TotalPhysical / (1024.0 * 1024.0) * 0.80;
+	// ... and the machine keeps a floor of free memory: other programs count too (the process ceiling alone let a PC with
+	// 16 GB taken by other programs page; 2026-11-22)
+	const double FreeMB = Mem.AvailablePhysical / (1024.0 * 1024.0);
+	static const double FloorMB = [] { double V = 3000.0; FParse::Value(FCommandLine::Get(), TEXT("TagMemFloorMB="), V); return V; }();
+	const bool bLowMem = FreeMB < FloorMB;
 	const int32 Rooted = BatchRoots[PackBatch % 2].Num();
 	if (PackChunk > 0 && PackChunk % 4 == 0)
 		UE_LOG(LogTemp, Display, TEXT("TAG: pack batch %d: %d of %d captures, %d rooted, %.0f MB of clips (%.1f MB a clip), %.0f MB used, %.0f s"), PackBatch, PackQueuePos, PackQueue.Num(), Rooted,
 			PackLoadedMB, Rooted ? PackLoadedMB / Rooted : 0.0, UsedMB, FPlatformTime::Seconds() - PackT0);
 	const bool bDone = PackQueuePos >= PackQueue.Num();
-	if (bDone || PackLoadedMB > PackBudgetMB || UsedMB > CeilingMB)
+	if (bDone || PackLoadedMB > PackBudgetMB || UsedMB > CeilingMB || bLowMem)
 	{
-		UE_LOG(LogTemp, Display, TEXT("TAG: pack batch %d %s: %d of %d captures in %.0f s, %d rooted, %.0f MB of clips (%.0f MB used)"), PackBatch,
-			bDone ? TEXT("complete") : UsedMB > CeilingMB ? TEXT("stopped at the memory ceiling") : TEXT("stopped at the clip budget"), PackQueuePos, PackQueue.Num(), FPlatformTime::Seconds() - PackT0, Rooted, PackLoadedMB, UsedMB);
+		UE_LOG(LogTemp, Display, TEXT("TAG: pack batch %d %s: %d of %d captures in %.0f s, %d rooted, %.0f MB of clips (%.0f MB used, %.0f MB free)"), PackBatch,
+			bDone ? TEXT("complete") : UsedMB > CeilingMB ? TEXT("stopped at the memory ceiling") : bLowMem ? TEXT("stopped: the machine is low on free memory") : TEXT("stopped at the clip budget"),
+			PackQueuePos, PackQueue.Num(), FPlatformTime::Seconds() - PackT0, Rooted, PackLoadedMB, UsedMB, FreeMB);
 		OnPackBatchLoaded();
 		return;
 	}
@@ -1004,16 +1357,35 @@ void FAthleteAssets::FillPackLoaded()
 		}
 		return Total < 1200.0;
 	};
+	// (a capture's verdict holds for the process: every quarter's draw sampled the clips it shares with earlier draws again,
+	// 30 root extractions a second of capture, in the chunk callback's frame. Kept by path and start.)
+	static TMap<FSoftObjectPath, TPair<float, bool>> SaneSeen;
+	auto RootSaneOnce = [&RootSane](const UAnimSequence* Seq, const FSoftObjectPath& SeqPath, float Start) -> bool
+	{
+		if (const TPair<float, bool>* Hit = SaneSeen.Find(SeqPath))
+			if (Hit->Key == Start) return Hit->Value;
+		const bool bSane = RootSane(Seq, Start);
+		SaneSeen.Add(SeqPath, TPair<float, bool>(Start, bSane));
+		return bSane;
+	};
 	for (FPendingPair& Q : PendingPairs)
 	{
 		if (Q.P.T || Q.bBad) continue;
 		UAnimSequence* T = Cast<UAnimSequence>(Q.TP.ResolveObject());
 		UAnimSequence* C = Cast<UAnimSequence>(Q.CP.ResolveObject());
 		if (!T || !C || !T->HasAnyFlags(RF_LoadCompleted) || !C->HasAnyFlags(RF_LoadCompleted)) continue;
-		if (!RootSane(T, Q.P.Start) || !RootSane(C, Q.P.Start))
+		if (!RootSaneOnce(T, Q.TP, Q.P.Start) || !RootSaneOnce(C, Q.CP, Q.P.Start))
 		{
 			Q.bBad = true;
 			UE_LOG(LogTemp, Display, TEXT("TAG: tackle pair %s left out: its root jumps or runs on"), *C->GetName());
+			continue;
+		}
+		// the carrier's capture must be the man with the ball (else the sim's carrier plays the tackler's motion with the
+		// ball in his hand, and the tackler the carrier's, tucked arm and all)
+		if (FString Why; !CarrierHoldsBall(C, T, nullptr, Q.P.Start, false, Why))
+		{
+			Q.bBad = true;
+			UE_LOG(LogTemp, Display, TEXT("TAG: tackle pair %s left out: %s"), *C->GetName(), *Why);
 			continue;
 		}
 		Keep(T);
@@ -1029,10 +1401,16 @@ void FAthleteAssets::FillPackLoaded()
 		UAnimSequence* T = Cast<UAnimSequence>(Q.TP.ResolveObject());
 		UAnimSequence* G = Cast<UAnimSequence>(Q.AP.ResolveObject());
 		if (!C || !T || !G || !C->HasAnyFlags(RF_LoadCompleted) || !T->HasAnyFlags(RF_LoadCompleted) || !G->HasAnyFlags(RF_LoadCompleted)) continue;
-		if (!RootSane(C, Q.G.Start) || !RootSane(T, Q.G.Start) || !RootSane(G, Q.G.Start))
+		if (!RootSaneOnce(C, Q.CP, Q.G.Start) || !RootSaneOnce(T, Q.TP, Q.G.Start) || !RootSaneOnce(G, Q.AP, Q.G.Start))
 		{
 			Q.bBad = true;
 			UE_LOG(LogTemp, Display, TEXT("TAG: gang tackle %s left out: its root jumps or runs on"), *C->GetName());
+			continue;
+		}
+		if (FString Why; !CarrierHoldsBall(C, T, G, Q.G.Start, false, Why))
+		{
+			Q.bBad = true;
+			UE_LOG(LogTemp, Display, TEXT("TAG: gang tackle %s left out: %s"), *C->GetName(), *Why);
 			continue;
 		}
 		Keep(C);
@@ -1052,6 +1430,17 @@ void FAthleteAssets::OnPackBatchLoaded()
 	// two live draws share stays rooted
 	{
 		TArray<TObjectPtr<UAnimSequence>>& Old = BatchRoots[(PackBatch + 1) % 2];
+		// nothing the game draws from may keep a clip that is about to lose its root (the stances, read by every idle man)
+		{
+			TSet<const UObject*> Going;
+			for (const TObjectPtr<UAnimSequence>& S : Old) if (S) Going.Add(S.Get());
+			for (const TObjectPtr<UAnimSequence>& S : BatchRoots[PackBatch % 2]) if (S) Going.Remove(S.Get());
+			int32 Scrubbed = 0;
+			if (Going.Num())
+				for (auto& KV : PackStances)
+					Scrubbed += KV.Value.RemoveAll([&Going](const TObjectPtr<UAnimationAsset>& O) { return Going.Contains(O.Get()); });
+			if (Scrubbed) UE_LOG(LogTemp, Display, TEXT("TAG: pack re-draw: %d stance clips of the last draw dropped before it is released"), Scrubbed);
+		}
 		for (const TObjectPtr<UAnimSequence>& S : Old) if (S) S->RemoveFromRoot();
 		Old.Reset();
 		for (const TObjectPtr<UAnimSequence>& S : BatchRoots[PackBatch % 2]) if (S) S->AddToRoot();
@@ -1082,6 +1471,48 @@ void FAthleteAssets::OnPackBatchLoaded()
 
 void FAthleteAssets::LoadMotionMatching()
 {
+	// every database FinishMotionMatching may ask for, the ones on disk: requested together and loaded behind the game
+	// (in place they held the launch for 8.8 s; MotionMatchReady keeps the blend spaces on until they are in)
+	static const bool bSyncMM = FParse::Param(FCommandLine::Get(), TEXT("TagMMSync")); // A/B: load in place, as before
+	if (bSyncMM) { bMMLoading = true; FinishMotionMatching(true); return; }
+	const FString MMDir = AnimRoot + TEXT("/MM/");
+	TArray<FString> Names = {TEXT("Stand_Idles"), TEXT("Crouch_Loops"), TEXT("Crouch_Idles"), TEXT("Crouch_Starts"), TEXT("Crouch_Walk_Pivots"), TEXT("Crouch_Walk_Stops")};
+	for (int32 v = 1; v <= 3; ++v) Names.Add(FString::Printf(TEXT("Stand_Idles_S%d"), v));
+	for (const TCHAR* GaitName : {TEXT("Walk"), TEXT("Run"), TEXT("Sprint")})
+	{
+		Names.Add(FString::Printf(TEXT("%s_Loops"), GaitName));
+		Names.Add(FString::Printf(TEXT("BC_%s_Loops"), GaitName));
+		for (const TCHAR* Part : {TEXT("Starts"), TEXT("Pivots"), TEXT("SpinTransition"), TEXT("Stops")})
+			Names.Add(FString::Printf(TEXT("Stand_%s_%s"), GaitName, Part));
+		for (int32 v = 1; v <= 6; ++v) Names.Add(FString::Printf(TEXT("%s_Loops_S%d"), GaitName, v));
+		for (int32 v = 1; v <= 3; ++v) Names.Add(FString::Printf(TEXT("Stand_%s_Starts_S%d"), GaitName, v));
+	}
+	TArray<FSoftObjectPath> Wanted;
+	for (const FString& N : Names)
+		if (FPackageName::DoesPackageExist(MMDir + TEXT("PSD_TAG_") + N))
+			Wanted.Add(FSoftObjectPath(FString::Printf(TEXT("%sPSD_TAG_%s.PSD_TAG_%s"), *MMDir, *N, *N)));
+	bMMLoading = true;
+	MMLoadT0 = FPlatformTime::Seconds();
+	// (without the standing idles there is no motion matching: FinishMotionMatching says so now, as the load in place did)
+	if (!FPackageName::DoesPackageExist(MMDir + TEXT("PSD_TAG_Stand_Idles")) || Wanted.Num() == 0) { FinishMotionMatching(true); return; }
+	// the bodies set up from here on take the matching instance (AAthlete::Setup); the search waits for the databases
+	bMotionMatch = true;
+	UE_LOG(LogTemp, Display, TEXT("TAG: motion matching loading behind the game (%d databases)"), Wanted.Num());
+	MMHandle = MMStreamer.RequestAsyncLoad(Wanted, FStreamableDelegate::CreateLambda([this] { FinishMotionMatching(false); }));
+	if (!MMHandle.IsValid()) FinishMotionMatching(true);
+}
+
+void FAthleteAssets::WaitMotionMatching()
+{
+	if (!bMMLoading) return;
+	if (MMHandle.IsValid()) MMHandle->WaitUntilComplete();
+	FinishMotionMatching(false); // (no-op when the request's own callback has run)
+}
+
+void FAthleteAssets::FinishMotionMatching(bool bLoadSync)
+{
+	if (!bMMLoading) return; // (once: the request's callback, or the load in place)
+	bMMLoading = false;
 	// Epic's Game Animation Sample motion matching data (free, UEFN mannequin), Dense variant: every database is
 	// searched against the same normalization set, so costs compare across databases
 	// every set prefers its TAG copy (Tools/Art/mm_build_dbs.py: the sample's clips plus the pack's starts, stops,
@@ -1089,9 +1520,18 @@ void FAthleteAssets::LoadMotionMatching()
 	// the TAG databases only (the pack's clips, Tools/Art/mm_build_dbs.py); without them motion matching is off and the
 	// blend spaces (also the pack's) drive the body
 	const FString MM = AnimRoot + TEXT("/MM/");
-	auto Db = [&MM](const FString& N) { return LoadAsset<UPoseSearchDatabase>(*FString::Printf(TEXT("%sPSD_TAG_%s.PSD_TAG_%s"), *MM, *N, *N), false); };
+	// (loaded by LoadMotionMatching's request: found here and rooted, as LoadAsset roots; bLoadSync loads in place)
+	auto Db = [&MM, bLoadSync](const FString& N) -> UPoseSearchDatabase*
+	{
+		const FString DbPath = FString::Printf(TEXT("%sPSD_TAG_%s.PSD_TAG_%s"), *MM, *N, *N);
+		if (bLoadSync) return LoadAsset<UPoseSearchDatabase>(*DbPath, false);
+		UPoseSearchDatabase* Found = Cast<UPoseSearchDatabase>(FSoftObjectPath(DbPath).ResolveObject());
+		if (Found) Found->AddToRoot();
+		return Found;
+	};
 	UPoseSearchDatabase* Idles = Db(TEXT("Stand_Idles"));
-	UPoseSearchDatabase* Turn = Db(TEXT("Stand_TurnInPlace"));
+	// (the turn-in-place database is not searched, see below: it is not loaded any more either)
+	UPoseSearchDatabase* Turn = nullptr;
 	static const TCHAR* Gait[3] = {TEXT("Walk"), TEXT("Run"), TEXT("Sprint")};
 	bool bOk = Idles != nullptr;
 	TArray<UPoseSearchDatabase*> All;
@@ -1144,8 +1584,24 @@ void FAthleteAssets::LoadMotionMatching()
 			auto Swap = [Loops, LV](const TArray<UPoseSearchDatabase*>& In) { TArray<UPoseSearchDatabase*> O = In; for (UPoseSearchDatabase*& X : O) if (X == Loops) X = LV; return O; };
 			MMMoveV[g][v] = Swap(MMMove[g]);
 			MMStartV[g][v] = Swap(MMStart[g]);
+			// (and the starts a third each: at the snap every man starting to run searched the same few, Start_Back /
+			// Start_Fwd on four or more men at once - Tools/Art/mm_start_sets_hero.py)
+			if (UPoseSearchDatabase* SharedStarts = Db(FString::Printf(TEXT("Stand_%s_Starts"), Gait[g])))
+				if (UPoseSearchDatabase* SV = Db(FString::Printf(TEXT("Stand_%s_Starts_S%d"), Gait[g], v % 3 + 1)))
+				{
+					for (UPoseSearchDatabase*& X : MMStartV[g][v]) if (X == SharedStarts) X = SV;
+					All.AddUnique(SV);
+				}
 			MMPivotV[g][v] = Swap(MMPivot[g]);
 			All.AddUnique(LV);
+			// (one stand-idle database for everyone: every man standing still searched the same idles and one capture won -
+			// Idle_Neutral2 on four or more men in a fifth of post-play and pre-snap frames, p80. A third each, by id)
+			MMStopV[g][v] = MMStop[g];
+			if (UPoseSearchDatabase* IV = Db(FString::Printf(TEXT("Stand_Idles_S%d"), v % 3 + 1)))
+			{
+				for (UPoseSearchDatabase*& X : MMStopV[g][v]) if (X == Idles) X = IV;
+				All.AddUnique(IV);
+			}
 		}
 	}
 	// crouched footwork: the sample's crouch walk (~1.5-2 m/s) plus, with the TAG database, the pack's kick slides,
@@ -1201,11 +1657,12 @@ void FAthleteAssets::LoadMotionMatching()
 		if (bOk) for (UPoseSearchDatabase* X : All) X->ContinuingPoseCostBias = Cont;
 	}
 	UE_LOG(LogTemp, Display, TEXT("TAG: motion matching %s (%d databases)"), bMotionMatch ? TEXT("enabled") : TEXT("unavailable"), All.Num());
+	if (!bLoadSync) UE_LOG(LogTemp, Display, TEXT("TAG: motion matching databases in %.1f s behind the game"), FPlatformTime::Seconds() - MMLoadT0);
 }
 
 bool FAthleteAssets::MotionMatchReady()
 {
-	if (!bMotionMatch) return false;
+	if (!bMotionMatch || bMMLoading) return false; // (still loading: the blend spaces drive, as while the indexes build)
 	if (bMMReady) return true;
 #if WITH_EDITOR
 	// uncooked runs build the search indexes through the DDC in the background (deferred until their animations have
@@ -1653,8 +2110,15 @@ void AAthlete::Setup(const tag::Player* InPlayer, const FUniform& U)
 	if (A.bHero)
 	{
 		// the pack's helmet, pads (in the jersey), cleats and gloves are part of the character: no stand-in gear
+		// (and off the body: hidden but still on its head and spine sockets, each was moved with the bones every frame.
+		// Unattached and unregistered they cost nothing; a later Setup attaches them again above and lands here again.)
 		for (UStaticMeshComponent* C : {Helmet.Get(), Facemask.Get(), Pads.Get()})
-			if (C) C->SetVisibility(false);
+			if (C)
+			{
+				C->SetVisibility(false);
+				C->DetachFromComponent(FDetachmentTransformRules::KeepRelativeTransform);
+				if (C->IsRegistered()) C->UnregisterComponent();
+			}
 		for (UStaticMeshComponent* G : Gear)
 			if (G) G->DestroyComponent();
 		Gear.Reset();
@@ -2115,6 +2579,7 @@ void AAthlete::PlayOneShotFrom(UAnimationAsset* Clip, float Start)
 	OneShot = Clip;
 	bPreShot = false;
 	bOneShotCatch = false;
+	bOneShotPA = false;
 	OneShotAge = 0.f;
 	OneShotStart = Start;
 	OneShotRate = 1.f + StyleJitter * 0.07f; // each player's own timing, within 7 %
@@ -2122,16 +2587,21 @@ void AAthlete::PlayOneShotFrom(UAnimationAsset* Clip, float Start)
 	// and a one-shot played to its very end showed it, a 65 cm jump of a rusher's feet on a win's last frame, p36)
 	OneShotLeft = FMath::Max(0.05f, Clip->GetPlayLength() - Start - 0.07f) / OneShotRate;
 	UE_LOG(LogTemp, Verbose, TEXT("TAG one-shot %s #%d"), *Clip->GetName(), Player ? Player->number : -1);
-	CurrentClip = CurrentClip == Clip ? nullptr : CurrentClip; // restart if the same clip is already playing
+	// restart if the same clip is already playing - crossfaded: clearing CurrentClip to force the restart also skipped
+	// StartBodyAsset's blend (it eases out of a previous clip only), and a rusher whose shed fired twice snapped from
+	// mid club back to its first frame, a 93 cm one-frame jump of his feet (to9 c034)
+	if (CurrentClip == Clip) bRestartClip = true;
 }
 
 void AAthlete::PlayClip(UAnimationAsset* Clip, bool bLoop, float Rate, float StartPos)
 {
 	if (!Clip) return;
-	if (bInMatch || CurrentClip != Clip)
+	if (bInMatch || CurrentClip != Clip || bRestartClip)
 	{
+		const bool bRestart = bRestartClip && CurrentClip == Clip && !bInMatch;
+		bRestartClip = false;
 		StartBodyAsset(Clip, bLoop);
-		if (StartPos > 0.f)
+		if (StartPos > 0.f || bRestart)
 			if (UAnimSingleNodeInstance* I = Body->GetSingleNodeInstance()) I->SetPosition(StartPos, false);
 	}
 	if (UAnimSingleNodeInstance* I = Body->GetSingleNodeInstance()) I->SetPlayRate(Rate);
@@ -2293,6 +2763,13 @@ bool AAthlete::DriveMotionMatching(const FVector& VelWorld, float SimYaw, float 
 	if (bMovingRaw) M->bMovingLatch = true;
 	else if (M->StillFor > 0.15f) M->bMovingLatch = false;
 	const bool bMoving = M->bMovingLatch;
+	// (the back coming out of the two-man handoff with the ball is running already: past the starts, which begin from a
+	// stance - on every filmed exchange the start set put him into a crouched first step at 3 m/s, h2)
+	if (bMeshBack && !bInMatch && Speed > 250.f && !(OneShot && OneShotLeft > 0.f))
+	{
+		MovingTime = FMath::Max(MovingTime, 0.6f);
+		bMeshBack = false;
+	}
 	MovingTime = bMoving ? MovingTime + Dt : 0.f;
 	// pivot: the predicted path turns sharply in the next half second (cut, plant, break on the ball)
 	bool bPivot = false;
@@ -2345,7 +2822,7 @@ bool AAthlete::DriveMotionMatching(const FVector& VelWorld, float SimYaw, float 
 		const int32 Sv = Player ? FMath::Abs(Player->id) % 6 : 0;
 		// with the ball: the ball carrier's loops, the ball tucked as Madden captured it
 		const bool bBall = bHasBallF && A.MMBallMove[MMGait].Num() > 0;
-		M->SetDatabases(!bMoving ? A.MMStop[MMGait] : MovingTime < 0.6f ? (bBall ? A.MMBallStart[MMGait] : A.MMStartV[MMGait][Sv])
+		M->SetDatabases(!bMoving ? (A.MMStopV[MMGait][Sv].Num() ? A.MMStopV[MMGait][Sv] : A.MMStop[MMGait]) : MovingTime < 0.6f ? (bBall ? A.MMBallStart[MMGait] : A.MMStartV[MMGait][Sv])
 			: bPivot ? (bBall ? A.MMBallPivot[MMGait] : A.MMPivotV[MMGait][Sv]) : (bBall ? A.MMBallMove[MMGait] : A.MMMoveV[MMGait][Sv]));
 	}
 	// what the databases cover: with the mocap pack's locomotion (mm_build_dbs.py) 10-11 m/s forward (sprint loops),
@@ -2495,6 +2972,8 @@ bool AAthlete::DriveMotionMatching(const FVector& VelWorld, float SimYaw, float 
 	}
 
 	// motion matching usage stats over all players (verbose log every 20 s): which kinds of clips the search picks
+	// (TagAnimStats: a name, seven substring tests, a Printf and two string-keyed maps per man per frame otherwise)
+	if (TagAnimStats())
 	{
 		static TMap<FString, int32> Kinds;
 		static TMap<FString, int32> Assets;
@@ -2542,8 +3021,17 @@ void AAthlete::StartRagdoll(const FVector& VelWorld)
 	V->SetAllPhysicsLinearVelocity(VelWorld * 0.85f + FVector(0, 0, -50));
 }
 
+// Where in a timed library capture (its Start is LeadFrames before the hands are on the ball) to begin so that moment
+// comes CatchIn seconds from now. (Begun from Start whenever the director primed it, 0.27-0.3 s out, the hands were on
+// the ball 0.13 s in and already coming down to the tuck when it got there.) Rate: the one-shot's own playback rate
+// (PlayOneShotFrom: 1 + StyleJitter * 0.07), so CatchIn of real time is CatchIn * Rate of the capture's.
+static float TagCatchStart(float Start, int32 LeadFrames, float CatchIn, float Rate = 1.f)
+{
+	return CatchIn >= 0.f ? FMath::Max(0.f, Start + LeadFrames / 30.f - FMath::Min(CatchIn, 0.6f) * Rate) : Start;
+}
+
 void AAthlete::PlayCatch(float BallZCm, float SpeedCm, const FVector& BallVelW, const FVector& SidelineDirW,
-	const FVector& BallPosW, bool bContested, bool bAggressive)
+	const FVector& BallPosW, bool bContested, bool bAggressive, float CatchIn)
 {
 	const FAthleteAssets& A = FAthleteAssets::Get();
 	const FVector Fwd = GetActorForwardVector(), Right = GetActorRightVector();
@@ -2566,7 +3054,7 @@ void AAthlete::PlayCatch(float BallZCm, float SpeedCm, const FVector& BallVelW, 
 			if (const FAthleteAssets::FPackClip* P = FAthleteAssets::PickOr(A.PackCatchSpectacular, Seq * 5 + 1))
 			{
 				UE_LOG(LogTemp, Display, TEXT("TAG spectacular catch #%d: %s (hard %d%s)"), Player ? Player->number : -1, *GetNameSafe(P->Anim), Hard, bAggressive ? TEXT(", aggressive") : TEXT(""));
-				PlayOneShotFrom(P->Anim, P->Start);
+				PlayOneShotFrom(P->Anim, TagCatchStart(P->Start, 4, CatchIn, 1.f + StyleJitter * 0.07f));
 				bOneShotCatch = true;
 				return;
 			}
@@ -2608,7 +3096,22 @@ void AAthlete::PlayCatch(float BallZCm, float SpeedCm, const FVector& BallVelW, 
 			(C == A.CatchScoop || C == A.CatchLow) ? &A.PackCatchLow :
 			(C == A.CatchComeback) ? &A.PackCatchComeback :
 			(C == A.CatchChest) ? &A.PackCatchStand : &A.PackCatchStride;
-		if (const FAthleteAssets::FPackClip* P = FAthleteAssets::PickOr(*Lib, Seq)) { PlayOneShotFrom(P->Anim, P->Start); bOneShotCatch = true; return; }
+		// (timed to the ball, CatchIn: always a library capture - the placed keyed one has no known hands-on-the-ball
+		// frame, and played from its first frame its hands met the ball whenever they happened to)
+		const FAthleteAssets::FPackClip* P = nullptr;
+		// (and one whose hands meet its ball at this one's height: the pack names each by it - Knees, Waist, Chest,
+		// Helmet, AboveHead. Picked in turn from the family, a strafing catch with the hands in front of the helmet
+		// played for a ball at the waist, filmed 37 cm off his hands)
+		if (CatchIn >= 0.f && Lib->Num())
+		{
+			const TCHAR* Want = BallZCm > 200.f ? TEXT("AboveHead") : BallZCm > 160.f ? TEXT("Helmet") : BallZCm > 112.f ? TEXT("Chest") : BallZCm > 72.f ? TEXT("Waist") : TEXT("Knees");
+			TArray<const FAthleteAssets::FPackClip*, TInlineAllocator<32>> Fit;
+			for (const FAthleteAssets::FPackClip& Cl : *Lib)
+				if (Cl.Name.Contains(Want)) Fit.Add(&Cl);
+			if (Fit.Num()) P = Fit[FMath::Abs(Seq) % Fit.Num()];
+		}
+		if (!P) P = CatchIn >= 0.f ? FAthleteAssets::Pick(*Lib, Seq) : FAthleteAssets::PickOr(*Lib, Seq);
+		if (P) { PlayOneShotFrom(P->Anim, TagCatchStart(P->Start, 4, CatchIn, 1.f + StyleJitter * 0.07f)); bOneShotCatch = true; return; }
 	}
 	if (C) PlayOneShot(A.Side(C, bMirror));
 	bOneShotCatch = C != nullptr;
@@ -2650,27 +3153,27 @@ void AAthlete::PlayThrowTimed(int32 Kind, float ReleaseIn)
 	UE_LOG(LogTemp, Verbose, TEXT("TAG throw timed: %s, release in %.2f s (clip from %.2f)"), *GetNameSafe(Clip), ReleaseIn, FMath::Max(0.f, ReleaseAt - ReleaseIn));
 }
 
-bool AAthlete::PlayBallDefense(int32 Gait, bool bInt)
+bool AAthlete::PlayBallDefense(int32 Gait, bool bInt, float CatchIn)
 {
 	const FAthleteAssets& A = FAthleteAssets::Get();
 	const TArray<FAthleteAssets::FPackClip>& L = bInt ? A.PackIntCatch : Gait == 0 ? A.PackSwatRun : Gait == 1 ? A.PackSwatStrafe : A.PackSwatBack;
 	if (!L.Num()) return false;
 	static int32 GSeq = 0;
 	const FAthleteAssets::FPackClip& P = L[(GSeq++) % L.Num()];
-	PlayOneShotFrom(P.Anim, P.Start);
+	PlayOneShotFrom(P.Anim, TagCatchStart(P.Start, 4, CatchIn, 1.f + StyleJitter * 0.07f));
 	bOneShotCatch = bInt;
 	UE_LOG(LogTemp, Display, TEXT("TAG ball defense #%d: %s"), Player ? Player->number : -1, *GetNameSafe(P.Anim));
 	return true;
 }
 
-bool AAthlete::PlayKickCatch(bool bRunning)
+bool AAthlete::PlayKickCatch(bool bRunning, float CatchIn)
 {
 	const FAthleteAssets& A = FAthleteAssets::Get();
 	const TArray<FAthleteAssets::FPackClip>& L = bRunning && A.PackKickCatchRun.Num() ? A.PackKickCatchRun : A.PackKickCatchStand.Num() ? A.PackKickCatchStand : A.PackKickCatchRun;
 	if (!L.Num()) return false;
 	static int32 GSeq = 0;
 	const FAthleteAssets::FPackClip& P = L[(GSeq++) % L.Num()];
-	PlayOneShotFrom(P.Anim, P.Start);
+	PlayOneShotFrom(P.Anim, TagCatchStart(P.Start, 6, CatchIn, 1.f + StyleJitter * 0.07f));
 	bOneShotCatch = true;
 	UE_LOG(LogTemp, Display, TEXT("TAG kick catch #%d: %s"), Player ? Player->number : -1, *GetNameSafe(P.Anim));
 	return true;
@@ -2765,12 +3268,181 @@ void AAthlete::BeginTackleOn(AAthlete* Carrier)
 		FVector::Dist2D(GetActorLocation(), Carrier->GetActorLocation()));
 }
 
-void AAthlete::PlayDiveAttempt()
+void AAthlete::PlayDiveAttempt(float CatchIn)
 {
 	const FAthleteAssets& A = FAthleteAssets::Get();
 	static int32 GDiveSeq = 0;
-	if (const FAthleteAssets::FPackClip* P = FAthleteAssets::PickOr(A.PackCatchDive, GDiveSeq++)) { PlayOneShotFrom(P->Anim, P->Start); return; }
+	// (timed to the ball: a library capture, whose layout's hands-on-the-ball frame is known; see PlayCatch)
+	const int32 DiveSeq = GDiveSeq++;
+	if (const FAthleteAssets::FPackClip* P = CatchIn >= 0.f ? FAthleteAssets::Pick(A.PackCatchDive, DiveSeq) : FAthleteAssets::PickOr(A.PackCatchDive, DiveSeq))
+		{ PlayOneShotFrom(P->Anim, TagCatchStart(P->Start, 6, CatchIn, 1.f + StyleJitter * 0.07f)); return; }
 	if (A.CatchDive) PlayOneShot(A.Side(A.CatchDive, Player && (Player->id % 2) == 1));
+}
+
+void AAthlete::PlaySlide()
+{
+	const FAthleteAssets& A = FAthleteAssets::Get();
+	static int32 GSlideSeq = 0;
+	// (Pick, not PickOr: there is no placed slide clip to take turns with - PickOr's null fell through to the catch dive)
+	if (const FAthleteAssets::FPackClip* P = FAthleteAssets::Pick(A.PackQBSlide, GSlideSeq++))
+	{
+		PlayOneShotFrom(P->Anim, P->Start);
+		UE_LOG(LogTemp, Display, TEXT("TAG slide #%d: %s from %.2f s"), Player ? Player->number : -1, *P->Name, P->Start);
+		return;
+	}
+	PlayDiveAttempt();  // (no slide capture in this pack: the layout at least takes him to the turf)
+}
+
+bool AAthlete::PlayLooseDive(float TouchIn, const FVector& AtW)
+{
+	const FAthleteAssets& A = FAthleteAssets::Get();
+	if (!A.PackDives.Num() || bRagdoll || bFalling || bGettingUp) return false;
+	// (nor a man still on the turf from the last one: a running dive played from there sprang him off his back, hips 15 ->
+	// 111 cm in five frames - to14 c032)
+	if (PelvisZ() < 45.f) return false;
+	// the capture whose travel from where it would start to its touch is what is left between him and the ball, and whose
+	// run-in speed is nearest his (a man standing over the ball does not go down off a sprinter's dive)
+	FVector To = AtW - GetActorLocation();
+	To.Z = 0.f;
+	const float Gap = static_cast<float>(To.Size());
+	const float Sp = static_cast<float>(LastVelW.Size2D()) / 100.f;
+	const float Lead = FMath::Clamp(TouchIn, 0.1f, 0.6f);
+	const FAthleteAssets::FPackDive* Best = nullptr;
+	float BestCost = 1e9f, BestFrom = 0.f;
+	static int32 GDiveSeq = 0;
+	const int32 Seq = GDiveSeq++;
+	for (int32 k = 0; k < A.PackDives.Num(); ++k)
+	{
+		const FAthleteAssets::FPackDive& D = A.PackDives[(k + Seq) % A.PackDives.Num()];
+		const float From = FMath::Max(0.f, D.Touch - Lead);
+		const FVector Tr = D.Anim->ExtractRootMotionFromRange(From, D.Touch, FAnimExtractContext(0.0, true)).GetTranslation();
+		// (the capture's hands are ahead of its root at the touch: a dive reaches about a body length past where the root is)
+		const float Left = static_cast<float>(Tr.Size2D()) + 90.f;
+		const float Cost = FMath::Abs(Left - Gap) + 40.f * FMath::Abs(D.V0 - Sp) + (k ? 1.f : 0.f);
+		if (Cost < BestCost) { BestCost = Cost; Best = &D; BestFrom = From; }
+	}
+	if (!Best) return false;
+	// face the ball: the dive goes where he faces. A little of the turn now, the rest at the man's turn rate in Drive (the
+	// sim faces him down the dive): put on the ball's heading in one frame, a man 120-190 deg off it swung his whole body
+	// round, head and feet 50-90 cm (to13 c002, c026)
+	if (Gap > 30.f)
+	{
+		SmoothedYaw += FMath::Clamp(FMath::FindDeltaAngleDegrees(SmoothedYaw, To.Rotation().Yaw), -25.f, 25.f);
+		SetActorRotation(FRotator(0, SmoothedYaw, 0));
+	}
+	PlayOneShotFrom(Best->Anim, BestFrom);
+	OneShotRate = 1.f;
+	OneShotLeft = FMath::Max(0.05f, Best->Anim->GetPlayLength() - BestFrom - 0.07f);
+	UE_LOG(LogTemp, Display, TEXT("TAG loose ball dive #%d: %s from %.2f s (touch in %.2f s, %.0f cm to the ball, cost %.0f)"), Player ? Player->number : -1,
+		*Best->Name, BestFrom, Lead, Gap, BestCost);
+	return true;
+}
+
+bool AAthlete::PlayScoop()
+{
+	const FAthleteAssets& A = FAthleteAssets::Get();
+	static int32 GScoopSeq = 0;
+	const FAthleteAssets::FPackClip* P = FAthleteAssets::Pick(A.PackCatchLow, GScoopSeq++);
+	if (!P) { if (A.CatchScoop) { PlayOneShot(A.CatchScoop); bOneShotCatch = true; return true; } return false; }
+	// (the low catch's hands at the ball now: from its reach, less a few frames)
+	PlayOneShotFrom(P->Anim, FMath::Max(0.f, P->Start + 1.f / 30.f));
+	bOneShotCatch = true;
+	UE_LOG(LogTemp, Display, TEXT("TAG loose ball scooped #%d: %s"), Player ? Player->number : -1, *GetNameSafe(P->Anim));
+	return true;
+}
+
+bool AAthlete::PlayStripPunch(const AAthlete* Carrier)
+{
+	const FAthleteAssets& A = FAthleteAssets::Get();
+	if (!A.PackStrips.Num() || bFalling || bRagdoll) return false;
+	// the stripper's part of the strip capture whose man comes from where this one is (relative to the carrier), from a
+	// beat before the punch
+	const FVector Rel = Carrier ? GetActorLocation() - Carrier->GetActorLocation() : -GetActorForwardVector();
+	const FVector Fc = Carrier ? Carrier->GetActorForwardVector() : GetActorForwardVector();
+	const float Ang = FMath::RadiansToDegrees(FMath::Atan2(FVector::CrossProduct(Fc, Rel.GetSafeNormal2D()).Z, FVector::DotProduct(Fc, Rel.GetSafeNormal2D())));
+	const FAthleteAssets::FPackStrip* Best = nullptr;
+	float BestCost = 1e9f;
+	static int32 GStripSeq = 0;
+	const int32 Seq = GStripSeq++;
+	for (int32 k = 0; k < A.PackStrips.Num(); ++k)
+	{
+		const FAthleteAssets::FPackStrip& S = A.PackStrips[(k + Seq) % A.PackStrips.Num()];
+		if (S.bSack) continue;
+		// where the capture has the stripper relative to the carrier: the carrier sits at (Ox, Oy) in the stripper's frame
+		// (x left, y back), heading Yaw off him (+ left). The stripper from the carrier, in the stripper's frame as (fwd,
+		// left) = (Oy, -Ox), turned into the carrier's frame (by -Yaw); its bearing is + left, Ang above is + right.
+		const float Yr = FMath::DegreesToRadians(S.Yaw);
+		const float Fs = S.Oy, Ls = -S.Ox;
+		const float Fc2 = Fs * FMath::Cos(Yr) + Ls * FMath::Sin(Yr), Lc2 = -Fs * FMath::Sin(Yr) + Ls * FMath::Cos(Yr);
+		const float CapAng = -FMath::RadiansToDegrees(FMath::Atan2(Lc2, Fc2));
+		const float Cost = FMath::Abs(FMath::FindDeltaAngleDegrees(Ang, CapAng)) + k * 0.5f;
+		if (Cost < BestCost) { BestCost = Cost; Best = &S; }
+	}
+	if (!Best) return false;
+	PlayOneShotFrom(Best->T, FMath::Max(0.f, Best->Out - 0.25f));
+	OneShotRate = 1.f;
+	UE_LOG(LogTemp, Display, TEXT("TAG strip punch #%d: %s"), Player ? Player->number : -1, *Best->Name);
+	return true;
+}
+
+bool AAthlete::PlayIntPair(AAthlete* D, AAthlete* R, float CatchIn, float BallZCm, int32 Which)
+{
+	const FAthleteAssets& A = FAthleteAssets::Get();
+	if (!D || !A.PackInts.Num() || D->bFalling || D->bRagdoll) return false;
+	const bool bWithR = R && !R->bFalling && !R->bRagdoll && FVector::Dist2D(D->GetActorLocation(), R->GetActorLocation()) < 320.f;
+	// the receiver in the defender's frame (x left, y back, m), the defender's speed (m/s), the ball's height (m)
+	float Rx = 0.f, Ry = 0.f;
+	if (bWithR)
+	{
+		const FVector Rel = R->GetActorLocation() - D->GetActorLocation();
+		Rx = static_cast<float>(-FVector::DotProduct(Rel, D->GetActorRightVector())) / 100.f;
+		Ry = static_cast<float>(-FVector::DotProduct(Rel, D->GetActorForwardVector())) / 100.f;
+	}
+	const float Dv = static_cast<float>(D->LastVelW.Size2D()) / 100.f;
+	const float Bz = BallZCm / 100.f;
+	const float Lead = FMath::Clamp(CatchIn, 0.f, 0.6f);
+	TArray<TPair<float, const FAthleteAssets::FPackInt*>, TInlineAllocator<64>> Cands;
+	for (const FAthleteAssets::FPackInt& I : A.PackInts)
+	{
+		if (I.T < Lead) continue;
+		const float Cost = (bWithR ? FMath::Sqrt(FMath::Square(I.Rx - Rx) + FMath::Square(I.Ry - Ry)) : 0.f) + 0.25f * FMath::Abs(I.DSpeed - Dv) + 0.6f * FMath::Abs(I.Bz - Bz);
+		Cands.Add(TPair<float, const FAthleteAssets::FPackInt*>(Cost, &I));
+	}
+	if (!Cands.Num()) return false;
+	Cands.Sort([](const TPair<float, const FAthleteAssets::FPackInt*>& X, const TPair<float, const FAthleteAssets::FPackInt*>& Y) { return X.Key < Y.Key; });
+	int32 NGood = 1;
+	while (NGood < Cands.Num() && NGood < 3 && Cands[NGood].Key < Cands[0].Key + 0.3f) ++NGood;
+	const FAthleteAssets::FPackInt& I = *Cands[FMath::Abs(Which) % NGood].Value;
+	const float From = I.T - Lead;
+	// each man his part in sync, from the same moment of the capture; the defender comes out of it running with the ball
+	// (the catch hands over to the return once he is away), the receiver plays his reaction then chases
+	D->PlayOneShotFrom(I.D.Get(), From);
+	D->OneShotRate = 1.f;
+	D->OneShotLeft = FMath::Min(D->OneShotLeft, Lead + 1.4f);
+	D->bOneShotCatch = true;
+	if (bWithR)
+	{
+		R->PlayOneShotFrom(I.R.Get(), From);
+		R->OneShotRate = 1.f;
+		R->OneShotLeft = FMath::Min(R->OneShotLeft, Lead + 1.1f);
+	}
+	UE_LOG(LogTemp, Display, TEXT("TAG interception pair: #%d %s #%d - %s (catch in %.2f s, receiver at (%.2f, %.2f) vs (%.2f, %.2f), ball %.0f cm, cost %.2f)"),
+		D->Player ? D->Player->number : -1, bWithR ? TEXT("over") : TEXT("alone, no"), bWithR && R->Player ? R->Player->number : -1, *I.Name, Lead, Rx, Ry, I.Rx, I.Ry,
+		BallZCm, Cands[0].Key);
+	return true;
+}
+
+bool AAthlete::PlayDrop(float CatchIn)
+{
+	const FAthleteAssets& A = FAthleteAssets::Get();
+	static int32 GDropSeq = 0;
+	const FAthleteAssets::FPackClip* P = FAthleteAssets::Pick(A.PackCatchDrops, GDropSeq++);
+	if (!P || bFalling || bRagdoll) return false;
+	// (the family starts 4 frames before the hands reach: the reach is at Start + 4/30)
+	PlayOneShotFrom(P->Anim, FMath::Max(0.f, P->Start + 4.f / 30.f - FMath::Clamp(CatchIn, 0.f, 0.5f)));
+	OneShotRate = 1.f;
+	UE_LOG(LogTemp, Display, TEXT("TAG drop #%d: %s"), Player ? Player->number : -1, *GetNameSafe(P->Anim));
+	return true;
 }
 
 float AAthlete::GetUpElapsed() const
@@ -2875,6 +3547,7 @@ void AAthlete::StartGetUp(const FVector& SimLoc)
 void AAthlete::StandOnSideline(const FVector& Loc, float Yaw, int32 Variant)
 {
 	SidelineVariant = Variant;
+	if (bDormantNow) SetDormant(false);
 	SetActorLocationAndRotation(Loc, FRotator(0, Yaw, 0));
 	// bench players are small in frame and helmeted: the face follows the head (leader pose) instead of running the
 	// facial rig, and the visible body updates at a reduced rate when it is small on screen
@@ -2894,9 +3567,43 @@ void AAthlete::StandOnSideline(const FVector& Loc, float Yaw, int32 Variant)
 	SidelineCheer(false);
 }
 
+void AAthlete::SetDormant(bool bDormant)
+{
+	if (bDormant == bDormantNow) return;
+	// (a body on the turf, in a fall or a get-up, or showing a replay is somebody's to finish: he stays awake, and the
+	// next call asks again. The director resets the pose before it hides a man.)
+	if (bDormant && (IsDown() || bReplaying || bReplayHold)) return;
+	bDormantNow = bDormant;
+	USkeletalMeshComponent* Bodies[4] = {Body.Get(), MHBody.Get(), MHFace.Get(), HeroHelmet.Get()};
+	for (int32 k = 0; k < 4; ++k)
+	{
+		USkeletalMeshComponent* C = Bodies[k];
+		if (bDormant)
+		{
+			// as it ticks now (a bench man's SleepWhenOffscreen may have it off already): that is what waking restores
+			DormantTick[k] = C ? C->IsComponentTickEnabled() : true;
+			if (C) C->SetComponentTickEnabled(false);
+		}
+		else if (C && DormantTick[k]) C->SetComponentTickEnabled(true);
+	}
+	if (!bDormant)
+	{
+		// awake: the bodies tick again this frame, after the director that woke him (TickAfter), on whatever Drive asks
+		// for now, so the first frame he is seen is a pose evaluated for it. What he was measured doing before he went
+		// off is not where he starts from: the motion history and the measured velocity start over, as at a new play.
+		TrajPos.Reset();
+		TrajRot.Reset();
+		TrajTime.Reset();
+		bHavePrevVel = false;
+		SmoothedAccel = FVector::ZeroVector;
+		LeanSmoothed = FVector::ZeroVector;
+	}
+}
+
 void AAthlete::SleepWhenOffscreen(float Dt)
 {
 	if (!Body || !MHBody) return;
+	if (bDormantNow) return; // (off the field altogether: SetDormant holds the ticks, and what it restores)
 	SleepClock += Dt;
 	// on screen this frame or the last (the shadow pass alone does not count: a bench shadow holding still reads fine)
 	const double Now = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0;
@@ -2926,6 +3633,9 @@ void AAthlete::PlayRushMove(const FString& Move, const AAthlete* Blocker)
 	// every other rush a library win past the blocker on the open side
 	static int32 GRushSeq = 0;
 	if (const FAthleteAssets::FPackClip* P = FAthleteAssets::PickOr(bBlockerRight ? A.PackRushWinsL : A.PackRushWinsR, GRushSeq++)) C = P->Anim;
+	// (the same move he is in the middle of plays on: the sim can report one shed twice, and starting the club over
+	// 0.6 s into it is a second club nobody threw)
+	if (C && OneShot == C && OneShotLeft > 0.f) return;
 	UE_LOG(LogTemp, Display, TEXT("TAG rush move #%d: %s (%s)"), Player ? Player->number : -1, *Move, C ? *C->GetName() : TEXT("-"));
 	if (C) PlayOneShot(C);
 }
@@ -3016,6 +3726,141 @@ bool AAthlete::PlayRepHandoff(AAthlete* QB, AAthlete* Back, bool bGun, float Exc
 	return true;
 }
 
+bool AAthlete::PlayRepHandoffFit(AAthlete* QB, AAthlete* Back, bool bGun, bool bQbLeft, int32 RunKind, float ArmCm, float ExchangeIn, int32 Which, bool& bNone,
+	int32 FakeSide, float BackMs, float QbMs)
+{
+	const FAthleteAssets& A = FAthleteAssets::Get();
+	bNone = true;
+	if (!QB || !Back || !A.RepHandoffs.Num() || !QB->GetWorld()) return false;
+	// The captures cannot be mirrored, so the one thing a capture must have right is the side of the back's path the
+	// quarterback stands on: with that wrong the ball is held out to nobody. (The old pick went by which side of the
+	// quarterback the back's root was on at the exchange - 8 to 77 cm, noise - and then took turns.) Of those, the same
+	// alignment first, then the nearest to the play's spacing; the best three take turns.
+	struct FCand { const FAthleteAssets::FHandoffRep* R; float Cost; };
+	TArray<FCand> Fit;
+	for (const FAthleteAssets::FHandoffRep& R : A.RepHandoffs)
+	{
+		if (FMath::Abs(R.Lat) < 0.25f || (R.Lat > 0.f) != bQbLeft) continue;
+		// (a capture whose own hands do not meet - the back's hands over 26 cm off the ball hand at its contact frame - or
+		// whose two men pass within 55 cm of each other around it cannot give a clean exchange: never used)
+		if (R.Dc > 0.26f || (R.MinSep >= 0.f && R.MinSep < 0.55f)) continue;
+		FCand Cd;
+		Cd.R = &R;
+		// (a draw's capture - the quarterback drops and hands it back to a waiting man - only for a draw, and a draw
+		// nothing else if there is one; a from-the-snap capture is worth more than a mesh alone)
+		Cd.Cost = (R.bGun == bGun ? 0.f : 1.5f) + FMath::Abs(FMath::Abs(R.Lat) * 100.f - ArmCm) / 40.f + FMath::Abs(R.Along) * 100.f / 60.f +
+			((R.Kind == 2) != (RunKind == 2) ? 2.f : R.Kind != RunKind ? 0.5f : 0.f) - (R.bSnap ? 0.4f : 0.f);
+		// (and the two men moving as the sim has them: a capture's back slower than ours lagged his sim spot by 65 cm at the
+		// exchange and his hands missed the ball - h2; an under-center capture's quarterback still backing out at 4 m/s
+		// where ours has settled. The carry-out to the side the sim takes him: a boot the other way spun him round.)
+		if (BackMs > 0.f && R.Vb >= 0.f) Cd.Cost += FMath::Abs(R.Vb - BackMs) / 1.2f;
+		if (QbMs >= 0.f && R.Vq >= 0.f) Cd.Cost += FMath::Max(0.f, FMath::Abs(R.Vq - QbMs) - 0.8f) / 2.f;
+		if (R.Fake != FakeSide) Cd.Cost += R.Fake != 0 && FakeSide != 0 ? 2.f : 1.2f;
+		if (R.Dc > 0.f) Cd.Cost += R.Dc * 4.f; // (the cleaner the capture's own contact the better)
+		Fit.Add(Cd);
+	}
+	if (!Fit.Num()) return false;
+	bNone = false;
+	Fit.Sort([](const FCand& Lhs, const FCand& Rhs) { return Lhs.Cost < Rhs.Cost; });
+	int32 NTop = 1;
+	while (NTop < Fit.Num() && NTop < 3 && Fit[NTop].Cost < Fit[0].Cost + 0.6f) ++NTop;
+	const FAthleteAssets::FHandoffRep& R = *Fit[FMath::Abs(Which) % NTop].R;
+	// (not before the capture has that long to its own exchange: started early it would play from its first frame and
+	// put the ball out with the back still coming)
+	if (ExchangeIn > R.T + 0.02f) return false;
+	const float From = FMath::Max(0.f, R.T - FMath::Max(0.f, ExchangeIn));
+	QB->PlayOneShotFrom(R.Q.Get(), From);
+	QB->OneShotRate = 1.f; // (the two parts in step, and on the sim's clock)
+	QB->OneShotLeft = FMath::Min(R.Q->GetPlayLength() - From - 0.07f, R.T - From + 0.9f); // the exchange and the carry-out, then his own motion
+	QB->bOneShotPA = true; // (held through the mesh: the follow keeps the body with the sim)
+	Back->PlayOneShotFrom(R.B.Get(), From);
+	Back->OneShotRate = 1.f;
+	Back->OneShotLeft = FMath::Min(R.B->GetPlayLength() - From - 0.07f, R.T - From + 0.45f); // the mesh and the first steps with it, then the run
+	Back->bOneShotPA = true;
+	// the pair's own spacing at the exchange, for Drive to close them onto (the json's x left / y back to forward / right)
+	const double AtW = QB->GetWorld()->GetTimeSeconds() + FMath::Max(0.f, ExchangeIn);
+	for (AAthlete* Man : {QB, Back})
+	{
+		Man->MeshMate = Man == QB ? Back : QB;
+		Man->bMeshQB = Man == QB;
+		Man->MeshOff = FVector2D(-R.By * 100.f, -R.Bx * 100.f);
+		Man->MeshYawRel = -R.BYaw;
+		Man->MeshClipT = R.T;
+		Man->MeshAtW = AtW;
+		Man->MeshSepMate = Man->MeshMate;
+	}
+	Back->bMeshBack = true;
+	QB->bMeshFake = true;
+	UE_LOG(LogTemp, Display, TEXT("TAG handoff mesh: %s from %.2f s (exchange in %.2f s, %s, quarterback on the back's %s, capture %.0f cm beside / %.0f cm ahead, play %.0f cm)"),
+		*R.Q->GetName(), From, ExchangeIn, bGun ? TEXT("gun") : TEXT("under center"), bQbLeft ? TEXT("left") : TEXT("right"), FMath::Abs(R.Lat) * 100.f, R.Along * 100.f, ArmCm);
+	return true;
+}
+
+void AAthlete::MeshRetime(float ExchangeIn)
+{
+	if (!MeshMate.IsValid() || !OneShot || OneShotLeft <= 0.f || !Body || !GetWorld()) return;
+	UAnimSingleNodeInstance* I = Body->GetSingleNodeInstance();
+	if (!I || I->GetCurrentAsset() != OneShot) return;
+	const float Left = MeshClipT - I->GetCurrentTime();
+	// (inside the last tenth of a second the capture is left alone: a rate from two small numbers swings)
+	OneShotRate = Left > 0.1f && ExchangeIn > 0.1f ? FMath::Clamp(Left / ExchangeIn, 0.85f, 1.18f) : 1.f;
+	MeshAtW = GetWorld()->GetTimeSeconds() + FMath::Max(0.f, ExchangeIn);
+}
+
+void AAthlete::BreakMesh()
+{
+	if (!bOneShotPA || !OneShot) return;
+	OneShotLeft = FMath::Min(OneShotLeft, 0.2f);
+	MeshMate.Reset();
+	MeshSepMate.Reset();
+	bMeshFake = false;
+	bMeshBack = false;
+}
+
+float AAthlete::MeshContactIn() const
+{
+	if (!bOneShotPA || MeshClipT <= 0.f || !OneShot || OneShotLeft <= 0.f || !Body) return 99.f;
+	UAnimSingleNodeInstance* I = Body->GetSingleNodeInstance();
+	if (!I || I->GetCurrentAsset() != OneShot) return 99.f;
+	return MeshClipT - I->GetCurrentTime();
+}
+
+FVector AAthlete::HandsMid() const
+{
+	if (!MHBody) return GetActorLocation() + FVector(0.f, 0.f, 105.f);
+	return (MHBody->GetSocketLocation(TEXT("hand_r")) + MHBody->GetSocketLocation(TEXT("hand_l"))) * 0.5f;
+}
+
+bool AAthlete::PlayRepPaFake(AAthlete* QB, AAthlete* Back, bool bGun, bool bBoot, float MeshIn, int32 Which)
+{
+	const FAthleteAssets& A = FAthleteAssets::Get();
+	if (!QB || !Back || !A.RepPaFakes.Num()) return false;
+	// one from the same alignment, with the back on the same side as ours and the same finish (a drop or a boot); the
+	// captures cannot be mirrored, so a near fit beats none
+	const bool bBackLeft = FVector::DotProduct(Back->GetActorLocation() - QB->GetActorLocation(), QB->GetActorRightVector()) < 0.f;
+	TArray<const FAthleteAssets::FPaFakeRep*> Fit;
+	for (int32 Pass = 0; Pass < 4 && !Fit.Num(); ++Pass)
+		for (const FAthleteAssets::FPaFakeRep& R : A.RepPaFakes)
+		{
+			const bool bSide = (R.Bx > 0.f) == bBackLeft, bAlign = R.bGun == bGun, bFin = R.bBoot == bBoot;
+			if (Pass == 0 ? (bSide && bAlign && bFin) : Pass == 1 ? (bAlign && bFin) : Pass == 2 ? bFin : true) Fit.Add(&R);
+		}
+	if (!Fit.Num()) return false;
+	const FAthleteAssets::FPaFakeRep& R = *Fit[FMath::Abs(Which) % Fit.Num()];
+	const float From = FMath::Max(0.f, R.T - FMath::Max(0.f, MeshIn));
+	// the quarterback plays on through his fake into the drop or the boot (the sim's path is the same), the back through
+	// the mesh and a few steps of the carry-out
+	QB->PlayOneShotFrom(R.Q.Get(), From);
+	QB->bOneShotPA = true;
+	QB->OneShotLeft = FMath::Min(QB->OneShotLeft, R.T - From + (bBoot ? 1.4f : 1.1f));
+	Back->PlayOneShotFrom(R.B.Get(), From);
+	Back->OneShotLeft = FMath::Min(Back->OneShotLeft, R.T - From + 0.7f);
+	Back->bOneShotPA = true;
+	UE_LOG(LogTemp, Display, TEXT("TAG play-action fake: %s from %.2f s (mesh in %.2f s, %s%s)"), *R.Q->GetName(), From, MeshIn, bGun ? TEXT("gun") : TEXT("under center"),
+		bBoot ? TEXT(", boot") : TEXT(""));
+	return true;
+}
+
 void AAthlete::PlayBeaten(const AAthlete* Rusher)
 {
 	const FAthleteAssets& A = FAthleteAssets::Get();
@@ -3053,6 +3898,7 @@ void AAthlete::BeginPairedFall(UAnimationAsset* Clip, const FVector& From, const
 	TackleOn = nullptr;
 	bMissing = false;
 	bGettingUp = false;
+	CatchHoldLeft = 0.f;
 	bFalling = true;
 	FallClip = Clip;
 	FallStart = Start;
@@ -3124,6 +3970,7 @@ void AAthlete::BeginScene(UAnimSequence* Clip, const FVector& AnchorW, float Yaw
 	SceneClip = Clip;
 	SceneStart = Start;
 	SceneT = 0.f;
+	SceneRate = 1.f;
 	SceneYaw = YawW;
 	SceneAnchor = FVector(AnchorW.X, AnchorW.Y, GetActorLocation().Z);
 	// a man a step from the capture's start is eased onto it, not put there in a frame (the helper of a help-up began
@@ -3156,7 +4003,7 @@ void AAthlete::TickScene(float DeltaTime)
 	}
 	// the capture's root carries the body (the same transform a library fall uses: TickFall), the pose set at the time
 	// the root was taken at, held a frame short of the end
-	const float Tc = FMath::Clamp(SceneStart + SceneT, 0.f, FMath::Max(SceneStart, Seq->GetPlayLength() - 1.f / 30.f));
+	const float Tc = FMath::Clamp(SceneStart + SceneT * SceneRate, 0.f, FMath::Max(SceneStart, Seq->GetPlayLength() - 1.f / 30.f));
 	const FTransform RM = Seq->ExtractRootMotionFromRange(SceneStart, Tc, FAnimExtractContext(0.0, true));
 	const USkeletalMeshComponent* V = Visible();
 	FTransform Crel = V ? V->GetComponentTransform().GetRelativeTransform(GetActorTransform()) : FTransform::Identity;
@@ -3387,6 +4234,7 @@ void AAthlete::ShowReplayPose(const FTransform& World, const TArray<FTransform>&
 	if (!MHBody) return;
 	UTagRetargetAnimInstance* R = Cast<UTagRetargetAnimInstance>(MHBody->GetAnimInstance());
 	if (!R) return;
+	if (bDormantNow) SetDormant(false); // (the recording plays through the body's own tick)
 	if (!bReplaying)
 	{
 		bReplaying = true;
@@ -3442,6 +4290,9 @@ void AAthlete::ResetPose()
 	bMissing = false;
 	TackleOn = nullptr;
 	BlockPartner = nullptr;
+	MeshMate = nullptr;
+	MeshSepMate = nullptr;
+	bMeshBack = bMeshFake = false;
 	PunchedPartner = nullptr;
 	PunchedThisPlay.Reset();
 	SincePunch = 99.f;
@@ -3549,6 +4400,7 @@ void AAthlete::MeasureMotion(const FVector& SimPos, float Dt)
 void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld, float VMaxYds, const FString& Anim, float AnimT, float DeltaTime, bool bLineman)
 {
 	FAthleteAssets& A = FAthleteAssets::Get();
+	if (bDormantNow) SetDormant(false); // (driven is on the field, whoever unhid him)
 	if (!PendingCarry.IsNearlyZero(1.f))
 	{
 		// a capture's travel handed to the actor last frame (the layout dive): his body is there, the offset to the sim
@@ -3583,9 +4435,12 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 			GFastSec += DeltaTime;
 			GFastM += FVector(VelWorld.X, VelWorld.Y, 0.f).Size() * DeltaTime / 100.0;
 			GFastSteps += RI->Touchdowns;
-			const float Ground = GetActorLocation().Z;
-			GFastHips += (MHBody->GetSocketLocation(TEXT("pelvis")).Z - Ground) / 100.0 * DeltaTime;
-			GFastHead += (MHBody->GetSocketLocation(TEXT("head")).Z - Ground) / 100.0 * DeltaTime;
+			if (TagAnimStats()) // (HeightStats: two socket lookups a frame per sprinting man)
+			{
+				const float Ground = GetActorLocation().Z;
+				GFastHips += (MHBody->GetSocketLocation(TEXT("pelvis")).Z - Ground) / 100.0 * DeltaTime;
+				GFastHead += (MHBody->GetSocketLocation(TEXT("head")).Z - Ground) / 100.0 * DeltaTime;
+			}
 		}
 		RI->Touchdowns = 0;
 		// body physics are off while the body is down: falls, get-ups and ragdolls own the pose (set again below)
@@ -3636,6 +4491,17 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 		VisOffset.Z = 0.f;
 		CurrentAnim.Reset();
 	}
+	if (CatchHoldLeft > 0.f)
+	{
+		// hit as he caught it: the catch plays out where he made it (the sim has already put him where the tackle ends;
+		// the director's pair takes him from here). The one-shot catch ran before the tackled-carrier branch, so the
+		// fall hold never held him and he jumped 2 m to the sim's spot (p92 clip 36)
+		CatchHoldLeft -= DeltaTime;
+		SetActorLocation(CatchHoldAt);
+		if (CatchHoldLeft > 0.f) return;
+		VisOffset = (CatchHoldAt - Location).GetClampedToMaxSize2D(300.f);
+		VisOffset.Z = 0.f;
+	}
 	if (FallHoldLeft > 0.f)
 	{
 		// down, held where the hit landed while the director pairs the tackle (same frame, normally); a keyed solo
@@ -3679,7 +4545,11 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 		VisOffset.Z = 0.f;
 		// (an offset already past the limit when the following starts - a dive's travel, a get-up - comes in at 1.5 m/s,
 		// not in one frame)
-		const float Max = FMath::Max(FollowMax, Was - 150.f * DeltaTime);
+		// (through a catch's capture, up to its hands on the ball, the body keeps to 20 cm of the spot the sim catches it
+		// at: the captures' own feet carried their receivers 40-60 cm off it - a strafing catch's side step - and the
+		// ball, brought to that spot, met him 40-95 cm from his hands. Filmed -TagCatchCheck, p23.)
+		const bool bCatchHold = bOneShotCatch && OneShot && OneShotLeft > 0.f && OneShotAge < 0.6f;
+		const float Max = FMath::Max(bCatchHold ? FMath::Min(FollowMax, 20.f) : FollowMax, Was - 150.f * DeltaTime);
 		if (VisOffset.SizeSquared2D() > Max * Max) VisOffset = VisOffset.GetClampedToMaxSize2D(Max);
 	}
 	else
@@ -3700,6 +4570,53 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 		Apart.Z = 0.f;
 		const float Gap = static_cast<float>(Apart.Size());
 		if (Gap > 1.f && Gap < 95.f) VisOffset += Apart / Gap * FMath::Min((95.f - Gap) * 0.5f, 400.f * DeltaTime);
+	}
+	// the handoff (PlayRepHandoffFit): the two men of the capture close onto where it has them around each other as the
+	// ball changes hands - the back's belly at the quarterback's hand, not a step wide of it. Each takes half of what is
+	// missing, at a step's pace, eased in over the 0.4 s before the exchange and let go a beat after it; the lag to the
+	// sim that leaves them with eases out as after any capture. (They played their two parts each on his own sim spot,
+	// 20-40 cm from where the capture's hands meet.)
+	float MeshW = 0.f;
+	FVector MeshGoal = FVector::ZeroVector; // (the offset off his sim spot the handoff wants him at: the follower below steps him to it)
+	if (AAthlete* Mate = MeshMate.Get())
+	{
+		const float Tm = GetWorld() ? static_cast<float>(GetWorld()->GetTimeSeconds() - MeshAtW) : 1.f;
+		if (Tm > 0.2f || bFalling || Mate->bFalling || Anim == TEXT("down") || !(OneShot && OneShotLeft > 0.f)) MeshMate = nullptr;
+		else
+		{
+			MeshW = FMath::SmoothStep(0.f, 1.f, FMath::Clamp(1.f + Tm / 0.4f, 0.f, 1.f));
+			const AAthlete* Qm = bMeshQB ? this : Mate;
+			const FVector MyAt = Location + VisOffset;
+			const FVector QAt = bMeshQB ? MyAt : Mate->GetActorLocation();
+			const FVector BAt = bMeshQB ? Mate->GetActorLocation() : MyAt;
+			FVector Miss = QAt + FRotator(0.f, Qm->SmoothedYaw, 0.f).RotateVector(FVector(MeshOff.X, MeshOff.Y, 0.f)) - BAt;
+			// (tried 2026-11-21, h4: closing the back's hands onto the ball in the quarterback's hand over the last 0.3 s
+			// instead of the capture's spacing. It pulled the bodies 16-42 cm apart - inside each other - and the back
+			// backwards through the exchange, 1.5-3 m/s under the sim. The capture's own spacing it is.)
+			Miss.Z = 0.f;
+			// (the back goes to it, the quarterback the other way)
+			// His capture's own steps take him there where they can: the follower's catch-up is aimed at MeshGoal rather
+			// than at his sim spot, so the stride and the turn of the steps close the gap with the feet; what they do not
+			// make up is slid in, at most 1.5 m/s (it was all slid, at up to 2.2 m/s under planted feet).
+			const FVector Half = Miss * 0.5f * (bMeshQB ? -1.f : 1.f);
+			MeshGoal = VisOffset + Half * MeshW;
+			VisOffset += (Half * MeshW).GetClampedToMaxSize(150.f * DeltaTime);
+			VisOffset = VisOffset.GetClampedToMaxSize2D(90.f);
+		}
+	}
+	// and the two of a handoff never inside each other, from the capture's start to 0.8 s after the exchange: each keeps
+	// half of what is missing to 60 cm (the pistol mesh had the quarterback's carry-out run through his back for a third
+	// of a second, h5 c005 - the sim's boot and the capture's drop going different ways)
+	if (const AAthlete* Sm = MeshSepMate.Get())
+	{
+		if (!GetWorld() || GetWorld()->GetTimeSeconds() > MeshAtW + 0.8 || bFalling || Sm->bFalling || Anim == TEXT("down")) MeshSepMate = nullptr;
+		else
+		{
+			FVector SepV = Location + VisOffset - Sm->GetActorLocation();
+			SepV.Z = 0.f;
+			const float SepGap = static_cast<float>(SepV.Size());
+			if (SepGap > 1.f && SepGap < 60.f) VisOffset += SepV / SepGap * FMath::Min((60.f - SepGap) * 0.5f, 300.f * DeltaTime);
+		}
 	}
 	const bool bFall = Anim == TEXT("down") || Anim == TEXT("tackle") || Anim == TEXT("dive");
 	bRepClip = false; // (set again below while his part of a two-man capture plays)
@@ -3727,6 +4644,13 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 		}
 		LeanSmoothed = FMath::VInterpTo(LeanSmoothed, Want, DeltaTime, 7.f);
 		RI->Proc.LeanCS = LeanSmoothed;
+		// a collision's jolt (AddImpact) handed to the body layer once, in its own frame
+		if (!ImpactAccW.IsNearlyZero(1.f))
+		{
+			RI->Proc.ImpactCS = MHBody->GetComponentTransform().InverseTransformVectorNoScale(ImpactAccW);
+			++RI->Proc.ImpactSerial;
+			ImpactAccW = FVector::ZeroVector;
+		}
 		RI->Proc.bFootLock = !bNoFootLock;
 		// a plain clip: in place (root velocity zero) unless it is a travelling capture played with its root locked (a
 		// drop, a locomotion loop): then its own root travel at the play position; a blend space: unknown
@@ -3760,8 +4684,10 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 							// travelled back-right at the capture's 45 degrees while the sim took him straight back: 60 cm off in
 							// a third of a second, then dragged - p18, a twentieth of all frames at the limit.)
 							FVector Ask = PrevVel;
-							const float Lag = VisOffset.Size2D();
-							if (Lag > 8.f) Ask -= VisOffset.GetSafeNormal2D() * FMath::Min((Lag - 8.f) * 2.5f, 200.f);
+							// (in a handoff the place he steps to is his half of the capture's spacing, not his sim spot: MeshGoal)
+							const FVector LagV = VisOffset - MeshGoal;
+							const float Lag = LagV.Size2D();
+							if (Lag > 8.f) Ask -= LagV.GetSafeNormal2D() * FMath::Min((Lag - 8.f) * 2.5f, 200.f);
 							// a locked-up man also steps to hand-fighting distance of his man (the steps keep the spacing; the
 							// alignment offset below would slide him there under his planted feet)
 							if (const AAthlete* Bp = BlockPartner.Get())
@@ -3807,7 +4733,17 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 	}
 	// (and no faster than a man can turn: 600 deg/s. A blocker meeting his man on the run was swung 60 degrees in one
 	// frame, his feet 63 cm across the turf - the one body pop left in a filmed game)
-	SmoothedYaw += FMath::Clamp(FMath::FindDeltaAngleDegrees(SmoothedYaw, Yaw) * FMath::Clamp(DeltaTime * 10.f, 0.f, 1.f), -600.f * DeltaTime, 600.f * DeltaTime);
+	const float YawFrameStart = SmoothedYaw; // (the turn rate holds for the frame as a whole: see the tackle's square-up)
+	// (the handoff's quarterback turns as his capture has him to the back's run - the back keeps his own heading, it is his
+	// path - so the hand with the ball is at the belly it is going into)
+	float YawAsk = Yaw;
+	if (const AAthlete* Mate = MeshMate.Get(); Mate && bMeshQB && MeshW > 0.f)
+		YawAsk = Yaw + FMath::FindDeltaAngleDegrees(Yaw, Mate->SmoothedYaw - MeshYawRel) * MeshW;
+	// (and once the ball is gone, his turn into the fake is a step-turn on his capture's feet, at most 300 deg/s: at the
+	// 600 cap he spun on the spot into every boot - h2, 20 deg a frame for a quarter second)
+	if (bMeshFake && !(OneShot && OneShotLeft > 0.f)) bMeshFake = false;
+	const float YawRateMax = bMeshFake && !MeshMate.IsValid() ? 300.f : 600.f;
+	SmoothedYaw += FMath::Clamp(FMath::FindDeltaAngleDegrees(SmoothedYaw, YawAsk) * FMath::Clamp(DeltaTime * 10.f, 0.f, 1.f), -YawRateMax * DeltaTime, YawRateMax * DeltaTime);
 	SetActorRotation(FRotator(0, SmoothedYaw, 0));
 
 	const float SpeedCm = FVector(VelWorld.X, VelWorld.Y, 0).Size();
@@ -3842,7 +4778,8 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 				bPancakePending = false;
 			}
 			bHitApplied = true; // the paired fall plays the hit
-			FallHoldLeft = 0.12f;
+			FallHoldLeft = FMath::Max(0.12f, CatchHold); // (longer when the director holds the tackle for a catch)
+			CatchHold = 0.f;
 			UE_LOG(LogTemp, Verbose, TEXT("TAG tackled #%d held %.0f cm behind the sim spot"), Player ? Player->number : -1, Jump);
 			return;
 		}
@@ -3882,7 +4819,11 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 				const FVector Off = FVector(Want.X, Want.Y, 0.f).GetClampedToMaxSize(250.f); // the pairing window is 3 yd
 				VisOffset = FMath::Lerp(VisOffset, Off, 1.f - FMath::Exp(-14.f * DeltaTime));
 				SetActorLocation(Location + VisOffset);
-				SmoothedYaw += FMath::FindDeltaAngleDegrees(SmoothedYaw, To.Rotation().Yaw) * FMath::Clamp(DeltaTime * 14.f, 0.f, 1.f);
+				// (at a man's turn rate, as in Drive: a receiver going after the man who picked him off, still on his part of
+				// the interception capture with the carrier behind him, was squared up 75 deg in a frame - to15 c030)
+				// (counted from the frame's start: on top of Drive's own turn to the sim's facing it made 40 deg a frame)
+				const float Sq = SmoothedYaw + FMath::FindDeltaAngleDegrees(SmoothedYaw, To.Rotation().Yaw) * FMath::Clamp(DeltaTime * 14.f, 0.f, 1.f);
+				SmoothedYaw = YawFrameStart + FMath::Clamp(FMath::FindDeltaAngleDegrees(YawFrameStart, Sq), -600.f * DeltaTime, 600.f * DeltaTime);
 				SetActorRotation(FRotator(0, SmoothedYaw, 0));
 			}
 		}
@@ -4056,7 +4997,8 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 		// (never a man the capture has put on the turf: cut there he stood up out of his back in one crossfade - a
 		// blocker run over by a bull rush snapping into a shuffle, p37)
 		const bool bOnTurf = MHBody && MHBody->GetSocketLocation(TEXT("pelvis")).Z - GetActorLocation().Z < 58.f;
-		if (!bOneShotCatch && !bDiveClip && !bOnTurf && OneShotAge > 0.4f && LagTime > 0.25f) OneShotLeft = 0.f;
+		// (not a play-action fake: the two-man capture plays its mesh and the follow keeps the body with the sim)
+		if (!bOneShotCatch && !bDiveClip && !bOnTurf && !bOneShotPA && OneShotAge > 0.4f && LagTime > 0.25f) OneShotLeft = 0.f;
 		PlayClip(OneShot, false, OneShotRate, OneShotStart);
 		bRepClip = bOneShotRep;
 		if (!BlockAlign.IsNearlyZero(0.5f)) SetActorLocation(Location + VisOffset + BlockAlign);
@@ -4117,6 +5059,21 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 			PlayClip(S, true, 1.f, FMath::Frac(Player->id * 0.37f) * 2.5f);
 			return;
 		}
+	}
+	// the ball covered up (R1): the pack's cover-ball carry at his pace (both arms wrapped on it, as captured)
+	if (bCoverBallF && bLiveF && !bPreSnap && (Anim == TEXT("run") || Anim == TEXT("idle")) && A.CoverJog.IsValid())
+	{
+		bRepClip = true; // (the capture holds the ball: no hands pulled to it)
+		if (SpeedCm < 120.f && A.CoverIdle.IsValid())
+		{
+			PlayClip(A.CoverIdle.Get(), true);
+			return;
+		}
+		const bool bSprint = SpeedCm > 680.f && A.CoverSprint.IsValid(), bRun = !bSprint && SpeedCm > 420.f && A.CoverRun.IsValid();
+		UAnimSequence* Sq = bSprint ? A.CoverSprint.Get() : bRun ? A.CoverRun.Get() : A.CoverJog.Get();
+		const float Ref = bSprint ? A.CoverSprintSpeed : bRun ? A.CoverRunSpeed : A.CoverJogSpeed;
+		PlayClip(Sq, true, FMath::Clamp(SpeedCm / FMath::Max(Ref, 1.f), 0.7f, 1.4f));
+		return;
 	}
 	// the quarterback's drop: the keyed three step (shotgun) or five step (under center) drop while the sim backs him
 	// out of the snap with the ball, at the sim's speed; then the pocket (on the toes, ball at the chest, eyes
@@ -4208,7 +5165,8 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 	if (Anim == TEXT("celebrate"))
 	{
 		// each player has his own celebration (keyed loops), phase offset so nobody moves in unison
-		UAnimationAsset* C = A.Celebrations.Num() && Player ? A.Side(A.Celebrations[Player->id % A.Celebrations.Num()], (Player->id / 7) % 2 == 1) : A.Celebrate.Get();
+		UAnimationAsset* C = CelebPick ? CelebPick.Get() :
+			A.Celebrations.Num() && Player ? A.Side(A.Celebrations[Player->id % A.Celebrations.Num()], (Player->id / 7) % 2 == 1) : A.Celebrate.Get();
 		// (a pack capture is a celebration played once, from its start, and held: looped from a point inside it, a man who
 		// dived to the turf to pose was back on his feet in one frame when it wrapped)
 		const bool bCapture = C && C->GetName().StartsWith(TEXT("A_TAG_Pack_"));
@@ -4486,6 +5444,7 @@ void AAthlete::SetFootball(const FAthleteFootball& InF, float Dt)
 	UpdateFace(Dt);
 	bPreSnap = InF.bPreSnap;
 	bHasBallF = InF.bHasBall;
+	bCoverBallF = InF.bHasBall && InF.bCoverBall;
 	bLiveF = InF.bLive;
 	CarrierDistF = InF.CarrierDist;
 	if (InF.bPreSnap) bUnderCenter = InF.bUnderCenter; // keep the alignment through the snap
@@ -4494,7 +5453,7 @@ void AAthlete::SetFootball(const FAthleteFootball& InF, float Dt)
 	if (!MHBody) return;
 	// pre-snap gaze of a set lineman (GazeStats): the head's bind forward (+Y in component space) as shown now
 	GazeSetT = InF.bPreSnap && SmoothedSpeed < 40.f ? GazeSetT + Dt : 0.f;
-	if (InF.bPreSnap && Player && GazeSetT > 0.5f && MHBody->GetSkeletalMeshAsset())
+	if (TagAnimStats() && InF.bPreSnap && Player && GazeSetT > 0.5f && MHBody->GetSkeletalMeshAsset())
 	{
 		const tag::Pos Pp = Player->pos;
 		const int32 Hi = MHBody->GetBoneIndex(TEXT("head"));
@@ -4565,12 +5524,25 @@ void AAthlete::SetFootball(const FAthleteFootball& InF, float Dt)
 	if (const UTagMotionMatchInstance* MI = MatchInstance())
 		if (const UAnimationAsset* Ma = MI->bMatch ? MI->GetMatchedAsset() : CurrentClip.Get())
 		{
-			const FString Nm = Ma->GetName();
-			bCarryClip = Nm.Contains(TEXT("_BC_")) && !Nm.Contains(TEXT("NonBC"));
+			// (by its name, once per clip he is on: tested every frame it was a name copy and two searches a man)
+			if (CarryClipFor.Get() != Ma)
+			{
+				const FString Nm = Ma->GetName();
+				bCarryClipIs = Nm.Contains(TEXT("_BC_")) && !Nm.Contains(TEXT("NonBC"));
+				CarryClipFor = Ma;
+			}
+			bCarryClip = bCarryClipIs;
 		}
 	Ease(CarryA, F.bHasBall && !F.bSecure && !bThrow && !bKeyedArms && !bCarryClip ? 1.f : 0.f, bKeyedArms || bCarryClip ? 14.f : 6.f);
 	Ease(SecureA, F.bSecure && !bThrow && !bKeyedArms && !bRepClip ? 1.f : 0.f, 9.f);
 	// (his part of a two-man capture has its hands where the two men put them: no reach over it)
+	// The catch reach: over the catch's own capture, in the last beat before the ball meets him, both hands go to where
+	// it will (the director's point, carried with his body). The capture puts his hands where its receiver caught his
+	// ball; this one comes in a hand or two off that. -TagNoCatchReach: the capture alone (A/B).
+	static const bool bNoCatchReach = FParse::Param(FCommandLine::Get(), TEXT("TagNoCatchReach"));
+	const bool bCatchReachOn = F.bCatchReach && !bNoCatchReach && !F.bReach && !bFalling && !bGettingUp && !bRagdoll && !bRepClip;
+	if (bCatchReachOn) Ease(ReachA, 1.f, 16.f);
+	else
 	Ease(ReachA, F.bReach && !bKeyedArms && !bRepClip ? 1.f : 0.f, F.bReach && !bKeyedArms && !bRepClip ? 7.f : 10.f);
 	Ease(LeanA, F.Lean, 5.f);
 	Ease(StanceA, F.bStance ? 1.f : 0.f, 6.f);
@@ -4585,6 +5557,13 @@ void AAthlete::SetFootball(const FAthleteFootball& InF, float Dt)
 	P.SecureAlpha = SecureA;
 	P.ReachAlpha = ReachA;
 	P.ReachTarget = C.InverseTransformPosition(ReachSmoothed);
+	if (bCatchReachOn)
+	{
+		CatchReachLocal = C.InverseTransformPosition(F.ReachWorld);
+		bCatchReachHeld = true;
+	}
+	else if (F.bReach || ReachA < 0.02f) bCatchReachHeld = false;
+	if (bCatchReachHeld) P.ReachTarget = CatchReachLocal;
 	static const bool bNoKeepOut = FParse::Param(FCommandLine::Get(), TEXT("TagNoKeepOut"));
 	P.KeepOutN = bNoKeepOut ? 0 : KeepOutN;
 	P.bDropFromTravel = GetWorld() && GetWorld()->GetTimeSeconds() < DropTravelUntil;
@@ -4642,7 +5621,9 @@ bool AAthlete::GetBallHold(FVector& OutLoc, FRotator& OutRot) const
 			BallSideFrame = Fr;
 			// (in the throw the ball is in the throwing hand's grip, fingers on the laces: cocking the arm back put that
 			// hand further from the chest, and the latch handed the ball to the other one)
-			const bool bLeft = IsThrowing() ? false : bBallLeft;
+			// (a strip capture's carrying arm, while the ball is punched out of it: the director's ForceBallHand)
+			const bool bForced = BallHandForce >= 0 && GetWorld() && GetWorld()->GetTimeSeconds() < BallHandForceUntil;
+			const bool bLeft = IsThrowing() ? false : bForced ? BallHandForce == 1 : bBallLeft;
 			const FTransform& T = bLeft ? TL : TR;
 			const FVector Hand = MHBody->GetSocketLocation(bLeft ? TEXT("hand_l") : TEXT("hand_r"));
 			const FVector Elbow = MHBody->GetSocketLocation(bLeft ? TEXT("lowerarm_l") : TEXT("lowerarm_r"));
@@ -4750,11 +5731,16 @@ FString AAthlete::DebugAnimState() const
 
 void AAthlete::SetSelected(bool bSel)
 {
+	if (Ring->GetVisibleFlag() == bSel) return; // (asked every frame)
 	Ring->SetVisibility(bSel);
 }
 
 void AAthlete::SetLabel(const FString& Text)
 {
+	// (asked every frame, nearly always for the same empty label: SetText marks the render state dirty whatever it is given)
+	if (bLabelKnown && LabelShown.Equals(Text, ESearchCase::CaseSensitive)) return;
+	bLabelKnown = true;
+	LabelShown = Text;
 	Label->SetVisibility(!Text.IsEmpty());
 	Label->SetText(FText::FromString(Text));
 }
@@ -4815,6 +5801,21 @@ FVector AAthlete::PelvisAt() const
 	return M && M->GetBoneIndex(TEXT("pelvis")) != INDEX_NONE ? M->GetBoneLocation(TEXT("pelvis")) : GetActorLocation();
 }
 
+FVector AAthlete::MarkerFeet() const
+{
+	const FVector At = GetActorLocation();
+	if (MarkerFrame != GFrameCounter)
+	{
+		const FVector P = PelvisAt();
+		const FVector Off(P.X - At.X, P.Y - At.Y, 0.f);
+		// the offset is smoothed, not the position: the ring keeps up with a sprinter and only the hip sway is filtered
+		const float Dt = FMath::Min(GetWorld() ? GetWorld()->GetDeltaSeconds() : 0.016f, 0.1f);
+		MarkerOffSm = MarkerFrame + 2 < GFrameCounter ? Off : FMath::Lerp(MarkerOffSm, Off, 1.f - FMath::Exp(-10.f * Dt));
+		MarkerFrame = GFrameCounter;
+	}
+	return FVector(At.X + MarkerOffSm.X, At.Y + MarkerOffSm.Y, 3.f);
+}
+
 void AAthlete::BreakFree()
 {
 	if (!bFalling) return;
@@ -4825,6 +5826,11 @@ void AAthlete::BreakFree()
 	// he goes on from where the capture had him: the gap to the sim's spot is eased off as after any capture
 	VisOffset = (GetActorLocation() - LastSimLoc).GetClampedToMaxSize2D(300.f);
 	VisOffset.Z = 0.f;
+	// crossfade out of the fall pose shown now: with CurrentClip cleared the stumble (or the run) that follows started
+	// without a blend, the body snapped from the paired capture's lean to the stumble's first frame (a foot 119 cm in one
+	// frame, to11 c129)
+	if (MHBody)
+		if (UTagRetargetAnimInstance* R = Cast<UTagRetargetAnimInstance>(MHBody->GetAnimInstance())) ++R->Proc.ClipSerial;
 	CurrentClip = nullptr;
 	CurrentAnim.Reset();
 }

@@ -119,6 +119,7 @@ void SGridironOverlay::ShowDepthChart(int32 InTeam, std::function<void()> InBack
 {
 	if (!Director || Director->League.empty()) return;
 	const int32 NTeams = static_cast<int32>(Director->League.size());
+	ATagAudio::Screen(TEXT("DepthChart"));
 	InTeam = FMath::Clamp(InTeam, 0, NTeams - 1);
 	if (InTeam != TeamIdx || InBack)
 	{
@@ -432,12 +433,12 @@ void SGridironOverlay::ShowDepthChart(int32 InTeam, std::function<void()> InBack
 	{
 		return SNew(SHorizontalBox)
 			+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)[ SNew(SPadGlyph).Owner(this).Glyph(Gl).Key(Key).Size(22.f) ]
-			+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(4, 0, 14, 0)[ Label(What, 10, White90, "Regular") ];
+			+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(*What ? 6.f : 1.f, 0, *What ? 18.f : 1.f, 0)[ Label(What, 10, White90, "Regular") ];
 	};
 	const bool bHeld = HeldId >= 0;
 	TSharedRef<SWidget> Hints = SNew(SHorizontalBox)
-		+ SHorizontalBox::Slot().AutoWidth()[ Hint(EPadGlyph::DUp, TEXT("↑↓"), bHeld ? TEXT("Carry") : TEXT("Move")) ]
-		+ SHorizontalBox::Slot().AutoWidth()[ Hint(EPadGlyph::DRight, TEXT("←→"), TEXT("Slots / Chart")) ]
+		+ SHorizontalBox::Slot().AutoWidth()[ Hint(EPadGlyph::DUpDown, TEXT("↑↓"), bHeld ? TEXT("Carry") : TEXT("Move")) ]
+		+ SHorizontalBox::Slot().AutoWidth()[ Hint(EPadGlyph::DLeftRight, TEXT("←→"), TEXT("Slots / Chart")) ]
 		+ SHorizontalBox::Slot().AutoWidth()[ Hint(EPadGlyph::L1, TEXT("Q"), TEXT("")) ]
 		+ SHorizontalBox::Slot().AutoWidth()[ Hint(EPadGlyph::R1, TEXT("E"), TEXT("Group")) ]
 		+ SHorizontalBox::Slot().AutoWidth()[ Hint(EPadGlyph::L2, TEXT("Z"), TEXT("")) ]
@@ -445,8 +446,8 @@ void SGridironOverlay::ShowDepthChart(int32 InTeam, std::function<void()> InBack
 		+ SHorizontalBox::Slot().AutoWidth()[ Hint(EPadGlyph::Cross, TEXT("Enter"), bHeld ? TEXT("Put down") : TEXT("Pick up")) ]
 		+ SHorizontalBox::Slot().AutoWidth()[ Hint(EPadGlyph::Square, TEXT("R"), bAll ? TEXT("Chart only") : TEXT("Whole roster")) ]
 		+ SHorizontalBox::Slot().AutoWidth()[ Hint(EPadGlyph::Triangle, TEXT("T"), TEXT("Best at slot")) ]
-		+ SHorizontalBox::Slot().AutoWidth()[ Hint(EPadGlyph::None, bPad ? TEXT("L3") : TEXT("X"), TEXT("Coach's slot")) ]
-		+ SHorizontalBox::Slot().AutoWidth()[ Hint(EPadGlyph::None, bPad ? TEXT("R3") : TEXT("V"), TEXT("Coach's team")) ]
+		+ SHorizontalBox::Slot().AutoWidth()[ Hint(bPad ? EPadGlyph::L3 : EPadGlyph::None, bPad ? TEXT("L3") : TEXT("X"), TEXT("Coach's slot")) ]
+		+ SHorizontalBox::Slot().AutoWidth()[ Hint(bPad ? EPadGlyph::R3 : EPadGlyph::None, bPad ? TEXT("R3") : TEXT("V"), TEXT("Coach's team")) ]
 		+ SHorizontalBox::Slot().AutoWidth()[ Hint(EPadGlyph::Circle, TEXT("Esc"), TEXT("Done")) ];
 
 	TSharedRef<SWidget> Page = SNew(SVerticalBox)
@@ -471,9 +472,9 @@ void SGridironOverlay::ShowDepthChart(int32 InTeam, std::function<void()> InBack
 			[
 				SNew(SBox).WidthOverride(360)
 				[
-					SNew(SBorder).BorderImage(WhiteBrush()).BorderBackgroundColor(Col == 0 ? Gold * FLinearColor(1, 1, 1, 0.5f) : FLinearColor(1, 1, 1, 0.07f)).Padding(1)
+					SNew(TagTheme::SPanel).Fill(Card).Radius(6.f).AccentTop(Col == 0 ? Gold : FLinearColor(1, 1, 1, 0.1f)).Padding(FMargin(0))
 					[
-						SNew(SBorder).BorderImage(WhiteBrush()).BorderBackgroundColor(Card).Padding(FMargin(10, 10))
+						SNew(SBox).Padding(FMargin(10, 10))
 						[
 							SNew(SVerticalBox)
 							+ SVerticalBox::Slot().AutoHeight().Padding(0, 0, 0, 8)[ Tabs ]
@@ -486,9 +487,9 @@ void SGridironOverlay::ShowDepthChart(int32 InTeam, std::function<void()> InBack
 			[
 				SNew(SBox).WidthOverride(860)
 				[
-					SNew(SBorder).BorderImage(WhiteBrush()).BorderBackgroundColor(Col == 1 ? Gold * FLinearColor(1, 1, 1, 0.5f) : FLinearColor(1, 1, 1, 0.07f)).Padding(1)
+					SNew(TagTheme::SPanel).Fill(Card).Radius(6.f).AccentTop(Col == 1 ? Gold : FLinearColor(1, 1, 1, 0.1f)).Padding(FMargin(0))
 					[
-						SNew(SBorder).BorderImage(WhiteBrush()).BorderBackgroundColor(Card).Padding(FMargin(12, 10))
+						SNew(SBox).Padding(FMargin(12, 10))
 						[
 							SNew(SVerticalBox)
 							+ SVerticalBox::Slot().AutoHeight()
@@ -512,7 +513,7 @@ void SGridironOverlay::ShowDepthChart(int32 InTeam, std::function<void()> InBack
 			[
 				SNew(SBox).WidthOverride(624)
 				[
-					SNew(SBorder).BorderImage(WhiteBrush()).BorderBackgroundColor(Card).Padding(FMargin(12, 10))
+					SNew(TagTheme::SPanel).Fill(Card).Radius(6.f).Padding(FMargin(12, 10))
 					[
 						SNew(SVerticalBox)
 						+ SVerticalBox::Slot().AutoHeight()[ CardW ]
@@ -524,7 +525,7 @@ void SGridironOverlay::ShowDepthChart(int32 InTeam, std::function<void()> InBack
 		]
 		+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(FMargin(0, 10, 0, 0))
 		[ SNew(SBox).HeightOverride(18)[ Label(Msg.IsEmpty() ? FString(TEXT("Set slots are the order the game plays them in; an untouched slot is the coach's (best OVR first).")) : Msg, 11, Msg.IsEmpty() ? Faint : MsgColor) ] ]
-		+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(FMargin(0, 6, 0, 0))[ Hints ];
+		+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(FMargin(0, 6, 0, 0))[ TagTheme::HintBar(Hints) ];
 
 	// ---- the keys
 	auto OnKey = [this, Rebuild](const FKey& K) -> bool
@@ -535,7 +536,9 @@ void SGridironOverlay::ShowDepthChart(int32 InTeam, std::function<void()> InBack
 		const tag::DSlot Sl = Slot();
 		const tag::DSlotInfo& In = tag::dslotInfo(Sl);
 		FRows R = RowsOf(T, Sl, bAll);
-		if (N.Moves()) ATagAudio::Ui(TEXT("UiMove"));
+		// (a man being carried slides a place; nothing else moves while he is held)
+		if (HeldId >= 0) { if (N.bUp || N.bDown) ATagAudio::Ui(TEXT("UiSwap")); }
+		else if (N.Moves()) ATagAudio::Ui(TEXT("UiMove"));
 		auto Commit = [&](const std::vector<tag::Player*>& Order)
 		{
 			tag::setChart(T, Sl, Order);
@@ -607,7 +610,7 @@ void SGridironOverlay::ShowDepthChart(int32 InTeam, std::function<void()> InBack
 			if (!P) return true;
 			if (HeldId >= 0)
 			{
-				ATagAudio::Ui(TEXT("UiSelect"));
+				ATagAudio::Ui(TEXT("UiDrop"));
 				HeldId = -1;
 				Say(FString::Printf(TEXT("%s: %s is %s %d"), *Str(T.abbr), *Short(*P), ANSI_TO_TCHAR(In.abbr), Row + 1), Good);
 			}
@@ -620,12 +623,12 @@ void SGridironOverlay::ShowDepthChart(int32 InTeam, std::function<void()> InBack
 				bAll = false;
 				Row = static_cast<int32>(L.size()) - 1;
 				HeldId = P->id;
-				ATagAudio::Ui(TEXT("UiSelect"));
+				ATagAudio::Ui(TEXT("UiPick"));
 				Say(FString::Printf(TEXT("%s added at %s: carry him up"), *Short(*P), ANSI_TO_TCHAR(In.abbr)), Good);
 			}
 			else
 			{
-				ATagAudio::Ui(TEXT("UiTab"));
+				ATagAudio::Ui(TEXT("UiPick"));
 				HeldId = P->id;
 				Say(FString::Printf(TEXT("Moving %s: up / down, cross to put him down"), *Short(*P)), Gold);
 			}
@@ -674,7 +677,7 @@ void SGridironOverlay::ShowDepthChart(int32 InTeam, std::function<void()> InBack
 		}
 		if (N.bL3)
 		{
-			ATagAudio::Ui(TEXT("UiBack"));
+			ATagAudio::Ui(TEXT("UiDelete"));
 			tag::clearChart(T, Sl);
 			SaveChart(T);
 			Say(FString::Printf(TEXT("%s is the coach's again"), ANSI_TO_TCHAR(In.abbr)), Dim);
@@ -683,7 +686,7 @@ void SGridironOverlay::ShowDepthChart(int32 InTeam, std::function<void()> InBack
 		}
 		if (N.bR3)
 		{
-			ATagAudio::Ui(TEXT("UiBack"));
+			ATagAudio::Ui(TEXT("UiDelete"));
 			tag::clearAllCharts(T);
 			SaveChart(T);
 			Say(FString::Printf(TEXT("%s: the whole depth chart is the coach's again"), *Str(T.abbr)), Dim);

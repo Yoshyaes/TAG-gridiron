@@ -228,6 +228,7 @@ class Game {
     KickFlight flight;
     bool good = false, blocked = false, isShort = false;
     double miss = 0;  // across the posts' plane, yd left (+) of centre
+    double v = 0, elevDeg = 0, drag = 0, plane = 0;  // the strike: launch (yd/s, deg), drag, spot to the posts (yd)
   };
   /** A place kick played out: leg and line drawn, the ball flown, good if it crosses over the bar between the uprights. */
   PlaceKick placeKick(double fromX, double p, const Player& k, TeamKey kt, double blockP);
@@ -255,6 +256,21 @@ class Game {
                                          std::optional<Side> userSide = std::nullopt);
   PlayLog finishKickReturn(PlaySim& sim);
   SpecialResult fieldGoal();
+  /** A field goal (pat = false: from the line of scrimmage) or extra point, played (Sim/PlaceKick.cpp): the kick unit
+   *  and the block unit on the field (empty: the game's own, fgUnit), the strike drawn now (placeKick, the user's swing
+   *  if Game::userKick is set), the snap setT seconds in, the block unit in rush look `look` (-1: its own pick). Step it,
+   *  then finishPlaceKick. fieldGoal() / extraPoint() are this run to the end. */
+  std::unique_ptr<PlaySim> placeKickSim(bool pat, std::vector<Player*> kick = {}, std::vector<Player*> block = {},
+                                        std::optional<Side> userSide = std::nullopt, double setT = 0.9, int look = -1);
+  /** The two units in the order the place kick gives out its jobs (PlaySim::placeAlign: K, H, LS, LG, RG, LT, RT, TE,
+   *  TE2, LW, RW; AL, AR, BL, BR, CL, CR, EL, ER, J, SP, FL) - kt is the kicking team. */
+  void orderPlaceUnits(TeamKey kt, std::vector<Player*>& kick, std::vector<Player*>& block) const;
+  /** The played place kick into the game: the score, the stats, the ball (a block: who has it where). */
+  SpecialResult finishPlaceKick(PlaySim& sim);
+  /** The eleven a team sends on for a field goal / extra point (kicking) or to block one. */
+  std::vector<Player*> fgUnit(TeamKey k, bool kickTeam) const;
+  /** The share of place kicks the rush blocks at this length (nflverse 2023; the make rate fgProb gives is with them in). */
+  static double placeBlockRate(double dist, bool pat);
   /** Decide 2-point try per a standard chart (CPU). */
   bool goForTwo();
   /** A flag on the return team during a return (block in the back, holding): 10 yd back from where it ended. */
@@ -289,6 +305,9 @@ class Game {
   double endY(const PlaySim& sim) const;
   double resultEP(const PlayResult& res, double los) const;
   void afterPAT(TeamKey kt);
+  std::optional<KickFlight> placeFlight_;  // the strike placeKickSim drew (finishPlaceKick hands it on)
+  SpecialResult legacyFieldGoal();   // (Tune::fgPlay = 0: the old roll)
+  SpecialResult legacyExtraPoint();
 };
 
 }  // namespace tag

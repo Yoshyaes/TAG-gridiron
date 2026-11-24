@@ -16,8 +16,8 @@ set "SIM=..\Source\TAGGridiron\Sim"
 set FLAGS=/nologo /std:c++17 /O2 /EHsc /W4 /permissive- /utf-8 /I"%SIM%"
 
 echo [1/3] Compiling Sim sources...
-cl %FLAGS% /c "%SIM%\League.cpp" "%SIM%\Playbook.cpp" "%SIM%\PlaySim.cpp" "%SIM%\Game.cpp" "%SIM%\Stats.cpp" "%SIM%\Abilities.cpp" /Fobuild\ || exit /b 1
-set "OBJS=build\League.obj build\Playbook.obj build\PlaySim.obj build\Game.obj build\Stats.obj build\Abilities.obj"
+cl %FLAGS% /c "%SIM%\League.cpp" "%SIM%\Playbook.cpp" "%SIM%\PlaySim.cpp" "%SIM%\Game.cpp" "%SIM%\Stats.cpp" "%SIM%\Abilities.cpp" "%SIM%\PlaceKick.cpp" /Fobuild\ || exit /b 1
+set "OBJS=build\League.obj build\Playbook.obj build\PlaySim.obj build\Game.obj build\Stats.obj build\Abilities.obj build\PlaceKick.obj"
 
 echo [2/3] Building SimCalibrate.exe...
 cl %FLAGS% SimCalibrate.cpp %OBJS% /Fobuild\ /Febuild\SimCalibrate.exe || exit /b 1

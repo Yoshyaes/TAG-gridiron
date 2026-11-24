@@ -1,7 +1,8 @@
 // A play drawn on a card: the formation at the snap and the play art (the same strokes the field shows). Both sides'
 // cards are drawn the way the broadcast and Madden's play art show the field: the offense at the bottom, the field
 // running up the card. A defensive call then reads with its deep zones across the top and its rushes coming down at
-// the quarterback.
+// the quarterback. Each picture is fitted to its card (any size: the call screen's, the team select's): everything it
+// draws inside a margin, the yards the same size both ways, the lines and the men sized to the scale.
 #pragma once
 
 #include "CoreMinimal.h"

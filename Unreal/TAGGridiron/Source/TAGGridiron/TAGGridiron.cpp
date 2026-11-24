@@ -13,6 +13,7 @@
 #include "Engine/Engine.h"
 #include "Engine/GameViewportClient.h"
 #include "Components/SkinnedMeshComponent.h"
+#include "HAL/IConsoleManager.h"
 #include "UObject/UObjectIterator.h"
 
 /**
@@ -28,6 +29,7 @@ class FTAGGridironModule : public FDefaultGameModuleImpl
 public:
 	virtual void StartupModule() override
 	{
+		SerialFirstFrames();
 		float At = -1.f;
 		if (FParse::Value(FCommandLine::Get(), TEXT("TagShotAt="), At) && At >= 0.f)
 		{
@@ -51,9 +53,39 @@ public:
 	virtual void ShutdownModule() override
 	{
 		if (Handle.IsValid()) FTSTicker::GetCoreTicker().RemoveTicker(Handle);
+		if (SerialHandle.IsValid()) FTSTicker::GetCoreTicker().RemoveTicker(SerialHandle);
 	}
 
 private:
+	/**
+	 * UE 5.8 engine race: FMeshElementCollector::AddMesh declares a function-local static log category and the engine
+	 * builds without thread-safe statics, so when two parallel gather-dynamic-mesh-elements workers make the process's
+	 * first AddMesh calls at once, both construct and register it (MTAccessDetector "Data race detected" ensure at frame
+	 * 0, and again at shutdown when the duplicate is torn down). Gather serially until the scene has rendered a few
+	 * seconds, then put the parallel gather back.
+	 */
+	void SerialFirstFrames()
+	{
+		IConsoleVariable* V = IConsoleManager::Get().FindConsoleVariable(TEXT("r.Visibility.DynamicMeshElements.Parallel"));
+		if (!V || !V->GetBool()) return;
+		V->Set(false, ECVF_SetByCode);
+		SerialHandle = FTSTicker::GetCoreTicker().AddTicker(FTickerDelegate::CreateLambda([this](float Dt)
+		{
+			if (!GEngine || !GEngine->GameViewport) return true;
+			SerialT += Dt;
+			if (++SerialFrames < 60 || SerialT < 3.f) return true;
+			if (IConsoleVariable* P = IConsoleManager::Get().FindConsoleVariable(TEXT("r.Visibility.DynamicMeshElements.Parallel")))
+				P->Set(true, ECVF_SetByCode);
+			UE_LOG(LogTemp, Display, TEXT("TAG parallel mesh gather restored after %d frames"), SerialFrames);
+			SerialHandle.Reset();
+			return false;
+		}));
+	}
+
+	FTSTicker::FDelegateHandle SerialHandle;
+	int32 SerialFrames = 0;
+	float SerialT = 0.f;
+
 	struct FSample { float Frame, Game, Draw, Rhi, Gpu; };
 
 	bool Tick(float Dt)

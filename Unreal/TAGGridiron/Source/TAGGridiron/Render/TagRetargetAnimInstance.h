@@ -63,6 +63,11 @@ struct FTagProcInput
 	// the pose being blended out of sits a travelling capture's distance from the actor, and the actor has since been
 	// moved there: the blend takes the new clip's root and hips position at once (the limbs still blend)
 	bool bDropFromTravel = false;
+	// contact: the velocity change the body took from a collision this frame (cm/s, this mesh's component space), handed
+	// over once per ImpactSerial. The hips go with the push; the upper body and the head are left behind and come back on
+	// damped springs (ApplyImpact) - the jolt of two bodies meeting that no capture of one man has.
+	FVector ImpactCS = FVector::ZeroVector;
+	int32 ImpactSerial = 0;
 };
 
 USTRUCT()
@@ -104,6 +109,10 @@ private:
 	void ApplyLean(FPoseContext& Output) const;
 	void ApplyFeet(FPoseContext& Output);
 	void ApplyKeepOut(FPoseContext& Output);
+	void ApplyImpact(FPoseContext& Output);
+	FVector ImpTheta = FVector::ZeroVector, ImpOmega = FVector::ZeroVector;   // the torso's tilt off the pose (rad, a rotation vector in component space) and its rate
+	FVector HeadTheta = FVector::ZeroVector, HeadOmega = FVector::ZeroVector; // the head's own (it whips further and faster)
+	int32 SeenImpact = 0;
 	FVector KeepOff[2] = {FVector::ZeroVector, FVector::ZeroVector}; // each hand's push, eased
 	FVector KeepOffLeg[2] = {FVector::ZeroVector, FVector::ZeroVector}; // each foot's push, eased
 	void ApplyCrossfade(FPoseContext& Output);

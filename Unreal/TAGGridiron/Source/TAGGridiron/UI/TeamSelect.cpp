@@ -7,6 +7,7 @@
 // options and the home team; L1 / R1 (Q / E) change the team (or the option) under it; square picks a random team,
 // triangle swaps the sides, cross / OPTIONS kicks off, circle goes back. The mouse can click everything.
 #include "UI/GridironOverlay.h"
+#include "UI/TagTheme.h"
 
 #include "Game/MatchDirector.h"
 #include "Audio/TagAudio.h"
@@ -339,7 +340,7 @@ namespace TeamSel
 			const auto It = std::find(Order.begin(), Order.end(), E);
 			const int32 I = It == Order.end() ? -1 : static_cast<int32>(It - Order.begin());
 			return I < 5 ? I : -1;
-		}, Out);
+		}, Out, ArtCardDepthCap);
 	}
 
 	// ------------------------------------------------------------------ widgets
@@ -394,10 +395,7 @@ namespace TeamSel
 		}
 		virtual FVector2D ComputeDesiredSize(float) const override
 		{
-			const bool bPad = Owner && Owner->PadGlyphs();
-			if (bPad || Key.Len() <= 1 || !FSlateApplication::IsInitialized()) return FVector2D(Size + 4, Size + 4);
-			const FVector2D M = Measure(Key, Font(FMath::RoundToInt(Size * 0.42f), "Bold"));
-			return FVector2D(FMath::Max<double>(Size, M.X + 12) + 4, Size + 4);
+			return Owner ? Owner->GlyphExtent(Glyph, Key, Size, Owner->PadGlyphs()) : FVector2D(Size + 4, Size + 4);
 		}
 		virtual int32 OnPaint(const FPaintArgs&, const FGeometry& G, const FSlateRect&, FSlateWindowElementList& Out, int32 Layer,
 			const FWidgetStyle&, bool) const override
@@ -585,7 +583,7 @@ namespace TeamSel
 	TSharedRef<SWidget> Click(TSharedRef<SWidget> Content, std::function<void()> OnClick)
 	{
 		return SNew(SButton).IsFocusable(false).ButtonStyle(&FCoreStyle::Get().GetWidgetStyle<FButtonStyle>("NoBorder")).ContentPadding(0)
-			.OnClicked_Lambda([OnClick] { OnClick(); return FReply::Handled(); })[ Content ];
+			.OnClicked_Lambda([OnClick] { ATagAudio::Ui(TEXT("UiSelect"), 0.8f); OnClick(); return FReply::Handled(); })[ Content ];
 	}
 	TSharedRef<SWidget> Label(const FString& S, int32 Size = 10, const FLinearColor& C = Dim, const char* W = "Bold")
 	{
@@ -663,6 +661,7 @@ using namespace TeamSel;
 void SGridironOverlay::ShowTeamSelect(bool bUserPlays)
 {
 	if (!Director || Director->League.size() < 2) return;
+	ATagAudio::Screen(TEXT("TeamSelect"));
 	static const TCHAR* WxNames[] = {TEXT("Random (realistic)"), TEXT("Clear"), TEXT("Windy"), TEXT("Rain"), TEXT("Snow")};
 	static const double Quarters[] = {900, 300, 480};
 	static const TCHAR* QNames[] = {TEXT("15 min"), TEXT("5 min"), TEXT("8 min")};
@@ -739,7 +738,7 @@ void SGridironOverlay::ShowTeamSelect(bool bUserPlays)
 		auto Arrow = [&](bool bNext) -> TSharedRef<SWidget>
 		{
 			return SNew(SButton).IsFocusable(false).ButtonColorAndOpacity(FLinearColor(0, 0, 0, 0.18f)).ContentPadding(FMargin(6, 4))
-				.OnClicked_Lambda([this, Step, bHome, bNext, Col0, Rebuild] { Step(bHome, bNext ? 1 : -1); SelCol = Col0; Rebuild(); return FReply::Handled(); })
+				.OnClicked_Lambda([this, Step, bHome, bNext, Col0, Rebuild] { ATagAudio::Ui(TEXT("UiTeam")); Step(bHome, bNext ? 1 : -1); SelCol = Col0; Rebuild(); return FReply::Handled(); })
 				[
 					SNew(SVerticalBox)
 					+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center)[ SNew(STextBlock).Font(Font(20, "Bold")).ColorAndOpacity(OnPri).Text(Tx(bNext ? TEXT(">") : TEXT("<"))) ]
@@ -987,18 +986,18 @@ void SGridironOverlay::ShowTeamSelect(bool bUserPlays)
 			[
 				SNew(SBox).WidthOverride(36).HeightOverride(36).ToolTipText(Tx(Str(T.city) + TEXT(" ") + Str(T.name)))
 				[
-					Click(SNew(SBorder).BorderImage(WhiteBrush()).BorderBackgroundColor(bSel ? Gold : FLinearColor::Transparent).Padding(2)
+					Click(SNew(SBorder).BorderImage(TagTheme::Round(5.f)).BorderBackgroundColor(bSel ? Gold : FLinearColor::Transparent).Padding(2)
 						[ SNew(SBox).RenderOpacity(bTaken ? 0.25f : 1.f)[ Mark(T, 32.f) ] ],
 						[this, k, bHome, Col0, Rebuild] { int32& S = bHome ? SelHome : SelAway; if (k != (bHome ? SelAway : SelHome)) S = k; SelCol = Col0; Rebuild(); })
 				]
 			];
 		}
 
-		return SNew(SBorder).BorderImage(WhiteBrush()).BorderBackgroundColor(bFocus ? Gold : FLinearColor(1, 1, 1, 0.07f)).Padding(bFocus ? 2.f : 1.f)
+		return SNew(SBox).WidthOverride(700.f)
 		[
-			SNew(SBox).WidthOverride(bFocus ? 696.f : 698.f)
+			SNew(TagTheme::SPanel).Fill(Card).Focused(bFocus).Radius(6.f).Padding(FMargin(0))
 			[
-				SNew(SBorder).BorderImage(WhiteBrush()).BorderBackgroundColor(Card).Padding(0)
+				SNew(SBox).Padding(0)
 				[
 					SNew(SVerticalBox)
 					+ SVerticalBox::Slot().AutoHeight()[ Header ]
@@ -1123,19 +1122,22 @@ void SGridironOverlay::ShowTeamSelect(bool bUserPlays)
 		std::function<void(int32)> Fn = Opts[r].Step;
 		OptBox->AddSlot().AutoHeight().Padding(0, 2)
 		[
-			SNew(SButton).IsFocusable(false).ContentPadding(FMargin(10, 6)).ButtonColorAndOpacity(bOn ? FLinearColor(1, 0.83f, 0, 0.22f) : FLinearColor(1, 1, 1, 0.05f))
-			.OnClicked_Lambda([this, r, Fn, Rebuild] { SelCol = 1; SelRow = r; Fn(1); Rebuild(); return FReply::Handled(); })
+			SNew(SButton).IsFocusable(false).ButtonStyle(&FCoreStyle::Get().GetWidgetStyle<FButtonStyle>("NoBorder")).ContentPadding(0)
+			.OnClicked_Lambda([this, r, Fn, Rebuild] { ATagAudio::Ui(TEXT("UiValue")); SelCol = 1; SelRow = r; Fn(1); Rebuild(); return FReply::Handled(); })
 			[
-				SNew(SHorizontalBox)
-				+ SHorizontalBox::Slot().FillWidth(1).VAlign(VAlign_Center)[ Label(Opts[r].Label, 10, bOn ? White90 : Dim, "Regular") ]
-				+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)[ Label(bOn ? FString(TEXT("<  ")) : FString(), 10, Gold) ]
-				+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)[ Label(Opts[r].Value, 11, bOn ? Gold : White90) ]
-				+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)[ Label(bOn ? FString(TEXT("  >")) : FString(), 10, Gold) ]
+				SNew(TagTheme::SSelect).Selected(bOn).Fill(FLinearColor(1, 1, 1, 0.045f)).Padding(FMargin(12, 7))
+				[
+					SNew(SHorizontalBox)
+					+ SHorizontalBox::Slot().FillWidth(1).VAlign(VAlign_Center)[ Label(Opts[r].Label, 10, bOn ? White90 : Dim, "Regular") ]
+					+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)[ Label(bOn ? FString(TEXT("<  ")) : FString(), 10, Gold) ]
+					+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)[ Label(Opts[r].Value, 11, bOn ? Gold : White90) ]
+					+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)[ Label(bOn ? FString(TEXT("  >")) : FString(), 10, Gold) ]
+				]
 			]
 		];
 	}
 	const bool bKickOn = SelCol == 1 && SelRow == Opts.Num();
-	TSharedRef<SWidget> KickBtn = Click(SNew(SBorder).BorderImage(WhiteBrush()).BorderBackgroundColor(bKickOn ? Gold : Gold * FLinearColor(0.88f, 0.88f, 0.88f, 1.f)).Padding(FMargin(14, 10))
+	TSharedRef<SWidget> KickBtn = Click(SNew(SBorder).BorderImage(TagTheme::Round(6.f)).BorderBackgroundColor(bKickOn ? Gold : Gold * FLinearColor(0.8f, 0.8f, 0.8f, 1.f)).Padding(FMargin(14, 10))
 		[
 			SNew(SHorizontalBox)
 			+ SHorizontalBox::Slot().FillWidth(1).HAlign(HAlign_Center).VAlign(VAlign_Center)[ SNew(STextBlock).Font(Font(18, "Bold")).ColorAndOpacity(Ink).Text(Tx(TEXT("KICK OFF"))) ]
@@ -1143,9 +1145,9 @@ void SGridironOverlay::ShowTeamSelect(bool bUserPlays)
 		], [Kick] { Kick(); });
 	TSharedRef<SWidget> Middle = SNew(SBox).WidthOverride(360)
 	[
-		SNew(SBorder).BorderImage(WhiteBrush()).BorderBackgroundColor(SelCol == 1 ? Gold : FLinearColor(1, 1, 1, 0.07f)).Padding(SelCol == 1 ? 2.f : 1.f)
+		SNew(TagTheme::SPanel).Fill(Card).Focused(SelCol == 1).Radius(6.f).Padding(FMargin(0))
 		[
-			SNew(SBorder).BorderImage(WhiteBrush()).BorderBackgroundColor(Card).Padding(FMargin(16, 12))
+			SNew(SBox).Padding(FMargin(16, 12))
 			[
 				SNew(SVerticalBox)
 				+ SVerticalBox::Slot().AutoHeight()
@@ -1188,11 +1190,10 @@ void SGridironOverlay::ShowTeamSelect(bool bUserPlays)
 	{
 		return SNew(SHorizontalBox)
 			+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)[ SNew(SGlyph).Owner(this).Glyph(G).Key(Key).Size(22.f) ]
-			+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(4, 0, 18, 0)[ Label(What, 11, White90, "Regular") ];
+			+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center).Padding(*What ? 6.f : 1.f, 0, *What ? 20.f : 1.f, 0)[ Label(What, 11, White90, "Regular") ];
 	};
 	TSharedRef<SWidget> Hints = SNew(SHorizontalBox)
-		+ SHorizontalBox::Slot().AutoWidth()[ Hint(EPadGlyph::DLeft, TEXT("←"), TEXT("")) ]
-		+ SHorizontalBox::Slot().AutoWidth()[ Hint(EPadGlyph::DRight, TEXT("→"), TEXT("Away / Options / Home")) ]
+		+ SHorizontalBox::Slot().AutoWidth()[ Hint(EPadGlyph::DLeftRight, TEXT("←→"), TEXT("Away / Options / Home")) ]
 		+ SHorizontalBox::Slot().AutoWidth()[ Hint(EPadGlyph::L1, TEXT("Q"), TEXT("")) ]
 		+ SHorizontalBox::Slot().AutoWidth()[ Hint(EPadGlyph::R1, TEXT("E"), TEXT("Change team")) ]
 		+ SHorizontalBox::Slot().AutoWidth()[ Hint(EPadGlyph::Square, TEXT("R"), TEXT("Random team")) ]
@@ -1221,11 +1222,12 @@ void SGridironOverlay::ShowTeamSelect(bool bUserPlays)
 			+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Fill).Padding(14, 0)[ Middle ]
 			+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Fill)[ TeamPanel(true) ]
 		]
-		+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(FMargin(0, 14, 0, 0))[ Hints ];
+		+ SVerticalBox::Slot().AutoHeight().HAlign(HAlign_Center).Padding(FMargin(0, 14, 0, 0))[ TagTheme::HintBar(Hints) ];
 
 	// ---- the pad and the keys
 	const int32 NOpts = Opts.Num();
 	TArray<std::function<void(int32)>> OptSteps;
+	OptSteps.Reserve(8); // (a TArray moves its items bytewise when it grows, which a std::function does not survive)
 	for (const FOpt& O : Opts) OptSteps.Add(O.Step);
 	auto OnKey = [this, Rebuild, Step, Kick, Random, NRows, NOpts, OptSteps](const FKey& K) -> bool
 	{
@@ -1235,22 +1237,23 @@ void SGridironOverlay::ShowTeamSelect(bool bUserPlays)
 		const bool bDown = K == EKeys::Gamepad_DPad_Down || K == EKeys::Gamepad_LeftStick_Down || K == EKeys::Down || K == EKeys::S;
 		const bool bPrev = K == EKeys::Gamepad_LeftShoulder || K == EKeys::Q;
 		const bool bNext = K == EKeys::Gamepad_RightShoulder || K == EKeys::E;
-		if (bLeft || bRight || bUp || bDown || bPrev || bNext) ATagAudio::Ui(TEXT("UiMove"));
-		if (bLeft || bRight) { SelCol = FMath::Clamp(SelCol + (bRight ? 1 : -1), 0, 2); Rebuild(); return true; }
+		// the cursor clicks; an option stepped ticks up or down; another team swishes in
+		if (bLeft || bRight) { ATagAudio::Ui(TEXT("UiMove")); SelCol = FMath::Clamp(SelCol + (bRight ? 1 : -1), 0, 2); Rebuild(); return true; }
 		if (SelCol == 1)
 		{
-			if (bUp || bDown) { SelRow = FMath::Clamp(SelRow + (bDown ? 1 : -1), 0, NRows - 1); Rebuild(); return true; }
-			if ((bPrev || bNext) && SelRow < NOpts) { OptSteps[SelRow](bNext ? 1 : -1); Rebuild(); return true; }
+			if (bUp || bDown) { ATagAudio::Ui(TEXT("UiMove")); SelRow = FMath::Clamp(SelRow + (bDown ? 1 : -1), 0, NRows - 1); Rebuild(); return true; }
+			if ((bPrev || bNext) && SelRow < NOpts) { ATagAudio::Ui(TEXT("UiValue"), 1.f, bNext ? 1.06f : 0.94f); OptSteps[SelRow](bNext ? 1 : -1); Rebuild(); return true; }
 		}
 		else if (bUp || bDown || bPrev || bNext)
 		{
+			ATagAudio::Ui(TEXT("UiTeam"));
 			Step(SelCol == 2, (bDown || bNext) ? 1 : -1);
 			Rebuild();
 			return true;
 		}
 		if (K == EKeys::Gamepad_FaceButton_Bottom || K == EKeys::Enter || K == EKeys::SpaceBar)
 		{
-			ATagAudio::Ui(SelCol == 1 && SelRow < NOpts ? TEXT("UiTab") : TEXT("UiSelect"));
+			ATagAudio::Ui(SelCol == 1 && SelRow < NOpts ? TEXT("UiValue") : TEXT("UiSelect"));
 			if (SelCol == 1 && SelRow < NOpts) { OptSteps[SelRow](1); Rebuild(); }
 			else Kick();
 			return true;
@@ -1283,7 +1286,7 @@ void SGridironOverlay::ShowTeamSelect(bool bUserPlays)
 		}
 		if (K == EKeys::Gamepad_FaceButton_Left || K == EKeys::R)
 		{
-			ATagAudio::Ui(TEXT("UiTab"));
+			ATagAudio::Ui(TEXT("UiRandom"));
 			if (SelCol != 2) Random(false);
 			if (SelCol != 0) Random(true);
 			Rebuild();
@@ -1292,7 +1295,7 @@ void SGridironOverlay::ShowTeamSelect(bool bUserPlays)
 		if (K == EKeys::Gamepad_FaceButton_Top || K == EKeys::T)
 		{
 			// the teams change ends; the user stays with their team and the pad with the team it was on
-			ATagAudio::Ui(TEXT("UiTab"));
+			ATagAudio::Ui(TEXT("UiSwapSides"));
 			Swap(SelHome, SelAway);
 			bSelUserHome = !bSelUserHome;
 			if (bSelMulti) Director->LobbySwapSides(); // (every player stays with his team)

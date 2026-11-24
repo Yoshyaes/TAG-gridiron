@@ -20,6 +20,7 @@ class UAudioComponent;
 class USoundWave;
 class USoundBase;
 class USoundAttenuation;
+struct FStreamableHandle;
 
 /** What the director shows the sound each frame. */
 struct FTagAudioView
@@ -58,14 +59,24 @@ public:
 
 	/** The one in this world (null with -TagNoAudio). */
 	static ATagAudio* Get(const UObject* WorldCtx);
-	/** A menu sound (plays through the pause): UiMove, UiSelect, UiBack, UiTab, UiSnap, UiWhoosh, UiToast, UiPause, UiError. */
+	/** A menu sound (plays through the pause). The kit is Tools/Audio/build_ui.py's: UiMove, UiValue, UiTab, UiSelect, UiBack,
+	 *  UiError, UiTeam, UiSwapSides, UiRandom, UiPick, UiDrop, UiSwap, UiEquip, UiUnequip, UiType, UiSave, UiDelete, UiJoin,
+	 *  UiLeave, UiCaller (and UiOpen, UiClose, UiTitle, UiStart, which Screen() and the kickoff play themselves). */
 	static void Ui(const UObject* WorldCtx, FName Bank, float Vol = 1.f);
 	/** The same from Slate code, which has no world to hand: the game's one sound actor. */
-	static void Ui(const TCHAR* Bank, float Vol = 1.f);
+	static void Ui(const TCHAR* Bank, float Vol = 1.f, float Pitch = 1.f);
+	/** The menu screen now up: "Main", "Lobby", "TeamSelect", "Settings", "Abilities", "DepthChart", "CreatePlayer",
+	 *  "Pause". A screen that comes forward or goes back is heard (the first main menu with the title's hit), and the
+	 *  front end's bed follows it: the building fills up on the way to the kickoff. The same screen again is nothing. */
+	static void Screen(const TCHAR* Id);
 
 	void Feed(float Dt, const FTagAudioView& V);
 	void MatchStart(const tag::Game& G);
 	void MatchEnd();
+	/** Start loading the match's sounds in the background (everything but the two PA calls of one team, which MatchStart
+	 *  asks for once it knows the home side). Safe to call at any time and more than once; MatchStart calls it itself,
+	 *  so calling it earlier (before the loading screen's wait) only gives the loads more time to land. */
+	void PreloadMatchBanks();
 	/** Stop the music now, without a fade (the game thread is about to be busy loading). */
 	void Hush();
 	/** Things only the director knows: "hardcount", "audible", "flag", "replay", "banner". */
@@ -89,10 +100,16 @@ private:
 		TArray<USoundWave*> Waves; // (kept alive by Loaded)
 		int32 Last = -1;
 		bool bLoaded = false;
+		bool bAsync = false; // a background load has been asked for (PreloadBank)
 	};
 	TMap<FName, FBank> Banks;
 	UPROPERTY()
 	TArray<TObjectPtr<USoundBase>> Loaded;
+	/** Background loads still held (each keeps its waves alive until BankLanded has put them in Loaded). */
+	TArray<TSharedPtr<FStreamableHandle>> Preloads;
+	/** Load a bank in the background; Pick still loads it on the spot if it is needed before it lands. */
+	void PreloadBank(FName Bank);
+	void BankLanded(FName Bank);
 	void FindBanks();
 	USoundWave* Pick(FName Bank);
 	bool Has(FName Bank) const { return Banks.Contains(Bank); }
@@ -157,6 +174,11 @@ private:
 	size_t LogSeen = 0;
 	FTagAudioView::EStage LastStage = FTagAudioView::EStage::Menu;
 	bool bWasPaused = false, bPauseMusic = false, bHushed = false;
+	FName ScreenNow;          // the menu screen last heard (Screen)
+	bool bTitled = false;     // the title's hit has been played (once a run)
+	float MenuHold = 0.f;     // the playlist waits this long (for the title's hit to land)
+	void ScreenChanged();
+	int32 Fed = 0;            // frames fed so far (nothing of the menus is heard before the game is on screen)
 	float StageT = 0.f;
 
 	struct FPlay

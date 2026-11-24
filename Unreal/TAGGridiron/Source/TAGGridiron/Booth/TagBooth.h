@@ -56,7 +56,13 @@ private:
 		int32 Rate = 24000;
 		float Secs = 0.f;
 	};
-	bool LoadClip(const FString& Key, FClip& Out) const;
+	/** Read and parse one wav (no actor state: it runs on a background thread). */
+	static bool LoadClip(const FString& Path, FClip& Out);
+	/** The current line's wav is read off the game thread; the answer comes back through ClipLoaded. */
+	void StartClipLoad();
+	void ClipLoaded(uint32 Serial, bool bOk, FClip&& C);
+	/** Forget any read that is out or waiting (the line it was for is gone). */
+	void DropClipWait();
 	void Request(const tag::booth::Line& L, int32 Prio);
 	void StartService();
 	bool ServiceAlive() const;
@@ -90,7 +96,20 @@ private:
 	FString CurKey;
 	tag::booth::Line CurLine;
 	TSet<FString> Asked;
+	TSet<FString> Present;          // line keys whose wav is known to be in the cache (never looked for again)
 	float ForecastT = 0.f;
+	uint64 ForecastStamp = 0;       // the forecast last asked for (Booth::forecastStamp): the same again is not walked again
+	bool bForecastSeen = false;
+	// the match's regulars and the generic calls with no audio yet (found on a background thread): asked a few a frame
+	std::vector<tag::booth::Line> WarmMissing; // (a std container: a Line holds std::strings, which a TArray may not move)
+	size_t WarmAt = 0;
+	// the current line's wav, read on a background thread
+	uint32 ClipSerial = 0;          // one per wait: an answer with an old serial is for a line since dropped
+	bool bClipLoading = false;      // a read is out
+	bool bClipReady = false;        // ReadyClip holds the current line's audio
+	bool bClipLast = false;         // the last look (as the wait ran out) has been taken
+	float ClipPollT = 0.f;          // until the next look (10 a second)
+	FClip ReadyClip;
 
 	TSharedPtr<SWidget> CaptionRoot;
 	TSharedPtr<STextBlock> CaptionWho, CaptionText;

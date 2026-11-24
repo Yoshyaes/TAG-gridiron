@@ -49,15 +49,29 @@ void ATagPlayArt::Tick(float Dt)
 	{
 		if (!Mat)
 		{
-			UMaterialInterface* Base = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/TAG/Materials/M_TagPlayArt.M_TagPlayArt"));
-			if (!Base) return;
-			Mat = UMaterialInstanceDynamic::Create(Base, this);
-			for (UProceduralMeshComponent* M : Meshes)
-				for (int32 s = 0; s < M->GetNumSections(); ++s) M->SetMaterial(s, Mat);
+			Warm();
+			if (!Mat) return;
 		}
 		Mat->SetScalarParameterValue(TEXT("Opacity"), FMath::SmoothStep(0.f, 1.f, Fade));
+		// (bright enough to hold its colour under a daylight exposure: at the material's 2.0 the yellow routes came out
+		// olive on the grass and the red ones brown - Madden's are saturated)
+		Mat->SetScalarParameterValue(TEXT("Intensity"), 4.5f);
 		for (UProceduralMeshComponent* M : Meshes) M->SetVisibility(Fade > 0.001f);
 	}
+}
+
+void ATagPlayArt::Warm()
+{
+	if (Mat) return;
+	UMaterialInterface* Base = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/TAG/Materials/M_TagPlayArt.M_TagPlayArt"));
+	if (!Base) return;
+	Mat = UMaterialInstanceDynamic::Create(Base, this);
+	for (UProceduralMeshComponent* M : Meshes)
+		for (int32 s = 0; s < M->GetNumSections(); ++s) M->SetMaterial(s, Mat);
+	// (as Tick sets them on the frame it makes the material)
+	Mat->SetScalarParameterValue(TEXT("Opacity"), FMath::SmoothStep(0.f, 1.f, Fade));
+	Mat->SetScalarParameterValue(TEXT("Intensity"), 4.5f);
+	for (UProceduralMeshComponent* M : Meshes) M->SetVisibility(Fade > 0.001f);
 }
 
 void ATagPlayArt::Begin()
@@ -248,6 +262,18 @@ void ATagPlayArt::Commit()
 	{
 		UProceduralMeshComponent* M = Meshes[i];
 		const FLayer& L = Layers[i];
+		// the same layer as the mesh already holds (every frame the art is up and nothing about it moved: no draw-in, no
+		// hot route, no shift): the section and its scene proxy stay as they are
+		uint32 Sig = 0;
+		if (L.V.Num())
+		{
+			Sig = FCrc::MemCrc32(L.V.GetData(), L.V.Num() * static_cast<int32>(sizeof(FVector)), static_cast<uint32>(L.V.Num()));
+			Sig = FCrc::MemCrc32(L.T.GetData(), L.T.Num() * static_cast<int32>(sizeof(int32)), Sig);
+			Sig = FCrc::MemCrc32(L.C.GetData(), L.C.Num() * static_cast<int32>(sizeof(FLinearColor)), Sig);
+		}
+		if (bLayerBuilt[i] && LayerSig[i] == Sig && (L.V.Num() == 0) == (M->GetNumSections() == 0)) continue;
+		bLayerBuilt[i] = true;
+		LayerSig[i] = Sig;
 		if (L.V.Num() == 0)
 		{
 			M->ClearAllMeshSections();

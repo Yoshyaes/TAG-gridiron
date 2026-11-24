@@ -22,7 +22,16 @@
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
+#include "Misc/PackageName.h"
+#include "UObject/UObjectGlobals.h"
+#if WITH_EDITOR
+#include "SkinnedAssetCompiler.h"
+#endif
 #include "EngineUtils.h"
+#include "CineCameraActor.h"
+#include "CineCameraComponent.h"
+#include "GameFramework/PlayerController.h"
+#include "Camera/PlayerCameraManager.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Sim/Types.h"
 #include "Sim/PlaySim.h"
@@ -372,8 +381,15 @@ void AStadium::Build(const tag::Team& Home, const tag::Team& Away, const tag::We
 		Ground->SetCastShadow(false);
 		Ground->RegisterComponent();
 	}
-	const bool bPro = A.TurfMat && A.Plane;
-	auto TurfMID = [&](float LinesAmt, const FLinearColor& Tint, float PaintAmt, const FLinearColor& Paint, const FLinearColor& Tiling, float Stripes)
+	// The realistic turf (Tools/Art/ue_build_turf.py): M_TagTurf2 is the whole playing surface in one material mapped
+	// from the world position (grass, view-dependent mowing stripes, wear, lines, end zones and their wordmarks, the
+	// midfield logo, the white border, the apron, rain and snow), so the paint lies in the grass and the close-up
+	// blades (M_TagGrassBlade) take the colour of the ground under them. -TagOldTurf falls back to M_TagTurf.
+	UMaterialInterface* Turf2Mat = (A.Plane && !FParse::Param(FCommandLine::Get(), TEXT("TagOldTurf")))
+		? LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/TAG/Materials/M_TagTurf2.M_TagTurf2"), nullptr, LOAD_NoWarn | LOAD_Quiet) : nullptr;
+	const bool bTurf2 = Turf2Mat != nullptr;
+	const bool bPro = bTurf2 || (A.TurfMat && A.Plane);
+	auto TurfMID =[&](float LinesAmt, const FLinearColor& Tint, float PaintAmt, const FLinearColor& Paint, const FLinearColor& Tiling, float Stripes)
 	{
 		UMaterialInstanceDynamic* M = UMaterialInstanceDynamic::Create(A.TurfMat, this);
 		M->SetScalarParameterValue(TEXT("LinesAmount"), LinesAmt);
@@ -397,7 +413,70 @@ void AStadium::Build(const tag::Team& Home, const tag::Team& Away, const tag::We
 		P->RegisterComponent();
 		return P;
 	};
-	if (bPro)
+	if (bTurf2)
+	{
+		// -TagTurfLum= scales the grass albedo (1 = linear 0.0135 / 0.0306 / 0.0063, before the material's Tint: the
+		// deep green of NFL broadcast turf in the sun, sRGB ~85 / 118 / 52; twice that read lime under Lumen), -TagStripes= the mowing stripes,
+		// -TagWear= the season wear between the hashes (0 = a fresh field), -TagSnowCover= how much snow lies in a snow game
+		static float Turf2Lum = 1.f, Turf2Stripes = 1.f, Turf2Wear = 0.6f, Turf2Snow = 0.5f;
+		FParse::Value(FCommandLine::Get(), TEXT("TagTurfLum="), Turf2Lum);
+		FParse::Value(FCommandLine::Get(), TEXT("TagStripes="), Turf2Stripes);
+		FParse::Value(FCommandLine::Get(), TEXT("TagWear="), Turf2Wear);
+		FParse::Value(FCommandLine::Get(), TEXT("TagSnowCover="), Turf2Snow);
+		const FLinearColor PaintWhite(0.72f, 0.72f, 0.70f); // brighter clips flat white under the sun
+		auto PaintLum = [](const FLinearColor& Col) { return 0.2126f * Col.R + 0.7152f * Col.G + 0.0722f * Col.B; };
+		// an end zone is the team's first colour laid on the grass; the wordmark (and the midfield mark's letter) its
+		// second colour when that stands off the first, white otherwise
+		auto FieldColor = [&](const tag::Team& Tm)
+		{
+			const FLinearColor First = Hex(Tm.colors.primary) * 0.6f;
+			return First * FMath::Min(1.f, 0.45f / FMath::Max(PaintLum(First), 0.01f));
+		};
+		auto WordColor = [&](const tag::Team& Tm)
+		{
+			const FLinearColor First = Hex(Tm.colors.primary), Second = Hex(Tm.colors.secondary);
+			return FMath::Abs(PaintLum(Second) - PaintLum(First)) > 0.18f ? Second * 0.8f : PaintWhite;
+		};
+		auto SetTurf2 = [&](UMaterialInstanceDynamic* M)
+		{
+			M->SetScalarParameterValue(TEXT("HomeIdx"), static_cast<float>(FMath::Clamp(Home.id, 0, 31)));
+			M->SetScalarParameterValue(TEXT("AwayIdx"), static_cast<float>(FMath::Clamp(Away.id, 0, 31)));
+			M->SetVectorParameterValue(TEXT("HomeA"), FieldColor(Home));
+			M->SetVectorParameterValue(TEXT("HomeB"), WordColor(Home));
+			M->SetVectorParameterValue(TEXT("AwayA"), FieldColor(Away));
+			M->SetVectorParameterValue(TEXT("AwayB"), WordColor(Away));
+			M->SetVectorParameterValue(TEXT("LogoLine"), FieldColor(Home));
+			M->SetVectorParameterValue(TEXT("LogoFill"), WordColor(Home));
+			M->SetVectorParameterValue(TEXT("LineColor"), PaintWhite);
+			M->SetVectorParameterValue(TEXT("GrassColor"), FLinearColor(0.0135f, 0.0306f, 0.0063f) * Turf2Lum);
+			M->SetScalarParameterValue(TEXT("StripeAmount"), Turf2Stripes);
+			M->SetScalarParameterValue(TEXT("WearAmount"), Turf2Wear);
+			M->SetScalarParameterValue(TEXT("Wet"), bWet ? 1.f : 0.f);
+			M->SetScalarParameterValue(TEXT("Snow"), bSnowy ? Turf2Snow : 0.f);
+			M->SetScalarParameterValue(TEXT("Specular"), bWet ? 0.45f : 0.3f);
+		};
+		// one plane for field, border and apron, at the height the old field plane had
+		UMaterialInstanceDynamic* GroundM = UMaterialInstanceDynamic::Create(Turf2Mat, this);
+		SetTurf2(GroundM);
+		PlaneAt(FVector(50 * YD, 0, 0.5), 170, 100, GroundM);
+		// blades for the close shots
+		UMaterialInterface* BladeMat = FParse::Param(FCommandLine::Get(), TEXT("TagNoGrass3D")) ? nullptr
+			: LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/TAG/Materials/M_TagGrassBlade.M_TagGrassBlade"), nullptr, LOAD_NoWarn | LOAD_Quiet);
+		if (BladeMat)
+		{
+			GrassMID = UMaterialInstanceDynamic::Create(BladeMat, this);
+			SetTurf2(GrassMID);
+			// the tips stir with the wind: 0.15 cm in still air, up to 0.7 cm in a gale
+			const FVector2D WindDir = FVector2D(W.windX, -W.windY).GetSafeNormal();
+			const float Sway = FMath::Clamp(0.15f + 0.05f * static_cast<float>(FMath::Sqrt(W.windX * W.windX + W.windY * W.windY)), 0.15f, 0.7f);
+			GrassMID->SetVectorParameterValue(TEXT("WindVec"), WindDir.IsNearlyZero() ? FLinearColor(Sway, 0.f, 0.f, 0.f)
+				: FLinearColor(static_cast<float>(WindDir.X) * Sway, static_cast<float>(WindDir.Y) * Sway, 0.f, 0.f));
+			BuildGrass3D();
+		}
+		UE_LOG(LogTemp, Display, TEXT("TAG turf: M_TagTurf2, stripes %.2f wear %.2f wet %d snow %.2f, 3D grass %s"), Turf2Stripes, Turf2Wear,
+			bWet ? 1 : 0, bSnowy ? Turf2Snow : 0.f, Grass3D ? TEXT("on") : TEXT("off"));
+	}
+	else if (bPro)
 	{
 		// broadcast turf: a deep, natural green (the grass texture alone renders neon under the sun), and 5-yard mowing
 		// stripes strong enough to read from the high camera (StripeAmount above 1 pushes the material's stripe contrast)
@@ -490,9 +569,12 @@ void AStadium::Build(const tag::Team& Home, const tag::Team& Away, const tag::We
 		AddText(S, FVector(yd * YD, (FW / 2 - 11) * YD, 2), FRotator(90, 180, 0), 180.f, FColor(225, 225, 220));
 		AddText(S, FVector(yd * YD, -(FW / 2 - 11) * YD, 2), FRotator(90, 0, 0), 180.f, FColor(225, 225, 220));
 	}
-	// midfield emblem
-	AddMesh(A.Cylinder, FVector(50 * YD, 0, 0.6), FVector(9, 9, 0.004), Hex(Home.colors.primary) * 0.45f, 0.85f, FRotator::ZeroRotator, false);
-	AddText(FString(Home.abbr.c_str()), FVector(50 * YD, 0, 3), FRotator(90, 0, 0), 300.f, FColor::White);
+	// midfield emblem (painted in the grass by M_TagTurf2)
+	if (!bTurf2)
+	{
+		AddMesh(A.Cylinder, FVector(50 * YD, 0, 0.6), FVector(9, 9, 0.004), Hex(Home.colors.primary) * 0.45f, 0.85f, FRotator::ZeroRotator, false);
+		AddText(FString(Home.abbr.c_str()), FVector(50 * YD, 0, 3), FRotator(90, 0, 0), 300.f, FColor::White);
+	}
 	// ---------------- line overlays
 	LosLine = AddMesh(Cube, FVector(0, 0, 2), FVector(0.2, (FW - 0.6) * YD / 100, 0.005), FLinearColor(0.1f, 0.35f, 1.f), 0.3f, FRotator::ZeroRotator, false);
 	FdLine = AddMesh(Cube, FVector(0, 0, 2), FVector(0.2, (FW - 0.6) * YD / 100, 0.005), FLinearColor(1.f, 0.82f, 0.f), 0.3f, FRotator::ZeroRotator, false);
@@ -632,6 +714,7 @@ void AStadium::Build(const tag::Team& Home, const tag::Team& Away, const tag::We
 	Sun->SetLightColor(bNight ? FLinearColor(0.6f, 0.7f, 1.f) : FLinearColor(1.f, 0.95f, 0.88f));
 	Sun->bAtmosphereSunLight = true;
 	Sun->SetDynamicShadowCascades(4);
+	Sun->SetCastShadows(!bNight); // at night it is 0.05 lux under the floodlights: a shadow pass nobody can see
 	Sun->RegisterComponent();
 
 	USkyAtmosphereComponent* Atmo = NewObject<USkyAtmosphereComponent>(this);
@@ -654,7 +737,9 @@ void AStadium::Build(const tag::Team& Home, const tag::Team& Away, const tag::We
 	UExponentialHeightFogComponent* Fog = NewObject<UExponentialHeightFogComponent>(this);
 	Fog->SetupAttachment(RootComponent);
 	Fog->SetFogDensity(W.precip == tag::Precip::None ? 0.004f : 0.03f);
-	Fog->SetVolumetricFog(true);
+	// volumetric fog for the floodlight beams at night and the thick air of rain and snow; a dry day's thin haze
+	// (density 0.004) is left to the height fog alone
+	Fog->SetVolumetricFog(bNight || W.precip != tag::Precip::None);
 	Fog->RegisterComponent();
 
 	// LED light banks hung from the roof's front edge along both sidelines and over the end zones, the way a modern
@@ -779,10 +864,43 @@ bool AStadium::LoadFanMeshes()
 	return FanMeshes.Num() > 0;
 }
 
+/**
+ * Loads the catalog meshes a build is about to use as one batch. One at a time (HeroMesh, then SetSkeletalMesh) every
+ * newly seen mesh stalls the game thread alone on its skinned asset build while the other build workers idle; here
+ * every package is requested first, so the builds all start, and they are waited for together. HeroMesh then finds
+ * each mesh in memory (and roots and caches it as before).
+ */
+static void PreloadHeroMeshes(FAthleteAssets& A, const TArray<int32>& Items, const TCHAR* What)
+{
+	const double T0 = FPlatformTime::Seconds();
+	TArray<int32> Requests;
+	for (int32 Item : Items)
+	{
+		if (!A.HeroItems.IsValidIndex(Item) || A.HeroItems[Item].Mesh) continue;
+		const FString Package = FPackageName::ObjectPathToPackageName(A.HeroItems[Item].Path);
+		if (!Package.IsEmpty() && FPackageName::DoesPackageExist(Package)) Requests.Add(LoadPackageAsync(Package));
+	}
+	if (Requests.Num()) FlushAsyncLoading(Requests);
+	TArray<USkinnedAsset*> Meshes;
+	for (int32 Item : Items)
+		if (USkeletalMesh* M = A.HeroMesh(Item)) Meshes.AddUnique(M);
+#if WITH_EDITOR
+	if (Meshes.Num()) FSkinnedAssetCompilingManager::Get().FinishCompilation(Meshes);
+#endif
+	UE_LOG(LogTemp, Display, TEXT("TAG: model pack %s preload %d meshes (%d packages requested) in %.2f s"), What, Meshes.Num(), Requests.Num(),
+		FPlatformTime::Seconds() - T0);
+}
+
 USkeletalMeshComponent* AStadium::AddStaticPerson(int32 Item, int32 HeadItem, const FVector& Rel, float FaceYaw, const FLinearColor& Team,
 	const FLinearColor& Bottom, bool bKneel, int32 Seed)
 {
 	FAthleteAssets& A = FAthleteAssets::Get();
+	if (PackPreload) // BuildPackSideline's collect pass: note the meshes, build nothing
+	{
+		if (A.HeroItems.IsValidIndex(Item)) PackPreload->AddUnique(Item);
+		if (A.HeroItems.IsValidIndex(HeadItem)) PackPreload->AddUnique(HeadItem);
+		return nullptr;
+	}
 	USkeletalMesh* M = A.HeroMesh(Item);
 	if (!M) return nullptr;
 	const FString Rig = A.HeroItems[Item].Rig;
@@ -844,6 +962,16 @@ void AStadium::BuildPackSideline(const tag::Team& Home, const tag::Team& Away)
 {
 	FAthleteAssets& A = FAthleteAssets::Get();
 	if (!A.bHero || FParse::Param(FCommandLine::Get(), TEXT("TagNoPackSideline"))) return;
+	// two passes over the same code: the first only collects the meshes it would use (AddStaticPerson records them
+	// while PackPreload is set), they load as one batch, then the second pass builds
+	if (!PackPreload)
+	{
+		TArray<int32> Want;
+		PackPreload = &Want;
+		BuildPackSideline(Home, Away);
+		PackPreload = nullptr;
+		PreloadHeroMeshes(A, Want, TEXT("sideline"));
+	}
 	const TCHAR* Wx = A.HeroWeather == 2 ? TEXT("rain") : A.HeroWeather == 1 ? TEXT("cold") : TEXT("warm");
 	const FString Top = A.HeroWeather == 2 ? TEXT("rainjacket") : A.HeroWeather == 1 ? TEXT("windbreaker") : TEXT("poloshirt");
 	auto Of = [&](const TCHAR* Token) -> TArray<int32>
@@ -902,6 +1030,7 @@ void AStadium::BuildPackSideline(const tag::Team& Home, const tag::Team& Away)
 			AddStaticPerson(Sp[k], INDEX_NONE, FVector((36.0 + k * 13.0 + T * 4.0) * YD, Side * (Edge + 5.2) * YD, 0), Side > 0 ? -90.f : 90.f,
 				Hex(Tm.colors.primary), Hex(Tm.colors.secondary), false, ++Seed);
 	}
+	if (PackPreload) return; // the collect pass
 	UE_LOG(LogTemp, Display, TEXT("TAG: model pack sideline people %d (media, coordinators, sideline players)"), SidelinePeople.Num());
 }
 
@@ -938,6 +1067,24 @@ bool AStadium::BuildPackFans(const TArray<FTransform>& Seats, const tag::Team& H
 	const TArray<int32> Story = A.HeroOf(TEXT("Story"), [](const FHeroItem& I) { return (I.Height <= 0.f || I.Height > 140.f) && I.Far < 0.15f; }); // whole people, intact skins only
 	const TArray<int32> Props = A.HeroOf(TEXT("FanProp"));
 	int32 StoryNext = Story.Num() ? (Home.id * 61 + Away.id * 7) % Story.Num() : 0;
+	// every mesh the seats below can ask for, loaded as one batch before the first fan is built: the weather's fan
+	// pool (1,900 draws over a few dozen fans use them all), this game's run of story characters (every 24th seat,
+	// in order, so the run is known up front) and the hand props. The seat loop itself is untouched and draws from
+	// Rand exactly as before; it now finds each mesh already loaded.
+	{
+		TArray<int32> Want;
+		auto Wanted = [&](int32 WantItem)
+		{
+			const FString WantRig = A.HeroItems[WantItem].Rig;
+			if (A.HeroClip(WantRig, TEXT("Idle")) && A.HeroClip(WantRig, TEXT("Cheer"))) Want.AddUnique(WantItem); // seats skip the others
+		};
+		for (int32 PoolItem : Pool) Wanted(PoolItem);
+		int32 StoryAt = StoryNext;
+		for (int32 SeatI = 0; SeatI < Seats.Num() && Story.Num(); ++SeatI)
+			if (SeatI % 24 == 3) Wanted(Story[StoryAt++ % Story.Num()]);
+		for (int32 PropItem : Props) Want.AddUnique(PropItem);
+		PreloadHeroMeshes(A, Want, TEXT("fans"));
+	}
 	for (int32 SeatI = 0; SeatI < Seats.Num(); ++SeatI)
 	{
 		const FTransform& Seat = Seats[SeatI];
@@ -955,7 +1102,15 @@ bool AStadium::BuildPackFans(const TArray<FTransform>& Seats, const tag::Team& H
 		F->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		F->SetCastShadow(false);
 		F->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::OnlyTickPoseWhenRendered;
-		F->bEnableUpdateRateOptimizations = true;
+		// A fan animates at about 30 Hz on a tick of his own (-TagFanHz=N, 0 = every frame). The engine's update rate
+		// optimisation keeps one tracker per owning actor, and every fan belongs to the stadium: one near fan held all
+		// 1,951 at full rate (measured: the crowd was 8 ms of a 15 ms game thread from the play-call camera, plus the
+		// skin cache dispatches of 2,000 bodies a frame). Intervals differ by a few percent so the fans spread over
+		// the frames instead of all posing on the same one.
+		static float FanHz = FParse::Value(FCommandLine::Get(), TEXT("TagFanHz="), FanHz) ? FMath::Clamp(FanHz, 0.f, 240.f) : 30.f;
+		const float FanTick = FanHz > 0.f ? (0.85f + 0.3f * static_cast<float>((SeatI * 37) % 101) / 100.f) / FanHz : 0.f;
+		F->bEnableUpdateRateOptimizations = FanHz <= 0.f;
+		F->PrimaryComponentTick.TickInterval = FanTick;
 		CrowdCheap(F);
 		F->RegisterComponent();
 		// the pack characters face +Y: yaw -90 turns them to the field
@@ -986,6 +1141,7 @@ bool AStadium::BuildPackFans(const TArray<FTransform>& Seats, const tag::Team& H
 				Pc->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 				Pc->SetCastShadow(false);
 				CrowdCheap(Pc);
+				Pc->PrimaryComponentTick.TickInterval = FanTick; // (it follows the fan's pose: no need to tick more often than he does)
 				Pc->bUseBoundsFromLeaderPoseComponent = true;
 				Pc->RegisterComponent();
 				Pc->SetLeaderPoseComponent(F);
@@ -1220,6 +1376,130 @@ void AStadium::BuildRain(const tag::Weather& W)
 	(void)W;
 }
 
+void AStadium::BuildGrass3D()
+{
+	// One square of blades, built once at the origin and never moved: the blade material wraps every blade's foot into
+	// the square around the shot's subject (GrassCenter), so the patch follows the camera while each blade stays where
+	// it grows, and shrinks the blades to nothing at the patch's rim and on worn turf. A blade is five points (foot,
+	// a bend at 55 % of its height, tip), both windings, its normal near straight up so it is lit like the ground it
+	// stands on. TexCoord 1 = the point's offset from the foot (x, y), TexCoord 2 = (offset z, random); vertex colour
+	// R = the blade's random number, G = height along the blade. No shadows, not in the ray tracing / Lumen scenes.
+	// Cost: nothing while hidden (the game camera); ~90k blades, 270k triangles a view when shown.
+	int32 Count = 90000;
+	FParse::Value(FCommandLine::Get(), TEXT("TagGrassN="), Count);
+	Count = FMath::Clamp(Count, 1000, 400000);
+	FParse::Value(FCommandLine::Get(), TEXT("TagGrassPx="), GrassPx);
+	FParse::Value(FCommandLine::Get(), TEXT("TagGrassDist="), GrassMaxDist);
+	bGrassAlways = FParse::Param(FCommandLine::Get(), TEXT("TagGrassAlways"));
+	GrassPx = FMath::Max(GrassPx, 0.5f);
+	TArray<FVector> Verts, Norms;
+	TArray<int32> Tris;
+	TArray<FVector2D> Uv0, Uv1, Uv2;
+	TArray<FLinearColor> Cols;
+	Verts.Reserve(Count * 5);
+	Norms.Reserve(Count * 5);
+	Uv0.Reserve(Count * 5);
+	Uv1.Reserve(Count * 5);
+	Uv2.Reserve(Count * 5);
+	Cols.Reserve(Count * 5);
+	Tris.Reserve(Count * 18);
+	FRandomStream Rand(4107);
+	static const int32 Idx[9] = {0, 1, 2, 1, 3, 2, 2, 3, 4};
+	static const float Along[5] = {0.f, 0.f, 0.55f, 0.55f, 1.f};
+	for (int32 i = 0; i < Count; ++i)
+	{
+		const FVector Foot(Rand.FRand() * GrassPatch, Rand.FRand() * GrassPatch, 0.0);
+		const float Az = Rand.FRandRange(0.f, 2.f * UE_PI);
+		const FVector Side(-FMath::Sin(Az), FMath::Cos(Az), 0.0);
+		const float Tall = Rand.FRandRange(2.4f, 4.0f), Wide = Rand.FRandRange(0.6f, 1.0f); // cm: mown to about 3 cm
+		const float LeanAz = Rand.FRandRange(0.f, 2.f * UE_PI);
+		const FVector Lean = FVector(FMath::Cos(LeanAz), FMath::Sin(LeanAz), 0.0) * (Tall * Rand.FRandRange(0.1f, 0.5f));
+		const float Rnd = Rand.FRand(), Rnd2 = Rand.FRand();
+		const FVector Nrm = FVector(Lean.X * 0.08, Lean.Y * 0.08, 1.0).GetSafeNormal();
+		const FVector Off[5] = {
+			-Side * (Wide * 0.5), Side * (Wide * 0.5),
+			Lean * 0.35 - Side * (Wide * 0.36) + FVector(0, 0, Tall * 0.55), Lean * 0.35 + Side * (Wide * 0.36) + FVector(0, 0, Tall * 0.55),
+			Lean + FVector(0, 0, Tall * 0.97)};
+		const int32 Base = Verts.Num();
+		for (int32 k = 0; k < 5; ++k)
+		{
+			Verts.Add(Foot + Off[k]);
+			Norms.Add(Nrm);
+			Uv0.Add(FVector2D(k == 4 ? 0.5 : double(k % 2), Along[k]));
+			Uv1.Add(FVector2D(Off[k].X, Off[k].Y));
+			Uv2.Add(FVector2D(Off[k].Z, Rnd2));
+			Cols.Add(FLinearColor(Rnd, Along[k], Rnd2, 1.f));
+		}
+		for (int32 k = 0; k < 9; k += 3)
+		{
+			Tris.Append({Base + Idx[k], Base + Idx[k + 1], Base + Idx[k + 2]});
+			Tris.Append({Base + Idx[k], Base + Idx[k + 2], Base + Idx[k + 1]});
+		}
+	}
+	UProceduralMeshComponent* G = NewObject<UProceduralMeshComponent>(this);
+	G->SetupAttachment(RootComponent);
+	G->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	G->SetCastShadow(false);
+	G->bVisibleInRayTracing = false;
+	G->bAffectDistanceFieldLighting = false;
+	G->bAffectDynamicIndirectLighting = false;
+	G->bReceivesDecals = false;
+	G->SetBoundsScale(40.f); // the vertex shader carries the blades anywhere on the field: never cull by the built square
+	G->RegisterComponent();
+	G->CreateMeshSection_LinearColor(0, Verts, Tris, Norms, Uv0, Uv1, Uv2, TArray<FVector2D>(), Cols, TArray<FProcMeshTangent>(), false);
+	if (GrassMID)
+	{
+		GrassMID->SetScalarParameterValue(TEXT("PatchSize"), GrassPatch);
+		GrassMID->SetScalarParameterValue(TEXT("Grow"), 0.f);
+		G->SetMaterial(0, GrassMID);
+	}
+	G->SetVisibility(false);
+	Grass3D = G;
+	GrassGrow = 0.f;
+}
+
+void AStadium::UpdateGrass3D(float Dt)
+{
+	if (!Grass3D || !GrassMID) return;
+	UWorld* World = GetWorld();
+	APlayerController* PC = World ? World->GetFirstPlayerController() : nullptr;
+	APlayerCameraManager* CamMgr = PC ? PC->PlayerCameraManager.Get() : nullptr;
+	if (!CamMgr) return;
+	const FVector Loc = CamMgr->GetCameraLocation();
+	const FVector Fwd = CamMgr->GetCameraRotation().Vector();
+	const float HalfFov = FMath::DegreesToRadians(FMath::Clamp(CamMgr->GetFOVAngle(), 1.f, 170.f)) * 0.5f;
+	// the director's cine camera says what the shot is of (focus distance) and whether it is a close shot (f/1.2)
+	double Focus = 0.0;
+	float Aperture = 5.6f;
+	if (const ACineCameraActor* CineCam = Cast<ACineCameraActor>(PC->GetViewTarget()))
+		if (const UCineCameraComponent* Lens = CineCam->GetCineCameraComponent())
+		{
+			Focus = Lens->FocusSettings.ManualFocusDistance;
+			Aperture = Lens->CurrentAperture;
+		}
+	// the subject: the focus distance down the view, no further than where the view meets the turf
+	const double ToTurf = Fwd.Z < -0.02 ? (Loc.Z - 0.5) / -Fwd.Z : 1.0e6;
+	const double Dist = FMath::Max(Focus > 50.0 ? FMath::Min(Focus, ToTurf) : ToTurf, 50.0);
+	// a 3.2 cm blade's height on a 1080p frame
+	const double BladePx = 3.2 * 960.0 / (Dist * FMath::Tan(HalfFov));
+	float Want = Aperture <= 2.f ? 1.f : FMath::Clamp(static_cast<float>((BladePx - GrassPx) / (GrassPx * 0.5)), 0.f, 1.f);
+	Want *= FMath::Clamp(static_cast<float>((GrassMaxDist - Dist) / 400.0), 0.f, 1.f);
+	if (bGrassAlways) Want = 1.f;
+	const bool bCut = FVector::DistSquared(Loc, GrassCamPrev) > FMath::Square(500.0);
+	GrassCamPrev = Loc;
+	GrassGrow = bCut ? Want : FMath::FInterpTo(GrassGrow, Want, Dt, 6.f);
+	const bool bShow = GrassGrow > 0.02f;
+	if (Grass3D->IsVisible() != bShow)
+	{
+		Grass3D->SetVisibility(bShow);
+		UE_LOG(LogTemp, Log, TEXT("TAG grass3D %s: subject %.0f cm, f/%.1f, blade %.1f px"), bShow ? TEXT("on") : TEXT("off"), Dist, Aperture, BladePx);
+	}
+	if (!bShow) return;
+	const FVector Subject = Loc + Fwd * FMath::Min(Dist, static_cast<double>(GrassMaxDist));
+	GrassMID->SetVectorParameterValue(TEXT("GrassCenter"), FLinearColor(static_cast<float>(Subject.X), static_cast<float>(Subject.Y), 0.f, 0.f));
+	GrassMID->SetScalarParameterValue(TEXT("Grow"), GrassGrow);
+}
+
 void AStadium::BuildOfficials()
 {
 	FAthleteAssets& A = FAthleteAssets::Get();
@@ -1341,6 +1621,7 @@ void AStadium::Tick(float Dt)
 	Time += Dt;
 	Hype = FMath::Max(0.f, Hype - Dt * 0.25f);
 	UpdateHeroCrowd(Dt);
+	UpdateGrass3D(Dt);
 	// crowd: idle sway, jumping on big plays (update a rotating slice each frame to stay cheap)
 	if (CrowdBase.Num() > 0)
 	{

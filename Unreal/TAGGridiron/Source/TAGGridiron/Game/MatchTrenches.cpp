@@ -95,7 +95,7 @@ void AMatchDirector::UpdateLineBars()
 		AAthlete* U = bShow ? AthleteFor(Sim->user->p, Sim->user->side == tag::Side::Off ? Game->poss : tag::other(Game->poss)) : nullptr;
 		if (U && !U->IsHidden())
 		{
-			const FVector Feet = FVector(U->GetActorLocation().X, U->GetActorLocation().Y, 3.f);
+			const FVector Feet = U->MarkerFeet(); // (under his visible body, not his actor: a capture carries the body off it)
 			const FVector Fw = U->GetActorForwardVector().GetSafeNormal2D();
 			FVector2D S;
 			bool bOk = true;
@@ -112,9 +112,25 @@ void AMatchDirector::UpdateLineBars()
 				bOk = bOk && PC->ProjectWorldLocationToScreen(Pt, S, true);
 				M.Notch.Add(S);
 			}
-			bOk = bOk && PC->ProjectWorldLocationToScreen(U->GetActorLocation() + FVector(0, 0, 225.f), M.Head, true);
+			bOk = bOk && PC->ProjectWorldLocationToScreen(FVector(Feet.X, Feet.Y, U->GetActorLocation().Z + 225.f), M.Head, true);
 			M.bOn = bOk;
 			M.Number = Sim->user->p ? FString::FromInt(Sim->user->p->number) : FString();
+			static const bool bMarkerCheck = FParse::Param(FCommandLine::Get(), TEXT("TagMarkerCheck"));
+			static double MarkerLogT = 0.0;
+			if (bMarkerCheck && FPlatformTime::Seconds() - MarkerLogT > 0.25)
+			{
+				MarkerLogT = FPlatformTime::Seconds();
+				FVector2D SPel, SAct, SFeet;
+				const FVector Pel = U->PelvisAt(), Act = U->GetActorLocation();
+				PC->ProjectWorldLocationToScreen(FVector(Pel.X, Pel.Y, 3.f), SPel, true);
+				PC->ProjectWorldLocationToScreen(FVector(Act.X, Act.Y, 3.f), SAct, true);
+				PC->ProjectWorldLocationToScreen(Feet, SFeet, true);
+				USkeletalMeshComponent* Vis = U->Visible();
+				const FVector VisAt = Vis ? Vis->GetComponentLocation() : FVector::ZeroVector;
+				UE_LOG(LogTemp, Display, TEXT("TAG markercheck: #%d pelvis-actor %.0f cm, visroot-actor %.0f cm, screen ring(%.0f,%.0f) pelvis(%.0f,%.0f) actor(%.0f,%.0f) vp %.0fx%.0f vis=%s pelvisbone=%d"),
+					Sim->user->p ? Sim->user->p->number : -1, FVector::Dist2D(Pel, Act), FVector::Dist2D(VisAt, Act), SFeet.X, SFeet.Y, SPel.X, SPel.Y, SAct.X, SAct.Y, VP.X, VP.Y,
+					Vis ? *Vis->GetName() : TEXT("none"), Vis ? Vis->GetBoneIndex(TEXT("pelvis")) : -2);
+			}
 		}
 		Overlay->SetUserMarker(M);
 	}
@@ -123,7 +139,7 @@ void AMatchDirector::UpdateLineBars()
 		FVector2D Scr;
 		const bool bShow = Sim && Game && PC && PadUI() && State == EMatchState::Live && Sim->user && (UserOff() || UserDef());
 		AAthlete* U = bShow ? AthleteFor(Sim->user->p, Sim->user->side == tag::Side::Off ? Game->poss : tag::other(Game->poss)) : nullptr;
-		if (U && !U->IsHidden() && PC->ProjectWorldLocationToScreen(U->GetActorLocation(), Scr, true)) Overlay->SetStamina(Scr, VP, SprintStamina, bSprinting);
+		if (U && !U->IsHidden() && PC->ProjectWorldLocationToScreen(FVector(U->MarkerFeet().X, U->MarkerFeet().Y, U->GetActorLocation().Z), Scr, true)) Overlay->SetStamina(Scr, VP, SprintStamina, bSprinting);
 		else Overlay->SetStamina(FVector2D::ZeroVector, VP, -1.f, false);
 	}
 }

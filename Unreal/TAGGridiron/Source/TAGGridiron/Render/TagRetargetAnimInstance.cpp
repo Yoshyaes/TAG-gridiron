@@ -171,6 +171,7 @@ bool FTagRetargetProxy::Evaluate(FPoseContext& Output)
 	ApplyLean(Output);
 	Step(4);
 	ApplyCrossfade(Output);
+	ApplyImpact(Output); // (after the blend: a jolt is not blended away by a change of clip)
 	Step(5);
 	ApplyFeet(Output); // on the shown pose, after the blend (a blended foot would slide through every transition)
 	Step(6);
@@ -729,6 +730,68 @@ void FTagRetargetProxy::ApplyLean(FPoseContext& Output) const
 	P.LocalBlendCSBoneTransforms(BT, 1.f);
 	LegIK(P, B.ThL, B.CaL, B.FtL, FL, 1.f);
 	LegIK(P, B.ThR, B.CaR, B.FtR, FR, 1.f);
+	FCSPose<FCompactPose>::ConvertComponentPosesToLocalPoses(MoveTemp(P), Output.Pose);
+}
+
+void FTagRetargetProxy::ApplyImpact(FPoseContext& Output)
+{
+	// two bodies meeting: the push moves the hips (the sim moves the man), the upper body and the head lag behind and
+	// spring back - a damped torsion spring about the pelvis for the trunk (2.2 Hz, damping ratio 0.35) and a stiffer,
+	// lighter one for the head (3 Hz, 0.3), each kicked by the impact's velocity change. A 4-5 m/s collision between
+	// two big men tips the trunk ~5 degrees and snaps the head ~9; a big hit more. -TagNoImpact for A/B.
+	static const bool bOff = FParse::Param(FCommandLine::Get(), TEXT("TagNoImpact"));
+	if (bOff || Dt <= 1e-5f) return;
+	if (In.ImpactSerial != SeenImpact)
+	{
+		SeenImpact = In.ImpactSerial;
+		FVector J = In.ImpactCS;
+		J.Z = 0.f;
+		const float Mag = FMath::Min(static_cast<float>(J.Size()), 900.f);
+		if (Mag > 25.f)
+		{
+			// a turn about (up x push) by a negative angle carries the top of the body back against the push
+			const FVector Axis = FVector::CrossProduct(FVector::UpVector, J.GetSafeNormal());
+			ImpOmega -= Axis * (Mag * 0.0043f);
+			HeadOmega -= Axis * (Mag * 0.009f);
+		}
+	}
+	// the springs (semi-implicit Euler in small steps)
+	{
+		const int32 N = FMath::Clamp(FMath::CeilToInt(Dt / (1.f / 240.f)), 1, 8);
+		const float H = FMath::Min(Dt, 0.1f) / N;
+		const float W1 = 2.f * PI * 2.2f, Z1 = 0.35f, W2 = 2.f * PI * 3.f, Z2 = 0.3f;
+		for (int32 i = 0; i < N; ++i)
+		{
+			ImpOmega += (-W1 * W1 * ImpTheta - 2.f * Z1 * W1 * ImpOmega) * H;
+			ImpTheta += ImpOmega * H;
+			HeadOmega += (-W2 * W2 * HeadTheta - 2.f * Z2 * W2 * HeadOmega) * H;
+			HeadTheta += HeadOmega * H;
+		}
+		ImpTheta = ImpTheta.GetClampedToMaxSize(0.38f);
+		HeadTheta = HeadTheta.GetClampedToMaxSize(0.5f);
+		if (ImpTheta.SizeSquared() < 1e-8f && ImpOmega.SizeSquared() < 1e-6f) { ImpTheta = ImpOmega = FVector::ZeroVector; }
+		if (HeadTheta.SizeSquared() < 1e-8f && HeadOmega.SizeSquared() < 1e-6f) { HeadTheta = HeadOmega = FVector::ZeroVector; }
+	}
+	if (ImpTheta.IsZero() && HeadTheta.IsZero()) return;
+	const FBones B = Resolve(Output.Pose.GetBoneContainer());
+	if (!B.bValid) return;
+	FCSPose<FCompactPose> P;
+	P.InitPose(Output.Pose);
+	auto Turn = [&P](FCompactPoseBoneIndex Bone, const FVector& Rv)
+	{
+		const float A = static_cast<float>(Rv.Size());
+		if (!Bone.IsValid() || A < 1e-5f) return;
+		FTransform T = P.GetComponentSpaceTransform(Bone);
+		T.SetRotation((FQuat(Rv / A, A) * T.GetRotation()).GetNormalized());
+		const FBoneTransform BT[] = {FBoneTransform(Bone, T)};
+		P.LocalBlendCSBoneTransforms(BT, 1.f);
+	};
+	// the trunk bends through the spine (most low and in the middle), the head through the neck and the skull
+	Turn(B.Spine1, ImpTheta * 0.35f);
+	Turn(B.Spine3, ImpTheta * 0.35f);
+	Turn(B.Spine5, ImpTheta * 0.3f);
+	Turn(B.Neck, HeadTheta * 0.55f);
+	Turn(B.Head, HeadTheta * 0.45f);
 	FCSPose<FCompactPose>::ConvertComponentPosesToLocalPoses(MoveTemp(P), Output.Pose);
 }
 

@@ -1,5 +1,6 @@
 #include "Booth/TagBooth.h"
 
+#include "Async/Async.h"
 #include "Components/AudioComponent.h"
 #include "Engine/Engine.h"
 #include "Engine/GameViewportClient.h"
@@ -117,6 +118,7 @@ void ATagBooth::Silence()
 	if (Core && CurId) Core->finished(CurId);
 	CurId = 0;
 	bPlaying = bWaitingAudio = false;
+	DropClipWait();
 	FadeT = -1.f;
 	CaptionAge = 99.f;
 }
@@ -187,10 +189,46 @@ void ATagBooth::StartService()
 	UE_LOG(LogTemp, Display, TEXT("TAG booth: speech service %s (%s)"), GBoothServiceStarted ? TEXT("started") : TEXT("failed to start"), *Python);
 }
 
-bool ATagBooth::LoadClip(const FString& Key, FClip& Out) const
+void ATagBooth::DropClipWait()
+{
+	++ClipSerial; // (a read still out answers with the old serial, and is thrown away)
+	bClipLoading = bClipReady = bClipLast = false;
+	ClipPollT = 0.f;
+	ReadyClip.Pcm.Reset();
+}
+
+void ATagBooth::StartClipLoad()
+{
+	// the stat, the read and the parse happen on a background thread; the samples come back to the game thread
+	bClipLoading = true;
+	ClipPollT = 0.1f;
+	const uint32 Serial = ClipSerial;
+	const TWeakObjectPtr<ATagBooth> Weak(this);
+	AsyncTask(ENamedThreads::AnyBackgroundThreadNormalTask, [Weak, Serial, Path = CacheDir / (CurKey + TEXT(".wav"))]()
+	{
+		FClip Clip;
+		const bool bOk = LoadClip(Path, Clip);
+		AsyncTask(ENamedThreads::GameThread, [Weak, Serial, bOk, Clip = MoveTemp(Clip)]() mutable
+		{
+			if (ATagBooth* Self = Weak.Get()) Self->ClipLoaded(Serial, bOk, MoveTemp(Clip));
+		});
+	});
+}
+
+void ATagBooth::ClipLoaded(uint32 Serial, bool bOk, FClip&& C)
+{
+	if (Serial != ClipSerial) return; // for a line since dropped (or already carried by its caption)
+	bClipLoading = false;
+	if (bOk && bWaitingAudio && CurId)
+	{
+		ReadyClip = MoveTemp(C);
+		bClipReady = true;
+	}
+}
+
+bool ATagBooth::LoadClip(const FString& Path, FClip& Out)
 {
 	TArray<uint8> B;
-	const FString Path = CacheDir / (Key + TEXT(".wav"));
 	if (!FPaths::FileExists(Path) || !FFileHelper::LoadFileToArray(B, *Path) || B.Num() < 44) return false;
 	auto U32 = [&B](int32 At) { return static_cast<uint32>(B[At]) | (static_cast<uint32>(B[At + 1]) << 8) | (static_cast<uint32>(B[At + 2]) << 16) | (static_cast<uint32>(B[At + 3]) << 24); };
 	auto U16 = [&B](int32 At) { return static_cast<uint16>(B[At] | (B[At + 1] << 8)); };
@@ -223,9 +261,11 @@ void ATagBooth::Request(const tag::booth::Line& L, int32 Prio)
 {
 	if (!bService || bMute) return;
 	const FString Key = LineKey(L);
-	if (FPaths::FileExists(CacheDir / (Key + TEXT(".wav")))) return;
+	// what is already known comes first: a line is looked for on the disk once per priority, and never again once found
+	if (Present.Contains(Key)) return;
 	const FString AskKey = Key + FString::Printf(TEXT("#%d"), Prio);
 	if (Asked.Contains(AskKey)) return;
+	if (FPaths::FileExists(CacheDir / (Key + TEXT(".wav")))) { Present.Add(Key); return; }
 	Asked.Add(AskKey);
 	const FString Json = FString::Printf(TEXT("{\"key\":\"%s\",\"text\":\"%s\",\"voice\":\"%s\",\"energy\":%d,\"prio\":%d,\"t\":%.3f}"), *Key, *JsonEsc(Utf8(L.say)),
 		L.who == tag::booth::Who::PBP ? TEXT("pbp") : TEXT("color"), L.energy, Prio, FPlatformTime::Seconds());
@@ -240,25 +280,44 @@ void ATagBooth::Prewarm(const tag::Game& G)
 	if (!bGenericsAsked)
 	{
 		bGenericsAsked = true;
-		for (const std::pair<std::string, int>& T : Core->rosterCalls(G))
+		// (some 500 lines: which of them have audio already is found on a background thread, not in the kickoff's frame;
+		// the ones that do not are then asked for a few a frame, in this order - Feed)
+		std::vector<std::pair<std::string, int>> Calls = Core->rosterCalls(G);
+		const std::vector<std::pair<std::string, int>> Generic = tag::booth::Booth::genericCalls();
+		Calls.insert(Calls.end(), Generic.begin(), Generic.end());
+		const TWeakObjectPtr<ATagBooth> Weak(this);
+		AsyncTask(ENamedThreads::AnyBackgroundThreadNormalTask, [Weak, Dir = CacheDir, Calls = MoveTemp(Calls)]()
 		{
-			tag::booth::Line L;
-			L.who = tag::booth::Who::PBP;
-			L.energy = T.second;
-			L.say = tag::booth::Booth::spoken(T.first);
-			Request(L, 0);
-		}
-		for (const std::pair<std::string, int>& T : tag::booth::Booth::genericCalls())
-		{
-			tag::booth::Line L;
-			L.who = tag::booth::Who::PBP;
-			L.energy = T.second;
-			L.say = tag::booth::Booth::spoken(T.first);
-			Request(L, 0);
-		}
+			std::vector<tag::booth::Line> Missing;
+			TArray<FString> Have;
+			for (const std::pair<std::string, int>& T : Calls)
+			{
+				tag::booth::Line L;
+				L.who = tag::booth::Who::PBP;
+				L.energy = T.second;
+				L.say = tag::booth::Booth::spoken(T.first);
+				const FString Key = LineKey(L);
+				if (FPaths::FileExists(Dir / (Key + TEXT(".wav")))) Have.Add(Key);
+				else Missing.push_back(std::move(L));
+			}
+			AsyncTask(ENamedThreads::GameThread, [Weak, Missing = MoveTemp(Missing), Have = MoveTemp(Have)]() mutable
+			{
+				if (ATagBooth* Self = Weak.Get())
+				{
+					Self->Present.Append(Have);
+					Self->WarmMissing = MoveTemp(Missing);
+					Self->WarmAt = 0;
+				}
+			});
+		});
 	}
 	// what is queued and the live calls this play could need: ahead of the generic ones (the service takes the newest
-	// "soon" request first, so the line just queued is made before the plan of the play)
+	// "soon" request first, so the line just queued is made before the plan of the play). Walked only when it has
+	// changed: every line of an unchanged forecast has been asked for (or found) already
+	const uint64 Stamp = Core->forecastStamp();
+	if (bForecastSeen && Stamp == ForecastStamp) return;
+	bForecastSeen = true;
+	ForecastStamp = Stamp;
 	for (const tag::booth::Line& L : Core->forecast()) Request(L, 1);
 }
 
@@ -307,6 +366,7 @@ void ATagBooth::Feed(float Dt, const tag::Game& G, const tag::booth::View& V)
 				Core->finished(CurId);
 				CurId = 0;
 				bPlaying = bWaitingAudio = false;
+				DropClipWait();
 				FadeT = -1.f;
 				CaptionAge = 0.9f;
 			}
@@ -314,15 +374,20 @@ void ATagBooth::Feed(float Dt, const tag::Game& G, const tag::booth::View& V)
 		else if (bWaitingAudio)
 		{
 			WaitT += Dt;
-			FClip C;
 			// how long a line may wait for its voice before the caption carries it: a live call is now or never; a result
 			// may come a beat after the whistle; the talk between the plays has the hold behind it
 			using K = tag::booth::Kind;
 			const K Kd = CurLine.kind;
 			const float MaxWait = CurLine.live ? 0.3f : Kd == K::Result ? 3.5f : Kd == K::Setup ? 3.f : Kd == K::Analysis || Kd == K::Read ? 3.5f : 5.f;
-			if (LoadClip(CurKey, C))
+			// the wav is looked for off the game thread (StartClipLoad), at once when the line comes up and then ten
+			// times a second; its samples arrive here
+			if (bClipReady)
 			{
+				const FClip C = MoveTemp(ReadyClip);
+				DropClipWait();
 				bWaitingAudio = false;
+				// (a wave per line, not one kept: a line cut short leaves samples queued in its wave, and the audio
+				// thread may still be reading them when the next line starts)
 				Wave = NewObject<USoundWaveProcedural>(this);
 				Wave->SetSampleRate(C.Rate);
 				Wave->NumChannels = 1;
@@ -339,9 +404,25 @@ void ATagBooth::Feed(float Dt, const tag::Game& G, const tag::booth::View& V)
 				Core->started(CurId, C.Secs);
 				ShowCaption(&CurLine);
 			}
-			else if (WaitT > MaxWait)
+			else if (bClipLoading)
+			{
+				// (a look is out: its answer first, a frame or so)
+			}
+			else if (WaitT > MaxWait && !bClipLast)
+			{
+				// the wait has run out: one last look, as there was on this frame when the look was made here
+				bClipLast = true;
+				StartClipLoad();
+			}
+			else if (WaitT <= MaxWait)
+			{
+				ClipPollT -= Dt;
+				if (ClipPollT <= 0.f) StartClipLoad();
+			}
+			else
 			{
 				// too late for its moment: the caption carries it at the booth's pace (the audio stays on order, for next time)
+				DropClipWait();
 				bWaitingAudio = false;
 				PlayT = 0.f;
 				PlaySecs = static_cast<float>(CurLine.estSecs);
@@ -373,6 +454,8 @@ void ATagBooth::Feed(float Dt, const tag::Game& G, const tag::booth::View& V)
 				// was not made ahead is too late to make now (it goes on order for next time, behind the game's frames)
 				Request(*L, L->live ? 0 : 2);
 				bWaitingAudio = true;
+				DropClipWait();
+				StartClipLoad(); // (made ahead, it is in hand by the next frame)
 				WaitT = L->live ? 0.f : 0.f;
 				Core->started(CurId, L->estSecs + (L->live ? 0.3 : 5.0));
 			}
@@ -397,6 +480,14 @@ void ATagBooth::Feed(float Dt, const tag::Game& G, const tag::booth::View& V)
 	{
 		ForecastT = 0.1f;
 		Prewarm(G);
+	}
+	// the match's regulars and the generic calls with no audio yet (Prewarm found them on a background thread): asked
+	// for a few a frame, in their order (Request does nothing without the service)
+	for (int32 Sent = 0; Sent < 4 && WarmAt < WarmMissing.size(); ++Sent) Request(WarmMissing[WarmAt++], 0);
+	if (WarmAt > 0 && WarmAt >= WarmMissing.size())
+	{
+		WarmMissing.clear();
+		WarmAt = 0;
 	}
 	// the writer (a local Ollama model the speech service runs on the CPU): on once the service says the model is there
 	WriterCheckT += Dt;

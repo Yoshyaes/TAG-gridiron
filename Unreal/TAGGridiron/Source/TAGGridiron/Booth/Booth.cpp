@@ -312,6 +312,24 @@ std::vector<Line> Booth::forecast() const {
   return out;
 }
 
+uint64_t Booth::forecastStamp() const {
+  // FNV-1a 64 over everything forecast() reads, in its order (voice, energy and words: what a line's audio is made from)
+  uint64_t h = 0xcbf29ce484222325ull;
+  auto mix = [&h](const std::string& words, int extra) {
+    for (const unsigned char c : words) {
+      h ^= c;
+      h *= 0x100000001b3ull;
+    }
+    h ^= static_cast<uint64_t>(static_cast<uint32_t>(extra)) + 0x9e3779b97f4a7c15ull;
+    h *= 0x100000001b3ull;
+  };
+  for (const Line& l : q_) mix(l.say, l.energy * 2 + (l.who == Who::PBP ? 0 : 1));
+  mix(pendingResult_, pendingResultEnergy_);
+  mix(nextSetup_, nextSetupEnergy_);
+  for (const auto& kv : plan_.at) mix(kv.second.text, kv.second.energy);
+  return h;
+}
+
 bool Booth::wantsHold() const {
   if (stage_ != View::Stage::Presnap && stage_ != View::Stage::Wait && stage_ != View::Stage::Call) return false;
   // the open, a quarter break, halftime: always worth the wait (the kickoff waits for the crew); the breakdown of a

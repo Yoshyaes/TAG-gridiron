@@ -23,6 +23,7 @@ struct FPreRow;
 class ATagBooth;
 class ATagAudio;
 class AStaticMeshActor;
+class UAnimSequence;
 
 UENUM()
 enum class EMatchState : uint8 { Menu, Call, Presnap, Live, Post, Kick, Wait, Final, Paused, Replay };
@@ -161,6 +162,18 @@ private:
 	// world
 	AAthlete* AthleteFor(tag::Player* P, tag::TeamKey Side);
 	void ShowOnly(const std::vector<tag::Player*>& Ps);
+	/** Under the loading screen (StartMatch): every man either team can field is made now, hidden and asleep
+	 *  (AAthlete::SetDormant), so the first snap, punt, field goal and substitution do not spawn and dress anyone
+	 *  (AthleteFor still makes a man it has not seen). The units and the depth chart's starters first, then the rest of
+	 *  both rosters while the time allows. Not in the lineup / test-course modes; -TagNoPrespawn: off (A/B). */
+	void PrespawnAthletes();
+	/** Under the loading screen too: the clips and the play art that were loaded on their first use in play (the
+	 *  pre-snap flag's captures, the hard counts, the art's actor and material), held in WarmClips. */
+	void WarmMatchAssets();
+	void WarmPresnapAssets();
+	UAnimSequence* WarmClip(const FString& Path);
+	UPROPERTY()
+	TMap<FString, TObjectPtr<UAnimSequence>> WarmClips;
 	void SyncPlay(float Dt, float Alpha);
 	/** Locked-up blockers: the upper bodies of a clip lean in further than the hips' spacing allows (a rusher's chest
 	 *  inside the blocker's shoulder); each frame the pair is eased apart until chest and helmet clear the other man. */
@@ -205,6 +218,9 @@ private:
 	bool bReplayWorthy = false;
 	FVector ReplayFocus = FVector::ZeroVector;
 	TArray<FTransform> ReplayScratch;
+	/** The last play's frames (up to 300), their arrays kept for the next play's recording instead of freed at the snap. */
+	TArray<FReplayFrame> ReplayPool;
+	void ResetReplayBuf();
 	void RecordReplayFrame(float Dt);
 	bool StartReplay();
 	void TickReplay(float Dt, bool bSkip);
@@ -268,6 +284,20 @@ private:
 	/** A live kick return (the sim fields the kick and runs it back; the user returns it or covers it). */
 	bool bLiveReturn = false;
 	void StartLiveReturn(const std::vector<tag::Player*>& KickTeam, const std::vector<tag::Player*>& RecvTeam);
+	/** A field goal / extra point played (Sim/PlaceKick.cpp, Game/MatchKicking.cpp): the two units live from the set,
+	 *  the snap, the protection and the rush, the strike; the snapper, the holder and the kicker on the pack's capture
+	 *  timed to the sim's snap and foot. Look: the block unit's rush (-1 its own; a user's kick shows it while he aims). */
+	bool bPlaceKick = false;
+	void StartPlaceKick(bool bPat, const std::vector<tag::Player*>& KickTeam, const std::vector<tag::Player*>& BlockTeam, double SetT, int32 Look = -1);
+	/** The place kick's operation on the capture (SyncPlay); the ball in the snapper's / holder's hands before the foot. */
+	bool SyncPlaceOperation(tag::Ent* E, AAthlete* A, float Dt);
+	void SyncPlaceBall();
+	/** The call once the ball is through, short or blocked (a banner), once per kick. */
+	void TickPlaceKickCalls();
+	unsigned long long FgSceneSim = 0, FgCallSim = 0;
+	int32 FgStage[3] = {0, 0, 0};
+	TWeakObjectPtr<AAthlete> FgHolderA;
+	int32 FgUserLook = -1;  // the look shown while a user aims (the play then rushes it)
 	int32 SidelineScore[2] = {0, 0};
 	float SidelineCheerLeft[2] = {0.f, 0.f};
 
@@ -363,12 +393,33 @@ private:
 	/** The trenches' bars over each engaged pass rush (the rusher's energy, his blocker's power) in a user game on
 	 *  defense, the user's own pair larger with the move he last tried. */
 	void UpdateLineBars();
+	/** The screen-space marks over the men (user ring, icons, highlight cue, line bars) are projected once the frame's
+	 *  camera and bodies are final: in Tick they used last frame's camera before the athletes moved, so the ring
+	 *  trailed a runner by a frame (1-2 m at a few fps). */
+	void OnPostActorTick(UWorld* InWorld, ELevelTick InTickType, float InDt);
+	FDelegateHandle PostTickHandle;
+	bool bOverlayDue = false;
 	bool bRushHint = false;
 	/** The aggressive catch: TRIANGLE (Y) held while the pass is in the air - the catch goes up for the spectacular one. */
 	bool bAggroCatch = false;
 	/** The catch started early (a beat before the ball arrives) this play, and by whom: the catch event does not restart it. */
 	unsigned long long PrimedSerial = 0;
 	unsigned long long HandoffSerial = 0; // (the two-man handoff started this play)
+	/** The run exchange as drawn. HandoffNoneSerial: no capture fits this play's handoff (the keyed clip plays at the
+	 *  exchange). HandXfer*: the ball going from the quarterback's hand into the back's arms over a few frames from the
+	 *  sim's exchange (it jumped from one man's socket to the other's in a frame). Toss*: a toss in the air, from the
+	 *  quarterback's hands as it left them. HandGiveSerial: the giving hand latched for this play's handoff. */
+	unsigned long long HandoffNoneSerial = 0, HandXferSerial = 0, TossSerial = 0, HandGiveSerial = 0, TossClipSerial = 0;
+	int32 HandoffSeq = 0;
+	bool bHandGiveRight = true;
+	// (the sim's exchange came before the capture's contact frame: the ball stays in the quarterback's hand until the
+	// back's hands get there, 0.3 s at most)
+	unsigned long long HandDeferSerial = 0;
+	double HandDeferT = 0.0;
+	double HandXferT = 0.0;
+	TWeakObjectPtr<AAthlete> HandXferFrom;
+	FVector TossHandW = FVector::ZeroVector;
+	unsigned long long PaFakeSerial = 0;  // (the two-man play-action fake started this play)
 	unsigned long long KickCatchSerial = 0; // (the returner's catch started before the ball came down, this play)
 	/** The defender who went up for the ball in the air this play (his swat started a beat before it arrived). */
 	unsigned long long SwatSerial = 0;
@@ -378,6 +429,28 @@ private:
 	FVector ReleaseHandW = FVector::ZeroVector, ReleaseOff = FVector::ZeroVector;
 	double ReleaseOffT = -1.0;
 	const tag::Ent* PrimedCatcher = nullptr;
+	/** The ball against the hands that play it (SyncPlay). BallBend: what the drawn ball is off the sim's, brought
+	 *  onto the hands of the man the pass's outcome was rolled for over the last 0.25 s (45 cm at most) and let go
+	 *  after. Attach*: what is left between the ball's flight and his hold when the sim gives it to him, eased out
+	 *  (it went from the air into his socket in one frame). BallDrawn*: the ball as drawn last frame. FatePrimed*: the
+	 *  rolled outcome the captures were started for (a defender's play rolled later replaces the receiver's).
+	 *  CatchCheck*: -TagCatchCheck, a log line per contact with the hands' distance from the ball's path and the
+	 *  largest off-path step of the drawn ball in the 0.3 s around it. */
+	FVector BallBend = FVector::ZeroVector, AttachOff = FVector::ZeroVector;
+	float AttachLeft = 0.f, AttachDur = 0.f;
+	FVector BallDrawnW = FVector::ZeroVector, BallDrawnVelW = FVector::ZeroVector, BallDrawnRel = FVector::ZeroVector;
+	unsigned long long BallDrawnSerial = 0, DivePrimedSerial = 0, IntPrimedSerial = 0; // (Dive / Int: the layout, the one-man interception started before the ball got there)
+	int32 BallDrawnMode = -1;
+	const tag::Ent* BallDrawnHolder = nullptr;
+	int32 FatePrimedFate = 0;
+	const tag::Ent* FatePrimedBy = nullptr;
+	struct FCatchCheck { FString What; const tag::Ent* Who = nullptr; int32 Num = -1; float HandPath = -1.f, HandNow = -1.f, HandMid = -1.f, HandMin = 1e9f, Bend = 0.f, Snap = 0.f, MaxStep = 0.f, BallZ = 0.f, BallSpeed = 0.f, Left = 0.15f; };
+	/** -TagCatchCheck: the ball as drawn this frame against the open checks (see SyncPlay, after the ball's drawing). */
+	void TickCatchCheck(float Dt, float BendWas, float SnapNow);
+	TArray<FCatchCheck> CatchChecks;
+	TArray<TPair<const tag::Ent*, FString>> CatchCheckNew;
+	TArray<FVector2D> BallSteps; // (time s, off-path step cm) of the last 0.3 s
+	double CatchCheckClock = 0.0;
 	/** A hint written with PlayStation names, renamed for an Xbox-style pad when that is what is plugged in. */
 	FString PadHint(const TCHAR* PS) const;
 	/** The match loading screen: the highlight reel under UI/LoadingScreen while BuildWorld runs (the engine's movie
@@ -421,6 +494,26 @@ private:
 	std::map<tag::Ent*, FString> Labels;
 	ECamMode CamMode = ECamMode::Broadcast;
 	ECamMode LastCamMode = ECamMode::Broadcast;
+	float CamHoldT = 0.f; // how long the pad's VIEW / CREATE has been held (the camera changes at 0.5 s)
+	/** A break in the broadcast (the end of a quarter, the two-minute warning): the score panel up and the camera on a
+	 *  slow crane over the stadium while the teams change ends or the clock stops, then a cut back to the game with the
+	 *  men set (it froze on the last play's men idling for a beat, then teleported them to the other end). */
+	float BreakLeft = 0.f, BreakT = 0.f;
+	bool bTwoMinShown[8] = {};
+	bool bSetAfterBreak = false;
+	/** -TagPadPlayTest (Game/MatchPadPlay.cpp): the in-game pad controls pressed into the controller and checked. */
+	bool bPadPlayTest = false;
+	struct FPadPlay { int32 Step = 0, Pass = 0, Fail = 0, CamWas = 0; float Clock = 0.f, HoldT = 0.f, Wait = 0.f, ReleaseCross = 0.f; bool bSnapSent = false; } PadPlay;
+	void TickPadPlayTest(float Dt);
+	void PadKey(const FKey& Key, bool bDown); // the next snap's men are put on their spots (the teams changed ends during the break)
+	void BeginBreak(const FString& Title, const FString& Sub, float Secs);
+	bool BreakCamera(FVector& T, FVector& Look) const;
+	/** The user's tempo after the whistle (Madden's): CROSS held - hurry up (no huddle, no replay, the last play called
+	 *  again at the line); TRIANGLE held - spike it. Read while the men come back from the play (Post / Wait). */
+	const tag::OffPlay* LastUserPlay = nullptr;
+	bool bHurryNext = false, bSpikeNext = false;
+	float HurryHoldT = 0.f, SpikeHoldT = 0.f;
+	void ReadTempoInput(float Dt);
 	FVector CamPos = FVector(4572, 6000, 2500);
 	FVector CamLook = FVector(4572, 0, 0);
 	FVector IdleFocus = FVector(4572, 0, 0);
@@ -530,7 +623,27 @@ private:
 	void TcFlush();
 	/** Pair a tackle: Tk tackles Cr, the sim put the carrier down at SimSpot (world). Pair -1 picks from the hit
 	 *  (angle, yards after contact); both men fall together, anchored in the pair's authored relation. */
-	void StartPairedTackle(AAthlete* Tk, AAthlete* Cr, const FVector& SimSpot, int32 Pair, bool bDive, float PileSecs = 0.f, bool bBigHit = false);
+	void StartPairedTackle(AAthlete* Tk, AAthlete* Cr, const FVector& SimSpot, int32 Pair, bool bDive, float PileSecs = 0.f, bool bBigHit = false,
+		int32 Strip = 0);
+	/** Strip = 1 / 2 (sack): the tackle the sim fumbles at - one of the pack's strip captures, picked like a pair. The
+	 *  capture's punch comes LastStripOut s after the contact, out of the arm bLastStripRight (-1: no strip capture fit). */
+	float LastStripOut = -1.f;
+	bool bLastStripRight = true;
+	/** A fumble this play: the ball drawn in the carrier's arm until the capture's punch, then eased onto the sim's loose
+	 *  ball (the rigid body, BallPhysics.h) over 0.25 s. */
+	unsigned long long FumbleSerial = 0;
+	double FumbleWT = 0.0;
+	float FumbleOutIn = 0.f;
+	TWeakObjectPtr<AAthlete> FumbleCarrier;
+	FVector FumbleHandW = FVector::ZeroVector;
+	/** The pass's outcome, rolled before it arrived (PlaySim::preRollCatch), started on film this play: a two-man
+	 *  interception, the named defender's breakup, the receiver's drop. */
+	unsigned long long FatePrimedSerial = 0;
+	bool bIntPaired = false;
+	/** A takeaway's celebrations started after the whistle this play. */
+	unsigned long long TurnoverCelebSerial = 0;
+	tag::Ent* TurnoverCelebMan = nullptr; // (he celebrates once he is up off the turf)
+	float TurnoverWaitT = 0.f;            // (how long the shot has waited for him)
 	/** The last paired tackle (a pile started at the sim's wrap is retargeted when the sim ends it). */
 	TWeakObjectPtr<AAthlete> PileCarrier, PileTackler;
 	FVector PileSpot = FVector::ZeroVector;
@@ -538,12 +651,33 @@ private:
 	 *  fits where the two are (the caller pairs Tk and Cr and As piles on). */
 	bool StartGangTackle(AAthlete* Tk, AAthlete* Cr, AAthlete* As, const FVector& SimSpot);
 	TWeakObjectPtr<AAthlete> GangAssist;
+	/** A tackle landed a beat after the catch waits until the catch has the ball secured (the catch plays, then the
+	 *  hit): the fall took over on the catch's own frame and the ball just turned up in his hands as he went down. */
+	struct FHeldTackle
+	{
+		TWeakObjectPtr<AAthlete> Tk, Cr, As;
+		FVector Spot = FVector::ZeroVector;
+		bool bDive = false, bBig = false, bWrap = false;
+		int32 Strip = 0;
+		float PileSecs = 0.f, Left = 0.f;
+	};
+	TArray<FHeldTackle> HeldTackles;
+	const tag::Ent* LastCatcher = nullptr;
+	double LastCatchT = -10.0;
+	void FireHeldTackle(const FHeldTackle& H);
 	TWeakObjectPtr<AAthlete> LastPileCarrier;
 	FVector LastPileDir = FVector::ForwardVector;
 	double LastPileT = -10.0;
 	FVector LastPileSpot = FVector::ZeroVector;
 	/** A second man arriving on the pile. */
 	void StartPileOn(AAthlete* As, AAthlete* Cr);
+	/** Bodies meeting (any two men whose torsos come within reach closing at speed): each takes his share of the
+	 *  collision's velocity change by mass (restitution 0.15), handed to his body layer's springs (AAthlete::AddImpact).
+	 *  A pair is struck once, then not again for 0.6 s. Logged as "TAG contact". */
+	void DetectContacts();
+	TMap<uint64, double> ContactUntil;
+	int32 ContactsThisPlay = 0;
+	float MaxJoltThisPlay = 0.f;
 	int32 GapShot = 0;
 	bool bMoveTest = false;
 	FVector MovePos = FVector::ZeroVector;
@@ -585,6 +719,10 @@ private:
 		/** A user kick being aimed: the team set and held (the clock stops at HoldT, short of the snap) until the swing. */
 		bool bAwait = false;
 		float HoldT = 0.f;
+		/** The units in the played place kick's order (Game::orderPlaceUnits), set where its play will line them up
+		 *  (PlaySim::placeAlign, the block unit in its rush look): a user's field goal aimed before its play starts. */
+		bool bPlaceOrder = false;
+		int32 PlaceLook = 0;
 		/** The ball down and not caught (a touchback, a punt let go): it bounces on as a football does, high and off line,
 		 *  and rolls to a stop (offense frame yd, yd/s). It stopped dead where it landed. */
 		bool bBounce = false;
@@ -635,6 +773,9 @@ private:
 	TObjectPtr<ATagAudio> Audio;
 	void FeedAudio(float Dt);
 	bool BoothHold() const;
+	/** A played game: a confirm press while the booth holds the kickoff (the open, a break) lets the game go on; the
+	 *  booth's hold is passed over until this time (platform seconds; the booth itself is not told and talks on). */
+	double BoothSkipUntil = 0.0;
 
 	// ---- local multiplayer (Game/MatchMulti.cpp)
 	bool bMultiNext = false;     // (StartMatch: the game being started is a multiplayer one)

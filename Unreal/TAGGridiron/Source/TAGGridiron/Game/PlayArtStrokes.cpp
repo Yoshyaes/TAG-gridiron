@@ -18,6 +18,7 @@ namespace
 	const FLinearColor RunBlockC(0.88f, 0.90f, 0.93f, 0.92f);
 	const FLinearColor PassProC(0.88f, 0.90f, 0.93f, 0.80f);
 	const FLinearColor QbDrop(0.92f, 0.94f, 1.f, 0.45f);
+	const FLinearColor MotionC(0.86f, 0.90f, 0.98f, 0.75f);
 	const FLinearColor Unlabeled(0.75f, 0.78f, 0.84f);
 	const FLinearColor DeepC(0.18f, 0.46f, 1.f);
 	const FLinearColor FlatC(0.22f, 0.86f, 1.f);
@@ -29,7 +30,8 @@ namespace
 	const FLinearColor OffMark(0.92f, 0.94f, 0.97f);
 	const FLinearColor DefMark(0.95f, 0.45f, 0.40f);
 
-	void AddLine(FArtPicture& Out, TArray<tag::V2> Pts, const FLinearColor& C, float Width, EArtEnd End, bool bGlow = false)
+	FArtStroke& AddLine(FArtPicture& Out, TArray<tag::V2> Pts, const FLinearColor& C, float Width, EArtEnd End, bool bGlow = false,
+		FArtStroke::ERole Role = FArtStroke::Other)
 	{
 		FArtStroke& S = Out.Strokes.AddDefaulted_GetRef();
 		S.Kind = FArtStroke::Line;
@@ -38,6 +40,8 @@ namespace
 		S.Width = Width;
 		S.End = End;
 		S.bGlow = bGlow;
+		S.Role = Role;
+		return S;
 	}
 
 	void AddZone(FArtPicture& Out, const tag::V2& Ctr, double RX, double RY, const FLinearColor& C)
@@ -48,7 +52,10 @@ namespace
 		S.RX = RX;
 		S.RY = RY;
 		S.Color = C;
+		S.Role = FArtStroke::ZoneDrop;
 	}
+
+	bool IsLineRole(const std::string& R) { return R == "LT" || R == "LG" || R == "C" || R == "RG" || R == "RT"; }
 }
 
 std::vector<tag::Ent*> ArtLabelOrder(const tag::PlaySim& P)
@@ -105,7 +112,7 @@ std::vector<tag::Ent*> ArtLabelOrder(const tag::PlaySim& P)
 }
 
 void BuildArtPicture(const tag::PlaySim& P, bool bOffense, const tag::Ent* PreEnt, const tag::Ent* UserEnt,
-	TFunctionRef<int32(const tag::Ent*)> LabelOf, FArtPicture& Out)
+	TFunctionRef<int32(const tag::Ent*)> LabelOf, FArtPicture& Out, double CardDepthCap)
 {
 	Out.Strokes.Reset();
 	Out.Marks.Reset();
@@ -119,6 +126,7 @@ void BuildArtPicture(const tag::PlaySim& P, bool bOffense, const tag::Ent* PreEn
 		M.Pos = E->shiftTo ? *E->shiftTo : E->pos;
 		M.bOffense = E->side == tag::Side::Off;
 		M.bCenter = E->role == "C";
+		M.bLine = M.bOffense && IsLineRole(E->role);
 		M.bQB = E == Q;
 		M.bMe = E == UserEnt;
 		M.Label = M.bOffense && bOffense ? LabelOf(E) : -1;
@@ -128,35 +136,114 @@ void BuildArtPicture(const tag::PlaySim& P, bool bOffense, const tag::Ent* PreEn
 	{
 		const tag::OffPlay& Op = *P.cfg.offPlay;
 		const std::string First = P.readOrder.empty() ? std::string() : P.readOrder.front();
+		// a card: who has a special block on this run, as the play draws it (RunScheme::jobs, "PG" the play-side guard,
+		// "BT" the back-side tackle, or an eligible role). (The sim may wave a pull off against the card's stock front - a
+		// covered guard blocks the man on him - but the card shows the play as called.)
+		TMap<const tag::Ent*, std::string> CardJobs;
+		if (CardDepthCap > 0.0 && Op.run && !Op.run->jobs.empty())
+		{
+			const double JobSide = FMath::Sign(P.runAimDy()) == 0 ? 1.0 : FMath::Sign(P.runAimDy());
+			for (const tag::BlockJob& Bj : Op.run->jobs)
+			{
+				const tag::Ent* Man = nullptr;
+				const std::string& W = Bj.who;
+				if (W.size() == 2 && (W[0] == 'P' || W[0] == 'B') && (W[1] == 'G' || W[1] == 'T'))
+				{
+					// the guard (tackle) on the play side or the back side of the center
+					const bool bPlay = W[0] == 'P';
+					for (const tag::Ent* O : P.off)
+					{
+						const bool bKind = W[1] == 'G' ? (O->role == "LG" || O->role == "RG") : (O->role == "LT" || O->role == "RT");
+						if (bKind && ((O->pos.y - P.by) * JobSide > 0) == bPlay) { Man = O; break; }
+					}
+				}
+				else Man = P.offRole(W);
+				if (Man && Man != Q && Man->state == tag::EntState::RunBlock) CardJobs.Add(Man, Bj.job);
+			}
+		}
 		for (const tag::Ent* E : P.off)
 		{
 			if (E->state == tag::EntState::Route && !E->route.empty())
 			{
-				// the route, capped at ~24 yards of stem (a streak points on up the field)
+				// the route: on the field capped at ~24 yards of path (a streak points on up the field); on a card in full,
+				// every break, to the card's depth cap past the line (a go or a post is cut there and runs on)
 				TArray<tag::V2> Pts;
 				Pts.Add(E->pos);
 				const tag::V2 Start = E->shiftTo ? *E->shiftTo : E->pos;
-				double Left = 24.0;
-				tag::V2 Last = Start;
-				for (const tag::V2& R : E->route)
+				bool bCut = false;
+				if (CardDepthCap > 0.0)
 				{
-					const double Seg = tag::dist(Last, R);
-					if (Seg >= Left)
+					const double CapX = P.los + CardDepthCap;
+					tag::V2 Last = Start;
+					for (const tag::V2& R : E->route)
 					{
-						Pts.Add(tag::add(Last, tag::scale(tag::norm(tag::sub(R, Last)), Left)));
-						break;
+						if (R.x > CapX && Last.x <= CapX)
+						{
+							const double T = FMath::Clamp((CapX - Last.x) / FMath::Max(1e-6, R.x - Last.x), 0.0, 1.0);
+							Pts.Add(tag::add(Last, tag::scale(tag::sub(R, Last), T)));
+							bCut = true;
+							break;
+						}
+						Pts.Add(R);
+						Last = R;
 					}
-					Pts.Add(R);
-					Left -= Seg;
-					Last = R;
+				}
+				else
+				{
+					double Left = 24.0;
+					tag::V2 Last = Start;
+					for (const tag::V2& R : E->route)
+					{
+						const double Seg = tag::dist(Last, R);
+						if (Seg >= Left)
+						{
+							Pts.Add(tag::add(Last, tag::scale(tag::norm(tag::sub(R, Last)), Left)));
+							break;
+						}
+						Pts.Add(R);
+						Left -= Seg;
+						Last = R;
+					}
 				}
 				const bool bPrimary = E->role == First;
-				AddLine(Out, MoveTemp(Pts), bPrimary ? PrimaryC : RouteC, bPrimary ? 20.f : 18.f, EArtEnd::Arrow, E == PreEnt);
+				AddLine(Out, MoveTemp(Pts), bPrimary ? PrimaryC : RouteC, bPrimary ? 17.f : 14.f, EArtEnd::Arrow, E == PreEnt, FArtStroke::Route).bRunsOn = bCut;
 			}
 			else if (E->state == tag::EntState::PassBlock || E->state == tag::EntState::RunBlock)
 			{
 				const bool bRun = E->state == tag::EntState::RunBlock;
 				const tag::V2 From = E->shiftTo ? *E->shiftTo : E->pos;
+				// a card: the run's special blocks drawn as Madden draws them - a guard pulling behind the line to kick out
+				// the end or wrap up through the hole, a back leading through it, the arc to the back-side end (power,
+				// counter and power read read apart from inside zone by them)
+				const std::string* Job = bRun ? CardJobs.Find(E) : nullptr;
+				if (Job)
+				{
+					const std::string J = *Job;
+					const double AimY = P.by + P.runAimDy();
+					const double PlaySide = FMath::Sign(AimY - P.by) == 0 ? 1.0 : FMath::Sign(AimY - P.by);
+					TArray<tag::V2> Pull{E->pos};
+					if (J == "arc")
+					{
+						Pull.Add(tag::V2{P.los - 0.6, P.by - PlaySide * 3.0});
+						Pull.Add(tag::V2{P.los + 1.2, P.by - PlaySide * 5.0});
+					}
+					else if (J == "lead")
+					{
+						Pull.Add(tag::V2{P.los - 0.5, AimY});
+						Pull.Add(tag::V2{P.los + 3.5, AimY});
+					}
+					else
+					{
+						// a lineman pulls: a step back, down the line behind it, then up (the kick-out outside the hole)
+						const double Back = FMath::Min(From.x, P.los) - 1.3;
+						const double ToY = J == "kick" ? AimY + PlaySide * 2.2 : AimY;
+						Pull.Add(tag::V2{Back, From.y + (ToY - From.y) * 0.12});
+						Pull.Add(tag::V2{Back, ToY});
+						Pull.Add(tag::V2{J == "trap" ? P.los + 0.4 : J == "kick" ? P.los + 1.2 : P.los + 3.5, ToY + (J == "kick" ? PlaySide * 0.6 : 0.0)});
+					}
+					AddLine(Out, MoveTemp(Pull), RunBlockC, 13.f, EArtEnd::Block, false, FArtStroke::BlockMark);
+					continue;
+				}
 				const tag::Ent* T = E->blockTarget;
 				if (!T && bRun)
 				{
@@ -175,15 +262,36 @@ void BuildArtPicture(const tag::PlaySim& P, bool bOffense, const tag::Ent* PreEn
 				}
 				else
 					To = tag::V2{From.x - 1.3, From.y + (From.y - P.by) * 0.15};  // sets back in his pass set
-				AddLine(Out, {E->pos, To}, bRun ? RunBlockC : PassProC, bRun ? 12.f : 11.f, EArtEnd::Block);
+				AddLine(Out, {E->pos, To}, bRun ? RunBlockC : PassProC, bRun ? 12.f : 11.f, EArtEnd::Block, false, FArtStroke::BlockMark);
 			}
 		}
+		// a card: the play's own motion (a jet sweep, a jet fake) as Madden draws it, a squiggle across the formation from
+		// the man's spot to where he is at the snap (the field's art has the man himself moving)
+		if (CardDepthCap > 0.0 && Op.motion)
+			if (const tag::Ent* Mo = P.offRole(Op.motion->role))
+			{
+				const tag::V2 From = Mo->pos;
+				const tag::V2 To = Mo->shiftTo ? *Mo->shiftTo : tag::V2{Mo->pos.x, Mo->pos.y + (P.cfg.flip ? -Op.motion->dy : Op.motion->dy)};
+				const double Len = tag::dist(From, To);
+				if (Len > 0.8)
+				{
+					TArray<tag::V2> Pts;
+					const int32 N = FMath::Max(2, static_cast<int32>(Len / 0.9));
+					for (int32 i = 0; i <= N; ++i)
+					{
+						const double T = static_cast<double>(i) / N;
+						const double Wig = (i == 0 || i == N) ? 0.0 : (i % 2 ? 0.32 : -0.32);
+						Pts.Add(tag::V2{From.x + (To.x - From.x) * T + Wig, From.y + (To.y - From.y) * T});
+					}
+					AddLine(Out, MoveTemp(Pts), MotionC, 9.f, EArtEnd::None, false, FArtStroke::Motion);
+				}
+			}
 		// the quarterback's drop, the run path
 		if (Q && P.passPlay())
 		{
 			const tag::Formation* F = tag::formationById(Op.formation);
 			const double DropX = P.los - (F ? F->qbDepth : 5.0) - Op.dropDepth.value_or(2.0);
-			if (Q->pos.x - DropX > 0.6) AddLine(Out, {Q->pos, tag::V2{DropX, P.by}}, QbDrop, 9.f, EArtEnd::None);
+			if (Q->pos.x - DropX > 0.6) AddLine(Out, {Q->pos, tag::V2{DropX, P.by}}, QbDrop, 9.f, EArtEnd::None, false, FArtStroke::Drop);
 		}
 		if (Op.run)
 		{
@@ -203,7 +311,7 @@ void BuildArtPicture(const tag::PlaySim& P, bool bOffense, const tag::Ent* PreEn
 				Pts.Add(tag::V2{P.los - (bWide ? 1.0 : 0.3), AimY});
 				Pts.Add(tag::V2{P.los + 2.5, AimY + (bWide ? Side * 1.5 : 0)});
 				Pts.Add(tag::V2{P.los + 6.5, AimY + (bWide ? Side * 1.0 : 0)});
-				AddLine(Out, MoveTemp(Pts), RunPath, 22.f, EArtEnd::Arrow, false);
+				AddLine(Out, MoveTemp(Pts), RunPath, 18.f, EArtEnd::Arrow, false, FArtStroke::RunPath);
 			}
 		}
 	}
@@ -225,7 +333,7 @@ void BuildArtPicture(const tag::PlaySim& P, bool bOffense, const tag::Ent* PreEn
 				if (bEdge) Pts.Add(tag::V2{P.los - 1.6, From.y + Out1 * 0.4});
 				const tag::V2 Last = bEdge ? tag::V2{P.los - 1.6, From.y} : From;
 				Pts.Add(tag::add(Qp, tag::scale(tag::norm(tag::sub(Last, Qp)), 1.8)));
-				AddLine(Out, MoveTemp(Pts), RushC, E->isDL ? 14.f : 18.f, EArtEnd::Arrow, bMe);
+				AddLine(Out, MoveTemp(Pts), RushC, E->isDL ? 14.f : 18.f, EArtEnd::Arrow, bMe, FArtStroke::Rush);
 				break;
 			}
 			case tag::EntState::Zone:
@@ -242,7 +350,7 @@ void BuildArtPicture(const tag::PlaySim& P, bool bOffense, const tag::Ent* PreEn
 					else if (Z.size() == 2 && Z[0] == 'q') { RX = 6; RY = 6.5; }
 					else if (bFlat) { RX = 4; RY = 5; }
 					AddZone(Out, *E->zoneSpot, RX, RY, C);
-					AddLine(Out, {E->pos, *E->zoneSpot}, C, bMe ? 16.f : 10.f, EArtEnd::None, bMe);
+					AddLine(Out, {E->pos, *E->zoneSpot}, C, bMe ? 16.f : 10.f, EArtEnd::None, bMe, FArtStroke::ZoneDrop);
 				}
 				break;
 			case tag::EntState::Man:
@@ -250,14 +358,14 @@ void BuildArtPicture(const tag::PlaySim& P, bool bOffense, const tag::Ent* PreEn
 				{
 					const tag::V2 Mp = E->man->shiftTo ? *E->man->shiftTo : E->man->pos;
 					const tag::V2 End = tag::add(Mp, tag::scale(tag::norm(tag::sub(From, Mp)), 0.9));
-					AddLine(Out, {E->pos, End}, ManC, bMe ? 16.f : 11.f, EArtEnd::Dot, bMe);
+					AddLine(Out, {E->pos, End}, ManC, bMe ? 16.f : 11.f, EArtEnd::Dot, bMe, FArtStroke::ManCover);
 				}
 				break;
 			case tag::EntState::Spy:
 			{
 				const tag::V2 Spot{FMath::Max(P.los + 4.5, Qp.x + 6), Qp.y};
 				AddZone(Out, Spot, 2.5, 3.5, SpyC);
-				AddLine(Out, {E->pos, Spot}, SpyC, bMe ? 16.f : 11.f, EArtEnd::None, bMe);
+				AddLine(Out, {E->pos, Spot}, SpyC, bMe ? 16.f : 11.f, EArtEnd::None, bMe, FArtStroke::ManCover);
 				break;
 			}
 			default:
@@ -304,5 +412,5 @@ void BuildCardPicture(tag::Game& G, const tag::OffPlay* Op, const tag::DefCall* 
 		const auto It = std::find(Order.begin(), Order.end(), E);
 		const int32 I = It == Order.end() ? -1 : static_cast<int32>(It - Order.begin());
 		return I < 5 ? I : -1;
-	}, Out);
+	}, Out, ArtCardDepthCap);
 }
