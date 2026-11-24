@@ -38,3 +38,6 @@ __pycache__/
 
 # Epic MetaHuman Crowd Sample: junction to the engine install (Fab content, never committed)
 Unreal/TAGGridiron/Plugins/MetaHumanCrowdContent/
+
+# broadcast booth speech service (Tools/Booth/setup_booth.bat builds it)
+Unreal/TAGGridiron/Tools/Booth/.venv/
