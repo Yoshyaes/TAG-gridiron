@@ -4,7 +4,7 @@
 # For every gait and style set this writes, per class (Big: the line; Med: linebackers, tight ends, fullbacks, power
 # backs; Agile: receivers, the secondary, light backs - AAthlete::BodyClass):
 #   PSD_TAG_<Gait>_Loops_S<n>_<Class>      the set's captures of that class plus its general ones (no body in the name)
-#   PSD_TAG_<Gait>_Loops_S<n>_<Class>_Off  the set's captures of the other classes, BaseCostBias +0.1 (TAG_STYLE_BIAS):
+#   PSD_TAG_<Gait>_Loops_S<n>_<Class>_Off  the set's captures of the other classes, BaseCostBias +0.25 (TAG_STYLE_BIAS):
 #                                          they win only where nothing of his own fits - a class has 8-12 captures in a
 #                                          set, too few to cover every direction and speed alone
 # and per gait the tired captures (MG_NonBC_Fatigued_MC_*), out of every class set, on their own:
@@ -33,7 +33,9 @@ LIB = unreal.TagEditorLib
 MM = "/Game/TAG/AnimH/MM/"
 SAVED = unreal.Paths.convert_relative_path_to_full(unreal.Paths.project_saved_dir())
 REPORT = os.path.join(SAVED, "mm_style_sets_hero.json")
-BIAS = float(os.environ.get("TAG_STYLE_BIAS", "0.1"))
+# (+0.1 left big men on the agile jogs 12 % of their moving frames in the first measured game: the off-class captures
+# still won over the general ones; +0.25 makes them a last resort)
+BIAS = float(os.environ.get("TAG_STYLE_BIAS", "0.25"))
 DRY = os.environ.get("TAG_STYLE_DRY", "") == "1"
 GAITS = ("Walk", "Run", "Sprint")
 rep = {"bias": BIAS, "dry": DRY, "source": {}, "built": {}, "fatigued": {}, "normalization": {}, "rule_check": [], "errors": []}
@@ -177,6 +179,30 @@ try:
                         db.set_editor_property("normalization_set", ns)
                         EAL.save_asset(db.get_path_name().split(".")[0], only_if_is_dirty=False)
                     rep["normalization"][key] = "new " + ns.get_path_name()
+        # the starts and pivots beside the loops, split the same way where they hold a class's captures (the first
+        # measured game: a lineman's start out of his stance on Loco_Start_Agile and an agile man's turn on a BigGuy turn
+        # were most of the cross-class frames the loop split left). A set of general captures only is left as it is.
+        for part in ("Starts", "Starts_S1", "Starts_S2", "Starts_S3", "Pivots", "SpinTransition"):
+            src_path = MM + "PSD_TAG_Stand_%s_%s" % (gait, part)
+            if not EAL.does_asset_exist(src_path):
+                continue
+            names = anim_names(unreal.load_asset(src_path))
+            key = "PSD_TAG_Stand_%s_%s" % (gait, part)
+            rep["source"][key] = {"n": len(names), "classes": census(names), "anims": {}}
+            if DRY or not any(capture_class(n) in CLASSES or capture_class(n) == "Fatigued" for n in names):
+                continue
+            for c in CLASSES:
+                own = [n for n in names if capture_class(n) in (c, "General")]
+                other = [n for n in names if capture_class(n) in CLASSES and capture_class(n) != c]
+                base = src_path + "_" + c
+                if own:
+                    build_db(base, src_path, own, 0.0, by_name)
+                if other:
+                    build_db(base + "_Off", src_path, other, BIAS, by_name)
+                elif EAL.does_asset_exist(base + "_Off"):
+                    db = unreal.load_asset(base + "_Off")
+                    LIB.database_remove_anims_containing(db, "_")
+                    EAL.save_asset(base + "_Off", only_if_is_dirty=False)
 except Exception:  # noqa: BLE001
     import traceback
     rep["errors"].append(traceback.format_exc()[-2000:])

@@ -152,13 +152,19 @@ float fx = frac(yd.x / 5.0);
 float s = (fmod(floor(yd.x / 5.0) + 400.0, 2.0) < 0.5 ? 1.0 : -1.0) * inField * saturate(min(fx, 1.0 - fx) * 60.0);
 float2 v2 = CamVec.xy / max(length(CamVec.xy), 0.3);
 g *= 1.0 + StripeAmount * s * (0.035 - 0.19 * v2.y) * (1.0 - 0.7 * saturate(Snow * 2.0));
-// wear: stressed grass yellows, then thins to dirt between the blades
-float w = Texture2DSample(Wear, WearSampler, FUV).r * WearAmount * inField;
+// wear: stressed grass yellows, then thins to dirt between the blades. The season's map (Wear x WearAmount), or the
+// game's live one (WearLive 1: WearRT, R wear, G trampled snow, B mud, stamped by Render/Stadium.cpp as the game goes)
+float4 wl = Texture2DSample(WearRT, WearRTSampler, FUV) * WearLive;
+float w = lerp(Texture2DSample(Wear, WearSampler, FUV).r * WearAmount, wl.r, WearLive) * inField;
+float tramp = saturate(wl.g) * inField;
+float mud = saturate(wl.b) * inField;
 g = lerp(g, g * float3(1.4, 1.08, 0.7), saturate(w * 1.6) * 0.55);
 float bare = saturate((w * 1.25 + (fine - 0.5) * 0.5 - 0.55 - (h - 0.5) * 0.5 * nearF) * 2.2) * step(0.02, w);
+bare = max(bare, saturate(mud * 1.2 + (fine - 0.5) * 0.4) * step(0.02, mud));  // churned to mud: bare ground
 float3 c = g * det;
 float3 dirt = lerp(DirtColor, g, 0.3) * lerp(0.85, 1.15, fine) * lerp(1.0, 0.6 + 0.8 * b1.g, nearF * (1.0 - isBlade));
 c = lerp(c, dirt, bare);
+c *= lerp(1.0, 0.72, mud * Wet);  // wet churned mud is darker still
 c *= lerp(1.0, ApronTint, saturate((bd - 2.0) * 4.0));
 // paint lies on the blades: worn off with the turf, uneven coats, and up close the gaps between blades stay dark
 // and the edge follows the blades
@@ -174,13 +180,24 @@ float cl0 = dot(c, float3(0.3333, 0.3333, 0.3333));
 c = lerp(c, max(cl0 + (c - cl0) * 1.2, 0.0), wetv) * (1.0 - 0.35 * wetv);
 float rough = lerp(lerp(0.9, 0.8, pa), lerp(0.7, 0.6, n2.r), wetv);
 rough = lerp(rough, lerp(0.95, 0.3, wetv), bare);
+rough = lerp(rough, 0.15, mud * wetv * 0.6);  // puddles in the mud
 // snow: a dusting the turf shows through, deeper in drifts and off the field, the blade tips standing out of it,
-// trampled away where the game is played and swept off the lines
+// trampled away where the game is played and swept off the lines. Trampled by the season's wear map, or (WearLive)
+// by the game's own lanes and worn spots
 float sn = saturate(Snow * lerp(0.6, 1.4, big) + (patch - 0.5) * 0.7 * Snow + (fine - 0.5) * 0.5 * Snow + saturate(bd * 0.5) * 0.3 * Snow - (h - 0.5) * 0.6 * nearF) * step(0.01, Snow);
-sn *= 1.0 - saturate(w * 1.6 + (patch - 0.5) * 0.4) * 0.75;
-sn *= 1.0 - Paint.a * 0.85 * inField;
-c = lerp(c, float3(0.62, 0.64, 0.68), sn);
+float tr = lerp(saturate(w * 1.6 + (patch - 0.5) * 0.4), saturate(tramp * 0.9 + w * 0.5 + (patch - 0.5) * 0.3), WearLive);
+sn *= 1.0 - tr * 0.75;
+// the crews keep the lines swept: a band of turf either side of the paint (the line mask's mip 5, ~40 cm texels);
+// SweepAmount 0: only the paint shows through, as before
+float sweep = saturate(Texture2DSampleLevel(Lines, LinesSampler, FUV, 5.0).r * 6.0) * inField * SweepAmount;
+sn *= 1.0 - max(Paint.a * 0.85 * inField, sweep * 0.92);
+// snow that holds detail: drifts and hollows, and grey slush where it is trodden (SnowDetail 0: the flat grey as before)
+float3 snc = SnowColor * lerp(1.0, lerp(0.84, 1.04, big) * lerp(0.95, 1.03, fine), SnowDetail);
+float slush = tr * step(0.01, Snow) * SnowDetail;
+c = lerp(c, lerp(c, SnowColor * float3(0.42, 0.41, 0.40), 0.6), slush * 0.7);
+c = lerp(c, snc, sn);
 rough = lerp(rough, 0.72, sn);
+rough = lerp(rough, 0.45, slush * 0.5);
 return float4(c, rough);"""
 
 NORMAL = """float nearF = saturate(1.0 - (Dist - 500.0) / 4500.0);
@@ -189,6 +206,16 @@ float inField = (abs(yd.x - 50.0) < 60.0 && abs(yd.y) < 26.6667) ? 1.0 : 0.0;
 float s = (fmod(floor(yd.x / 5.0) + 400.0, 2.0) < 0.5 ? 1.0 : -1.0) * inField;
 float3 n = lerp(float3(0.0, 0.0, 1.0), BN, nearF * NormalAmount);
 n.y += s * StripeTilt;
+// snow lies in soft lumps over the blades and the stripes (SnowBump 0: as before)
+float sb = SnowBump * saturate(Snow * 1.5);
+if (sb > 0.0)
+{
+    float2 q = P.xy / 260.0 + 0.17;
+    float h0 = Texture2DSample(Macro, MacroSampler, q).g;
+    float hx = Texture2DSample(Macro, MacroSampler, q + float2(0.03, 0.0)).g;
+    float hy = Texture2DSample(Macro, MacroSampler, q + float2(0.0, 0.03)).g;
+    n = lerp(n, normalize(float3((h0 - hx) * sb, (h0 - hy) * sb, 1.0)), saturate(Snow * 1.5));
+}
 return normalize(n);"""
 
 # The blade patch: PatchSize square of blades built once at the origin (the component never moves). TexCoord 1 = the
@@ -208,7 +235,7 @@ float keep = (hx < 71.0 && hy < 34.0) ? 1.0 : 0.0;
 float inField = (hx < 60.0 && hy < 26.6667) ? 1.0 : 0.0;
 float2 f = float2((yd.x + 10.0) / 120.0, yd.y / 53.3333 + 0.5);
 f = float2(lerp(f.x, 1.0 - f.x, UVFlipU), lerp(f.y, 1.0 - f.y, UVFlipV));
-float w = Texture2DSampleLevel(Wear, WearSampler, f, 0).r * WearAmount * inField;
+float w = lerp(Texture2DSampleLevel(Wear, WearSampler, f, 0).r * WearAmount, Texture2DSampleLevel(WearRT, WearRTSampler, f, 0).r, WearLive) * inField;
 float k = Grow * rim * keep * saturate(1.0 - w * 1.5);
 float3 o = float3(OffXY, OffZR.x) * k;
 float ph = Tm * 2.1 + wr.x * 0.021 + wr.y * 0.017 + OffZR.y * 6.283;
@@ -279,11 +306,15 @@ def build(name, tex, blade):
           "WordFlipU": 0.0, "WordFlipV": 0.0, "EzAmount": 0.92, "LinesAmount": 1.0, "LogoSize": 15.0, "LogoFlip": 1.0,
           "LogoAmount": 1.0, "BorderAmount": 1.0, "DetailGain": 2.0, "StripeAmount": 1.0, "WearAmount": 0.0,
           "ApronTint": 0.72, "Wet": 0.0, "Snow": 0.0, "NormalAmount": 0.9, "StripeTilt": 0.08, "Specular": 0.3,
-          "PatchSize": 1500.0, "Grow": 1.0, "ZBase": 0.5}
+          "PatchSize": 1500.0, "Grow": 1.0, "ZBase": 0.5,
+          # Research/NextLevel/03 A2 / A5 (Render/Stadium.cpp sets them; each default is the look before them): the
+          # live wear map off, no swept lines, flat snow, no snow lumps
+          "WearLive": 0.0, "SweepAmount": 0.0, "SnowDetail": 0.0, "SnowBump": 0.0}
     VC = {"LineColor": (0.72, 0.72, 0.70), "HomeA": (0.02, 0.05, 0.3), "HomeB": (0.72, 0.72, 0.70),
           "AwayA": (0.3, 0.03, 0.03), "AwayB": (0.72, 0.72, 0.70), "LogoFill": (0.72, 0.72, 0.70),
           "LogoLine": (0.02, 0.05, 0.3), "GrassColor": (0.0135, 0.0306, 0.0063), "Tint": (0.96, 0.96, 1.15),
-          "DirtColor": (0.048, 0.034, 0.019), "GrassCenter": (4572.0, 0.0, 0.0), "WindVec": (0.25, 0.1, 0.0)}
+          "DirtColor": (0.048, 0.034, 0.019), "GrassCenter": (4572.0, 0.0, 0.0), "WindVec": (0.25, 0.1, 0.0),
+          "SnowColor": (0.62, 0.64, 0.68)}
 
     wp = node(unreal.MaterialExpressionWorldPosition)
     fuv = custom(FIELD_UV, F2, ["P", "UVFlipU", "UVFlipV"], "TAG field uv")
@@ -305,9 +336,10 @@ def build(name, tex, blade):
     for n in p_s:
         link(scalar(n, SC[n]), paint, n)
 
-    g_s = ["DetailGain", "StripeAmount", "WearAmount", "ApronTint", "Wet", "Snow"]
-    g_v = ["GrassColor", "Tint", "DirtColor"]
-    ground = custom(GROUND, F4, ["Paint", "P", "FUV", "Dist", "CamVec", "Blade", "BladesD", "Macro", "Wear"] + g_v + g_s, "TAG turf")
+    g_s = ["DetailGain", "StripeAmount", "WearAmount", "ApronTint", "Wet", "Snow", "WearLive", "SweepAmount", "SnowDetail"]
+    g_v = ["GrassColor", "Tint", "DirtColor", "SnowColor"]
+    ground = custom(GROUND, F4, ["Paint", "P", "FUV", "Dist", "CamVec", "Blade", "BladesD", "Macro", "Wear", "WearRT", "Lines"] + g_v + g_s,
+                    "TAG turf")
     link(paint, ground, "Paint")
     link(wp, ground, "P")
     link(fuv, ground, "FUV")
@@ -325,6 +357,10 @@ def build(name, tex, blade):
     link(texobj("BladesD", tex["blades_d"], ST.SAMPLERTYPE_LINEAR_COLOR), ground, "BladesD")
     link(texobj("Macro", tex["macro"], ST.SAMPLERTYPE_LINEAR_COLOR), ground, "Macro")
     link(texobj("Wear", tex["wear"], ST.SAMPLERTYPE_LINEAR_GRAYSCALE), ground, "Wear")
+    # the live wear map: a render target the game sets (RGBA16f); the macro noise stands in as the default, unused
+    # while WearLive is 0
+    link(texobj("WearRT", tex["macro"], ST.SAMPLERTYPE_LINEAR_COLOR), ground, "WearRT")
+    link(texobj("Lines", tex["lines"], ST.SAMPLERTYPE_LINEAR_GRAYSCALE), ground, "Lines")
     for n in g_v:
         link(vector(n, VC[n]), ground, n)
     for n in g_s:
@@ -357,16 +393,17 @@ def build(name, tex, blade):
         bn.set_editor_property("texture", tex["blades_n"])
         bn.set_editor_property("sampler_type", ST.SAMPLERTYPE_NORMAL)
         link(nuv, bn, "UVs")
-        nrm = custom(NORMAL, F3, ["BN", "P", "Dist", "NormalAmount", "StripeTilt"], "TAG turf normal")
+        nrm = custom(NORMAL, F3, ["BN", "P", "Dist", "NormalAmount", "StripeTilt", "Macro", "Snow", "SnowBump"], "TAG turf normal")
         link(bn, nrm, "BN", "RGB")
         link(wp, nrm, "P")
         link(node(unreal.MaterialExpressionPixelDepth), nrm, "Dist")
-        for n in ("NormalAmount", "StripeTilt"):
+        link(params["Macro"], nrm, "Macro")
+        for n in ("NormalAmount", "StripeTilt", "Snow", "SnowBump"):
             link(scalar(n, SC[n]), nrm, n)
         MEL.connect_material_property(nrm, "", unreal.MaterialProperty.MP_NORMAL)
     else:
-        w_s = ["PatchSize", "Grow", "ZBase", "UVFlipU", "UVFlipV", "WearAmount"]
-        wpo = custom(BLADE_WPO, F3, ["OffXY", "OffZR", "T", "WP", "Tm", "Wear", "GrassCenter", "WindVec"] + w_s, "TAG blade patch")
+        w_s = ["PatchSize", "Grow", "ZBase", "UVFlipU", "UVFlipV", "WearAmount", "WearLive"]
+        wpo = custom(BLADE_WPO, F3, ["OffXY", "OffZR", "T", "WP", "Tm", "Wear", "WearRT", "GrassCenter", "WindVec"] + w_s, "TAG blade patch")
         for i, pin in ((1, "OffXY"), (2, "OffZR")):
             tc = node(unreal.MaterialExpressionTextureCoordinate)
             tc.set_editor_property("coordinate_index", i)
@@ -375,6 +412,7 @@ def build(name, tex, blade):
         link(wp, wpo, "WP")
         link(node(unreal.MaterialExpressionTime), wpo, "Tm")
         link(params["Wear"], wpo, "Wear")
+        link(params["WearRT"], wpo, "WearRT")
         link(vector("GrassCenter", VC["GrassCenter"]), wpo, "GrassCenter")
         link(vector("WindVec", VC["WindVec"]), wpo, "WindVec")
         for n in w_s:

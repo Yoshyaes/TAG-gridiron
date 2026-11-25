@@ -9,7 +9,12 @@
 #   Ax, Ay, AYaw   blocker A's root in the defender's frame at T0 (m; x left, y back; yaw relative, + turns left)
 #   Bx, By, BYaw   blocker B's
 #   Drift          how far the defender's root goes over the stretch (m)
-#   Kind           "hold" (a double team that holds), "shed" (the defender beats it: DefWin / Spits / Splits / Beats / Shed)
+#   Kind           "hold" (a double team that holds), "shed" (the defender beats it: DefWin / Spits / Splits / Beats / Shed),
+#                  "run" (a run block's double team, the combo: RunBlock_DbleTm_* / RunBlock_DoubleTeam_*)
+#   Out            (run) how the capture ends: "drive" (the two move him off the ball: OffWin, Push, Power, Zone_Fwd),
+#                  "hold" (Stalemate, Neutral), "climb" (one comes off: Takeover, Disengage, Chip, Swap, ShoveExit, NonEng),
+#                  "defwin" (he beats it: DefWin, Shed, Split, Leave)
+# A run double's pile travels (the two drive him back): its steady stretch allows the defender 2.5 m/s, and 0.6 s.
 # Output: Content/TAG/AnimH/Pack/pack_dbl.json for FAthleteAssets (double teams), and Saved/pack_dbl_report.json.
 #   UnrealEditor-Cmd.exe TAGGridiron.uproject -run=pythonscript -script="<this file>" -unattended -nosplash -nullrhi
 import glob
@@ -30,7 +35,18 @@ _skel = unreal.load_asset("/Game/TAG/Hero/Rig/SKM_TAG_HeroRig_Skeleton")
 ROOT_REST_YAW = unreal.AnimPoseExtensions.get_bone_pose(unreal.AnimPoseExtensions.get_reference_pose(_skel), "root",
                                                         unreal.AnimPoseSpaces.LOCAL).rotation.rotator().yaw
 WANT = re.compile(r"(PassBlock_D(ou)?ble?T|PassBlock_DbleTm|DoubleTeam_PassBlock|Passblock_3man)")
+RUN = re.compile(r"RunBlock_D(bleTm|bletm|bleTeam|oubleTeam)")  # (the run doubles: 100 groups in the pack)
 SHED = ("DefWin", "Spits", "Splits", "Beats", "Shed", "Fail_Inside")
+RUN_OUT = (("defwin", ("DefWin", "Shed", "Split", "Leave")), ("climb", ("Takeover", "Disengage", "DisEng", "Chip", "Swap", "ShoveExit", "NonEng")),
+           ("hold", ("Stalemate", "Neutral", "_Neu")))
+
+
+def run_out(g):
+    gl = g.lower()
+    for out, keys in RUN_OUT:
+        if any(k.lower() in gl for k in keys):
+            return out
+    return "drive"
 
 
 def bone(anim, t, b):
@@ -84,7 +100,7 @@ groups = {}
 for jpath in glob.glob(os.path.join(SRC, "A_TAG_Pack_*.json")):
     name = os.path.splitext(os.path.basename(jpath))[0]
     m = re.match(r"^(.*)__P(\d+)$", name)
-    if not m or not WANT.search(name):
+    if not m or not (WANT.search(name) or RUN.search(name)):
         continue
     groups.setdefault(m.group(1), {})[m.group(2)] = jpath
 rows, report = [], []
@@ -109,11 +125,12 @@ for g, parts in sorted(groups.items()):
         B1, L1 = man(an[bk[0]], js[bk[0]])
         B2, L2 = man(an[bk[1]], js[bk[1]])
         n = min(len(D), len(B1), len(B2))
+        bRun = bool(RUN.search(g))
         ok = []
         for i in range(n):
             on = dist(D[i][0], B1[i][0]) < 1.3 and dist(D[i][0], B2[i][0]) < 1.3
             sp = dist(D[i][1], D[max(0, i - 3)][1]) / max(1, i - max(0, i - 3)) * 30.0 if i else 0.0
-            ok.append(on and sp < 0.9)
+            ok.append(on and sp < (2.5 if bRun else 0.9))
         best, cur, s0 = (0, 0), 0, 0
         for i in range(n + 1):
             if i < n and ok[i]:
@@ -125,9 +142,9 @@ for g, parts in sorted(groups.items()):
                     best = (s0, s0 + cur)
                 cur = 0
         i0, i1 = best
-        entry = {"group": g, "D": ns[dk], "frames_on": sum(ok), "best": [round(i0 / 30, 2), round(i1 / 30, 2)]}
+        entry = {"group": g, "D": ns[dk], "frames_on": sum(ok), "best": [round(i0 / 30, 2), round(i1 / 30, 2)], "run": bRun}
         report.append(entry)
-        if (i1 - i0) / 30.0 < 0.8:
+        if (i1 - i0) / 30.0 < (0.6 if bRun else 0.8):
             continue
         dp, dr, dh = D[i0]
         a = rel(dr, dh, B1[i0][1])
@@ -138,7 +155,8 @@ for g, parts in sorted(groups.items()):
         rows.append({"Name": g.replace("A_TAG_Pack_", ""), "D": ns[dk], "A": ns[ka], "B": ns[kb], "T0": round(i0 / 30.0, 2), "T1": round(i1 / 30.0, 2),
                      "Ax": round(ax, 2), "Ay": round(ay, 2), "AYaw": round(wrap180(A[i0][2] - dh), 1),
                      "Bx": round(bx, 2), "By": round(by, 2), "BYaw": round(wrap180(B[i0][2] - dh), 1),
-                     "Drift": round(dist(D[i0][1], D[i1 - 1][1]), 2), "Kind": "shed" if any(s in g for s in SHED) else "hold"})
+                     "Drift": round(dist(D[i0][1], D[i1 - 1][1]), 2),
+                     "Kind": "run" if bRun else "shed" if any(s in g for s in SHED) else "hold", "Out": run_out(g) if bRun else ""})
     except Exception as e:
         report.append({"group": g, "error": str(e)[:160]})
 json.dump(rows, open(OUT, "w"), indent=0)

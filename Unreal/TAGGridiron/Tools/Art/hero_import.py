@@ -193,6 +193,75 @@ SCALARS = {"Mode": 0.0, "Packed": 0.0, "TeamGlove": 0.0, "AlphaTint": 1.0, "LumR
 VECTORS = {"Tint": (1, 1, 1), "Trim": (0.8, 0.1, 0.1), "Trim2": (0.05, 0.05, 0.05), "NumColor": (1, 1, 1),
            "LogoFill": (1, 1, 1), "LogoLine": (0.05, 0.05, 0.05)}
 
+# A man's kit through the game (Research/NextLevel/03 A6): Render/Stadium.cpp StepPlayers hands each man's meshes nine
+# numbers as custom primitive data (no material instance is touched); a mesh nobody sets reads 0, so fans, crew and
+# everyone before the game look as they did. Index: knees and shins, elbows and forearms, chest and front, back and
+# seat, helmet (grime 0..1), wet, snow on top, sweat, mud (the stain's colour: 0 grass, 1 mud).
+KIT_DATA = ["GrimeKnee", "GrimeArm", "GrimeFront", "GrimeBack", "GrimeHelmet", "KitWet", "KitSnow", "KitSweat", "KitMud",
+            "HelmetPlain"]  # (9: Phase 4 A9, 1 = the shell without its clear coat and scuffs, -TagOldHelmet)
+# where on him (the bind pose: z up from the soles, front = +Y, x across), broken up by a tiling noise; out: dirt,
+# wetness (cloth soaks, skin and the shell only take a film), snow (on what faces up, never on skin), sweat
+WEATHER_MASK_HLSL = r"""
+float ax = abs(P.x);
+float z = P.z;
+float front = P.y > TorsoY ? 1.0 : 0.0;
+float helm = z > NeckZ + 2.0 ? 1.0 : 0.0;
+float body = 1.0 - helm;
+float legs = saturate((62.0 - z) / 10.0) * saturate((z - 12.0) / 6.0);
+float arms = saturate((ax - 26.0) / 8.0) * body;
+float torso = saturate((z - 70.0) / 10.0) * saturate((NeckZ - 4.0 - z) / 6.0) * (1.0 - arms) * body;
+float thighs = saturate((z - 55.0) / 8.0) * saturate((100.0 - z) / 8.0) * (1.0 - arms);
+float g = GrimeKnee * legs * lerp(0.4, 1.0, front)
+        + GrimeArm * arms
+        + GrimeFront * max(torso, thighs * 0.8) * front
+        + GrimeBack * max(torso, thighs) * (1.0 - front)
+        + GrimeHelmet * helm;
+g *= 1.0 - IsSkin * helm;  // (the face is skin: never dirtied)
+float n1 = Texture2DSample(Noise, NoiseSampler, float2(P.x + P.y * 0.7, P.z) / 23.0).r;
+float n2 = Texture2DSample(Noise, NoiseSampler, float2(P.y - P.x * 0.6, P.z * 1.7) / 9.0 + 0.37).g;
+float n = n1 * 0.6 + n2 * 0.4;
+float dirt = saturate((saturate(g) * 1.25 - (1.0 - n)) * 3.0);
+float porous = lerp(1.0, 0.12, max(helm, IsSkin));
+float wet = saturate(KitWet) * porous;
+float upw = saturate((NW.z - 0.55) * 3.0);
+float snow = saturate(KitSnow) * upw * (1.0 - IsSkin) * saturate(n * 1.6 - 0.2);
+float sweat = saturate(KitSweat) * (IsSkin > 0.5 ? 1.0 : torso * 0.3);
+return float4(dirt, wet, snow, sweat);
+"""
+# the colour: grass-green streaks or mud (by KitMud), soaked cloth darker (its pores fill with water), snow on top
+WEATHER_COLOR_HLSL = r"""
+float3 stain = lerp(float3(0.055, 0.075, 0.025), float3(0.085, 0.060, 0.038), saturate(KitMud));
+float3 o = C;
+o = lerp(o, stain, Mask.x * 0.85);
+o *= lerp(1.0, 0.55, Mask.y);
+o = lerp(o, float3(0.80, 0.82, 0.86), Mask.z);
+return o;
+"""
+# roughness / specular / metal (the surface node's): soaked cloth a dull sheen, a film of water on skin and the shell,
+# sweat on skin, dirt matte (and not metal), snow
+WEATHER_SURF_HLSL = r"""
+float helm = P.z > NeckZ + 2.0 ? 1.0 : 0.0;
+float r = S.x;
+r = lerp(r, min(r, 0.5), Mask.y * (1.0 - IsSkin));
+r = lerp(r, min(r, 0.22), saturate(KitWet) * max(IsSkin, helm) * 0.7);
+r = lerp(r, min(r, 0.3), Mask.w * IsSkin);
+r = lerp(r, 0.92, Mask.x * 0.7);
+r = lerp(r, 0.65, Mask.z);
+return float3(saturate(r), lerp(S.y, 0.5, Mask.z), S.z * (1.0 - Mask.x * 0.8));
+"""
+GRIME_NOISE = "/Game/TAG/Textures/T_TagTurfMacro"  # tiling cloud noise (Tools/Art/ue_build_turf.py imports it)
+# Phase 4 A9, the helmet shell (M_TAG_HeroCoat, clear coat): a hard lacquer over the team paint (coat roughness 0.05,
+# 0.03 wet), the paint itself softer under it; as the game goes (the kit's helmet grime) scratches cut through the
+# lacquer and scrape the paint back toward the white shell, the side marks with it. Out: coat, coat roughness, scuff.
+COAT_HLSL = r"""
+float helm = P.z > NeckZ + 2.0 ? 1.0 : 0.0;
+float n = Texture2DSample(Noise, NoiseSampler, float2(P.x * 0.6 + P.y, P.z * 2.5) / 7.0).b;
+float scuff = saturate((n - (1.0 - saturate(GrimeHelmet) * 0.85)) * 5.0) * helm * (1.0 - HelmetPlain);
+float coat = (1.0 - HelmetPlain) * lerp(1.0, 0.35, scuff);
+float cr = lerp(lerp(0.05, 0.03, saturate(KitWet)), 0.3, scuff);
+return float3(coat, cr, scuff);
+"""
+
 
 def ensure_dir(p):
     if not EAL.does_directory_exist(p):
@@ -280,7 +349,7 @@ def skin_profile():
     return prof
 
 
-def master(name, masked, skin=False):
+def master(name, masked, skin=False, coat=False):
     path = MATDIR + "/" + name
     if EAL.does_asset_exist(path) and os.environ.get("TAG_HERO_MATS") != "1":
         return unreal.load_asset(path)
@@ -295,6 +364,23 @@ def master(name, masked, skin=False):
         m.set_editor_property("blend_mode", unreal.BlendMode.BLEND_MASKED)
         m.set_editor_property("two_sided", True)
         m.set_editor_property("opacity_mask_clip_value", 0.4)
+    attrs = None
+    if coat:
+        # (the clear coat pins are hidden from Python: the coat master goes out through Make Material Attributes)
+        m.set_editor_property("shading_model", unreal.MaterialShadingModel.MSM_CLEAR_COAT)
+        m.set_editor_property("use_material_attributes", True)
+        attrs = MEL.create_material_expression(m, unreal.MaterialExpressionMakeMaterialAttributes, 300, 0)
+        MEL.connect_material_property(attrs, "", unreal.MaterialProperty.MP_MATERIAL_ATTRIBUTES)
+
+    def prop_out(src, out, prop, pin):
+        """A material output: the property itself, or the coat master's attribute pin (Make Material Attributes)."""
+        if attrs is None:
+            MEL.connect_material_property(src, out, prop)
+            return
+        for name in (pin, re.sub(r"(?<!^)([A-Z])", r" ", pin)):
+            if MEL.connect_material_expressions(src, out, attrs, name):
+                return
+        raise RuntimeError("%s: no attribute pin %s" % (name, pin))
     if skin:
         # the pack's skin maps carry subsurface (B) and translucency (A) beside roughness and specular: a scattering
         # skin, not Default Lit plastic (faces, arms, legs)
@@ -412,8 +498,10 @@ def master(name, masked, skin=False):
         MEL.connect_material_expressions(patch, "", col, "Patch")
         for k, v in VECTORS.items():
             MEL.connect_material_expressions(vector(k, v), "", col, k)
+        sp = {}
         for k, v in SCALARS.items():
-            MEL.connect_material_expressions(scalar(k, v), "", col, k)
+            sp[k] = scalar(k, v)
+            MEL.connect_material_expressions(sp[k], "", col, k)
         # the pack's decal layer (logoOverlayTexture: the cleats' brand marks), over the colour by its alpha
         # (an sRGB default: a linear one fails the Color sampler and the whole master falls back to the default material)
         dec = tex("Decal", raw_tex("T_TAG_Hero_White", "color"), unreal.MaterialSamplerType.SAMPLERTYPE_COLOR)
@@ -423,7 +511,58 @@ def master(name, masked, skin=False):
         MEL.connect_material_expressions(dec, "RGBA", over, "D")
         MEL.connect_material_expressions(vector("DecalTint", (1, 1, 1)), "", over, "DecalTint")
         MEL.connect_material_expressions(scalar("DecalOn", 0.0), "", over, "DecalOn")
-        MEL.connect_material_property(over, "", unreal.MaterialProperty.MP_BASE_COLOR)
+        # A6: the kit's weather through the game (KIT_DATA as custom primitive data, set by Render/Stadium.cpp)
+        kit = {}
+        for i, n in enumerate(KIT_DATA):
+            e = scalar(n, 0.0)
+            e.set_editor_property("use_custom_primitive_data", True)
+            e.set_editor_property("primitive_data_index", i)
+            kit[n] = e
+        is_skin = node(unreal.MaterialExpressionConstant)
+        is_skin.set_editor_property("r", 1.0 if skin else 0.0)
+        have_noise = EAL.does_asset_exist(GRIME_NOISE)
+        gnoise = node(unreal.MaterialExpressionTextureObjectParameter)
+        gnoise.set_editor_property("parameter_name", "GrimeNoise")
+        gnoise.set_editor_property("texture", unreal.load_asset(GRIME_NOISE) if have_noise else raw_tex("T_TAG_Hero_White", "color"))
+        gnoise.set_editor_property("sampler_type", unreal.MaterialSamplerType.SAMPLERTYPE_LINEAR_COLOR if have_noise
+                                   else unreal.MaterialSamplerType.SAMPLERTYPE_COLOR)
+        wmask = custom(WEATHER_MASK_HLSL, unreal.CustomMaterialOutputType.CMOT_FLOAT4,
+                       ["P", "NW", "Noise", "IsSkin", "NeckZ", "TorsoY"] + KIT_DATA[:8], "TAG hero kit weather", -450)
+        MEL.connect_material_expressions(vi, "", wmask, "P")
+        MEL.connect_material_expressions(node(unreal.MaterialExpressionVertexNormalWS), "", wmask, "NW")
+        MEL.connect_material_expressions(gnoise, "", wmask, "Noise")
+        MEL.connect_material_expressions(is_skin, "", wmask, "IsSkin")
+        MEL.connect_material_expressions(sp["NeckZ"], "", wmask, "NeckZ")
+        MEL.connect_material_expressions(sp["TorsoY"], "", wmask, "TorsoY")
+        for n in KIT_DATA[:8]:
+            MEL.connect_material_expressions(kit[n], "", wmask, n)
+        wcol = custom(WEATHER_COLOR_HLSL, unreal.CustomMaterialOutputType.CMOT_FLOAT3, ["C", "Mask", "KitMud"], "TAG hero kit colour", -250)
+        MEL.connect_material_expressions(over, "", wcol, "C")
+        MEL.connect_material_expressions(wmask, "", wcol, "Mask")
+        MEL.connect_material_expressions(kit["KitMud"], "", wcol, "KitMud")
+        coat_node = None
+        if coat:
+            coat_node = custom(COAT_HLSL, unreal.CustomMaterialOutputType.CMOT_FLOAT3,
+                               ["P", "NeckZ", "GrimeHelmet", "KitWet", "HelmetPlain", "Noise"], "TAG helmet coat", -250)
+            MEL.connect_material_expressions(vi, "", coat_node, "P")
+            MEL.connect_material_expressions(sp["NeckZ"], "", coat_node, "NeckZ")
+            for n in ("GrimeHelmet", "KitWet", "HelmetPlain"):
+                MEL.connect_material_expressions(kit[n], "", coat_node, n)
+            MEL.connect_material_expressions(gnoise, "", coat_node, "Noise")
+            scr = custom("return lerp(C, max(C, float3(0.62, 0.62, 0.6)), CS.z * 0.7);", unreal.CustomMaterialOutputType.CMOT_FLOAT3,
+                         ["C", "CS"], "TAG helmet scrapes", -150)
+            MEL.connect_material_expressions(wcol, "", scr, "C")
+            MEL.connect_material_expressions(coat_node, "", scr, "CS")
+            prop_out(scr, "", unreal.MaterialProperty.MP_BASE_COLOR, "BaseColor")
+            for ch, pin in (("r", "ClearCoat"), ("g", "ClearCoatRoughness")):
+                cm = MEL.create_material_expression(m, unreal.MaterialExpressionComponentMask, -100, y[0])
+                y[0] += 100
+                for c in "rgba":
+                    cm.set_editor_property(c, c == ch)
+                MEL.connect_material_expressions(coat_node, "", cm, "")
+                prop_out(cm, "", None, pin)
+        else:
+            prop_out(wcol, "", unreal.MaterialProperty.MP_BASE_COLOR, "BaseColor")
         # a detail normal over the main one (the in-house knit / twill over the pack's jersey folds), reoriented
         # normal mapping; DetailOn 0 leaves the main normal alone
         det_uv = custom("return UV * DetailTile;", unreal.CustomMaterialOutputType.CMOT_FLOAT2, ["UV", "DetailTile"], "detail uv")
@@ -440,7 +579,7 @@ def master(name, masked, skin=False):
         MEL.connect_material_expressions(nrm, "RGB", blend, "N")
         MEL.connect_material_expressions(dn, "RGB", blend, "D")
         MEL.connect_material_expressions(scalar("DetailOn", 0.0), "", blend, "DetailOn")
-        MEL.connect_material_property(blend, "", unreal.MaterialProperty.MP_NORMAL)
+        prop_out(blend, "", unreal.MaterialProperty.MP_NORMAL, "Normal")
         if skin:
             # the skin map's B: how much light scatters under the skin (thin ears and nose, not the scalp)
             sss = MEL.create_material_expression(m, unreal.MaterialExpressionComponentMask, -200, y[0] + 400)
@@ -455,14 +594,30 @@ def master(name, masked, skin=False):
         MEL.connect_material_expressions(rsm, "RGB", surf, "RSM")
         for n, v in (("RoughOver", 0.5), ("RoughOverA", 0.0), ("SpecFlat", 0.0), ("MetalWeight", 1.0), ("MetalAdd", 0.0)):
             MEL.connect_material_expressions(scalar(n, v), "", surf, n)
-        for ch, prop in (("r", unreal.MaterialProperty.MP_ROUGHNESS), ("g", unreal.MaterialProperty.MP_SPECULAR),
-                         ("b", unreal.MaterialProperty.MP_METALLIC)):
+        # A6: the kit's weather on the surface (wet sheen, sweat, matte dirt, snow); all 0: the surface as it was
+        wsurf = custom(WEATHER_SURF_HLSL, unreal.CustomMaterialOutputType.CMOT_FLOAT3, ["S", "Mask", "P", "NeckZ", "IsSkin", "KitWet"],
+                       "TAG hero kit surface", -300)
+        MEL.connect_material_expressions(surf, "", wsurf, "S")
+        MEL.connect_material_expressions(wmask, "", wsurf, "Mask")
+        MEL.connect_material_expressions(vi, "", wsurf, "P")
+        MEL.connect_material_expressions(sp["NeckZ"], "", wsurf, "NeckZ")
+        MEL.connect_material_expressions(is_skin, "", wsurf, "IsSkin")
+        MEL.connect_material_expressions(kit["KitWet"], "", wsurf, "KitWet")
+        surf_out = wsurf
+        if coat:
+            soft = custom("return float3(lerp(max(S.x, 0.32), S.x, HelmetPlain), S.y, S.z);", unreal.CustomMaterialOutputType.CMOT_FLOAT3,
+                          ["S", "HelmetPlain"], "TAG helmet paint under the coat", -250)
+            MEL.connect_material_expressions(wsurf, "", soft, "S")
+            MEL.connect_material_expressions(kit["HelmetPlain"], "", soft, "HelmetPlain")
+            surf_out = soft
+        for ch, prop, pin in (("r", unreal.MaterialProperty.MP_ROUGHNESS, "Roughness"), ("g", unreal.MaterialProperty.MP_SPECULAR, "Specular"),
+                              ("b", unreal.MaterialProperty.MP_METALLIC, "Metallic")):
             cm = MEL.create_material_expression(m, unreal.MaterialExpressionComponentMask, -200, y[0])
             y[0] += 100
             for c in "rgba":
                 cm.set_editor_property(c, c == ch)
-            MEL.connect_material_expressions(surf, "", cm, "")
-            MEL.connect_material_property(cm, "", prop)
+            MEL.connect_material_expressions(surf_out, "", cm, "")
+            prop_out(cm, "", prop, pin)
     MEL.recompile_material(m)
     EAL.save_loaded_asset(m, only_if_is_dirty=False)
     return m
@@ -485,7 +640,7 @@ def instance(kind, slot, masked, params):
         ensure_dir(MATDIR + "/Instances")
         mi = tools.create_asset(name, MATDIR + "/Instances", unreal.MaterialInstanceConstant, unreal.MaterialInstanceConstantFactoryNew())
         REPORT["materials"] += 1
-    MEL.set_material_instance_parent(mi, SKINM if masked == "skin" else MASKED if masked else OPAQUE)
+    MEL.set_material_instance_parent(mi, SKINM if masked == "skin" else COATM if masked == "coat" else MASKED if masked else OPAQUE)
     for k, v in params.items():
         if v is None:
             continue
@@ -587,7 +742,9 @@ def slot_params(entry, slot, info):
     elif role == "Socks":
         P = {"Mode": 3.0, "BaseColor": texture(col), "LumRef": 0.85, "Normal": texture(nrm, "normal"), "RSM": texture(rsm, "linear"), "MetalWeight": 0.0}
     elif role == "Shell":
-        # the vent / hardware normal on the shell's own detail set (TexCoord 1, kept when the job has two sets)
+        # the vent / hardware normal on the shell's own detail set (TexCoord 1, kept when the job has two sets); the
+        # clear-coat master (Phase 4 A9)
+        masked = "coat"
         P = {"Mode": 3.0, "Mask": raw_tex("T_TAG_Hero_HelmetMask"), "Normal": texture(nrm, "normal"), "RoughOver": 0.16,
              "RoughOverA": 1.0, "MetalWeight": 0.0, "MetalAdd": 0.15, "NormalUV1": 1.0 if entry.get("uv_sets") == 2 else 0.0}
     elif role == "Facemask":
@@ -725,12 +882,13 @@ def apply_materials(entry, mesh):
 
 
 def main():
-    global OPAQUE, MASKED, SKINM
+    global OPAQUE, MASKED, SKINM, COATM
     unreal.AssetRegistryHelpers.get_asset_registry().search_all_assets(True)
     index = json.load(open(os.path.join(RAW, "hero_index.json")))
     OPAQUE = master("M_TAG_Hero", False)
     MASKED = master("M_TAG_HeroMasked", True)
     SKINM = master("M_TAG_HeroSkin", False, skin=True)
+    COATM = master("M_TAG_HeroCoat", False, coat=True)  # helmet shells (Phase 4 A9)
     only = os.environ.get("TAG_HERO_ONLY")
     rx = re.compile(only, re.I) if only else None
     skip_mesh = os.environ.get("TAG_HERO_SKIP_MESH") == "1"
