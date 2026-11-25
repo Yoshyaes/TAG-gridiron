@@ -270,6 +270,112 @@ struct Tune {
   // against 3.8 / 4.6 / 5.1 with the pulls alone (probe, 600 snaps each, 2026-11-22); pullers' gaps want a real
   // back-block / hinge rule before it goes back on
   double downBlock = 0;
+  // combo blocks (Research/NextLevel/01 #4, 02 1.3; the two-man run block): on a run, an uncovered lineman - one the
+  // line's rules left with a linebacker and nobody on the line in front of him - works with the covered lineman beside
+  // him (on a zone run the play-side one first) on that man's down lineman: the double drives him off the ball, both
+  // with their eyes on the backer. When the backer comes downhill to within comboNear yd of the double or to comboFill
+  // yd of the line, comboT s after the double formed, or once the ball gets to the line, the one of the two on the
+  // backer's side comes off and climbs to him; the other keeps the down lineman. A double that has not formed by
+  // comboLate s is given up (the helper climbs). 0: each man takes his own at the snap, the uncovered one straight up;
+  // 1: the zone runs' combos (inside zone, stretch); 2: gap runs and draws double too.
+  // OFF by default (2026-11-25, 200 games x seeds 11/29/41, held-out 53): zone-only combos form on 90 % of the pairs set
+  // (1.45 a run) and the climber gets a hand on his backer on ~45-50 % of climbs, but the held-out loss goes 1.19 -> 1.26
+  // (fit seeds 1.60 -> 1.59) and the league's yards a carry fall 4.29 -> 4.25 (every run: 4.29 -> 4.05, gap runs 4.37 ->
+  // 3.88 - the uncovered man is later to the second level than when he went straight up). A refit of runShed / lvl2Shed
+  // / engArmK with combos on overfit (1.59 -> 1.16 on the fit seeds, 1.96 against 1.26 held out). The render side has
+  // no two-man run-block capture playing yet (01 #4). Re-tested on readBlocks 1 (2026-11-25): held-out 0.98 -> 1.59.
+  // ON (2026-11-25, on the run-family call mix and armPen 2, 200 games x held-out seeds 53/67/71/83): loss 1.28 -> 1.09;
+  // with matchCov 1 as well 1.21, with gapFit 2 1.42, all three 1.53 (matchCov alone 1.21, gapFit 2 alone 1.28, stunts
+  // 0.15 1.30): combos on, the others off. Middle runs 1.61 -> 1.36 yd a carry (NFL 3.70) - the loss gain is elsewhere.
+  double comboBlock = 1;
+  double comboT = 0.1;
+  double comboNear = 3.0;
+  double comboFill = 2.0;
+  double comboLate = 1.0;
+  double comboDeclare = 1.5;  // ... or the backer comes downhill faster than this (yd/s; 0: not read)
+  double comboReach = 0.9;    // yd past touching at which the climber's block on the backer lands (a run block's: 0.3)
+  // backs read their blocks (Research/NextLevel/02 A7): a blocked defender is a danger to the runner on the side of him
+  // his blocker is not on (his head is free there: readOpen x the free defender's weight) and hardly at all behind the
+  // block (readShut), more when he is winning the rep; a back presses the play's aiming point (readPress x the yards he
+  // drifts off it) until he is readPressD yd from the line, then cuts off what he sees; on a gap run he follows his lead
+  // blocker or puller (readLead per unit of heading toward the man's back) until that man has his block. 0: an engaged
+  // defender weighs 0.25 wherever he is, the aiming point barely counts (0.05 a yd).
+  // ON (2026-11-25, 200 games x seeds 11/29/41, held-out 53): held-out loss 1.33 -> 0.98, box stats out 2.0 -> 2.0, yards
+  // a carry 4.28 -> 4.44 (NFL 4.3 +- 0.2), 1st-down run shape TV 8.9 -> 8.5; the fit seeds went the other way (1.65 ->
+  // 1.89), so the gain is inside the seed noise. With stunts on as well the held-out loss was 2.0: not both.
+  double readBlocks = 1;
+  double readOpen = 0.6;
+  double readShut = 0.05;
+  double readPress = 0.25;
+  double readPressD = 2.5;
+  double readLead = 0.8;
+  // The run game's shape (2026-11-25; SimCalibrate gap.*, nflverse 2023 run_gap classes). Designed runs by where they
+  // went: middle 23.7 % at 1.51 yd a carry (NFL 26.4 %, 3.70), guard 19.5 % 4.44 (26.0, 4.07), tackle 14.8 % 5.98 (22.6,
+  // 4.07), end 42.0 % 5.77 (24.3, 4.88). Why: stretch calls are 29 % of the designed runs and 90 % of them go outside (the
+  // call mix alone puts 26 % of all runs at the edge), gap runs bounce outside 38 %; inside zone and draws are stopped at
+  // the line 40 % of the time, 54 % of middle runs by a blocked lineman's arm tackle (engArmK 2.0, ~90 % of them made).
+  // The knobs below go at those; none of them, alone or fitted together with tackleBase / runShed / engArmK on the fit
+  // seeds (a run-gap term in fit.py --gap-w), beat the held-out loss, so all stay neutral: armSide 1 lifts the middle to
+  // 2.3 yd and armPen 2 puts missed tackles in PFF's band (9.8 -> 11.4 %) and the fit-seed loss 1.89 -> 1.52, but held
+  // out 0.98 -> 2.4 / 1.33; stretchAim 0.75 and the edge-only gapFit 2 do not move the edge share at all.
+  // a blocked defender reaches for a runner going by only on his free side: not when his blocker is between them (the
+  // runner's direction from him within acos(armShut) of his blocker's). 0: from wherever he is engaged.
+  double armSide = 0;
+  double armShut = 0.2;
+  // the box score's passes defensed: a contested incompletion (the defender at the catch point, the receiver failing to
+  // hold it with him there) goes down as broken up by him when he was within pdCredit yd as near the ball as the receiver
+  // (facing it or playing through the hands) - as the NFL's charters credit one (nflverse 2023: 30.7 % of incompletions, 10.2 % of attempts).
+  // Counting only: the ball is as incomplete as before. 0: only a rolled breakup is one.
+  // (2026-11-25, 100 games seed 11: breakups 5.47 -> 7.83 % of attempts, passes defensed 8.2 -> 10.6 % (nflverse 12.5
+  // with interceptions); every contested incompletion credited reaches only 8.3 %: the rest of the NFL's gap is balls
+  // the sim throws off target or has dropped with nobody at the catch point)
+  double pdCredit = 1.0;
+  double runNearShed = 3.2;
+  // (2.0 on the run-family call mix, CallAdapt.h runFamilyW, 2026-11-25: 200 games x held-out seeds 53/67/71/83, loss
+  // 1.60 -> 1.28 against 1.1; middle runs 1.47 -> 1.61 yd a carry)
+  double armPen = 2.0;       // a blocked man's arm tackle: this much off the tackle logit (an arm free, not a wrap)  // x a run block's shed hazard with the runner within reach of the man (lvl2Near / 1.6 yd)
+  double stretchAim = 1.0;  // x a stretch / outside zone's drawn aiming point (the drawn ones sit 5 yd out, past a tight end)
+  // gap integrity and force / contain (02 A8): at the snap each man in the front has a gap (the down linemen the gap
+  // nearest their alignment, the backers the rest, nearest first), and the outermost man of the front on each side sets
+  // the edge. On a run, until the ball crosses the line, a free defender fits his gap - he slides with the back at most
+  // gapGive yd off it and goes at him once he is within gapCommit yd of it - and the edge man keeps the runner on his
+  // inside shoulder (outside him by containW yd) until the back has turned it inside him; past the line everyone runs
+  // to the ball as before. 0: everyone pursues the ball from his read.
+  // OFF by default (2026-11-25, same protocol): the edge works - stretch runs bounced outside the aiming point 33 % ->
+  // 6 %, runs turned back inside 13.9 -> 17.5 % - but a front that holds its gaps is late to the ball everywhere else:
+  // yards a carry 4.28 -> 4.82, held-out loss 1.33 -> 4.70 (gapFlow 1 / gapGive 2: 4.83, 6.97). Needs the tackle and shed
+  // constants refit with it, or fits that release on the back's commitment rather than at the line. Re-tested on
+  // readBlocks 1: gapFit 1 held-out 0.98 -> 9.86 (5.0 yd a carry), gapFit 2 (the edge only) 1.43.
+  double gapFit = 0;          // (1: gaps and the edge; 2: the edge only, the inside men pursue as before)
+  double gapGive = 1.2;
+  double gapCommit = 2.0;
+  double gapFlow = 0.8;   // x the back's move across from the ball that the front's gaps slide with him (0: fixed gaps)
+  double containW = 1.2;
+  // match coverage (02 A11; Madden 26's Cover 3 Match / Quarters / Cover 2 rules), by the receivers' numbers from the
+  // outside at the snap: Cover 3 - the curl / flat man carries #2 up the field to matchCarry yd, the hook man the inside
+  // vertical (#3) the same, then each passes him on and sinks back into his zone; Quarters - the inside safety reads #2:
+  // vertical past 7 yd he has him man to man, anything else and he helps over #1; Cover 2 - a corner with nobody in his
+  // flat sinks under #1 going deep, and the Tampa Mike carries a vertical down the middle. 0: spot drops and the nearest
+  // threat, as before.
+  // OFF by default (2026-11-25, same protocol): held-out loss 1.33 -> 1.69 (fit seeds 1.65 -> 1.70), box stats out 2.0 ->
+  // 1.0. Quarters is where it shows: completions 71.6 -> 69.2 %, 8.05 -> 7.71 yd an attempt, broken up 3.7 -> 4.7 %;
+  // Cover 3 70.1 % (71.9). League breakups 5.45 -> 5.30 % (NFL 10.2): it does not close that gap by itself.
+  // Re-tested on readBlocks 1 / pdCredit 1: fit seeds 1.89 -> 1.55, box stats out 2.0 -> 0.75, Quarters breakups 5.5 ->
+  // 6.4 %, but held-out 0.98 -> 1.36: still off.
+  double matchCov = 0;
+  double matchCarry = 11;
+  // defensive line stunts (02 A12): on a passing down (2nd & 8+, 3rd / 4th & 5+) the front runs a twist this share of the
+  // time, stuntEarly x it on other downs - tackle-end, end-tackle or tackle-tackle: the penetrator crosses his partner's
+  // face first, the looper jabs upfield stuntJab s and comes round behind him into the gap he left. 0: no stunts (a
+  // stunt is rolled on the play's rng only when this is on). A stunt man cannot be blocked by the man the protection gave
+  // him at the snap while the twist is on (the pick); a blocker takes the penetrator coming into his gap (the pass-off).
+  // OFF by default (2026-11-25, same protocol): 0.25 - 13 % of dropbacks, 27 % of twists won, pressure 35.4 % on them
+  // against 35.9 without, sacks 6.1 %, 1.7 pass-offs a twist (0.12 otherwise) - held-out loss 1.33 -> 1.40; 0.15 - 7.8 %
+  // of dropbacks, fit seeds 1.65 -> 1.44, held-out 1.327 -> 1.332 (a tie, so off by the rule; the first one to try on).
+  // Re-tested at 0.15 on readBlocks 1: fit seeds 1.89 -> 1.89, held-out 0.98 -> 2.06.
+  double stunts = 0;
+  double stuntEarly = 0.3;
+  double stuntJab = 0.4;
 };
 Tune& tune();
 /** Set a tune field by name; false if there is none. */
@@ -374,6 +480,10 @@ class Ent {
   Ent* man = nullptr;
   Ent* blockTarget = nullptr;
   Ent* snapTarget = nullptr;  // (the man the protection gave him at the snap: diagnostics)
+  /** A run's combo block he is one of the two on (PlaySim::combos_ index; -1 none), and the second-level man he came off
+   *  it to block (until he has a block on him: telemetry). Tune::comboBlock. */
+  int combo = -1;
+  Ent* climbFor = nullptr;
   double pressDelay = 0;
   std::deque<V2> velHist;
   double reactT = 0;
@@ -384,6 +494,22 @@ class Ent {
   std::optional<V2> rushTarget;
   bool userControlled = false;
   double gap = 0;  // run-fit gap y
+  /** Gap integrity (Tune::gapFit): the gap he fits on a run (y, set at the snap; fitOn false: none), and the side he
+   *  sets the edge on as the force / contain man (+1 / -1 the +y / -y side, 0: not the edge). */
+  double fitY = 0;
+  bool fitOn = false;
+  int contain = 0;
+  /** A receiver's number from the outside on his side at the snap (#1 the widest; 0 none) and the side (+1 / -1): the
+   *  match rules read them (Tune::matchCov). A defender carrying a receiver up the field in a match zone: matchOn. */
+  int recNum = 0, recSide = 0;
+  bool matchOn = false;
+  /** A line stunt (Tune::stunts): 1 the penetrator (crosses first, into his partner's gap), 2 the looper (a jab, then
+   *  round behind him into the gap he left); stuntY the gap he goes for, stuntT the looper's go, stuntDone when it is
+   *  over (he rushes as ever). */
+  int stunt = 0;
+  double stuntY = 0, stuntT = 0;
+  bool stuntDone = false, stuntSet = false;
+  Ent* stuntMate = nullptr;
   double getOff = 0;
   double sprintT = 0;
   /** A velocity change (juke, catch, broken tackle) spread over a human contact time instead of one tick. */
@@ -585,6 +711,27 @@ struct PlayResult {
   // read keys (A4): the linebackers' depth past the line (sum yd, n) at 0.5, 1.0 and 1.5 s, the ball not yet thrown
   double lbDepth[3] = {0, 0, 0};
   int lbDepthN[3] = {0, 0, 0};
+  // combo blocks (Tune::comboBlock, 01 #4): pairs set at the snap, doubles that formed, climbs off them to the second
+  // level, climbs that got a block on their man (and the sum of the times they did, s); on a run play, the linebackers
+  // and those an offensive lineman got a block on, and the seconds a down lineman had two run blockers on him (summed)
+  int comboSet = 0, comboDbl = 0, comboClimb = 0, comboHit = 0;
+  double comboHitT = 0;
+  int lbN = 0, lbBlocked = 0;
+  double runDblT = 0;
+  // a designed run's path (A7 / A8 telemetry): the play's aiming point (y from the ball, offense frame), where the carrier
+  // crossed the line (y from the ball; or where he went down behind it: runCrossed false), when he did (s from the snap)
+  // and when he had the ball, the depth past the line of the first tackle tried on him (-99: none), his distance run
+  // with the ball (yd), and whether an edge man had him on his inside shoulder at the line (the force turned him in)
+  double runAimDy = 0, runCrossDy = 0, runCrossT = -1, runHandT = -1, runContactX = -99, runDist = 0, runDist0 = 0;
+  bool runCrossed = false, runDesigned = false;
+  // match coverage (Tune::matchCov): carries made on the play (a zone defender running with his receiver up the field)
+  int matchCarries = 0;
+  // stunts (Tune::stunts): the twist run (0 none, 1 tackle-end, 2 end-tackle, 3 tackle-tackle), whether one of its two
+  // men won (beat his block or came free in the win window, or put the first pressure on), and the pass-offs the
+  // protection made on the play (two blockers trading the rushers who crossed)
+  int stunt = 0;
+  bool stuntWon = false;
+  int passOffs = 0;
   bool pressured = false;
   std::string pressWhy;  // how the first pressure came: "<near|eta> <shed|unblocked|loose> <role>" (calibration)
   double pressT = 0;
@@ -1211,6 +1358,43 @@ class PlaySim {
   V2 blockGoal(const Ent* blocker, const Ent* d) const;
   int engN_ = 0, engPastHip_ = 0, engRefused_ = 0;
   double engLatSum_ = 0, engGeoSum_ = 0;
+  /** Combo blocks (Tune::comboBlock): the two blockers, their down lineman, the second-level man one of them climbs to
+   *  (nullptr: whoever matters when he goes), the uncovered one, when the double formed (-1 not yet) and whether it is
+   *  over (a climb, or the down lineman off it). Set by assignBlocks, played by thinkCombo. */
+  struct Combo {
+    Ent* a = nullptr;
+    Ent* b = nullptr;
+    Ent* dl = nullptr;
+    Ent* lb = nullptr;
+    Ent* uncovered = nullptr;
+    double formT = -1;
+    bool done = false;
+  };
+  std::vector<Combo> combos_;
+  void setupCombos();
+  bool thinkCombo(Ent* e);
+  int comboDbl_ = 0, comboClimb_ = 0, comboHit_ = 0;
+  double comboHitT_ = 0, runDblT_ = 0;
+  std::vector<const Ent*> lbBlocked_;
+  // a designed run's path (PlayResult::runCrossDy ..): tracked in step()
+  double runCrossDy_ = 0, runCrossT_ = -1, runHandT_ = -1, runContactX_ = -99, runDist_ = 0, runDist0_ = 0;
+  bool runCrossed_ = false;
+  V2 runLastPos_{0, 0}, runLast0_{0, 0};
+  /** Gap integrity (Tune::gapFit): each front man's gap and the edge men, at the snap. */
+  void setupFits();
+  /** A free defender's fit on a run before the ball crosses the line: true with e->want set, false to pursue as before. */
+  bool fitRun(Ent* e, const Ent* c);
+  /** Match coverage (Tune::matchCov): the receivers' numbers at the snap; the receiver numbered n on side s still on his
+   *  route (nullptr: none); a zone man's match rule this tick (true with e->want set, false to play the zone as before). */
+  void numberReceivers();
+  Ent* recNo(int side, int n) const;
+  bool matchZone(Ent* e, const V2& spot);
+  int matchCarries_ = 0;
+  /** Stunts (Tune::stunts): rolled at the snap; the twist's kind; a stunt man's rush (true with e->want set). */
+  void setupStunt();
+  bool thinkStunt(Ent* e);
+  int stunt_ = 0;
+  int passOffs_ = 0;
   void disengage(Ent* b);
   void setupReturn();
   // a place kick (Sim/PlaceKick.cpp)

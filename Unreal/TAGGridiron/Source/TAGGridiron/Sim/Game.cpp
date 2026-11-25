@@ -434,9 +434,21 @@ double Game::windHelp(TeamKey k) const {
 const OffPlay* Game::cpuOffense() {
   if (shouldKneel()) return playById("kneel");
   const Tempo tp = tempo();
-  const Team& t = offense();
   // spike to stop the clock
   if (tp == Tempo::Hurry && clockRunning && timeouts[poss] == 0 && clock < 30 && clock > 4 && down < 3) return playById("spike");
+  const bool pass = rng.chance(cpuPassProb());
+  std::vector<const OffPlay*> pool;
+  std::vector<double> w;
+  cpuOffensePool(pass, pool, w);
+  const OffPlay* pick = rng.weighted(pool, w);
+  recent.push_back(pick->id);
+  if (recent.size() > 4) recent.erase(recent.begin());
+  return pick;
+}
+
+double Game::cpuPassProb() const {
+  const Tempo tp = tempo();
+  const Team& t = offense();
   double pPass = t.passLean - 0.05;  // (-0.04 before the 2026-11-22 playbook expansion: RPOs the quarterback throws turn a run call into a pass)
   const int d = down;
   const double tg = toGo;
@@ -453,13 +465,22 @@ const OffPlay* Game::cpuOffense() {
   if (tp == Tempo::Hurry) pPass += 0.3;
   if (tp == Tempo::Milk) pPass -= 0.25;
   if (ballOn >= 96) pPass -= 0.1;
-  pPass = clamp(pPass, 0.1, 0.95);
-  const bool pass = rng.chance(pPass);
+  // the tendencies (CallAdapt.h): more of what works today and of what beats the looks this defense keeps showing
+  if (callTune().adapt > 0) pPass += readDefense(tend[poss], tend[other(poss)], sitBucket(down, toGo)).passShift;
+  return clamp(pPass, 0.1, 0.95);
+}
+
+void Game::cpuOffensePool(bool pass, std::vector<const OffPlay*>& pool, std::vector<double>& w) const {
+  const Tempo tp = tempo();
+  const Team& t = offense();
+  const int d = down;
+  const double tg = toGo;
   const bool goal = ballOn >= 95;
   const bool shortY = tg <= 2;
   const bool longY = tg >= 8;
+  pool.clear();
+  w.clear();
   // the team's own book
-  std::vector<const OffPlay*> pool;
   for (const OffPlay* pp : offBookFor(t).plays) {
     const OffPlay& p = *pp;
     if (p.type == PlayType::Kneel || p.type == PlayType::Spike) continue;
@@ -481,7 +502,9 @@ const OffPlay* Game::cpuOffense() {
   // (the quarterback's legs: designed runs and read keeps are called for the mobile ones)
   const std::vector<Player*> qbs = depth(t, Pos::QB);
   const double qbLegs = qbs.empty() ? 0.5 : clamp((qbs[0]->r.speed - 62) / 18.0, 0.15, 1.3);
-  std::vector<double> w;
+  // the tendencies (CallAdapt.h): this offense's day and the looks the defense keeps showing
+  const bool adapt = callTune().adapt > 0;
+  const OffRead adaptRead = adapt ? readDefense(tend[poss], tend[other(poss)], sitBucket(down, toGo)) : OffRead();
   w.reserve(pool.size());
   for (const OffPlay* pp : pool) {
     const OffPlay& p = *pp;
@@ -496,6 +519,9 @@ const OffPlay* Game::cpuOffense() {
     // (an RPO is a run call the quarterback may throw; trick plays are a once-a-game call)
     if (p.cat == PlayCat::RPO) x *= 0.35;
     if (p.cat == PlayCat::Trick) x *= 0.12;
+    // the run game's concept families toward the NFL's mix (CallAdapt.h runFamilyW): one factor a family for every
+    // scheme, so a book's own lean (a wide-zone team's stretch, a gap team's power) stays
+    if (p.run) x *= runFamilyW(runFamily(p));
     // the run game's mix by scheme: zone and stretch are the base of every modern run game, the gap schemes a
     // complement (2023: ~55 % of NFL runs are zone, ~35 % gap)
     if (p.type == PlayType::Run && p.run && p.cat == PlayCat::Run) {
@@ -530,17 +556,23 @@ const OffPlay* Game::cpuOffense() {
       if (some) x *= 2.2;
       else if (every) x *= 0.35;
     }
+    if (adapt) x *= offAdaptMul(adaptRead, tend[poss], p);
     w.push_back(x);
   }
-  const OffPlay* pick = rng.weighted(pool, w);
-  recent.push_back(pick->id);
-  if (recent.size() > 4) recent.erase(recent.begin());
-  return pick;
 }
 
 const DefCall* Game::cpuDefense(const OffPlay& offPlay) {
+  std::vector<const DefCall*> pool;
+  std::vector<double> w;
+  cpuDefensePool(offPlay.formation, rng, pool, w);
+  return rng.weighted(pool, w);
+}
+
+void Game::cpuDefensePool(const std::string& formation, Rng& r, std::vector<const DefCall*>& pool, std::vector<double>& w) const {
   const Team& t = defense();
-  const std::string& pers = formationById(offPlay.formation)->personnel;
+  const Formation* form = formationById(formation);
+  static const std::string kEleven = "11";
+  const std::string& pers = form ? form->personnel : kEleven;
   const bool goal = ballOn >= 93;
   const bool shortY = toGo <= 2;
   const bool longY = toGo >= 8 && down >= 2;
@@ -548,7 +580,7 @@ const DefCall* Game::cpuDefense(const OffPlay& offPlay) {
   Front front;
   if (goal || (shortY && (pers == "22" || pers == "21" || pers == "23" || pers == "31"))) front = Front::Goalline;
   else if (pers == "21" || pers == "12" || pers == "22" || pers == "13" || pers == "23" || pers == "31") front = book.base;
-  else front = (longY && down == 3 && rng.chance(0.5)) ? Front::Dime : Front::Nickel;
+  else front = (longY && down == 3 && r.chance(0.5)) ? Front::Dime : Front::Nickel;
   // the family of fronts: the book's base sets (4-3 or 3-4), its nickel packages (4-2-5, 3-3-5, 2-4-5), its dime ones
   auto fam = [](Front f) {
     switch (f) {
@@ -558,13 +590,16 @@ const DefCall* Game::cpuDefense(const OffPlay& offPlay) {
       default: return f;
     }
   };
-  std::vector<const DefCall*> pool;
+  pool.clear();
+  w.clear();
   for (const DefCall* d : book.calls)
     if (fam(d->front) == front) pool.push_back(d);
   if (pool.empty())
     for (const DefCall& d : DEF_PLAYS())
       if (fam(d.front) == front && d.set.empty()) pool.push_back(&d);
-  std::vector<double> w;
+  // the tendencies (CallAdapt.h): what this offense has shown in this situation and from this formation
+  const bool adapt = callTune().adapt > 0;
+  const DefRead adaptRead = adapt ? readOffense(tend[poss], sitBucket(down, toGo), formation) : DefRead();
   for (const DefCall* dp : pool) {
     const DefCall& d = *dp;
     double x = defSchemeLean(book.scheme, d);
@@ -575,9 +610,9 @@ const DefCall* Game::cpuDefense(const OffPlay& offPlay) {
     // Cover 0 (no deep help) is a situational call: short yardage / goal line / desperation
     if (d.coverage == Coverage::C0 && !shortY && !goal) x *= 0.12;
     if (tempo() == Tempo::Hurry && margin(other(poss)) > 0 && d.hasTag("prevent")) x += 2;
+    if (adapt) x *= defAdaptMul(adaptRead, d);
     w.push_back(x);
   }
-  return rng.weighted(pool, w);
 }
 
 // ------------------------------------------------------------------ penalties
@@ -743,6 +778,9 @@ PlayLog Game::finishPlay(PlaySim& sim) {
   const int startDown = down;
   const double startToGo = toGo;
   if (onPlayResult) onPlayResult(sim, res);
+  // the call into both teams' tendencies (CallAdapt.h): what was called here and what it got (whoever called it)
+  if (play.type != PlayType::Kneel && play.type != PlayType::Spike && sim.cfg.defCall)
+    noteCall(tend[ok], tend[dk], down, toGo, play, *sim.cfg.defCall, playEpa(down, toGo, los, res), playSuccess(down, toGo, res), res.yards);
   // fatigue / injuries
   for (Ent* e : sim.ents) {
     Player* p = e->p;
@@ -2113,7 +2151,8 @@ std::optional<PlayLog> Game::simStep() {
     applyPresnap(*pre);
     return log.back();
   }
-  const OffPlay* op = cpuOffense();
+  const OffPlay* op = scriptOffense ? scriptOffense(*this) : nullptr;
+  if (!op) op = cpuOffense();
   const DefCall* dc = cpuDefense(*op);
   auto sim = makePlay(*op, *dc);
   sim->runToEnd();

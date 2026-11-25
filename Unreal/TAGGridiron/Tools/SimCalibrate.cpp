@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
     if (std::strcmp(argv[i], "--set") == 0 && i + 1 < argc) {  // --set name=value: override a tag::Tune constant
       const std::string kv = argv[++i];
       const size_t eq = kv.find('=');
-      if (eq == std::string::npos || !setTune(kv.substr(0, eq), std::atof(kv.c_str() + eq + 1))) {
+      if (eq == std::string::npos || !(setTune(kv.substr(0, eq), std::atof(kv.c_str() + eq + 1)) || setCallTune(kv.substr(0, eq), std::atof(kv.c_str() + eq + 1)))) {
         std::fprintf(stderr, "unknown tune %s\n", kv.c_str());
         return 2;
       }
@@ -171,6 +171,22 @@ int main(int argc, char** argv) {
   // a carry by the run's style (a draw should not trail the inside zone by much)
   double lbD[4][3] = {{0}}, lbN[4][3] = {{0}};
   Rate ypcStyle[5];
+  // combo blocks (Tune::comboBlock, 01 #4): per designed run carried, the pairs set, doubles formed, climbs, climbs that
+  // got a block on their man (and when), run double-team seconds, linebackers a lineman blocked; yards a carry with one
+  double cbRuns = 0, cbSet = 0, cbDbl = 0, cbClimb = 0, cbHit = 0, cbHitT = 0, cbDblT = 0, cbLb = 0, cbLbHit = 0;
+  Rate cbYpc[2];
+  // a designed run's path (A7 backs read blocks / A8 gap integrity): by where it crossed the line - nflverse's run_gap
+  // classes, middle (inside the guards), guard, tackle, end - the share, yards a carry, stuffed, 10+, and the depth of
+  // first contact; cutbacks and bounces (crossing 2.5 yd to the back side / the outside of the aiming point), outside
+  // runs the edge turned back inside, time to the line, and NGS efficiency (yd run per yd gained, backs)
+  double gcN[4] = {0, 0, 0, 0}, gcY[4] = {0, 0, 0, 0}, gcLe0[4] = {0, 0, 0, 0}, gc10[4] = {0, 0, 0, 0}, gcC[4] = {0, 0, 0, 0}, gcCN[4] = {0, 0, 0, 0};
+  Rate rnCut, rnBounce, rnCutYpc, rnTurn, rnTlos, rnTlosH;
+  double rnDist = 0, rnDist0 = 0, rnGain = 0;
+  double styX[5][4] = {{0}}, styY[5][4] = {{0}}, styAim[5][4] = {{0}};
+  // stunts (A12): dropbacks with a twist and without - pressure, sacks, pass-offs a dropback; the twists one of the two
+  // men won. Match coverage (A11): passes against each shell - completion, yards an attempt, broken up, carries a dropback
+  Rate stPress[2], stSack[2], stOffs[2], stWon;
+  std::map<std::string, Rate> cvComp, cvYpa, cvPbu, cvCarry;
   // the season: every team's wins and point differential (ties a half) and its OVR, by season
   std::vector<std::pair<int, int>> sched;
   if (seasons > 0) {
@@ -395,6 +411,51 @@ int main(int argc, char** argv) {
         if (r.kind == PlayKind::Run && op.type == PlayType::Run && op.run) {
           const int st = static_cast<int>(op.run->style);
           if (st >= 0 && st < 5) ypcStyle[st].n++, ypcStyle[st].w += r.yards;
+          if (op.run->style != RunStyle::Sneak) {
+            cbRuns++;
+            cbSet += r.comboSet;
+            cbDbl += r.comboDbl;
+            cbClimb += r.comboClimb;
+            cbHit += r.comboHit;
+            cbHitT += r.comboHitT;
+            cbDblT += r.runDblT;
+            cbLb += r.lbN;
+            cbLbHit += r.lbBlocked;
+            cbYpc[r.comboDbl > 0 ? 1 : 0].n++;
+            cbYpc[r.comboDbl > 0 ? 1 : 0].w += r.yards;
+          }
+          if (op.run->style != RunStyle::Sneak && r.runDesigned) {
+            // (a run that crossed by where it crossed; one stopped behind the line by the gap it was aimed at, as the
+            // charter has a stuffed run - with the crossing point for it, every stuff in the backfield is "middle")
+            const double ay = std::fabs(r.runCrossed || std::getenv("TAG_GAPEND") ? r.runCrossDy : r.runAimDy);
+            const int gc = ay < 1.35 ? 0 : ay < 2.7 ? 1 : ay < 4.05 ? 2 : 3;
+            {
+              // (by the run's style and its aiming point's class: where it crossed, and its yards)
+              const double aa = std::fabs(r.runAimDy);
+              const int ac = aa < 1.35 ? 0 : aa < 2.7 ? 1 : aa < 4.05 ? 2 : 3;
+              const int sty = static_cast<int>(op.run->style);
+              if (sty >= 0 && sty < 5) styX[sty][gc]++, styY[sty][gc] += r.yards, styAim[sty][ac]++;
+            }
+            gcN[gc]++;
+            gcY[gc] += r.yards;
+            gcLe0[gc] += r.yards <= 0;
+            gc10[gc] += r.yards >= 10;
+            if (r.runContactX > -98) gcC[gc] += r.runContactX, gcCN[gc]++;
+            if (std::fabs(r.runAimDy) >= 1.0) {
+              const double sgn = r.runAimDy > 0 ? 1.0 : -1.0;
+              const double off = (r.runCrossDy - r.runAimDy) * sgn;
+              rnCut.n++, rnBounce.n++;
+              rnCut.w += off < -2.5;
+              rnBounce.w += off > 2.5;
+              if (off < -2.5) rnCutYpc.n++, rnCutYpc.w += r.yards;
+              if (std::fabs(r.runAimDy) >= 3.5 && r.runCrossed) rnTurn.n++, rnTurn.w += r.runCrossDy * sgn < std::fabs(r.runAimDy) - 1.5;
+            }
+            if (r.runCrossed && r.runCrossT >= 0) {
+              rnTlos.n++, rnTlos.w += r.runCrossT;
+              if (r.runHandT >= 0) rnTlosH.n++, rnTlosH.w += r.runCrossT - r.runHandT;
+            }
+            if (r.rusher && r.rusher->pos == Pos::RB) rnDist += r.runDist, rnDist0 += r.runDist0, rnGain += r.yards;
+          }
         }
       }
       if (!sim.isReturn() && !sim.cfg.place) {
@@ -416,6 +477,21 @@ int main(int argc, char** argv) {
         if (r.kind == PlayKind::Run && r.rusher) {
           manRun[r.rusher].n++;
           manRun[r.rusher].w += r.yards;
+        }
+        if ((r.kind == PlayKind::Pass || r.kind == PlayKind::Sack || r.kind == PlayKind::Scramble) && sim.cfg.offPlay && sim.cfg.offPlay->type != PlayType::Screen && sim.cfg.defCall) {
+          const int st = r.stunt ? 1 : 0;
+          stPress[st].n++, stPress[st].w += r.pressured || r.kind == PlayKind::Sack;
+          stSack[st].n++, stSack[st].w += r.kind == PlayKind::Sack;
+          stOffs[st].n++, stOffs[st].w += r.passOffs;
+          if (st) stWon.n++, stWon.w += r.stuntWon;
+          static const char* cn[9] = {"C0", "C1", "C2", "C3", "C4", "C2M", "C3Fire", "C2T", "C6"};
+          const std::string cv = cn[static_cast<int>(sim.cfg.defCall->coverage)];
+          cvCarry[cv].n++, cvCarry[cv].w += r.matchCarries;
+          if (r.kind == PlayKind::Pass && !r.thrownAway) {
+            cvComp[cv].n++, cvComp[cv].w += r.complete;
+            cvYpa[cv].n++, cvYpa[cv].w += r.interception ? 0 : r.yards;
+            cvPbu[cv].n++, cvPbu[cv].w += r.pbuBy && !r.interception;
+          }
         }
         if ((r.kind == PlayKind::Pass || r.kind == PlayKind::Sack) && sim.cfg.offPlay && sim.cfg.offPlay->type != PlayType::Screen) {
           const int pa = sim.cfg.offPlay->type == PlayType::PlayAction ? 1 : 0;
@@ -1225,6 +1301,82 @@ int main(int argc, char** argv) {
       J["lb.depth1_pa"] = lbD[3][1] / (std::max)(1.0, lbN[3][1]);
       J["ypc.zone"] = ypcStyle[0].r();
       J["ypc.draw"] = ypcStyle[3].r();
+      J["ypc.gap"] = ypcStyle[1].r();
+      J["ypc.stretch"] = ypcStyle[2].r();
+    }
+    {
+      const double rn = (std::max)(1.0, cbRuns);
+      std::printf("run blocking (%.0f designed runs): combos set %.2f a run, doubled %.0f%% of them, climbed %.0f%% of the doubles, the climber on his man %.0f%% of climbs "
+                  "(at %.2f s); run double teams %.2f s a run; linebackers a lineman blocked %.0f%%; yards a carry with a combo doubled %.2f (%.0f%%), without %.2f\n",
+                  cbRuns, cbSet / rn, 100 * cbDbl / (std::max)(1.0, cbSet), 100 * cbClimb / (std::max)(1.0, cbDbl), 100 * cbHit / (std::max)(1.0, cbClimb),
+                  cbHitT / (std::max)(1.0, cbHit), cbDblT / rn, 100 * cbLbHit / (std::max)(1.0, cbLb), cbYpc[1].r(), 100 * cbYpc[1].n / rn, cbYpc[0].r());
+      J["combo.set_per_run"] = cbSet / rn;
+      J["combo.dbl_pct"] = 100 * cbDbl / (std::max)(1.0, cbSet);
+      J["combo.climb_pct"] = 100 * cbClimb / (std::max)(1.0, cbDbl);
+      J["combo.hit_pct"] = 100 * cbHit / (std::max)(1.0, cbClimb);
+      J["combo.dbl_secs_per_run"] = cbDblT / rn;
+      J["combo.lb_blocked_pct"] = 100 * cbLbHit / (std::max)(1.0, cbLb);
+    }
+    {
+      // nflverse 2023 regular season designed runs (scratch nfl_runs.py): middle 26.4 % 3.70 yd, <=0 16.8 %, 10+ 7.1 %;
+      // guard 26.0 % 4.07, 15.3, 8.3; tackle 22.6 % 4.07, 19.3, 9.4; end 24.3 % 4.88, 22.2, 16.6. NGS 2023 (backs,
+      // attempt-weighted): time to the line 2.78 s, efficiency 3.91
+      static const char* gn[4] = {"middle", "guard", "tackle", "end"};
+      static const double nS[4] = {26.4, 26.0, 22.6, 24.3}, nY[4] = {3.70, 4.07, 4.07, 4.88}, nL[4] = {16.8, 15.3, 19.3, 22.2}, nT[4] = {7.1, 8.3, 9.4, 16.6};
+      const double all = (std::max)(1.0, gcN[0] + gcN[1] + gcN[2] + gcN[3]);
+      double tv = 0;
+      std::printf("designed runs by where they crossed (share / yd a carry / <=0 / 10+ / first contact past the line; NFL in brackets):");
+      for (int k = 0; k < 4; k++) {
+        const double n = (std::max)(1.0, gcN[k]);
+        std::printf("  %s %.1f%% [%.1f] %.2f [%.2f] %.0f%% [%.0f] %.0f%% [%.0f] %+.1f", gn[k], 100 * gcN[k] / all, nS[k], gcY[k] / n, nY[k], 100 * gcLe0[k] / n, nL[k], 100 * gc10[k] / n, nT[k],
+                    gcC[k] / (std::max)(1.0, gcCN[k]));
+        tv += std::fabs(100 * gcN[k] / all - nS[k]) / 2;
+        J[std::string("gap.") + gn[k] + ".share"] = 100 * gcN[k] / all;
+        J[std::string("gap.") + gn[k] + ".ypc"] = gcY[k] / n;
+        J[std::string("gap.") + gn[k] + ".le0"] = 100 * gcLe0[k] / n;
+        J[std::string("gap.") + gn[k] + ".ten"] = 100 * gc10[k] / n;
+        J[std::string("gap.") + gn[k] + ".contact"] = gcC[k] / (std::max)(1.0, gcCN[k]);
+      }
+      J["gap.share_tv"] = tv;
+      {
+        static const char* sn[4] = {"zone", "gap", "stretch", "draw"};
+        for (int s = 0; s < 4; s++) {
+          const double n = (std::max)(1.0, styX[s][0] + styX[s][1] + styX[s][2] + styX[s][3]);
+          std::printf("\n  %s runs (%.0f; aimed middle/guard/tackle/end %.0f/%.0f/%.0f/%.0f%%): crossed", sn[s], n, 100 * styAim[s][0] / n, 100 * styAim[s][1] / n,
+                      100 * styAim[s][2] / n, 100 * styAim[s][3] / n);
+          for (int k = 0; k < 4; k++) std::printf(" %s %.0f%% %.2f", gn[k], 100 * styX[s][k] / n, styY[s][k] / (std::max)(1.0, styX[s][k]));
+        }
+      }
+      std::printf("\n  cutbacks %.1f%% of aimed runs (%.2f yd a carry), bounces %.1f%%; outside runs turned back inside %.1f%%; to the line %.2f s from the snap, %.2f from the handoff "
+                  "(NGS 2.78); efficiency %.2f from the handoff, %.2f from the snap (NGS 3.91)\n",
+                  100 * rnCut.r(), rnCutYpc.r(), 100 * rnBounce.r(), 100 * rnTurn.r(), rnTlos.r(), rnTlosH.r(), rnDist / (std::max)(1.0, rnGain), rnDist0 / (std::max)(1.0, rnGain));
+      J["run.efficiency_snap"] = rnDist0 / (std::max)(1.0, rnGain);
+      const double dbs = (std::max)(1.0, stPress[0].n + stPress[1].n);
+      std::printf("stunts on %.1f%% of dropbacks (won by one of the two %.0f%%): pressure %.1f%% / %.1f%% without, sacks %.1f%% / %.1f%%, pass-offs %.2f / %.2f a dropback\n",
+                  100 * stPress[1].n / dbs, 100 * stWon.r(), 100 * stPress[1].r(), 100 * stPress[0].r(), 100 * stSack[1].r(), 100 * stSack[0].r(), stOffs[1].r(), stOffs[0].r());
+      J["stunt.rate_pct"] = 100 * stPress[1].n / dbs;
+      J["stunt.won_pct"] = 100 * stWon.r();
+      J["stunt.pressure_pct"] = 100 * stPress[1].r();
+      J["stunt.pressure_none_pct"] = 100 * stPress[0].r();
+      J["stunt.sack_pct"] = 100 * stSack[1].r();
+      J["stunt.passoffs"] = stOffs[1].r();
+      J["stunt.passoffs_none"] = stOffs[0].r();
+      std::printf("passes by shell (attempts: comp / yd an attempt / broken up, match carries a dropback):");
+      for (const auto& kv : cvComp) {
+        std::printf("  %s %.0f: %.1f%% / %.2f / %.1f%%, %.2f", kv.first.c_str(), kv.second.n, 100 * kv.second.r(), cvYpa[kv.first].r(), 100 * cvPbu[kv.first].r(), cvCarry[kv.first].r());
+        J["cov." + kv.first + ".comp"] = 100 * kv.second.r();
+        J["cov." + kv.first + ".ypa"] = cvYpa[kv.first].r();
+        J["cov." + kv.first + ".pbu"] = 100 * cvPbu[kv.first].r();
+        J["cov." + kv.first + ".carries"] = cvCarry[kv.first].r();
+      }
+      std::printf("\n");
+      J["run.cutback_pct"] = 100 * rnCut.r();
+      J["run.cutback_ypc"] = rnCutYpc.r();
+      J["run.bounce_pct"] = 100 * rnBounce.r();
+      J["run.turned_in_pct"] = 100 * rnTurn.r();
+      J["run.tlos_snap"] = rnTlos.r();
+      J["run.tlos_hand"] = rnTlosH.r();
+      J["run.efficiency"] = rnDist / (std::max)(1.0, rnGain);
     }
     J["pa.ypa_lift"] = paYpa[1].r() - paYpa[0].r();
     J["pa.ypa"] = paYpa[1].r();

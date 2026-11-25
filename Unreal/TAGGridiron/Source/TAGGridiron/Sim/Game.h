@@ -33,6 +33,7 @@
 #include <string>
 #include <vector>
 
+#include "CallAdapt.h"
 #include "Playbook.h"
 #include "PlaySim.h"
 #include "Rng.h"
@@ -200,7 +201,18 @@ class Game {
   bool shouldKneel() const;
   FourthDownCall fourthDownCall();
   const OffPlay* cpuOffense();
+  /** offPlay: only its formation is read (what a defense sees before it calls). */
   const DefCall* cpuDefense(const OffPlay& offPlay);
+  /** The CPU offense's chance of a pass call here (cpuOffense draws against it). */
+  double cpuPassProb() const;
+  /** The plays the CPU offense calls from here (pass or run) and their weights, the tendencies' lean in. */
+  void cpuOffensePool(bool pass, std::vector<const OffPlay*>& pool, std::vector<double>& w) const;
+  /** The calls the CPU defense picks from against a formation, and their weights (r: the front's coin on 3rd & long). */
+  void cpuDefensePool(const std::string& formation, Rng& r, std::vector<const DefCall*>& pool, std::vector<double>& w) const;
+  /** Each team's calls this game and what they got (CallAdapt.h): noted at every scrimmage play, whoever called it. */
+  PerTeam<Tendency> tend;
+  /** (tests) a scripted offense: a play it returns is called instead of the CPU's (nullptr: the CPU calls). */
+  std::function<const OffPlay*(Game&)> scriptOffense;
 
   // ---- penalties
   std::optional<Penalty> rollPresnap();

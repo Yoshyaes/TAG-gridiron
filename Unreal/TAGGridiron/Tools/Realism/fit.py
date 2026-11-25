@@ -20,7 +20,13 @@ ap.add_argument("--start", help="a previous fit_result.json to start from")
 ap.add_argument("--seeds", help="several seeds, comma separated: the loss is the mean over them (one seed fits its own noise: a fit at 100 games on seed 11 took the loss from 6.5 to 0.5 there and from 6.9 to 7.1 on seed 29)")
 ap.add_argument("--only", help="fit these parameters only (comma separated); the rest stay at their defaults")
 ap.add_argument("--exe", default=EXE, help="SimCalibrate build to run (a copy, so the tools can be rebuilt during a fit)")
+ap.add_argument("--fixed", default="", help="k=v,k2=v2: tunes set on every run and not fitted (a feature switched on for the fit, e.g. comboBlock=1)")
+ap.add_argument("--gap-w", type=float, default=0.0, help="weight of the run-gap term: designed runs' share and yards a carry by where they went "
+                "(SimCalibrate gap.*) against nflverse 2023's run_gap classes - one unit a class 4 points of share or 0.5 yd off")
 a = ap.parse_args()
+FIXED = [kv for kv in a.fixed.split(",") if kv]
+# nflverse 2023 regular-season designed runs by run_gap class: share %, yards a carry
+GAP_NFL = {"middle": (26.4, 3.70), "guard": (26.0, 4.07), "tackle": (22.6, 4.07), "end": (24.3, 4.88)}
 EXE = a.exe
 
 # name: (default, lo, hi, first step)
@@ -113,6 +119,19 @@ P = {
     "rushLate": (2.5, 1.0, 4.0, 0.4),
     "fumbleK": (0.704, 0.4, 1.5, 0.15),
     "slideK": (0.654, 0.2, 0.9, 0.15),
+    # (backs read blocks, 02 A7: the open / shut side of a blocked man, the press of the aiming point; on by default)
+    "readOpen": (0.6, 0.2, 1.2, 0.15),
+    "readShut": (0.05, 0.0, 0.25, 0.05),
+    "readPress": (0.25, 0.05, 0.6, 0.08),
+    # (combos, gap fits, match coverage, stunts: off by default - fit them with --fixed comboBlock=1 etc.)
+    "comboT": (0.1, 0.0, 0.8, 0.15),
+    "comboReach": (0.9, 0.3, 1.2, 0.15),
+    "gapGive": (1.2, 0.3, 4.0, 0.6),
+    "gapFlow": (0.8, 0.0, 1.2, 0.2),
+    "matchCarry": (11, 7, 15, 1.5),
+    "stunts": (0.0, 0.0, 0.5, 0.08),
+    "runNearShed": (3.2, 1.0, 5.0, 0.6),
+    "armShut": (0.2, -0.4, 0.8, 0.2),
 }
 SEEDS = [int(x) for x in a.seeds.split(",")] if a.seeds else []
 if a.only:
@@ -126,6 +145,8 @@ def run1(params, seed, games):
     fd, path = tempfile.mkstemp(suffix=".json")
     os.close(fd)
     cmd = [EXE, str(games), str(seed), "--json", path]
+    for kv in FIXED:
+        cmd += ["--set", kv]
     for k, v in params.items():
         cmd += ["--set", f"{k}={v:.6g}"]
     subprocess.run(cmd, capture_output=True, check=True)
@@ -169,6 +190,11 @@ def loss(J):
             x = max(0.0, abs(z) - 1.0) ** 2 * 0.5
             if x:
                 parts[k] = round(x, 3)
+            L += x
+    if a.gap_w > 0 and "gap.middle.share" in J:
+        for g, (s, y) in GAP_NFL.items():
+            x = a.gap_w * (((J[f"gap.{g}.share"] - s) / 4) ** 2 + ((J[f"gap.{g}.ypc"] - y) / 0.5) ** 2)
+            parts["gap." + g] = round(x, 3)
             L += x
     return L, parts
 

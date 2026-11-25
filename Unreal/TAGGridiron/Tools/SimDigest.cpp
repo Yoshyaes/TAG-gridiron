@@ -204,11 +204,11 @@ int main(int argc, char** argv) {
     } else if (std::strcmp(argv[i], "--set") == 0 && i + 1 < argc) {
       const std::string kv = argv[++i];
       const size_t eq = kv.find('=');
-      if (eq == std::string::npos || !setTune(kv.substr(0, eq), std::atof(kv.c_str() + eq + 1))) {
+      if (eq == std::string::npos || !(setTune(kv.substr(0, eq), std::atof(kv.c_str() + eq + 1)) || setCallTune(kv.substr(0, eq), std::atof(kv.c_str() + eq + 1)))) {
         std::fprintf(stderr, "unknown tune %s\n", kv.c_str());
         return 2;
       }
-      sets += " [--set " + kv + "]";
+      sets +=" [--set " + kv + "]";
     } else if (std::strcmp(argv[i], "--dir") == 0 && i + 1 < argc) {
       dir = argv[++i];
     } else if (std::strcmp(argv[i], "--dump") == 0 && i + 1 < argc) {

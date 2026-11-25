@@ -1658,6 +1658,7 @@ int main() {
   });
 
   t("man coverage by the body: a double move beats a man defender who reads the break (02 A1)", [&] {
+    League bodyL = createLeague(2027);  // (a league of its own: the injuries of the games in the tests before carry over)
     // Cover 1 press against the X receiver on a sluggo / an out-and-up and on a go: the man defender to his receiver when
     // the receiver is 16 yd down the field (the quarterback, a user's with the stick left alone, holds the ball behind max
     // protection). Reading
@@ -1672,8 +1673,8 @@ int main() {
       int n = 0;
       for (int k = 0; k < reps; k++) {
         PlayConfig cfg;
-        cfg.off = league[k % 32].get();
-        cfg.def = league[(k + 7) % 32].get();
+        cfg.off = bodyL[k % 32].get();
+        cfg.def = bodyL[(k + 7) % 32].get();
         cfg.offPlay = playById("trips_4verts");
         cfg.defCall = defById("base_c1");
         cfg.los = 30;
@@ -1888,6 +1889,230 @@ int main() {
     check(paOn < dbOn - 1.5, "play action did not hold the linebackers up: " + fx(paOn, 1) + " against a dropback's " + fx(dbOn, 1));
     check(drOn > izOn + 1.0, "the draw did not send the linebackers back: " + fx(drOn, 1) + " against an inside zone's " + fx(izOn, 1));
     check(drOn - izOn > drOff - izOff + 0.5, "the draw fooled them no more than when they knew the play: " + fx(drOn - izOn, 1) + " vs " + fx(drOff - izOff, 1));
+  });
+
+  t("combo blocks: the uncovered lineman doubles the man beside him, drives him, and one of the two climbs to the backer (01 #4)", [&] {
+    // an inside zone and a power against a 4-3 Cover 3 (four down, so a lineman is uncovered): how many combos are set,
+    // how many doubles form and climb, whether the climber gets his backer, and how hard a doubled lineman is driven
+    // against one blocked by one man
+    struct Out {
+      int plays = 0, set = 0, dbl = 0, climb = 0, hit = 0;
+      double pushDbl = 0, nDbl = 0, pushOne = 0, nOne = 0;
+    };
+    auto run = [&](const char* play, bool combo) {
+      const double keep = tune().comboBlock;
+      setTune("comboBlock", combo ? 2 : 0);  // (2: gap runs double too, not only the zone runs)
+      Out o;
+      Rng rng(818);
+      for (int k = 0; k < 300; k++) {
+        PlayConfig cfg;
+        cfg.off = league[k % 32].get();
+        cfg.def = league[(k + 7) % 32].get();
+        cfg.offPlay = playById(play);
+        cfg.defCall = defById("base_c3");
+        cfg.los = 30;
+        cfg.ballY = FIELD_W / 2;
+        cfg.flip = k % 2 == 0;
+        cfg.worldDir = 1;
+        cfg.weather.tempF = 60;
+        cfg.rng = rng.fork();
+        PlaySim sim(cfg);
+        while (sim.isLive() && sim.t < 12) {
+          sim.step();
+          if (sim.t > 1.5) continue;
+          for (const Ent* d : sim.def) {
+            if (!d->isDL || d->engagedBy.empty() || d->engagedBy[0]->state != EntState::RunBlock) continue;
+            if (d->engagedBy.size() >= 2) o.pushDbl += d->linePush, o.nDbl++;
+            else o.pushOne += d->linePush, o.nOne++;
+          }
+        }
+        if (sim.isLive()) sim.endPlay("tackle");
+        const PlayResult& r = *sim.result;
+        o.plays++;
+        o.set += r.comboSet;
+        o.dbl += r.comboDbl;
+        o.climb += r.comboClimb;
+        o.hit += r.comboHit;
+      }
+      setTune("comboBlock", keep);
+      return o;
+    };
+    for (const char* play : {"dbl_iz", "i_power"}) {
+      if (!playById(play)) continue;
+      const Out on = run(play, true), off = run(play, false);
+      std::printf("       (%s, 300 snaps: combos set %d, doubled %d, climbed %d, the climber on his man %d; a doubled lineman's push %+.2f against %+.2f one on one; off: %d set)\n",
+                  play, on.set, on.dbl, on.climb, on.hit, on.pushDbl / (std::max)(1.0, on.nDbl), on.pushOne / (std::max)(1.0, on.nOne), off.set);
+      check(off.set == 0 && off.dbl == 0, std::string("combos with the rule off on ") + play);
+      check(on.set >= on.plays / 2, std::string("too few combos set on ") + play + ": " + std::to_string(on.set) + " in " + std::to_string(on.plays));
+      check(on.dbl * (std::string(play) == "dbl_iz" ? 2 : 3) >= on.set, std::string("too few doubles formed on ") + play + ": " + std::to_string(on.dbl) + " of " + std::to_string(on.set));
+      check(on.climb * 2 >= on.dbl, std::string("too few climbs off the doubles on ") + play + ": " + std::to_string(on.climb) + " of " + std::to_string(on.dbl));
+      check(on.hit * 4 >= on.climb, std::string("the climber rarely got his man on ") + play + ": " + std::to_string(on.hit) + " of " + std::to_string(on.climb));
+      check(on.nDbl > 0 && on.pushDbl / on.nDbl < on.pushOne / (std::max)(1.0, on.nOne) - 0.15, std::string("a double did not drive the lineman harder than one blocker on ") + play);
+    }
+  });
+
+  // one play config for the scenario tests below
+  auto scen = [&](int k, const char* play, const char* call, Rng& rng, double down = 0, double toGo = 0) {
+    PlayConfig cfg;
+    cfg.off = league[k % 32].get();
+    cfg.def = league[(k + 7) % 32].get();
+    cfg.offPlay = playById(play);
+    cfg.defCall = defById(call);
+    cfg.los = 30;
+    cfg.ballY = FIELD_W / 2;
+    cfg.flip = k % 2 == 0;
+    cfg.worldDir = 1;
+    cfg.weather.tempF = 60;
+    if (down > 0) cfg.down = down, cfg.toGo = toGo;
+    cfg.rng = rng.fork();
+    return cfg;
+  };
+
+  t("backs read their blocks: the back presses the aiming point, then cuts off the blocks (02 A7)", [&] {
+    // an inside zone against Cover 3: how far the back is off the aiming point 2.5 yd behind the line (he presses it), and
+    // the yards a carry (sane either way)
+    auto run = [&](bool reads, double& off3, double& ypc) {
+      const double keep = tune().readBlocks;
+      setTune("readBlocks", reads ? 1 : 0);
+      Rng rng(919);
+      double offSum = 0, offN = 0, yds = 0, n = 0;
+      for (int k = 0; k < 300; k++) {
+        PlaySim sim(scen(k, "dbl_iz", "base_c3", rng));
+        bool seen = false;
+        while (sim.isLive() && sim.t < 12) {
+          sim.step();
+          const Ent* c = sim.carrier;
+          if (!seen && c && c->side == Side::Off && c->pos.x > sim.los - 2.5) {
+            seen = true;
+            offSum += std::fabs(c->pos.y - (sim.by + sim.runAimDy())), offN++;
+          }
+        }
+        if (sim.isLive()) sim.endPlay("tackle");
+        if (sim.result->kind == PlayKind::Run) yds += sim.result->yards, n++;
+      }
+      setTune("readBlocks", keep);
+      off3 = offSum / (std::max)(1.0, offN);
+      ypc = yds / (std::max)(1.0, n);
+    };
+    double offOn = 0, ypcOn = 0, offOff = 0, ypcOff = 0;
+    run(true, offOn, ypcOn);
+    run(false, offOff, ypcOff);
+    std::printf("       (inside zone, 300 snaps: off the aiming point 2.5 yd behind the line %.2f yd reading the blocks, %.2f without; %.2f / %.2f yd a carry)\n", offOn, offOff, ypcOn, ypcOff);
+    check(offOn < offOff - 0.1, "the back did not press the aiming point: " + fx(offOn, 2) + " against " + fx(offOff, 2));
+    check(ypcOn > 2.5 && ypcOn < 7.0, "yards a carry reading the blocks " + fx(ypcOn, 2));
+  });
+
+  t("gap integrity: every man in the front has a gap, the edge is set each side, outside runs get turned inside (02 A8)", [&] {
+    auto run = [&](bool fit, double& turned, double& bounced, int& badSetup) {
+      const double keep = tune().gapFit;
+      setTune("gapFit", fit ? 1 : 0);
+      Rng rng(929);
+      double tn = 0, bn = 0, n = 0;
+      badSetup = 0;
+      for (int k = 0; k < 300; k++) {
+        PlaySim sim(scen(k, "ace_stretch", "base_c3", rng));
+        if (fit) {
+          int edge[2] = {0, 0}, unfit = 0;
+          for (const Ent* d : sim.def) {
+            if (d->contain) edge[d->contain > 0 ? 0 : 1]++;
+            if (d->isDL && !d->fitOn) unfit++;
+          }
+          if (edge[0] < 1 || edge[1] < 1 || unfit) badSetup++;
+        }
+        const double aim = sim.runAimDy();
+        while (sim.isLive() && sim.t < 12) sim.step();
+        if (sim.isLive()) sim.endPlay("tackle");
+        const PlayResult& r = *sim.result;
+        if (r.runDesigned && r.runCrossed && std::fabs(aim) >= 3.5) {
+          n++;
+          tn += r.runCrossDy * (aim > 0 ? 1 : -1) < std::fabs(aim) - 1.5;
+          bn += r.runCrossDy * (aim > 0 ? 1 : -1) > std::fabs(aim) + 2.5;
+        }
+      }
+      setTune("gapFit", keep);
+      turned = tn / (std::max)(1.0, n);
+      bounced = bn / (std::max)(1.0, n);
+    };
+    double tOn = 0, tOff = 0, bOn = 0, bOff = 0;
+    int badOn = 0, badOff = 0;
+    run(true, tOn, bOn, badOn);
+    run(false, tOff, bOff, badOff);
+    std::printf("       (stretch, 300 snaps: turned back inside %.0f%% / bounced outside the aiming point %.0f%% with gap fits, %.0f%% / %.0f%% without; %d snaps without a gap for every lineman or an edge each side)\n",
+                100 * tOn, 100 * bOn, 100 * tOff, 100 * bOff, badOn);
+    check(badOn == 0, std::to_string(badOn) + " snaps without a gap for every down lineman or an edge man each side");
+    check(tOn - bOn > tOff - bOff + 0.03, "the edge did not keep more outside runs inside: turned in less bounced " + fx(100 * (tOn - bOn), 0) + "% against " + fx(100 * (tOff - bOff), 0) + "%");
+  });
+
+  t("match coverage: Cover 3 carries #2 up the seam, Quarters' safety takes a vertical #2 (02 A11)", [&] {
+    // four verticals: at 1.8 s (the ball not out), how near the nearest underneath zone man (Cover 3) / the inside safety
+    // (Quarters) is to each #2 running vertical, with the match rules and without
+    auto near2 = [&](const char* call, bool match, int& carries) {
+      const double keep = tune().matchCov;
+      setTune("matchCov", match ? 1 : 0);
+      Rng rng(939);
+      double sum = 0, n = 0;
+      carries = 0;
+      for (int k = 0; k < 300; k++) {
+        PlaySim sim(scen(k, "trips_4verts", call, rng));
+        while (sim.isLive() && sim.t < 1.8 - 1e-9) sim.step();
+        if (!sim.isLive() || sim.passThrown) continue;
+        for (const Ent* r : sim.off) {
+          if (r->recNum != 2 || r->state != EntState::Route || r->pos.x - sim.los < 7) continue;
+          double bd = 1e9;
+          for (const Ent* d : sim.def) {
+            const bool under = d->zone.rfind("flat", 0) == 0 || d->zone.rfind("hook", 0) == 0;
+            const bool insideSafety = d->zone == "q2" || d->zone == "q3";
+            if (d->state == EntState::Zone && (std::string(call) == "base_c3" ? under : insideSafety)) bd = (std::min)(bd, dist(d->pos, r->pos));
+          }
+          if (bd < 1e8) sum += bd, n++;
+        }
+        for (const Ent* d : sim.def) carries += d->matchOn;
+      }
+      setTune("matchCov", keep);
+      return sum / (std::max)(1.0, n);
+    };
+    int c3On = 0, c3Off = 0, c4On = 0, c4Off = 0;
+    const double d3On = near2("base_c3", true, c3On), d3Off = near2("base_c3", false, c3Off);
+    const double d4On = near2("nk_c4", true, c4On), d4Off = near2("nk_c4", false, c4Off);
+    std::printf("       (four verticals at 1.8 s, nearest man to a vertical #2: Cover 3 %.1f yd matching, %.1f spot drops; Quarters %.1f / %.1f; men carrying at 1.8 s %d / %d)\n", d3On, d3Off,
+                d4On, d4Off, c3On, c4On);
+    check(c3Off == 0 && c4Off == 0, "match carries with the rules off");
+    check(d3On < d3Off - 0.4 && d3On < 3.0, "Cover 3 did not carry #2: " + fx(d3On, 1) + " yd against " + fx(d3Off, 1));
+    check(d4On < d4Off - 0.5, "the Quarters safety did not take #2: " + fx(d4On, 1) + " yd against " + fx(d4Off, 1));
+  });
+
+  t("stunts: on passing downs the line twists - the penetrator crosses first, the protection passes them off (02 A12)", [&] {
+    auto run = [&](double rate, int& stunts, int& crossed, int& offs, int& n) {
+      const double keep = tune().stunts;
+      setTune("stunts", rate);
+      Rng rng(949);
+      stunts = crossed = offs = n = 0;
+      for (int k = 0; k < 300; k++) {
+        PlaySim sim(scen(k, "dbl_curls", "base_c3", rng, 3, 8));
+        n++;
+        const Ent* pen = nullptr;
+        for (const Ent* d : sim.def)
+          if (d->stunt == 1) pen = d;
+        bool cr = false;
+        while (sim.isLive() && sim.t < 6) {
+          sim.step();
+          if (pen && sim.t < 1.6 && ((pen->engaged && pen->engaged->snapTarget != pen) || (pen->free() && pen->pos.x < sim.los - 1.0))) cr = true;
+        }
+        if (sim.isLive()) sim.endPlay("tackle");
+        stunts += sim.result->stunt != 0;
+        crossed += cr;
+        offs += sim.result->passOffs;
+      }
+      setTune("stunts", keep);
+    };
+    int sOn = 0, cOn = 0, oOn = 0, nOn = 0, sOff = 0, cOff = 0, oOff = 0, nOff = 0;
+    run(1.0, sOn, cOn, oOn, nOn);
+    run(0.0, sOff, cOff, oOff, nOff);
+    std::printf("       (3rd & 8 dropbacks: %d of %d stunted, the penetrator into his partner's gap on %d; pass-offs %d, %d with no stunts)\n", sOn, nOn, cOn, oOn, oOff);
+    check(sOff == 0, "stunts with the rule off");
+    check(sOn * 10 >= nOn * 9, "a passing down at stunts 1 did not stunt: " + std::to_string(sOn) + " of " + std::to_string(nOn));
+    check(cOn * 2 >= sOn, "the penetrator rarely got across: " + std::to_string(cOn) + " of " + std::to_string(sOn));
+    check(oOn > oOff, "the protection passed off no more twists than with none: " + std::to_string(oOn) + " against " + std::to_string(oOff));
   });
 
   // ---------------- the rules, every action of many games (Sim/GameInvariants.h)
@@ -2375,6 +2600,172 @@ int main() {
       }
       check(done, "no live punt return to test");
     }
+  });
+
+  // ---- adaptive play calling and the coach's suggestions (Sim/CallAdapt.h)
+  t("adaptive calls: the defense answers a spammed concept (a pass and a run)", [&] {
+    // a scripted offense calls one concept (each home team's first intermediate pass, then its first inside run, from 11
+    // personnel) on its first ten 1st-and-10s a game. At each call of it: the defense's whole call distribution there by
+    // its measured matchup with the concept (conceptMatchup: EPA a play given up against the concept's average; no draw,
+    // so low noise), and what the play gained; calls 1-2 (nothing seen yet) against 6-10, with the lean on and off.
+    // Thresholds (2026-11-25, seeds 2027/11/29/41/53/67/71/83): the matchup given up fell 0.0055-0.0080 (pass) and
+    // 0.0050-0.0058 (run) from calls 1-2 to 6-10, and sat 0.0055-0.0082 / 0.0059-0.0069 under the lean off: want 0.003.
+    // Yards are a guard only (80 games: +-0.6 yd a seed; answered - unanswered, calls 6-10, pass -1.15..+0.63, run
+    // -0.69..+0.27). TAG_SPAM_SEED=<n>: another seed.
+    const double keep = callTune().adapt;
+    const uint32_t seed0 = std::getenv("TAG_SPAM_SEED") ? static_cast<uint32_t>(std::atoi(std::getenv("TAG_SPAM_SEED"))) : 2027u;
+    struct Agg {
+      double n[11] = {}, m[11] = {}, yn[11] = {}, yds[11] = {};
+    };
+    auto run = [&](double adapt, int cls) {
+      callTune().adapt = adapt;
+      Agg A;
+      League L = createLeague(2027);  // (a league of its own: the injuries of the games before carry over)
+      Rng rng(seed0);
+      for (int gi = 0; gi < 80; gi++) {
+        const int h = rng.intRange(0, 31);
+        const int a = (h + 1 + rng.intRange(0, 30)) % 32;
+        GameOptions o;
+        o.seed = static_cast<uint32_t>(rng.intRange(1, 1000000000));
+        Game g(*L[h], *L[a], o);
+        const OffPlay* spam = nullptr;
+        for (const OffPlay* p : offBookFor(*g.home).plays)
+          if (offClass(*p) == cls && !p->conceptName.empty() && p->personnel == "11") {
+            spam = p;
+            break;
+          }
+        if (!spam) continue;
+        int calls = 0;
+        g.scriptOffense = [&A, &calls, spam](Game& gg) -> const OffPlay* {
+          if (gg.poss != TeamKey::Home || gg.down != 1 || gg.toGo < 10 || gg.ballOn > 85 || calls >= 10) return nullptr;
+          calls++;
+          // the defense's whole call distribution against it here (its pool and weights, an Rng of its own: no game draw)
+          std::vector<const DefCall*> pool;
+          std::vector<double> w;
+          Rng own(1);
+          gg.cpuDefensePool(spam->formation, own, pool, w);
+          double tw = 0, s = 0;
+          for (size_t i = 0; i < pool.size(); i++) tw += w[i], s += w[i] * conceptMatchup(conceptKey(*spam), offClass(*spam), defFamily(*pool[i]));
+          if (tw > 0) A.n[calls]++, A.m[calls] += s / tw;
+          return spam;
+        };
+        g.onPlayResult = [&A, &calls, spam](const PlaySim& sim, const PlayResult& res) {
+          if (sim.cfg.offPlay != spam || calls < 1) return;
+          A.yn[calls]++;
+          A.yds[calls] += res.yards;
+        };
+        g.simToEnd();
+      }
+      return A;
+    };
+    auto avg = [](const double* cnt, const double* v, int from, int to) {
+      double n = 0, s = 0;
+      for (int i = from; i <= to; i++) n += cnt[i], s += v[i];
+      return n > 0 ? s / n : 0;
+    };
+    for (const int cls : {4, 0}) {
+      const Agg off = run(0, cls), on = run(1, cls);
+      const double mEarly = avg(on.n, on.m, 1, 2), mLate = avg(on.n, on.m, 6, 10), mOff = avg(off.n, off.m, 6, 10);
+      const double yOn = avg(on.yn, on.yds, 6, 10), yOff = avg(off.yn, off.yds, 6, 10);
+      std::printf("       %s spam: matchup given up calls 1-2 %+.4f, 6-10 %+.4f (lean off %+.4f); yd a play 1-5 %.2f -> 6-10 %.2f (lean off %.2f -> %.2f)\n",
+                  offClassName(cls), mEarly, mLate, mOff, avg(on.yn, on.yds, 1, 5), yOn, avg(off.yn, off.yds, 1, 5), yOff);
+      check(mLate < mEarly - 0.003, std::string(offClassName(cls)) + ": the calls against it by the sixth call take no more away than at the first: " + fx(mEarly, 4) + " -> " + fx(mLate, 4));
+      check(mLate < mOff - 0.003, std::string(offClassName(cls)) + ": the calls against it take no more away than with the lean off: " + fx(mLate, 4) + " vs " + fx(mOff, 4));
+      check(yOn < yOff + (cls == 0 ? 0.6 : 0.9), std::string(offClassName(cls)) + ": the answered spam gains far more than the unanswered: " + fx(yOn) + " vs " + fx(yOff));
+    }
+    callTune().adapt = keep;
+  });
+  t("adaptive calls: the league's play mix stays where it is calibrated", [&] {
+    // CPU against CPU, the same games with the lean on and off: the run/pass mix, the blitz share, yards a play, points
+    const double keep = callTune().adapt;
+    struct Mix {
+      double calls = 0, pass = 0, blitz = 0, yds = 0, pts = 0, games = 0;
+      std::string first;
+    };
+    auto run = [&](double adapt) {
+      callTune().adapt = adapt;
+      Mix M;
+      League L = createLeague(2027);  // (a league of its own: the injuries of the games before carry over)
+      Rng rng(909);
+      for (int gi = 0; gi < 80; gi++) {
+        const int h = rng.intRange(0, 31);
+        const int a = (h + 1 + rng.intRange(0, 30)) % 32;
+        GameOptions o;
+        o.seed = static_cast<uint32_t>(rng.intRange(1, 1000000000));
+        Game g(*L[h], *L[a], o);
+        g.onPlayResult = [&M](const PlaySim& sim, const PlayResult& res) {
+          if (sim.cfg.offPlay->type == PlayType::Kneel || sim.cfg.offPlay->type == PlayType::Spike) return;
+          M.calls++;
+          M.pass += sim.cfg.offPlay->type != PlayType::Run ? 1 : 0;
+          M.blitz += sim.cfg.defCall->rushers() >= 5 ? 1 : 0;
+          M.yds += res.yards;
+        };
+        g.simToEnd();
+        M.pts += g.score.home + g.score.away;
+        M.games += 2;
+        if (gi == 0 && adapt > 0) {
+          // (determinism with the lean on: the same seed plays the same game - each in a league of its own, as the
+          // injuries of one game carry into the next)
+          auto once = [h, a, &o] {
+            League L2 = createLeague(2027);
+            Game g2(*L2[h], *L2[a], o);
+            g2.simToEnd();
+            return std::to_string(g2.score.home) + "-" + std::to_string(g2.score.away) + "-" + std::to_string(g2.log.size());
+          };
+          const std::string r1 = once(), r2 = once();
+          check(r1 == r2, "the same seed played a different game with the lean on: " + r1 + " vs " + r2);
+        }
+      }
+      return M;
+    };
+    const Mix off = run(0), on = run(1);
+    callTune().adapt = keep;
+    const double pOff = 100 * off.pass / off.calls, pOn = 100 * on.pass / on.calls;
+    const double bOff = 100 * off.blitz / off.calls, bOn = 100 * on.blitz / on.calls;
+    const double yOff = off.yds / off.calls, yOn = on.yds / on.calls;
+    const double ptOff = off.pts / off.games, ptOn = on.pts / on.games;
+    std::printf("       lean off / on: pass calls %.1f / %.1f %%, 5+ rushers %.1f / %.1f %%, yds a play %.2f / %.2f, points %.1f / %.1f\n", pOff, pOn, bOff, bOn, yOff, yOn, ptOff, ptOn);
+    check(std::fabs(pOn - pOff) <= 2.0, "pass calls moved " + fx(pOn - pOff, 1) + " points");
+    check(std::fabs(bOn - bOff) <= 2.5, "blitz share moved " + fx(bOn - bOff, 1) + " points");
+    check(std::fabs(yOn - yOff) <= 0.25, "yards a play moved " + fx(yOn - yOff));
+    check(std::fabs(ptOn - ptOff) <= 2.0, "points moved " + fx(ptOn - ptOff, 1));
+  });
+
+  t("coach suggestions: from the book, explained, deterministic, the game's RNG untouched", [&] {
+    GameOptions o;
+    o.seed = 777;
+    Game g(*league[5], *league[12], o);
+    int states = 0, offN = 0, defN = 0;
+    for (int step = 0; step < 400 && !g.isFinal(); step++) {
+      if (g.phase == GamePhase::Scrimmage && g.down < 4) {
+        const uint32_t before = g.rng.state();
+        const std::vector<CallSuggestion> a = suggestOffense(g);
+        const std::vector<CallSuggestion> b = suggestOffense(g);
+        const std::string form = offBookFor(g.offense()).formations.empty() ? std::string() : offBookFor(g.offense()).formations[0];
+        const std::vector<CallSuggestion> d = suggestDefense(g, form);
+        const std::vector<std::string> read = coachRead(g, true, form);
+        (void)read;
+        check(g.rng.state() == before, "a suggestion drew the game's RNG");
+        check(a.size() == b.size(), "suggestions not repeatable");
+        check(!a.empty() && a.size() <= 3 && !d.empty() && d.size() <= 3, "suggestions: " + std::to_string(a.size()) + " off, " + std::to_string(d.size()) + " def");
+        std::set<std::string> seen;
+        for (size_t i = 0; i < a.size(); i++) {
+          check(a[i].off == b[i].off && a[i].reason == b[i].reason, "suggestions not repeatable");
+          check(a[i].off && offBookFor(g.offense()).has(a[i].off), "a suggestion not in the offense's book");
+          check(!a[i].reason.empty() && a[i].reason.find("  -  ") != std::string::npos, "no reason: " + a[i].reason);
+          check(seen.insert(conceptKey(*a[i].off)).second, "two suggestions of one concept: " + conceptKey(*a[i].off));
+          check(i == 0 || a[i].weight <= a[i - 1].weight + 1e-12, "suggestions not ranked");
+        }
+        for (const CallSuggestion& s : d) check(s.def && defBookFor(g.defense()).has(s.def) && !s.reason.empty(), "a defensive suggestion not in the book or unexplained");
+        states++;
+        offN += static_cast<int>(a.size());
+        defN += static_cast<int>(d.size());
+        if (states == 40) std::printf("       e.g. %s: %s / %s\n", g.downText().c_str(), a[0].reason.c_str(), d[0].reason.c_str());
+      }
+      g.simStep();
+    }
+    check(states >= 40, "too few states: " + std::to_string(states));
+    check(offN >= states * 2 && defN >= states * 2, "fewer than two suggestions a call on average");
   });
 
   std::printf("\n%d passed, %d failed\n", passCount, failCount);
