@@ -161,15 +161,37 @@ public:
 		if (!PendingCarry.IsNearlyZero(1.f)) SetActorLocation(GetActorLocation() + FVector(PendingCarry.X, PendingCarry.Y, 0.f));
 		PendingCarry = FVector::ZeroVector;
 		VisOffset = FVector::ZeroVector; bFollowActive = false; LastSimLoc = GetActorLocation();
+		AvoidOff = FVector::ZeroVector; // (his step-aside is in the place handed over too: AvoidOthers)
 	}
+	/** Personal space off the live play (AvoidOthers): before the snap and after the whistle, a man walking or jogging
+	 *  steps aside from anyone he would pass inside half a metre of in the next 0.6 s (each takes half), on top of his sim
+	 *  spot and eased; what he still has when something else takes him (the snap, a fall, a scene) eases out as any
+	 *  offset does. The walk-ins and the jogs back ran men through each other (new2 defects: 22 high in 40 plays, none
+	 *  live). -TagNoAvoid. */
+	FVector AvoidOff = FVector::ZeroVector;
+	FVector AvoidVelW = FVector::ZeroVector; // his velocity this frame, for the others' look ahead
+	uint64 AvoidFrame = 0;                   // the frame he was last driven
+	bool bAvoidUpright = false;              // on his feet then (an obstacle to the others)
+	bool bAvoidListed = false;
+	void AvoidOthers(const FVector& Location, const FVector& VelWorld, float DeltaTime);
 	FVector PendingCarry = FVector::ZeroVector; // travel a capture leaves for the actor to take next frame
 	// (GetBallHold) which hand carries the ball: the arm that stays tucked, smoothed and latched (per frame it flipped
 	// hands every few frames as the free arm swung past the chest, bc5)
 	mutable float BallSideEma = 0.f;
 	mutable bool bBallLeft = false;
 	mutable uint64 BallSideFrame = 0;
+	// (GetBallHold) the visible body where its last pose was shown, before anything moved him this frame: a re-seat
+	// (StartGetUp stands the actor where the body lies, turned to it) moves the mesh before its new pose is evaluated,
+	// and the ball, read off the old pose in the new place, jumped 3.4 m for a frame (new2 defects: ball_teleport, held)
+	FTransform ShownMeshXf = FTransform::Identity;
+	uint64 ShownMeshFrame = 0;
+	uint64 ReseatFrame = 0;   // the frame a re-seat moved him (StartGetUp)
+	float ShownMoveCm = 0.f;  // how far his drive this frame expects him to go (sim speed x frame)
+	void NoteShownMesh(float ExpectCm);
+	bool GetBallHoldPose(FVector& OutLoc, FRotator& OutRot) const;
 	FVector SepNow = FVector::ZeroVector; // the push that keeps him out of another body, eased (AMatchDirector::ResolveEngagedOverlap)
 	float VisOffsetCm() const { return static_cast<float>(VisOffset.Size2D()); } // how far the body is from its sim spot (telemetry)
+	float GetExertion() const { return Exertion; } // 0..1, the face's breathing (UpdateFace); the stadium's sweat on the kit reads it (A6)
 	/** How long a fall eases from where he was onto its anchor (a pile-on from a few yards away travels there). */
 	void SetFallEaseTime(float T) { FallEaseT = FMath::Max(0.05f, T); }
 
@@ -278,6 +300,20 @@ public:
 	/** A double team (two blockers on one rusher): the three men on their parts of one of the pack's three-man captures,
 	 *  each blocker the part on his own side. Returns the seconds it runs (0: none played). */
 	static float PlayRepDouble(AAthlete* Rusher, AAthlete* B1, AAthlete* B2, int32 Which);
+	/** A run block's double team (the sim's combo, Tune::comboBlock): the down lineman and his two run blockers on a
+	 *  three-man capture of one (pack_dbl.json "run"), a drive when the blockers are winning the rep (bDrive), a stand-off
+	 *  or the start of a climb otherwise. Each part ends when the sim takes the double apart (RunDblHeld). The seconds it
+	 *  runs (0: none). Started from the down lineman's own drive (TryRunDouble), not the director. */
+	static float PlayRepRunDouble(AAthlete* Down, AAthlete* B1, AAthlete* B2, int32 Which, bool bDrive);
+	/** The down lineman: two run blockers on him now (the men whose block partner he is) start a run double. */
+	bool TryRunDouble();
+	/** The run blockers on this man this frame (up to two), and his co-blocker's for a blocker. */
+	int32 RunBlockersOn(AAthlete* Out[2]) const;
+	AAthlete* CoBlocker() const;
+	/** His part of a run double still fits what the sim has (a blocker still on the man, the man still with two on him). */
+	bool RunDblHeld() const;
+	TWeakObjectPtr<AAthlete> RunDblOn; // the down lineman of the run double he is part of
+	double RunDblNext = 0.0;           // (the down lineman) no new run double before this (world seconds)
 	/** A handoff: the quarterback and the back on their parts of one of the pack's handoffs, timed so the exchange
 	 *  comes ExchangeIn seconds from now. False when none fits. */
 	static bool PlayRepHandoff(AAthlete* QB, AAthlete* Back, bool bGun, float ExchangeIn, int32 Which);
@@ -631,6 +667,28 @@ private:
 	float LookUpMax = 20.f; // how far up his face may turn (eased: 45 deg watching a ball in the air, 20 otherwise)
 	float HeadUpT = 0.f, HeadUpMax = 0.f; // -TagHeadLog: how long his face has been turned up at the stands
 	float ArmSlot = 0.f, StyleJitter = 0.f;
+	/** Signature (Research/NextLevel 01 #8, #10; -TagNoSignature: the old picks by roster id). A number of his own from who
+	 *  he is - his name and position, not where the roster put him - and from his body and ratings his gait: the cadence
+	 *  his matched loops play at (the stride warp makes up the speed: under 1 a long strider, over 1 quick short steps)
+	 *  and his posture at speed (forward lean: + low and compact, - upright). In each capture library a man prefers two of
+	 *  the full pool (every third pick still the game's rotation); a Superstar or X-Factor always his first, and his
+	 *  locomotion style set is the one with the most captures of his body class. The pools are never cut. */
+	uint32 SigId = 0;
+	float SigCadence = 1.f;
+	float SigLeanDeg = 0.f;
+	// (SigBase slots. Stances, breakdowns and post-play stands stay by roster id: the line and the huddle are groups, and
+	// consecutive ids keep neighbours on different captures)
+	static constexpr int32 SigMove = 1;
+	static constexpr int32 SigThrow = 2;
+	static constexpr int32 SigDrop = 3;
+	static constexpr int32 SigKick = 4;
+	static constexpr int32 SigCeleb = 5;
+	void SetupSignature();
+	bool IsStarMan() const;
+	/** A fixed pick of his for a library (what Player->id was): his own number for the slot, or the id with -TagNoSignature. */
+	int32 SigBase(int32 Slot) const;
+	/** A library pick sequence: Seq (the game's rotation) turned into his preference (see SigId). */
+	int32 SigSeq(int32 Slot, int32 Seq) const;
 	// body physics inputs (TagRetargetAnimInstance): the lean from the measured acceleration, planted feet pinned
 	void MeasureMotion(const FVector& SimPos, float Dt);
 	FVector LeanSmoothed = FVector::ZeroVector;
@@ -772,8 +830,10 @@ struct FAthleteAssets
 	TArray<FLineRep> RepLoops, RepWins, RepBigWins, RepHolds, RepPowerHolds;
 	/** The pack's three-man pass-block double teams (pack_dbl.json, Tools/Art/pack_dbl.py): the defender's part, the
 	 *  blocker on his left (A) and on his right (B), and the stretch [T0, T1] where both are on him and the pile holds. */
-	struct FDoubleRep { TStrongObjectPtr<UAnimSequence> D, A, B; float T0 = 0.f, T1 = 0.f; };
+	struct FDoubleRep { TStrongObjectPtr<UAnimSequence> D, A, B; float T0 = 0.f, T1 = 0.f; int32 Out = 0; };
 	TArray<FDoubleRep> RepDoubles;
+	// run blocks' double teams (pack_dbl.json Kind "run"; Out 0 drive, 1 hold, 2 climb; the defender's wins are left out)
+	TArray<FDoubleRep> RepRunDoubles;
 	/** The pack's two-man handoffs (pack_handoffs.json, Tools/Art/pack_handoffs.py): the quarterback's part, the back's,
 	 *  the exchange T seconds in, and whether it is from the shotgun / pistol. */
 	struct FHandoffRep
@@ -1044,13 +1104,27 @@ struct FAthleteAssets
 	 *  only where nothing of his own fits; a class has 8-12 captures, too few to stand alone in every direction). Empty
 	 *  where the databases are not built (the style set as before). The tired captures (MG_NonBC_Fatigued_MC_*) are in
 	 *  none of them: MMFatigued[gait] is searched besides only by a tired man (Player::fatigue, -TagFatigueGait=0.35)
-	 *  after the first 2 s of a live play. -TagNoStyleSets: every man on the style sets as before. */
+	 *  after the first 2 s of a live play. Off by default (it put more men on one loop at once: Athlete.cpp, the set
+	 *  choice in DriveMotionMatching); -TagStyleSets turns it on, -TagNoStyleSets keeps it off whatever else is given. */
 	TArray<class UPoseSearchDatabase*> MMMoveC[3][6][3], MMStartC[3][6][3], MMPivotC[3][6][3];
 	class UPoseSearchDatabase* MMFatigued[3] = {nullptr, nullptr, nullptr};
 	bool bMMStyle = false; // any class set is in
 	/** The class a capture was filmed in, from its name (0 big, 1 medium, 2 agile, 3 tired, -1 general): the style-share
 	 *  stats ("TAG style share") and the editor script share these rules. */
 	static int32 CaptureClass(const FString& Name);
+	/** -TagStyleSets given (and not -TagNoStyleSets): the class sets and the tired-gait set are loaded and searched. */
+	static bool StyleSetsOn();
+	/** Signature styles on (not -TagNoSignature): AAthlete::SigId. */
+	static bool SignatureOn();
+	/** -TagSigClassSets: the body-class sets for the Superstars and X-Factors alone (everyone else on the style sets). */
+	static bool SigClassSets();
+	/** The class sets are loaded: -TagStyleSets, or -TagSigClassSets. */
+	static bool ClassSetsLoad();
+	/** The style set (0-5) of a gait whose loops hold the largest share of captures of body class Cls (ties: by Sig);
+	 *  Fallback when nothing is loaded. Counted once per gait from the loaded databases. */
+	int32 SignatureSet(int32 Gait, int32 Cls, uint32 Sig, int32 Fallback) const;
+	mutable int32 MMSetClassN[3][6][5] = {};  // [gait][set][capture class + 1: general, big, medium, agile, tired]
+	mutable bool bMMSetCensus[3] = {false, false, false};
 	// the man with the ball: the pack's ball-carrier loops (MG_BC_*, Tools/Art/mm_build_bc_dbs.py), the ball tucked as captured
 	TArray<class UPoseSearchDatabase*> MMBallMove[3], MMBallPivot[3], MMBallStart[3];
 	// crouched line footwork (pass sets, pulls, drive blocks), same state split: [0] loops, [1] starts, [2] pivots, [3] stops + idles

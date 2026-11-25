@@ -511,7 +511,7 @@ void SGridironOverlay::StartCallTour()
 		Shot(FString::Printf(TEXT("off_family%d"), i + 1));
 	}
 	// the first family again: a formation stepped to, the whole family, the type tabs, pages
-	Do([W] { if (auto O = W.Pin()) if (O->CallTabs.Num()) { O->CallTab = O->CallTabs[0].Key; O->CallSet.Reset(); O->CallPage = 0; O->BuildPlayCall(); } });
+	Do([W] { if (auto O = W.Pin()) if (O->CallTabs.Num()) { const int32 F0 = O->CallTabs[0].Key == CallCoachTab() && O->CallTabs.Num() > 1 ? 1 : 0; O->CallTab = O->CallTabs[F0].Key; O->CallSet.Reset(); O->CallPage = 0; O->BuildPlayCall(); } }); // (the first family: past the SUGGESTED tab)
 	Frames(10);
 	Tap(EKeys::Gamepad_DPad_Down);
 	Shot(TEXT("off_formation2"));

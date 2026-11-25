@@ -3,7 +3,25 @@
 #include "PoseSearch/PoseSearchDatabase.h"
 #include "Animation/AnimSequence.h"
 #include "Animation/AnimRootMotionProvider.h"
+#include "Animation/AnimTraceDefines.h"
 #include "Misc/CommandLine.h"
+
+/** -TagMMDeadBlend asked for and the engine node usable here: never in a build with anim tracing (see the constructor). */
+static bool TagMMDeadBlendUsable()
+{
+	static const bool bAsked = FParse::Param(FCommandLine::Get(), TEXT("TagMMDeadBlend"));
+#if ANIM_TRACE_ENABLED
+	static bool bWarned = false;
+	if (bAsked && !bWarned)
+	{
+		bWarned = true;
+		UE_LOG(LogTemp, Warning, TEXT("TAG: -TagMMDeadBlend ignored: the engine's dead blending node asserts outside an Anim Blueprint in a build with anim tracing"));
+	}
+	return false;
+#else
+	return bAsked;
+#endif
+}
 
 void FTagRootTapNode::Evaluate_AnyThread(FPoseContext& Output)
 {
@@ -150,7 +168,8 @@ void FTagMotionMatchProxy::PreUpdate(UAnimInstance* InAnimInstance, float DeltaS
 			I->MatchedClipDir = Move.GetSafeNormal2D();
 			// the node plays at WantedPlayRate (= MatchPlayRate for a fixed interval) x multiplier
 			if (ClipSpeed > 60.f && I->SimSpeed > 60.f)
-				Mul = FMath::Clamp(I->SimSpeed / ClipSpeed, I->SpeedMatchMin, I->bCrouchGait ? I->CrouchSpeedMatchMax : I->SpeedMatchMax) / FMath::Max(I->MatchedWantedRate, 0.1f);
+				Mul = FMath::Clamp(I->SimSpeed / ClipSpeed, I->SpeedMatchMin, I->bCrouchGait ? I->CrouchSpeedMatchMax : I->SpeedMatchMax) / FMath::Max(I->MatchedWantedRate, 0.1f) *
+					FMath::Clamp(I->Cadence, 0.85f, 1.15f);
 		}
 		else
 		{
@@ -302,8 +321,11 @@ UTagMotionMatchInstance::UTagMotionMatchInstance(const FObjectInitializer& Objec
 		UserBlendTime = UBlend;
 	}
 	// -TagMMDeadBlend: transitions by the engine's dead blending instead of the blend stack (DeadNode): the node asks for an
-	// inertial blend of BlendTime and keeps one clip playing
-	static const bool bMMDead = FParse::Param(FCommandLine::Get(), TEXT("TagMMDeadBlend"));
+	// inertial blend of BlendTime and keeps one clip playing. NOT AVAILABLE in this graph: FAnimNode_DeadBlending's
+	// Evaluate traces under its node index (GetNodeIndex), which only an Anim Blueprint gives a node - in a C++ graph it
+	// asserts (NodeData, AnimNodeBase.h) on the first matched update in any build with anim tracing (Development: the
+	// 24 Nov bench crashed both runs). The flag is ignored until the node can be hosted; the wiring is kept for that.
+	static const bool bMMDead = TagMMDeadBlendUsable();
 	if (bMMDead)
 	{
 		SetMatchSetting(TEXT("bUseInertialBlend"), true);
@@ -371,6 +393,6 @@ void UTagMotionMatchInstance::SetDatabases(TConstArrayView<UPoseSearchDatabase*>
 
 FAnimInstanceProxy* UTagMotionMatchInstance::CreateAnimInstanceProxy()
 {
-	static const bool bMMDead = FParse::Param(FCommandLine::Get(), TEXT("TagMMDeadBlend"));
+	static const bool bMMDead = TagMMDeadBlendUsable();
 	return new FTagMotionMatchProxy(this, &HistoryNode, &OffsetNode, &MatchNode, bMMDead ? &DeadNode : nullptr);
 }

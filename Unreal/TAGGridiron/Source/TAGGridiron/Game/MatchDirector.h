@@ -16,8 +16,12 @@
 #include "Game/TagMoveBuffer.h"
 #include "Game/TagContact.h"
 #include "Game/TagFeel.h"
+#include "Game/TagBroadcast.h"
 #include "MatchDirector.generated.h"
 
+struct FTagBcState;
+struct FTagBcBeat;
+class STagWipe;
 class AAthlete;
 class AStadium;
 class ACineCameraActor;
@@ -149,6 +153,18 @@ public:
 	/** The bodies meeting this frame (Game/TagContact.h; the same as FTagContacts::Get().ThisFrame()). */
 	TArrayView<const FTagContact> ContactsThisFrame() const { return FTagContacts::Get().ThisFrame(); }
 
+	// ---- what the broadcast shows now (Game/TagBroadcast.h, made in Game/MatchBroadcast.cpp), for the on-screen
+	// graphics: the replay (its angle, subject and key moment), the between-play shot, the pregame open and its
+	// matchup, the wipe. Plain data, updated every frame; bOn false when there is none.
+	const FTagReplayView& ReplayNow() const { return ReplayView; }
+	const FTagShotView& ShotNow() const { return ShotView; }
+	const FTagPregameView& PregameNow() const { return PregameView; }
+	const FTagHalftimeView& HalftimeNow() const { return HalftimeView; }
+	const FTagPostgameView& PostgameNow() const { return PostgameView; }
+	FTagWipeView WipeNow() const;
+	/** The presentation pace this game plays at (Settings > Presentation, Auto resolved; -TagPace= over it). */
+	ETagPace PaceNow() const;
+
 private:
 	// flow
 	void Next();
@@ -217,9 +233,10 @@ private:
 	TMap<int32, TObjectPtr<AAthlete>> Athletes;
 
 	/** Instant replay: every visible player's shown pose and the ball, sampled at 30 Hz from the snap to just after
-	 *  the whistle, played back in slow motion from a field-level reverse angle after a big play. */
+	 *  the whistle, played back after a big play as the broadcast's package (MatchBroadcast.cpp: its angles, its speed
+	 *  ramp through the key moment, the wipe). */
 	struct FReplayAth { int32 Id = 0; FTransform World; TArray<FQuat4f> Rot; TArray<FVector3f> Pos; };
-	struct FReplayFrame { float T = 0.f; FTransform Ball; bool bBall = false; TArray<FReplayAth> Ath; };
+	struct FReplayFrame { float T = 0.f; float SimT = 0.f; FTransform Ball; bool bBall = false; TArray<FReplayAth> Ath; }; // (SimT: the sim's clock, for its events)
 	TArray<FReplayFrame> ReplayBuf;
 	float ReplayClock = 0.f, ReplayPostRec = 0.f, ReplayT = 0.f, ReplayEnd = 0.f;
 	int32 ReplayIdx = 0, ReplayCount = 0;
@@ -601,8 +618,99 @@ private:
 	void TickStands();
 	void HomeCheer(float Level, tag::TeamKey For);
 	bool bStandsUp = false;
-	/** Once a frame from Tick (after the sound): the overlays and the stands. */
+	/** Once a frame from Tick (after the sound): the overlays and the stands, the shots, the wipe, the open. */
 	void TickBroadcast(float Dt);
+	/** The package around the plays (Research/NextLevel/04 A2, A3, A5, A8; state in FTagBcState, made on first use):
+	 *  - the replay: three or four angles chosen by the play, two on a touchdown or a takeaway, a speed ramp through the
+	 *    key moment (the catch, the hit, the release), the TAG wipe in and out (Game/TagWipe.h). -TagReplayOne: one
+	 *    field-level reverse at 0.55x as before, still under the wipe (A/B).
+	 *  - the shots between the plays: a lead shot at the whistle (the man who made the play) and after the replay one or
+	 *    two cappers (the beaten man, a bench, a coach, the crowd, an official on a flag) and a wide reset, picked by
+	 *    the play's context with cooldowns and the store of recent picks (Game/TagRecent.h), every shot checked for a
+	 *    posed subject and a clear lens, a wide reset when it fails. -TagShotsOld: the one cut-in as before (A/B).
+	 *  - the pace (Settings > Presentation) and the one skip rule: a confirm press skips the shot, replay or open on
+	 *    screen; nothing more is skipped for 0.3 s. The clocks of a played game hold while a shot is on screen.
+	 *  - the pregame open: a crane over the stadium, the matchup card, both kickoff units on the field, short or long by
+	 *    the pace. -TagNoOpen: the old wait for the booth (A/B). */
+	std::shared_ptr<FTagBcState> BcState;
+	FTagBcState& Bc();
+	TSharedPtr<STagWipe> Wipe;
+	FTagReplayView ReplayView;
+	FTagShotView ShotView;
+	FTagPregameView PregameView;
+	FTagHalftimeView HalftimeView;
+	FTagPostgameView PostgameView;
+	uint32 BroadcastSeed = 0;     // the game's seed (StartMatch): the shots' tie-breaks; never the sim's own dice
+	float ShotFocal = 50.f, ShotAperture = 1.2f; // (the lens of the shot on screen: UpdateCamera)
+	void PlanReplay();
+	void SetupReplayRun();
+	/** The film at time T on the bodies and the ball; where the ball and the run's subject are. */
+	void ApplyReplayAt(float T, FVector& OutBall, FVector& OutSubject, bool& bOutSubject);
+	void ReplayCameraFrame(float Dt, const FVector& BallAt, const FVector& SubjAt, bool bSubj, bool bCutNow);
+	void FinishReplay();
+	bool BeatsAllowed() const;
+	/** At the whistle (OnPlayDead, after DecideReplay): the play's context, the pace's say over the replay, the lead shot. */
+	void BroadcastPlayDead(const tag::PlayResult& R, const tag::Ent* Star);
+	/** When the play is in the book (ApplyPlay): the cappers and the wide reset queued; the seconds they take (the Wait). */
+	float BroadcastAfterPlay();
+	bool StartShot(const FTagBcBeat& B);
+	void EndShot(const TCHAR* How);
+	bool PlaceShot(bool bRecut);
+	/** UpdateCamera: the shot on screen sets the lens (OutP; CamLook) - false when there is none. A shot whose subject or
+	 *  lens fails is cut away from that frame, to the game camera's framing (GameT, GameLook). */
+	bool ShotCamera(float Dt, FVector& OutP, const FVector& GameT, const FVector& GameLook);
+	bool ShotOnScreen() const { return ShotView.bOn; }
+	/** The confirm press this frame (a pad's CROSS / A, ENTER, SPACE), 0.3 s after a skip at the soonest. */
+	bool BroadcastSkipPress(APlayerController* PC);
+	/** A press: the shot, replay or open on screen is skipped (true). */
+	bool BroadcastSkip(bool bPress);
+	/** A played game's clocks hold while a shot or the open is on screen (the pace never changes the game). */
+	bool BroadcastHoldsClock() const;
+	/** -TagHighlights: a shot after the replay is filmed with its play (the Wait). */
+	bool BroadcastFilming() const;
+	bool BeginPregameOpen();
+	void TickOpen(float Dt);
+	void EndOpen(const TCHAR* How);
+	/** The kickoff units at their 25s for the open and the second half (FTagBcState::Open: who, where, facing), shown. */
+	void StageKickoffUnits();
+	void DriveStagedUnits(float Dt);
+	/** The halftime and postgame shows (04 A10; MatchBroadcast.cpp): directed like the open, by the pace, one press skips
+	 *  the rest. Next() starts the halftime one at the half (true: it runs; the second half's kickoff follows it);
+	 *  ShowFinal starts the postgame one (true: it runs; ShowFinal again once it is over, the box score as before).
+	 *  -TagNoHalftimeShow / -TagNoPostgameShow: the old halftime / final (A/B). */
+	bool BeginHalftimeShow();
+	bool BeginPostgameShow();
+	void StartShowStage();
+	void TickShow(float Dt);
+	void EndShow(const TCHAR* How);
+	/** The halftime show walks the last play's men off itself (the post-play jog and the sim's poses hold off). */
+	bool BroadcastDrivesMen() const;
+	/** Substitutes (04 A11): a man coming on for the next play walks in from his sideline (PlaySim::walkFrom, as the
+	 *  men coming back from the last play do); a man going off jogs to his bench and is put away there. SubEntrySpot:
+	 *  where a man coming on starts (offense frame; false: he takes his spot as before). BeginSubsOff: the men of the
+	 *  last play not in this one set jogging; the seconds the last of them needs to be off the field. At the snap
+	 *  (BroadcastAtSnap) a man still on the field is put away, and the snap is checked: 11 a side, nobody walking.
+	 *  -TagNoSubJog: they pop on and off as before (A/B). */
+	bool SubEntrySpot(const tag::Ent* E, double MaxYd, tag::V2& Out);
+	float BeginSubsOff(const std::map<tag::Player*, FVector>& From);
+	void TickLeavers(float Dt);
+	void BroadcastAtSnap();
+	/** -TagRecentTest, -TagReplayTest, -TagShotTest, -TagPaceTest, -TagOpenTest, -TagHalftimeTest, -TagPostgameTest (BeginPlay):
+	 *  true when one started. */
+	bool BeginBroadcastTest();
+	void TickBroadcastTests(float Dt);
+	void TickBeats(float SDt);
+	void LogBroadcastSummary();
+	void BroadcastEndPlay();
+	/** CommitCameraFrame: a cut this frame (marked or not), against the wipe's cover (a replay's cuts must be under it). */
+	void NoteCutForBroadcast(bool bMarked);
+	/** The nearest head or pelvis of anybody on the field or the sidelines to At (cm), Except left out. */
+	float NearestPerson(const FVector& At, const AActor* Except) const;
+	/** Nobody at the lens C or on its line to At (men within SubjectR of At belong to the shot). */
+	bool SightClear(const FVector& C, const FVector& At, const AActor* Except, float SubjectR) const;
+	/** A lens position that is not in the turf, the stands or a stand-side person (the stadium's own people, the fans). */
+	bool ShotSpotOk(const FVector& C) const;
+	AAthlete* AthleteOfEnt(const tag::Ent* E);
 	/** Pre-snap: the user is walking his defender (the blocking preview is redone when he settles). */
 	bool bPreMoved = false;
 	float SprintStamina = 1.f; // the user's sprint (R2) stamina, 0..1, drawn under his man

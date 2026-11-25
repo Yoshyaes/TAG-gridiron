@@ -1,0 +1,122 @@
+{
+ "version": 1,
+ "provisional": true,
+ "note": "PROVISIONAL (2026-11-25): proposed by defects.py --propose-budget from two filmed 40-clip captures of 2026-11-24 (TAGAnim new2 and old1, seed 11, day dry, full quarters). Replace with a budget proposed from Fred's -TagHlNoFrames baseline: python Tools/QA/defects.py <baseline run> --no-budget --propose-budget Tools/QA/defect_budget.json [--also <more runs>/defects.json]",
+ "unit": "a class fails when count > per100 x plays / 100 + allow (high: severity-3 events, high_per100 / high_allow)",
+ "classes": {
+  "foot_slide": {
+   "per100": 231.3,
+   "allow": 2,
+   "high_per100": 0.0,
+   "high_allow": 1
+  },
+  "pose_pop": {
+   "per100": 12.5,
+   "allow": 2,
+   "high_per100": 0.0,
+   "high_allow": 1
+  },
+  "actor_teleport": {
+   "per100": 0.0,
+   "allow": 2,
+   "high_per100": 0.0,
+   "high_allow": 1
+  },
+  "sim_teleport": {
+   "per100": 15.7,
+   "allow": 2,
+   "high_per100": 0.0,
+   "high_allow": 1
+  },
+  "interpenetration": {
+   "per100": 140.7,
+   "allow": 2,
+   "high_per100": 75.0,
+   "high_allow": 1
+  },
+  "frozen": {
+   "per100": 0.0,
+   "allow": 2,
+   "high_per100": 0.0,
+   "high_allow": 1
+  },
+  "tpose": {
+   "per100": 0.0,
+   "allow": 0,
+   "high_per100": 0.0,
+   "high_allow": 0
+  },
+  "nan_bones": {
+   "per100": 0.0,
+   "allow": 0,
+   "high_per100": 0.0,
+   "high_allow": 0
+  },
+  "ball_teleport": {
+   "per100": 25.0,
+   "allow": 2,
+   "high_per100": 0.0,
+   "high_allow": 1
+  },
+  "ball_off_hand": {
+   "per100": 65.7,
+   "allow": 2,
+   "high_per100": 0.0,
+   "high_allow": 1
+  },
+  "feet_under_turf": {
+   "per100": 3.2,
+   "allow": 2,
+   "high_per100": 0.0,
+   "high_allow": 1
+  },
+  "facing_backward": {
+   "per100": 3.2,
+   "allow": 2,
+   "high_per100": 0.0,
+   "high_allow": 1
+  },
+  "official_near": {
+   "per100": 6.3,
+   "allow": 2,
+   "high_per100": 0.0,
+   "high_allow": 1
+  },
+  "camera_in_body": {
+   "per100": 0.0,
+   "allow": 0,
+   "high_per100": 0.0,
+   "high_allow": 0
+  },
+  "camera_cut_storm": {
+   "per100": 0.0,
+   "allow": 2,
+   "high_per100": 0.0,
+   "high_allow": 1
+  },
+  "carrier_off_screen": {
+   "per100": 0.0,
+   "allow": 2,
+   "high_per100": 0.0,
+   "high_allow": 1
+  },
+  "stall": {
+   "per100": 0.0,
+   "allow": 2,
+   "high_per100": 0.0,
+   "high_allow": 1
+  },
+  "clock": {
+   "per100": 0.0,
+   "allow": 0,
+   "high_per100": 0.0,
+   "high_allow": 0
+  },
+  "run": {
+   "per100": 0.0,
+   "allow": 0,
+   "high_per100": 0.0,
+   "high_allow": 0
+  }
+ }
+}

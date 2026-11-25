@@ -8,6 +8,7 @@
 
 class AMatchDirector;
 class SBox;
+class FBroadcastGfx;
 struct FCtlState;
 struct FCallPicCache;
 namespace tag { struct OffPlay; struct DefCall; }
@@ -196,6 +197,10 @@ public:
 	void ShowPlayCall(bool bOffense, bool bFourthDown, bool bTwoPoint, std::function<void(FCallChoice)> Done);
 	/** The defensive call screen's line on what the offense has come out in (its formation and personnel); empty: none. */
 	void SetCallOffenseLook(const FString& S) { CallOffLook = S; }
+	/** ... and its formation (an id; empty: unknown): the coach's suggestions read the offense's tendencies from it. */
+	void SetCallOffenseForm(const FString& FormationId);
+	/** -TagCallCoachTest: the call screen's suggestions, TRIANGLE and the call timer in a game (UI/CallCoach.cpp). */
+	void StartCallCoachTest();
 	/** Multiplayer: the player making this call ("P2 CALLING  -  PS5 CONTROLLER") and his colour; empty: none shown. */
 	void SetCallWho(const FString& S, const FLinearColor& C) { CallWho = S; CallWhoColor = C; }
 	void ShowPatChoice(std::function<void(bool)> Done);
@@ -243,6 +248,12 @@ public:
 	void StartMenuAudioTest();
 	/** -TagChartTest: at the end of a soak, who played (the passers, the runners, the returner) against the chart. */
 	static void LogChartTest(AMatchDirector* D);
+	/** The broadcast's graphics (UI/BroadcastGfx.h): the score bug and its states, the lower thirds and stat tags, the
+	 *  drive summary, the third-down graphic, the matchup card (each a Show* call with a plain struct). */
+	FBroadcastGfx& Gfx() const;
+	/** -TagGfxShots: every state of the bug and each graphic pictured, on a field colour and over a real frame, with the
+	 *  text fit at 720p / 1080p / 1440p and every team's mark checked, then exit (UI/BroadcastGfx.cpp). */
+	void StartGfxShots();
 
 	virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
 	/** A controller button (or keyboard key) centred at C, Size across, in G's local space (the glyph widgets use it too). */
@@ -260,6 +271,10 @@ public:
 
 private:
 	friend class AMatchDirector; // (the multiplayer test reads which call is up)
+	friend class FBroadcastGfx;  // (the HUD's state: on, a menu up, the flag down, the clock's offset)
+	TSharedPtr<FBroadcastGfx> GfxPtr;
+	/** The match's booth (the director's), for the graphics that go with its lines (UI/BroadcastGfx.cpp). */
+	class ATagBooth* GfxBooth() const;
 	TSharedRef<SWidget> MakeButton(const FString& Label, const FString& Sub, std::function<void()> OnClick, float Width = 420.f);
 	TSharedRef<SWidget> MakeScoreBug();
 	FText ClockText() const;
@@ -379,6 +394,29 @@ private:
 	void BuildPlayCall();
 	bool CallKey(const FKey& K, bool bRepeat);
 	void CallPick(FCallChoice C);
+	// the coach on the call screen (UI/CallCoach.cpp): the SUGGESTED tab (plays with a line on why, Sim/CallAdapt.h),
+	// his read of the tendencies, TRIANGLE calling his pick, and the call timer on the play clock that calls it when it
+	// runs out
+	TSharedPtr<struct FCallCoach> Coach;
+	FString CallOffForm;
+	static const TCHAR* CallCoachTab() { return TEXT("suggest"); }
+	/** ShowPlayCall: the suggestions, the tab (opened on), the timer armed. */
+	void CallCoachOpen();
+	/** BuildPlayCall: the SUGGESTED tab's cards (false: another tab is up). */
+	bool CallCoachCards();
+	TSharedRef<SWidget> CallCoachRead() const;
+	TSharedRef<SWidget> CallTimerWidget() const;
+	void CallTimerTick(float Dt);
+	bool CallTimerOn() const;
+	/** Seconds until the coach's pick is called (< 0: no timer). */
+	float CallTimerLeft() const;
+	/** The coach's pick: the top suggestion (4th down: his punt / kick / go); Auto when there is none. */
+	FCallChoice CallCoachPick() const;
+	FString CallCoachPickName() const;
+	/** TRIANGLE: the coach's pick called. */
+	void CallCoachPress();
+	/** CallPick: the time the call took, logged ("TAG call time"), and the timer stopped. */
+	void CallCoachPicked(const FCallChoice& C);
 	// gamepad navigation: focus the menu's button (by its order in the menu) once the menu is laid out
 	int32 PendingFocus = -1;
 	/** When the screen now up came in (it fades and rises in over 0.22 s; a screen rebuilt in place does not). */

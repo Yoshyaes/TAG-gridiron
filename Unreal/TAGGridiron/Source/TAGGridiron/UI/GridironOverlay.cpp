@@ -8,6 +8,7 @@
 #include "UI/PlayDiagram.h"
 #include "UI/RosterUI.h"
 #include "UI/TagTheme.h"
+#include "UI/BroadcastGfx.h"
 #include "Game/TagBindings.h"
 #include "Render/Coords.h"
 #include "Sim/Playbook.h"
@@ -54,6 +55,7 @@ namespace
 void SGridironOverlay::Construct(const FArguments& InArgs)
 {
 	Director = InArgs._Director;
+	GfxPtr = MakeShared<FBroadcastGfx>(this); // (the score bug and the broadcast's graphics: UI/BroadcastGfx.h)
 	ChildSlot
 	[
 		SNew(SOverlay)
@@ -61,7 +63,7 @@ void SGridironOverlay::Construct(const FArguments& InArgs)
 		+ SOverlay::Slot().HAlign(HAlign_Left).VAlign(VAlign_Top).Padding(24)
 		[
 			SNew(SBorder).BorderImage(TagTheme::Round(6.f)).BorderBackgroundColor(Panel).Padding(FMargin(14, 10))
-			.Visibility_Lambda([this] { return bHud && !bBroadcastOnly && !bModal && !TickerText().IsEmpty() ? EVisibility::HitTestInvisible : EVisibility::Collapsed; })
+			.Visibility_Lambda([this] { return bHud && !bBroadcastOnly && !bModal && !(GfxPtr && GfxPtr->OpenOn()) && !TickerText().IsEmpty() ? EVisibility::HitTestInvisible : EVisibility::Collapsed; })
 			[
 				SNew(SBox).WidthOverride(560)
 				[ SNew(STextBlock).Font(Font(12)).ColorAndOpacity(FLinearColor(0.92f, 0.94f, 0.97f)).AutoWrapText(true).Text_Lambda([this] { return TickerText(); }) ]
@@ -71,7 +73,8 @@ void SGridironOverlay::Construct(const FArguments& InArgs)
 		+ SOverlay::Slot().HAlign(HAlign_Right).VAlign(VAlign_Top).Padding(24)
 		[
 			SNew(SBorder).BorderImage(TagTheme::Round(6.f)).BorderBackgroundColor(Panel).Padding(FMargin(14, 8))
-			.Visibility_Lambda([this] { return bHud && !bBroadcastOnly && !bModal ? EVisibility::HitTestInvisible : EVisibility::Collapsed; })
+			// (not over the pregame open: its card has the conditions)
+			.Visibility_Lambda([this] { return bHud && !bBroadcastOnly && !bModal && !(GfxPtr && GfxPtr->OpenOn()) ? EVisibility::HitTestInvisible : EVisibility::Collapsed; })
 			[ SNew(STextBlock).Font(Font(12)).ColorAndOpacity(Dim).Text_Lambda([this] { return WeatherText(); }) ]
 		]
 		// banner
@@ -122,16 +125,23 @@ void SGridironOverlay::Construct(const FArguments& InArgs)
 				[ SNew(STextBlock).Font(Font(17, "Bold")).ColorAndOpacity(Accent).Text_Lambda([this] { FString N, St; ToastText.Split(TEXT("   "), &N, &St); return T(St.ToUpper()); }) ]
 			]
 		]
-		// hint
-		+ SOverlay::Slot().HAlign(HAlign_Center).VAlign(VAlign_Bottom).Padding(FMargin(0, 0, 0, 110))
+		// hint: small in the bottom-left corner, under the score bug's line (UI/BroadcastGfx.h); it stands down while a card,
+		// a lower third or a drive summary is up, and through the pregame open
+		+ SOverlay::Slot().HAlign(FBroadcastGfx::OldBug() ? HAlign_Center : HAlign_Left).VAlign(VAlign_Bottom)
+			.Padding(FBroadcastGfx::OldBug() ? FMargin(0, 0, 0, 110) : FMargin(24, 0, 0, 4))
 		[
-			SNew(SBorder).BorderImage(TagTheme::Round(6.f)).BorderBackgroundColor(Panel).Padding(FMargin(16, 8))
-			.Visibility_Lambda([this] { return (bHud && !HintText.IsEmpty() && !bModal) ? EVisibility::HitTestInvisible : EVisibility::Collapsed; })
-			[ SNew(STextBlock).Font(Font(13)).ColorAndOpacity(FLinearColor(0.85f, 0.88f, 0.92f)).Text_Lambda([this] { return T(HintText); }) ]
+			SNew(SBorder).BorderImage(TagTheme::Round(4.f)).BorderBackgroundColor(FLinearColor(0.02f, 0.025f, 0.04f, 0.72f))
+			.Padding(FBroadcastGfx::OldBug() ? FMargin(16, 8) : FMargin(10, 3))
+			.Visibility_Lambda([this] { return (bHud && !HintText.IsEmpty() && !bModal && !(GfxPtr && (GfxPtr->CoverUp() || GfxPtr->OpenOn()))) ? EVisibility::HitTestInvisible : EVisibility::Collapsed; })
+			[ SNew(STextBlock).Font(Font(FBroadcastGfx::OldBug() ? 13 : 11)).ColorAndOpacity(FLinearColor(0.78f, 0.81f, 0.86f)).Text_Lambda([this] { return T(HintText); }) ]
 		]
-		// scorebug
+		// scorebug (the old widget one: -TagOldBug)
 		+ SOverlay::Slot().HAlign(HAlign_Center).VAlign(VAlign_Bottom).Padding(FMargin(0, 0, 0, 28))
 		[ MakeScoreBug() ]
+		// the broadcast's graphics: the score bug and its states, lower thirds, stat tags, the matchup card (under the menus)
+		+ SOverlay::Slot().HAlign(HAlign_Fill).VAlign(VAlign_Fill)
+		[ SNew(SBox).Visibility_Lambda([this] { return Director && Director->WipeNow().bCovered ? EVisibility::Collapsed : EVisibility::SelfHitTestInvisible; }) // (off under the replay wipe: Game/TagWipe.h)
+			[ GfxPtr->MakeLayer() ] ]
 		// modal content
 		+ SOverlay::Slot().HAlign(HAlign_Fill).VAlign(VAlign_Fill)
 		[ SAssignNew(ModalBox, SBox).Visibility_Lambda([this] { return bModal ? EVisibility::Visible : EVisibility::Collapsed; }) ]
@@ -161,6 +171,7 @@ void SGridironOverlay::Tick(const FGeometry& G, const double Now, const float Dt
 	LastFrame = GFrameCounter;
 	BannerT += GameDt;
 	ToastT += GameDt;
+	if (GfxPtr) GfxPtr->Pump(GameDt); // (the score bug from the game, the graphics its changes call for: UI/BroadcastGfx.h)
 	PumpAbilities();  // (the zone: banners, the badges over the X-Factor men)
 	// the play call sizes its cards to the screen: a window resized (or the first layout, if it was built before the
 	// overlay had a size) lays it out again
@@ -168,6 +179,7 @@ void SGridironOverlay::Tick(const FGeometry& G, const double Now, const float Dt
 	{
 		const FVector2D Now2 = G.GetLocalSize();
 		if (Now2.X >= 640.0 && Now2.Y >= 360.0 && !Now2.Equals(CallBuiltAvail, 2.0)) BuildPlayCall();
+		CallTimerTick(GameDt); // (the call timer: its time up calls the coach's pick, UI/CallCoach.cpp)
 	}
 	// a screen coming in: it fades up and rises 16 px into place
 	if (ModalBox.IsValid())
@@ -239,9 +251,11 @@ int32 SGridironOverlay::OnPaint(const FPaintArgs& Args, const FGeometry& Allotte
 {
 	int32 Layer = SCompoundWidget::OnPaint(Args, AllottedGeometry, MyCullingRect, OutDrawElements, LayerId, InWidgetStyle, bParentEnabled);
 	// pre-snap: the receivers' icons and the adjustments panel
-	if (bHud && !bModal) Layer = PaintPresnap(OutDrawElements, Layer + 1, AllottedGeometry);
-	if (bHud && !bModal) Layer = PaintLineBars(OutDrawElements, Layer + 1, AllottedGeometry);
-	if (bHud && !bModal && !bBroadcastOnly) Layer = PaintAbilities(OutDrawElements, Layer + 1, AllottedGeometry);
+	// (the marks over the men are under the full-screen matchup card: none while it is up, UI/BroadcastGfx.h)
+	const bool bCardUp = GfxPtr && GfxPtr->CardOnScreen();
+	if (bHud && !bModal && !bCardUp) Layer = PaintPresnap(OutDrawElements, Layer + 1, AllottedGeometry);
+	if (bHud && !bModal && !bCardUp) Layer = PaintLineBars(OutDrawElements, Layer + 1, AllottedGeometry);
+	if (bHud && !bModal && !bBroadcastOnly && !bCardUp) Layer = PaintAbilities(OutDrawElements, Layer + 1, AllottedGeometry);
 	if (!bModal) Layer = PaintKickMeter(OutDrawElements, Layer + 1, AllottedGeometry);
 	// the focused menu button (gamepad / keyboard navigation) gets a gold frame
 	if (bModal && FSlateApplication::IsInitialized())
@@ -552,6 +566,12 @@ int32 SGridironOverlay::PaintPresnap(FSlateWindowElementList& Out, int32 Layer, 
 
 void SGridironOverlay::Banner(const FString& Text, const FString& Sub, const FLinearColor& Color)
 {
+	// a flag is the score bug's state, not a banner over the field (UI/BroadcastGfx.h); a two-minute warning is both
+	if (GfxPtr && GfxPtr->OnBanner(Text, Sub))
+	{
+		ATagAudio::Ui(TEXT("UiWhoosh"), 0.55f);
+		return;
+	}
 	BannerText = Text;
 	BannerSub = Sub;
 	BannerColor = Color;
@@ -561,8 +581,13 @@ void SGridironOverlay::Banner(const FString& Text, const FString& Sub, const FLi
 
 void SGridironOverlay::Toast(const FString& Text)
 {
+	// (not over the pregame open: held for a moment after it, UI/BroadcastGfx.h)
+	if (GfxPtr && GfxPtr->HoldToast(Text)) return;
 	ToastText = Text;
 	ToastT = 0.f;
+	// a big play's stat line is the broadcast's lower third, the first down the bug's one line (UI/BroadcastGfx.h): the
+	// toast's own widgets stay down
+	if (GfxPtr && GfxPtr->OnToast(Text)) ToastT = 99.f;
 	ATagAudio::Ui(TEXT("UiToast"), 0.7f);
 }
 
@@ -596,8 +621,9 @@ TSharedRef<SWidget> SGridironOverlay::MakeScoreBug()
 				]
 			];
 	};
+	// (the old bug, kept for an A/B with -TagOldBug: the broadcast's own is drawn by UI/BroadcastGfx)
 	return SNew(SHorizontalBox)
-		.Visibility_Lambda([this] { return bHud ? EVisibility::HitTestInvisible : EVisibility::Collapsed; })
+		.Visibility_Lambda([this] { return bHud && FBroadcastGfx::OldBug() ? EVisibility::HitTestInvisible : EVisibility::Collapsed; })
 		+ SHorizontalBox::Slot().AutoWidth()[ TeamCell(tag::TeamKey::Away) ]
 		+ SHorizontalBox::Slot().AutoWidth()[ TeamCell(tag::TeamKey::Home) ]
 		+ SHorizontalBox::Slot().AutoWidth()
@@ -835,6 +861,13 @@ void SGridironOverlay::ShowMainMenu()
 		bCallTour = false;
 		StartCallTour();
 	}
+	// -TagCallCoachTest: the call screen's suggestions, TRIANGLE and the call timer in a game, then exit (UI/CallCoach.cpp)
+	static bool bCoachTest = FParse::Param(FCommandLine::Get(), TEXT("TagCallCoachTest"));
+	if (bCoachTest)
+	{
+		bCoachTest = false;
+		StartCallCoachTest();
+	}
 	// -TagControlsTest: the controls screen and a remapped button in a game (UI/ControlsScreen.cpp)
 	static bool bControlsTest = FParse::Param(FCommandLine::Get(), TEXT("TagControlsTest"));
 	if (bControlsTest)
@@ -867,6 +900,14 @@ void SGridironOverlay::ShowMainMenu()
 	{
 		bAbilityShot = false;
 		ShowAbilities(SelHome, [this] { ShowMainMenu(); });
+	}
+	// -TagGfxShots: the score bug's states and the broadcast's graphics pictured and checked, then the game exits
+	// (UI/BroadcastGfx.cpp)
+	static bool bGfxShots = FParse::Param(FCommandLine::Get(), TEXT("TagGfxShots"));
+	if (bGfxShots)
+	{
+		bGfxShots = false;
+		StartGfxShots();
 	}
 }
 
@@ -1167,6 +1208,7 @@ void SGridironOverlay::ShowPlayCall(bool bOffense, bool bFourthDown, bool bTwoPo
 		CallTab = CallTabs.Num() ? CallTabs[0].Key : FString();
 		if (!bOffense && CallTabs.ContainsByPredicate([](const TPair<FString, FString>& Tb) { return Tb.Key == TEXT("Nickel"); })) CallTab = TEXT("Nickel");
 	}
+	CallCoachOpen(); // (the SUGGESTED tab first and opened on, the call timer: UI/CallCoach.cpp)
 	BuildPlayCall();
 }
 
@@ -1174,6 +1216,7 @@ void SGridironOverlay::CallPick(FCallChoice C)
 {
 	std::function<void(FCallChoice)> Done = CallDone;
 	CallDone = nullptr;
+	CallCoachPicked(C); // (the time the call took, logged; the timer stopped: UI/CallCoach.cpp)
 	ATagAudio::Ui(TEXT("UiSelect"));
 	// what this side called (R3 on its next call screen calls it again)
 	if (C.Kind == FCallChoice::Off && C.Play && C.Play->type != tag::PlayType::Kneel && C.Play->type != tag::PlayType::Spike) CallLastOff = C.Play;
@@ -1255,7 +1298,7 @@ bool SGridironOverlay::CallKey(const FKey& K, bool bRepeat)
 	}
 	if (Is({EKeys::Gamepad_FaceButton_Top, EKeys::H}))
 	{
-		if (!bRepeat) CallPick(FCallChoice());
+		if (!bRepeat) CallCoachPress(); // (the coach's pick: the top suggestion, shown on the SUGGESTED tab and in the box)
 		return true;
 	}
 	const bool bPrevTab = Is({EKeys::Gamepad_LeftShoulder, EKeys::Q});
@@ -1347,7 +1390,8 @@ void SGridironOverlay::BuildPlayCall()
 		K.Choice = C;
 		return K;
 	};
-	const bool bSpecial = CallTab == TEXT("special") || CallTab == TEXT("clock");
+	const bool bCoachTab = CallTab == CallCoachTab();
+	const bool bSpecial = CallTab == TEXT("special") || CallTab == TEXT("clock") || bCoachTab;
 	// the formations (sets) of the tab's family and, per type tab, how many plays the family has (which tabs there
 	// are) and how many of them are listed (their counts); each formation's count under the type tab
 	TMap<FString, int32> CatShown;
@@ -1357,7 +1401,9 @@ void SGridironOverlay::BuildPlayCall()
 	// (the scope: one formation, or every one in the family - CallAllSet)
 	struct FScoped { const tag::OffPlay* Op = nullptr; const tag::DefCall* Dc = nullptr; int32 Set = 0; FString Cat; };
 	TArray<FScoped> Scoped;
-	if (bOffense && CallTab == TEXT("special"))
+	if (CallCoachCards()) // (the SUGGESTED tab, UI/CallCoach.cpp: the coach's plays, typed and named as the book's tabs show them)
+		for (FCallCard& Cd : CallCards) { Cd.Cat = Cd.Op ? OffCategory(*Cd.Op) : Cd.Dc ? DefCategory(*Cd.Dc) : FString(); if (Cd.Op) Cd.Concept = OffConcept(*Cd.Op, Cd.Cat); else if (Cd.Dc) Cd.Name = DefShortName(*Cd.Dc); }
+	else if (bOffense && CallTab == TEXT("special"))
 	{
 		const tag::Player* K = G.kicker(G.poss);
 		const double Dist = FMath::RoundToDouble(100 - G.ballOn + 17);
@@ -1591,6 +1637,7 @@ void SGridironOverlay::BuildPlayCall()
 				})
 			]
 		]
+		+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Bottom).Padding(0, 0, 8, 0)[ CallTimerWidget() ] // (the call timer, UI/CallCoach.cpp)
 		+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Bottom)
 		[
 			SNew(SBorder).BorderImage(White()).BorderBackgroundColor(FLinearColor(0.08f, 0.10f, 0.14f, 1.f)).Padding(FMargin(16, 4))
@@ -1881,10 +1928,11 @@ void SGridironOverlay::BuildPlayCall()
 	[
 		SNew(SHorizontalBox)
 		+ SHorizontalBox::Slot().FillWidth(1.f).VAlign(VAlign_Center)
-		[ SNew(STextBlock).Font(TagTheme::Font(12, "BoldCondensed", 80)).ColorAndOpacity(Dim).Text(T(bSpecial ? TEXT("SITUATION") : bOffense ? TEXT("FORMATIONS") : TEXT("SETS"))) ]
+		[ SNew(STextBlock).Font(TagTheme::Font(12, "BoldCondensed", 80)).ColorAndOpacity(Dim).Text(T(bCoachTab ? TEXT("COACH'S READ") : bSpecial ? TEXT("SITUATION") : bOffense ? TEXT("FORMATIONS") : TEXT("SETS"))) ]
 		+ SHorizontalBox::Slot().AutoWidth().VAlign(VAlign_Center)[ CallSets.Num() > 1 && !bSpecial ? Glyph(EPadGlyph::DUpDown, TEXT("↑↓"), 22.f) : SNullWidget::NullWidget ]
 	];
-	if (bSpecial)
+	if (bCoachTab) Forms->AddSlot().AutoHeight()[ CallCoachRead() ]; // (the tendencies he reads: UI/CallCoach.cpp)
+	else if (bSpecial)
 	{
 		Forms->AddSlot().AutoHeight().Padding(4, 0)
 		[ SNew(STextBlock).Font(Font(12)).ColorAndOpacity(TagTheme::Faint).AutoWrapText(true).Text(T(CallTab == TEXT("special") ? TEXT("Punt it away or try the kick.") : TEXT("Kneel to run the clock, spike to stop it."))) ];
@@ -1974,7 +2022,7 @@ void SGridironOverlay::BuildPlayCall()
 			[ SideBox(EPadGlyph::R3, TEXT("R"), bOffense ? TEXT("LAST PLAY") : TEXT("LAST CALL"), RepName, RepSub, Rep) ]
 		]
 		+ SVerticalBox::Slot().AutoHeight().Padding(0, 8, 0, 0)
-		[ SideBox(EPadGlyph::Triangle, TEXT("H"), TEXT("COACH'S PICK"), bOffense ? TEXT("Coach calls it") : TEXT("Coordinator calls it"), FString(), FCallChoice()) ]
+		[ SideBox(EPadGlyph::Triangle, TEXT("H"), TEXT("COACH'S PICK"), CallCoachPickName(), FString(), CallCoachPick()) ] // (the top suggestion: UI/CallCoach.cpp)
 	];
 
 	// the legend: what the buttons do
@@ -2145,6 +2193,9 @@ void SGridironOverlay::ShowSettings(std::function<void()> Back)
 	const bool bCc = Director && Director->CaptionsOn();
 	V->AddSlot().AutoHeight()[ MakeButton(FString::Printf(TEXT("Commentary captions: %s"), bCc ? TEXT("On") : TEXT("Off")),
 		TEXT("The booth's words as text at the bottom of the screen."), [this, Back, bCc] { if (Director) Director->SetCaptionsOn(!bCc); ShowSettings(Back); }) ];
+	// the broadcast's pace between the plays (Game/TagBroadcast.h): Auto, Full, Standard, Quick
+	V->AddSlot().AutoHeight()[ MakeButton(FString::Printf(TEXT("Presentation: %s"), TagPace::Name(TagPace::Setting())), TagPace::Blurb(TagPace::Setting()),
+		[this, Back] { TagPace::Step(); ShowSettings(Back); }) ];
 	const bool bInv = Director && Director->InvertRightY();
 	V->AddSlot().AutoHeight()[ MakeButton(FString::Printf(TEXT("Right stick up / down: %s"), bInv ? TEXT("Inverted") : TEXT("Standard")),
 		TEXT("If the hit stick, truck and kick swing go the wrong way on your controller, flip this."), [this, Back, bInv] { if (Director) Director->SetInvertRightY(!bInv); ShowSettings(Back); }) ];

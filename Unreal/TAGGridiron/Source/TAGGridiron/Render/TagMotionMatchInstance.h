@@ -116,6 +116,10 @@ public:
 	 *  as quick feet at 1.5x, where a sprint sped up that far would read as a cartoon (cadence, -TagMoveTest gait). */
 	float CrouchSpeedMatchMax = 1.5f;
 	bool bCrouchGait = false;
+	/** His signature cadence (AAthlete::SigCadence) on top of the speed match: the feet a little quicker or slower than
+	 *  the capture at the same ground speed; the stride warp (AAthlete::DriveMotionMatching, the clip's root travel at the
+	 *  rate played) lengthens or shortens the step by as much. 1 = the capture's own. */
+	float Cadence = 1.f;
 	float* RateMultiplierSetting = nullptr; // the node's PlayRateMultiplier, found through reflection
 	/** The player's ground velocity (cm/s, world): the minimum dwell lets a search through early when it changes. */
 	FVector SimVel = FVector::ZeroVector;
@@ -193,7 +197,9 @@ protected:
 	UPROPERTY(Transient)
 	FAnimNode_MotionMatching MatchNode;
 
-	/** -TagMMDeadBlend (A/B, off by default): the matching node's transitions as the engine's dead blending (the outgoing
+	/** (Not usable yet: the engine node asserts outside an Anim Blueprint in builds with anim tracing, so -TagMMDeadBlend
+	 *  is ignored there - TagMotionMatchInstance.cpp.)
+	 *  -TagMMDeadBlend (A/B, off by default): the matching node's transitions as the engine's dead blending (the outgoing
 	 *  clip extrapolated with its own velocities and faded into the new one) instead of its blend stack (up to four clips
 	 *  evaluated and mixed per man). The node asks for it through the graph's inertialization message, which this node
 	 *  answers from above it in the update; with it the blend stack holds one clip (MaxActiveBlends 0). */

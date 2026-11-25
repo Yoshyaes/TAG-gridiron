@@ -160,7 +160,7 @@ void AMatchDirector::BeginPlay()
 			for (const FString& P : Parts)
 			{
 				FString K, V;
-				if (P.Split(TEXT("="), &K, &V)) UE_LOG(LogTemp, Display, TEXT("TAG tune %s = %s (%s)"), *K, *V, tag::setTune(TCHAR_TO_UTF8(*K), FCString::Atod(*V)) ? TEXT("set") : TEXT("unknown"));
+				if (P.Split(TEXT("="), &K, &V)) UE_LOG(LogTemp, Display, TEXT("TAG tune %s = %s (%s)"), *K, *V, tag::setTune(TCHAR_TO_UTF8(*K), FCString::Atod(*V)) || tag::setCallTune(TCHAR_TO_UTF8(*K), FCString::Atod(*V)) ? TEXT("set") : TEXT("unknown"));
 			}
 		}
 	}
@@ -319,6 +319,7 @@ void AMatchDirector::BeginPlay()
 		FParse::Value(FCommandLine::Get(), TEXT("TagQuarterLen="), HsQLen);
 		StartMatch(3, 7, false, true, 1, true, HsQLen);
 	}
+	else if (BeginBroadcastTest()) {} // (-TagRecentTest, -TagReplayTest, -TagShotTest, -TagPaceTest, -TagOpenTest: Game/MatchBroadcast.cpp)
 	else if (FParse::Param(FCommandLine::Get(), TEXT("TagPadPlayTest")))
 	{
 		bPadPlayTest = true;
@@ -2539,6 +2540,7 @@ void AMatchDirector::TickAutomation(float Dt)
 void AMatchDirector::EndPlay(const EEndPlayReason::Type Reason)
 {
 	FWorldDelegates::OnWorldPostActorTick.Remove(PostTickHandle);
+	BroadcastEndPlay(); // (the wipe off the viewport, the store of recent shots written: MatchBroadcast.cpp)
 	if (GEngine && GEngine->GameViewport && Overlay.IsValid()) GEngine->GameViewport->RemoveViewportWidgetContent(Overlay.ToSharedRef());
 	FTagInputHub::Shutdown();
 	Super::EndPlay(Reason);
@@ -2790,6 +2792,7 @@ void AMatchDirector::StartMatch(int HomeIdx, int AwayIdx, bool bUserPlays, bool 
 	if (bUserPlays) O.userTeam = bUserHome ? tag::TeamKey::Home : tag::TeamKey::Away;
 	O.abilities = !FParse::Param(FCommandLine::Get(), TEXT("TagNoAbilities"));  // (Superstar / X-Factor abilities: A/B)
 	Game = std::make_unique<tag::Game>(Home, Away, O);
+	BroadcastSeed = O.seed.value_or(0u); // (the presentation's tie-breaks: the same game, the same shots for the same saved history)
 	UserTeam = O.userTeam;
 	// the broadcast booth for this match (not on the highlight reel, not with -TagNoBooth)
 	if (Booth) { Booth->Destroy(); Booth = nullptr; }
@@ -2818,8 +2821,11 @@ void AMatchDirector::StartMatch(int HomeIdx, int AwayIdx, bool bUserPlays, bool 
 	ResetReplayBudget(); // (each game earns its own replays: MatchBroadcast.cpp)
 	if (Audio) Audio->MatchStart(*Game);
 	BoothSkipUntil = 0.0;
-	// with the booth, the game starts in a short wait: the kickoff holds while the crew opens the broadcast (BoothHold)
-	if (Booth) Wait(0.5f);
+	// the pregame open (a crane over the stadium, the matchup, both kickoff units on the field: MatchBroadcast.cpp), the
+	// booth talking over it; without it (-TagNoOpen, automation), with the booth, a short wait while the crew opens the
+	// broadcast (BoothHold: the camera on an empty field)
+	if (BeginPregameOpen()) {}
+	else if (Booth) Wait(0.5f);
 	else Next();
 }
 
@@ -2890,7 +2896,8 @@ void AMatchDirector::TickHighlights(float Dt)
 	if (Overlay) Overlay->SetHint(TEXT(""));
 	const bool bRec = State == EMatchState::Live || State == EMatchState::Post || State == EMatchState::Replay ||
 		(bHlFull && (State == EMatchState::Presnap || State == EMatchState::Kick)) ||
-		(bHlFull && (State == EMatchState::Wait || State == EMatchState::Call) && bHlInClip && FCString::Strifind(FCommandLine::Get(), TEXT("TagHuddleSecs="))); // (the huddle too, when it is held)
+		(bHlFull && (State == EMatchState::Wait || State == EMatchState::Call) && bHlInClip && FCString::Strifind(FCommandLine::Get(), TEXT("TagHuddleSecs="))) || // (the huddle too, when it is held)
+		(State == EMatchState::Wait && BroadcastFilming()); // (the shots after the replay, with their play; the open with -TagHlOpen: MatchBroadcast.cpp)
 	// the pose the last screenshot showed is final now (the bodies evaluate after the director): its telemetry row
 	if (bHlFull && bHlInClip && HlFrame > 0 && !bHlSkipClip) HlTelemetry(HlFrame - 1);
 	if (bRec && !bHlInClip)
@@ -2904,7 +2911,7 @@ void AMatchDirector::TickHighlights(float Dt)
 		bHlSkipClip = bHlFull && Game && Game->q < FromQ;
 		static const bool bHlBroadcast = FParse::Param(FCommandLine::Get(), TEXT("TagHlBroadcast")); // (the player's default camera, for checking what he sees)
 		CamMode = bHlBroadcast ? ECamMode::Broadcast : bHlFull || HlClip % 4 == 2 ? ECamMode::Sideline : ECamMode::Broadcast; // (a filmed full game: the TV camera throughout)
-		UE_LOG(LogTemp, Display, TEXT("TAG hl clip %d start cam %d"), HlClip, static_cast<int32>(CamMode));
+		UE_LOG(LogTemp, Display, TEXT("TAG hl clip %d start cam %d gf %llu"), HlClip, static_cast<int32>(CamMode), static_cast<unsigned long long>(GFrameCounter));
 	}
 	if (!bRec && bHlInClip)
 	{
@@ -2936,7 +2943,8 @@ void AMatchDirector::TickHighlights(float Dt)
 				PendingDel = bTO ? 0 : HlClip;
 				if (bTO) UE_LOG(LogTemp, Display, TEXT("TAG hl turnover clip %d kept: %s"), HlClip, *Desc);
 			}
-			UE_LOG(LogTemp, Display, TEXT("TAG hl clip %d game q%d clock %.0f score %d-%d"), HlClip, Game ? Game->q : 0, Game ? Game->clock : 0.0, Game ? Game->score.away : 0, Game ? Game->score.home : 0);
+			UE_LOG(LogTemp, Display, TEXT("TAG hl clip %d game q%d clock %.0f score %d-%d gf %llu"), HlClip, Game ? Game->q : 0, Game ? Game->clock : 0.0, Game ? Game->score.away : 0, Game ? Game->score.home : 0,
+				static_cast<unsigned long long>(GFrameCounter));
 		}
 	}
 	if (bRec && !bHlSkipClip)
@@ -2953,7 +2961,10 @@ void AMatchDirector::TickHighlights(float Dt)
 			if (FParse::Value(FCommandLine::Get(), TEXT("TagHlDir="), D) && !D.IsEmpty()) return D;
 			return FPaths::ConvertRelativePathToFull(FPaths::ProjectSavedDir() / TEXT("Highlights/frames"));
 		}();
-		FScreenshotRequest::RequestScreenshot(bHlFull ? FString::Printf(TEXT("%s/c%03d_%05d.png"), *HlDir, HlClip, HlFrame++)
+		// -TagHlNoFrames (with -TagHlFull, 07 A6): every frame counted and its telemetry row written, no screenshot taken
+		static const bool bHlNoFrames = FParse::Param(FCommandLine::Get(), TEXT("TagHlNoFrames"));
+		if (bHlFull && bHlNoFrames) ++HlFrame;
+		else FScreenshotRequest::RequestScreenshot(bHlFull ? FString::Printf(TEXT("%s/c%03d_%05d.png"), *HlDir, HlClip, HlFrame++)
 			: FString::Printf(TEXT("%s/c%02d_%05d.png"), *HlDir, HlClip, HlFrame++), true, false);
 	}
 	const int32 MaxClips = 18;
@@ -3283,6 +3294,7 @@ void AMatchDirector::Next()
 	if (G.q == 3 && LastQ == 2)
 	{
 		LastQ = 3;
+		if (BeginHalftimeShow()) return; // (the halftime show, then the second half's kickoff: MatchBroadcast.cpp)
 		if (bHighlights || !UserTeam.has_value())
 		{
 			// a CPU-vs-CPU game (watched or filmed) has nobody to press Start 2nd Half: show halftime and go on
@@ -3507,6 +3519,7 @@ void AMatchDirector::CallPlays(bool bTwo)
 		Stadium->SetScoreboard(FString::Printf(TEXT("%s %d   %s %d"), UTF8_TO_TCHAR(G.away->abbr.c_str()), G.score.away,
 			UTF8_TO_TCHAR(G.home->abbr.c_str()), G.score.home),
 			FString::Printf(TEXT("%s  %d:%02d"), G.q >= 1 && G.q <= 4 ? QName[G.q - 1] : TEXT("OT"), Secs / 60, Secs % 60));
+		Stadium->SetGameClock(G.q, G.clock, G.quarterLen); // (the weather and the field's wear build over the game: visual only)
 	}
 	if (!bTwo) HudDown.Reset(); // (the scorebug still read KICKOFF through the first call of a drive)
 	auto Finish = [this](const tag::OffPlay* Op, const tag::DefCall* Dc) { StartPresnap(Op, Dc); };
@@ -3581,6 +3594,7 @@ void AMatchDirector::CallPlays(bool bTwo)
 			UE_LOG(LogTemp, Display, TEXT("TAG defensive call sees: %s"), *LookStr);
 		}
 		Overlay->SetCallOffenseLook(LookStr);
+		Overlay->SetCallOffenseForm(Op ? FString(UTF8_TO_TCHAR(Op->formation.c_str())) : FString()); // (the coach's suggestions read the offense's tendencies from this look: UI/CallCoach.cpp)
 		if (bMulti) SetMenuOwner(CallerOf(tag::other(Game->poss)));
 		Overlay->ShowPlayCall(false, false, false, [this, Op, Finish](FCallChoice C)
 		{
@@ -3713,10 +3727,28 @@ void AMatchDirector::StartPresnap(const tag::OffPlay* Op, const tag::DefCall* Dc
 	Dir = G.worldDir();
 	double Far = 0.0;
 	int32 Walkers = 0, Known = 0;
+	// (a substitute walks on from his sideline as the rest walk back: as far as the play clock leaves time for)
+	const double SubMax = bRealClock && bPlayClockOn ? FMath::Max(0.0, (PlayClockF - 4.0) * 4.2) : 32.0;
+	// (substitutions, a few men: a whole unit coming on - the offense after a kickoff - takes its spots as before; the
+	// quarterback walking 25 yd on from the sideline had no audible to play at the line)
+	int32 SubsComing = 0;
+	for (const tag::Ent* E : Sim->ents) SubsComing += From.count(E->p) ? 0 : 1;
 	for (tag::Ent* E : Sim->ents)
 	{
 		auto It = From.find(E->p);
-		if (It == From.end()) continue;
+		if (It == From.end())
+		{
+			// a substitute (not on the field for the last play): in from his sideline (MatchBroadcast.cpp; -TagNoSubJog)
+			tag::V2 SubFrom;
+			if (From.size() >= 11 && SubsComing <= 6 && !bSetAfterBreak && SubEntrySpot(E, SubMax, SubFrom))
+			{
+				const double Ds = tag::dist(SubFrom, E->pos);
+				Sim->walkFrom(E, SubFrom);
+				Far = FMath::Max(Far, Ds);
+				++Walkers;
+			}
+			continue;
+		}
 		++Known;
 		const tag::V2 P = TagCoords::FromWorld(It->second, Dir);
 		const double D = tag::dist(P, E->pos);
@@ -3736,6 +3768,7 @@ void AMatchDirector::StartPresnap(const tag::OffPlay* Op, const tag::DefCall* Dc
 	std::vector<tag::Player*> Ps;
 	for (tag::Ent* E : Sim->ents) Ps.push_back(E->p);
 	ShowOnly(Ps);
+	const float SubsOffSecs = BeginSubsOff(From); // (the men going off jog to their benches: MatchBroadcast.cpp)
 	CapturePrev();
 	Stadium->SetLines(ToWorld(Sim->los, 0, Dir).X, bTwoPoint ? -1 : ToWorld(FMath::Min(100.0, G.ballOn + G.toGo), 0, Dir).X);
 	Labels.clear();
@@ -3746,6 +3779,8 @@ void AMatchDirector::StartPresnap(const tag::OffPlay* Op, const tag::DefCall* Dc
 	Timer = bWatch ? 1.1f / Speed : (US && *US == tag::Side::Off) ? 999.f : US ? 7.f : 1.6f;
 	// ...and nobody snaps it before the men jogging back have set (4.2 yd/s is their jog; at most a few seconds)
 	if (!(US && *US == tag::Side::Off)) Timer = FMath::Max(Timer, static_cast<float>(FMath::Min(6.0, Far / 4.2 + 0.7)) / Speed);
+	// ...or before the men going off are off the field
+	if (!(US && *US == tag::Side::Off)) Timer = FMath::Max(Timer, SubsOffSecs / Speed);
 	// the pre-snap panel lists the calls; the hint is for the play itself
 	bCarrierHint = false;
 	const TagBind::FScope HintScope(US && *US == tag::Side::Off ? TagBind::ECtx::Passing : US ? TagBind::ECtx::Defense : TagBind::ECtx::None);
@@ -3863,7 +3898,7 @@ void AMatchDirector::ApplyPlay()
 		if (L.big == tag::LogTag::Turnover) Overlay->Banner(TEXT("FUMBLE"), S(L.desc), Bad);
 		else if (L.desc.find("Touchback") != std::string::npos) Overlay->Toast(TEXT("TOUCHBACK"));
 		State = EMatchState::Wait;
-		Timer = 0.f;
+		Timer = BroadcastAfterPlay(); // (the shots after the play, if it earned any: MatchBroadcast.cpp)
 		return;
 	}
 	if (bPlaceKick)
@@ -3878,7 +3913,7 @@ void AMatchDirector::ApplyPlay()
 		if (L && L->big == tag::LogTag::Td) { Overlay->Banner(TEXT("TOUCHDOWN"), S(L->desc), Good); HomeCheer(1.f, tag::other(PossBefore)); } // (the block team's)
 		else if (P.placeBlocked && L) Overlay->Banner(TEXT("BLOCKED"), S(L->desc), Bad);
 		State = EMatchState::Wait;
-		Timer = 0.f;
+		Timer = BroadcastAfterPlay();
 		return;
 	}
 	if (bTwoPoint)
@@ -3909,7 +3944,7 @@ void AMatchDirector::ApplyPlay()
 		else if (L.desc.find("Turnover on downs") != std::string::npos) Overlay->Banner(TEXT("TURNOVER ON DOWNS"), TEXT(""), Bad);
 	}
 	State = EMatchState::Wait;
-	Timer = 0.f;
+	Timer = BroadcastAfterPlay(); // (the cappers and the wide reset after the play, by the pace: MatchBroadcast.cpp)
 }
 
 void AMatchDirector::StartCutIn(const tag::Ent* Who, float Seconds)
@@ -3989,16 +4024,15 @@ void AMatchDirector::OnPlayDead()
 	HudPreRun = 0.0;
 	// (from the result: the game's own clock flag is set when the play is applied, later)
 	bPreRun = Game && !R.incomplete && !R.outOfBounds && !R.td && !R.turnover && !R.safety && Game->tempo() != tag::Tempo::Hurry;
-	// the broadcast cut-in: who made the play (the ball carrier on a score, takeaway or big gain; the sacker)
+	// the broadcast at the whistle: who made the play (the ball carrier on a score, takeaway or big gain; the sacker),
+	// whether it earns a replay, the lead shot (Game/MatchBroadcast.cpp; -TagShotsOld: the one cut-in as before)
 	{
 		const tag::Ent* Star = Sim->ball.holder;
 		if (R.kind == tag::PlayKind::Sack && !R.tacklers.empty())
 			for (const tag::Ent* E : Sim->ents)
 				if (E->p == R.tacklers.front()) Star = E;
-		static const int32 BigGain = FParse::Param(FCommandLine::Get(), TEXT("TagCutIns")) ? 5 : 20; // review: more samples
-		if (R.td || R.interception || R.fumbleLost || R.kind == tag::PlayKind::Sack || R.yards >= BigGain)
-			StartCutIn(Star, R.td ? 3.5f : 2.8f);
-		DecideReplay(R); // (a score against the game's replay budget: Game/MatchBroadcast.cpp)
+		DecideReplay(R); // (a score against the game's replay budget)
+		BroadcastPlayDead(R, Star);
 	}
 	for (const auto& KV : Athletes) if (AAthlete* X = KV.Value.Get()) X->CelebPick = nullptr;
 	TurnoverCelebMan = nullptr;
@@ -4088,6 +4122,7 @@ void AMatchDirector::RecordReplayFrame(float Dt)
 	else ReplayBuf.AddDefaulted();
 	FReplayFrame& F = ReplayBuf.Last();
 	F.T = ReplayClock;
+	F.SimT = Sim ? static_cast<float>(Sim->t) : ReplayClock; // (the sim's events are on its clock: the replay's key moment)
 	F.Ball = FTransform::Identity;
 	F.bBall = false;
 	if (Ball)
@@ -4125,103 +4160,15 @@ void AMatchDirector::ResetReplayBuf()
 	ReplayBuf.Reset();
 }
 
-bool AMatchDirector::StartReplay()
-{
-	if (!bReplayWorthy || ReplayBuf.Num() < 20) return false;
-	bReplayWorthy = false;
-	// the last 5 s of the play at a little over half speed (a long run is picked up as it breaks free)
-	ReplayEnd = ReplayBuf.Last().T;
-	ReplayT = FMath::Max(0.f, ReplayEnd - 5.f);
-	ReplayIdx = 0;
-	ReplayFocus = FVector::ZeroVector;
-	State = EMatchState::Replay;
-	Overlay->SetHint(bWatch ? TEXT("REPLAY") : TEXT("REPLAY      SPACE skip"));
-	UE_LOG(LogTemp, Display, TEXT("TAG replay: %d frames, %.1f s of play from %.1f s"), ReplayBuf.Num(), ReplayEnd - ReplayT, ReplayT);
-	SpendReplay(); // (out of the game's replay budget: MatchBroadcast.cpp)
-	return true;
-}
-
-void AMatchDirector::TickReplay(float Dt, bool bSkip)
-{
-	ReplayT += Dt * 0.55f;
-	while (ReplayIdx + 1 < ReplayBuf.Num() && ReplayBuf[ReplayIdx + 1].T <= ReplayT) ++ReplayIdx;
-	const FReplayFrame& A = ReplayBuf[ReplayIdx];
-	const FReplayFrame& B = ReplayBuf[FMath::Min(ReplayIdx + 1, ReplayBuf.Num() - 1)];
-	const float Al = B.T > A.T ? FMath::Clamp((ReplayT - A.T) / (B.T - A.T), 0.f, 1.f) : 0.f;
-	for (const FReplayAth& RA : A.Ath)
-	{
-		AAthlete* Ath = Athletes.FindRef(RA.Id);
-		if (!Ath) continue;
-		const FReplayAth* RB = B.Ath.FindByPredicate([&](const FReplayAth& X) { return X.Id == RA.Id; });
-		if (!RB || RB->Rot.Num() != RA.Rot.Num()) RB = &RA;
-		ReplayScratch.SetNum(RA.Rot.Num());
-		for (int32 i = 0; i < RA.Rot.Num(); ++i)
-			ReplayScratch[i] = FTransform(FQuat::Slerp(FQuat(RA.Rot[i]), FQuat(RB->Rot[i]), Al).GetNormalized(),
-				FMath::Lerp(FVector(RA.Pos[i]), FVector(RB->Pos[i]), Al));
-		FTransform W;
-		W.Blend(RA.World, RB->World, Al);
-		if (!Ath->IsHidden()) Ath->SetDormant(false); // (a man on the film is awake to show it; no-op when he already is)
-		Ath->ShowReplayPose(W, ReplayScratch);
-	}
-	FTransform BallT;
-	BallT.Blend(A.Ball, B.Ball, Al);
-	if (Ball)
-	{
-		Ball->SetActorTransform(BallT);
-		Ball->SetActorHiddenInGame(!A.bBall);
-	}
-	// reverse angle from field level on the far side, a longer lens, easing after the ball
-	const FVector BallAt = BallT.GetLocation();
-	// (the camera stays on the playing field: 16 m to the far side of a play near that sideline put it behind the bench,
-	// and the replay was of a lineman's back and a staff member's shorts - then it shoots from the near side instead,
-	// chosen once a replay so the angle does not flip)
-	static float ReplaySide = 1.f;
-	const float SideLim = static_cast<float>(tag::FIELD_W) * 0.5f * YD - 150.f;
-	if (ReplayFocus.IsZero())
-	{
-		ReplaySide = BallAt.Y + 1650.f > SideLim ? -1.f : 1.f;
-		MarkCameraCut(TEXT("replay in"));
-	}
-	ReplayFocus = ReplayFocus.IsZero() ? BallAt : FMath::Lerp(ReplayFocus, BallAt, 1.f - FMath::Exp(-Dt / 0.55f * 4.f));
-	// (5.6 m up: from head height on the field the men between the camera and the ball were the picture)
-	FVector P = ReplayFocus + FVector(-350.f, 1650.f * ReplaySide, 560.f);
-	P.Y = FMath::Clamp(P.Y, -SideLim, SideLim);
-	const FVector Look = FVector(ReplayFocus.X, ReplayFocus.Y, 95.f);
-	Camera->SetActorLocation(P);
-	Camera->SetActorRotation((Look - P).Rotation());
-	if (UCineCameraComponent* C = Camera->GetCineCameraComponent())
-	{
-		C->FocusSettings.ManualFocusDistance = (Look - P).Size();
-		C->CurrentFocalLength = 50.f;
-	}
-	static int32 GReplayShots = 0;
-	if (bAuto && GReplayShots < 12 && ReplayCount == 0)
-	{
-		static float NextShot = 0.f;
-		if (ReplayT >= NextShot || NextShot > ReplayEnd)
-		{
-			FScreenshotRequest::RequestScreenshot(FString::Printf(TEXT("tag_replay_%02d.png"), GReplayShots++), false, false);
-			NextShot = ReplayT + 0.45f;
-		}
-	}
-	if (ReplayT >= ReplayEnd || bSkip)
-	{
-		for (auto& KV : Athletes)
-			if (KV.Value) KV.Value->EndReplay();
-		++ReplayCount;
-		bCutNext = true; // (out of the replay: a cut back to the game camera at its framing, not a swoop from the old one)
-		Overlay->SetHint(TEXT(""));
-		State = EMatchState::Post;
-		Overlay->SetClockOffset(0);
-		ApplyPlay();
-	}
-}
+// (StartReplay / TickReplay: the replay package, Game/MatchBroadcast.cpp)
 
 void AMatchDirector::ShowFinal()
 {
+	if (BeginPostgameShow()) return; // (the postgame show first; it comes back here when it is over: MatchBroadcast.cpp)
 	State = EMatchState::Final;
 	Overlay->SetHint(TEXT(""));
 	LogReplaySummary();
+	LogBroadcastSummary(); // (the shots, the replay package, the pace's timings; the store written: MatchBroadcast.cpp)
 	const tag::Game& G = *Game;
 	const FString W = G.score.home == G.score.away ? FString(TEXT("Tie game"))
 		: G.score.home > G.score.away ? S(G.home->city) + TEXT(" ") + S(G.home->name) + TEXT(" win")
@@ -7354,7 +7301,8 @@ void AMatchDirector::UpdateCamera(float Dt, const FVector& InFocus)
 	};
 	// the TV camera between plays: what it is asked to show is suddenly somewhere else (the teams set for a kick 40 yd
 	// from the last whistle) and it cuts there; panned, it swept the turf for half a second
-	if (bTv && FVector::Dist2D(Look, CamLook) > 15.f * Y && !(Sim && (Sim->isLive() || Sim->isReturn())))
+	// (not under a broadcast shot: the shot sets CamLook, and the game's own look far from it read as a reframe every frame)
+	if (bTv && !ShotOnScreen() && FVector::Dist2D(Look, CamLook) > 15.f * Y && !(Sim && (Sim->isLive() || Sim->isReturn())))
 	{
 		MarkCameraCut(TEXT("tv reframe"));
 		CamLook = Look;
@@ -7442,6 +7390,7 @@ void AMatchDirector::UpdateCamera(float Dt, const FVector& InFocus)
 		P = FVector(50 * Y, -30 * Y, 22 * Y);
 		CamLook = FVector(50 * Y, 70 * Y, 14 * Y);
 	}
+	else if (!CloseupTarget && ShotCamera(Dt, P, T, Look)) {} // (a broadcast shot: the lead, a capper, the wide reset, the open - MatchBroadcast.cpp)
 	else if (!CloseupTarget && CutInTarget && CutInLeft > 0.f)
 	{
 		CutInLeft -= Dt;
@@ -7586,7 +7535,7 @@ void AMatchDirector::UpdateCamera(float Dt, const FVector& InFocus)
 	// an operator never loses the ball carrier: the springs above trail him and lead the play, and a returner who fields
 	// a kick deep and runs at the climbed camera (c085, to6: 76 frames under the bottom edge as he got up to speed)
 	// outran the tilt. Past 72 % of the half frame the pan / tilt turns just enough to hold him there.
-	if (Sim && CamMode != ECamMode::Player && !bAutoEstablish && !CloseupTarget && !(CutInTarget && CutInLeft > 0.f) && !bKickAim &&
+	if (Sim && CamMode != ECamMode::Player && !bAutoEstablish && !CloseupTarget && !(CutInTarget && CutInLeft > 0.f) && !ShotOnScreen() && !bKickAim &&
 		BreakLeft <= 0.f && !bSetAfterBreak && Game && (Sim->isLive() || Sim->isReturn()) && Sim->ball.mode == tag::BallMode::Held && Sim->ball.holder)
 	{
 		const tag::Ent* H = Sim->ball.holder;
@@ -7671,11 +7620,11 @@ void AMatchDirector::UpdateCamera(float Dt, const FVector& InFocus)
 	{
 		C->FocusSettings.ManualFocusDistance = (CamLook - P).Size();
 		C->CurrentFocalLength = bCcCamShot ? 35.f : bLineShot || (bLineCam && State == EMatchState::Presnap) ? 50.f
-			: CutInTarget && CutInLeft > 0.f && !CloseupTarget ? 85.f : CloseupTarget ? 30.f : CamFocal;
+			: ShotOnScreen() && !CloseupTarget ? ShotFocal : CutInTarget && CutInLeft > 0.f && !CloseupTarget ? 85.f : CloseupTarget ? 30.f : CamFocal;
 		// a close shot is a long lens wide open, as on TV: the man sharp, the stands behind him soft (at f/5.6 the
 		// painted crowd behind a touchdown close-up read as coloured blocks); the game camera keeps the field sharp
 		const bool bClose = (CutInTarget && CutInLeft > 0.f) || CloseupTarget;
-		C->CurrentAperture = bClose ? 1.2f : 5.6f; // (f/2 left the crowd's heads as readable blobs, p75 c013)
+		C->CurrentAperture = ShotOnScreen() && !CloseupTarget && !bCcCamShot && !bLineShot ? ShotAperture : bClose ? 1.2f : 5.6f; // (f/2 left the crowd's heads as readable blobs, p75 c013)
 	}
 	static int32 GLineShots = 0;
 	static double GNextLineShot = 0.0;
@@ -8168,7 +8117,10 @@ void AMatchDirector::Tick(float Dt)
 	if (bPlayClockOn && bRealClock)
 	{
 		// a human game: real seconds, from the whistle to the snap (the game clock only while it runs, never under 0:01)
-		const bool bBetween = State == EMatchState::Call || State == EMatchState::Presnap || State == EMatchState::Post || State == EMatchState::Wait;
+		// (a broadcast shot or the open on screen holds them too, as a replay does: the presentation's pace never takes the
+		// game's time - MatchBroadcast.cpp)
+		const bool bBetween = (State == EMatchState::Call || State == EMatchState::Presnap || State == EMatchState::Post || State == EMatchState::Wait) &&
+			!BroadcastHoldsClock();
 		if (bBetween && !UGameplayStatics::IsGamePaused(this)) // (the pause menu holds both clocks)
 		{
 			PlayClockF = FMath::Max(0.f, PlayClockF - Dt);
@@ -8316,7 +8268,9 @@ void AMatchDirector::Tick(float Dt)
 		if (PC->WasInputKeyJustPressed(EKeys::Four)) Speed = 4.f;
 	}
 	const float SDt = Dt * (bWatch ? Speed : 1.f);
-	const bool bSpace = PC && (PC->WasInputKeyJustPressed(EKeys::SpaceBar) || PC->WasInputKeyJustPressed(EKeys::Gamepad_FaceButton_Bottom));
+	// the one skip rule (04 A8): a confirm press (CROSS / A, SPACE, ENTER) skips the shot, the replay or the open on
+	// screen, and no press skips anything for 0.3 s after (MatchBroadcast.cpp)
+	const bool bSkipPress = BroadcastSkipPress(PC);
 	// the snap: the offense's own (multiplayer: the player in slot 0 - the offense's caller - and nobody else)
 	// (on the player's own snap button: Settings > Controls, pre-snap offense)
 	bool bSnapKey = false;
@@ -8337,10 +8291,12 @@ void AMatchDirector::Tick(float Dt)
 	case EMatchState::Wait:
 		Timer -= SDt;
 		ReadTempoInput(SDt);
+		BroadcastSkip(bSkipPress); // (the shot after the replay, or the pregame open, skipped: MatchBroadcast.cpp)
 		if (bHurryNext || bSpikeNext) Timer = FMath::Min(Timer, 0.1f);
 		UpdateCamera(Dt, Sim ? FocusPoint() : IdleFocus);
-		if (Sim && !Sim->isLive()) TickPostJog(SDt);
-		if (Sim) SyncPlay(Dt, 1.f);
+		// (the halftime show walks the last play's men off itself: MatchBroadcast.cpp)
+		if (Sim && !Sim->isLive() && !BroadcastDrivesMen()) TickPostJog(SDt);
+		if (Sim && !BroadcastDrivesMen()) SyncPlay(Dt, 1.f);
 		{
 			// -TagHuddleSecs=<n>: a watched or filmed game waits this long between plays, as a user picking his play does
 			// (the films cut straight to the next snap, and what the men do in the huddle was never on them)
@@ -8356,11 +8312,11 @@ void AMatchDirector::Tick(float Dt)
 			else if (bBoothHeld && FPlatformTime::Seconds() - BoothHeldSince > 0.25 && !bWatch && PC && !(bPadTest || bPadPlayTest || bMultiTest || bArtTest || bCallShot || bMoveShot || bPauseTest) &&
 				!(Overlay && Overlay->HasModal()))
 			{
-				bool bSkipPress = false;
+				bool bHoldPress = false;
 				for (const FKey& SkipKey : {EKeys::Gamepad_FaceButton_Bottom, EKeys::Gamepad_FaceButton_Right, EKeys::Gamepad_FaceButton_Left,
 					EKeys::Gamepad_FaceButton_Top, EKeys::Enter, EKeys::SpaceBar})
-					bSkipPress = bSkipPress || PC->WasInputKeyJustPressed(SkipKey);
-				if (bSkipPress)
+					bHoldPress = bHoldPress || PC->WasInputKeyJustPressed(SkipKey);
+				if (bHoldPress)
 				{
 					BoothSkipUntil = FPlatformTime::Seconds() + 45.0;
 					bBoothHeld = false;
@@ -8414,6 +8370,7 @@ void AMatchDirector::Tick(float Dt)
 			(UserOff() && bSnapKey && !bMenu && !bPreConsumed && !Sim->walking()))
 		{
 			EndPresnapUI();
+			BroadcastAtSnap(); // (a man going off still on the field is put away; 11 a side checked: MatchBroadcast.cpp)
 			State = EMatchState::Live;
 			SyncRealClock();
 			HudRunoffLeft = 0.0; // the snap: the scorebug clock is the game's again
@@ -8532,7 +8489,8 @@ void AMatchDirector::Tick(float Dt)
 		}
 		UpdateCamera(Dt, FocusPoint());
 		if ((ReplayPostRec += SDt) < 1.3f) RecordReplayFrame(SDt); // the whistle and the moment after it
-		if (Timer <= 0 || (!bWatch && Timer < 1.2f && bSpace))
+		BroadcastSkip(bSkipPress); // (the one skip rule: the lead shot, else the last of the beat - MatchBroadcast.cpp)
+		if (Timer <= 0)
 		{
 			if (!bTackleCam && !bHurryNext && !bSpikeNext && StartReplay()) break;
 			Overlay->SetClockOffset(0);
@@ -8540,7 +8498,7 @@ void AMatchDirector::Tick(float Dt)
 		}
 		break;
 	case EMatchState::Replay:
-		TickReplay(SDt, bSpace);
+		TickReplay(SDt, bSkipPress); // (the package: its angles, its ramp, the wipe - MatchBroadcast.cpp)
 		break;
 	case EMatchState::Kick:
 		UpdateKick(SDt);

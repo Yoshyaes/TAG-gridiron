@@ -65,6 +65,17 @@ $GameModes = @(
     @{ Name = "feel";        On = $true; Timeout = 900; Flags = "-TagFeelTest" },
     @{ Name = "hitstop-off"; On = $true; Timeout = 900; Flags = "-TagHitStopTest -TagNoHitStop -TagWeatherSeed=7 -TagHitStopPlays=16 -TagQuarterLen=120 -TagNoLoad" },
     @{ Name = "hitstop";     On = $true; Timeout = 900; Flags = "-TagHitStopTest -TagWeatherSeed=7 -TagHitStopPlays=16 -TagQuarterLen=120 -TagNoLoad" },
+    @{ Name = "recent"; On = $true; Timeout = 180; Flags = "-TagRecentTest -TagNoLoad" },
+    @{ Name = "replay"; On = $true; Timeout = 900; Flags = "-TagReplayTest -TagWeatherSeed=7 -TagNoLoad -TagRecentReset -TagRecentNoSave" },
+    @{ Name = "shots";  On = $true; Timeout = 900; Flags = "-TagShotTest -TagWeatherSeed=7 -TagNoLoad -TagRecentReset -TagRecentNoSave" },
+    @{ Name = "pace";   On = $true; Timeout = 900; Flags = "-TagPaceTest -TagWeatherSeed=7 -TagNoLoad -TagRecentReset -TagRecentNoSave" },
+    @{ Name = "open";   On = $true; Timeout = 300; Flags = "-TagOpenTest -TagWeatherSeed=7 -TagNoLoad -TagRecentReset -TagRecentNoSave" },
+    @{ Name = "halftime"; On = $true; Timeout = 600; Flags = "-TagHalftimeTest -TagWeatherSeed=7 -TagNoLoad -TagRecentReset -TagRecentNoSave" },
+    @{ Name = "postgame"; On = $true; Timeout = 900; Flags = "-TagPostgameTest -TagWeatherSeed=7 -TagNoLoad -TagRecentReset -TagRecentNoSave" },
+    @{ Name = "callcoach"; On = $true; Timeout = 400; Flags = "-TagCallCoachTest -TagNoLoad" },
+    @{ Name = "gfx";        On = $true; Timeout = 420; Flags = "-TagGfxShots -TagNoLoad" },
+    @{ Name = "mix";        On = $true; Timeout = 300; Flags = "-TagMixTest -TagSoak=120 -TagNoLoad -TagAudioLog" },
+    @{ Name = "mix-legacy"; On = $true; Timeout = 300; Flags = "-TagMixTest -TagMixLegacy -TagSoak=120 -TagNoLoad -TagAudioLog" },
     @{ Name = "chart";    On = $true; Timeout = 900; Flags = "-TagChartTest -TagSoak=540 -TagQuarterLen=60 -TagNoLoad" },
     @{ Name = "soak";     On = $true; Timeout = 900; Flags = "-TagSoak=600 -TagQuarterLen=60 -TagNoLoad -TagWeatherSeed=7" }
 )

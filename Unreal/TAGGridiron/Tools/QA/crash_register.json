@@ -1,8 +1,63 @@
 {
  "version": 1,
- "updated": "2026-11-24 10:24",
+ "updated": "2026-11-25 09:08",
  "help": "status: open | fixed | ignore; set fixed_on ('YYYY-MM-DD HH:MM') with fixed - a later report of the signature fails the check as a regression. Written by Tools/QA/crashes.py --update; status, note and fixed_on are kept across updates.",
  "signatures": {
+  "914d6286d8": {
+   "status": "open",
+   "note": "",
+   "fixed_on": null,
+   "first_seen": "2026-11-25 08:50",
+   "reports": [
+    "UECC-Windows-22E648D248956D61112595B9C4BC1360_0000",
+    "UECC-Windows-4FAFDD764046CB1E6E030CB9150C15D0_0000",
+    "UECC-Windows-5FA61CF64BBFD36A53238480D92A5411_0000"
+   ],
+   "process": "game",
+   "kind": "assert",
+   "signature": "assert | Assertion failed: (Index >= N) & (Index < ArrayNum) [Array.h] Array index out of bounds: N into an array of size N | AMatchDirector::TickShow() < AMatchDirector::TickBroadcast()",
+   "message": "Assertion failed: (Index >= 0) & (Index < ArrayNum) [File:C:\\Program Files\\Epic Games\\UE_5.8\\Engine\\Source\\Runtime\\Core\\Public\\Containers\\Array.h] [Line: 1339] \nArray index out of bounds: 5 into an array of size 5",
+   "top": "AMatchDirector::TickShow() Source/TAGGridiron/Game/MatchBroadcast.cpp:2941",
+   "last_seen": "2026-11-25 09:04",
+   "count": 3,
+   "flags_seen": [
+    "-TagAudioSilent",
+    "-TagChartTest",
+    "-TagNoBooth",
+    "-TagNoLoad",
+    "-TagPostgameTest",
+    "-TagQuarterLen",
+    "-TagRecentNoSave",
+    "-TagRecentReset",
+    "-TagSoak",
+    "-TagWeatherSeed"
+   ]
+  },
+  "18a8154e83": {
+   "status": "open",
+   "note": "",
+   "fixed_on": null,
+   "first_seen": "2026-11-24 18:52",
+   "reports": [
+    "UECC-Windows-18A8835844C0ADE2AA886CBD0C5AB4F0_0000",
+    "UECC-Windows-C8A8C6E1453AC4E9F53D0986BE8A1944_0000"
+   ],
+   "process": "game",
+   "kind": "assert",
+   "signature": "assert | Assertion failed: NodeData [AnimNodeBase.h] | mods:UnrealEditor_Core>UnrealEditor_Engine>UnrealEditor_TAGGridiron>UnrealEditor_Engine",
+   "message": "Assertion failed: NodeData [File:D:\\build\\++UE5\\Sync\\Engine\\Source\\Runtime\\Engine\\Classes\\Animation\\AnimNodeBase.h] [Line: 825]",
+   "top": null,
+   "last_seen": "2026-11-24 18:54",
+   "count": 2,
+   "flags_seen": [
+    "-TagBench",
+    "-TagBenchWarm",
+    "-TagMMDeadBlend",
+    "-TagNoLoad",
+    "-TagSoak",
+    "-TagWeatherSeed"
+   ]
+  },
   "671523af4a": {
    "status": "open",
    "note": "",

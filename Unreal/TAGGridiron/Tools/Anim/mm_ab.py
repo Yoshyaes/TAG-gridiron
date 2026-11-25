@@ -7,6 +7,13 @@
 #             on big ones: both should be < 5 % with the body-class sets; A/B -TagNoStyleSets); tired captures shown.
 #   stumble - frames on a contact-reaction capture (the bumps, jams, upright stumbles): how far the body is from its sim
 #             spot there (voff p95 <= 60 cm, the follower's limit). A/B: -TagNoStumble.
+#   switch_dip - the frozen fade itself: at each switch into / out of a single clip, the hands' and feet's speed against
+#             the pelvis on the two frames from it over the three before (share under 0.2 = a frame the limbs stopped).
+#             24 Nov, 15 clips, -TagFrozenFade 0.382 against 0.001 with dead blending (xfj, an average over 0.25 s,
+#             barely moved: p50 1.76 / 1.80, p95 36.9 / 33.2).
+#   signature - (2026-11-25, 01 #8 / #10) the Superstars' and X-Factors' moving matched frames on captures of their own
+#             body class (the log's "TAG signature #<n> <pos> (star)" lines name them; target > 70 %), against the other men
+#             of their classes. A/B: -TagNoSignature.
 #   log     - the game's own cumulative lines: "TAG break lag" (with the user's man and the pelvis's turn), "TAG xfj"
 #             (transition jerk, A/B -TagFrozenFade / -TagMMDeadBlend), "TAG style share" (with the tired gait by
 #             fatigue), "TAG stumbles", the last of each.
@@ -126,6 +133,48 @@ def style(D, fps):
         if len(x):
             R[man] = {"frames": int(len(x)), **{"on_" + c: round(float((x.cap == c).mean()) * 100, 1) for c in ("Big", "Med", "Agile", "General", "Fatigued")}}
     R["fatigued_frames_all"] = int((M.cap == "Fatigued").sum())
+    # what the cross-class frames are: the captures, and the state (live / presnap / post)
+    for man, other in (("Big", "Agile"), ("Agile", "Big")):
+        x = M[(M.man == man) & (M.cap == other)]
+        if len(x):
+            R["%s_on_%s_top" % (man, other)] = x.asset.str.replace("A_TAG_Pack_", "").value_counts().head(8).to_dict()
+            R["%s_on_%s_by_state" % (man, other)] = x.state.value_counts().to_dict()
+    return R
+
+
+STAR_RE = re.compile(r"TAG signature #(\d+) (\w+) \(star\)")
+
+
+def signature(D, log, fps):
+    stars = set()
+    if log and os.path.exists(log):
+        for line in open(log, encoding="utf-8", errors="replace"):
+            m = STAR_RE.search(line)
+            if m:
+                stars.add((int(m.group(1)), m.group(2)))
+    M = D[(D["mode"] == "mm") & (D.hidden == 0) & (D.down == 0) & D.state.isin(["presnap", "live", "post"])].copy()
+    g = M.groupby(["clip", "pid"])
+    step = np.hypot(g.wx.diff(), g.wy.diff()) * fps
+    M = M[step > 150].copy()
+    if M.empty:
+        return {"stars": len(stars)}
+    M["man"] = [body_class(p) for p in M["pos"]]
+    M["cap"] = [capture_class(a) for a in M["asset"]]
+    M["own"] = M.man == M.cap
+    M["star"] = [(int(n), str(p)) in stars for n, p in zip(M["num"], M["pos"])]
+    R = {"stars": len(stars)}
+    for man in ("Big", "Med", "Agile"):
+        x = M[M.man == man]
+        if len(x):
+            st, ot = x[x.star], x[~x.star]
+            R[man] = {"star_frames": int(len(st)), "star_on_own_pct": round(float(st.own.mean()) * 100, 1) if len(st) else None,
+                      "others_on_own_pct": round(float(ot.own.mean()) * 100, 1) if len(ot) else None}
+    # each star: his share, and how many captures he ran on (fewer = a more recognisable run)
+    per = []
+    for (n, p), x in M[M.star].groupby(["num", "pos"]):
+        per.append({"num": int(n), "pos": p, "frames": int(len(x)), "own_pct": round(float(x.own.mean()) * 100, 1), "captures": int(x.asset.nunique()),
+                    "top": x.asset.str.replace("A_TAG_Pack_", "").value_counts().head(3).to_dict()})
+    R["per_star"] = per
     return R
 
 
@@ -141,24 +190,61 @@ def stumble(D):
     return {"bumps": blk(one[one.asset.str.contains(BUMP_RE)]), "carrier_stumbles": blk(one[one.asset.str.contains(STUMBLE_RE) & ~one.asset.str.contains(BUMP_RE)])}
 
 
+def switch_dip(D):
+    """The frozen-fade check from telemetry: at each switch into or out of a single clip (the anim column's mode or clip
+    changes, not a matched pick change, not a fall or get-up), the hands' and feet's speed relative to the pelvis on the
+    two frames from the switch, over the same speed on the three frames before. A fade out of a frozen pose shows one
+    frame of no limb motion (a ratio near 0); a blend that carries the motion on stays near 1."""
+    V = D[(D.hidden == 0) & D["mode"].isin(["mm", "one", "clip"])].copy()
+    out = []
+    for (clip, pid), g in V.groupby(["clip", "pid"]):
+        g = g.sort_values("frame")
+        f = g.frame.to_numpy()
+        px, py, pz = g.pvx.to_numpy(), g.pvy.to_numpy(), g.pz.to_numpy()
+        J = []
+        for a, b, c in (("hrx", "hry", "hrz"), ("hlx", "hly", "hlz"), ("flx", "fly", "flz"), ("frx", "fry", "frz")):
+            J.append(np.stack([g[a].to_numpy() - px, g[b].to_numpy() - py, g[c].to_numpy() - pz], 1))
+        J = np.stack(J, 1)  # frames x 4 joints x 3
+        sp = np.full(len(g), np.nan)
+        sp[1:] = np.nanmean(np.linalg.norm(J[1:] - J[:-1], axis=2), axis=1)
+        sp[1:][np.diff(f) != 1] = np.nan
+        mode, asset = g["mode"].to_numpy(), g.asset.to_numpy()
+        for k in range(4, len(g) - 2):
+            if asset[k] == asset[k - 1] or (mode[k] == "mm" and mode[k - 1] == "mm"):
+                continue
+            pre = np.nanmean(sp[k - 3:k])
+            if not (pre > 0.5):  # (limbs moving before it: over 0.5 cm a frame)
+                continue
+            out.append(min(sp[k], sp[k + 1]) / pre)
+    a = np.array([x for x in out if np.isfinite(x)])
+    if not len(a):
+        return {"n": 0}
+    return {"n": int(len(a)), "p10": round(float(np.percentile(a, 10)), 3), "p50": round(float(np.median(a)), 3),
+            "share_under_0.2": round(float((a < 0.2).mean()), 3)}
+
+
 def log_lines(path):
     if not path or not os.path.exists(path):
         return {}
     keys = {"break_lag": "TAG break lag", "xfj": "TAG xfj", "style_share": "TAG style share", "stumbles": "TAG stumbles:", "mm_enabled": "TAG: motion matching enabled"}
-    R, n = {}, 0
+    R, n, rd = {}, 0, 0
     for line in open(path, encoding="utf-8", errors="replace"):
         if "TAG stumble #" in line:
             n += 1
+        if "TAG run double team on" in line:
+            rd += 1
         for k, t in keys.items():
             if t in line:
                 R[k] = line.split(t, 1)[1].strip() if k != "mm_enabled" else line.strip()
     R["stumble_lines"] = n
+    R["run_double_teams"] = rd
     return R
 
 
 def report(td, log, fps):
     D = load(td)
-    return {"dir": td, "breaks": summarize_breaks(breaks(D, fps)), "style": style(D, fps), "stumble": stumble(D), "log": log_lines(log)}
+    return {"dir": td, "breaks": summarize_breaks(breaks(D, fps)), "style": style(D, fps), "stumble": stumble(D), "switch_dip": switch_dip(D),
+            "signature": signature(D, log, fps), "log": log_lines(log)}
 
 
 def main():

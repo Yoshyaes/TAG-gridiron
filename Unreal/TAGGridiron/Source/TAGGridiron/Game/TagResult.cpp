@@ -94,7 +94,8 @@ namespace
 const TCHAR* TagResult::ModeName()
 {
 	static const TCHAR* const Modes[] = {TEXT("TagPauseTest"), TEXT("TagMultiTest"), TEXT("TagPadPlayTest"), TEXT("TagPadTest"), TEXT("TagControlsTest"),
-		TEXT("TagInputTest"), TEXT("TagChartTest"), TEXT("TagFeelTest"), TEXT("TagHitStopTest")};
+		TEXT("TagInputTest"), TEXT("TagChartTest"), TEXT("TagFeelTest"), TEXT("TagHitStopTest"),
+		TEXT("TagMixTest"), TEXT("TagGfxShots"), TEXT("TagRecentTest"), TEXT("TagReplayTest"), TEXT("TagShotTest"), TEXT("TagPaceTest"), TEXT("TagOpenTest"), TEXT("TagCallCoachTest"), TEXT("TagHalftimeTest"), TEXT("TagPostgameTest")};
 	for (const TCHAR* M : Modes)
 		if (FParse::Param(FCommandLine::Get(), M)) return M;
 	if (FCString::Strifind(FCommandLine::Get(), TEXT("TagSoak="))) return TEXT("TagSoak");
