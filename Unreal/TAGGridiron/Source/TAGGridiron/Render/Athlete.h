@@ -668,11 +668,13 @@ private:
 	float HeadUpT = 0.f, HeadUpMax = 0.f; // -TagHeadLog: how long his face has been turned up at the stands
 	float ArmSlot = 0.f, StyleJitter = 0.f;
 	/** Signature (Research/NextLevel 01 #8, #10; -TagNoSignature: the old picks by roster id). A number of his own from who
-	 *  he is - his name and position, not where the roster put him - and from his body and ratings his gait: the cadence
+	 *  he is - his name and position, not where the roster put him - and from his body and ratings his gait (-TagSigGait,
+	 *  opt in: it cost ball-in-hand accuracy for little that reads on screen): the cadence
 	 *  his matched loops play at (the stride warp makes up the speed: under 1 a long strider, over 1 quick short steps)
 	 *  and his posture at speed (forward lean: + low and compact, - upright). In each capture library a man prefers two of
 	 *  the full pool (every third pick still the game's rotation); a Superstar or X-Factor always his first, and his
-	 *  locomotion style set is the one with the most captures of his body class. The pools are never cut. */
+	 *  locomotion searches his body class's captures first, the rest at a cost (FAthleteAssets::SigClassSets). The pools
+	 *  are never cut. */
 	uint32 SigId = 0;
 	float SigCadence = 1.f;
 	float SigLeanDeg = 0.f;
@@ -1116,7 +1118,8 @@ struct FAthleteAssets
 	static bool StyleSetsOn();
 	/** Signature styles on (not -TagNoSignature): AAthlete::SigId. */
 	static bool SignatureOn();
-	/** -TagSigClassSets: the body-class sets for the Superstars and X-Factors alone (everyone else on the style sets). */
+	/** The body-class sets for the Superstars and X-Factors alone (everyone else on the style sets); on with the
+	 *  signature, off with -TagNoSigClassSets. */
 	static bool SigClassSets();
 	/** The class sets are loaded: -TagStyleSets, or -TagSigClassSets. */
 	static bool ClassSetsLoad();

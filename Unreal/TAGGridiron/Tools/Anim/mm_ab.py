@@ -161,6 +161,7 @@ def signature(D, log, fps):
     M["man"] = [body_class(p) for p in M["pos"]]
     M["cap"] = [capture_class(a) for a in M["asset"]]
     M["own"] = M.man == M.cap
+    M["fam"] = M.own | (M.cap == "General")  # (his class's set: its own captures and the general ones, AAthlete class sets)
     M["star"] = [(int(n), str(p)) in stars for n, p in zip(M["num"], M["pos"])]
     R = {"stars": len(stars)}
     for man in ("Big", "Med", "Agile"):
@@ -168,7 +169,9 @@ def signature(D, log, fps):
         if len(x):
             st, ot = x[x.star], x[~x.star]
             R[man] = {"star_frames": int(len(st)), "star_on_own_pct": round(float(st.own.mean()) * 100, 1) if len(st) else None,
-                      "others_on_own_pct": round(float(ot.own.mean()) * 100, 1) if len(ot) else None}
+                      "others_on_own_pct": round(float(ot.own.mean()) * 100, 1) if len(ot) else None,
+                      "star_in_family_pct": round(float(st.fam.mean()) * 100, 1) if len(st) else None,
+                      "others_in_family_pct": round(float(ot.fam.mean()) * 100, 1) if len(ot) else None}
     # each star: his share, and how many captures he ran on (fewer = a more recognisable run)
     per = []
     for (n, p), x in M[M.star].groupby(["num", "pos"]):
