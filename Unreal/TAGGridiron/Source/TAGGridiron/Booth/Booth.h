@@ -25,16 +25,20 @@
 #include <utility>
 #include <vector>
 
+#include "Booth/BoothBanks.h"
 #include "Sim/Game.h"
 #include "Sim/Rng.h"
 
 namespace tag {
 namespace booth {
 
-enum class Who { PBP, Color };
-inline const char* whoName(Who w) { return w == Who::PBP ? "PBP" : "COLOR"; }
+/** The voices: the play-by-play man, the analyst, and the referee at his microphone (a flag's announcement: the foul,
+ *  the side, the number, the enforcement and the down - Booth::enableReferee). */
+enum class Who { PBP, Color, Ref };
+inline const char* whoName(Who w) { return w == Who::PBP ? "PBP" : w == Who::Color ? "COLOR" : "REF"; }
 
-enum class Kind { Open, Setup, Read, Live, Result, Analysis, Story, Score, Break, Close };
+/** Ref: the referee's announcement (Who::Ref), in the queue like the talk so nobody speaks over it. */
+enum class Kind { Open, Setup, Read, Live, Result, Analysis, Story, Score, Break, Close, Ref };
 const char* kindName(Kind k);
 
 struct Line {
@@ -51,6 +55,15 @@ struct Line {
   bool snapSafe = false;  // may still be said after the next snap (a score, a flag)
   double estSecs = 0;     // estimated length when spoken
   std::string tag;        // a live call's kind ("catch", "throw:<id>", "sack:<id>", ...): what PBP has said this play
+  /** A live call's stand-in: the generic call that means the same and names nobody ("Caught!" for a named catch,
+   *  "Sacked!" for a named sack), baked once for every game (genericCalls). The voice says it when this call's own audio
+   *  is not made yet, rather than leaving the call to a silent caption. Empty: the call is generic itself, or has none. */
+  std::string alt;
+  int altEnergy = 1;      // the energy the stand-in is baked at
+  /** What the line is about, for the broadcast graphics that follow the booth (UI/BroadcastGfx: a stat line's man
+   *  "stat:<id>", a story's "qb:<id>" / "rb:<id>" / "3rd:<team>"..., a read's or a breakdown's angle, "ref" for the
+   *  referee). Never part of the voice's cache key (LineKey: voice, energy, words). Empty: nothing to show. */
+  std::string topic;
 };
 
 /** What the presentation is doing this frame. */
@@ -101,10 +114,26 @@ class Booth {
   uint64_t forecastStamp() const;
   /** Every live call that names nobody (yard lines, "Touchdown!", "Dropped!"...): synthesize once, keep. */
   static std::vector<std::pair<std::string, int>> genericCalls();
+  /** The generic call (and its energy) that stands in for a live call with this tag and words; empty when the call is
+   *  generic itself. The fallback the call was made with is used when it is generic. */
+  static std::pair<std::string, int> genericAlt(const std::string& tag, const std::string& text, const std::string& fallback);
   /** The live calls this match's regulars can get (each man's planned variants), to synthesize at the kickoff. */
   std::vector<std::pair<std::string, int>> rosterCalls(const Game& g);
   /** Hold the snap a moment: the booth is in the middle of something worth hearing (only with View::canHold). */
   bool wantsHold() const;
+  /** Remember across games what the booth has said (Game/TagRecent.h: the store the game saves between matches, kept in
+   *  memory by BoothScript): pick() takes the wording of a phrase bank heard least recently - in this game or an earlier
+   *  one, every wording before any comes round again - and a story sentence heard lately waits its turn. A wording
+   *  counts as heard when its line is said (next()), not when it is written. On by default. Live-call rot() is not
+   *  touched (its three stable variants are what the voice cache holds). */
+  void enableMemory(bool on) { memory_ = on; }
+  bool memoryOn() const { return memory_; }
+  /** The referee announces every flag himself (Who::Ref lines: "Holding, offense, number 74. 10-yard penalty. Repeat
+   *  1st down."), and the play-by-play man only leads into it and says what it means. Off by default: a Ref line needs
+   *  the third voice (the speech service has two; the game turns this on once it can voice and caption the referee).
+   *  Off, the play-by-play man reads the flag himself, as before. */
+  void enableReferee(bool on) { ref_ = on; }
+  bool refereeOn() const { return ref_; }
   double now() const { return now_; }
 
   /** Estimated seconds a line takes to say (words at a broadcaster's pace; a live call runs faster). */
@@ -179,6 +208,8 @@ class Booth {
   void afterApply(const Game& g, const PlaySim& s, const PlayResult& r, const PlayLog& l);
   void onKickTick(const Game& g, const View& v);
   void kickResult(const Game& g, const std::string& desc);
+  /** A flag on a return (in the kick's own log line): the play-by-play man, and the referee when he speaks. */
+  void returnFoul(const Game& g, const std::string& desc);
   void onPresnapEnter(const Game& g, const View& v);
   void idle(const Game& g, const View& v);
   bool airWritten(const Game& g);
@@ -231,6 +262,28 @@ class Booth {
 
   // ---- phrase choice without repeats
   std::string pick(const std::string& bank, const std::vector<std::string>& opts);
+  /** A bank's authored wordings (BoothBanks.inl) with these facts filled, chosen like pick(); "" when no wording of the
+   *  bank can be said with the facts given. */
+  std::string say(const std::string& bank, const Slots& s);
+  /** pick() over opts whose ids (what the memory keeps) are ids: a bank's wording index, or the position in opts. */
+  std::string pickFrom(const std::string& bank, const std::vector<std::string>& opts, const std::vector<int>& ids);
+  /** The facts most lines name (the teams, the down before the snap, the score): s plus these, s first. */
+  Slots facts(const Game& g, Slots s) const;
+  /** The referee's announcement of a flag (enableReferee), queued after what is waiting. */
+  void refSay(const std::string& text, double delay = 0.3);
+  /** A foul in the referee's words with its side and number ("Holding, offense, number 74"), from the log's name. */
+  std::string refFoul(const std::string& logName, bool offense, const Player* man) const;
+  bool ref_ = false;
+  /** The memory across games (enableMemory): the wordings picked and not yet said, matched to the line that says them. */
+  struct PickUse {
+    std::string bank;
+    int idx = 0;
+    std::string text;
+  };
+  std::deque<PickUse> pendingPicks_;
+  bool memory_ = true;
+  uint32_t salt_ = 1;  // (the order of wordings no game has heard yet: the booth's seed)
+  void heardNow(const Line& l);
   /** A live call planned for one man: one of his three ways of saying it, in turn (stable, so the voice cache hits). */
   std::string rot(int pid, const std::vector<std::string>& opts);
   bool chance(double p) { return rng_.chance(p); }
@@ -277,13 +330,22 @@ class Booth {
   LivePlan plan_;
   bool calledThrow_ = false, calledCatch_ = false, calledRun_ = false, breakaway_ = false, calledPressure_ = false;
   bool calledTD_ = false, calledINT_ = false, calledSack_ = false, calledFumble_ = false, calledPbu_ = false, calledGoingToScore_ = false;
-  bool calledDrop_ = false, pbuSeen_ = false, dropSeen_ = false;
+  bool calledDrop_ = false, pbuSeen_ = false, dropSeen_ = false, battedSeen_ = false;
+  int handoffPid_ = -1;  // the back the play's handoff call was planned for (a handoff to another man is called generically)
+  const Player* qbOnField_[2] = {nullptr, nullptr};  // each side's quarterback at its last snap (home, away): a new one is introduced
+  std::string resultSaid_;     // the play's call (the breakdown does not say it back)
+  std::vector<size_t> deferredLogs_;  // clock stops logged before the play's own line: heard after it (flushDeferred)
+  bool flushingLogs_ = false;
+  void flushDeferred(const Game& g);
+  std::string creditFor_;      // the held breakdown a held credit belongs to (said together, or not at all)
   std::set<std::string> spokenTags_;  // the live calls PBP has said this play
   int spokenTarget_ = -1;             // the man the spoken throw call named
   std::string lastRead_;              // the analyst's read before this snap (his breakdown may come back to it)
   bool replayWorthy_ = false;         // this play gets the presentation's replay (the breakdown rides it)
   std::string downTag_;               // "First down." held from the whistle until the play is applied (no flag)
   std::string pendingAnalysis_;       // the breakdown of a play with no replay, said after the down
+  std::string pendingAnalysisTopic_;  // ... its angle (Line::topic)
+  std::string lastAnalysisTopic_, lastStoryTopic_;  // the angle analysis() chose, the topic storyLine() chose (Line::topic)
   int pendingAnalysisEnergy_ = 1;
   std::unordered_map<int, int> penCount_;  // flags on a man this game
   bool setupPossKnown_ = false;       // the last setup's team and quarter (the first snap of a series says whose ball)

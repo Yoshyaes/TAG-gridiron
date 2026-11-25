@@ -203,10 +203,12 @@ def recipes(base):
         for k in range(n):
             R['%s_%02d' % (name, k + 1)] = (lambda k=k: fn(k))
 
-    add('Field/HitLight/HitLight', 6, lambda k: hit(base, np.random.default_rng(1000 + k), 0.12 + 0.05 * (k % 3), body_pool()))
-    add('Field/HitMed/HitMed', 6, lambda k: hit(base, np.random.default_rng(1100 + k), 0.42 + 0.05 * (k % 3), body_pool()))
-    add('Field/HitHeavy/HitHeavy', 6, lambda k: hit(base, np.random.default_rng(1200 + k), 0.7 + 0.05 * (k % 3), body_pool()))
-    add('Field/HitHuge/HitHuge', 4, lambda k: hit(base, np.random.default_rng(1300 + k), 0.92 + 0.02 * k, body_pool()))
+    # (12-14 takes of each: the director's on-screen contacts play HitLight / HitMed many times a play, and a full game has
+    # dozens of heavy hits; takes 1-6 / 1-4 are as they were - the same seeds and power - 05 A9)
+    add('Field/HitLight/HitLight', 12, lambda k: hit(base, np.random.default_rng(1000 + k), 0.12 + 0.05 * (k % 3), body_pool()))
+    add('Field/HitMed/HitMed', 12, lambda k: hit(base, np.random.default_rng(1100 + k), 0.42 + 0.05 * (k % 3), body_pool()))
+    add('Field/HitHeavy/HitHeavy', 14, lambda k: hit(base, np.random.default_rng(1200 + k), 0.7 + 0.05 * (k % 3), body_pool()))
+    add('Field/HitHuge/HitHuge', 12, lambda k: hit(base, np.random.default_rng(1300 + k), 0.92 + 0.02 * (k % 4), body_pool()))
     add('Field/LineCrash/LineCrash', 5, lambda k: line_crash(base, np.random.default_rng(1400 + k), body_pool()))
 
     def fall(k):

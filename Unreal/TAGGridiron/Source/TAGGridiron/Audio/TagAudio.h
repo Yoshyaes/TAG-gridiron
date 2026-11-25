@@ -6,6 +6,12 @@
 //
 // Sounds are USoundWave assets under /Game/TAG/Audio/<group>/<Bank>/ (built by Tools/Audio); a bank is a folder of
 // takes of one sound, and a take is never played twice running. A bank that is not there is simply silent.
+//
+// The mix is a broadcast's (Research/NextLevel/05 A3, A4): the master is trimmed to the console loudness target and
+// limited under -1 dBTP (-TagNoLimiter: neither; -TagMixTrimDb=<dB> another trim), and the crowd, the stadium and the
+// music give way to the booth by what it is saying - well down under calm talk, a little under a live call, not at all
+// under the big call over a roaring building (-TagMixLegacy: the old fixed duck under any voice, the beds only).
+// -TagMixTest plays a calm line, an excited call and a touchdown over a CPU game and checks the gains it applied.
 #pragma once
 
 #include "CoreMinimal.h"
@@ -20,6 +26,7 @@ class UAudioComponent;
 class USoundWave;
 class USoundBase;
 class USoundAttenuation;
+class USubmixEffectDynamicsProcessorPreset;
 struct FStreamableHandle;
 
 /** What the director shows the sound each frame. */
@@ -86,6 +93,20 @@ public:
 	 *  body thud (HitMed) by Strength 0..1, its gain 6 dB and more under a tackle's hit. Heard in the replay too. */
 	void ContactHit(const FVector& At, float Strength);
 
+	/** The booth's line now on the air (ATagBooth, as each voiced line starts and ends): its energy 0..3 (-1: nobody is
+	 *  talking) and whether it is talk - analysis, a story, a read, the setup - rather than a call of the action. The
+	 *  crowd, the stadium's one-shots and the music ride it (the broadcast mix). */
+	void BoothLine(int32 Energy, bool bTalk);
+	/** The playback gain for a booth line of this energy: an excited call is louder than calm talk (about -2, 0, +2, +4 dB
+	 *  for energy 0..3; the clips are all levelled alike), and the lift stops where the clip's peak (ClipPeak, 0..1) played
+	 *  at Level (the settings' Master x Commentary) would pass -1 dBFS at the output. 1 with -TagMixLegacy. */
+	static float VoiceEnergyGain(int32 Energy, float ClipPeak, float Level);
+	/** -TagMixLegacy: the mix as it was before the broadcast mix (a fixed duck under any voice, the beds only, every
+	 *  line at one level). */
+	static bool LegacyMix();
+	/** The master's trim, linear (the console loudness target; 1 with -TagNoLimiter). */
+	static float MasterTrim();
+
 	/** 0..1 each (the settings screen). */
 	void SetLevels(float Master, float Music, float Stadium);
 	/** The settings screen's volumes, in quarters (0..4), kept in GameUserSettings [TAG.Settings]. Which: 0 everything, 1 music, 2 stadium and field. */
@@ -133,6 +154,7 @@ private:
 	/** The play's field sounds as they happened (T = seconds from the snap), so the replay can be heard as well as seen. */
 	TArray<FLater> Tape;
 	float TapeT = 0.f, TapeSeen = -1.f;
+	float TapeRate = 0.5f;            // the replay's speed (seconds of the play a second), smoothed: the replayed hits' pitch
 	bool bTaping = false;
 	TMap<const tag::Ent*, float> Feet; // the men around the ball: each one's next footfall
 	void Field(FName Bank, const FVector& Pos, float Vol = 1.f, float Pitch = 1.f, float Delay = 0.f);
@@ -148,6 +170,11 @@ private:
 		float Vol = 0.f, Target = 0.f;
 		float Up = 1.5f, Down = 0.6f;  // volume per second
 		bool bStarted = false;
+		// a bed with more than one take moves to another every few minutes, crossfaded at a quiet moment, so its loop
+		// never comes round to be heard (C2 is the take coming in)
+		UAudioComponent* C2 = nullptr;
+		float Xf = -1.f;               // the crossfade, 0..1 (-1: none going)
+		float NextSwap = 0.f;          // seconds until the next take may come in
 	};
 	enum { LCalm, LBuzz, LRoar, LNoise, LRain, LWind, LNum };
 	FLoop Loops[LNum];
@@ -155,6 +182,10 @@ private:
 	TArray<TObjectPtr<UAudioComponent>> Comps;
 	UPROPERTY()
 	TObjectPtr<USoundAttenuation> FieldAtt;
+	/** The master's trim and limiter (an effect on the main submix, so the -TagAudioRec recording hears it too). */
+	UPROPERTY()
+	TObjectPtr<USubmixEffectDynamicsProcessorPreset> Limiter;
+	void StartLimiter();
 	UAudioComponent* MakeComp(bool bUi);
 	void TickLoops(float Dt, float CrowdGain);
 	void StopLoops();
@@ -192,6 +223,8 @@ private:
 	void ScreenChanged();
 	int32 Fed = 0;            // frames fed so far (nothing of the menus is heard before the game is on screen)
 	float StageT = 0.f;
+	bool bOpenPending = false;    // the match has started but is not on screen yet (its load): the open's sound waits
+	float OpenT = -1.f;           // seconds into the open (-1: not in it)
 
 	struct FPlay
 	{
@@ -221,7 +254,33 @@ private:
 	float DNoise = 0.f;                   // the home crowd making noise against the other offense before the snap
 	float Swell = 0.f;                    // a play breaking open, a deep ball in the air
 	float Deflate = 0.f;                  // seconds of stunned quiet after the visitors score
-	float Duck = 1.f;
+
+	// ---- the broadcast mix: the faders the booth's line rides (1 = as built; under 1 the crowd gives way, over 1 it blooms)
+	float Duck = 1.f;                     // the crowd's beds, the stadium's music and (but in the legacy mix) its one-shots
+	float MusicDuck = 1.f;
+	int32 VoiceEnergy = -1;               // the booth's line on the air (BoothLine): its energy, -1 none
+	bool bVoiceTalk = false;              // ... and it is talk, not a call
+	bool bLegacyMix = false;
+	bool bBoothRef = false;               // -TagBoothRef: the booth's referee announces the flags (the PA's stock sample stays quiet)
+	/** The crowd's and the PA's one-shots still sounding, so the duck can ride them as well as the beds. */
+	struct FShot
+	{
+		TWeakObjectPtr<UAudioComponent> C;
+		float Base = 0.f;                 // its volume with no duck
+		float Set = 1.f;                  // the duck it was last set at
+	};
+	TArray<FShot> Shots;
+	TWeakObjectPtr<UAudioComponent> LastShot;     // the last one-shot started (the mix test reads it)
+	float LastShotBase = 0.f, LastShotGain = 0.f;
+	/** The last one-shot's gain now over its gain with no duck (its gain as it started, once it has played out). */
+	float LastShotDuck() const;
+	void TickMix(float Dt, const FTagAudioView& V);
+	// -TagMixTest: a scripted calm line, excited call and touchdown over the match, the gains checked as they settle
+	bool bMixTest = false, bTestOnAir = false;
+	float MixTestT = -1.f;
+	int32 MixTestStep = 0, MixPass = 0, MixFail = 0;
+	void TickMixTest(float Dt);
+	void MixCheck(const TCHAR* What, float Got, float Want, float Tol);
 	void Roar(float Level, float Hold);
 	float Stakes(const tag::Game& G) const;
 	void NewPlay(const FTagAudioView& V);
@@ -239,5 +298,6 @@ private:
 	float RecLeft = 0.f;
 	bool bRec = false;
 	TMap<FName, int32> Counts;
-	void Note(const TCHAR* Kind, FName Bank, float Vol);
+	TMap<FName, TMap<FName, int32>> TakeUses; // bank -> take -> times played this match (the summary's "take uses")
+	void Note(const TCHAR* Kind, FName Bank, float Vol, const USoundWave* Take = nullptr);
 };

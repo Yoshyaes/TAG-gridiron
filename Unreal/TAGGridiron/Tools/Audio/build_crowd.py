@@ -115,8 +115,41 @@ def shape(n, attack, hold, decay, floor_db=-40.0):
     return e.astype(np.float32)
 
 
-def take(base, i, a, b, fin=0.05, fout=1.0):
-    return al.fade(al.cut(src(i, base), a, b), fin, fout)
+def take(base, i, a, b, fin=0.05, fout=1.0, pitch=1.0):
+    x = al.fade(al.cut(src(i, base), a, b), fin, fout)
+    return x if pitch == 1.0 else al.resample(x, pitch)
+
+
+def extra_sets(real, n):
+    """n more real layers from the excerpts a bank's hand-picked takes already use (so nothing new needs vetting by ear):
+    pairs of them laid together that no take has yet, then each one started a little further in. Fewer than n come
+    round again (each take still gets its own seed: its own woven bed, swell and pitch)."""
+    ex = []
+    for s in real:
+        for e in s:
+            if e not in ex:
+                ex.append(e)
+    used = {tuple(sorted(s)) for s in real}
+    out = []
+    for i in range(len(ex)):
+        for j in range(i + 1, len(ex)):
+            c = tuple(sorted([ex[i], ex[j]]))
+            if c not in used:
+                used.add(c)
+                out.append(list(c))
+    for off in (0.7, 1.4, 2.1):
+        for (i, a, b) in ex:
+            if b - a - off >= max(1.2, 0.6 * (b - a)):
+                out.append([(i, round(a + off, 2), b)])
+    if not out:
+        out = [list(s) for s in real]
+    return [out[k % len(out)] for k in range(n)]
+
+
+def jitter(seed):
+    """A take's own swell and pitch: a few percent either way."""
+    rng = np.random.default_rng(seed * 7 + 3)
+    return rng.uniform(0.88, 1.12), rng.uniform(0.88, 1.15), 1.0 + rng.uniform(-0.03, 0.03)
 
 
 def follow(x, smooth=0.25):
@@ -149,7 +182,7 @@ def level(x, target=-16.0):
     return al.limit(x * (al.db(target) / (r + 1e-9)), -1.0)
 
 
-def cheer(base, seed, real, attack, hold, decay, bright=0.0, tier='roar', real_gain=1.0):
+def cheer(base, seed, real, attack, hold, decay, bright=0.0, tier='roar', real_gain=1.0, pitch=1.0):
     """A real eruption over the woven roar shaped to the same swell."""
     rng = np.random.default_rng(seed)
     total = attack + hold + decay
@@ -161,7 +194,7 @@ def cheer(base, seed, real, attack, hold, decay, bright=0.0, tier='roar', real_g
     bed = (bed.T * env ** 1.3 + dark.T * (env * (1 - env) * 1.5)).T
     out = bed * 0.8
     for (i, a, b) in real:
-        r = take(base, i, a, min(b, a + total), 0.03, min(2.5, decay * 0.5))
+        r = take(base, i, a, min(b, a + total), 0.03, min(2.5, decay * 0.5), pitch)
         r = r / (al.rms(r[: int(3 * SR)]) + 1e-6) * al.rms(bed[int(attack * SR): int((attack + 2) * SR)])
         al.place(out, r, 0.0, real_gain)
     if bright:
@@ -170,9 +203,9 @@ def cheer(base, seed, real, attack, hold, decay, bright=0.0, tier='roar', real_g
     return al.fade(level(out), 0.0, 1.0)
 
 
-def groan(base, seed, real, big=False):
+def groan(base, seed, real, big=False, pitch=1.0):
     rng = np.random.default_rng(seed)
-    parts = [take(base, i, a, b, 0.03, 0.5) for (i, a, b) in real]
+    parts = [take(base, i, a, b, 0.03, 0.5, pitch) for (i, a, b) in real]
     n = int(max(len(p) for p in parts) + 1.5 * SR)
     out = np.zeros((n, 2), np.float32)
     for p in parts:
@@ -188,9 +221,9 @@ def groan(base, seed, real, big=False):
     return al.fade(level(out, -17.0), 0.02, 1.2)
 
 
-def boo(base, seed, real):
+def boo(base, seed, real, pitch=1.0):
     rng = np.random.default_rng(seed)
-    parts = [take(base, i, a, b, 0.4, 2.0) for (i, a, b) in real]
+    parts = [take(base, i, a, b, 0.4, 2.0, pitch) for (i, a, b) in real]
     n = max(len(p) for p in parts)
     out = np.zeros((n, 2), np.float32)
     for p in parts:
@@ -208,34 +241,42 @@ def recipes(base):
     R['Crowd/CrowdBuzz/CrowdBuzz_01'] = lambda: loop(base, 'buzz', 60, 12)
     R['Crowd/CrowdRoar/CrowdRoar_01'] = lambda: loop(base, 'roar', 48, 13, lambda x: al.shelf(x, 2500, 1.5))
     R['Crowd/CrowdNoise/CrowdNoise_01'] = lambda: loop(base, 'roar', 44, 14, lambda x: al.shelf(al.peq(x, 2800, 4, 0.8), 5000, 3.0))
+    # more takes of each bed, woven from other grains and a little longer or shorter: the game crossfades to another
+    # every few minutes (ATagAudio::TickLoops), so no bed cycle comes round to be heard (05 A9)
+    for k, (calm, buzz, roar, noise) in enumerate(((58, 66, 53, 40), (70, 55, 43, 49)), start=2):
+        R['Crowd/CrowdCalm/CrowdCalm_%02d' % k] = (lambda s=calm, k=k: loop(base, 'calm', s, 11 + 10 * k, lambda x: al.shelf(x, 3500, -2.5)))
+        R['Crowd/CrowdBuzz/CrowdBuzz_%02d' % k] = (lambda s=buzz, k=k: loop(base, 'buzz', s, 12 + 10 * k))
+        R['Crowd/CrowdRoar/CrowdRoar_%02d' % k] = (lambda s=roar, k=k: loop(base, 'roar', s, 13 + 10 * k, lambda x: al.shelf(x, 2500, 1.5)))
+        R['Crowd/CrowdNoise/CrowdNoise_%02d' % k] = (lambda s=noise, k=k: loop(base, 'roar', s, 14 + 10 * k, lambda x: al.shelf(al.peq(x, 2800, 4, 0.8), 5000, 3.0)))
+
+    def deepen(bank, real, total, seed0, make):
+        """The hand-picked takes, then more up to `total` from the same excerpts (extra_sets), each with its own seed,
+        swell and pitch (jitter): a game's worth of reactions without the same cheer coming round every few plays."""
+        for k, r in enumerate(real):
+            R['Crowd/%s/%s_%02d' % (bank, bank, k + 1)] = (lambda r=r, k=k: make(seed0 + k, r, 1.0, 1.0, 1.0))
+        for k, r in enumerate(extra_sets(real, total - len(real)), start=len(real)):
+            R['Crowd/%s/%s_%02d' % (bank, bank, k + 1)] = (lambda r=r, k=k: make(seed0 + 20 + k, r, *jitter(seed0 + k)))
+
     # the big ones: a touchdown, a takeaway
     big = [[('528799', 1.2, 14)], [('691975', 13.6, 27)], [('328623', 50.3, 64)], [('528799', 1.2, 14), ('691975', 13.6, 27)]]
-    for k, r in enumerate(big):
-        R['Crowd/CheerBig/CheerBig_%02d' % (k + 1)] = (lambda r=r, k=k: cheer(base, 100 + k, r, 0.45, 4.0, 8.5, bright=1.5))
+    deepen('CheerBig', big, 12, 100, lambda s, r, h, d, p: cheer(base, s, r, 0.45, 4.0 * h, 8.5 * d, bright=1.5, pitch=p))
     med = [[('649156', 7.6, 15)], [('629884', 15.6, 22)], [('639283', 5.2, 12)], [('829453', 6.6, 13)], [('130568', 10.6, 17)]]
-    for k, r in enumerate(med):
-        R['Crowd/CheerMed/CheerMed_%02d' % (k + 1)] = (lambda r=r, k=k: cheer(base, 200 + k, r, 0.4, 1.6, 4.5))
+    deepen('CheerMed', med, 14, 200, lambda s, r, h, d, p: cheer(base, s, r, 0.4, 1.6 * h, 4.5 * d, pitch=p))
     small = [[('397434', 0.3, 7)], [('397435', 0.3, 7)], [('829453', 14.6, 20)], [('649156', 13.0, 19)]]
-    for k, r in enumerate(small):
-        R['Crowd/CheerSmall/CheerSmall_%02d' % (k + 1)] = (lambda r=r, k=k: cheer(base, 300 + k, r, 0.5, 0.8, 3.2, tier='buzz', real_gain=0.8))
+    deepen('CheerSmall', small, 12, 300, lambda s, r, h, d, p: cheer(base, s, r, 0.5, 0.8 * h, 3.2 * d, tier='buzz', real_gain=0.8, pitch=p))
     gr = [[('264499', 0.0, 2.3)], [('264499', 4.9, 7.6)], [('494362', 2.6, 6.5)], [('264499', 8.2, 10.8)], [('264499', 14.0, 16.8), ('124996', 0, 2.0)],
           [('264499', 20.6, 24.5)]]
-    for k, r in enumerate(gr):
-        R['Crowd/Groan/Groan_%02d' % (k + 1)] = (lambda r=r, k=k: groan(base, 400 + k, r))
+    deepen('Groan', gr, 14, 400, lambda s, r, h, d, p: groan(base, s, r, pitch=p))
     grb = [[('264499', 0.0, 2.3), ('494362', 2.6, 6.5)], [('264499', 4.9, 7.6), ('264499', 10.9, 13.9)],
            [('264499', 14.0, 16.8), ('494362', 2.6, 6.5), ('124996', 0, 2.0)]]
-    for k, r in enumerate(grb):
-        R['Crowd/GroanBig/GroanBig_%02d' % (k + 1)] = (lambda r=r, k=k: groan(base, 450 + k, r, big=True))
+    deepen('GroanBig', grb, 12, 450, lambda s, r, h, d, p: groan(base, s, r, big=True, pitch=p))
     bo = [[('764251', 0.4, 12.5)], [('557189', 1.0, 14.0)], [('25270', 0.5, 12.0)], [('577098', 15.5, 23.5), ('764251', 0.4, 8.0)]]
-    for k, r in enumerate(bo):
-        R['Crowd/Boo/Boo_%02d' % (k + 1)] = (lambda r=r, k=k: boo(base, 500 + k, r))
+    deepen('Boo', bo, 12, 500, lambda s, r, h, d, p: boo(base, s, r, pitch=p))
     ga = [[('635110', 0.0, 1.5)], [('324898', 0.3, 3.6)], [('264499', 2.3, 4.6)], [('264499', 16.9, 19.5), ('635110', 0.0, 1.5)], [('494362', 2.6, 5.5), ('324898', 0.3, 3.0)]]
-    for k, r in enumerate(ga):
-        R['Crowd/Gasp/Gasp_%02d' % (k + 1)] = (lambda r=r, k=k: groan(base, 600 + k, r, big=True))
+    deepen('Gasp', ga, 14, 600, lambda s, r, h, d, p: groan(base, s, r, big=True, pitch=p))
     # the visitors' corner: a few thousand, far away
     aw = [[('629884', 15.6, 22)], [('649156', 7.6, 14)], [('397434', 0.3, 7)]]
-    for k, r in enumerate(aw):
-        R['Crowd/AwayCheer/AwayCheer_%02d' % (k + 1)] = (lambda r=r, k=k: al.lp(cheer(base, 700 + k, r, 0.3, 1.0, 4.0, tier='calm', real_gain=1.4), 2600) * 0.5)
+    deepen('AwayCheer', aw, 12, 700, lambda s, r, h, d, p: al.lp(cheer(base, s, r, 0.3, 1.0 * h, 4.0 * d, tier='calm', real_gain=1.4, pitch=p), 2600) * 0.5)
 
     def rise(seed, secs=7.0):
         # the kickoff: the whole building on one rising "ohhhhh" until the foot meets the ball

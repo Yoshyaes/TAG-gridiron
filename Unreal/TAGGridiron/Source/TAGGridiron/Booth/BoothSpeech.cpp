@@ -50,6 +50,7 @@ const char* kindName(Kind k) {
     case Kind::Score: return "score";
     case Kind::Break: return "break";
     case Kind::Close: return "close";
+    case Kind::Ref: return "ref";
   }
   return "?";
 }
@@ -145,7 +146,9 @@ double Booth::estimate(const std::string& say, Who who, int energy) {
     if (c == '.' || c == '!' || c == '?' || c == ';') ++pauses;
     if (c == ',') pauses += 0;
   }
-  // a broadcaster's pace: ~2.7 words a second in a setup, faster when the play is on, the analyst a touch slower
+  // a broadcaster's pace: ~2.7 words a second in a setup, faster when the play is on, the analyst a touch slower; the
+  // referee reads it slow and flat, a beat at every stop (the stadium hears it through the PA)
+  if (who == Who::Ref) return 0.4 + words / 2.3 + 0.3 * pauses;
   double wps = who == Who::PBP ? 2.75 : 2.6;
   wps += 0.25 * energy;
   return 0.2 + words / wps + 0.18 * pauses;

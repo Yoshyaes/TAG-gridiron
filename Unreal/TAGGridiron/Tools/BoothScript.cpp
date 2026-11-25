@@ -2,9 +2,17 @@
 // the live play at 60 Hz, the post-play beat and replays, kicks in the air, live returns) and prints the broadcast as
 // a timed transcript, then a summary (talk time, lines dropped and cut, repeats).
 //
-//   BoothScript.exe [seed=7] [--hold] [--quiet] [--games=N] [--jsonl=path]
+//   BoothScript.exe [seed=7] [--hold] [--quiet] [--games=N] [--jsonl=path] [--teams=H,A] [--nomemory]
 //     --hold : the presentation lets the booth hold the snap (a watched CPU game)
 //     --jsonl: also write every spoken line as JSON (for TTS batch synthesis and listening tests)
+//     --teams: every game between these two league teams (0..31, home first); otherwise a random pair a game
+//     --nomemory: the booth forgets between games (Booth::enableMemory; the baseline for the cross-game repeat share)
+//     --noref: the play-by-play man reads the flags himself (no referee announcements: Booth::enableReferee, the game's default)
+//     --xrep[=N]: after a run of games, where the cross-game repeats come from and the N sentences heard again most
+//   BoothScript.exe --banks                   the authored phrase banks and their sizes
+//   BoothScript.exe --bake --jsonl=path       every generic live call and each team's regulars' calls (one pairing a team)
+//   BoothScript.exe --bake-all --jsonl=path   the same for every one of the 992 pairings (the calls that name the other
+//                                             side's quarterback differ by opponent): feed it to booth_tts.py --once
 #include <algorithm>
 #include <cstdio>
 #include <cstdlib>
@@ -172,6 +180,9 @@ struct Show {
   std::map<std::string, int> textCount;
   std::map<std::string, int> kindCount;
   std::map<std::string, int> talkCount;  // the non-live lines (a repeated sentence of talk is what an ear notices)
+  std::map<std::string, std::string> talkKind;  // a talk line's kind (the cross-game list says where a repeat comes from)
+  std::map<std::string, int> wordsBy;           // words said per voice (PBP, COLOR, REF)
+  std::map<std::string, int> refCount;          // the referee's announcements (not talk: counted on their own)
   int plays = 0, playsWithAnalysis = 0;
   int lastAnalysisPlay = -1;
 
@@ -186,6 +197,13 @@ struct Show {
 
   std::set<std::string> forecastSeen;  // every text offered for prewarm before it was needed
   int liveLines = 0, liveHit = 0, frameNo = 0, liveStatic = 0;
+  int liveAlt = 0, liveGeneric = 0, liveBare = 0;  // live calls with a generic stand-in / generic themselves / neither
+  std::map<std::string, int> bareTags;
+  std::set<std::string> genericSet = [] {
+    std::set<std::string> s;
+    for (const auto& gc : Booth::genericCalls()) s.insert(gc.first);
+    return s;
+  }();
   std::set<std::string> staticSet;
   std::vector<std::string> playCalls;  // what PBP said since the snap (checked against the play's result)
   int checked = 0, contradictions = 0;
@@ -293,8 +311,20 @@ struct Show {
           ++liveLines;
           if (forecastSeen.count(l->text)) ++liveHit;
           if (staticSet.count(l->text)) ++liveStatic;
+          // a call the voice can always say on a cold cache: generic itself, or with a generic stand-in (Line::alt)
+          if (!l->alt.empty()) ++liveAlt;
+          else if (genericSet.count(l->text)) ++liveGeneric;
+          else {
+            ++liveBare;
+            bareTags[l->tag.substr(0, l->tag.find(':'))]++;
+          }
         }
-        if (!l->live) talkCount[l->text]++;
+        if (l->kind == booth::Kind::Ref) refCount[l->text]++;  // (the referee's formula is the same every time, like a live call)
+        else if (!l->live) {
+          talkCount[l->text]++;
+          talkKind[l->text] = std::string(booth::whoName(l->who)) + " " + booth::kindName(l->kind);
+        }
+        wordsBy[booth::whoName(l->who)] += static_cast<int>(std::count(l->text.begin(), l->text.end(), ' ') + 1);
         kindCount[booth::kindName(l->kind)]++;
         if (l->kind == booth::Kind::Analysis && lastAnalysisPlay != plays) {
           lastAnalysisPlay = plays;
@@ -378,60 +408,139 @@ int main(int argc, char** argv) {
   bool hold = false, quiet = false;
   int games = 1;
   const char* jsonPath = nullptr;
+  int teamH = -1, teamA = -1;
+  bool memory = true, xrep = false, ref = true;
+  int xrepN = 60;
   for (int i = 1; i < argc; ++i) {
     if (!std::strcmp(argv[i], "--hold")) hold = true;
     else if (!std::strcmp(argv[i], "--quiet")) quiet = true;
+    else if (!std::strcmp(argv[i], "--nomemory")) memory = false;
+    else if (!std::strncmp(argv[i], "--xrep", 6)) {
+      xrep = true;
+      if (argv[i][6] == '=') xrepN = std::atoi(argv[i] + 7);
+    }
+    else if (!std::strcmp(argv[i], "--noref")) ref = false;
+    else if (!std::strncmp(argv[i], "--teams=", 8)) {
+      teamH = std::atoi(argv[i] + 8);
+      const char* comma = std::strchr(argv[i] + 8, ',');
+      teamA = comma ? std::atoi(comma + 1) : -1;
+    } else if (!std::strncmp(argv[i], "--bake", 6)) {
+    }
     else if (!std::strncmp(argv[i], "--games=", 8)) games = std::atoi(argv[i] + 8);
     else if (!std::strncmp(argv[i], "--jsonl=", 8)) jsonPath = argv[i] + 8;
     else if (!std::strncmp(argv[i], "--writer=", 9)) gWriterModel = argv[i] + 9;
     else if (!std::strncmp(argv[i], "--writerlag=", 12)) gWriterLag = std::atof(argv[i] + 12);
     else seed = static_cast<uint32_t>(std::atoi(argv[i]));
   }
+  // --banks: the authored phrase banks (Booth/BoothBanks.inl) and their sizes
+  for (int i = 1; i < argc; ++i)
+    if (!std::strcmp(argv[i], "--banks")) {
+      auto sizes = booth::bankSizes();
+      std::sort(sizes.begin(), sizes.end());
+      size_t total = 0;
+      for (const auto& kv : sizes) {
+        std::printf("%-18s %3zu\n", kv.first.c_str(), kv.second);
+        total += kv.second;
+      }
+      std::printf("BANKS %zu banks, %zu wordings\n", sizes.size(), total);
+      for (const std::string& d : booth::bankDuplicates()) std::printf("DUPLICATE bank id: %s\n", d.c_str());
+      return booth::bankDuplicates().empty() ? 0 : 1;
+    }
   FILE* jf = jsonPath ? std::fopen(jsonPath, "wb") : nullptr;
   // --bake: no game, just every line the voice cache can hold for good: the generic calls, then each team's regulars'
-  // live calls (the league is fixed: createLeague(2027)), the default Play Now matchup (3 v 7) first
+  // live calls (the league is fixed: createLeague(2027)), the default Play Now matchup (3 v 7) first.
+  // --bake-all: every pairing (home and away, 32 x 31): a man's own calls are the same in every game, but a sack call
+  // names the other side's quarterback and a shared surname is said in full only against the team that shares it. The
+  // order is what a bake stopped part way should already have: the generics, the default matchup, every team's own
+  // calls (one pairing a team), then the calls only other pairings add (a miss on those has its generic stand-in).
   for (int i = 1; i < argc; ++i)
-    if (!std::strcmp(argv[i], "--bake")) {
+    if (!std::strcmp(argv[i], "--bake") || !std::strcmp(argv[i], "--bake-all")) {
+      const bool all = !std::strcmp(argv[i], "--bake-all");
       if (!jf) {
-        std::printf("--bake needs --jsonl=path\n");
+        std::printf("%s needs --jsonl=path\n", argv[i]);
         return 1;
       }
       League league = createLeague(2027);
       std::set<std::string> done;
+      size_t wordCount = 0;
       auto emit = [&](const std::string& text, int energy) {
         const std::string say = Booth::spoken(text);
         if (!done.insert(std::to_string(energy) + "|" + say).second) return;
+        wordCount += static_cast<size_t>(std::count(say.begin(), say.end(), ' ') + 1);
         std::fprintf(jf, "{\"t\":0,\"who\":\"PBP\",\"kind\":\"live\",\"energy\":%d,\"text\":\"%s\",\"say\":\"%s\"}\n", energy, Show::esc(text).c_str(),
                      Show::esc(say).c_str());
       };
       for (const auto& gc : Booth::genericCalls()) emit(gc.first, gc.second);
+      const size_t generic = done.size();
       std::vector<std::pair<int, int>> pairs = {{3, 7}};
-      for (int t = 0; t < 32; t += 2) pairs.push_back({t, t + 1});
+      if (all) {
+        pairs.push_back({7, 3});
+        for (int t = 0; t < 32; ++t) pairs.push_back({t, (t + 1) % 32});
+        for (int h = 0; h < 32; ++h)
+          for (int a = 0; a < 32; ++a)
+            if (h != a) pairs.push_back({h, a});
+      } else
+        for (int t = 0; t < 32; t += 2) pairs.push_back({t, t + 1});
+      size_t ownCalls = 0;
+      std::set<std::pair<int, int>> seen;
       for (auto [h, a] : pairs) {
+        if (!seen.insert({h, a}).second) continue;
         Game g(*league[h], *league[a]);
         Booth b(1);
         View v;
         v.stage = View::Stage::Wait;
         b.tick(0.1, g, v);  // the open: the booth learns the rosters (names two teammates share)
         for (const auto& rc : b.rosterCalls(g)) emit(rc.first, rc.second);
+        if (seen.size() == 34 || (!all && seen.size() == pairs.size())) ownCalls = done.size();
       }
       std::fclose(jf);
-      std::printf("baked %zu lines\n", done.size());
+      std::printf("baked %zu lines: %zu generic, %zu more for every team's own calls, %zu more only other pairings add (about %zu words)\n", done.size(), generic,
+                  ownCalls - generic, done.size() - ownCalls, wordCount);
       return 0;
     }
   double totTalk = 0, totTime = 0;
   int totLines = 0, totRepeats = 0, totDistinct = 0, totPlays = 0, totAnalysis = 0, totExpired = 0, totCut = 0, totQueued = 0;
+  // the memory across games (Booth::enableMemory, Game/TagRecent.h kept in this process): the share of the talk's
+  // sentences in each game that an earlier game of the run already said
+  std::set<std::string> heardBefore;
+  int crossSentences = 0, crossHeard = 0;
+  std::map<std::string, int> crossRep;           // --xrep: a sentence an earlier game said -> times heard again
+  std::map<std::string, std::string> crossKind;  // ... and the voice and kind of the line it was in
+  std::map<std::string, int> totWords;           // words per voice, every game
+  int totRef = 0;                                // the referee's announcements, every game
+  auto sentences = [](const std::string& text) {
+    std::vector<std::string> out;
+    std::string cur;
+    for (size_t k = 0; k < text.size(); ++k) {
+      cur += text[k];
+      const bool end = (text[k] == '.' || text[k] == '!' || text[k] == '?') && (k + 1 == text.size() || text[k + 1] == ' ');
+      if (end) {
+        while (!cur.empty() && cur[0] == ' ') cur.erase(0, 1);
+        if (!cur.empty()) out.push_back(cur);
+        cur.clear();
+      }
+    }
+    while (!cur.empty() && cur[0] == ' ') cur.erase(0, 1);
+    if (!cur.empty()) out.push_back(cur);
+    return out;
+  };
   for (int gi = 0; gi < games; ++gi) {
     League league = createLeague(2027);
     Rng pickRng(seed + gi * 7919);
-    const int hi = pickRng.intRange(0, 31);
+    int hi = pickRng.intRange(0, 31);
     int ai = pickRng.intRange(0, 31);
     if (ai == hi) ai = (ai + 1) % 32;
+    if (teamH >= 0 && teamH < 32 && teamA >= 0 && teamA < 32 && teamH != teamA) {
+      hi = teamH;
+      ai = teamA;
+    }
     GameOptions o;
     o.seed = seed + gi * 104729;
     Game g(*league[hi], *league[ai], o);
     Booth b(seed * 31 + gi);
     b.enableWriter(!gWriterModel.empty());
+    b.enableMemory(memory);
+    b.enableReferee(ref);
     Show sh{g, b};
     sh.quiet = quiet;
     sh.jsonl = jf;
@@ -555,9 +664,53 @@ int main(int argc, char** argv) {
     std::printf("predicted voiced (warm league cache): %d of %d (%.0f%%)\n", sh.predVoiced, sh.predLines, 100.0 * sh.predVoiced / (std::max)(1, sh.predLines));
     std::printf("live calls %d, prewarmable %d (%.0f%%), in the kickoff prewarm %d (%.0f%%; %zu lines)\n", sh.liveLines, sh.liveHit,
                 100.0 * sh.liveHit / (std::max)(1, sh.liveLines), sh.liveStatic, 100.0 * sh.liveStatic / (std::max)(1, sh.liveLines), sh.staticSet.size());
+    {
+      std::string bare;
+      for (const auto& kv : sh.bareTags) bare += " " + kv.first + "=" + std::to_string(kv.second);
+      std::printf("live calls voiceable on a cold cache: %d of %d (%.1f%%): generic %d, named with a generic stand-in %d; neither %d%s\n",
+                  sh.liveGeneric + sh.liveAlt, sh.liveLines, 100.0 * (sh.liveGeneric + sh.liveAlt) / (std::max)(1, sh.liveLines), sh.liveGeneric, sh.liveAlt, sh.liveBare,
+                  bare.c_str());
+    }
     std::printf("talk lines %d, repeated %d (%.1f%%)\n", talkLines, talkRepeats, 100.0 * talkRepeats / (std::max)(1, talkLines));
+    {
+      // the talk's sentences (every time said) that an earlier game of this run said word for word
+      int sent = 0, old = 0;
+      std::set<std::string> mine;
+      for (const auto& kv : sh.talkCount)
+        for (const std::string& s : sentences(kv.first)) {
+          sent += kv.second;
+          if (heardBefore.count(s)) {
+            old += kv.second;
+            crossRep[s] += kv.second;
+            crossKind[s] = sh.talkKind[kv.first];
+          }
+          mine.insert(s);
+        }
+      if (gi > 0) {
+        crossSentences += sent;
+        crossHeard += old;
+      }
+      if (gi == 0)
+        std::printf("cross-game: game 0 talk sentences %d, said in an earlier game n/a (the first game of the run)\n", sent);
+      else
+        std::printf("cross-game: game %d talk sentences %d, said in an earlier game %d (%.1f%%)%s\n", gi, sent, old, 100.0 * old / (std::max)(1, sent),
+                    memory ? "" : " [no memory]");
+      heardBefore.insert(mine.begin(), mine.end());
+    }
     for (const auto& kv : sh.textCount)
       if (kv.second > 1) repeats += kv.second - 1;
+    {
+      int all = 0;
+      for (const auto& kv : sh.wordsBy) {
+        all += kv.second;
+        totWords[kv.first] += kv.second;
+      }
+      int refLines = 0;
+      for (const auto& kv : sh.refCount) refLines += kv.second;
+      totRef += refLines;
+      std::printf("words: analyst %d of %d (%.1f%%), referee %d (%d announcements)\n", sh.wordsBy["COLOR"], all, 100.0 * sh.wordsBy["COLOR"] / (std::max)(1, all),
+                  sh.wordsBy["REF"], refLines);
+    }
     totTalk += sh.talk;
     totTime += b.now();
     totLines += sh.lines;
@@ -584,5 +737,26 @@ int main(int argc, char** argv) {
   std::printf("SUMMARY games %d | broadcast %.0f s, talk %.0f s (%.0f%%) | lines %d, distinct %d, repeats %d (%.1f%%) | plays %d, analysis on %d (%.0f%%) | queued %d, dropped %d, cut %d\n",
               games, totTime, totTalk, 100 * totTalk / (std::max)(1.0, totTime), totLines, totDistinct, totRepeats, 100.0 * totRepeats / (std::max)(1, totLines), totPlays, totAnalysis,
               100.0 * totAnalysis / (std::max)(1, totPlays), totQueued, totExpired, totCut);
+  {
+    int all = 0;
+    for (const auto& kv : totWords) all += kv.second;
+    std::printf("WORDS analyst %.1f%% of %d, referee %d (%.1f%%) in %d announcements\n", 100.0 * totWords["COLOR"] / (std::max)(1, all), all, totWords["REF"],
+                100.0 * totWords["REF"] / (std::max)(1, all), totRef);
+  }
+  if (games > 1)
+    std::printf("CROSS-GAME games 2..%d: %d talk sentences, %d said in an earlier game (%.1f%%), memory %s\n", games, crossSentences, crossHeard,
+                100.0 * crossHeard / (std::max)(1, crossSentences), memory ? "on" : "off");
+  if (xrep) {
+    // where the cross-game repeats come from: by kind, then the sentences heard again most
+    std::map<std::string, int> byKind;
+    for (const auto& kv : crossRep) byKind[crossKind[kv.first]] += kv.second;
+    std::printf("cross-game repeats by line kind:");
+    for (const auto& kv : byKind) std::printf(" [%s] %d", kv.first.c_str(), kv.second);
+    std::printf("\n");
+    std::vector<std::pair<int, std::string>> rep;
+    for (const auto& kv : crossRep) rep.push_back({kv.second, kv.first});
+    std::sort(rep.rbegin(), rep.rend());
+    for (size_t i = 0; i < rep.size() && i < static_cast<size_t>(xrepN); ++i) std::printf("  %3d x %-15s %s\n", rep[i].first, crossKind[rep[i].second].c_str(), rep[i].second.c_str());
+  }
   return 0;
 }

@@ -7,7 +7,11 @@
 //     synthesized again. A line with no audio yet is asked for at once and waited on briefly; the live calls the
 //     next snap could need are asked for before it (the booth's forecast), the generic ones at the start of a match.
 //   - the audio plays through a 2D audio component (a procedural sound wave fed the wav's samples) at the settings'
-//     Master x Commentary volume; a line the booth cuts (a live call takes the floor) fades out in 0.15 s.
+//     Master x Commentary volume, lifted by the line's energy (the broadcast mix, ATagAudio::VoiceEnergyGain), and the
+//     sound's mix is told what is on the air (ATagAudio::BoothLine) so the crowd makes room for it; a line the booth
+//     cuts (a live call takes the floor) fades out in 0.15 s.
+//   - a live call whose own audio is not made yet (a matchup never played) is voiced by its generic stand-in
+//     (Line::alt: "Caught!" for a named catch) when that is cached, rather than left to a silent caption.
 //   - the caption shows who is talking and what he says, broadcast closed-caption style. Without the speech service
 //     (no venv, -TagBoothMute) the booth still runs, captions only, at the estimated pace.
 // -TagBoothLog writes every line to the log ("TAG booth ..."), -TagNoBooth turns the booth off.
@@ -40,6 +44,11 @@ public:
 	bool WantsHold() const { return Core && Core->wantsHold(); }
 	/** A voice is on the air right now (the sound mix makes room for it). */
 	bool Talking() const { return bPlaying; }
+	/** The line on the air now - its words as heard (a live call's generic stand-in when that is what plays), who says
+	 *  it, its kind and Line::topic - or null when nobody is talking (the broadcast graphics follow it: UI/BroadcastGfx). */
+	const tag::booth::Line* OnAir() const { return bPlaying && CurId ? &CurLine : nullptr; }
+	/** -TagBoothRef: the referee announces the flags himself (Booth::enableReferee). */
+	bool RefereeOn() const { return Core && Core->refereeOn(); }
 	/** Hide the captions (the reel, a cut-in); the voices go on. */
 	void SetCaptionsShown(bool b) { bCaptions = b; }
 	/** Stop talking at once (quit to menu). */
@@ -61,7 +70,13 @@ private:
 		TArray<uint8> Pcm;
 		int32 Rate = 24000;
 		float Secs = 0.f;
+		float Peak = 1.f;   // its loudest sample, 0..1 (the energy's lift stops under the ceiling: ATagAudio::VoiceEnergyGain)
 	};
+	/** The line's wav is in the cache (looked for on the disk once, then remembered). */
+	bool HasClip(const FString& Key);
+	/** Tell the sound's mix what is on the air now (ATagAudio::BoothLine): energy -1 when nobody is. */
+	void TellMix(int32 Energy, bool bTalk) const;
+	static bool IsTalk(tag::booth::Kind K);
 	/** Read and parse one wav (no actor state: it runs on a background thread). */
 	static bool LoadClip(const FString& Path, FClip& Out);
 	/** The current line's wav is read off the game thread; the answer comes back through ClipLoaded. */
@@ -100,8 +115,11 @@ private:
 	bool bPlaying = false;
 	float WaitT = 0.f, PlayT = 0.f, PlaySecs = 0.f, FadeT = -1.f;
 	float GainSet = -1.f;           // the voice's volume as last set (a settings change reaches a line already playing)
+	float EnergyGain = 1.f;         // the line's own lift by its energy (the broadcast mix), on top of GainSet
 	FString CurKey;
 	tag::booth::Line CurLine;
+	bool bAltLine = false;          // CurLine is a live call's generic stand-in (its own audio was not made yet)
+	int32 AltLines = 0, LiveLines = 0, LiveVoiced = 0; // this match's live calls, voiced ones, and of those the stand-ins
 	TSet<FString> Asked;
 	TSet<FString> Present;          // line keys whose wav is known to be in the cache (never looked for again)
 	float ForecastT = 0.f;

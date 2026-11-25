@@ -17,7 +17,10 @@
 #include <cmath>
 #include <cstdio>
 #include <cstring>
+#include <tuple>
 
+#include "Booth/BoothBanks.inl"  // the authored phrase banks (data: compiled here, once)
+#include "Game/TagRecent.h"
 #include "Sim/Playbook.h"
 
 namespace tag {
@@ -50,6 +53,14 @@ const char* bOrdWord(int n) {
 const char* bCountWord(int n) {
   static const char* const k[] = {"no", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve"};
   return n >= 0 && n <= 12 ? k[n] : "a lot of";
+}
+
+// how many times, the way a man says it: "once", "twice", "three times", "11 times" ("" for none: a wording of its own)
+std::string bTimes(int n) {
+  if (n <= 0) return std::string();
+  if (n == 1) return "once";
+  if (n == 2) return "twice";
+  return (n <= 12 ? std::string(bCountWord(n)) : std::to_string(n)) + " times";
 }
 
 std::string bDist(double toGo, double ballOn) {
@@ -125,11 +136,100 @@ std::string bRoute(const std::string& r) {
 }
 bool bIsDL(const Ent* e) { return e && e->isDL; }
 
+// the small grammar a template can't know: "1 yards", "a 8-yard"
+void bGrammar(std::string& x) {
+  for (const char* a : {" 1 yards", " -1 yards"})
+    for (size_t at = x.find(a); at != std::string::npos; at = x.find(a, at + 1)) x.replace(at, std::strlen(a), std::string(a).substr(0, std::strlen(a) - 1));
+  // "1 catches", "1 carries", "one sacks": the count's noun in the singular
+  static const std::pair<const char*, const char*> kOne[] = {
+      {" 1 catches", " 1 catch"},     {" 1 carries", " 1 carry"},       {" 1 passes", " 1 pass"},         {" 1 runs", " 1 run"},
+      {" 1 tackles", " 1 tackle"},    {" 1 sacks", " 1 sack"},          {" 1 penalties", " 1 penalty"},   {" 1 plays", " 1 play"},
+      {" 1 touchdowns", " 1 touchdown"}, {" 1 interceptions", " 1 interception"}, {" one sacks", " one sack"}, {" one tackles", " one tackle"},
+      {" 1 attempts", " 1 attempt"},  {" 1 points", " 1 point"},        {" one catches", " one catch"},   {" one carries", " one carry"},
+      {" one timeouts", " one timeout"}, {" 1 timeouts", " 1 timeout"}};
+  for (const auto& kv : kOne)
+    for (size_t at = x.find(kv.first); at != std::string::npos; at = x.find(kv.first, at + 1)) x.replace(at, std::strlen(kv.first), kv.second);
+  static const char* const kAn[] = {"8-", "11-", "18-", "80-", "81-", "82-", "83-", "84-", "85-", "86-", "87-", "88-", "89-", "8 ", "11 ", "18 "};
+  for (const char* n : kAn)
+    for (const char* art : {"A ", " a "}) {
+      const std::string from = std::string(art) + n;
+      std::string to = from;
+      to.replace(to.find(art[0] == 'A' ? "A" : "a"), 1, art[0] == 'A' ? "An" : "an");
+      for (size_t at = x.find(from); at != std::string::npos; at = x.find(from, at + to.size())) x.replace(at, from.size(), to);
+    }
+}
+
+// a line and the tail that goes with it: a tail that opens with a comma joins the line's last sentence ("Carter picks
+// up 12" + ", and that's a first down."); one that opens with a space is a sentence of its own
+std::string bJoin(const std::string& line, const std::string& tail) {
+  if (tail.empty()) return line;
+  if (line.empty()) {
+    // (no line to join: the tail stands alone)
+    size_t a = tail.find_first_not_of(", ");
+    return a == std::string::npos ? std::string() : bCap(tail.substr(a));
+  }
+  if (tail[0] == ',') {
+    if (line.back() == '.') return line.substr(0, line.size() - 1) + tail;
+    // ("What a run! 25 yards!" can't take ", first down": the tail says it on its own)
+    const size_t a = tail.find_first_not_of(", ");
+    return a == std::string::npos ? line : line + " " + bCap(tail.substr(a));
+  }
+  return line + tail;
+}
+
+// a line that says back four words in a row of another ("...will want that one back" from both men); runs with a
+// number in them ("on 2nd and 10") are facts, not an echo
+bool bEcho(const std::string& a, const std::string& b) {
+  auto words = [](const std::string& s) {
+    std::vector<std::string> w;
+    std::string cur;
+    for (const char ch : s) {
+      const unsigned char u = static_cast<unsigned char>(ch);
+      if (std::isalnum(u) || ch == '\'') cur += static_cast<char>(std::tolower(u));
+      else if (!cur.empty()) {
+        w.push_back(cur);
+        cur.clear();
+      }
+    }
+    if (!cur.empty()) w.push_back(cur);
+    return w;
+  };
+  const std::vector<std::string> wa = words(a), wb = words(b);
+  if (wa.size() < 4 || wb.size() < 4) return false;
+  auto gram = [](const std::vector<std::string>& w, size_t i, std::string& out) {
+    out.clear();
+    for (size_t k = i; k < i + 4; ++k) {
+      if (std::isdigit(static_cast<unsigned char>(w[k][0]))) return false;
+      out += w[k] + " ";
+    }
+    return true;
+  };
+  std::set<std::string> gb;
+  std::string gm;
+  for (size_t i = 0; i + 4 <= wb.size(); ++i)
+    if (gram(wb, i, gm)) gb.insert(gm);
+  for (size_t i = 0; i + 4 <= wa.size(); ++i)
+    if (gram(wa, i, gm) && gb.count(gm)) return true;
+  return false;
+}
+
+// a sentence as a short stable id (FNV-1a 64, hex): what the memory across games keeps of a story it has heard
+std::string bTextId(const std::string& s) {
+  uint64_t h = 0xcbf29ce484222325ull;
+  for (const unsigned char c : s) {
+    h ^= c;
+    h *= 0x100000001b3ull;
+  }
+  char b[24];
+  std::snprintf(b, sizeof b, "%016llx", static_cast<unsigned long long>(h));
+  return b;
+}
+
 }  // namespace
 
 // ------------------------------------------------------------------ construction, queue
 
-Booth::Booth(uint32_t seed, const Crew& crew) : crew_(crew), rng_(seed) {}
+Booth::Booth(uint32_t seed, const Crew& crew) : crew_(crew), rng_(seed) { salt_ = seed; }
 
 Line& Booth::push(Who who, Kind kind, const std::string& text, int energy, int prio, double delay, double ttl) {
   Line l;
@@ -145,20 +245,8 @@ Line& Booth::push(Who who, Kind kind, const std::string& text, int energy, int p
   l.notBefore = now_ + delay;
   l.expireAt = now_ + delay + ttl;
   // the small grammar a template can't know: "1 yards", "a 8-yard", "that's sixth"
-  {
-    std::string& x = l.text;
-    for (const char* a : {" 1 yards", " -1 yards"})
-      for (size_t at = x.find(a); at != std::string::npos; at = x.find(a, at + 1)) x.replace(at, std::strlen(a), std::string(a).substr(0, std::strlen(a) - 1));
-    static const char* const kAn[] = {"8-", "11-", "18-", "80-", "81-", "82-", "83-", "84-", "85-", "86-", "87-", "88-", "89-", "8 ", "11 ", "18 "};
-    for (const char* n : kAn)
-      for (const char* art : {"A ", " a "}) {
-        const std::string from = std::string(art) + n;
-        std::string to = from;
-        to.replace(to.find(art[0] == 'A' ? "A" : "a"), 1, art[0] == 'A' ? "An" : "an");
-        for (size_t at = x.find(from); at != std::string::npos; at = x.find(from, at + to.size())) x.replace(at, from.size(), to);
-      }
-    l.say = spoken(x);
-  }
+  bGrammar(l.text);
+  l.say = spoken(l.text);
   l.estSecs = estimate(l.say, who, energy);
   recentText_.push_back(l.text);
   while (recentText_.size() > 60) recentText_.pop_front();
@@ -205,6 +293,10 @@ const Line* Booth::next() {
     if (q_[i].live && q_[i].notBefore <= now_) {
       if (best < 0 || q_[i].prio > q_[best].prio) best = static_cast<int>(i);
     }
+  // while the ball is live (a play, a kick in the air) only the call of the action is heard: the two-minute warning, a
+  // score or a story waits for the whistle
+  const bool ballLive = (sim_ && snapped_ && sim_->isLive()) || (stage_ == View::Stage::Kick && kickFootSaid_ && !kickLandSaid_);
+  if (best < 0 && ballLive) return nullptr;
   // everything else strictly in order: a conversation (the toss to the analyst, his answer) never runs backwards
   if (best < 0)
     for (size_t i = 0; i < q_.size(); ++i)
@@ -213,6 +305,12 @@ const Line* Booth::next() {
         break;
       }
   if (best < 0) return nullptr;
+  // a question (a toss, "you called it") whose answer is gone (dropped, expired) is not asked: it would hang in the air
+  if (q_[best].tag == "question" && !q_[best].live && (best + 1 >= static_cast<int>(q_.size()) || q_[best + 1].tag != "answer")) {
+    q_.erase(q_.begin() + best);
+    st_.expired++;
+    return nullptr;
+  }
   const Line& l = q_[best];
   const bool talk = l.kind == Kind::Read || l.kind == Kind::Story || l.kind == Kind::Analysis;
   const bool answer = l.tag == "answer";  // (its question was asked: the answer comes)
@@ -233,6 +331,10 @@ const Line* Booth::next() {
   if (now_ < lastEnd_ + gap) return nullptr;
   cur_ = l;
   q_.erase(q_.begin() + best);
+  // a question asked keeps its answers: a snap or a kick does not flush them away from it
+  if (cur_.tag == "question")
+    for (int k = best; k < static_cast<int>(q_.size()) && q_[k].tag == "answer"; ++k) q_[k].snapSafe = true;
+  if (memory_) heardNow(cur_);
   for (const auto& sf : sharedFull_)  // (the man a shared surname now means, for the next bare "Calloway")
     if (cur_.text.find(sf.full) != std::string::npos) lastBySurname_[sf.last] = sf.id;
   if (cur_.who == Who::Color) lastColorT_ = now_;
@@ -265,8 +367,9 @@ void Booth::finished(int id) {
 bool Booth::cutCurrent() const {
   if (!cur_.id) return false;
   if (cutForSnap_) return true;
-  // a live call takes the floor from anything less urgent, except the score, a break or the open/close
-  if (cur_.kind == Kind::Score || cur_.kind == Kind::Open || cur_.kind == Kind::Close) return false;
+  // a live call takes the floor from anything less urgent, except the score, a break, the open/close or the referee
+  // (nobody talks over the official's announcement: the snap waits for it, wantsHold)
+  if (cur_.kind == Kind::Score || cur_.kind == Kind::Open || cur_.kind == Kind::Close || cur_.kind == Kind::Ref) return false;
   const bool ownCall = cur_.who == Who::PBP && cur_.live;
   const double played = cur_.estSecs > 0 ? (now_ - curStart_) / cur_.estSecs : 1.0;
   for (const Line& l : q_)
@@ -323,7 +426,7 @@ uint64_t Booth::forecastStamp() const {
     h ^= static_cast<uint64_t>(static_cast<uint32_t>(extra)) + 0x9e3779b97f4a7c15ull;
     h *= 0x100000001b3ull;
   };
-  for (const Line& l : q_) mix(l.say, l.energy * 2 + (l.who == Who::PBP ? 0 : 1));
+  for (const Line& l : q_) mix(l.say, l.energy * 3 + static_cast<int>(l.who));
   mix(pendingResult_, pendingResultEnergy_);
   mix(nextSetup_, nextSetupEnergy_);
   for (const auto& kv : plan_.at) mix(kv.second.text, kv.second.energy);
@@ -332,9 +435,9 @@ uint64_t Booth::forecastStamp() const {
 
 bool Booth::wantsHold() const {
   if (stage_ != View::Stage::Presnap && stage_ != View::Stage::Wait && stage_ != View::Stage::Call) return false;
-  // the open, a quarter break, halftime: always worth the wait (the kickoff waits for the crew); the breakdown of a
-  // play only when the presentation lets the booth hold the snap
-  auto big = [](const Line& l) { return l.kind == Kind::Open || l.kind == Kind::Break || l.kind == Kind::Close; };
+  // the open, a quarter break, halftime, the referee's announcement: always worth the wait (the kickoff waits for the
+  // crew, the snap for the official); the breakdown of a play only when the presentation lets the booth hold the snap
+  auto big = [](const Line& l) { return l.kind == Kind::Open || l.kind == Kind::Break || l.kind == Kind::Close || l.kind == Kind::Ref; };
   const bool breakTalk = (cur_.id && big(cur_)) || std::any_of(q_.begin(), q_.end(), big);
   if (breakTalk || breakDeadline_ >= 0) return holdUsed_ < 45.0;
   if (holdUsed_ >= holdBudget_) return false;
@@ -352,14 +455,15 @@ std::vector<std::pair<std::string, int>> Booth::genericCalls() {
   };
   at(1, {"Incomplete.", "Falls incomplete.", "Off the mark, incomplete.", "Throws it away.", "Gets rid of it, out of bounds.", "Out of bounds, no catch.",
          "Fielded.", "Handoff.", "Throws...", "Back to throw.", "Here's the kickoff.", "Here's the punt.", "And we're underway!",
-         "And the kickoff is away.", "And the punt is away.", "Here's the free kick."});
+         "And the kickoff is away.", "And the punt is away.", "Here's the free kick.", "Here comes the punt team.", "Here's the field goal try."});
   at(2, {"Caught!", "Got it!", "Makes the grab!", "Hauls it in!", "And he's got it!", "Makes the catch in traffic!", "Holds on with a man draped all over him!",
          "Snags it!", "Caught on the sideline!", "Makes the grab at the sideline!", "Caught over the middle!", "Got it, over the middle!", "Dropped!", "Drops it!", "Right through his hands!", "Can't hang on!", "Broken up!", "Knocked away!", "Batted down!", "Batted at the line!",
          "Knocked down at the line of scrimmage!", "Pressure!", "Here comes the rush!", "He's got company!", "Pocket's collapsing!", "Spin move!",
          "Makes a man miss!", "Runs him over!", "Stiff arm!", "Hurdles a man!", "He takes off!", "The snap, the hold, the kick...", "It's up..."});
   at(3, {"Diving catch!", "Lays out, and makes the grab!", "What a catch!", "He's got room!", "He's loose!", "Breaks free!", "Nobody's going to catch him!",
          "Oh, big hit!", "What a shot!", "Lowers the boom!", "Fumble! Ball's loose!", "He coughs it up! Loose ball!", "The ball is out!", "Midfield!",
-         "Touchdown!", "He's in! Touchdown!", "He's going to score!", "Into the end zone!", "Intercepted!", "Sacked!", "Safety!", "He's in the clear!"});
+         "Touchdown!", "He's in! Touchdown!", "He's going to score!", "Into the end zone!", "Intercepted!", "Sacked!", "Safety!", "He's in the clear!",
+         "Recovered!"});
   for (int n = 10; n <= 40; n += 10) v.push_back({"The " + bS(n) + "!", 3});
   for (int n = 1; n <= 50; ++n) {
     v.push_back({"Brought down at the " + bS(n) + ".", 1});
@@ -371,14 +475,55 @@ std::vector<std::pair<std::string, int>> Booth::genericCalls() {
   return v;
 }
 
+std::pair<std::string, int> Booth::genericAlt(const std::string& tag, const std::string& text, const std::string& fallback) {
+  static const std::unordered_map<std::string, int> kGeneric = [] {
+    std::unordered_map<std::string, int> m;
+    for (const auto& gc : genericCalls()) m.emplace(gc.first, gc.second);
+    return m;
+  }();
+  if (kGeneric.count(text)) return {};  // (the call names nobody: its audio is baked with the generics)
+  if (auto it = kGeneric.find(fallback); it != kGeneric.end()) return {it->first, it->second};
+  // a call made from a phrase bank with a name in it ("And Austin recovers!"): the generic call of its kind
+  static const std::pair<const char*, const char*> kByTag[] = {
+      {"catch", "Caught!"}, {"drop", "Dropped!"},      {"pbu", "Broken up!"},        {"recover", "Recovered!"},     {"fum", "Fumble! Ball's loose!"},
+      {"int:", "Intercepted!"}, {"sack", "Sacked!"},   {"press", "Pressure!"},       {"td", "Touchdown!"},          {"field", "Fielded."},
+      {"handoff", "Handoff."}, {"scramble", "He takes off!"}, {"away", "Throws it away."}, {"qbdrop", "Back to throw."}, {"throw:", "Throws..."},
+      {"deep:", "Throws..."}, {"break", "He's loose!"}, {"hit", "Oh, big hit!"}, {"kset:punt", "Here comes the punt team."},
+      {"kset:fg", "Here's the field goal try."}};
+  for (const auto& kv : kByTag)
+    if (tag.rfind(kv.first, 0) == 0)
+      if (auto it = kGeneric.find(kv.second); it != kGeneric.end()) return {it->first, it->second};
+  return {};
+}
+
 // ------------------------------------------------------------------ phrase choice
 
 std::string Booth::pick(const std::string& bank, const std::vector<std::string>& opts) {
+  std::vector<int> ids(opts.size());
+  for (size_t i = 0; i < ids.size(); ++i) ids[i] = static_cast<int>(i);
+  return pickFrom(bank, opts, ids);
+}
+
+std::string Booth::say(const std::string& bank, const Slots& s) {
+  // the bank's wordings this moment can say (every fact each names is known), each under its index in the bank
+  const std::vector<const char*>& w = bankWordings(bank);
+  std::vector<std::string> opts;
+  std::vector<int> ids;
+  std::string o;
+  for (size_t i = 0; i < w.size(); ++i)
+    if (fillWording(w[i], s, o)) {
+      opts.push_back(o);
+      ids.push_back(static_cast<int>(i));
+    }
+  return pickFrom(bank, opts, ids);
+}
+
+std::string Booth::pickFrom(const std::string& bank, const std::vector<std::string>& opts, const std::vector<int>& ids) {
   if (opts.empty()) return std::string();
   std::deque<int>& rec = recentPick_[bank];
   const size_t n = opts.size();
   const size_t keep = n <= 1 ? 0 : (std::min)(n - 1, (std::max)(static_cast<size_t>(1), n * 2 / 3));
-  auto inRec = [&rec](int i) { return std::find(rec.begin(), rec.end(), i) != rec.end(); };
+  auto inRec = [&rec, &ids](int i) { return std::find(rec.begin(), rec.end(), ids[static_cast<size_t>(i)]) != rec.end(); };
   auto inText = [this](const std::string& s) {
     return spokenSet_.count(s) > 0 || std::find(recentText_.begin(), recentText_.end(), s) != recentText_.end();
   };
@@ -390,10 +535,78 @@ std::string Booth::pick(const std::string& bank, const std::vector<std::string>&
       if (!inRec(static_cast<int>(i))) ok.push_back(static_cast<int>(i));
   if (ok.empty())
     for (size_t i = 0; i < n; ++i) ok.push_back(static_cast<int>(i));
-  const int i = ok[rng_.intRange(0, static_cast<int>(ok.size()) - 1)];
-  rec.push_back(i);
+  int i = ok[rng_.intRange(0, static_cast<int>(ok.size()) - 1)];
+  if (memory_ && ok.size() > 1) {
+    // across games (Game/TagRecent.h): of the wordings this game allows, the one heard least recently - never heard
+    // first - so the next game does not open with the last one's lines (NHL's rule: all of them before any comes back)
+    std::vector<std::string> keys;
+    keys.reserve(ok.size());
+    for (int k : ok) keys.push_back(bS(ids[static_cast<size_t>(k)]));
+    const int j = Recent::get().leastRecent("booth." + bank, keys, salt_);
+    if (j >= 0) i = ok[j];
+  }
+  rec.push_back(ids[static_cast<size_t>(i)]);
   while (rec.size() > keep) rec.pop_front();
+  // heard when its line is said (next()); a wording written into a line that is dropped stays unheard
+  if (memory_) {
+    pendingPicks_.push_back({bank, ids[static_cast<size_t>(i)], opts[i]});
+    while (pendingPicks_.size() > 160) pendingPicks_.pop_front();
+  }
   return opts[i];
+}
+
+Slots Booth::facts(const Game& g, Slots s) const {
+  // (a wording takes the first fact of a name: the caller's own come first and win)
+  const Team& O = g.offense();
+  const Team& D = g.defense();
+  const int m = g.margin();
+  const int hi = (std::max)(g.score.home, g.score.away), lo = (std::min)(g.score.home, g.score.away);
+  const Team* lead = g.score.home == g.score.away ? nullptr : g.score.home > g.score.away ? g.home : g.away;
+  const Team* trail = lead == g.home ? g.away : lead == g.away ? g.home : nullptr;
+  s.push_back({"off", O.city});
+  s.push_back({"def", D.city});
+  s.push_back({"offn", nick(O)});
+  s.push_back({"defn", nick(D)});
+  s.push_back({"pf", crew_.pbpFirst});
+  s.push_back({"cf", crew_.colorFirst});
+  s.push_back({"ddb", bDownDist(downBefore_, toGoBefore_, losBefore_)});
+  s.push_back({"dd", bDownDist(g.down, g.toGo, g.ballOn)});
+  s.push_back({"qn", bQuarterName(g.q)});
+  s.push_back({"clock", bClock(g.clock)});
+  s.push_back({"seg", g.q == 2 ? std::string("half") : g.q >= 5 ? std::string("overtime") : g.q == 4 ? std::string("game") : std::string(bQuarterName(g.q))});
+  s.push_back({"leader", lead ? lead->city : std::string()});
+  s.push_back({"trailer", trail ? trail->city : std::string()});
+  s.push_back({"hi", bS(hi)});
+  s.push_back({"lo", bS(lo)});
+  s.push_back({"margin", bS(std::abs(m))});
+  s.push_back({"tied", hi != lo ? std::string() : hi == 0 ? std::string("still scoreless") : "tied at " + bS(hi)});
+  s.push_back({"sc", hi == lo ? (hi == 0 ? std::string("still scoreless") : "tied at " + bS(hi)) : lead->city + " " + bS(hi) + ", " + trail->city + " " + bS(lo)});
+  s.push_back({"sit", situation(g)});
+  return s;
+}
+
+void Booth::heardNow(const Line& l) {
+  // the wordings picked for this line (matched by their words: a night game's line says "tonight" for "today", the
+  // grammar fixed "a 8-yard", and a wording joined to the next one lost its full stop)
+  auto in = [&l, this](const std::string& words) {
+    if (words.empty()) return false;
+    std::string w = words;
+    bGrammar(w);
+    if (view_.night)
+      for (size_t at = w.find(" today"); at != std::string::npos; at = w.find(" today", at + 8)) w.replace(at, 6, " tonight");
+    if (l.text.find(w) != std::string::npos) return true;
+    while (!w.empty() && (w.back() == '.' || w.back() == '!' || w.back() == '?')) w.pop_back();
+    if (!w.empty() && w[0] == ' ') w.erase(0, 1);
+    return w.size() > 6 && l.text.find(w) != std::string::npos;
+  };
+  for (auto it = pendingPicks_.begin(); it != pendingPicks_.end();)
+    if (in(it->text)) {
+      Recent::get().use("booth." + it->bank, bS(it->idx));
+      it = pendingPicks_.erase(it);
+    } else
+      ++it;
+  // a story's sentence as said (its numbers are part of it: only a sentence that is word for word the same waits)
+  if (l.kind == Kind::Story || l.kind == Kind::Break) Recent::get().use("booth.story", bTextId(l.text));
 }
 
 std::string Booth::rot(int pid, const std::vector<std::string>& opts) {
@@ -425,20 +638,9 @@ bool Booth::once(const std::string& topic) {
 std::string Booth::nm(const Player* p, bool full) {
   if (!p) return "the ball carrier";
   if (full) return p->first + " " + p->last;
-  if (shared_.count(p->last)) {
-    // a surname two men share: the full name when the other one is on the field, or when "Calloway" last meant him
-    // (what a surname last meant is set when a line is spoken, not when one is written: the plan writes every man's calls)
-    auto it = lastBySurname_.find(p->last);
-    if (it == lastBySurname_.end() || it->second != p->id) return p->first + " " + p->last;
-    if (sim_) {
-      // a teammate namesake on the field (the one on the other side of the ball has a different job in the call)
-      const Ent* me = nullptr;
-      for (const Ent* e : sim_->ents)
-        if (e->p == p) me = e;
-      for (const Ent* e : sim_->ents)
-        if (e->p != p && e->p->last == p->last && (!me || e->side == me->side)) return p->first + " " + p->last;
-    }
-  }
+  // a surname two men in this game share (teammates or not): always the full name ("Tyrell Ramsey knocks it away from
+  // Ramsey" named nobody). The match-start prewarm (rosterCalls) makes the same full-name calls.
+  if (shared_.count(p->last)) return p->first + " " + p->last;
   return p->last;
 }
 
@@ -628,7 +830,11 @@ void Booth::tick(double dt, const Game& g, const View& v) {
     readSaid_ = true;
     // the read only when there is a moment for it: a user's offense taking its time, or the booth may hold the snap
     if (v.userGame || v.canHold) {
-      if (auto r = presnapRead(g, *sim_)) push(Who::Color, Kind::Read, *r, 1, 2, 0.1, 8).tag = readTopic_;
+      if (auto r = presnapRead(g, *sim_)) {
+        Line& rl = push(Who::Color, Kind::Read, *r, 1, 2, 0.1, 8);
+        rl.tag = readTopic_;
+        rl.topic = readTopic_;
+      }
     }
   }
   // between the plays once the last one is applied (in Post / Replay the Game still has the old down)
@@ -678,17 +884,9 @@ void Booth::onOpen(const Game& g, const View& v) {
   const std::string pbp = crew_.pbpFirst + " " + crew_.pbpLast;
   const std::string col = crew_.colorFirst + " " + crew_.colorLast;
   const std::string tod = v.night ? "evening" : "afternoon";
-  push(Who::PBP, Kind::Open,
-       pick("open1", {"Good " + tod + ", everybody, and welcome to " + H.city + ", where the " + H.name + " host the " + A.city + " " + A.name + ".",
-                      "Hello, everybody. It's a great " + tod + " for football here in " + H.city + ", the " + A.name + " in town to take on the " + H.name + ".",
-                      "From " + H.city + ", good " + tod + ". The " + A.name + " and the " + H.name + ", and we are just about ready to go."}),
-       1, 4, 0.4, 60)
-      .snapSafe = true;
-  push(Who::PBP, Kind::Open,
-       pick("open2", {pbp + " here, alongside " + col + ". " + crew_.colorFirst + ", what's the key today?",
-                      "I'm " + pbp + ", with " + col + " in the booth. " + crew_.colorFirst + ", where does this one get decided?"}),
-       1, 4, 0, 60)
-      .snapSafe = true;
+  const Slots show = facts(g, {{"tod", tod}, {"hcity", H.city}, {"hname", H.name}, {"acity", A.city}, {"aname", A.name}, {"pbp", pbp}, {"col", col}});
+  push(Who::PBP, Kind::Open, say("open1", show), 1, 4, 0.4, 60).snapSafe = true;
+  push(Who::PBP, Kind::Open, say("open2", show), 1, 4, 0, 60).snapSafe = true;
   // the analyst's key to the game: the schemes, and the best player on each side of the ball
   auto best = [](const Team& t, std::initializer_list<Pos> ps) -> const Player* {
     const Player* b = nullptr;
@@ -703,65 +901,84 @@ void Booth::onOpen(const Game& g, const View& v) {
   std::string key;
   openKey_ = !A.offScheme.empty() && !H.defScheme.empty() ? hRush : nullptr;  // the man the analyst names (halftime and the close come back to him)
   if (!A.offScheme.empty() && !H.defScheme.empty())
-    key = pick("openkey",
-               {"For me it's " + A.city + "'s " + A.offScheme + " offense against that " + H.defScheme + " look. " +
-                    (aq ? nm(aq) + " has to be patient. " : std::string()) + "And keep an eye on " + (hRush ? hRush->first + " " + hRush->last : std::string("the " + nick(H) + " front")) +
-                    ". He can wreck a game plan.",
-                "It starts up front. " + (hRush ? hRush->first + " " + hRush->last : std::string("That defensive front")) + " has been a problem for everybody, and " +
-                    (aq ? nm(aq) : std::string("the quarterback")) + " is going to have to handle him. Get the ball out quick, and stay ahead of the chains."});
+    key = say("openkey", facts(g, {{"acity", A.city}, {"aoff", A.offScheme}, {"hdef", H.defScheme}, {"aqb", aq ? nm(aq) : std::string("the quarterback")},
+                                   {"rush", hRush ? hRush->first + " " + hRush->last : "the " + nick(H) + " front"}}));
   else
-    key = "It's going to come down to the quarterbacks. " + (hq ? nm(hq) : std::string("One")) + " and " + (aq ? nm(aq) : std::string("the other")) + ", who makes the fewest mistakes.";
+    key = say("openkey2", facts(g, {{"hqb", hq ? nm(hq) : std::string()}, {"aqb", aq ? nm(aq) : std::string()}}));
   push(Who::Color, Kind::Open, key, 1, 4, 0, 60).snapSafe = true;
   // the weather, when it is part of the story
   const Weather& w = g.weather;
   const int mph = bRound(std::hypot(w.windX, w.windY) * 2.045);
+  const Slots wxs = facts(g, {{"hcity", H.city}, {"temp", bS(bRound(w.tempF))}, {"mph", mph >= 10 ? bS(mph) : std::string()}});
   std::string wx;
-  if (w.precip == Precip::Snow) wx = "And it is snowing here in " + H.city + ". " + bS(bRound(w.tempF)) + " degrees, footing is going to be an issue.";
-  else if (w.precip == Precip::Rain) wx = "We've got rain coming down, " + bS(bRound(w.tempF)) + " degrees. Ball security is going to be at a premium.";
-  else if (w.tempF <= 32) wx = "It is cold. " + bS(bRound(w.tempF)) + " degrees at kickoff" + (mph >= 10 ? ", wind at " + bS(mph) + " miles an hour." : ".");
-  else if (mph >= 14) wx = "The wind is going to be a factor, gusting around " + bS(mph) + " miles an hour. Watch the kicking game.";
+  if (w.precip == Precip::Snow) wx = say("wx_snow", wxs);
+  else if (w.precip == Precip::Rain) wx = say("wx_rain", wxs);
+  else if (w.tempF <= 32) wx = say("wx_cold", wxs);
+  else if (mph >= 14) wx = say("wx_wind", wxs);
   if (!wx.empty()) push(Who::PBP, Kind::Open, wx, 1, 3, 0, 60).snapSafe = true;
 }
 
 // ------------------------------------------------------------------ the log (Game's own lines)
 
 void Booth::onZone(const Game& g, const AbilityEvent& e) {
-  (void)g;
   if (!e.p) return;
   const Player& p = *e.p;
   const std::string full = p.first + " " + p.last;
   const std::string& last = p.last;
-  if (!e.entered) {
-    push(Who::Color, Kind::Analysis,
-         pick("zone_out", {"And that cools " + last + " off. " + (e.why.empty() ? std::string() : "It was " + e.why + " that did it. ") + "He's out of the zone.",
-                           "That's what knocks " + last + " out of the zone. He'll have to earn his way back.",
-                           "Well, " + last + " was rolling, but that ends it. He's out of the zone for now."}),
-         1, 3, 0.4, 25)
-        .snapSafe = true;
-    return;
-  }
-  push(Who::PBP, Kind::Story,
-       pick("zone_in", {full + " is in the zone!", "Here comes " + last + ". He's in the zone now.", "You can feel it. " + full + " has found the zone."}),
-       2, 4, 0.3, 25)
-      .snapSafe = true;
-  std::string c;
+  const Team& T = teamOfPlayer(g, e.p);
+  // The game's "zone" is a meter; a broadcast only knows a man who is having a day. Nothing is said when the meter
+  // drops, and a hot streak is called only when his stat line has earned it (the line is said with it).
+  if (!e.entered) return;
+  std::string line;
+  for (const PlayerLine* ln : g.stats.forTeam(T.abbr))
+    if (ln->pid == p.id) {
+      if (ln->passAtt >= 6 && (ln->passYds >= 150 || ln->passTD >= 2))
+        line = bS(ln->passComp) + " of " + bS(ln->passAtt) + " for " + bS(ln->passYds) + " yards" +
+               (ln->passTD ? std::string(", ") + bCountWord(ln->passTD) + (ln->passTD == 1 ? " touchdown" : " touchdowns") : std::string());
+      else if (ln->rec >= 4 || ln->recYds >= 70) line = bS(ln->rec) + (ln->rec == 1 ? " catch" : " catches") + " for " + bS(ln->recYds) + " yards";
+      else if (ln->rushYds >= 60 || (ln->rushTD >= 1 && ln->rushYds >= 30)) line = bS(ln->rushYds) + " yards on " + bS(ln->rushAtt) + " carries";
+      else if (ln->sacks >= 2) line = std::string(bCountWord(ln->sacks)) + " sacks";
+      else if (ln->ints >= 1) line = ln->ints == 1 ? std::string("an interception") : std::string(bCountWord(ln->ints)) + " interceptions";
+      else if (ln->tackles >= 6) line = bS(ln->tackles) + " tackles";
+      else if (ln->sacks >= 1 && ln->tackles >= 3) line = "a sack and " + bS(ln->tackles) + " tackles";
+    }
+  if (line.empty() || !cooled("hot:" + bS(p.id), 900)) return;
+  mark("hot:" + bS(p.id));
+  const Slots zs = facts(g, {{"full", full}, {"last", last}, {"team", T.city}, {"nick", nick(T)}, {"line", line}});
+  push(Who::PBP, Kind::Story, say("zone_in", zs), 2, 4, 0.3, 25).snapSafe = true;
+  // what a man this hot does to a game is said the first time (and once more, much later)
+  if (!cooled("zonein:" + bS(p.id), 1500)) return;
+  mark("zonein:" + bS(p.id));
+  // what the man in the zone does to a game, ability by ability
+  const char* bank = nullptr;
   switch (e.id) {
-    case AbilityId::IceVeins: c = "Look at the poise. You can put a man in his face and it doesn't matter, the ball's going to be right there."; break;
-    case AbilityId::RocketArm: c = "When he's like this, no throw is too far. Safeties better stay deep."; break;
-    case AbilityId::Juggernaut: c = "He's running angry. Arm tackles aren't going to get it done, you need two or three guys on him."; break;
-    case AbilityId::Phantom: c = "Good luck getting a clean shot on him. He makes people miss in a phone booth."; break;
-    case AbilityId::Spotlight: c = "Throw it up to him. Fifty-fifty balls aren't fifty-fifty when he's going like this."; break;
-    case AbilityId::Slipstream: c = "He's open on everything, and once he catches it he's gone."; break;
-    case AbilityId::Fortress: c = "Nobody is getting through on his side. That quarterback can set up and stay there."; break;
-    case AbilityId::Havoc: c = "He's winning every rep. The offense has to account for him or he's going to wreck this game."; break;
-    case AbilityId::BlackHole: c = "Run at him and you go nowhere. He's taking on blocks and making the tackle himself."; break;
-    case AbilityId::Enforcer: c = "Every hit is a statement. Receivers are going to hear him coming."; break;
-    case AbilityId::Lockdown: c = "Whoever he's on is not open. I'd throw the other way."; break;
-    case AbilityId::LastLine: c = "He's reading the quarterback's eyes. Anything thrown over the middle is in danger."; break;
-    case AbilityId::Automatic: c = "Right now he could make it from anywhere in range. That's a weapon in a close game."; break;
+    case AbilityId::IceVeins: bank = "z_iceveins"; break;
+    case AbilityId::RocketArm: bank = "z_rocketarm"; break;
+    case AbilityId::Juggernaut: bank = "z_juggernaut"; break;
+    case AbilityId::Phantom: bank = "z_phantom"; break;
+    case AbilityId::Spotlight: bank = "z_spotlight"; break;
+    case AbilityId::Slipstream: bank = "z_slipstream"; break;
+    case AbilityId::Fortress: bank = "z_fortress"; break;
+    case AbilityId::Havoc: bank = "z_havoc"; break;
+    case AbilityId::BlackHole: bank = "z_blackhole"; break;
+    case AbilityId::Enforcer: bank = "z_enforcer"; break;
+    case AbilityId::Lockdown: bank = "z_lockdown"; break;
+    case AbilityId::LastLine: bank = "z_lastline"; break;
+    case AbilityId::Automatic: bank = "z_automatic"; break;
     default: break;
   }
+  const std::string c = bank ? say(bank, zs) : std::string();
   if (!c.empty()) push(Who::Color, Kind::Analysis, c, 1, 3, 0.2, 30).snapSafe = true;
+}
+
+void Booth::flushDeferred(const Game& g) {
+  if (deferredLogs_.empty()) return;
+  const std::vector<size_t> held = deferredLogs_;
+  deferredLogs_.clear();
+  flushingLogs_ = true;
+  for (const size_t i : held)
+    if (i < g.log.size()) onLog(g, g.log[i], i);
+  flushingLogs_ = false;
 }
 
 void Booth::onLog(const Game& g, const PlayLog& l, size_t index) {
@@ -771,35 +988,30 @@ void Booth::onLog(const Game& g, const PlayLog& l, size_t index) {
     const Team& recv = g.teamOf(g.openingReceiver);
     const Team& kick = g.teamOf(other(g.openingReceiver));
     push(Who::PBP, Kind::Open,
-         pick("toss", {kick.city + " won the toss and deferred, so the " + recv.name + " will get the football first.",
-                       "The " + kick.name + " won the toss and chose to defer. " + recv.city + " will receive."}),
-         0, 3, 0, 60)
+         say("toss", facts(g, {{"kcity", kick.city}, {"kname", kick.name}, {"rcity", recv.city}, {"rname", recv.name}})), 0, 3, 0, 60)
         .snapSafe = true;
     return;
   }
+  // a clock stop logged while the play's own line is still to come (the two-minute warning, a timeout): heard after the
+  // play is called, not before its result
+  if ((bHas(d, "Two-minute warning") || bHas(d, "Timeout ")) && !flushingLogs_ && sim_ && whistled_ && !appliedThisPlay_ && !sim_->isReturn() &&
+      g.phase == GamePhase::Scrimmage) {
+    deferredLogs_.push_back(index);
+    return;
+  }
   if (bHas(d, "Two-minute warning")) {
-    push(Who::PBP, Kind::Break, pick("2min", {"And that brings us to the two-minute warning. " + scoreLine(g, false),
-                                              "Two-minute warning. " + scoreLine(g, false)}),
-         1, 4, 0.2, 30)
-        .snapSafe = true;
-    const Team& O = g.offense();
+    push(Who::PBP, Kind::Break, say("2min", facts(g, {})), 1, 4, 0.2, 30).snapSafe = true;
     const int to = g.timeouts[g.poss];
     const int m = g.margin();
+    const std::string tail = say(to >= 2 ? "2min4tail2" : "2min4tail1", facts(g, {}));
+    const Slots cs = facts(g, {{"to", bCountWord(to)}, {"tos", to == 1 ? "timeout" : "timeouts"}, {"tail", tail}});
     std::string c;
-    if (g.q == 4 && m < 0 && m >= -8)
-      c = O.city + " needs a score, and they've got " + bCountWord(to) + (to == 1 ? " timeout" : " timeouts") + " to work with. " +
-          (to >= 2 ? "That's plenty. They can use the whole field." : "They have to get out of bounds and stay out of the middle.");
-    else if (g.q == 4 && m < -8 && m >= -16)
-      c = "It's a two-score game. " + O.city + " needs a quick touchdown, a stop or an onside kick, and then another score. They have to move fast.";
-    else if (g.q == 4 && m < -16)
-      c = "This one is just about decided. " + O.city + " is playing for pride now.";
-    else if (g.q == 4 && m > 8)
-      c = "That'll just about do it. " + O.city + " can run the clock from here.";
-    else if (g.q == 4 && m > 0)
-      c = "Now it's about the clock. " + O.city + " gets a first down or two and this game is over.";
-    else if (g.q == 2)
-      c = pick("2minq2", {"Two minutes before the half is a big window. You'd like to come away with points and still get the ball to start the third.",
-                          "This is where the good teams steal points. Get into field goal range, don't do anything silly."});
+    if (g.q == 4 && m < 0 && m >= -8) c = say("2min4close", cs);
+    else if (g.q == 4 && m < -8 && m >= -16) c = say("2min4two", cs);
+    else if (g.q == 4 && m < -16) c = say("2min4done", cs);
+    else if (g.q == 4 && m > 8) c = say("2min4ahead", cs);
+    else if (g.q == 4 && m > 0) c = say("2min4close_up", cs);
+    else if (g.q == 2) c = say("2minq2", cs);
     if (!c.empty()) push(Who::Color, Kind::Break, c, 1, 3, 0, 30).snapSafe = true;
     return;
   }
@@ -811,20 +1023,14 @@ void Booth::onLog(const Game& g, const PlayLog& l, size_t index) {
     const int left = g.timeouts[k];
     if (sim_ && sim_->cfg.offPlay && sim_->cfg.offPlay->type == PlayType::Kneel && &t == &g.offense() && once("odd_to" + bS(g.q)))
       push(Who::Color, Kind::Break, "I'm not sure what " + t.city + " is doing with those timeouts. They're the ones kneeling it.", 1, 3, 0.4, 15).snapSafe = true;
-    push(Who::PBP, Kind::Break,
-         left == 0 ? pick("timeout0", {"Timeout, " + t.city + ". That's their last one.", t.city + " uses its final timeout."})
-                   : pick("timeout", {"Timeout called by " + t.city + ". They have " + std::string(bCountWord(left)) + " left.",
-                                      "And " + t.city + " will use a timeout. That leaves them with " + std::string(bCountWord(left)) + ".",
-                                      "The " + nick(t) + " stop the clock with a timeout, " + std::string(bCountWord(left)) + " remaining."}),
-         1, 3, 0.3, 20)
-        .snapSafe = true;
+    const Slots ts = facts(g, {{"team", t.city}, {"nick", nick(t)}, {"left", bCountWord(left)}});
+    push(Who::PBP, Kind::Break, say(left == 0 ? "timeout0" : "timeout", ts), 1, 3, 0.3, 20).snapSafe = true;
     return;
   }
   if (bHas(d, "End of ")) {
     const int qEnded = l.q;
     if (qEnded == 2 || qEnded >= 4) return;  // halftime / the final / overtime have their own calls
-    std::string s = qEnded == 1 ? "That will end the first quarter. " : qEnded == 3 ? "And that's the end of three. " : "That's the end of the quarter. ";
-    push(Who::PBP, Kind::Break, s + scoreLine(g, false), 1, 4, 0.5, 40).snapSafe = true;
+    push(Who::PBP, Kind::Break, say("qend", facts(g, {{"qn", bQuarterName(qEnded)}})), 1, 4, 0.5, 40).snapSafe = true;
     if (writer_) {
       if (auto st = quarterStory(g)) breakFallback_ = *st;
       breakDeadline_ = now_ + 40;
@@ -836,10 +1042,7 @@ void Booth::onLog(const Game& g, const PlayLog& l, size_t index) {
     return;
   }
   if (bHas(d, "Halftime")) {
-    push(Who::PBP, Kind::Break, pick("half", {"And that'll do it for the first half. " + scoreLine(g, false),
-                                             "The gun sounds, and we're at the half. " + scoreLine(g, false)}),
-         1, 5, 0.6, 60)
-        .snapSafe = true;
+    push(Who::PBP, Kind::Break, say("half", facts(g, {})), 1, 5, 0.6, 60).snapSafe = true;
     if (writer_) {
       if (auto st = halftimeStory(g)) breakFallback_ = *st;
       breakDeadline_ = now_ + 45;
@@ -848,11 +1051,12 @@ void Booth::onLog(const Game& g, const PlayLog& l, size_t index) {
     } else if (auto st = halftimeStory(g))
       push(Who::Color, Kind::Break, *st, 1, 4, 0, 60).snapSafe = true;
     // who gets the ball: the team that kicked off to open the game receives the second half
-    push(Who::PBP, Kind::Break, g.teamOf(other(g.openingReceiver)).city + " will get the football to start the second half.", 0, 3, 0, 60).snapSafe = true;
+    const Team& second = g.teamOf(other(g.openingReceiver));
+    push(Who::PBP, Kind::Break, say("half_recv", facts(g, {{"team", second.city}, {"nick", nick(second)}})), 0, 3, 0, 60).snapSafe = true;
     return;
   }
   if (bHas(d, "Overtime!")) {
-    push(Who::PBP, Kind::Break, "We are going to overtime! Ten minutes, and both teams are guaranteed a possession.", 2, 5, 0.5, 40).snapSafe = true;
+    push(Who::PBP, Kind::Break, say("ot", facts(g, {})), 2, 5, 0.5, 40).snapSafe = true;
     return;
   }
   if (bHas(d, "FINAL")) return;  // onFinal (the Final stage) closes the show
@@ -868,15 +1072,15 @@ void Booth::onLog(const Game& g, const PlayLog& l, size_t index) {
     static const char* const kPos[] = {"quarterback", "running back", "fullback", "receiver", "tight end", "tackle", "guard", "center", "defensive end",
                                        "defensive tackle", "linebacker", "cornerback", "safety", "kicker", "punter"};
     const std::string full = who ? t.city + " " + kPos[static_cast<int>(who->pos)] + " " + who->first + " " + who->last : logName;
-    pendingInjury_.push_back(pick("inj_down", {"We've got a man down. Looks like " + full + ".", "There's a player down on the field. That's " + full + ", and the trainers are on their way out.",
-                                               full + " is slow to get up, and the trainers are coming out."}));
-    injuryWord_.push_back({who ? nm(who) : logName, playNo_ + 3});
+    const std::string iname = who ? nm(who) : logName;
+    const Slots is = facts(g, {{"full", full}, {"name", iname}, {"team", t.city}});
+    pendingInjury_.push_back(say("inj_down", is));
+    injuryWord_.push_back({iname, playNo_ + 3});
     bool good = false;
     if (who)
       for (const PlayerLine* ln : g.stats.forTeam(t.abbr))
         if (ln->pid == who->id) good = ln->tackles >= 4 || ln->rec >= 3 || ln->rushYds >= 40 || ln->sacks >= 1 || ln->ints >= 1 || (ln->passAtt >= 8 && ln->passComp * 10 >= ln->passAtt * 6);
-    pendingInjury_.push_back(good ? pick("injuryg", {"That's a tough one. He'd been playing well, too.", "That hurts. He's been one of their best players today."})
-                                  : pick("injury", {"You never like to see that. Hopefully it's nothing serious.", "You hate to see anybody go down like that."}));
+    pendingInjury_.push_back(say(good ? "injuryg" : "injury", is));
     return;
   }
   // a kick line: called on the kick's own clock (onKickTick), not when the Game rolls it
@@ -889,6 +1093,7 @@ void Booth::onLog(const Game& g, const PlayLog& l, size_t index) {
       PlayResult none;
       onScored(g, scorer, 6, none);
     }
+    returnFoul(g, d);
     return;
   }
   if (kick) {
@@ -903,7 +1108,7 @@ void Booth::onLog(const Game& g, const PlayLog& l, size_t index) {
   }
   if (bHas(d, "Two-point attempt")) {
     const bool good = bHas(d, "GOOD!");
-    push(Who::PBP, Kind::Score, scoreSay(g, tdBy_, good ? "And the two-point try is good! " : "The two-point try fails. "), good ? 2 : 1, 4, 0.4, 20).snapSafe = true;
+    push(Who::PBP, Kind::Score, scoreSay(g, tdBy_, say(good ? "pt2_good" : "pt2_fail", facts(g, {{"team", g.teamOf(tdBy_).city}}))), good ? 2 : 1, 4, 0.4, 20).snapSafe = true;
     if (driveAfterTry_) {
       driveAfterTry_ = false;
       afterDrive(g, "td");
@@ -920,6 +1125,73 @@ void Booth::onLog(const Game& g, const PlayLog& l, size_t index) {
     appliedThisPlay_ = true;
     afterApply(g, *sim_, *sim_->result, l);
   }
+}
+
+// ---- the referee: a foul as the log names it, as he says it at his microphone, and its yardage (Sim/Game.cpp)
+namespace {
+struct RefFoul {
+  const char* log;
+  const char* words;
+  int yards;  // 0: a spot foul
+};
+const RefFoul kRefFouls[] = {{"Offensive Holding", "Holding", 10},
+                             {"Defensive Holding", "Holding", 5},
+                             {"Defensive Pass Interference", "Pass interference", 0},
+                             {"Offensive Pass Interference", "Pass interference", 10},
+                             {"Illegal Contact", "Illegal contact", 5},
+                             {"Roughing the Passer", "Personal foul, roughing the passer", 15},
+                             {"Face Mask", "Personal foul, face mask", 15},
+                             {"Unnecessary Roughness", "Personal foul, unnecessary roughness", 15},
+                             {"Illegal Block in the Back", "Illegal block in the back", 10},
+                             {"Illegal Use of Hands", "Illegal use of hands", 5},
+                             {"Intentional Grounding", "Intentional grounding", 10},
+                             {"False Start", "False start", 5},
+                             {"Delay of Game", "Delay of game", 5},
+                             {"Offside", "Offside", 5},
+                             {"Encroachment", "Encroachment", 5},
+                             {"Neutral Zone Infraction", "Neutral zone infraction", 5},
+                             {"Illegal Formation", "Illegal formation", 5},
+                             {"Illegal Shift", "Illegal shift", 5},
+                             {"Too Many Men on the Field", "Too many men on the field", 5},
+                             {"Holding", "Holding", 10}};
+const RefFoul* bRefFoul(const std::string& logName) {
+  for (const RefFoul& f : kRefFouls)
+    if (logName == f.log) return &f;
+  return nullptr;
+}
+// "10-yard penalty" (the caption keeps the digits; the voice reads "ten yard penalty")
+std::string bPenYards(int n) { return bS(n) + "-yard penalty"; }
+// the man the log names in "(#72 J.Smith)" on this team, or nobody
+const Player* bLogMan(const Team& t, const std::string& who) {
+  if (who.empty()) return nullptr;
+  const int num = std::atoi(who.c_str() + 1);
+  const size_t sp = who.find(' ');
+  const std::string nmLog = sp == std::string::npos ? std::string() : who.substr(sp + 1);
+  for (const auto& p : t.roster)
+    if (p->number == num && !p->first.empty() && nmLog == std::string(1, p->first[0]) + "." + p->last) return p.get();
+  return nullptr;
+}
+}  // namespace
+
+std::string Booth::refFoul(const std::string& logName, bool offense, const Player* man) const {
+  const RefFoul* f = bRefFoul(logName);
+  std::string s;
+  if (f) s = f->words;
+  else {
+    // (a foul the table does not know: the log's name in sentence case)
+    for (const char c : logName) s += static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+    s = bCap(s.empty() ? std::string("foul") : s);
+  }
+  s += offense ? ", offense" : ", defense";
+  if (man) s += ", number " + bS(man->number);
+  return s;
+}
+
+void Booth::refSay(const std::string& text, double delay) {
+  if (text.empty()) return;
+  Line& rl = push(Who::Ref, Kind::Ref, text, 1, 4, delay, 25);
+  rl.snapSafe = true;
+  rl.topic = "ref";
 }
 
 void Booth::onPenalty(const Game& g, const PlayLog& l) {
@@ -942,15 +1214,9 @@ void Booth::onPenalty(const Game& g, const PlayLog& l) {
     if (comma != std::string::npos) name = name.substr(0, comma);
   }
   const Team& t = g.home->abbr == ab ? *g.home : *g.away;
-  const Player* man = nullptr;
-  if (!who.empty()) {
-    const int num = std::atoi(who.c_str() + 1);
-    const size_t sp = who.find(' ');
-    const std::string nmLog = sp == std::string::npos ? std::string() : who.substr(sp + 1);
-    for (const auto& p : t.roster)
-      if (p->number == num && !p->first.empty() && nmLog == std::string(1, p->first[0]) + "." + p->last) man = p.get();
-  }
-  const bool presnap = bHas(name, "False Start") || bHas(name, "Delay of Game") || bHas(name, "Offside") || bHas(name, "Encroachment") || bHas(name, "Neutral Zone");
+  const Player* man = bLogMan(t, who);
+  // a flag before the snap is a log line of its own (a play's line starts with the play)
+  const bool presnap = at == 0;
   const bool onOff = presnap ? (&t == &g.offense()) : (&t == &g.teamOf(possBefore_));
   // the foul in the words a play-by-play man uses
   struct Say {
@@ -962,46 +1228,118 @@ void Booth::onPenalty(const Game& g, const PlayLog& l) {
                              {"Illegal Contact", "Illegal contact"}, {"Roughing the Passer", "Roughing the passer"}, {"Face Mask", "A face mask"},
                              {"Unnecessary Roughness", "Unnecessary roughness"}, {"Illegal Block in the Back", "An illegal block in the back"},
                              {"False Start", "False start"}, {"Delay of Game", "Delay of game"}, {"Offside", "The defense is offside"},
-                             {"Encroachment", "Encroachment"}, {"Neutral Zone Infraction", "Neutral zone infraction"}};
+                             {"Encroachment", "Encroachment"}, {"Neutral Zone Infraction", "Neutral zone infraction"},
+                             {"Illegal Use of Hands", "Illegal use of hands"}, {"Intentional Grounding", "Intentional grounding"},
+                             {"Illegal Formation", "Illegal formation"}, {"Illegal Shift", "An illegal shift"},
+                             {"Too Many Men on the Field", "Too many men on the field"}};
   std::string foul = name;
   for (const Say& k : kSay)
     if (name == k.log) foul = k.words;
-  // the yards, the down it leaves
-  // the foul's own yardage (the spot moved by it and the play together); pass interference is a spot foul
-  int yards = 0;
+  const PlayResult* r = (!presnap && sim_ && sim_->result) ? &*sim_->result : nullptr;
+  // the yards the foul really moved the ball (half the distance to the goal near one), and what it was worth
+  const bool dpiSpot = bHas(name, "Defensive Pass Interference");
+  const bool grounding = name == "Intentional Grounding";
+  const RefFoul* rf = bRefFoul(name);
+  const int nominal = rf ? rf->yards : 5;
+  // (a personal foul on the defense is marked from where the play ended; one on the offense, and the rest, from the line)
+  const bool fromEnd = !onOff && (bHas(name, "Roughing") || bHas(name, "Face Mask") || bHas(name, "Unnecessary"));
+  const double endSpot = r ? (r->turnover ? losBefore_ : r->endX) : losBefore_;
+  int moved = 0;
   const size_t yp = d.find(" yards.");
   if (presnap && yp != std::string::npos) {
     size_t q = yp;
     while (q > 0 && std::isdigit(static_cast<unsigned char>(d[q - 1]))) --q;
-    yards = std::atoi(d.c_str() + q);
-  } else if (bHas(name, "Defensive Pass Interference")) {
-    yards = g.poss == possBefore_ ? bRound(std::fabs(g.ballOn - losBefore_)) : 0;
-  } else {
-    yards = bHas(name, "Face Mask") || bHas(name, "Roughing") || bHas(name, "Unnecessary") ? 15
-            : bHas(name, "Offensive Holding") || bHas(name, "Offensive Pass") || bHas(name, "Block in the Back") ? 10
-                                                                                                          : 5;
+    moved = std::atoi(d.c_str() + q);
+  } else if (g.poss == possBefore_) {
+    moved = bRound(std::fabs(g.ballOn - (fromEnd ? endSpot : losBefore_)));
   }
-  const bool dpiSpot = bHas(name, "Defensive Pass Interference");
-  std::string after;
-  if (yards > 0) after = dpiSpot ? "A spot foul, " + bS(yards) + " yards" : bS(yards) + (yards == 1 ? " yard" : " yards");
-  if (g.down == 1 && !onOff && !presnap) after += pick("pen_first", {", and an automatic first down.", ", and that's a first down."});
-  else if (!presnap && g.down == downBefore_ && g.poss == possBefore_)
-    after += ", and they'll repeat " + std::string(bOrdWord(g.down)) + " down. Now it's " + bDownDist(g.down, g.toGo, g.ballOn) + ".";
-  else after += ". " + bCap(bDownDist(g.down, g.toGo, g.ballOn)) + ".";
-  if (!(g.down == 1 && !onOff && !presnap)) ddSaidKey_ = bDdKey(g, g.down, g.toGo, g.ballOn);
-  std::string open;
-  if (presnap) open = pick("flagpre", {"Flag before the snap.", "They've thrown a flag before the snap.", "We've got a flag, and nobody's moving."});
-  else open = once("laundry") ? std::string("We've got laundry on the field.") : pick("flag", {"Flag on the play.", "There's a flag down.", "And a flag comes in."});
-  std::string swing;
-  const PlayResult* r = (!presnap && sim_ && sim_->result) ? &*sim_->result : nullptr;
-  if (r && onOff && r->yards >= 10 && !r->incomplete && !r->interception) swing = " That wipes out a " + bS(r->yards) + "-yard play.";
-  else if (r && !onOff && r->interception) swing = " So the interception comes off the board.";
-  else if (r && !onOff && (r->incomplete || r->kind == PlayKind::Sack)) swing = " That bails them out.";
+  const bool halfDist = !dpiSpot && nominal > 0 && moved > 0 && moved < nominal && !(grounding && moved > 10);
+  // the down before the flag (a flag before the snap: the down the booth last saw set up)
+  const int downPre = presnap ? preKick_.down : downBefore_;
+  const double toGoPre = presnap ? preKick_.toGo : toGoBefore_;
+  const bool firstByFoul = !onOff && g.down == 1 && (presnap ? (downPre != 1 || g.toGo > toGoPre + 0.01) : true);
+  // the play the flag came in on, and what it wipes out
+  // (what the play did before the flag: a stop the defense had - an incompletion, a sack, short of the line to gain)
+  const bool stopped = r && !r->td && (r->incomplete || r->kind == PlayKind::Sack || r->interception || r->fumbleLost ||
+                                       (!r->turnover && r->endX - losBefore_ < toGoBefore_ - 1e-6));
+  std::string swingBank;
+  if (r && onOff && r->td) swingBank = "pen_notd";
+  else if (r && onOff && r->yards >= 10 && !r->incomplete && !r->interception && !r->turnover) swingBank = "pen_wipe";
+  else if (r && !onOff && r->interception) swingBank = "pen_noint";
+  else if (r && !onOff && r->fumbleLost) swingBank = "pen_nofum";
+  else if (r && !onOff && stopped && downBefore_ == 4) swingBank = "pen_no4th";
+  else if (r && !onOff && (r->incomplete || r->kind == PlayKind::Sack)) swingBank = "pen_bail";
   if (man && man->pos == Pos::QB && bHas(name, "Holding")) man = nullptr;  // (charged to the quarterback in the log: the line gets it)
-  const std::string mn = man ? ", " + nm(man) + ", number " + bS(man->number) + "." : onOff && !presnap ? ", on the offensive line." : ", on " + t.city + ".";
+  const Player* refMan = man;
+  if (grounding && r && r->passer) refMan = r->passer;  // (the passer grounds it: the log names nobody)
+  // a late hit by the defense: the log names nobody, and the man who made the tackle is the one who hit him
+  if (!refMan && !onOff && bHas(name, "Unnecessary") && r && !r->tacklers.empty() && t.hasPlayer(r->tacklers[0])) refMan = r->tacklers[0];
+  if (!man && refMan && refMan != (r ? r->passer : nullptr)) man = refMan;
+  const std::string ddNow = bDownDist(g.down, g.toGo, g.ballOn);
+  const std::string spotNow = spot(g, g.ballOn, g.poss);
+  std::string play;
+  if (r) {
+    if (r->kind == PlayKind::Run && r->rusher) play = "the run by " + nm(r->rusher);
+    else if (r->kind == PlayKind::Pass && r->complete && !r->interception && r->receiver) play = "the catch by " + nm(r->receiver);
+    else if (r->kind == PlayKind::Pass && r->interception) play = "the interception";
+    else if (r->kind == PlayKind::Pass && r->incomplete) play = "the incompletion";
+    else if (r->kind == PlayKind::Sack) play = "the sack";
+    else if (r->kind == PlayKind::Scramble) play = "the scramble";
+  }
+  const Slots ps = facts(g, {{"name", man ? nm(man) : std::string()}, {"num", man ? bS(man->number) : std::string()}, {"team", t.city}, {"nick", nick(t)},
+                             {"play", play}, {"pyds", r && r->yards > 0 ? bS(r->yards) : std::string()}, {"dd", ddNow}, {"spot", spotNow},
+                             {"foul", lowerFirst(foul)}});
   if (!pendingBare_.empty() && !presnap && pendingResult_.size()) push(Who::PBP, Kind::Result, pendingBare_, 1, 4, 0, 10);  // what happened, then the flag on it
   pendingBare_.clear();
-  push(Who::PBP, Kind::Result, open + " " + foul + mn + swing + " " + after, 1, 4, 0.2, 20).snapSafe = true;
+  std::string open;
+  if (presnap) open = say("flagpre", ps);
+  else open = say("flag", ps);
+  if (ref_) {
+    // the play-by-play man sees the flag, the referee announces it, and the play-by-play man says what it means
+    push(Who::PBP, Kind::Result, open, 1, 4, 0.2, 20).snapSafe = true;
+    std::string ref = refFoul(name, onOff, refMan) + ".";
+    if (dpiSpot) ref += " The ball will be placed at the spot of the foul.";
+    else if (grounding) ref += moved > 10 ? " Spot of the foul, and loss of down." : halfDist ? " Half the distance to the goal, and loss of down." : " 10-yard penalty, and loss of down.";
+    else if (halfDist) ref += fromEnd && r && std::fabs(endSpot - losBefore_) > 0.5 ? " Half the distance to the goal, enforced at the end of the play." : " Half the distance to the goal.";
+    else if (fromEnd && r && std::fabs(endSpot - losBefore_) > 0.5) ref += " " + bPenYards(nominal) + ", enforced at the end of the play.";
+    else ref += " " + bPenYards(moved > 0 ? moved : nominal) + ".";
+    if (firstByFoul && !presnap) ref += " Automatic first down.";
+    else if (firstByFoul) ref += " First down.";
+    else if (grounding) ref += " " + bCap(bOrdWord(g.down)) + " down.";
+    else ref += " Repeat " + std::string(bOrdWord(g.down)) + " down.";
+    refSay(ref);
+    std::string post;
+    if (!swingBank.empty()) post = say(swingBank, ps);
+    else if (chance(0.5)) post = say(firstByFoul ? "pen_first_ref" : "pen_dd", ps);
+    if (!post.empty()) {
+      push(Who::PBP, Kind::Result, post, 1, 4, 0, 15).snapSafe = true;
+      if (post.find(ddNow) != std::string::npos) ddSaidKey_ = bDdKey(g, g.down, g.toGo, g.ballOn);
+    }
+  } else {
+    // the play-by-play man reads the flag himself: the foul, the man, what it wipes out, the yards and the down
+    std::string after;
+    if (dpiSpot) {
+      const int dy = g.poss == possBefore_ ? bRound(std::fabs(g.ballOn - losBefore_)) : 0;
+      if (dy > 0) after = "A spot foul, " + bS(dy) + " yards";
+    } else if (halfDist) {
+      after = "Half the distance to the goal";
+    } else {
+      const int yy = presnap || grounding ? moved : nominal;
+      if (yy > 0) after = bS(yy) + (yy == 1 ? " yard" : " yards");
+    }
+    if (grounding) after += after.empty() ? "Loss of down" : ", and loss of down";
+    if (firstByFoul && !presnap) after += say("pen_first", ps);
+    else if (!presnap && !grounding && g.down == downBefore_ && g.poss == possBefore_)
+      after += ", and they'll repeat " + std::string(bOrdWord(g.down)) + " down. Now it's " + ddNow + ".";
+    else after += ". " + bCap(ddNow) + ".";
+    if (!(firstByFoul && !presnap)) ddSaidKey_ = bDdKey(g, g.down, g.toGo, g.ballOn);
+    const std::string mn = man ? ", " + nm(man) + ", number " + bS(man->number) + "." : onOff && !presnap ? ", on the offensive line." : ", on " + t.city + ".";
+    // (what the flag wipes out: the short form, the down and distance follows in the same line)
+    const std::string swing = swingBank.empty() ? std::string() : say(swingBank + "0", ps);
+    push(Who::PBP, Kind::Result, open + " " + foul + (grounding ? std::string(", on the quarterback.") : mn) + (swing.empty() ? "" : " " + swing) + " " + bCap(after), 1, 4, 0.2,
+         20)
+        .snapSafe = true;
+  }
   dropKind(Kind::Analysis);
   pendingAnalysis_.clear();
   pendingResult_.clear();
@@ -1009,40 +1347,37 @@ void Booth::onPenalty(const Game& g, const PlayLog& l) {
   int& times = man ? penCount_[man->id] : penCount_[0];
   if (man) ++times;
   std::string c;
-  if (man && times >= 2)
-    c = times == 2 ? pick("pen_again", {"That's twice now on " + nm(man) + ". He's having a rough day.", nm(man) + " again. That's the second flag on him."})
-                   : nm(man) + " again. That's " + bCountWord(times) + " flags on him. They might have to get him some help.";
-  else if (!onOff && !presnap && g.down == 1 && downBefore_ >= 3)
-    c = pick("pen_gift", {"That's a gift. They had them stopped, and now it's a first down.", "The defense did its job, and that flag hands it right back to them."});
-  else if (bHas(name, "Offensive Holding"))
-    c = pick("pen_hold", {"He got beat, and when you get beat on the edge you grab. The official was right there.", "You can see it, he's got two handfuls of jersey.",
-                          "That's a drive killer. Now you're behind the chains."});
-  else if (bHas(name, "Defensive Pass Interference"))
-    c = pick("pen_dpi", {"He never turned his head around to find the football. When you do that, you're going to get flagged.",
-                         "He was beat, and he knew it, so he grabbed. That's a big chunk of yards.", "Contact before the ball got there. Easy call."});
-  else if (bHas(name, "Roughing"))
-    c = pick("pen_rough", {"The ball was gone, and he still drove him into the ground. You can't put your full weight on the quarterback.", "That one's going to cost them fifteen yards. He was late."});
-  else if (bHas(name, "False Start"))
-    c = pick("pen_fs", {"Crowd noise. When it gets this loud, the snap count is the first thing to go.", "Just jumped early. Little things like that hurt you."});
-  else if (bHas(name, "Offside") || bHas(name, "Neutral Zone") || bHas(name, "Encroachment"))
-    c = pick("pen_off", {"Free five yards. The hard count got him.", "He was trying to time the snap and guessed wrong."});
-  else if (bHas(name, "Face Mask")) c = pick("pen_mask", {"Grabbed the face mask on the tackle. That's fifteen yards.", "Hand right on the mask. Can't do that."});
-  else if (bHas(name, "Delay of Game")) c = pick("pen_delay", {"They just couldn't get it snapped in time. That's on the operation.", "Five yards for nothing."});
-  else if (bHas(name, "Defensive Holding") || bHas(name, "Illegal Contact"))
-    c = pick("pen_dhold", {"Contact past five yards. The automatic first down is the big part of it.", "He got his hands on him downfield. The officials see it."});
-  else if (bHas(name, "Offensive Pass Interference"))
-    c = pick("pen_opi", {"He pushed off to create the separation.", "Extended the arms, gave him a shove. That's offensive pass interference."});
-  const bool must = (man && times >= 2) || (!onOff && !presnap && g.down == 1 && downBefore_ >= 3);
+  const Slots as = facts(g, {{"name", man ? nm(man) : std::string()}, {"team", t.city}, {"times", bCountWord(times)}, {"yds", bS(moved > 0 ? moved : nominal)}});
+  if (man && times >= 2) c = say(times == 2 ? "pen_again" : "pen_again3", as);
+  else if (!onOff && !presnap && g.down == 1 && downBefore_ >= 3 && stopped) c = say("pen_gift", as);
+  else if (bHas(name, "Offensive Holding")) c = say("pen_hold", as);
+  else if (bHas(name, "Defensive Pass Interference")) c = say("pen_dpi", as);
+  else if (bHas(name, "Roughing")) c = say("pen_rough", as);
+  else if (bHas(name, "False Start")) c = say("pen_fs", as);
+  else if (bHas(name, "Offside") || bHas(name, "Neutral Zone") || bHas(name, "Encroachment")) c = say("pen_off", as);
+  else if (bHas(name, "Face Mask")) c = say("pen_mask", as);
+  else if (bHas(name, "Delay of Game")) c = say("pen_delay", as);
+  else if (bHas(name, "Defensive Holding") || bHas(name, "Illegal Contact")) c = say("pen_dhold", as);
+  else if (bHas(name, "Offensive Pass Interference")) c = say("pen_opi", as);
+  else if (grounding) c = say("pen_ground", as);
+  else if (bHas(name, "Illegal Formation") || bHas(name, "Illegal Shift")) c = say("pen_form", as);
+  else if (bHas(name, "Too Many Men")) c = say("pen_12", as);
+  else if (bHas(name, "Unnecessary")) c = say("pen_ur", as);
+  else if (bHas(name, "Illegal Use of Hands")) c = say("pen_hands", as);
+  else if (bHas(name, "Block in the Back")) c = say("pen_bib", as);
+  const bool must = (man && times >= 2) || (!onOff && !presnap && g.down == 1 && downBefore_ >= 3 && stopped);
   if (!c.empty() && (must || chance(0.7))) push(Who::Color, Kind::Analysis, c, 1, 3, 0, 15);
+  if (!presnap) flushDeferred(g);  // (a timeout logged before the flag's line: after it)
 }
 
 // ------------------------------------------------------------------ a new play
 
 void Booth::onNewPlay(const Game& g, const PlaySim& s) {
+  flushDeferred(g);  // (a play that was never applied: what it held goes now)
   presnapT_ = 0;
   presnapSaid_ = readSaid_ = false;
   calledThrow_ = calledCatch_ = calledRun_ = breakaway_ = calledPressure_ = liveTalk_ = fumbleCalled_ = false;
-  calledTD_ = calledINT_ = calledSack_ = calledFumble_ = calledPbu_ = calledGoingToScore_ = calledDrop_ = pbuSeen_ = dropSeen_ = false;
+  calledTD_ = calledINT_ = calledSack_ = calledFumble_ = calledPbu_ = calledGoingToScore_ = calledDrop_ = pbuSeen_ = dropSeen_ = battedSeen_ = false;
   dropDecided_ = skipDrop_ = false;
   spokenTags_.clear();
   spokenTarget_ = -1;
@@ -1163,6 +1498,7 @@ std::vector<std::pair<std::string, int>> Booth::rosterCalls(const Game& g) {
 
 void Booth::buildPlan(const Game& g, const PlaySim& s) {
   plan_.at.clear();
+  handoffPid_ = -1;
   if (s.isReturn()) {
     if (s.returner) plan_.at["field"] = {rot(s.returner->p->id, oField(nm(s.returner->p))), 1};
     return;
@@ -1184,6 +1520,7 @@ void Booth::buildPlan(const Game& g, const PlaySim& s) {
       const bool mid = std::fabs(aim) < 2.5;
       const std::string dir = mid ? std::string("up the middle") : std::string(aim > 0 ? "to the left side" : "to the right side");
       plan_.at["handoff"] = {rot(rb->p->id, oHand(nm(rb->p), qb, dir, op->run->style)), 1};
+      handoffPid_ = rb->p->id;
     }
   }
   // the touchdown call, for either side of the ball
@@ -1223,6 +1560,9 @@ void Booth::live(const std::string& key, const std::string& fallback, int energy
   Line& l = push(Who::PBP, Kind::Live, text, (std::max)(en, energy), prio, 0, ttl);
   l.live = true;
   l.tag = tag ? std::string(tag) : key;
+  // the generic call the voice can fall back on when this one's audio is not made yet (a named call on a cold matchup)
+  std::tie(l.alt, l.altEnergy) = genericAlt(l.tag, l.text, fallback);
+  if (l.alt.empty()) l.altEnergy = l.energy;
   liveTalk_ = true;
 }
 
@@ -1240,6 +1580,14 @@ bool Booth::said(const char* prefix) const {
 void Booth::onSnap(const Game& g, const PlaySim& s) {
   snapFlush();
   if (s.isReturn()) return;
+  // the analyst's word on a break the snap overtook ("two minutes before the half is a big window") is stale after
+  // the play: dropped, not said after the next result
+  for (auto it = q_.begin(); it != q_.end();)
+    if (!it->live && it->who == Who::Color && it->kind == Kind::Break) {
+      it = q_.erase(it);
+      st_.expired++;
+    } else
+      ++it;
   const OffPlay* op = s.cfg.offPlay;
   if (op && (op->type == PlayType::Kneel || op->type == PlayType::Spike)) return;
   (void)g;
@@ -1253,7 +1601,11 @@ void Booth::onEvent(const Game& g, const PlaySim& s, const PlayEvent& e) {
     return;
   }
   if (t == "handoff") {
-    live("handoff", "Handoff.", 1);
+    // (the plan names the back the play was drawn for; a handoff to somebody else gets the call that names nobody, and a
+    // reverse's second handoff is not called again)
+    if (e.note == "reverse") return;
+    if (e.b && e.b->p && e.b->p->id != handoffPid_) live("", "Handoff.", 1, 0.9, "handoff");
+    else live("handoff", "Handoff.", 1);
     calledRun_ = true;
     return;
   }
@@ -1302,18 +1654,23 @@ void Booth::onEvent(const Game& g, const PlaySim& s, const PlayEvent& e) {
     live("", pick("l_drop", {"Dropped!", "Drops it!", "Right through his hands!", "Can't hang on!"}), 2, 0.9, "drop");
     return;
   }
-  if (t == "pbu") {
+  if (t == "pbu" || t == "contested_inc") {
     // a hand on the ball is not yet an incompletion (a tipped ball can still be caught, or picked): called when it lands
     pbuSeen_ = true;
     return;
   }
-  if ((t == "contested_inc" || (t == "incomplete" && pbuSeen_)) && !calledPbu_) {
-    calledPbu_ = true;
-    live("", pick("l_pbu", {"Broken up!", "Knocked away!", "Batted down!"}), 2, 0.9, "pbu");
+  if (t == "batted") {
+    battedSeen_ = true;  // (batted at the line, it can still come down in somebody's hands: called when it lands)
     return;
   }
-  if (t == "batted") {
+  if (t == "incomplete" && battedSeen_ && !calledPbu_) {
+    calledPbu_ = true;
     live("", pick("l_bat", {"Batted at the line!", "Knocked down at the line of scrimmage!"}), 2, 0.9, "pbu");
+    return;
+  }
+  if (t == "incomplete" && pbuSeen_ && !calledPbu_) {
+    calledPbu_ = true;
+    live("", pick("l_pbu", {"Broken up!", "Knocked away!", "Batted down!"}), 2, 0.9, "pbu");
     return;
   }
   if (t == "oobcatch") {
@@ -1446,7 +1803,8 @@ void Booth::livePocket(const Game& g, const PlaySim& s) {
   if (!calledDrop_ && !dropDecided_) {
     dropDecided_ = true;
     const OffPlay* op = s.cfg.offPlay;
-    skipDrop_ = (op && (op->type == PlayType::Screen || op->hasTag("quick"))) || chance(0.2);
+    // (the drop-back call ("Jessup, in the pocket.") on fewer than half the passes: on every one it was the line heard most)
+    skipDrop_ = (op && (op->type == PlayType::Screen || op->hasTag("quick"))) || chance(0.55);
   }
   if (!calledDrop_ && !skipDrop_ && s.t > 0.9 && !s.pendingThrow && !s.passThrown && !cur_.id) {
     calledDrop_ = true;
@@ -1509,10 +1867,10 @@ void Booth::onWhistle(const Game& g, const PlaySim& s, const PlayResult& r) {
   fourthFail_ = false;
   std::string bare = resultLine(g, s, r, energy);
   if (fourthFail_ && !downTag_.empty() && bare.empty()) {
-    bare = downTag_.substr(1);
+    bare = bJoin(std::string(), downTag_);
     downTag_.clear();
   }
-  const std::string text = bare.empty() ? downTag_.substr(downTag_.empty() ? 0 : 1) : bare + downTag_;
+  const std::string text = bJoin(bare, downTag_);
   if (!text.empty()) {
     if (replayWorthy_) {
       Line& l = push(Who::PBP, Kind::Result, text, energy, 4, liveTalk_ ? 0.25 : 0.45, 8);
@@ -1527,33 +1885,44 @@ void Booth::onWhistle(const Game& g, const PlaySim& s, const PlayResult& r) {
     }
   }
   int aEnergy = 1;
+  resultSaid_ = text;
+  creditLine_.clear();
+  creditFor_.clear();
   if (auto a = analysis(g, s, r, aEnergy)) {
     std::string t = *a;
-    if (replayWorthy_ && playAngle_ && chance(0.6))
-      t = pick("replay", {"Let's take another look. ", "Here's the replay. ", "Watch this again. ", "Look at it from this angle. "}) + t;
+    // the replay's lead-in: a sentence of its own, or joined to the breakdown ("Watch this again, they were in man...")
+    const Slots ws = facts(g, {{"yds", r.yards > 0 ? bS(r.yards) : std::string()}});
+    std::string pre;
+    if (replayWorthy_ && playAngle_ && chance(0.6)) pre = say("replay", ws);
+    // a credit and a toss go with the breakdown they lead into: a question and its answer (dropped together, never alone)
+    bool led = false;
     if (creditRead_) {
       creditRead_ = false;
-      const std::string credit = pick("credit", {"You called it before the snap, " + crew_.colorFirst + ".", "Just like you said, " + crew_.colorFirst + ".",
-                                                 crew_.colorFirst + ", you saw that one coming."});
-      if (replayWorthy_) push(Who::PBP, Kind::Analysis, credit, 1, 3, 0, 20);  // (after the result, said at the whistle)
-      else creditLine_ = credit;                                                // after the held result
+      const std::string credit = say("credit", ws);
+      if (replayWorthy_) {
+        push(Who::PBP, Kind::Analysis, credit, 1, 3, 0, 20).tag = "question";  // (after the result, said at the whistle)
+        led = true;
+      } else {
+        creditLine_ = credit;  // after the held result, with the held breakdown
+        creditFor_ = t;
+      }
     }
     if (replayWorthy_) {
       if (playAngle_ && !r.td && chance(0.3) && cooled("toss", 240)) {
         mark("toss");
-        push(Who::PBP, Kind::Analysis, pick("toss", {crew_.colorFirst + ", what happened there?", "Take us through it, " + crew_.colorFirst + ".",
-                                                     crew_.colorFirst + ", how does that happen?", "What did you see, " + crew_.colorFirst + "?"}),
-             1, 3, 0, 20);
-        // the answer opens with the play, not with "Let's take another look"
-        if (t.rfind("Let's take another look. ", 0) == 0 || t.rfind("Here's the replay. ", 0) == 0 || t.rfind("Watch this again. ", 0) == 0 ||
-            t.rfind("Look at it from this angle. ", 0) == 0)
-          t = t.substr(t.find(". ") + 2);
+        push(Who::PBP, Kind::Analysis, say("toss_q", ws), 1, 3, 0, 20).tag = led ? "answer" : "question";
+        led = true;
+        pre.clear();  // (the answer opens with the play, not with "Let's take another look")
       }
-      push(Who::Color, Kind::Analysis, t, aEnergy, 3, 0, 25);
+      if (!pre.empty()) t = pre.size() >= 2 && pre.compare(pre.size() - 2, 2, ", ") == 0 ? pre + lowerFirst(t) : pre + t;
+      Line& al = push(Who::Color, Kind::Analysis, t, aEnergy, 3, 0, 25);
+      al.topic = lastAnalysisTopic_;
+      if (led) al.tag = "answer";
     }
     else {
       pendingAnalysis_ = t;
       pendingAnalysisEnergy_ = aEnergy;
+      pendingAnalysisTopic_ = lastAnalysisTopic_;
     }
   }
 }
@@ -1575,8 +1944,6 @@ int Booth::tier(const Game& g) const {
 }
 
 std::string Booth::resultLine(const Game& g, const PlaySim& s, const PlayResult& r, int& energy) {
-  const Team& O = g.offense();
-  const Team& D = g.defense();
   // a touchdown's yards are to the goal line (the ball carrier may finish deep in the end zone)
   const double los = losBefore_;
   const bool first = !r.td && !r.turnover && !r.safety && r.endX - losBefore_ >= toGoBefore_ - 1e-6 && r.kind != PlayKind::Spike && r.kind != PlayKind::Kneel;
@@ -1603,134 +1970,144 @@ std::string Booth::resultLine(const Game& g, const PlaySim& s, const PlayResult&
     downTag_ = t;
     return std::string();
   };
+  // the down and distance the play leaves when it is short of the line to gain ("..., and that brings up 3rd and 2.")
+  const double gainedX = r.endX - losBefore_;
+  const double ndToGo = r.incomplete ? toGoBefore_ : toGoBefore_ - gainedX;
+  const double ndBall = r.incomplete ? losBefore_ : r.endX;
+  const bool ndOk = !first && !r.td && !r.turnover && !r.safety && downBefore_ <= 3 && !lastSnap && r.kind != PlayKind::Kneel && r.kind != PlayKind::Spike &&
+                    ndBall > 0.5 && ndBall < 99.5;
+  const std::string nd = ndOk ? bDownDist(downBefore_ + 1, ndToGo, ndBall) : std::string();
+  // the facts a result can name (each wording names the ones it needs)
+  // the spot is said once: not again after the live call gave it ("Brought down at the 26."), and a tail does not repeat
+  // the one the result just named (rsNoSpot)
+  const bool spotCalled = said("down");
+  const Slots rs = facts(g, {{"qb", qb}, {"tk", tk}, {"at", spotCalled ? std::string() : at}, {"to", spotCalled ? std::string() : fieldX(endX)},
+                             {"yds", y > 0 ? bS(y) : std::string()}, {"ydsw", y > 0 ? yds(y) : std::string()},
+                             {"forn", y > 0 ? forN(y) : std::string()}, {"loss", y < 0 ? bS(-y) : std::string()}, {"lossw", y < 0 ? yds(-y) : std::string()}, {"nd", nd},
+                             {"ord", bOrdWord(downBefore_)}});
+  Slots rsNoSpot = rs;
+  for (Slot& x : rsNoSpot)
+    if (!std::strcmp(x.k, "at") || !std::strcmp(x.k, "to")) x.v.clear();
+  const std::string toWord = fieldX(endX);
+  auto tailSlots = [&]() -> const Slots& { return spotCalled || out.find(at) != std::string::npos || out.find(toWord) != std::string::npos ? rsNoSpot : rs; };
+  auto with = [&rs](Slots e) {
+    e.insert(e.end(), rs.begin(), rs.end());
+    return e;
+  };
   if (r.safety) {
     energy = 3;
     const std::string who = !r.tacklers.empty() ? nm(r.tacklers[0]) : std::string("the defense");
-    return pick("r_safety", {"Brought down in the end zone by " + who + ", and that's a safety! Two points, " + D.city + ".",
-                             "Safety! " + who + " gets him in the end zone. Two points for " + D.city + "."});
+    return say("r_safety", with({{"who", who}}));
   }
   auto firstTag = [&]() -> std::string {
     if (!first) return std::string();
-    if (downBefore_ == 3)
-      return " " + (tier(g) == 0 ? pick("r_3rd", {"And that's a first down! Big conversion on third down.", "Moves the chains on third down.", "First down, and they keep the drive alive.",
-                                                 "That'll do it, first down.", "And they've moved the sticks."})
-                                 : pick("r_3rdq", {"That's a first down.", "Enough for the first.", "They move the chains."}));
-    if (downBefore_ == 4)
-      return " " + (tier(g) == 0 ? pick("r_4th", {"They pick it up on fourth down!", "And they convert on fourth down!", "Gamble pays off! First down!"})
-                                 : pick("r_4thq", {"They get it on fourth down.", "That's enough on fourth down."}));
+    if (downBefore_ == 3) return say(tier(g) == 0 ? "r_3rd" : "r_3rdq", tailSlots());
+    if (downBefore_ == 4) return say(tier(g) == 0 ? "r_4th" : "r_4thq", tailSlots());
     if (los + y >= 100) return std::string();
-    return " " + pick("r_1st", {"First down.", "That's a first down.", "And that'll move the chains.", "That's enough for the first.", "Moves the sticks.",
-                                "First down, " + O.city + ".", "And they've got a fresh set of downs.", "Past the marker, first down."});
+    return say("r_1st", tailSlots());
   };
   auto nextDown = [&]() -> std::string {
     if (first || r.td || r.turnover) return std::string();
     if (fourth) {
       energy = (std::max)(energy, 2);
       fourthFail_ = true;
-      if (g.q >= 4 && g.margin() < 0 && g.clock < 240) {
+      if (g.q >= 4 && g.margin() < 0 && g.margin() >= -8 && g.clock < 240) {  // (a one-score game: down 25, a stop decides nothing)
         sealed_ = g.timeouts[g.poss] == 0 || g.clock < 45;
-        return " " + pick("r_todlate", {"Stopped! Turnover on downs, and that should just about do it.", "They don't get it! " + D.city + " takes over, and that may be the ballgame."});
+        return say("r_todlate", tailSlots());
       }
-      return " " + pick("r_tod", {"Short! And that'll be a turnover on downs.", "They don't get it. " + D.city + " takes over on downs.", "Stopped short! Turnover on downs."});
+      return say("r_tod", tailSlots());
     }
     const double gained = r.endX - losBefore_;
-    if (downBefore_ == 3 && gained > 0 && toGoBefore_ - gained < 1.5 && r.kind != PlayKind::Sack)
-      return " " + pick("r_short3", {"But he's just short of the marker.", "Just short of the first down.", "And that's short of the sticks."});
+    if (downBefore_ == 3 && gained > 0 && toGoBefore_ - gained < 1.5 && r.kind != PlayKind::Sack) return say("r_short3", tailSlots());
+    // now and then the down it brings up, said with the play (the setup then does not say it again)
+    if (!nd.empty() && downBefore_ <= 2 && chance(r.incomplete ? 0.55 : 0.4)) {
+      const std::string t = say("r_nd", rs);
+      if (!t.empty()) ddSaidKey_ = bDdKey(g, downBefore_ + 1, ndToGo, ndBall);
+      return t;
+    }
     return std::string();  // (third and fourth downs: the setup says them)
   };
   switch (r.kind) {
     case PlayKind::Kneel:
       if (!once("kneel" + bS(g.q) + bS(static_cast<int>(g.clock / 60)))) return std::string();
-      return g.q == 2 ? pick("r_kneelh", {qb + " takes a knee.", qb + " kneels it."})
-                      : pick("r_kneel", {qb + " takes a knee.", "And " + qb + " will kneel it.", "Victory formation, " + qb + " goes down."});
+      return say(g.q == 2 ? "r_kneelh" : "r_kneel", rs);
     case PlayKind::Spike:
-      return pick("r_spike", {qb + " spikes it to stop the clock with " + bClock(g.clock - r.duration) + " left.", "Ball spiked, the clock stops."});
+      return say("r_spike", with({{"left", bClock(g.clock - r.duration)}}));
     case PlayKind::Sack: {
       energy = 2;
       const std::string who = r.sackedBy ? pname(r.sackedBy) : tk;
       if (r.fumbleBy) {
         energy = 3;
-        out = r.fumbleLost ? pick("r_sfum", {"Strip sack! And " + D.city + " has the football!", who + " gets the sack and the fumble, and " + D.city + " recovers!"})
-                           : who + " gets the sack, the ball came out, but " + O.city + " falls on it.";
-        return out;
+        return say(r.fumbleLost ? "r_sfum" : "r_sfumkept", with({{"who", who}}));
       }
       if (said("sack"))
       {
         int n = 1;
         if (r.sackedBy)
-          for (const PlayerLine* ln : g.stats.forTeam(D.abbr))
+          for (const PlayerLine* ln : g.stats.forTeam(g.defense().abbr))
             if (ln->pid == r.sackedBy->id) n = ln->sacks + 1;  // (this one not in the book yet)
         if (n >= 2) topicT_["sk:" + bS(r.sackedBy->id) + ":" + bS(n)] = now_;  // (the count is said here: the story would repeat it)
         if (n >= 2)
-          out = pick("r_sackn", {"That's sack number " + bS(n) + " for " + nm(r.sackedBy) + ". A loss of " + bS(-y) + ".", nm(r.sackedBy) + " again! That's " + std::string(bCountWord(n)) + " sacks today."});
+          out = say("r_sackn", with({{"who", nm(r.sackedBy)}, {"n", bS(n)}, {"nw", bCountWord(n)}, {"nth", bOrdWord(n)}}));
         else
-          out = pick("r_sack2", {"That's a loss of " + bS(-y) + ".", "A " + bS(-y) + "-yard loss on the play.", "Back to " + at + ".", "He loses " + yds(-y) + " on the play."});
+          out = say("r_sack2", with({{"who", who}}));
       }
       else
-        out = pick("r_sack", {who + " with the sack, a loss of " + bS(-y) + ".", qb + " is sacked by " + who + ", down at " + at + ".", who + " gets home! Sack, and a loss of " + bS(-y) + "."});
+        out = say("r_sack", with({{"who", who}}));
       return out + later(nextDown());
     }
     case PlayKind::Scramble: {
-      std::string pre;
-      if (y >= 10) pre = pick("r_scrbig", {qb + " scrambles and picks up " + bS(y) + "!", "Great improvisation by " + qb + ", " + yds(y) + " on the ground.", qb + " takes off and gets " + bS(y) + "!"});
-      else if (y > 0) pre = pick("r_scr", {qb + " scrambles " + forN(y) + ".", qb + " tucks it and gets " + yds(y) + ".", qb + " runs it " + forN(y) + "."});
-      else pre = qb + " tries to run, but he's dropped for " + (y == 0 ? std::string("no gain.") : "a loss of " + bS(-y) + ".");
+      if (y >= 10) out = say("r_scrbig", rs);
+      else if (y > 0) out = say("r_scr", rs);
+      else out = say(y == 0 ? "r_scr0" : "r_scrneg", rs);
       if (y >= 10) energy = 2;
-      return pre + later(firstTag() + nextDown());
+      return out + later(firstTag() + nextDown());
     }
     case PlayKind::Run: {
       const std::string rb = pname(r.rusher);
+      const Slots ru = with({{"rb", rb}, {"rec", r.fumbleRecBy ? nm(r.fumbleRecBy) : std::string()}});
       // the live call just said his name: the result can go straight to the yards
       const bool saidRun = said("handoff") && chance(0.55);
       if (r.fumbleBy) {
         energy = 3;
-        if (r.fumbleLost)
-          return pick("r_rfum", {"And it's " + D.city + " ball! " + (r.fumbleRecBy ? nm(r.fumbleRecBy) + " came up with it." : std::string()), "Turnover! " + D.city + " takes it away."});
-        return std::string("The ball came loose, but ") + O.city + " held on to it. " + (y > 0 ? "A gain of " + bS(y) + "." : y == 0 ? std::string("No gain.") : "A loss of " + bS(-y) + ".");
+        if (r.fumbleLost) return say("r_rfum", ru);
+        return say(y > 0 ? "r_rfumkept" : "r_rfumkept0", ru);
       }
       if (r.td) {
         energy = 3;
-        if (y <= 4) return pick("r_rtds", {rb + " punches it in from the " + bS(y) + "!", rb + " pushes in from " + yds(y) + " out!", rb + " gets in from short yardage!"});
-        return pick("r_rtd", {rb + " from " + bS(y) + " yards out! " + O.city + " scores!", "A " + bS(y) + "-yard touchdown run for " + rb + "!", rb + " goes " + bS(y) + " yards for the score!"});
+        return say(y <= 4 ? "r_rtds" : "r_rtd", ru);
       }
       if (r.safety) {
         energy = 3;
-        return rb + " is tackled in the end zone, and that's a safety! Two points for " + D.city + ".";
+        return say("r_rsafety", ru);
       }
       if (y >= 20) {
         energy = 2;
-        out = pick("r_runbig", {rb + " breaks off a " + bS(y) + "-yard run!", "What a run by " + rb + "! " + bS(y) + " yards!", rb + " rips off " + bS(y) + "!", "A " + bS(y) + "-yard gallop for " + rb + "!"});
-        if (!r.outOfBounds && !tk.empty() && chance(0.5)) out += " " + tk + " finally brings him down at " + at + ".";
+        out = say("r_runbig", ru);
+        if (!r.outOfBounds && !tk.empty() && chance(0.5) && &tailSlots() == &rs) out += say("r_runbig_tk", ru);
       } else if (y >= 5) {
-        out = saidRun ? pick("r_runS", {"Picks up " + bS(y) + ".", "Gain of " + bS(y) + ".", bCap(yds(y)) + " on the play.", "Good for " + bS(y) + ".", "And he gets " + bS(y) + "."})
-                   : pick("r_run", {rb + " picks up " + bS(y) + ".", rb + " " + forN(y) + ".", rb + " gains " + bS(y) + " before " + (tk.empty() ? std::string("they bring him down") : tk + " brings him down") + ".",
-                                    "Good run by " + rb + ", " + yds(y) + ".", rb + " finds a crease, picks up " + bS(y) + "."});
+        out = say(saidRun ? "r_runS" : "r_run", ru);
       } else if (y > 0) {
-        out = saidRun && first ? pick("r_runshortF", {"Picks up " + yds(y) + ".", "Gets " + yds(y) + "."})
-              : saidRun ? pick("r_runshortS", {"Just " + yds(y) + ".", "Only " + yds(y) + " there.", "Gets " + yds(y) + " before he's wrapped up.", "Not much there, " + yds(y) + "."})
-                   : pick("r_runshort", {rb + " " + forN(y) + ".", rb + " grinds out " + yds(y) + ".", "Just " + yds(y) + " on the carry for " + rb + ".",
-                                         rb + " is met by " + (tk.empty() ? std::string("a crowd") : tk) + " after " + yds(y) + "."});
+        out = say(saidRun && first ? "r_runshortF" : saidRun ? "r_runshortS" : "r_runshort", ru);
       } else if (y == 0) {
-        out = pick("r_run0", {rb + " is stopped for no gain.", (tk.empty() ? std::string("The defense") : tk) + " stuffs " + rb + " at the line.", "Nothing there for " + rb + ".",
-                              "No gain on the play. " + (tk.empty() ? std::string("They") : tk) + " got there in a hurry."});
+        out = say("r_run0", ru);
       } else {
         energy = 2;
-        out = pick("r_runloss", {(tk.empty() ? std::string("The defense") : tk) + " drops " + rb + " for a loss of " + bS(-y) + ".",
-                                 rb + " is hit in the backfield, a loss of " + bS(-y) + ".", "Stopped behind the line! A " + bS(-y) + "-yard loss."});
+        out = say("r_runloss", ru);
       }
-      if (r.outOfBounds && y > 0 && y < 20 && chance(0.4)) out = rb + " picks up " + bS(y) + " and steps out of bounds.";
+      if (r.outOfBounds && y > 0 && y < 20 && chance(0.4)) out = say("r_runoob", ru);
       return out + later(firstTag() + nextDown());
     }
     case PlayKind::Pass: {
       if (r.thrownAway) {
         if (said("away")) {
-          const int nd = downBefore_ + 1;
-          if (nd > 4) return std::string();
-          if (nd == 4) return pick("r_away4", {"Incomplete. That brings up fourth down.", "Incomplete, and it'll be fourth down."});  // (the setup gives the distance)
-          ddSaidKey_ = bDdKey(g, nd, toGoBefore_, los);
-          return pick("r_away2", {"Incomplete. " + bCap(bDownDist(nd, toGoBefore_, los)) + ".", "Incomplete, and that'll bring up " + bDownDist(nd, toGoBefore_, los) + "."});
+          const int nd2 = downBefore_ + 1;
+          if (nd2 > 4) return std::string();
+          if (nd2 == 4) return say("r_away4", rs);  // (the setup gives the distance)
+          ddSaidKey_ = bDdKey(g, nd2, toGoBefore_, los);
+          return say("r_away2", with({{"nd", bDownDist(nd2, toGoBefore_, los)}}));
         }
-        return pick("r_away", {qb + " has to throw it away.", "Nothing open, and " + qb + " throws it away.", qb + " gets rid of it. Nobody there."}) + later(nextDown());
+        return say("r_away", rs) + later(nextDown());
       }
       if (r.interception && !r.turnover) {
         if (giveBackPlay_ != playNo_) {
@@ -1740,76 +2117,60 @@ std::string Booth::resultLine(const Game& g, const PlaySim& s, const PlayResult&
         energy = 3;
         const std::string who = r.intBy ? nm(r.intBy) : std::string("the defender");
         if (r.intBy) gaveBack_.insert(r.intBy->id);
-        return pick("r_intback", {who + " picks it off, but he coughs it up on the return, and " + O.city + " gets it back! What a sequence!",
-                                  "Intercepted, and then fumbled! " + O.city + " falls on it and keeps the football!"});
+        return say("r_intback", with({{"who", who}}));
       }
       if (r.interception) {
         energy = 3;
         const std::string who = r.intBy ? pname(r.intBy) : std::string("the defense");
+        const Slots is = with({{"who", who}, {"intat", spot(g, 100 - endX, other(g.poss))}});
         // the man who gave one back earlier: this one he keeps
-        const std::string amends = r.intBy && gaveBack_.count(r.intBy->id) && once("amends" + bS(r.intBy->id))
-                                       ? pick("r_amends", {" He gave one back earlier. Not this time.", " And he makes up for the one he fumbled away."}) : std::string();
-        if (r.td == Side::Def)
-          return pick("r_pick6", {"Pick six! " + who + " takes it all the way back!", who + " jumps the route and he's gone! Interception for a touchdown!"}) + amends;
-        if (!amends.empty()) return pick("r_int", {"Intercepted by " + who + "! " + D.city + " ball.", "And it's picked off! " + who + " with the interception."}) + amends;
-        out = said("int") ? pick("r_int2", {who + " with the interception, and " + D.city + " takes over at " + spot(g, 100 - endX, other(g.poss)) + ".",
-                                           who + " brings it back to " + spot(g, 100 - endX, other(g.poss)) + ". A huge turnover."})
-                         : pick("r_int", {"Intercepted by " + who + "! " + D.city + " ball.", "And it's picked off! " + who + " with the interception."});
-        return out;
+        const std::string amends = r.intBy && gaveBack_.count(r.intBy->id) && once("amends" + bS(r.intBy->id)) ? say("r_amends", is) : std::string();
+        if (r.td == Side::Def) return say("r_pick6", is) + amends;
+        // (downed in his own end zone: a touchback, not "returns it to the Portland 1")
+        if (100 - r.endX <= 0.5) return say("r_inttb", is) + amends;
+        if (!amends.empty()) return say("r_int", is) + amends;
+        return say(said("int") ? "r_int2" : "r_int", is);
       }
       if (r.incomplete) {
         const std::string tg = r.target ? nm(r.target) : std::string("his receiver");
         bool drop = false;
         for (const PlayEvent& e : s.events)
           if (e.type == "drop") drop = true;
-        if (r.pbuBy && said("pbu"))
-          out = pick("r_pbu2", {nm(r.pbuBy) + " with the breakup.", "That's " + nm(r.pbuBy) + " getting a hand in there.", "Nice play by " + nm(r.pbuBy) + "."});
-        else if (drop && said("drop"))
-          out = pick("r_drop2", {"Incomplete. That one was right there for " + tg + ".", "Dropped by " + tg + ". He'll want that one back."});
-        else if (r.pbuBy)
-          out = pick("r_pbu", {"Incomplete, broken up by " + pname(r.pbuBy) + ".", "Intended for " + tg + ", but " + nm(r.pbuBy) + " gets a hand on it.",
-                               "Good coverage by " + nm(r.pbuBy) + ", the pass falls incomplete."});
-        else if (drop)
-          out = pick("r_drop", {"Incomplete. " + tg + " couldn't hang on.", "That one's dropped by " + tg + ".", "Off the hands of " + tg + ", incomplete."});
-        else
-          out = pick("r_inc", {"Incomplete, intended for " + tg + ".", "The pass falls incomplete. " + tg + " was the target.", "Incomplete, looking for " + tg + ".",
-                               qb + "'s pass for " + tg + " is off the mark.", "Can't connect. " + tg + " was the intended receiver."});
+        const std::string pbF = r.pbuBy ? pname(r.pbuBy) : std::string();  // (the first time he is named: his full name)
+        const Slots is = with({{"tg", tg}, {"pbu", r.pbuBy ? nm(r.pbuBy) : std::string()}, {"pbuf", pbF}});
+        if (r.pbuBy && said("pbu")) out = say("r_pbu2", is);
+        else if (drop && said("drop")) out = say("r_drop2", is);
+        else if (r.pbuBy) out = say("r_pbu", is);
+        else if (drop) out = say("r_drop", is);
+        else out = say("r_inc", is);
         return out + later(nextDown());
       }
       const std::string rc = pname(r.receiver);
+      const Slots ps = with({{"rc", rc}});
       const bool otherMan = (said("throw") || said("deep")) && r.receiver && spokenTarget_ >= 0 && spokenTarget_ != r.receiver->id;
       if (otherMan && !r.td && !r.fumbleBy) {
         if (y >= 25) energy = 2;
-        return pick("r_otherman", {"And it's " + rc + " who comes down with it, " + yds(y) + ".", "It ends up with " + rc + " instead. " + bCap(yds(y)) + ".",
-                                   "It's " + rc + " who hauls it in, good for " + bS(y) + "."});
+        return say(y > 0 ? "r_otherman" : "r_otherman0", ps);
       }
       if (r.fumbleBy) {
         energy = 3;
-        if (r.fumbleLost) return "Caught, but then stripped! " + D.city + " comes up with it!";
-        return rc + " made the catch and put it on the ground, but " + O.city + " recovers.";
+        return say(r.fumbleLost ? "r_pfum" : "r_pfumkept", ps);
       }
       if (r.td) {
         energy = 3;
-        return said("catch") || said("throw") || said("deep") ? pick("r_ptd2", {qb + " to " + rc + ", " + bS(y) + " yards, for the touchdown!", "A " + bS(y) + "-yard touchdown strike from " + qb + " to " + rc + "!",
-                                              "That's a " + bS(y) + "-yard touchdown pass, " + qb + " to " + rc + "!"})
-                            : pick("r_ptd", {qb + " finds " + rc + " in the end zone! Touchdown!", rc + " with the touchdown catch!"});
+        return say(said("catch") || said("throw") || said("deep") ? "r_ptd2" : "r_ptd", ps);
       }
       if (y >= 25) {
         energy = 2;
-        out = pick("r_pbig", {qb + " to " + rc + ", a " + bS(y) + "-yard gain!", "That's a big play! " + rc + " for " + bS(y) + ".", rc + " with a " + bS(y) + "-yard catch, down to " + at + "."});
+        out = say("r_pbig", ps);
       } else if ((said("throw") || said("deep")) && spokenTarget_ == (r.receiver ? r.receiver->id : -2) && y > 0) {
-        out = pick("r_pcomp2", {rc + " picks up " + bS(y) + ".", "A gain of " + bS(y) + " on the play.", rc + " with the grab, " + yds(y) + ".", "That's good for " + bS(y) + ".",
-                                "Complete, " + yds(y) + ".", "Caught for " + bS(y) + "."});
+        out = say("r_pcomp2", ps);
       } else if (y > 0) {
-        out = pick("r_pcomp", {qb + " completes it to " + rc + " " + forN(y) + ".", "Complete to " + rc + ", " + yds(y) + ".", qb + " finds " + rc + " " + forN(y) + ".",
-                               "Short pass to " + rc + ", picks up " + bS(y) + "."});
+        out = say("r_pcomp", ps);
       } else {
-        if (y >= -1)
-          out = pick("r_pzero", {rc + " makes the catch, but goes nowhere.", "Caught by " + rc + ", but " + (tk.empty() ? std::string("they're") : tk + " is") + " right there. No gain."});
-        else
-          out = pick("r_ploss", {rc + " makes the catch, and loses " + bS(-y) + ".", "Caught behind the line, and " + (tk.empty() ? std::string("they drop") : tk + " drops") + " him for a loss of " + bS(-y) + "."});
+        out = say(y == 0 ? "r_pzero" : "r_ploss", ps);  // (a yard lost is a loss: "no gain" read wrong next to "3rd and 11")
       }
-      if (r.outOfBounds && y > 0 && chance(0.4)) out += " He gets out of bounds.";
+      if (r.outOfBounds && y > 0 && chance(0.4)) out = bJoin(out, say("r_poob", tailSlots()));
       return out + later(firstTag() + nextDown());
     }
   }
@@ -1822,32 +2183,33 @@ void Booth::returnResult(const Game& g, const PlaySim& s, const PlayResult& r) {
   const bool punt = s.cfg.kick && s.cfg.kick->punt;
   const Player* who = s.returner ? s.returner->p : nullptr;
   const std::string rn = who ? pname(who) : std::string("the returner");
+  const double endX = (std::max)(0.5, (std::min)(99.5, r.endX));
+  const int ry = bRound(endX - (s.catchX > 0 ? s.catchX : (s.cfg.kick ? s.cfg.kick->landX : endX)));
+  const Slots rs = facts(g, {{"rn", rn}, {"ry", bS(ry)}, {"at", spot(g, endX, g.poss)}, {"to", fieldX(endX)}, {"kind", punt ? "punt" : "kickoff"}, {"team", g.offense().city},
+                             {"kteam", g.defense().city}});
   if (r.td == Side::Off) {
-    push(Who::PBP, Kind::Result, pick("ret_td", {rn + " takes it all the way! What a return!", "He's gone! " + rn + " goes the distance!"}), 3, 5, 0.3, 10).snapSafe = true;
-    push(Who::Color, Kind::Analysis, pick("ret_tdA", {"Look at the wall they set up. One cut, and there's nobody left.", "That's a special teams breakdown. Somebody lost his lane."}), 2,
-         3, 0, 20);
+    push(Who::PBP, Kind::Result, say("ret_td", rs), 3, 5, 0.3, 10).snapSafe = true;
+    push(Who::Color, Kind::Analysis, say("ret_tdA", rs), 2, 3, 0, 20);
     return;
   }
   if (r.fumbleLost) {
-    push(Who::PBP, Kind::Result, "He's lost the football on the return! And the kicking team has it!", 3, 5, 0.2, 10).snapSafe = true;
+    push(Who::PBP, Kind::Result, say("ret_fum", rs), 3, 5, 0.2, 10).snapSafe = true;
     return;
   }
-  const double endX = (std::max)(0.5, (std::min)(99.5, r.endX));
-  const int ry = bRound(endX - (s.catchX > 0 ? s.catchX : (s.cfg.kick ? s.cfg.kick->landX : endX)));
-  const std::string at = spot(g, endX, g.poss);
+  if (r.endX <= 0.0) {
+    // (downed in his own end zone after fielding it: a touchback, the ball out at the 35 / the 20, not "the Austin 1")
+    push(Who::PBP, Kind::Result, say("ret_tb", facts(g, {{"rn", rn}, {"kind", punt ? "punt" : "kickoff"}, {"team", g.offense().city}, {"yl", punt ? "20" : "35"}})), 0, 3, 0.3,
+         10);
+    return;
+  }
   std::string out;
   const bool spotSaid = said("down");
-  if (ry >= 30)
-    out = endX >= 45 ? pick("ret_big", {"A big return by " + rn + "! " + bS(ry) + " yards, and great field position.", rn + " with a " + bS(ry) + "-yard return!"})
-                     : pick("ret_big2", {"A " + bS(ry) + "-yard return by " + rn + ".", rn + " gets " + bS(ry) + " on the return."});
-  else if (ry > 0 && spotSaid) out = pick("ret2", {"A " + bS(ry) + "-yard return for " + rn + ".", rn + " brings it back " + bS(ry) + ".", "Good for " + bS(ry) + " on the return."});
-  else if (ry > 0) out = pick("ret", {rn + " brings it back to " + at + ".", "Returned to " + at + " by " + rn + ".", rn + " gets it out to " + at + "."});
-  else out = rn + " is stopped right there, at " + at + ".";
+  if (ry >= 30) out = say(endX >= 45 ? "ret_big" : "ret_big2", rs);
+  else if (ry > 0 && spotSaid) out = say("ret2", rs);
+  else if (ry > 0) out = say("ret", rs);
+  else out = say("ret0", rs);
   push(Who::PBP, Kind::Result, out, ry >= 30 ? 2 : 1, 4, 0.3, 10);
-  if (ry >= 30 && chance(0.6))
-    push(Who::Color, Kind::Analysis, pick("ret_A", {"That flips the field. They start in great shape.", "The coverage unit got caught up in the wash, and he found the seam."}), 1, 2,
-         0, 15);
-  (void)punt;
+  if (ry >= 30 && chance(0.6)) push(Who::Color, Kind::Analysis, say("ret_A", rs), 1, 2, 0, 15);
 }
 
 // ------------------------------------------------------------------ the analyst
@@ -1859,187 +2221,124 @@ std::optional<std::string> Booth::analysis(const Game& g, const PlaySim& s, cons
     std::string text;
   };
   std::vector<Angle> c;
+  creditRead_ = false;  // (a credit is for this play's read, and only when the breakdown is about it: decided below)
   auto add = [&](double sc, const std::string& topic, const std::string& text, double cool = 1300) {
     if (text.empty() || !cooled(topic, cool) || spokenSet_.count(text)) return;
+    // (the analyst does not say back what the play-by-play man just said: "...will want that one back" twice)
+    if (bEcho(text, resultSaid_)) return;
     if (s.cfg.defCall && text.find(bCoverageWords(s.cfg.defCall->coverage)) != std::string::npos && !cooled("covname", 420)) return;
     c.push_back({sc + rng_.range(0, 0.25), topic, text});
   };
   const OffPlay* op = s.cfg.offPlay;
   const DefCall* dc = s.cfg.defCall;
-  const Team& O = g.offense();
-  const Team& D = g.defense();
   const bool blitz = dc && !dc->blitz.empty();
   const bool big = r.yards >= 20 || r.td || r.turnover;
   const std::string qb = r.passer ? nm(r.passer) : (s.qb ? nm(s.qb->p) : std::string("the quarterback"));
   std::string cov = dc ? bCoverageWords(dc->coverage) : std::string("zone");
-  const std::string cf = crew_.pbpFirst;
   // a blocker the play showed: the pancake, the man who beat his block
   const Player* pancake = pancakes_.empty() ? nullptr : pancakes_.front();
   const Shed* shed = sheds_.empty() ? nullptr : &sheds_.front();
+  // the facts a breakdown can name (each wording names the ones it needs)
+  const Slots as = facts(g, {{"qb", qb}, {"rc", r.receiver ? nm(r.receiver) : std::string()}, {"rb", r.rusher ? nm(r.rusher) : std::string()},
+                             {"cdef", catchDef_ ? nm(catchDef_) : std::string()}, {"route", bRoute(catchRoute_)}, {"cov", cov},
+                             {"yds", r.yards > 0 ? bS(r.yards) : std::string()}, {"yac", r.yac >= 1 ? bS(static_cast<int>(r.yac)) : std::string()},
+                             {"air", r.airYards >= 1 ? bS(static_cast<int>(r.airYards)) : std::string()},
+                             {"who", r.intBy ? nm(r.intBy) : std::string("the defender")}, {"pbu", r.pbuBy ? nm(r.pbuBy) : std::string()},
+                             {"sk", r.sackedBy ? nm(r.sackedBy) : std::string()}, {"dl", shed && shed->d ? nm(shed->d) : std::string()},
+                             {"blk", shed && shed->b ? nm(shed->b) : std::string()}, {"move", shed ? bMoveWords(shed->move) : std::string()},
+                             {"pan", pancake ? nm(pancake) : std::string()}, {"hitter", hitBy_ ? nm(hitBy_) : std::string()},
+                             {"tg", (r.receiver ? r.receiver : r.target) ? nm(r.receiver ? r.receiver : r.target) : std::string()},
+                             {"loss", r.yards < 0 ? bS(-r.yards) : std::string()}, {"brk", bCountWord(r.brokenTackles)},
+                             {"qbnote", qb + (qbSharp(g, r.passer) ? " has been calm all day" : " came through when it mattered")}});
+  auto with = [&as](Slots e) {
+    e.insert(e.end(), as.begin(), as.end());
+    return e;
+  };
+  // an angle's wordings, filled: "" when none can be said now
+  auto w = [&](const char* bank) { return say(bank, as); };
   switch (r.kind) {
     case PlayKind::Pass: {
       if (r.complete && !r.interception) {
-        const std::string rc = nm(r.receiver);
-        {
-          const std::string route = bRoute(catchRoute_);
-          const std::string def = catchDef_ ? nm(catchDef_) : std::string();
-          if (!route.empty() && r.yards >= 6)
-            add(1.05, "a_route", pick("a_route", {rc + " runs the " + route + (def.empty() ? std::string("") : " and gets " + def + " turned around") + ". That's a pro route.",
-                                                  "Watch the " + route + " by " + rc + ". He sells it, breaks it off, and " + qb + " puts it right on him.",
-                                                  "It's the " + route + " against " + cov + ", and that's exactly the throw that coverage gives you.",
-                                                  (def.empty() ? std::string("The defender") : def) + " is in decent position, but " + rc + " wins on the " + route + ". You can't cover it much better than that."}),
-                1800);
-        }
-        if (r.catchSep >= 5 && r.airYards >= 6 && r.yards >= 8)
-          add(1.0, "a_open",
-              bManCov(dc->coverage) ? pick("a_openman", {"They were in man, and " + rc + " just ran away from his guy. Look at the separation.",
-                                                         "Man coverage, and " + (catchDef_ ? nm(catchDef_) : std::string("the corner")) + " never had a chance. " + rc + " was open by five yards."})
-                                    : pick("a_openzone", {"That's " + cov + ", and " + rc + " sits down right in the hole. Nobody within five yards of him.",
-                                                          "Somebody busted the coverage there. " + rc + " was all by himself.",
-                                                          "They're playing " + cov + ", and " + qb + " finds the soft spot. That's an easy throw for him."}));
-        if (r.catchSep >= 0 && r.catchSep < 1.2 && r.airYards >= 8 && r.yards >= 8)
-          add(1.1, "a_tight", pick("a_tight", {"What a throw. That window was tiny, " + (catchDef_ ? nm(catchDef_) : std::string("the defender")) + " was all over him and " + qb + " put it right on him.",
-                                               "Tight coverage, and it didn't matter. That's trust between a quarterback and his receiver.",
-                                               "That ball had to be perfect, and it was."}));
+        if (!bRoute(catchRoute_).empty() && r.yards >= 6) add(1.05, "a_route", w("a_route"), 1800);
+        if (r.catchSep >= 5 && r.airYards >= 6 && r.yards >= 8) add(1.0, "a_open", w(bManCov(dc->coverage) ? "a_openman" : "a_openzone"));
+        if (r.catchSep >= 0 && r.catchSep < 1.2 && r.airYards >= 8 && r.yards >= 8) add(1.1, "a_tight", w("a_tight"));
         if (r.yac >= 10 && r.yac > r.yards + 0.5)  // (caught behind the line: the whole gain is his)
-          add(1.0 + r.yac * 0.02, "a_yacb", pick("a_yacb", {"He catches it behind the line, and " + rc + " makes all of that himself.",
-                                                            "That's a negative throw, and " + rc + " turns it into a positive play. That's all him."}));
+          add(1.0 + r.yac * 0.02, "a_yacb", w("a_yacb"));
         else if (r.yac >= 10)
-          add(1.0 + r.yac * 0.02, "a_yac", pick("a_yac", {"It's a short throw, and " + rc + " does the rest. " + bS(r.yac) + " yards after the catch.",
-                                                          "Look at him after the catch. He makes the first man miss and now it's a big play.",
-                                                          "The yards after the catch, that's what separates the good ones."}));
-        if (r.airYards >= 25)
-          add(1.2, "a_deep", pick("a_deep", {"That ball traveled " + bS(r.airYards) + " yards in the air and hit him in stride. That's a big-time throw.",
-                                             qb + " dropped it right in the bucket. You can't defend that.",
-                                             "He gave his guy a chance, and " + rc + " went and got it."}));
-        if (r.throwPath == 1 && blitz && r.yards >= 5)
-          add(1.3, "a_hot", pick("a_hot", {"They brought pressure and " + qb + " knew exactly where to go with it. That's the hot read, and that's preparation.",
-                                           "Blitz, and he beats it. Ball's out before the rush gets home. When you bring the house, that's the risk.",
-                                           "He saw the blitz coming pre-snap and got it out to the vacated area. Textbook.",
-                                           "Everybody's coming, so somebody's open. He found him in a hurry."}));
-        if (r.timeToThrow >= 3.4 && !r.pressured && r.yards >= 8)
-          add(0.9, "a_time", pick("a_time", {"Look at the time he had. You give a quarterback that long and somebody's going to come open.",
-                                             "The protection was outstanding. Nobody got near him."}));
-        if (r.pressured && r.yards >= 8 && r.airYards >= 15)
-          add(1.0, "a_hitthrow", pick("a_hitthrow", {"He's getting hit as he lets it go, and he still delivers. That's toughness.",
-                                                     "He stood in there knowing he was going to take a shot. That's a big-boy throw."}));
+          add(1.0 + r.yac * 0.02, "a_yac", w("a_yac"));
+        if (r.airYards >= 25) add(1.2, "a_deep", w("a_deep"));
+        if (r.throwPath == 1 && blitz && r.yards >= 5) add(1.3, "a_hot", w("a_hot"));
+        if (r.timeToThrow >= 3.4 && !r.pressured && r.yards >= 8) add(0.9, "a_time", w("a_time"));
+        if (r.pressured && r.yards >= 8 && r.airYards >= 15) add(1.0, "a_hitthrow", w("a_hitthrow"));
         if (op && op->type == PlayType::PlayAction && r.yards >= 8) {
           const TeamLine& otl = g.team[g.poss];
           const bool runWorks = otl.rushAtt >= 8 && otl.rushYds >= otl.rushAtt * 4.3;  // (the fake only holds them if the run has been hurting them)
-          add(1.0, "a_pa", runWorks ? pick("a_pa", {"The play fake does it. The linebackers come up hard on the run, and that window opens right behind them.",
-                                                    "Play action. When you can run the ball like they have, the fake holds everybody."})
-                                    : std::string("Play action, and the linebackers still bite. One false step, and that window opens right behind them."));
+          add(1.0, "a_pa", w(runWorks ? "a_pa" : "a_pa2"));
         }
-        if (op && op->type == PlayType::Screen && r.yards >= 6)
-          add(1.0, "a_screen", pick("a_screen", {"Screen's set up beautifully. Let the rush come, then get the big guys out in front.",
-                                                 "They baited the rush right into it. That's a well-timed screen."}));
-        if (r.brokenTackles > 0 && r.yards >= 10)
-          add(1.0, "a_brk", r.brokenTackles >= 2 ? rc + " made " + bCountWord(r.brokenTackles) + " guys miss on that play. That's not on the scheme, that's all him."
-                                                 : "Watch him break that tackle. First guy has to get him down, and he didn't.");
-        if (downBefore_ == 3 && r.yards >= toGoBefore_)
-          add(tier(g) == 0 && r.yards >= 5 ? 0.95 : 0.0, "a_3rdconv", pick("a_3rdconv", {"That's the money down, and they won it. " + qb + (qbSharp(g, r.passer) ? " has been calm all day." : " came through when it mattered."),
-                                                    "Third down's where you win football games. That was a great call against " + cov + "."}));
+        if (op && op->type == PlayType::Screen && r.yards >= 6) add(1.0, "a_screen", w("a_screen"));
+        if (r.brokenTackles > 0 && r.yards >= 10) add(1.0, "a_brk", w(r.brokenTackles >= 2 ? "a_brk2" : "a_brk1"));
+        if (downBefore_ == 3 && r.yards >= toGoBefore_) add(tier(g) == 0 && r.yards >= 5 ? 0.95 : 0.0, "a_3rdconv", w("a_3rdconv"));
       } else if (r.interception) {
-        const std::string who = r.intBy ? nm(r.intBy) : std::string("the defender");
-        if (!r.turnover)
-          add(2.2, "a_intback", pick("a_intback", {who + " makes a great play on the ball, and then he tries to do too much with it. Get down. You've got the football, protect it.",
-                                                   "Two turnovers on one play. " + who + " had it, and he gave it right back. You have to finish the play."}));
-        if (r.pressured) add(1.4, "a_intp", "The pressure gets there, he can't step into it, and the ball just floats. " + who + " was sitting there waiting.");
-        if (r.airYards >= 20) add(1.2, "a_intd", pick("a_intd", {"He underthrew it, and " + who + " had position. You can't leave that one short.",
-                                                                  "Deep ball into coverage. " + who + " read his eyes the whole way."}));
-        add(1.0, "a_intr", pick("a_intr", {"He never saw " + who + ". Stared his guy down, and the defense knew where the ball was going.",
-                                           "That's " + cov + ", and the quarterback thought it was something else. " + who + " jumps it.",
-                                           "Bad decision. You have to throw that one away and live to fight another down."}));
+        if (!r.turnover) add(2.2, "a_intback", w("a_intback"));
+        if (r.pressured) add(1.4, "a_intp", w("a_intp"));
+        if (r.airYards >= 20) add(1.2, "a_intd", w("a_intd"));
+        add(1.0, "a_intr", w("a_intr"));
       } else if (r.incomplete) {
         bool drop = false;
         for (const PlayEvent& e : s.events)
           if (e.type == "drop") drop = true;
-        if (drop) add(1.1, "a_drop", pick("a_drop", {"He's got to catch that. That's right in his hands.", "The throw was there. That's a drop, plain and simple.",
-                                                      "He took his eyes off it, started to run before he caught it."}));
-        if (r.pbuBy) add(1.1, "a_pbu", pick("a_pbu", {"Great job by " + nm(r.pbuBy) + ". Stayed in phase, turned and found the football.",
-                                                       nm(r.pbuBy) + " played that perfectly. Didn't panic, just got a hand in there at the last second."}));
-        if (r.thrownAway) add(0.9, "a_away", pick("a_away", {"Smart play. Nothing there, don't force it. Live to play another down.",
-                                                              "That's a veteran move. Throw it away, it's only a down.",
-                                                              "No harm done. Better than taking the sack.", "Everybody was covered. He did the right thing with it."}));
-        if (r.pressured && !r.thrownAway && !drop) add(1.0, "a_hurry", "The rush got there in a hurry and made him speed it up. Never got to set his feet.");
-        if (!drop && !r.pbuBy && !r.thrownAway && r.airYards >= 15) add(0.8, "a_over", pick("a_over", {"Just a little too far out in front of him. He was open, too.",
-                                                                                                         "They weren't on the same page. He broke it in, the ball went out."}));
+        if (drop) add(1.1, "a_drop", w("a_drop"));
+        if (r.pbuBy) add(1.1, "a_pbu", w("a_pbu"));
+        if (r.thrownAway) add(0.9, "a_away", w("a_away"));
+        // (one cause a play: a breakup is the coverage, not the rush; a hurried throw is not a miss)
+        if (r.pressured && !r.thrownAway && !drop && !r.pbuBy) add(1.0, "a_hurry", w("a_hurry"));
+        if (!drop && !r.pbuBy && !r.thrownAway && !r.pressured && r.airYards >= 15) add(0.8, "a_over", w("a_over"));
       }
       break;
     }
     case PlayKind::Sack: {
       if (shed && shed->d == r.sackedBy && shed->b)
-        if (once("a_sackmove_sig")) add(1.4, "a_sackmove", "Watch " + nm(shed->d) + " against " + nm(shed->b) + ". " + bCap(bMoveWords(shed->move)) + ", and he's by him clean. The quarterback never had a chance.");
+        if (once("a_sackmove_sig")) add(1.4, "a_sackmove", w("a_sackmove"));
       if (blitz) {
         bool unblocked = false;
         for (const std::string& role : dc->blitz)
           if (const Ent* e = s.defRole(role))
             if (r.sackedBy && e->p == r.sackedBy) unblocked = true;
-        if (unblocked) add(1.3, "a_sackblitz", "They sent " + nm(r.sackedBy) + " and nobody picked him up. That's a protection breakdown. Somebody has to account for him.");
-        else add(0.9, "a_sackblitz2", "They brought more than they could block. " + D.city + " has been dialing up the pressure.");
+        if (unblocked) add(1.3, "a_sackblitz", w("a_sackblitz"));
+        else add(0.9, "a_sackblitz2", w("a_sackblitz2"));
       }
-      if (s.t >= 3.6 && !(shed && shed->d == r.sackedBy) && !said("press") && !said("pressure"))
-        add(1.0, "a_cov", pick("a_cov", {"That's a coverage sack. He looked left, looked right, nothing there. Credit the secondary.",
-                                         "He held onto it way too long. At some point you have to get rid of it."}));
-      if (downBefore_ <= 2 && r.yards <= -6) add(0.5, "a_sackgen", pick("a_sackgen", {"That's a drive-killer. Second and long against this rush is a tough spot.", "Now they're way behind the chains."}));
+      if (s.t >= 3.6 && !(shed && shed->d == r.sackedBy) && !said("press") && !said("pressure")) add(1.0, "a_cov", w("a_cov"));
+      if (downBefore_ <= 2 && r.yards <= -6) add(0.5, "a_sackgen", w("a_sackgen"));
       break;
     }
     case PlayKind::Run:
     case PlayKind::Scramble: {
-      const std::string rb = nm(r.rusher);
-      if (r.kind == PlayKind::Scramble && r.yards >= 6)
-        add(1.1, "a_scr", pick("a_scr", {"When they play man and turn their backs, the quarterback can take off. Nobody's watching him.",
-                                         "That's the dimension he gives you. The play breaks down, and he just makes something happen."}));
-      if (r.yards >= 8 && pancake)
-        add(1.2, "a_pancake", pick("a_pancake", {"Watch " + nm(pancake) + " on this play. He puts his man on his back, and that's the hole right there.",
-                                                 "That's " + nm(pancake) + " just burying his guy. Running backs love that."}));
-      if (r.yards >= 10 && r.olBlockDepth >= 3.5)
-        add(1.1, "a_second", pick("a_second", {"The offensive line gets to the second level. When your guards are on the linebackers, that's a big play waiting to happen.",
-                                               "Look at the push up front. They're moving people five yards off the ball.",
-                                               "The center climbs to the linebacker and seals him. Easy yards.", "That hole was huge. You could drive a truck through it."}));
-      if (r.yards <= 0 && shed && shed->d)
-      {
+      if (r.kind == PlayKind::Scramble && r.yards >= 6) add(1.1, "a_scr", w(dc && bManCov(dc->coverage) ? "a_scrman" : "a_scr"));
+      if (r.yards >= 8 && pancake) add(1.2, "a_pancake", w("a_pancake"));
+      if (r.yards >= 10 && r.olBlockDepth >= 3.5) add(1.1, "a_second", w("a_second"));
+      if (r.yards <= 0 && shed && shed->d) {
         const bool tackled = std::find(r.tacklers.begin(), r.tacklers.end(), shed->d) != r.tacklers.end();
-        if (tackled)
-          add(1.2, "a_stuff", pick("a_stuff", {nm(shed->d) + " sheds the block" + (shed->b ? " from " + nm(shed->b) : std::string()) + " and blows it up. That's a defensive lineman winning his gap.",
-                                               "Watch " + nm(shed->d) + ". He gets off the block and he's right there to make the play.",
-                                               nm(shed->d) + " takes on the blocker, sheds him, and makes the tackle. Textbook."}), 1500);
+        if (tackled) add(1.2, "a_stuff", w(shed->b ? "a_stuff" : "a_stuff0"), 1500);
       }
-      if (r.brokenTackles > 0 && r.yards >= 8)
-        add(1.0, "a_rbrk", pick("a_rbrk", {"That's all " + rb + ". Contact early, and he kept those legs churning.",
-                                           rb + " breaks the tackle. They had him, and he wouldn't go down.",
-                                           "Yards after contact. That's what makes " + rb + " special. The first guy never gets him down.",
-                                           "Watch the balance on " + rb + ". Gets hit, spins off it, keeps going."}));
+      if (r.brokenTackles > 0 && r.yards >= 8) add(1.0, "a_rbrk", w("a_rbrk"));
       for (const std::string& m : movesSeen_) {
         if (r.yards < 5) break;  // a move that did not get him anywhere is not the story
-        if (m == "spin") add(1.0, "a_spin", "The spin move, right at the point of contact. The tackler ends up hugging air.");
-        if (m == "truck") add(1.0, "a_truck", "He just lowered the shoulder and ran right through him. That's a grown man run.");
-        if (m == "stiffarm") add(1.0, "a_stiff", "The stiff arm. Locked it out and pushed him right into the ground.");
-        if (m == "juke") add(0.9, "a_juke", "One jump cut and the defender's left grabbing at nothing.");
+        if (m == "spin") add(1.0, "a_spin", w("a_spin"));
+        if (m == "truck") add(1.0, "a_truck", w("a_truck"));
+        if (m == "stiffarm") add(1.0, "a_stiff", w("a_stiff"));
+        if (m == "juke") add(0.9, "a_juke", w("a_juke"));
       }
       if (op && op->run && r.yards >= 5) {
         const RunStyle st = op->run->style;
-        if (st == RunStyle::Gap)
-          add(0.9, "a_gap", pick("a_gap", {"That's the power scheme. They pull the guard, kick out the end, and " + rb + " follows him right through it.",
-                                           "Gap scheme, double team at the point of attack, and the guard leads him up in there.",
-                                           "Downhill run. Everybody blocks down, the puller kicks out, and it's a clean lane."}));
-        if (st == RunStyle::Stretch)
-          add(0.9, "a_stretch", pick("a_stretch", {"Outside zone. Stretch it, stretch it, and when the cutback lane opens, one cut and go.",
-                                                   "They get the defense flowing sideways and " + rb + " plants and cuts back against it."}));
-        if (st == RunStyle::Draw)
-          add(1.0, "a_draw", pick("a_draw", {"The draw. They show pass, the linebackers bail into coverage, and there's nobody home in the middle.",
-                                             "Perfect time for a draw. The rush comes upfield, and they run right by the play."}));
-        if (st == RunStyle::Zone)
-          add(0.7, "a_zone", pick("a_zone", {"Inside zone, and he's patient. Lets the blocks develop and picks his hole.",
-                                             "He presses the line, makes the linebacker commit, and then he goes.", "Good patience. He waited for the double team to open it up."}));
+        if (st == RunStyle::Gap) add(0.9, "a_gap", w("a_gap"));
+        if (st == RunStyle::Stretch) add(0.9, "a_stretch", w("a_stretch"));
+        if (st == RunStyle::Draw) add(1.0, "a_draw", w("a_draw"));
+        if (st == RunStyle::Zone) add(0.7, "a_zone", w("a_zone"));
       }
-      if (toGoBefore_ <= 2 && r.yards >= toGoBefore_ && (downBefore_ >= 3))
-        add(1.1, "a_short", "Short yardage, everybody in the stadium knows it's coming, and they still get it. That's a physical offensive line.");
-      if (toGoBefore_ <= 2 && r.yards < toGoBefore_ && downBefore_ >= 3)
-        add(1.1, "a_shortstop", "They sold out for the run, put eight in the box, and won the line of scrimmage. Great stop.");
-      if (r.yards >= 20) add(0.8, "a_bigrun", pick("a_bigrun", {"Once he gets to the second level, it's over. Nobody's catching him from behind.",
-                                                                "One missed tackle in the hole and that's what happens."}));
-      if (hitBy_) add(1.3, "a_hit", "What a hit by " + nm(hitBy_) + ". He timed that perfectly. You hear that one all the way up here.");
+      if (toGoBefore_ <= 2 && r.yards >= toGoBefore_ && (downBefore_ >= 3)) add(1.1, "a_short", w("a_short"));
+      if (toGoBefore_ <= 2 && r.yards < toGoBefore_ && downBefore_ >= 3) add(1.1, "a_shortstop", w("a_shortstop"));
+      if (r.yards >= 20) add(0.8, "a_bigrun", w("a_bigrun"));
+      if (hitBy_) add(1.3, "a_hit", w("a_hit"));
       break;
     }
     default:
@@ -2052,65 +2351,41 @@ std::optional<std::string> Booth::analysis(const Game& g, const PlaySim& s, cons
   const bool pressureShowed = r.pressured || r.kind == PlayKind::Sack || said("press") || said("pressure");
   if (lastRead_ == "r_blitz" && blitz && pressureShowed && !dropped && chance(0.5)) creditRead_ = true;
   if (lastRead_ == "r_blitz" && !dropped && (pressureShowed || !blitz))
-    add(1.6, "a_readblitz", blitz ? (r.yards >= 8 ? pick("a_readblitz1", {"There's the pressure I was talking about, and he beat it. That's a big play against the blitz.",
-                                                                          "They brought it, like I thought they would, and he made them pay."})
-                                                  : pick("a_readblitz2", {"There's the pressure I was talking about, and it got there.", "They brought the extra man, and the protection never sorted it out."}))
-                                  : std::string("They showed it, and then they backed out. Good disguise by the defense."), 0);
-  if (lastRead_ == "r_c0" && (r.yards >= 15 || r.incomplete || r.kind == PlayKind::Sack))
-    add(1.5, "a_readc0", r.yards >= 15 ? "That's what happens against Cover Zero. One man beats his guy and it's a big play." : "Cover Zero, and the rush got there before anybody could get open.", 0);
-  if (lastRead_ == "r_4th")
-    add(1.4, "a_read4th", r.yards >= toGoBefore_ ? std::string("And there it is. You trust your guys, and they deliver.") : std::string("You have to live with it. I'd make that call every time."), 0);
+    add(1.6, "a_readblitz", w(blitz ? (r.yards >= 8 ? "a_readblitz1" : "a_readblitz2") : "a_readblitz0"), 0);
+  if (lastRead_ == "r_c0" && (r.yards >= 15 || r.incomplete || r.kind == PlayKind::Sack)) add(1.5, "a_readc0", w(r.yards >= 15 ? "a_readc0w" : "a_readc0s"), 0);
+  if (lastRead_ == "r_4th") add(1.4, "a_read4th", w(r.yards >= toGoBefore_ ? "a_read4thy" : "a_read4thn"), 0);
   if (const size_t hashAt = lastRead_.find('#'); hashAt != std::string::npos && r.kind == PlayKind::Pass) {
     const std::string topic = lastRead_.substr(0, hashAt);
     const int subj = std::atoi(lastRead_.c_str() + hashAt + 1);
     const Player* tgt = r.receiver ? r.receiver : r.target;
     if (tgt && tgt->id == subj) {
-      const std::string tn = nm(tgt);
       if (r.complete && !r.interception && r.yards >= 8) {
         creditRead_ = chance(0.6);
-        add(1.7, "a_readwin" + topic,
-            topic == "r_press" ? pick("a_readpress", {"He beat the jam. Clean release off the line, and after that it's a footrace.", "They pressed him, and " + tn + " won at the line. That's the whole play."})
-            : topic == "r_slot" ? pick("a_readslot", {"That's the matchup I liked. " + tn + " is too quick for him inside.", "Inside, one on one, and " + tn + " wins it again."})
-                                : pick("a_readmatch", {"They went right back to " + tn + ". When it's working, you keep doing it.", "That's what I'd do. Keep feeding " + tn + " until they take him away."}),
-            0);
+        add(1.7, "a_readwin" + topic, w(topic == "r_press" ? "a_readpress" : topic == "r_slot" ? "a_readslot" : "a_readmatch"), 0);
       } else if (r.incomplete && r.pbuBy) {
-        add(1.6, "a_readlost" + topic, pick("a_readlost", {"That one goes to the defense. " + nm(r.pbuBy) + " won the matchup this time.",
-                                                             "They went to " + tn + ", and " + nm(r.pbuBy) + " was ready for it. Good answer by the defense."}), 0);
+        add(1.6, "a_readlost" + topic, w("a_readlost"), 0);
       }
     }
   }
   // the routine down, read like a coach: staying ahead of the chains, throwing short of the sticks, a run streak
   const bool runKind = r.kind == PlayKind::Run;
   const int runsInRow = (runStreakTeam_ == possBefore_ ? runStreak_ : 0) + (runKind ? 1 : 0);
-  if (runKind && downBefore_ == 1 && r.yards >= 4 && r.yards < 10)
-    add(0.55, "a_ahead", pick("a_ahead", {"That's what you want on first down. Four, five yards, stay ahead of the chains and the whole playbook is open.",
-                                          "Good, efficient first-down run. Now it's second and manageable.", "You win first down like that, you're in control of the series."}));
-  if ((runKind || r.kind == PlayKind::Sack) && downBefore_ <= 2 && r.yards <= -1)
-    add(0.6, "a_behind", pick("a_behind", {"Now they're behind the chains. That's a tough spot against this defense.", "Negative play on early down. That's what kills drives."}));
-  if (r.kind == PlayKind::Pass && r.complete && downBefore_ == 3 && toGoBefore_ >= 5 && r.yards < toGoBefore_ && !r.td)
-    add(0.75, "a_short3", pick("a_short3", {"That's not going to get it. On third down you have to throw it past the sticks.",
-                                            "He checked it down, and they tackled the catch. That's exactly what " + D.city + " wanted."}));
-  if (runKind && runsInRow >= 4 && r.yards >= 3)
-    add(0.65, "a_runstreak", "That's " + std::string(bCountWord(runsInRow)) + " straight runs. They want to lean on this front and wear it down.", 300);
-  if (r.kind == PlayKind::Pass && r.complete && r.yards >= 6 && r.yards < 20 && dc)
-    add(0.5, "a_readcov", pick("a_readcov", {"Good read. They're in " + cov + ", and he takes what it gives him.", "He knew where he was going with that before the snap. " + bCap(cov) + ", and that route beats it.",
-                                             "Nice rhythm throw. Hitch, ball's out, catch, turn upfield."}));
-  if (r.kind == PlayKind::Pass && r.complete && r.catchSep >= 0 && r.catchSep < 1.0 && r.yards >= 5 && !r.td)
-    add(0.6, "a_contact", pick("a_contact", {"And he holds on through the contact. That's a strong catch.", "Took a shot as the ball got there and hung on."}));
-  if (r.kind == PlayKind::Run && r.yards >= 3 && r.yards < 8 && downBefore_ == 3 && r.yards >= toGoBefore_)
-    add(0.7, "a_3rdrun", "They ran it on third down and got it. That's confidence in your offensive line.");
-  if (r.td && *r.td == Side::Def)
-    add(1.2, "a_deftd", pick("a_deftd", {"That's a killer. The defense just took the game into its own hands.", "You can't throw that ball there. That's seven points the wrong way.",
-                                         "That changes everything. The offense was moving, and now it's points the other way."}));
+  if (runKind && downBefore_ == 1 && r.yards >= 4 && r.yards < 10) add(0.55, "a_ahead", w("a_ahead"));
+  if ((runKind || r.kind == PlayKind::Sack) && downBefore_ <= 2 && r.yards <= -1) add(0.6, "a_behind", w("a_behind"));
+  if (r.kind == PlayKind::Pass && r.complete && downBefore_ == 3 && toGoBefore_ >= 5 && r.yards < toGoBefore_ && !r.td) add(0.75, "a_short3", w("a_short3"));
+  if (runKind && runsInRow >= 4 && r.yards >= 3) add(0.65, "a_runstreak", say("a_runstreak", with({{"runs", bCountWord(runsInRow)}})), 300);
+  if (r.kind == PlayKind::Pass && r.complete && r.yards >= 6 && r.yards < 20 && dc) add(0.5, "a_readcov", w("a_readcov"));
+  if (r.kind == PlayKind::Pass && r.complete && r.catchSep >= 0 && r.catchSep < 1.0 && r.yards >= 5 && !r.td) add(0.6, "a_contact", w("a_contact"));
+  if (r.kind == PlayKind::Run && r.yards >= 3 && r.yards < 8 && downBefore_ == 3 && r.yards >= toGoBefore_) add(0.7, "a_3rdrun", w("a_3rdrun"));
+  // (a game already decided gets no "momentum" or "statement": the score says what a touchdown or a turnover means now)
+  const bool decided = tier(g) >= 2;
+  if (r.td && *r.td == Side::Def) add(1.2, "a_deftd", w(decided ? "a_tdlate" : "a_deftd"));
   if (r.td && *r.td == Side::Off && r.kind != PlayKind::Sack) {
     const double drivePl = drive_.plays + 1;
-    if (drivePl >= 8) add(1.0, "a_tddrive", pick("a_tddrive", {"What a drive. They just kept grinding and finished it off.", "That's a long, patient drive, and they finish it in style."}), 600);
-    add(0.7, "a_tdgen", pick("a_tdgen", {"Great execution. They had the look they wanted and they took advantage.",
-                                         "That's a statement drive for " + O.city + "."}));
+    if (drivePl >= 8 && !decided) add(1.0, "a_tddrive", say("a_tddrive", with({{"plays", bS(static_cast<int>(drivePl))}})), 600);
+    add(0.7, "a_tdgen", w(decided ? "a_tdlate" : "a_tdgen"));
   }
-  if (r.turnover && !r.td) {
-    add(0.6, "a_to", pick("a_to", {"That's a backbreaker. You can't give a team like this extra possessions.", "Turnovers decide football games, " + cf + ". That could be the one."}), 400);
-  }
+  if (r.turnover && !r.td && !decided) add(0.6, "a_to", w("a_to"), 400);
   if (c.empty()) return std::nullopt;
   if (g.q >= 4 && g.clock - r.duration <= 0.05) return std::nullopt;  // the game's last snap: the close says it
   // routine plays get the analyst some of the time; big ones nearly always
@@ -2118,7 +2393,10 @@ std::optional<std::string> Booth::analysis(const Game& g, const PlaySim& s, cons
   const double want = big || silent || downBefore_ >= 3 || r.yards >= 15 ? 0.97 : (r.kind == PlayKind::Sack || r.interception) ? 0.95 : (view_.canHold || view_.userGame) ? 0.92 : 0.5;
   if (!chance(want)) return std::nullopt;
   std::sort(c.begin(), c.end(), [](const Angle& a, const Angle& b) { return a.score > b.score; });
+  // "you called it" only goes with the breakdown that says the read came true
+  if (creditRead_ && c[0].topic.rfind("a_readblitz", 0) != 0 && c[0].topic.rfind("a_readwin", 0) != 0) creditRead_ = false;
   mark(c[0].topic);
+  lastAnalysisTopic_ = c[0].topic;
   spokenSet_.insert(c[0].text);
   if (dc && c[0].text.find(bCoverageWords(dc->coverage)) != std::string::npos) mark("covname");
   {
@@ -2131,7 +2409,6 @@ std::optional<std::string> Booth::analysis(const Game& g, const PlaySim& s, cons
       if (c[0].topic == k) playAngle_ = true;
   }
   energy = big ? 2 : 1;
-  (void)D;
   return c[0].text;
 }
 
@@ -2174,39 +2451,90 @@ void Booth::afterApply(const Game& g, const PlaySim& s, const PlayResult& r, con
     push(Who::PBP, Kind::Result, pendingResult_, pendingResultEnergy_, 4, 0, 12).snapSafe = r.turnover;
     pendingResult_.clear();
   }
-  if (!creditLine_.empty()) {
-    push(Who::PBP, Kind::Analysis, creditLine_, 1, 3, 0, 20);
-    creditLine_.clear();
+  if (bHas(l.desc, "(declined)")) {
+    if (ref_) {
+      // "... Offensive Holding (#72 J.Smith) on ABQ (declined)."
+      const std::string& d = l.desc;
+      const size_t dec = d.rfind(" (declined)");
+      const size_t on = d.rfind(" on ", dec);
+      const std::string ab = on == std::string::npos ? std::string() : d.substr(on + 4, dec - on - 4);
+      const Team& t = g.home->abbr == ab ? *g.home : *g.away;
+      // (the foul's name nearest the " on ABQ": the one that ends last, the longest of those - "Offensive Holding", not "Holding")
+      std::string name;
+      size_t nameAt = std::string::npos, nameEnd = 0;
+      for (const RefFoul& f : kRefFouls) {
+        const size_t p = d.rfind(f.log, on);
+        if (p == std::string::npos) continue;
+        const size_t e = p + std::strlen(f.log);
+        if (nameAt == std::string::npos || e > nameEnd || (e == nameEnd && p < nameAt)) {
+          nameAt = p;
+          nameEnd = e;
+          name = f.log;
+        }
+      }
+      std::string who;
+      if (nameAt != std::string::npos) {
+        const size_t par = d.find(" (#", nameAt);
+        if (par != std::string::npos && par < on) who = d.substr(par + 2, d.find(')', par) - par - 2);
+      }
+      const Player* man = bLogMan(t, who);
+      if (man && man->pos == Pos::QB && bHas(name, "Holding")) man = nullptr;
+      if (name == "Intentional Grounding" && r.passer) man = r.passer;
+      std::string ref = refFoul(name, &t == &g.teamOf(possBefore_), man) + ". The penalty is declined.";
+      if (g.poss == possBefore_ && !r.td && g.phase == GamePhase::Scrimmage) ref += g.down == 1 ? " First down." : " " + bCap(bOrdWord(g.down)) + " down.";
+      refSay(ref, 0.2);
+    } else
+      push(Who::PBP, Kind::Result, say("declined", facts(g, {})), 1, 4, 0, 10);
   }
-  if (bHas(l.desc, "(declined)"))
-    push(Who::PBP, Kind::Result, pick("declined", {"There was a flag on the play, but it's been declined.", "A flag came in on that one, but it'll be declined."}), 1, 4, 0, 10);
+  // a flag that is the play's whole story: grounding on fourth down (the ball goes over), or in the end zone (a safety)
+  if (bHas(l.desc, "PENALTY on ") && (bHas(l.desc, "Turnover on downs") || bHas(l.desc, "SAFETY"))) {
+    const bool safety = bHas(l.desc, "SAFETY");
+    const Slots gs = facts(g, {{"def", g.teamOf(other(possBefore_)).city}});
+    push(Who::PBP, Kind::Result, say(safety ? "pen_safety" : "pen_tod", gs), safety ? 3 : 2, 4, 0.2, 15).snapSafe = true;
+    if (ref_)
+      refSay(refFoul("Intentional Grounding", true, r.passer) + (safety ? ", in the end zone. The result of the play is a safety." : ". Loss of down. The ball goes over on downs."));
+    if (safety) {
+      freeKick_ = true;
+      PlayResult none;
+      onScored(g, other(possBefore_), 2, none, true);
+    }
+  }
   if (risky4th_ && downBefore_ == 4 && lastRead_ == "r_4th") {
     // the analyst said he would have punted: now they both know how it went
     const bool got = r.yards >= toGoBefore_ && !r.turnover;
-    push(Who::PBP, Kind::Analysis, got ? pick("r4_ok", {"Well, " + crew_.colorFirst + ", the gamble paid off.", "They got it, " + crew_.colorFirst + ". Maybe they knew something we didn't."})
-                                       : pick("r4_no", {"And there's your point, " + crew_.colorFirst + ".", "Just what you were worried about, " + crew_.colorFirst + "."}),
-         1, 3, 0, 15);
-    push(Who::Color, Kind::Analysis, got ? pick("r4_oka", {"I'll take it. Sometimes you have to trust your guys. I still wouldn't have done it.", "Hey, they made me look bad. Good for them."})
-                                         : pick("r4_noa", {"That's a short field for the other side now. You just can't do that in your own end.", "That's the risk. Now the defense has to bail them out."}),
-         1, 3, 0, 15);
+    const Slots fs = facts(g, {});
+    push(Who::PBP, Kind::Analysis, say(got ? "r4_ok" : "r4_no", fs), 1, 3, 0, 15);
+    push(Who::Color, Kind::Analysis, say(got ? "r4_oka" : "r4_noa", fs), 1, 3, 0, 15);
     pendingAnalysis_.clear();
   }
   risky4th_ = false;
-  if (fourthFail_ && !sealed_ && g.q >= 4 && g.clock < 240 && possBefore_ != g.poss) {
-    pendingAnalysis_ = "Huge stop. Now " + g.offense().city + " needs one first down to put it away, and " + g.teamOf(possBefore_).city + " has to use those timeouts.";
+  if (fourthFail_ && !sealed_ && g.q >= 4 && g.clock < 240 && possBefore_ != g.poss && std::abs(g.margin()) <= 8 && tier(g) == 0) {
+    pendingAnalysis_ = say("bigstop", facts(g, {{"ahead", g.offense().city}, {"behind", g.teamOf(possBefore_).city}}));
+    pendingAnalysisTopic_ = "bigstop";
   }
   fourthFail_ = false;
   if (sealed_) {
     sealed_ = false;
-    pendingAnalysis_ = pick("sealed", {"That's the ballgame. The defense came up big when it had to.", "What a stand. They needed one stop, and they got it.",
-                                       "Game over. That defensive front won the biggest snap of the day."});
+    pendingAnalysis_ = say("sealed", facts(g, {{"team", g.teamOf(other(possBefore_)).city}}));
+    pendingAnalysisTopic_ = "sealed";
   }
   if (!pendingAnalysis_.empty()) {
-    push(Who::Color, Kind::Analysis, pendingAnalysis_, pendingAnalysisEnergy_, 3, 0, 20);
+    // the credit for a read goes right before the breakdown it belongs to (and only that one: a stop that replaced it
+    // gets none); the credit, the breakdown and a "good eye" after it are one exchange, dropped together if at all
+    const bool credit = !creditLine_.empty() && creditFor_ == pendingAnalysis_;
+    if (credit) push(Who::PBP, Kind::Analysis, creditLine_, 1, 3, 0, 20).tag = "question";
+    creditLine_.clear();
+    creditFor_.clear();
+    Line& al = push(Who::Color, Kind::Analysis, pendingAnalysis_, pendingAnalysisEnergy_, 3, 0, 20);
+    al.topic = pendingAnalysisTopic_;
+    // ("good eye" answers a breakdown of the play itself, not a line about the down or the game)
+    const bool ack = !credit && playAngle_ && pendingAnalysisTopic_ == lastAnalysisTopic_ && chance(0.12) && cooled("ack", 300);
+    al.tag = credit ? "answer" : ack ? "question" : std::string();
     pendingAnalysis_.clear();
-    if (chance(0.12) && cooled("ack", 300)) {
+    pendingAnalysisTopic_.clear();
+    if (ack) {
       mark("ack");
-      push(Who::PBP, Kind::Analysis, pick("ack", {"Good eye.", "You can see it right there."}), 0, 2, 0, 10);
+      push(Who::PBP, Kind::Analysis, say("ack", facts(g, {})), 0, 2, 0, 10).tag = "answer";
     }
     // now and then the play-by-play man adds the fact that goes with it
     const Player* who = r.receiver && r.complete ? r.receiver : r.rusher;
@@ -2216,8 +2544,8 @@ void Booth::afterApply(const Game& g, const PlaySim& s, const PlayResult& r, con
       const int n = rec ? ln.rec : ln.rushAtt, y = rec ? ln.recYds : ln.rushYds;
       if (n >= 3) mark("stat:" + bS(who->id));  // (one stat line per man per stretch: the follow-up said it again)
       if (n >= 3)
-        push(Who::PBP, Kind::Story, pick("addfact", {"And that's " + nm(who) + "'s " + (n <= 10 ? std::string(bOrdWord(n)) : bS(n) + "th") + (rec ? " catch" : " carry") + ". " + bS(y) + " yards on the day.",
-                                                     nm(who) + " is up to " + bS(y) + " yards on " + bS(n) + (rec ? " catches." : " carries.")}),
+        push(Who::PBP, Kind::Story,
+             say(rec ? "addfact_rec" : "addfact_rush", facts(g, {{"name", nm(who)}, {"nth", n <= 10 ? std::string(bOrdWord(n)) : bS(n) + "th"}, {"n", bS(n)}, {"y", bS(y)}})),
              0, 2, 0, 12);
     }
   }
@@ -2229,7 +2557,7 @@ void Booth::afterApply(const Game& g, const PlaySim& s, const PlayResult& r, con
   // the word from the sideline on a man who went down a few plays ago
   for (auto it = injuryWord_.begin(); it != injuryWord_.end();)
     if (playNo_ >= it->second) {
-      push(Who::PBP, Kind::Story, pick("inj_word", {"Word from the sideline: " + it->first + " will not return.", "We're told " + it->first + " is out for the rest of the game."}), 0, 2, 0, 20);
+      push(Who::PBP, Kind::Story, say("inj_word", facts(g, {{"name", it->first}})), 0, 2, 0, 20);
       it = injuryWord_.erase(it);
     } else
       ++it;
@@ -2244,7 +2572,7 @@ void Booth::afterApply(const Game& g, const PlaySim& s, const PlayResult& r, con
     freeKick_ = true;
     PlayResult none;
     onScored(g, other(possBefore_), 2, none, true);
-    push(Who::PBP, Kind::Break, g.teamOf(possBefore_).city + " will have to free kick from its own 20.", 0, 3, 0, 15).snapSafe = true;
+    push(Who::PBP, Kind::Break, say("freekick", facts(g, {{"team", g.teamOf(possBefore_).city}})), 0, 3, 0, 15).snapSafe = true;
   }
   // a written exchange waiting: next in line after this play's call and breakdown (the booth is never quiet enough to
   // wait for silence: they went stale ten plays deep). Not on a score, a turnover, fourth down or the late, close snaps.
@@ -2260,7 +2588,12 @@ void Booth::afterApply(const Game& g, const PlaySim& s, const PlayResult& r, con
   // the plays the close will remember
   if (r.td && r.yards >= 25 && bigPlays_.size() < 6) bigPlays_.push_back("The " + bS(r.yards) + "-yard touchdown" + (r.receiver ? " to " + nm(r.receiver) : r.rusher ? " run by " + nm(r.rusher) : std::string()) + ".");
   if (r.interception && r.td && r.intBy) bigPlays_.push_back("The pick six by " + nm(r.intBy) + ".");
-  if (downBefore_ == 4 && toGoBefore_ <= 10 && !r.td && r.yards < toGoBefore_ && g.q >= 4 && g.clock < 240) bigPlays_.push_back("And that fourth-down stop that sealed it.");
+  {
+    // a fourth-down stop "sealed it" only when the offense was within one score, behind
+    const int mBefore = possBefore_ == TeamKey::Home ? scoreBefore_.home - scoreBefore_.away : scoreBefore_.away - scoreBefore_.home;
+    if (downBefore_ == 4 && toGoBefore_ <= 10 && !r.td && r.yards < toGoBefore_ && g.q >= 4 && g.clock < 240 && mBefore < 0 && mBefore >= -8)
+      bigPlays_.push_back("And that fourth-down stop that sealed it.");
+  }
   // the man, the first time he makes a play: what the viewer should know about him
   {
     const Player* who = r.td || r.yards >= 12 ? (r.receiver && r.complete ? r.receiver : r.rusher) : r.sackedBy ? r.sackedBy : r.intBy;
@@ -2271,14 +2604,14 @@ void Booth::afterApply(const Game& g, const PlaySim& s, const PlayResult& r, con
       char f[16];
       std::snprintf(f, sizeof f, "%.2f", forty);
       std::string bio;
-      if (who->age <= 22) bio = pick("bio_rook", {nm(who) + " is a rookie, and he's playing like he's been here for years.", "Keep an eye on " + nm(who) + ". He's just " + bS(who->age) + ", a rookie."});
-      else if (who->age >= 32) bio = pick("bio_vet", {nm(who) + " is " + bS(who->age) + " years old and still doing this. That's a pro.", nm(who) + " is " + bS(who->age) + ", and he's still making plays like that one."});
-      else if (who->r.speed >= 93 && who->pos != Pos::DT && who->pos != Pos::OT && r.yards >= 18)
-        bio = pick("bio_fast", {nm(who) + " runs about a " + std::string(f) + " forty. Give him a crease and he's gone.", "That speed is real. " + nm(who) + " is one of the fastest players on the field."});
-      else if (who->weightLb >= 235 && (who->pos == Pos::RB || who->pos == Pos::TE || who->pos == Pos::FB))
-        bio = nm(who) + " is " + bS(ft) + "-" + bS(in) + ", " + bS(static_cast<int>(who->weightLb)) + " pounds. That's a load to bring down.";
-      else if (who->heightIn >= 76 && who->pos == Pos::WR)
-        bio = nm(who) + " is " + bS(ft) + "-" + bS(in) + ". On those contested balls, he's always open.";
+      // (a height as "6-4" would read as a score: "6 foot 4")
+      const Slots bs = facts(g, {{"name", nm(who)}, {"age", bS(who->age)}, {"forty", f}, {"ht", bS(ft) + " foot " + bS(in)}, {"lbs", bS(static_cast<int>(who->weightLb))},
+                                 {"pos", bPosWord(who->pos)}, {"team", teamOfPlayer(g, who).city}});
+      if (who->age <= 22) bio = say("bio_rook", bs);
+      else if (who->age >= 32) bio = say("bio_vet", bs);
+      else if (who->r.speed >= 93 && who->pos != Pos::DT && who->pos != Pos::OT && r.yards >= 18) bio = say("bio_fast", bs);
+      else if (who->weightLb >= 235 && (who->pos == Pos::RB || who->pos == Pos::TE || who->pos == Pos::FB)) bio = say("bio_big", bs);
+      else if (who->heightIn >= 76 && who->pos == Pos::WR) bio = say("bio_tall", bs);
       if (!bio.empty() && chance(0.7)) push(Who::Color, Kind::Story, bio, 1, 2, 0, 15);
     }
   }
@@ -2289,9 +2622,10 @@ void Booth::afterApply(const Game& g, const PlaySim& s, const PlayResult& r, con
   if (g.poss != possBefore_ && !r.td) {
     drive_.active = false;
   }
+  flushDeferred(g);  // (the two-minute warning or a timeout logged before this play's line: now, after its call)
 }
 
-void Booth::onScored(const Game& g, TeamKey scorer, int pts, const PlayResult& r, bool say) {
+void Booth::onScored(const Game& g, TeamKey scorer, int pts, const PlayResult& r, bool announce) {
   (void)r;
   (void)pts;
   const Team& T = g.teamOf(scorer);
@@ -2301,11 +2635,11 @@ void Booth::onScored(const Game& g, TeamKey scorer, int pts, const PlayResult& r
     unanswered_ = pts;
   }
   // a touchdown's score is read after the try (the extra point / two-point line); a field goal's right away
-  if (pts != 6 && say) push(Who::PBP, Kind::Score, scoreSay(g, scorer, ""), 1, 4, 0, 25).snapSafe = true;
+  if (pts != 6 && announce) push(Who::PBP, Kind::Score, scoreSay(g, scorer, ""), 1, 4, 0, 25).snapSafe = true;
   else tdBy_ = scorer;
   if (unanswered_ >= 14 && chance(0.7) && cooled("unanswered", 300)) {
     mark("unanswered");
-    push(Who::Color, Kind::Story, "That's " + bS(unanswered_) + " unanswered points for " + T.city + ". They've completely taken over this game.", 1, 3, 0, 25);
+    push(Who::Color, Kind::Story, say("unanswered", facts(g, {{"n", bS(unanswered_)}, {"team", T.city}, {"nick", nick(T)}})), 1, 3, 0, 25);
   }
   if (drive_.active && drive_.team == scorer && drive_.plays >= 3) {
     if (pts == 6) driveAfterTry_ = true;  // said after the extra point (kickResult), never over the try
@@ -2318,14 +2652,27 @@ std::string Booth::scoreSay(const Game& g, TeamKey scorer, const std::string& le
   const Team& T = g.teamOf(scorer);
   const int h = g.score.home, a = g.score.away;
   const std::optional<TeamKey> leader = h == a ? std::nullopt : std::optional<TeamKey>(h > a ? TeamKey::Home : TeamKey::Away);
-  std::string s = lead + scoreLine(g, false);
+  // the score: said with the lead in front of it ("It's good from 42, and that makes it Austin 10, Fresno 7."), or with
+  // what it changed (the lead, the tie) as a sentence of its own
+  const Slots ss = facts(g, {{"team", T.city}, {"nick", nick(T)}});
+  const bool join = lead.size() >= 2 && lead.compare(lead.size() - 2, 2, ", ") == 0;
+  std::string head = lead;
+  auto sentenceLead = [&head]() {
+    if (head.size() >= 2 && head.compare(head.size() - 2, 2, ", ") == 0) head = head.substr(0, head.size() - 2) + ". ";
+  };
+  std::string s;
   if (leader && lastLeader_ && *leader != *lastLeader_ && *leader == scorer) {
     ++leadChanges_;
-    s = lead + pick("lead", {"And " + T.city + " takes the lead. ", T.city + " goes back in front. ", "That puts " + T.city + " on top. "}) + scoreLine(g, false);
+    sentenceLead();
+    s = head + say("sc_lead", ss);
   } else if (leader && !lastLeader_ && *leader == scorer && lastSaidTotal_ > 0) {
-    s = lead + T.city + " breaks the tie. " + scoreLine(g, false);
+    sentenceLead();
+    s = head + say("sc_breaktie", ss);
   } else if (!leader && h > 0) {
-    s = lead + pick("tie", {"And we're all even. ", "Tie ballgame. "}) + scoreLine(g, false);
+    sentenceLead();
+    s = head + say("sc_tie", ss);
+  } else {
+    s = head + say(join ? "sc_plainj" : "sc_plain", ss);
   }
   lastLeader_ = leader;
   lastSaidTotal_ = h + a;
@@ -2341,10 +2688,9 @@ void Booth::afterDrive(const Game& g, const std::string& how) {
   const int yards = how == "td" ? bRound(100 - drive_.startBallOn) : bRound(preKick_.ballOn - drive_.startBallOn);
   if (yards < 25 && how != "td") return;
   const std::string t = bS(secs / 60) + ":" + (secs % 60 < 10 ? "0" : "") + bS(secs % 60);
+  const Team& D = g.teamOf(drive_.team);
   push(Who::PBP, Kind::Story,
-       pick("drive", {"That drive: " + bS(plays) + " plays, " + bS(yards) + " yards, " + t + " off the clock.",
-                      bS(plays) + " plays, " + bS(yards) + " yards on the drive.", "They went " + bS(yards) + " yards in " + bS(plays) + " plays."}),
-       0, 2, 0, 30);
+       say(how == "td" ? "drive_td" : "drive_fg", facts(g, {{"plays", bS(plays)}, {"yards", bS(yards)}, {"time", t}, {"team", D.city}, {"nick", nick(D)}})), 0, 2, 0, 30);
 }
 
 void Booth::statFollow(const Game& g, const PlayResult& r) {
@@ -2359,16 +2705,14 @@ void Booth::statFollow(const Game& g, const PlayResult& r) {
   const int td = rec ? ln.recTD : ln.rushTD;
   std::string s;
   const std::string topic = "stat:" + bS(who->id);
-  if (yds >= 100 && once("100:" + bS(who->id)))
-    s = pick("st100", {"And that puts " + nm(who) + " over a hundred yards " + (rec ? "receiving" : "rushing") + " today.",
-                       "That's a hundred-yard day for " + nm(who) + (g.q <= 3 ? std::string(", and there's still plenty of football left.") : std::string(".")) });
-  else if (td >= 2 && once("td" + bS(td) + ":" + bS(who->id)))
-    s = "That's " + std::string(bCountWord(td)) + " touchdowns for " + nm(who) + " today.";
-  else if (n >= 4 && yds >= 60 && cooled(topic, 420) && chance(0.5))
-    s = nm(who) + " now has " + bS(n) + (rec ? " catches for " : " carries for ") + bS(yds) + " yards.";
+  const Slots fs = facts(g, {{"name", nm(who)}, {"how", rec ? "receiving" : "rushing"}, {"what", rec ? "catches" : "carries"}, {"n", bS(n)}, {"yds", bS(yds)},
+                             {"tdw", bCountWord(td)}, {"more", g.q <= 3 ? "and there's still plenty of football left" : ""}, {"team", T.city}});
+  if (yds >= 100 && once("100:" + bS(who->id))) s = say("st100", fs);
+  else if (td >= 2 && once("td" + bS(td) + ":" + bS(who->id))) s = say("st_tds", fs);
+  else if (n >= 4 && yds >= 60 && cooled(topic, 420) && chance(0.5)) s = say("st_line", fs);
   if (s.empty()) return;
   mark(topic);
-  push(chance(0.6) ? Who::PBP : Who::Color, Kind::Story, s, 1, 2, 0, 20);
+  push(chance(0.6) ? Who::PBP : Who::Color, Kind::Story, s, 1, 2, 0, 20).topic = topic;
 }
 
 // ------------------------------------------------------------------ kicks
@@ -2405,14 +2749,12 @@ void Booth::onKickTick(const Game& g, const View& v) {
                      0, 5, 0, presented ? 3.0 : 5);
       l.live = true;
       l.tag = "kset";
+      std::tie(l.alt, l.altEnergy) = genericAlt("kset:punt", l.text, std::string());
     }
-    if (kickKind_ == 1 && k.down == 4 && k.toGo <= 2 && k.ballOn >= 50 && k.tier == 0)
-      push(Who::Color, Kind::Read, pick("k_puntgo", {"I'd have gone for it there, " + crew_.pbpFirst + ". Fourth and short, in their territory.",
-                                                     "That's a conservative call. You're on their side of the field with a yard to go. I don't love it."}),
-           1, 4, 0, 5)
-          .snapSafe = true;
+    const Slots kr = facts(g, {{"down", bS(-k.margin)}, {"kdd", "4th and " + bDist(k.toGo, k.ballOn)}});
+    if (kickKind_ == 1 && k.down == 4 && k.toGo <= 2 && k.ballOn >= 50 && k.tier == 0) push(Who::Color, Kind::Read, say("k_puntgo", kr), 1, 4, 0, 5).snapSafe = true;
     if (kickKind_ == 2 && k.down == 4 && k.toGo <= 2 && k.ballOn >= 70 && k.q >= 3 && k.margin < -3)
-      push(Who::Color, Kind::Read, "Interesting. Down " + bS(-k.margin) + ", they're taking the points. You might need seven there.", 1, 4, 0, 5).snapSafe = true;
+      push(Who::Color, Kind::Read, say("k_fgtake", kr), 1, 4, 0, 5).snapSafe = true;
     if (kickKind_ == 2 && bHas(d, "field goal")) {
       const int dist = std::atoi(d.c_str() + d.find(' ') + 1);
       Line& l = push(Who::PBP, Kind::Live, pick("k_fgset", {"Fourth down, and they'll send out kicker " + kn + " for a " + bS(dist) + "-yard attempt.", "Kicker " + kn + " lines up from " + bS(dist) + " yards.",
@@ -2420,6 +2762,7 @@ void Booth::onKickTick(const Game& g, const View& v) {
                      1, 5, 0, presented ? 4.0 : 6);
       l.live = true;
       l.tag = "kset";
+      std::tie(l.alt, l.altEnergy) = genericAlt("kset:fg", l.text, std::string());
     }
   }
   if (!kickFootSaid_ && (!presented || v.kickT >= foot)) {
@@ -2441,6 +2784,10 @@ void Booth::onKickTick(const Game& g, const View& v) {
 
 void Booth::kickResult(const Game& g, const std::string& d) {
   if (!bHas(d, "extra point") && !bHas(d, "field goal")) drive_.active = false;  // a kickoff or punt: the next snap starts a new drive
+  const std::string kn = d.substr(d.find('.') + 1, d.find(' ') - d.find('.') - 1);  // "J.Smith kicks" -> "Smith"
+  const int dist = std::atoi(d.c_str() + d.find(' ') + 1);
+  const Slots ks = facts(g, {{"kicker", kn}, {"dist", dist > 0 ? bS(dist) : std::string()}, {"at", spot(g, g.ballOn, g.poss)}, {"yl", bS(bRound(g.ballOn))},
+                             {"team", g.offense().city}, {"nick", nick(g.offense())}});
   if (bHas(d, "extra point")) {
     const bool good = bHas(d, "GOOD") && !bHas(d, "NO GOOD");
     struct After {
@@ -2454,79 +2801,100 @@ void Booth::kickResult(const Game& g, const std::string& d) {
         }
       }
     } after{this, g};
-    if (good) push(Who::PBP, Kind::Score, scoreSay(g, tdBy_, pick("k_pat", {"The extra point is good. ", "And the kick is good. ", "Extra point's good. "})), 0, 4, 0.1, 15).snapSafe = true;
+    if (good) push(Who::PBP, Kind::Score, scoreSay(g, tdBy_, say("k_pat", ks)), 0, 4, 0.1, 15).snapSafe = true;
     else {
-      push(Who::PBP, Kind::Score, scoreSay(g, tdBy_, "And the extra point is no good! "), 2, 4, 0.1, 15).snapSafe = true;
-      push(Who::Color, Kind::Analysis, "That point could loom large. You just don't miss those.", 1, 3, 0, 15);
+      push(Who::PBP, Kind::Score, scoreSay(g, tdBy_, say("k_patmiss", ks)), 2, 4, 0.1, 15).snapSafe = true;
+      push(Who::Color, Kind::Analysis, say("k_patmissA", ks), 1, 3, 0, 15);
     }
     return;
   }
   if (bHas(d, "field goal")) {
-    const int dist = std::atoi(d.c_str() + d.find(' ') + 1);
     if (bHas(d, "is GOOD")) {
       const TeamKey scorer = g.kicking;  // a good field goal: the scoring team kicks off next
-      push(Who::PBP, Kind::Score, scoreSay(g, scorer, dist >= 50 ? "It's good! From " + bS(dist) + " yards! " : pick("k_fggood", {"It's good! ", "Right down the middle! ", "And it's good! "})),
-           dist >= 50 ? 3 : 2, 5, 0.05, 15)
-          .snapSafe = true;
-      if (dist >= 50) push(Who::Color, Kind::Analysis, pick("k_fglong", {"That's a big-time kick. " + bS(dist) + " yards, and it had plenty of leg.", "From " + bS(dist) + "! He hit that one pure."}), 1, 3, 0, 15);
+      push(Who::PBP, Kind::Score, scoreSay(g, scorer, say(dist >= 50 ? "k_fggood50" : "k_fggood", ks)), dist >= 50 ? 3 : 2, 5, 0.05, 15).snapSafe = true;
+      if (dist >= 50) push(Who::Color, Kind::Analysis, say("k_fglong", ks), 1, 3, 0, 15);
       PlayResult none;
       onScored(g, scorer, 3, none, false);
     } else {
-      const std::string how = bHas(d, "BLOCKED") ? "It's blocked!" : bHas(d, "right") ? "No good! Wide right." : "No good! It hooks wide left.";
-      push(Who::PBP, Kind::Result, how, 3, 5, 0.05, 15).snapSafe = true;
-      push(Who::Color, Kind::Analysis, bHas(d, "BLOCKED") ? std::string("They got penetration up the middle. The kick had no chance.")
-                                                           : pick("k_fgmiss", {"He pulled it. You could see it right off his foot.", "Points left on the field, and in a game like this you can't afford it."}),
-           1, 3, 0, 15);
+      push(Who::PBP, Kind::Result, say(bHas(d, "BLOCKED") ? "k_fgblock" : bHas(d, "right") ? "k_fgright" : "k_fgleft", ks), 3, 5, 0.05, 15).snapSafe = true;
+      push(Who::Color, Kind::Analysis, say(bHas(d, "BLOCKED") ? "k_fgblockA" : "k_fgmiss", ks), 1, 3, 0, 15);
       drive_.active = false;
     }
     return;
   }
   if (bHas(d, "onside")) {
     const bool kept = bHas(d, "RECOVERED by the kicking team");
-    push(Who::PBP, Kind::Result, kept ? "Onside kick... and they've got it! The kicking team recovers!" : "Onside kick, and it's recovered by the receiving team.", kept ? 3 : 1, 5, 0, 10)
-        .snapSafe = true;
+    push(Who::PBP, Kind::Result, say(kept ? "k_onside_kept" : "k_onside_lost", ks), kept ? 3 : 1, 5, 0, 10).snapSafe = true;
     return;
   }
   if (bHas(d, "punt") && bHas(d, "BLOCKED")) {
-    push(Who::PBP, Kind::Result, "Blocked! The punt is blocked!", 3, 5, 0, 10).snapSafe = true;
+    push(Who::PBP, Kind::Result, say("k_puntblock", ks), 3, 5, 0, 10).snapSafe = true;
     return;
   }
   if (bHas(d, "MUFFED")) {
-    push(Who::PBP, Kind::Result, "He muffs it! Loose ball! And the kicking team comes up with it!", 3, 5, 0, 10).snapSafe = true;
+    push(Who::PBP, Kind::Result, say("k_muff", ks), 3, 5, 0, 10).snapSafe = true;
     return;
   }
   if (bHas(d, "FUMBLES")) {
-    push(Who::PBP, Kind::Result, "Fumble on the return! And the kicking team has it!", 3, 5, 0, 10).snapSafe = true;
+    push(Who::PBP, Kind::Result, say("k_retfum", ks), 3, 5, 0, 10).snapSafe = true;
     return;
   }
   if (bHas(d, "TOUCHDOWN")) {
-    push(Who::PBP, Kind::Result, pick("k_rettd", {"He's gone! All the way back for a touchdown!", "Touchdown on the return! What a play!"}), 3, 5, 0, 10).snapSafe = true;
+    push(Who::PBP, Kind::Result, say("k_rettd", ks), 3, 5, 0, 10).snapSafe = true;
     return;
   }
-  const std::string at = spot(g, g.ballOn, g.poss);
+  // a kickoff out of bounds or short of the landing zone: the receiving team's ball at its 40 (a foul: the referee's)
+  if (bHas(d, " kicks ") && (bHas(d, "out of bounds") || bHas(d, "short of the landing zone"))) {
+    const bool oob = bHas(d, "out of bounds");
+    if (ref_)
+      refSay(oob ? "The kickoff went out of bounds. The ball will be placed at the receiving team's 40-yard line."
+                 : "The kickoff did not reach the landing zone. The ball will be placed at the receiving team's 40-yard line.",
+             0.2);
+    else
+      push(Who::PBP, Kind::Result, say(oob ? "k_oob" : "k_short", ks), 1, 3, 0, 10);
+    return;
+  }
   if (bHas(d, "Touchback")) {
-    push(Who::PBP, Kind::Result, pick("k_tb", {"Into the end zone, touchback.", "That one's a touchback.", "Down in the end zone. " + g.offense().city + " starts at its own " + bS(bRound(g.ballOn)) + "."}), 0, 3, 0, 8);
+    push(Who::PBP, Kind::Result, say("k_tb", ks), 0, 3, 0, 8);
     return;
   }
   if (bHas(d, "fair catch")) {
-    push(Who::PBP, Kind::Result, pick("k_fc", {"Fair catch at " + at + ".", "He calls for the fair catch at " + at + "."}), 0, 3, 0, 8);
+    push(Who::PBP, Kind::Result, say("k_fc", ks), 0, 3, 0, 8);
     return;
   }
   if (bHas(d, "downed")) {
-    push(Who::PBP, Kind::Result, pick("k_downed", {"And it's downed at " + at + ". Great punt.", "Downed at " + at + ".", "The coverage team gets there, and it's downed at " + at + ".",
-                                                   "That one dies at " + at + "."}),
-         1, 3, 0, 8);
-    if (g.ballOn <= 10)
-      push(Who::Color, Kind::Analysis, pick("k_pinned", {"That's a weapon. Pinned them inside the ten, now they've got a long way to go.",
-                                                         "Great coverage on the punt. Now they're backed up, and the defense can play aggressive.",
-                                                         "Field position. That's how you win a game like this.", "That punt team doesn't get enough credit. Look where the ball is."}),
-           1, 2, 0, 12);
+    push(Who::PBP, Kind::Result, say("k_downed", ks), 1, 3, 0, 8);
+    if (g.ballOn <= 10) push(Who::Color, Kind::Analysis, say("k_pinned", ks), 1, 2, 0, 12);
     return;
   }
   if (bHas(d, "returned")) {
-    push(Who::PBP, Kind::Result, pick("k_ret", {"Brought back to " + at + ".", "Returned out to " + at + "."}), 1, 3, 0, 8);
+    push(Who::PBP, Kind::Result, say("k_ret", ks), 1, 3, 0, 8);
+    returnFoul(g, d);
     return;
   }
+}
+
+// a flag on a return: the return team's block, marked from where the return ended (Game::returnFoul)
+void Booth::returnFoul(const Game& g, const std::string& d) {
+  // " PENALTY on ABQ: Holding, 8 yards from the end of the return."
+  const size_t at = d.find("PENALTY on ");
+  if (at == std::string::npos) return;
+  const size_t colon = d.find(':', at);
+  const size_t comma = d.find(',', colon);
+  if (colon == std::string::npos || comma == std::string::npos) return;
+  const std::string name = d.substr(colon + 2, comma - colon - 2);
+  const int y = std::atoi(d.c_str() + comma + 2);
+  const RefFoul* rf = bRefFoul(name);
+  const Slots fs = facts(g, {{"foul", rf ? lowerFirst(rf->words) : std::string("a block")}, {"yds", bS(y)}, {"team", g.offense().city}});
+  if (!ref_) {
+    push(Who::PBP, Kind::Result, say("ret_flag", fs), 1, 3, 0, 12).snapSafe = true;
+    return;
+  }
+  push(Who::PBP, Kind::Result, say("ret_flaglead", fs), 1, 3, 0, 12).snapSafe = true;
+  const std::string words = rf ? rf->words : std::string("Illegal block");
+  refSay(words + ", receiving team." +
+         (y < 10 ? std::string(" Half the distance to the goal, enforced from the end of the return.") : " " + bPenYards(y) + ", enforced from the end of the return.") +
+         " First down.");
 }
 
 // ------------------------------------------------------------------ before the snap
@@ -2534,18 +2902,31 @@ void Booth::kickResult(const Game& g, const std::string& d) {
 void Booth::onPresnapEnter(const Game& g, const View& v) {
   presnapSaid_ = true;
   if (g.phase == GamePhase::Pat) {
-    push(Who::PBP, Kind::Setup, pick("2pt", {g.offense().city + " is going to go for two.", "They're staying on the field. They'll go for the two-point conversion."}), 1, 3, 0, 10);
+    push(Who::PBP, Kind::Setup, say("2pt", facts(g, {})), 1, 3, 0, 10);
     return;
   }
   const PlaySim* s = sim_;
   const OffPlay* op = s ? s->cfg.offPlay : nullptr;
   if (op && op->type == PlayType::Kneel) {
     if (g.q == 2) {
-      if (once("kneelhalf" + bS(g.q))) push(Who::PBP, Kind::Setup, "They'll take a knee and run out the half.", 0, 3, 0, 6);
+      if (once("kneelhalf" + bS(g.q))) push(Who::PBP, Kind::Setup, say("kneelhalf", facts(g, {})), 0, 3, 0, 6);
     } else if (once("kneelgame")) {
-      push(Who::PBP, Kind::Setup, pick("kneelset", {"And here comes the victory formation.", "They'll take a knee, and this one is over."}), 0, 3, 0, 6);
+      push(Who::PBP, Kind::Setup, say("kneelset", facts(g, {})), 0, 3, 0, 6);
     }
     return;
+  }
+  // a new quarterback (the starter hurt, or pulled): introduced the first time he lines up
+  if (s && s->qb && s->qb->p) {
+    const Player*& was = qbOnField_[g.poss == TeamKey::Home ? 0 : 1];
+    const Player* now = s->qb->p;
+    if (was && was != now && once("newqb" + bS(now->id))) {
+      const Team& T = g.offense();
+      push(Who::PBP, Kind::Setup,
+           say(was->injuredWeeks > 0 ? "qb_new_hurt" : "qb_new", facts(g, {{"full", now->first + " " + now->last}, {"old", nm(was)}, {"team", T.city}, {"nick", nick(T)}})), 1,
+           3, 0, 12);
+      mentions_[now->id]++;  // (introduced: the next mention is the short name)
+    }
+    was = now;
   }
   const bool keyDown = g.down >= 3 || g.ballOn >= 80 || ((g.q == 2 || g.q >= 4) && g.clock <= 150) || g.toGo >= 15 || !setupPossKnown_ || g.poss != setupPoss_ ||
                        g.q != setupQ_;
@@ -2582,6 +2963,8 @@ std::string Booth::setupLine(const Game& g, bool full) {
   const bool late = (g.q == 2 || g.q >= 4) && g.clock <= 150;
   const bool close = std::abs(g.margin()) <= 8;
   const bool clutch = g.q >= 4 && g.clock < 300 && g.margin() < 0 && g.margin() >= -8 && g.down >= 3;
+  const Slots ss = facts(g, {{"where", where}, {"togo", bDist(g.toGo, g.ballOn)}, {"qbn", sim_ && sim_->qb ? nm(sim_->qb->p) : std::string()},
+                             {"upby", g.margin() > 0 ? bS(g.margin()) : std::string()}, {"downby", g.margin() < 0 ? bS(-g.margin()) : std::string()}});
   if (clutch && full) {
     const int m = -g.margin();
     const int tg = (std::max)(1, bRound(g.toGo));
@@ -2593,29 +2976,26 @@ std::string Booth::setupLine(const Game& g, bool full) {
     return s;
   }
   if (g.down == 4 && full && sim_ && sim_->cfg.offPlay && sim_->cfg.offPlay->type != PlayType::Kneel) {
-    s = pick("set_4go", {"Fourth and " + bDist(g.toGo, g.ballOn) + ", and they're going for it.", "They're staying on the field. Fourth and " + bDist(g.toGo, g.ballOn) + " " + where + ".",
-                         O.city + " will go for it on fourth and " + bDist(g.toGo, g.ballOn) + "."});
+    s = say("set_4go", ss);
   } else if (takeover && g.down == 1) {
-    s = pick("set_take", {O.city + " takes over, " + dd + " " + where + ".", O.city + " ball, " + dd + " " + where + ".", "The " + nick(O) + " take over. " + bCap(dd) + " " + where + ".",
-                          "Here comes the " + nick(O) + " offense. " + bCap(dd) + " " + where + "."});
-    if (g.margin() != 0 && chance(0.6)) s += " They're " + situation(g) + ".";
+    s = say("set_take", ss);
+    if (g.margin() != 0 && chance(0.35)) s = bJoin(s, say("set_sit", ss));
   } else if (newQ) {
-    s = pick("set_newq", {"And we're underway in the " + std::string(bQuarterName(g.q)) + ". " + O.city + ", " + dd + " " + where + ".",
-                          "To start the " + std::string(bQuarterName(g.q)) + ", " + O.city + " with a " + dd + " " + where + "."});
+    s = say("set_newq", ss);
   } else if (late) {
-    s = pick("set_late", {bCap(dd) + " " + where + ", " + bClock(g.clock) + " to go.", bCap(dd) + ", " + bClock(g.clock) + " left, " + O.city + " " + situation(g) + "."});
+    s = say("set_late", ss);
     // the timeouts that matter: the trailing team's (the leader's clock is the defense's problem)
     const TeamKey trail = g.margin() <= 0 ? g.poss : other(g.poss);
     const int to = g.timeouts[trail];
     if (g.q >= 4 && close && chance(0.6))
-      s += trail == g.poss ? " They have " + std::string(bCountWord(to)) + (to == 1 ? " timeout." : " timeouts.")
-                           : " " + g.teamOf(trail).city + " has " + bCountWord(to) + (to == 1 ? " timeout left." : " timeouts left.");
+      s = bJoin(s, say(trail == g.poss ? "set_to_own" : "set_to_other",
+                       facts(g, {{"to", bCountWord(to)}, {"tos", to == 1 ? "timeout" : "timeouts"}, {"team", g.teamOf(trail).city}})));
   } else if (g.down == 1 && g.toGo >= 10 && yl < 80 && chance(0.35)) {
-    s = pick("set_1st", {O.city + " with a first down " + where + ".", "First and ten " + where + ".", bCap(dd) + " " + where + "."});
+    s = say("set_1st", ss);
   } else {
-    s = pick("set", {bCap(dd) + " " + where + ".", bCap(dd) + " for " + O.city + ", " + where + ".", O.city + ", " + dd + " " + where + "."});
+    s = say("set", ss);
   }
-  // the formation, now and then
+  // the formation, now and then (joined to the down and distance: "2nd and 6 at the 41, Jessup in the shotgun.")
   if (full && sim_ && sim_->qb && chance(0.35)) {
     const Formation* f = sim_->cfg.offPlay ? formationById(sim_->cfg.offPlay->formation) : nullptr;
     int rbs = 0, tes = 0, wrs = 0;
@@ -2624,21 +3004,21 @@ std::string Booth::setupLine(const Game& g, bool full) {
       if (e->p->pos == Pos::TE) ++tes;
       if (e->p->pos == Pos::WR) ++wrs;
     }
-    const std::string qb = nm(sim_->qb->p);
-    if (rbs == 0) s += " Empty backfield, " + qb + " alone in the gun.";
-    else if (tes >= 3 || (f && formationFamily(*f) == "Goal Line")) s += " Heavy set, three tight ends.";
-    else if (f && formationFamily(*f) == "Shotgun") s += " " + qb + " in the shotgun.";
-    else if (f && formationFamily(*f) == "Pistol") s += " " + qb + " in the pistol.";
-    else if (f && (formationFamily(*f) == "I-Form" || bHas(formationFamily(*f), "I"))) s += " " + qb + " under center, two backs in the I.";
-    else if (wrs >= 4) s += " Four wide.";
-    else s += " " + qb + " under center.";
+    const char* fm = rbs == 0                                                        ? "fm_empty"
+                     : tes >= 3 || (f && formationFamily(*f) == "Goal Line")         ? "fm_heavy"
+                     : f && formationFamily(*f) == "Shotgun"                        ? "fm_gun"
+                     : f && formationFamily(*f) == "Pistol"                         ? "fm_pistol"
+                     : f && (formationFamily(*f) == "I-Form" || bHas(formationFamily(*f), "I")) ? "fm_i"
+                     : wrs >= 4                                                     ? "fm_4wide"
+                                                                                    : "fm_uc";
+    s = bJoin(s, say(fm, facts(g, {{"qb", nm(sim_->qb->p)}, {"tes", bCountWord(tes)}})));
   }
   // the streak that makes this snap a story
   if (full && sim_ && sim_->qb && chance(0.3)) {
     auto it = qbStreak_.find(sim_->qb->p->id);
     if (it != qbStreak_.end() && it->second.completions >= 6 && cooled("streak", 200)) {
       mark("streak");
-      s += " " + nm(sim_->qb->p) + " has completed " + bS(it->second.completions) + " straight.";
+      s = bJoin(s, say("set_streak", facts(g, {{"qb", nm(sim_->qb->p)}, {"n", bS(it->second.completions)}})));
     }
   }
   return s;
@@ -2661,20 +3041,23 @@ std::optional<std::string> Booth::presnapRead(const Game& g, const PlaySim& s) {
   };
   const bool blitz = !dc->blitz.empty();
   const bool passDown = g.down == 3 && g.toGo >= 6;
+  const std::string qbn = s.qb ? nm(s.qb->p) : std::string("the quarterback");
+  // the facts a read can name: the down, the men where they line up
+  const Ent* fsE = s.defRole("FS");
+  const Ent* ssE = s.defRole("SS");
+  const Slots rs = facts(g, {{"qb", qbn}, {"togo", bDist(g.toGo, g.ballOn)}, {"fs", fsE ? nm(fsE->p) : std::string()}, {"ss", ssE ? nm(ssE->p) : std::string()}});
+  auto with = [&rs](Slots e) {
+    e.insert(e.end(), rs.begin(), rs.end());
+    return e;
+  };
   // a man the defense will send, creeping down
   if (blitz && (s.shellAdj == PlaySim::ShellAdj::ShowBlitz || chance(0.5))) {
     const Ent* b = s.defRole(dc->blitz.front());
-    if (b) add(1.2, "r_blitz", pick("r_blitz", {"Watch " + nm(b->p) + ". He's creeping down, I think he's coming.", "They're going to bring it. Look at " + nm(b->p) + " walking up into the A gap.",
-                                                "I've got a feeling " + D.city + " is sending pressure here. " + nm(b->p) + " is cheating up."}));
+    if (b) add(1.2, "r_blitz", say("r_blitz", with({{"b", nm(b->p)}})));
   }
-  if (!blitz && s.shellAdj == PlaySim::ShellAdj::ShowBlitz)
-    add(1.1, "r_fake", "They're showing blitz, but watch these guys bail out at the snap. They want him to panic.");
-  if (bTwoHigh(dc->coverage) && passDown)
-    add(0.9, "r_2high", pick("r_2high", {"Two deep safeties. They're going to make him check it down and tackle the catch.",
-                                          "Look at the shell. Two high, everything in front of them. Take the underneath stuff.",
-                                          "They're keeping a lid on it. Nobody's getting behind this secondary on third and long.",
-                                          "Split safeties. " + D.city + " is daring them to be patient."}));
-  if (dc->coverage == Coverage::C0) add(1.3, "r_c0", "Nobody deep! They're in Cover Zero, it's all man, and somebody's going to be one-on-one.");
+  if (!blitz && s.shellAdj == PlaySim::ShellAdj::ShowBlitz) add(1.1, "r_fake", say("r_fake", rs));
+  if (bTwoHigh(dc->coverage) && passDown) add(0.9, "r_2high", say("r_2high", rs));
+  if (dc->coverage == Coverage::C0) add(1.3, "r_c0", say("r_c0", rs));
   // a one-on-one matchup the alignment gives away
   if (bManCov(dc->coverage)) {
     for (const Ent* e : s.off)
@@ -2684,7 +3067,7 @@ std::optional<std::string> Booth::presnapRead(const Game& g, const PlaySim& s) {
             const PlayerLine& ln = const_cast<StatBook&>(g.stats).line(*e->p, O.abbr);
             if (ln.rec >= 3) {
               readSubj_["r_match" + bS(e->p->id)] = e->p->id;
-              add(1.0, "r_match" + bS(e->p->id), nm(e->p) + " is going to see man coverage from " + nm(d->p) + ". He's already got " + bS(ln.rec) + " catches today. I'd go right back to him.", 400);
+              add(1.0, "r_match" + bS(e->p->id), say("r_match", with({{"wr", nm(e->p)}, {"cb", nm(d->p)}, {"n", bS(ln.rec)}, {"y", bS(ln.recYds)}})), 400);
             }
           }
         break;
@@ -2695,88 +3078,72 @@ std::optional<std::string> Booth::presnapRead(const Game& g, const PlaySim& s) {
     if (e->p->pos == Pos::RB || e->p->pos == Pos::FB) ++rbs;
     if (e->p->pos == Pos::TE) ++tes;
   }
-  if (rbs == 0) add(0.9, "r_empty", "Empty backfield. Nobody to help in protection, so " + (s.qb ? nm(s.qb->p) : std::string("the quarterback")) + " has to get it out quick. Hot reads.");
-  if (tes >= 3 && g.toGo <= 3) add(1.0, "r_heavy", "Big personnel. They're telling you they're going to run it, and daring " + D.city + " to stop it.");
+  if (rbs == 0) add(0.9, "r_empty", say("r_empty", rs));
+  if (tes >= 3 && g.toGo <= 3) add(1.0, "r_heavy", say("r_heavy", rs));
   const bool risky4 = g.down == 4 && g.toGo >= 3 && g.ballOn < 50 && tier(g) == 0 && !(g.q >= 4 && g.margin() < 0);
   if (risky4) {
-    add(2.2, "r_4th", pick("r_4thno", {"I don't love this, " + crew_.pbpFirst + ". Fourth and " + bS(bRound(g.toGo)) + " in your own end? If you don't get it, you've handed them points.",
-                                       "That's a gamble. Their own side of the field, and they need " + bS(bRound(g.toGo)) + ". I'm punting."}),
-        0);
+    add(2.2, "r_4th", say("r_4thno", rs), 0);
     risky4th_ = true;
   } else if (g.down == 4)
-    add(2.0, "r_4th", g.margin() <= -9 && g.q >= 4 ? "They don't have a choice here. Down " + bS(-g.margin()) + ", you have to go for it."
-                      : tier(g) >= 1 ? std::string("Not much to decide here. They're just playing it out.")
-                                     : pick("r_4th", {"I love this decision. You're " + std::string(g.ballOn >= 50 ? "in their territory" : "near midfield") + ", you have to be aggressive.",
-                                                      "This is the game right here. If they don't get it, " + D.city + " has a short field."}),
+    add(2.0, "r_4th",
+        say(tier(g) >= 2 || g.margin() < -16 ? "r_4thdone" : g.margin() <= -9 && g.q >= 4 ? "r_4thmust" : tier(g) >= 1 ? "r_4thdone" : g.ballOn >= 50 ? "r_4thgo" : "r_4thmid",
+            with({{"down", bS(-g.margin())}})),
         0);
-  if (g.ballOn >= 90) add(0.8, "r_goal", "Everything gets tight down here. No room to throw it over the top, so it's about winning at the line.");
-  if (passDown && D.blitzLean > 0.33) add(0.8, "r_tend", D.city + " loves to bring pressure on third down. Watch for the blitz.", 500);
+  if (g.ballOn >= 90) add(0.8, "r_goal", say("r_goal", rs));
+  if (passDown && D.blitzLean > 0.33) add(0.8, "r_tend", say("r_tend", rs), 500);
   if (passDown && O.passLean > 0.6) {
     // the offense's own identity, named (a bare "they spread you out" sounded like the other team's scheme)
     const bool spread = bHas(O.offScheme, "Air Raid") || bHas(O.offScheme, "Spread") || bHas(O.offScheme, "Run and Shoot");
-    add(0.6, "r_tend2" + O.abbr, spread ? "This is what the " + O.offScheme + " is built for. They spread you out and make you cover everybody."
-                                        : O.city + " is going to throw it here. They put it in the quarterback's hands on third and long.", 900);
+    add(0.6, "r_tend2" + O.abbr, say(spread ? "r_tendspread" : "r_tendpass", with({{"scheme", O.offScheme}})), 900);
   }
   // the shell: what the safeties tell you
-  const std::string qbn = s.qb ? nm(s.qb->p) : std::string("the quarterback");
   if (dc->coverage != Coverage::C0) {
-    if (bTwoHigh(dc->coverage))
-      add(0.65, "r_shell2", pick("r_shell2", {"Two safeties deep. They're taking away the shot play, so " + qbn + " has to be patient.", "Split safeties. Everything is in front of them on this one.",
-                                               "Two-high look. That's an invitation to run the football."}), 240);
-    else
-      add(0.65, "r_shell1", pick("r_shell1", {"Single-high safety. That's man or Cover 3, and the seams are there if he has time.", "One deep safety, eight guys near the box. They want to stop the run first.",
-                                               "Middle of the field closed. Watch the outside matchups."}), 240);
+    if (bTwoHigh(dc->coverage)) add(0.65, "r_shell2", say("r_shell2", rs), 240);
+    else add(0.65, "r_shell1", say("r_shell1", rs), 240);
   }
   // the men: who is where (names make every read its own sentence)
   {
     const Ent* fs = s.defRole("FS");
     const Ent* ss = s.defRole("SS");
-    if (!bTwoHigh(dc->coverage) && dc->coverage != Coverage::C0 && fs)
-      add(0.7, "r_fs", pick("r_fs", {nm(fs->p) + " is the only man deep. Everything over the top is on him.", "Watch " + nm(fs->p) + " in the middle of the field. He's the last line.",
-                                      nm(fs->p) + " is sitting at about fifteen yards. Single high."}),
-          600);
-    if (bTwoHigh(dc->coverage) && fs && ss)
-      add(0.7, "r_ss", pick("r_ss", {nm(fs->p) + " and " + nm(ss->p) + " both deep. They don't want to give up anything big.", "Look at " + nm(ss->p) + ", he's backed way off. Two-deep shell."}), 600);
+    if (!bTwoHigh(dc->coverage) && dc->coverage != Coverage::C0 && fs) add(0.7, "r_fs", say("r_fs", with({{"fs", nm(fs->p)}})), 600);
+    if (bTwoHigh(dc->coverage) && fs && ss) add(0.7, "r_ss", say("r_ss", with({{"fs", nm(fs->p)}, {"ss", nm(ss->p)}})), 600);
     for (const Ent* d : s.def)
       if (d->man && d->man->eligible && (d->p->pos == Pos::CB) && (s.shellAdj == PlaySim::ShellAdj::Press || bManCov(dc->coverage))) {
         readSubj_["r_press"] = d->man->p->id;
-        add(0.75, "r_press", pick("r_press", {nm(d->p) + " is right up in " + nm(d->man->p) + "'s face. Press man.", "Look at " + nm(d->p) + ", he's going to jam " + nm(d->man->p) + " at the line.",
-                                              "It's " + nm(d->p) + " on " + nm(d->man->p) + ", one on one."}),
-            600);
+        add(0.75, "r_press", say("r_press", with({{"cb", nm(d->p)}, {"wr", nm(d->man->p)}})), 600);
         break;
       }
     const Ent* slot = s.offRole("SLOT");
     const Ent* nb = s.defRole("NB");
     if (slot && nb && passDown) readSubj_["r_slot"] = slot->p->id;
-    if (slot && nb && passDown) add(0.7, "r_slot", pick("r_slot", {"Watch " + nm(slot->p) + " in the slot against " + nm(nb->p) + ". That's a matchup they like.", nm(nb->p) + " has " + nm(slot->p) + " inside. Quickness on quickness."}), 600);
+    if (slot && nb && passDown) add(0.7, "r_slot", say("r_slot", with({{"slot", nm(slot->p)}, {"nb", nm(nb->p)}})), 600);
     const Ent* rb = s.offRole("RB");
-    if (rb && passDown && g.toGo >= 7)
-      add(0.65, "r_rbpro", pick("r_rbpro", {"If they blitz, " + nm(rb->p) + " has to pick it up. That's the hardest job a back has.", nm(rb->p) + " stays in to help in protection, I'd bet."}), 1e9);
+    if (rb && passDown && g.toGo >= 7) add(0.65, "r_rbpro", say("r_rbpro", with({{"rb", nm(rb->p)}})), 1e9);
   }
   // personnel
   int wrs = 0;
   for (const Ent* e : s.off) wrs += e->p->pos == Pos::WR ? 1 : 0;
-  if (wrs >= 4) add(0.6, "r_4wide", pick("r_4wide", {"Four wide. They're spreading " + D.city + " out to see what the defense shows them.", "They've gone to four receivers. That's a lot of space to cover."}), 400);
-  if (tes >= 2 && g.toGo >= 5) add(0.6, "r_2te", pick("r_2te", {"Two tight ends. That's a play-action look. Watch the linebackers' eyes.", "Heavy personnel on a passing down. They might be setting up the boot."}), 400);
+  if (wrs >= 4) add(0.6, "r_4wide", say("r_4wide", rs), 400);
+  if (tes >= 2 && g.toGo >= 5) add(0.6, "r_2te", say("r_2te", rs), 400);
   // the situation
-  if (g.down == 3 && g.toGo <= 2) add(0.8, "r_3short", pick("r_3short", {"Third and short. Somebody has to win his one-on-one up front.", "Short yardage. Watch for the quarterback sneak.",
-                                                                          "This is about the push. Whoever gets lower wins this down."}), 300);
-  if (g.down == 2 && g.toGo >= 8) add(0.6, "r_2long", pick("r_2long", {"Second and long. You want half of it back here to make third down manageable.", "They need a chunk here, or it's third and long."}), 400);
-  if (g.ballOn >= 80 && g.ballOn < 90) add(0.7, "r_rz", pick("r_rz", {"Red zone. The field shrinks, so the windows get tight.", "Inside the 20, everybody's within reach. This is where a big back earns his money."}), 400);
+  if (g.down == 3 && g.toGo <= 2) add(0.8, "r_3short", say("r_3short", rs), 300);
+  if (g.down == 2 && g.toGo >= 8) add(0.6, "r_2long", say("r_2long", rs), 400);
+  if (g.ballOn >= 80 && g.ballOn < 90) add(0.7, "r_rz", say("r_rz", rs), 400);
   // the offense's habits so far
   {
     const TeamLine& tl = g.team[g.poss];
     if (tl.plays >= 12) {
       const int runs = tl.rushAtt, passes = tl.passAtt;
-      if (runs >= passes * 1.5)
-        add(0.75, "r_runtend", O.city + " has run it " + bS(runs) + " times to " + bS(passes) + " passes. Everybody in the stadium knows what's coming, and they still have to stop it.", 900);
-      else if (passes >= runs * 2)
-        add(0.75, "r_passtend", O.city + " has thrown it " + bS(passes) + " times and run it just " + bS(runs) + ". They're living on " + qbn + "'s arm.", 900);
+      const Slots hs = with({{"runs", bS(runs)}, {"passes", bS(passes)}, {"runst", bTimes(runs)}, {"passest", bTimes(passes)}});
+      if (runs >= passes * 1.5) add(0.75, "r_runtend", say(passes == 0 ? "r_runtend0" : "r_runtend", hs), 900);
+      else if (passes >= runs * 2) add(0.75, "r_passtend", say(runs == 0 ? "r_passtend0" : "r_passtend", hs), 900);
     }
   }
   if (c.empty()) return std::nullopt;
   std::sort(c.begin(), c.end(), [](const C& a, const C& b) { return a.sc > b.sc; });
-  if (c[0].sc < 0.7 && chance(0.3)) return std::nullopt;
+  // a read on every snap is a formula: the routine looks (the shell, a man deep) about one snap in two, the ones that
+  // matter (a blitz coming, Cover Zero, fourth down, a matchup) every time
+  if (c[0].sc < 0.95 && chance(0.5)) return std::nullopt;
   mark(c[0].topic);
   readTopic_ = c[0].topic;
   if (auto it = readSubj_.find(c[0].topic); it != readSubj_.end()) readTopic_ += "#" + bS(it->second);
@@ -2834,11 +3201,22 @@ void Booth::idle(const Game& g, const View& v) {
     return;
   }
   if (g.q >= 4 && g.clock < 300 && std::abs(g.margin()) <= 8 && g.down >= 3) return;  // (the deciding snaps: nothing in the way)
+  // a game that is decided: talk of what it is now (the clock, the backups, a long day), now and then
+  if (g.q >= 4 && tier(g) >= 2 && g.score.home != g.score.away && cooled("garbage", 240)) {
+    mark("garbage");
+    lastStoryT_ = now_;
+    const TeamKey lk = g.score.home > g.score.away ? TeamKey::Home : TeamKey::Away;
+    const Team& L = g.teamOf(lk);
+    const Team& T = g.teamOf(other(lk));
+    const bool pbp = chance(0.5);
+    push(pbp ? Who::PBP : Who::Color, Kind::Story, say(pbp ? "s_garbage_pbp" : "s_garbage", facts(g, {{"lteam", L.city}, {"tteam", T.city}, {"lnick", nick(L)}, {"tnick", nick(T)}})), 1, 2, 0, 10);
+    return;
+  }
   // late in a half or a decided fourth quarter: the clock and what each side needs, not stat lines
   if (((g.q == 2 || g.q >= 4) && g.clock < 120) || (g.q >= 4 && tier(g) >= 1)) return;
   if (auto s = storyLine(g, who)) {
     lastStoryT_ = now_;
-    push(who, Kind::Story, *s, 1, 2, 0, 10);
+    push(who, Kind::Story, *s, 1, 2, 0, 10).topic = lastStoryTopic_;
     if (!storyReply_.empty()) {
       push(Who::Color, Kind::Story, storyReply_, 1, 1, 0, 12);
       storyReply_.clear();
@@ -2854,88 +3232,90 @@ std::optional<std::string> Booth::storyLine(const Game& g, Who& who) {
   };
   std::vector<C> c;
   auto add = [&](double sc, const std::string& topic, const std::string& text, Who w, double cool) {
-    if (!text.empty() && cooled(topic, cool) && !spokenSet_.count(text)) c.push_back({sc + rng_.range(0, 0.4), topic, text, w});
+    if (text.empty() || !cooled(topic, cool) || spokenSet_.count(text)) return;
+    // a sentence an earlier game heard word for word (the weather, the building) waits behind the others
+    if (memory_ && Recent::get().age("booth.story", bTextId(text)) >= 0) sc -= 0.35;
+    c.push_back({sc + rng_.range(0, 0.4), topic, text, w});
   };
   const Team& O = g.offense();
   const Team& D = g.defense();
   const TeamKey ok = g.poss, dk = other(g.poss);
   const TeamLine& to = g.team[ok];
   const TeamLine& td = g.team[dk];
+  const Slots base = facts(g, {});
+  auto with = [&base](Slots e) {
+    e.insert(e.end(), base.begin(), base.end());
+    return e;
+  };
   // the quarterback's day
   for (const PlayerLine* ln : g.stats.forTeam(O.abbr)) {
-    if (ln->passAtt >= 8)
-      add(0.9, "qb:" + bS(ln->pid),
-          pick("s_qb", {lineName(g, *ln) + " is " + bS(ln->passComp) + " of " + bS(ln->passAtt) + " today for " + bS(ln->passYds) + " yards" +
-                            (ln->passTD ? ", " + std::string(bCountWord(ln->passTD)) + (ln->passTD == 1 ? " touchdown" : " touchdowns") : std::string()) +
-                            (ln->passInt ? ", " + std::string(bCountWord(ln->passInt)) + (ln->passInt == 1 ? " interception." : " interceptions.") : std::string(".")),
-                        lineName(g, *ln) + " is now " + bS(ln->passComp) + " for " + bS(ln->passAtt) + ", " + bS(ln->passYds) + " yards" +
-                            (ln->passComp > 0 && ln->passYds / static_cast<double>(ln->passComp) < 6.5 ? ". A lot of short stuff." : ".")}),
-          Who::PBP, 360);
+    if (ln->passAtt >= 8) {
+      const std::string tds = ln->passTD ? std::string(bCountWord(ln->passTD)) + (ln->passTD == 1 ? " touchdown" : " touchdowns") : std::string();
+      const std::string ints = ln->passInt ? std::string(bCountWord(ln->passInt)) + (ln->passInt == 1 ? " interception" : " interceptions") : std::string();
+      const Slots qs = with({{"name", lineName(g, *ln)}, {"c", bS(ln->passComp)}, {"a", bS(ln->passAtt)}, {"y", bS(ln->passYds)}, {"tds", tds}, {"ints", ints},
+                             {"short", ln->passComp > 0 && ln->passYds / static_cast<double>(ln->passComp) < 6.5 ? "a lot of short stuff" : ""},
+                             {"clean", ints.empty() ? "no interceptions" : ""}});
+      add(0.9, "qb:" + bS(ln->pid), say(tds.empty() && ints.empty() ? "s_qb" : !tds.empty() && !ints.empty() ? "s_qbti" : !tds.empty() ? "s_qbt" : "s_qbi", qs), Who::PBP, 360);
+    }
     if (ln->rushAtt >= 8) {
       const double ypc = ln->rushYds / static_cast<double>((std::max)(1, ln->rushAtt));
       const bool chasing = g.margin() <= -9 && g.q >= 3;  // down two scores late, the run is not the plan any more
-      std::string tail = ypc >= 5.0 ? (chasing ? pick("rb_hot2", {"He's been their best weapon. They just don't have the time to lean on him now.", "Good numbers, but the scoreboard says they have to throw."})
-                                               : pick("rb_hot", {"That's over five a pop. They have to keep feeding him.", "He's been the engine of this offense.", "Every time they hand it to him, something good happens."}))
-                         : ypc < 3.2 ? pick("rb_cold", {"They just haven't been able to get him going.", "The front has been winning that battle all day.", "There's been nothing there for him."})
-                                     : pick("rb_mid", {"Steady.", "Nothing flashy, but he keeps them on schedule.", "Workmanlike."});
-      add(0.8, "rb:" + bS(ln->pid), lineName(g, *ln) + " has " + bS(ln->rushYds) + " yards on " + bS(ln->rushAtt) + " carries. " + tail, Who::Color, 900);
+      const Slots rs = with({{"name", lineName(g, *ln)}, {"y", bS(ln->rushYds)}, {"n", bS(ln->rushAtt)}});
+      const std::string tail = say(ypc >= 5.0 ? (chasing ? "rb_hot2" : "rb_hot") : ypc < 3.2 ? "rb_cold" : "rb_mid", rs);
+      add(0.8, "rb:" + bS(ln->pid), bJoin(say("s_rb", rs), tail), Who::Color, 900);
     }
     if (ln->rec >= 4 && !(lastBig_ == ln->pid)) {
       const double ypr = ln->recYds / static_cast<double>(ln->rec);
       int most = 0;
       for (const PlayerLine* o : g.stats.forTeam(O.abbr)) most = (std::max)(most, o->rec);
       if (ln->rec < most) continue;
-      add(0.7, "wr:" + bS(ln->pid),
-          ypr >= 9 ? lineName(g, *ln) + " has been " + O.city + "'s go-to guy. " + bS(ln->rec) + " catches, " + bS(ln->recYds) + " yards."
-                   : bS(ln->rec) + " catches for " + lineName(g, *ln) + ", but only " + bS(ln->recYds) + " yards. They just can't get him going down the field.",
-          ypr >= 9 ? Who::PBP : Who::Color, 420);
+      const Slots ws = with({{"name", lineName(g, *ln)}, {"n", bS(ln->rec)}, {"y", bS(ln->recYds)}, {"team", O.city}});
+      add(0.7, "wr:" + bS(ln->pid), say(ypr >= 9 ? "s_wrgo" : "s_wrshort", ws), ypr >= 9 ? Who::PBP : Who::Color, 420);
     }
   }
   for (const PlayerLine* ln : g.stats.forTeam(O.abbr))
     if (ln->passInt >= 2)
       add(0.95, "qbint:" + bS(ln->pid) + ":" + bS(ln->passInt),
-          lineName(g, *ln) + " has thrown " + bCountWord(ln->passInt) + " interceptions today. " + (g.margin() >= 0 ? std::string("They're winning in spite of it.") : std::string("That's why they're behind.")),
-          Who::Color, 1e9);
+          say(g.margin() >= 0 ? "s_qbint_ahead" : "s_qbint_behind", with({{"name", lineName(g, *ln)}, {"n", bCountWord(ln->passInt)}, {"team", O.city}})), Who::Color,
+          1e9);
   for (const PlayerLine* ln : g.stats.forTeam(D.abbr)) {
-    if (ln->sacks >= 2)
-      add(1.0, "sk:" + bS(ln->pid) + ":" + bS(ln->sacks),
-          once("sk1:" + bS(ln->pid)) ? lineName(g, *ln) + " already has " + bCountWord(ln->sacks) + " sacks today. He's been living in the backfield."
-                                     : "That's " + std::string(bCountWord(ln->sacks)) + " sacks now for " + lineName(g, *ln) + ". They still haven't found an answer for him.",
-          Who::Color, 1e9);
-    if (ln->ints >= 1 && ln->tackles >= 3) add(0.6, "dbint:" + bS(ln->pid), lineName(g, *ln) + " has been everywhere. The interception, and " + bS(ln->tackles) + " tackles.", Who::PBP, 600);
+    if (ln->sacks >= 2) {
+      const Slots ks = with({{"name", lineName(g, *ln)}, {"n", bCountWord(ln->sacks)}, {"team", D.city}});
+      add(1.0, "sk:" + bS(ln->pid) + ":" + bS(ln->sacks), say(once("sk1:" + bS(ln->pid)) ? "s_sacks1" : "s_sacks2", ks), Who::Color, 1e9);
+    }
+    if (ln->ints >= 1 && ln->tackles >= 3)
+      add(0.6, "dbint:" + bS(ln->pid), say("s_dbint", with({{"name", lineName(g, *ln)}, {"tk", bS(ln->tackles)}, {"team", D.city}})), Who::PBP, 600);
   }
   // the teams
-  if (to.thirdAtt >= 4 && (tier(g) == 0 || g.margin() < 0))
-    add(0.8, "3rd:" + O.abbr, O.city + " is " + bS(to.thirdConv) + " of " + bS(to.thirdAtt) + " on third down. " +
-                                   (to.thirdConv * 2 >= to.thirdAtt ? pick("3rd_good", {"That's how you stay on the field.", "They've been money on the money down."})
-                                    : g.margin() > 0               ? std::string("They've been getting by on the other side of the ball.")
-                                                                   : pick("3rd_bad", {"They've got to be better than that.", "That's why they're chasing.", "That's been the difference in this game."})),
-        Who::PBP, 1e9);
+  if (to.thirdAtt >= 4 && (tier(g) == 0 || g.margin() < 0)) {
+    const Slots ts = with({{"team", O.city}, {"c", bS(to.thirdConv)}, {"a", bS(to.thirdAtt)}});
+    add(0.8, "3rd:" + O.abbr,
+        bJoin(say("s_3rd", ts), say(to.thirdConv * 2 >= to.thirdAtt ? "3rd_good" : g.margin() > 0 ? "3rd_badahead" : "3rd_bad", ts)), Who::PBP, 1e9);
+  }
   if (to.plays + td.plays >= 30 && std::abs(to.yards - td.yards) >= 90)
-    add(0.7, "yds", (to.yards > td.yards ? O.city : D.city) + " has out-gained them " + bS((std::max)(to.yards, td.yards)) + " to " + bS((std::min)(to.yards, td.yards)) + ".", Who::Color,
-        700);
-  if (to.penalties + td.penalties >= 6) add(0.6, "pens", "Lots of flags in this one. " + bS(to.penalties + td.penalties) + " penalties so far.", Who::PBP, 900);
+    add(0.7, "yds", say("s_yds", with({{"team", to.yards > td.yards ? O.city : D.city}, {"big", bS((std::max)(to.yards, td.yards))}, {"small", bS((std::min)(to.yards, td.yards))}})),
+        Who::Color, 700);
+  if (to.penalties + td.penalties >= 6) add(0.6, "pens", say("s_pens", with({{"n", bS(to.penalties + td.penalties)}})), Who::PBP, 900);
   const int toG = giveaways(g, to), tdG = giveaways(g, td);
   if (tdG >= 2 || toG >= 2) {
     const bool offBad = toG >= tdG;
     const int badMargin = offBad ? g.margin() : -g.margin();
-    add(0.8, "tos", (offBad ? O.city : D.city) + " has turned it over " + ((offBad ? toG : tdG) == 2 ? std::string("twice") : std::string(bCountWord(offBad ? toG : tdG)) + " times") + ". " +
-                        (badMargin > 0 ? std::string("They're lucky to still be in front.") : std::string("You can't win like that.")),
+    const int n = offBad ? toG : tdG;
+    add(0.8, "tos", say(badMargin > 0 ? "s_tos_ahead" : "s_tos_behind", with({{"team", offBad ? O.city : D.city}, {"times", n == 2 ? std::string("twice") : std::string(bCountWord(n)) + " times"}})),
         Who::Color, 900);
   }
-  if (blitzCount_[dk == TeamKey::Home ? 0 : 1] >= 6 || blitzCount_[ok == TeamKey::Home ? 0 : 1] >= 6) {}
   // the weather and the building
   const Weather& w = g.weather;
-  if (w.precip == Precip::Snow) add(0.5, "wx", "Look at that snow coming down. Footing has to be a real issue for the receivers.", Who::Color, 900);
-  if (w.precip == Precip::Rain) add(0.5, "wx", "This rain hasn't let up. Every snap, you're worried about the exchange.", Who::Color, 900);
-  if (w.tempF <= 30) add(0.4, "wx", "You can see their breath out there. This is a cold one.", Who::PBP, 1200);
-  if (g.q == 4 && std::abs(g.margin()) <= 7 && g.clock < 480 && tier(g) == 0)
-    add(1.0, "tight4", pick("s_tight", {"This one is going to come down to the wire.", "Every snap matters now. One play could decide it."}), Who::PBP, 400);
-  if (g.q >= 3 && std::abs(g.margin()) >= 17)
-    add(0.5, "blowout", D.city + " has to find something here. They're running out of time to get back into it.", Who::Color, 900);
+  const Slots wx = with({{"temp", bS(bRound(w.tempF))}});
+  if (w.precip == Precip::Snow) add(0.5, "wx", say("s_snow", wx), Who::Color, 900);
+  if (w.precip == Precip::Rain) add(0.5, "wx", say("s_rain", wx), Who::Color, 900);
+  if (w.tempF <= 30) add(0.4, "wx", say("s_cold", wx), Who::PBP, 1200);
+  if (g.q == 4 && std::abs(g.margin()) <= 7 && g.clock < 480 && tier(g) == 0) add(1.0, "tight4", say("s_tight", base), Who::PBP, 400);
+  if (g.q >= 3 && std::abs(g.margin()) >= 17) add(0.5, "blowout", say("s_blowout", with({{"team", D.city}})), Who::Color, 900);
   if (c.empty()) return std::nullopt;
   std::sort(c.begin(), c.end(), [](const C& a, const C& b) { return a.sc > b.sc; });
   mark(c[0].topic);
+  lastStoryTopic_ = c[0].topic;
   who = c[0].who;
   // a quarterback's line from the play-by-play man: the analyst says what it means
   storyReply_.clear();
@@ -2944,10 +3324,11 @@ std::optional<std::string> Booth::storyLine(const Game& g, Who& who) {
     for (const PlayerLine* ln : g.stats.forTeam(O.abbr))
       if (ln->pid == pid && ln->passAtt > 0) {
         const double pct = ln->passComp / static_cast<double>(ln->passAtt), ypa = ln->passYds / static_cast<double>(ln->passAtt);
-        if (ln->passInt >= 2) storyReply_ = pick("qbr_int", {"The interceptions are what you worry about. You can't keep giving them extra possessions.", bCap(bCountWord(ln->passInt)) + " picks. He's been forcing it."});
-        else if (pct >= 0.7 && ln->passInt == 0) storyReply_ = pick("qbr_hot", {"He's been surgical. Getting the ball out on time, hitting guys in stride.", "He's in a rhythm. They're not going to stop him unless they get pressure."});
-        else if (pct < 0.5) storyReply_ = pick("qbr_cold", {"He's been off. Some of that's the pressure, some of it is just missing throws he usually makes.", "That's not his day. They've got to find him something easy to get him going."});
-        else if (ypa < 5.5 && pct >= 0.6) storyReply_ = pick("qbr_short", {"Efficient, but it's all underneath. They're not taking any shots.", "They're keeping it short. That's fine, until you need a big play."});
+        const Slots qs = with({{"name", lineName(g, *ln)}, {"n", bCap(bCountWord(ln->passInt))}});
+        if (ln->passInt >= 2) storyReply_ = say("qbr_int", qs);
+        else if (pct >= 0.7 && ln->passInt == 0) storyReply_ = say("qbr_hot", qs);
+        else if (pct < 0.5) storyReply_ = say("qbr_cold", qs);
+        else if (ypa < 5.5 && pct >= 0.6) storyReply_ = say("qbr_short", qs);
       }
     if (chance(0.4)) storyReply_.clear();  // not every time
   }
@@ -2956,45 +3337,34 @@ std::optional<std::string> Booth::storyLine(const Game& g, Who& who) {
 
 std::optional<std::pair<std::string, std::string>> Booth::exchange(const Game& g) {
   if (g.shouldKneel()) return std::nullopt;  // (they're kneeling it out: no talk of what the next down needs)
-  const std::string cf = crew_.colorFirst;
   const Team& O = g.offense();
   const Team& D = g.defense();
   const TeamLine& to = g.team[g.poss];
   const double ypc = to.rushYds / static_cast<double>((std::max)(1, to.rushAtt));
+  const Slots xs = facts(g, {{"ypc", bS(static_cast<int>(ypc * 10) / 10)}, {"ry", bS(to.rushYds)}, {"ra", bS(to.rushAtt)}, {"team", O.city}, {"dteam", D.city},
+                             {"to", bCountWord(g.timeouts[g.poss])}, {"togo", bDist(g.toGo, g.ballOn)}});
   // third and short: run it or throw it
   if (g.down == 3 && g.toGo <= 2 && tier(g) == 0 && cooled("x_3short", 400) && chance(0.6)) {
     mark("x_3short");
-    return std::make_pair(pick("x3sq", {"Run it or throw it here, " + cf + "?", "What do you call here, " + cf + "?", cf + ", third and short. What's your play?"}),
-                          ypc >= 4.2 ? pick("x3sa", {"I run it. They've been getting " + bS(static_cast<int>(ypc * 10) / 10) + " a carry, and the line has been winning up front all day.",
-                                                     "Hand it off. Their offensive line has earned the right to that call today."})
-                                     : pick("x3sb", {"I'm throwing it. The run game hasn't been there, so play-action, quick throw to the flat, move the sticks.",
-                                                     "Not the run. They've been stuffed all day. Get the ball out of his hand quick."}));
+    return std::make_pair(say("x3sq", xs), say(ypc >= 4.2 ? "x3sa" : "x3sb", xs));
   }
   // the red zone
   if (g.ballOn >= 80 && g.down == 1 && tier(g) == 0 && cooled("x_rz", 600) && chance(0.5)) {
     mark("x_rz");
-    return std::make_pair(pick("xrzq", {"How do you attack this defense down here, " + cf + "?", "Red zone, " + cf + ". What are you looking for?"}),
-                          D.blitzLean > 0.32 ? std::string("They're going to bring pressure. So you want quick game, slants, the back in the flat. Make them pay for sending people.")
-                                             : std::string("They'll sit in zone and squeeze the field. I'd use the tight end, he's a matchup problem for linebackers in tight space."));
+    return std::make_pair(say("xrzq", xs), say(D.blitzLean > 0.32 ? "xrza_blitz" : "xrza_zone", xs));
   }
   // third and long coming up: what does the analyst want to see
   if (g.down == 3 && g.toGo >= 7 && tier(g) == 0 && cooled("x_3long", 600) && chance(0.4)) {
     mark("x_3long");
-    return std::make_pair(pick("x3q", {"Big down here, " + cf + ".", cf + ", what are you looking for on third and long?"}),
-                          D.blitzLean > 0.3 ? "They've been bringing pressure all day. If I'm the quarterback, I know where my hot read is before the snap."
-                                            : "They're going to sit back and make him be patient. Take what's underneath, get to the sticks.");
+    return std::make_pair(say("x3q", xs), say(D.blitzLean > 0.3 ? "x3a_blitz" : "x3a_zone", xs));
   }
   if (to.plays >= 20 && to.rushAtt >= 10 && once("x_run" + O.abbr) && chance(0.6)) {
     const bool behind = g.margin() <= -14;
-    return std::make_pair("How has " + O.city + "'s running game looked to you, " + cf + "?",
-                          ypc >= 4.5 && !behind ? "Really good. " + bS(to.rushYds) + " yards on the ground, and that keeps the defense honest. The safeties have to come down, and that's where the shots come from."
-                          : behind ? "It's been fine, " + bS(to.rushYds) + " yards, but down " + bS(-g.margin()) + " you can't lean on it anymore. They have to throw."
-                                   : "Not much there. " + bS(to.rushYds) + " yards on " + bS(to.rushAtt) + " carries. But they're staying with it to keep the defense honest.");
+    return std::make_pair(say("x_runq", xs), say(ypc >= 4.5 && !behind ? "x_runa_good" : behind ? "x_runa_behind" : "x_runa_bad", xs));
   }
   if (g.q == 4 && g.clock < 360 && std::abs(g.margin()) <= 8 && g.margin() < 0 && g.phase == GamePhase::Scrimmage && g.down == 1 && cooled("x_late", 900)) {
     mark("x_late");
-    return std::make_pair(O.city + " needs a drive here, " + cf + ".",
-                          "Stay calm. You've got " + bClock(g.clock) + " and " + bCountWord(g.timeouts[g.poss]) + " timeouts, that's plenty. Don't try to get it all on one play.");
+    return std::make_pair(say("x_lateq", xs), say("x_latea", xs));
   }
   return std::nullopt;
 }
@@ -3005,13 +3375,16 @@ std::optional<std::string> Booth::quarterStory(const Game& g) {
   const Team& H = *g.home;
   const Team& A = *g.away;
   const int m = g.score.home - g.score.away;
+  // (the quarter that just ended: the Game is already in the next one)
+  const int qEnded = (std::max)(1, g.q - 1);
   if (std::abs(h.yards - a.yards) >= 60 && once("qcontrol"))
-    return (h.yards > a.yards ? H.city : A.city) + " has controlled it so far. " + bS((std::max)(h.yards, a.yards)) + " yards of offense to " + bS((std::min)(h.yards, a.yards)) + ".";
+    return say("qstory_yds", facts(g, {{"team", h.yards > a.yards ? H.city : A.city}, {"big", bS((std::max)(h.yards, a.yards))}, {"small", bS((std::min)(h.yards, a.yards))},
+                                       {"qn", bQuarterName(qEnded)}}));
   if (giveaways(g, h) + giveaways(g, a) >= 2)
-    return std::string("The turnovers have been the story. ") + H.city + " has turned it over " + bCountWord(giveaways(g, h)) + (giveaways(g, h) == 1 ? " time, " : " times, ") + A.city + " " +
-           bCountWord(giveaways(g, a)) + (giveaways(g, a) == 1 ? " time." : " times.");
-  if (std::abs(m) >= 9) return (m > 0 ? H.city : A.city) + " has made the plays. That's a " + std::string(std::abs(m) >= 17 ? "three-score" : "two-score") + " lead already.";
-  return pick("qstory", {"Pretty even so far. Neither team has really been able to impose its will.", "It's been a chess match. Both defenses have come to play."});
+    return say("qstory_to", facts(g, {{"home", H.city}, {"away", A.city}, {"hto", bS(giveaways(g, h))}, {"ato", bS(giveaways(g, a))}}));
+  if (std::abs(m) >= 9)
+    return say("qstory_lead", facts(g, {{"team", m > 0 ? H.city : A.city}, {"lead", std::abs(m) >= 17 ? "three-score" : "two-score"}}));
+  return say("qstory_even", facts(g, {{"qn", bQuarterName(qEnded)}}));
 }
 
 std::optional<std::string> Booth::halftimeStory(const Game& g) {
@@ -3022,11 +3395,9 @@ std::optional<std::string> Booth::halftimeStory(const Game& g) {
   const TeamLine& lt = homeLead ? h : a;
   const TeamLine& tt = homeLead ? a : h;
   const int m = std::abs(g.score.home - g.score.away);
-  std::string s = "Big picture: ";
-  if (lt.yards > tt.yards + 50) s += L.city + " has moved the ball at will, " + bS(lt.yards) + " total yards. ";
-  else if (tt.yards > lt.yards + 50) s += "the other side has out-gained them, but " + L.city + " has made the plays that count. ";
-  else if (m >= 9) s += "the yardage is close, but " + L.city + " has turned its chances into points. ";
-  else s += "this has been an even half. ";
+  // the half in a sentence: the leader moved it at will, was out-gained, finished his chances, or an even half
+  const char* how = lt.yards > tt.yards + 50 ? "half_will" : tt.yards > lt.yards + 50 ? "half_outgained" : m >= 9 ? "half_finish" : "half_even";
+  std::string s = say(how, facts(g, {{"team", L.city}, {"yds", bS(lt.yards)}})) + " ";
   // the open's key, revisited
   if (openKey_) {
     const PlayerLine* kl = nullptr;
@@ -3037,15 +3408,17 @@ std::optional<std::string> Booth::halftimeStory(const Game& g) {
     for (const Team* tm : {g.home, g.away})
       for (const PlayerLine* ln : g.stats.forTeam(tm->abbr))
         if (ln->sacks >= 2 && (!lead || ln->sacks > lead->sacks)) lead = ln;
-    if (lead && lead->pid != openKey_->id && (!kl || lead->sacks > kl->sacks))
-      s += "I said before the game " + openKey_->first + " " + openKey_->last + " would be the problem. It's been " + leadName(g, *lead) + " instead, " + bS(lead->sacks) + " sacks already. ";
-    else if (kl && kl->sacks >= 2) s += "And I said before the game " + nm(openKey_) + " could wreck the game plan. " + bS(kl->sacks) + " sacks already. ";
-    else if (kl && kl->sacks == 1) s += nm(openKey_) + " has a sack, and he's been a factor. ";
-    else if (kl && kl->tackles >= 4) s += nm(openKey_) + " has been in on " + bS(kl->tackles) + " tackles. ";
-    else s += "And they've kept " + nm(openKey_) + " quiet. I didn't expect that. ";
+    const Slots ks = facts(g, {{"key", nm(openKey_)}, {"keyfull", openKey_->first + " " + openKey_->last}, {"who", lead ? leadName(g, *lead) : std::string()},
+                               {"n", lead && lead->pid != openKey_->id ? bS(lead->sacks) : kl ? bS(kl->sacks) : std::string()}, {"tk", kl ? bS(kl->tackles) : std::string()}});
+    if (lead && lead->pid != openKey_->id && (!kl || lead->sacks > kl->sacks)) s += say("hs_keywrong", ks) + " ";
+    else if (kl && kl->sacks >= 2) s += say("hs_keyright", ks) + " ";
+    else if (kl && kl->sacks == 1) s += say("hs_key1", ks) + " ";
+    else if (kl && kl->tackles >= 4) s += say("hs_keytk", ks) + " ";
+    else s += say("hs_keyquiet", ks) + " ";
   }
-  if (giveaways(g, lt) + giveaways(g, tt) > 0) s += "And the turnovers, " + bS(giveaways(g, tt)) + " to " + bS(giveaways(g, lt)) + ". ";
-  s += pick("half2", {"Whoever wins the line of scrimmage in the third quarter wins this game.", "The adjustments at halftime are going to be huge."});
+  if (giveaways(g, lt) + giveaways(g, tt) > 0)
+    s += say("hs_to", facts(g, {{"team", giveaways(g, tt) > giveaways(g, lt) ? L.city : std::string()}, {"won", bS(giveaways(g, tt))}, {"lost", bS(giveaways(g, lt))}})) + " ";
+  s += say("half2", facts(g, {}));
   return s;
 }
 
@@ -3055,16 +3428,14 @@ void Booth::onFinal(const Game& g) {
   const Team& W = homeWin ? *g.home : *g.away;
   const Team& L = homeWin ? *g.away : *g.home;
   const int ws = (std::max)(g.score.home, g.score.away), ls = (std::min)(g.score.home, g.score.away);
-  push(Who::PBP, Kind::Close,
-       ws == ls ? "And that's the final. " + scoreLine(g, false)
-                : pick("final", {"And that's going to do it! The " + W.name + " win it, " + bS(ws) + " to " + bS(ls) + ".",
-                                 "The final from " + g.home->city + ": " + W.city + " " + bS(ws) + ", " + L.city + " " + bS(ls) + "."}),
-       2, 5, 0.6, 60)
-      .snapSafe = true;
+  const Slots fs = facts(g, {{"wname", W.name}, {"lname", L.name}, {"wcity", W.city}, {"lcity", L.city}, {"ws", bS(ws)}, {"ls", bS(ls)}, {"hcity", g.home->city},
+                             {"pbp", crew_.pbpFirst + " " + crew_.pbpLast}, {"col", crew_.colorFirst + " " + crew_.colorLast},
+                             {"tod", view_.night ? "evening" : "afternoon"}});
+  push(Who::PBP, Kind::Close, say(ws == ls ? "final_tie" : "final", fs), 2, 5, 0.6, 60).snapSafe = true;
   pendingInjury_.clear();  // (the game is over: a man hurt is for the postgame, not the final call)
   // the plays that decided it
   if (!bigPlays_.empty()) {
-    std::string r = "What a game. ";
+    std::string r = say("close_big", fs) + " ";
     for (size_t i = 0; i < bigPlays_.size() && i < 3; ++i) r += bigPlays_[i] + (i + 1 < (std::min)(bigPlays_.size(), static_cast<size_t>(3)) ? " " : "");
     push(Who::PBP, Kind::Close, r, 1, 4, 0, 60).snapSafe = true;
   }
@@ -3099,10 +3470,12 @@ void Booth::onFinal(const Game& g) {
       std::string full = lastName(star->name);
       for (const auto& p : W.roster)
         if (p->id == star->pid) full = p->first + " " + p->last;
-      push(Who::Color, Kind::Close, "The story today was " + full + ". " + line + ". He was the difference.", 1, 4, 0, 60).snapSafe = true;
+      Slots ss = fs;
+      ss.insert(ss.begin(), {{"star", full}, {"line", line}});
+      push(Who::Color, Kind::Close, say("close_star", ss), 1, 4, 0, 60).snapSafe = true;
     }
   }
-  push(Who::PBP, Kind::Close, "For " + crew_.colorFirst + " " + crew_.colorLast + ", I'm " + crew_.pbpFirst + " " + crew_.pbpLast + ". Thanks for joining us.", 0, 4, 0, 60).snapSafe = true;
+  push(Who::PBP, Kind::Close, say("signoff", fs), 0, 4, 0, 60).snapSafe = true;
 }
 
 std::string Booth::lastName(const std::string& full) {

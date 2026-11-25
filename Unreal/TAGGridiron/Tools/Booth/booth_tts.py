@@ -1,7 +1,8 @@
 """The broadcast booth's voices: a local speech service for the game.
 
 The game (ATagBooth) and this service talk through two folders under the cache root:
-  req/<key>.json   a line to synthesize: {"key", "text", "voice": "pbp"|"color", "energy": 0..3, "prio": 0..2, "t"}
+  req/<key>.json   a line to synthesize: {"key", "text", "voice": "pbp"|"color"|"ref", "energy": 0..3, "prio": 0..2, "t"}
+                   ("ref" is the referee at his microphone, the game's -TagBoothRef: made the first time it is asked for)
                    prio 2 = needed now (the line is up), 1 = soon (queued), 0 = background (prewarm)
   <key>.wav        the finished line (24 kHz mono 16-bit), written atomically (tmp + rename)
 The game removes request files it no longer needs; the service always takes the most urgent, newest request first.
@@ -13,7 +14,12 @@ background clip is checked with Whisper (faster-whisper) and re-rolled when the 
 garbled take never reaches the cache. --engine chatterbox uses the full model (exaggeration control, ~4x slower); --engine kokoro
 uses Kokoro alone (fastest, flattest).
 
-  python booth_tts.py --cache <dir> [--engine turbo|chatterbox|kokoro] [--no-qc] [--once file.jsonl]
+  python booth_tts.py --cache <dir> [--engine turbo|chatterbox|kokoro] [--no-qc] [--once file.jsonl [--dry-run] [--limit N]]
+
+The offline bake of every roster's live calls (05 A5; the game is closed, the GPU idle):
+  Tools/build/BoothScript.exe --bake-all --jsonl=Tools/build/bake_all.jsonl
+  Tools/Booth/.venv/Scripts/python.exe Tools/Booth/booth_tts.py --cache Saved/BoothVoice --once Tools/build/bake_all.jsonl --dry-run
+  ... the same without --dry-run (stop it any time: a second run picks up where it was)
 """
 import argparse, json, os, re, sys, time, glob, hashlib, threading, traceback
 import numpy as np
@@ -31,7 +37,16 @@ VOICES = {
     'color': dict(kokoro='am_onyx', ref_text=(
         "You know what I love about this team? They play hard for sixty minutes. They're physical up front, they run the "
         "football, and when you have to stop the run every single snap, it wears you down by the fourth quarter.")),
+    # the referee at his microphone (the booth's Who::Ref, -TagBoothRef in the game): a flat, measured announcement. Not the
+    # Kokoro speaker of either broadcaster. Made only when a referee line is first asked for (Engine.conds_for), so the
+    # two broadcasters' service and bakes never load it
+    'ref': dict(kokoro='am_fenrir', ref_text=(
+        "Holding, offense, number seventy-four. Ten yard penalty, from the spot of the foul. Repeat second down. "
+        "After review, the runner was down by contact. The ruling on the field stands.")),
 }
+CORE_VOICES = ('pbp', 'color')  # made and loaded at start; any other voice on its first line
+# what the referee's reference take reads, at every energy (he does not get excited: one flat delivery)
+REF_ENERGY_TEXT = "Illegal formation, offense. Five yard penalty. Replay second down. Personal foul, defense, number fifty-one."
 # energy 0..3 -> Chatterbox exaggeration / cfg weight (past ~0.9 the clone loses its pitch and shrieks)
 EXAG = {0: (0.38, 0.5), 1: (0.5, 0.5), 2: (0.68, 0.42), 3: (0.85, 0.32)}
 KOKORO_SPEED = {0: 1.0, 1: 1.05, 2: 1.12, 3: 1.18}
@@ -133,6 +148,32 @@ def finish(audio, sr):
     return a
 
 
+def on_stadium_mic(a):
+    """The referee as the broadcast hears him: his lapel mic through the stadium's horns (band-limited, a touch of grit,
+    the bowl's slap and tail: Tools/Audio/audiolib.pa_voice, as build_voices.py treats the PA), a little drier than the
+    PA's own announcer so the words stay clear under the booth's level. 24 kHz in and out (the treatment runs at 48)."""
+    sys.path.insert(0, os.path.join(HERE, '..', 'Audio'))
+    try:
+        import audiolib as al
+    finally:
+        sys.path.pop(0)
+    from scipy.signal import resample_poly
+    x = resample_poly(np.asarray(a, np.float32), 2, 1).astype(np.float32)
+    n = len(x)
+    y = al.mono(al.pa_voice(x, np.random.default_rng(n % 9973), wet=0.32))[: n + int(1.4 * al.SR)]
+    y = resample_poly(y, 1, 2).astype(np.float32)
+    # the same level as the broadcasters' clips (speech at -19 dBFS RMS, measured on the dry words), peaks under -1 dBFS
+    rms = np.sqrt(np.mean(y[: len(a)] ** 2) + 1e-12)
+    y = y * (10 ** (-19 / 20) / rms)
+    lim = 10 ** (-1 / 20)
+    if np.max(np.abs(y)) > lim:
+        y = np.tanh(y / lim * 1.2) * lim / np.tanh(1.2)
+    f = min(len(y) // 4, int(0.3 * SR))
+    if f > 0:
+        y[-f:] *= np.linspace(1, 0, f)
+    return y.astype(np.float32)
+
+
 def write_wav(path, a):
     import soundfile as sf
     tmp = path + '.tmp.wav'
@@ -149,13 +190,8 @@ class Engine:
         self.voices_dir = voices_dir
         os.makedirs(voices_dir, exist_ok=True)
         self.refs = {}
-        for v, cfg in VOICES.items():
-            p = os.path.join(voices_dir, f'{v}_ref.wav')
-            if not os.path.exists(p):
-                a = np.concatenate([x.numpy() for _, _, x in self.kp()(cfg['ref_text'], voice=cfg['kokoro'], speed=1.0)])
-                write_wav(p, a)
-                log('made reference voice', p)
-            self.refs[v] = p
+        for v in CORE_VOICES:
+            self.refs[v] = self.ref_voice(v)
         self.cb = None
         self.tb = None
         self.conds = {}
@@ -163,21 +199,10 @@ class Engine:
             # Chatterbox Turbo has no exaggeration control: the energy is in the reference. Each voice has one take per
             # energy (voices/<voice>_e<n>.wav, read by the full model at that exaggeration), and Turbo clones the take
             # that matches the line. ~4x faster than the full model.
-            need = [(v, e) for v in VOICES for e in range(4) if not os.path.exists(os.path.join(voices_dir, f'{v}_e{e}.wav'))]
-            if need:
-                from chatterbox.tts import ChatterboxTTS
-                full = ChatterboxTTS.from_pretrained(device=self.dev)
-                for v, e in need:
-                    full.prepare_conditionals(self.refs[v], exaggeration=0.5)
-                    torch.manual_seed(11 + e)
-                    w = full.generate(ENERGY_REF[e], exaggeration=EXAG[e][0] + (0.03 if e == 3 else 0), cfg_weight=EXAG[e][1])
-                    write_wav(os.path.join(voices_dir, f'{v}_e{e}.wav'), finish(w.squeeze().cpu().numpy(), full.sr))
-                    log('made energy reference', v, e)
-                del full
-                torch.cuda.empty_cache()
+            self.energy_takes(CORE_VOICES)
             from chatterbox.tts_turbo import ChatterboxTurboTTS
             self.tb = ChatterboxTurboTTS.from_pretrained(device=self.dev)
-            for v in VOICES:
+            for v in CORE_VOICES:
                 for e in range(4):
                     self.tb.prepare_conditionals(os.path.join(voices_dir, f'{v}_e{e}.wav'))
                     self.conds[(v, e)] = self.tb.conds
@@ -202,6 +227,51 @@ class Engine:
             self._kp = KPipeline(lang_code='a', device=self.dev)
         return self._kp
 
+    def ref_voice(self, v):
+        """voices/<v>_ref.wav: the Kokoro speaker reading the voice's reference text (made once)."""
+        p = os.path.join(self.voices_dir, f'{v}_ref.wav')
+        if not os.path.exists(p):
+            cfg = VOICES[v]
+            a = np.concatenate([x.numpy() for _, _, x in self.kp()(cfg['ref_text'], voice=cfg['kokoro'], speed=1.0)])
+            write_wav(p, a)
+            log('made reference voice', p)
+        return p
+
+    def energy_takes(self, voices):
+        """voices/<v>_e0..3.wav: each voice's reference take at each energy, read by the full model (made once). The
+        referee reads one flat announcement at every energy."""
+        import torch
+        need = [(v, e) for v in voices for e in range(4) if not os.path.exists(os.path.join(self.voices_dir, f'{v}_e{e}.wav'))]
+        if not need:
+            return
+        from chatterbox.tts import ChatterboxTTS
+        full = ChatterboxTTS.from_pretrained(device=self.dev)
+        for v, e in need:
+            full.prepare_conditionals(self.ref_voice(v), exaggeration=0.5)
+            torch.manual_seed(11 + e)
+            if v == 'ref':
+                w = full.generate(REF_ENERGY_TEXT, exaggeration=0.3, cfg_weight=0.55)
+            else:
+                w = full.generate(ENERGY_REF[e], exaggeration=EXAG[e][0] + (0.03 if e == 3 else 0), cfg_weight=EXAG[e][1])
+            write_wav(os.path.join(self.voices_dir, f'{v}_e{e}.wav'), finish(w.squeeze().cpu().numpy(), full.sr))
+            log('made energy reference', v, e)
+        del full
+        torch.cuda.empty_cache()
+
+    def conds_for(self, voice, energy):
+        """The Turbo conditionals of a voice at an energy; a voice past the two broadcasters is made and loaded here, on its
+        first line (the referee)."""
+        key = (voice, max(0, min(3, energy)))
+        if key not in self.conds:
+            self.refs[voice] = self.ref_voice(voice)
+            self.energy_takes((voice,))
+            saved = self.tb.conds
+            for e in range(4):
+                self.tb.prepare_conditionals(os.path.join(self.voices_dir, f'{voice}_e{e}.wav'))
+                self.conds[(voice, e)] = self.tb.conds
+            self.tb.conds = saved
+        return self.conds[key]
+
     def kokoro(self, text, voice, energy):
         cfg = VOICES[voice]
         return np.concatenate([x.numpy() for _, _, x in self.kp()(text, voice=cfg['kokoro'], speed=KOKORO_SPEED.get(energy, 1.05))]), 24000
@@ -209,11 +279,14 @@ class Engine:
     def chatter(self, text, voice, energy, seed):
         import torch
         if self.tb is not None:
-            self.tb.conds = self.conds[(voice, max(0, min(3, energy)))]
+            self.tb.conds = self.conds_for(voice, energy)
             torch.manual_seed(seed)
             wav = self.tb.generate(text)
             return wav.squeeze().cpu().numpy(), self.tb.sr
         ex, cfgw = EXAG.get(energy, EXAG[1])
+        if voice not in self.conds:
+            self.cb.prepare_conditionals(self.ref_voice(voice), exaggeration=0.5)
+            self.conds[voice] = self.cb.conds
         self.cb.conds = self.conds[voice]
         torch.manual_seed(seed)
         wav = self.cb.generate(text, exaggeration=ex, cfg_weight=cfgw, temperature=0.75)
@@ -385,6 +458,8 @@ def serve(args):
                     return False
                 a, how, err, secs = eng.synth(j['text'], j.get('voice', 'pbp'), int(j.get('energy', 1)), prio >= 1,
                                               urgent_waiting if prio == 0 else None)
+                if j.get('voice') == 'ref':
+                    a = on_stadium_mic(a)
                 write_wav(out, a)
                 log(f'p{prio} {how} {secs:.2f}s wer {err:.2f} {len(a)/SR:.2f}s audio | {j["text"][:70]}')
                 rest_until = time.time() + (0.0 if prio >= 2 else secs * args.rest)
@@ -397,22 +472,54 @@ def serve(args):
 
 
 def batch(args):
-    """Synthesize every line of a BoothScript --jsonl transcript (for listening tests and the broadcast render)."""
+    """Synthesize every line of a BoothScript --jsonl file that the cache does not have yet: a transcript (listening
+    tests, the broadcast render) or a bake (BoothScript --bake / --bake-all: every live call of every roster, made once
+    and kept). Each line gets the background treatment (up to three takes, Whisper-checked). A bake stopped part way
+    resumes where it was (made lines are skipped). --dry-run counts and estimates without loading a model."""
     root = os.path.abspath(args.cache)
     os.makedirs(root, exist_ok=True)
-    eng = Engine(args.engine, not args.no_qc, os.path.join(HERE, 'voices'))
-    n = 0
+    todo, have = [], []
     for line in open(args.once, encoding='utf-8'):
         j = json.loads(line)
-        voice = 'pbp' if j['who'] == 'PBP' else 'color'
+        voice = 'pbp' if j['who'] == 'PBP' else 'ref' if j['who'] == 'REF' else 'color'
         key = line_key(voice, j['energy'], j['say'])
+        (have if os.path.exists(os.path.join(root, key + '.wav')) else todo).append((key, voice, j))
+    if args.limit > 0:
+        todo = todo[:args.limit]
+    # what a line costs on disk: the cache's own made lines of this file, seconds of audio per word (24 kHz 16-bit mono)
+    per_word = 0.36
+    sample = [os.path.join(root, k + '.wav') for k, _, _ in have[:400]]
+    if sample:
+        secs = sum(max(0, os.path.getsize(p) - 44) / (2 * SR) for p in sample)
+        words_n = sum(len(j['say'].split()) for _, _, j in have[:400])
+        per_word = secs / max(1, words_n)
+    todo_words = sum(len(j['say'].split()) for _, _, j in todo)
+    audio_s = todo_words * per_word
+    print(f'{args.once}: {len(have) + len(todo)} lines, {len(have)} already in {root}, {len(todo)} to make')
+    print(f'  about {audio_s / 3600:.1f} h of audio, {audio_s * 2 * SR / 1e9:.2f} GB of wavs '
+          f'({per_word:.2f} s a word, measured on {len(sample)} made lines of this file)')
+    print(f'  at {args.secs_per_line:.1f} s a line (idle GPU, Turbo, three takes with the Whisper check): '
+          f'{len(todo) * args.secs_per_line / 3600:.1f} h')
+    if args.dry_run or not todo:
+        return
+    alive = os.path.join(root, '_alive')
+    if not args.force and os.path.exists(alive) and time.time() - os.path.getmtime(alive) < 10:
+        print('the game\'s speech service is running on this cache (it and the game want the GPU): close the game first, or --force')
+        sys.exit(2)
+    eng = Engine(args.engine, not args.no_qc, os.path.join(HERE, 'voices'))
+    t0, n = time.time(), 0
+    for key, voice, j in todo:
         out = os.path.join(root, key + '.wav')
         if os.path.exists(out):
-            continue
+            continue  # (made meanwhile: a game's service shares the cache)
         a, how, err, secs = eng.synth(j['say'], voice, int(j['energy']), False)
+        if voice == 'ref':
+            a = on_stadium_mic(a)
         write_wav(out, a)
         n += 1
-        log(f'{n} {how} {secs:.2f}s wer {err:.2f} | {j["say"][:70]}')
+        line_s = (time.time() - t0) / n
+        eta = (len(todo) - n) * line_s
+        log(f'{n}/{len(todo)} {how} {secs:.2f}s wer {err:.2f} | eta {eta / 3600:.1f} h ({line_s:.2f} s a line) | {j["say"][:60]}')
 
 
 def line_key(voice, energy, say):
@@ -429,7 +536,13 @@ if __name__ == '__main__':
     ap.add_argument('--cache', required=True)
     ap.add_argument('--engine', default='turbo', choices=['turbo', 'chatterbox', 'kokoro'])
     ap.add_argument('--no-qc', action='store_true')
-    ap.add_argument('--once', help='synthesize a BoothScript --jsonl file and exit')
+    ap.add_argument('--once', help='synthesize a BoothScript --jsonl file and exit (a transcript, or a --bake / --bake-all list)')
+    ap.add_argument('--dry-run', action='store_true', help='--once: count what is missing and estimate time and disk; load no model')
+    ap.add_argument('--limit', type=int, default=0, help='--once: make at most this many lines this run (0 = all)')
+    # (the service log: one take of a ~3 s line costs ~2.9 s while the game renders, the GPU idle about a quarter of that;
+    # plus the Whisper check and the 9% of lines that need another take)
+    ap.add_argument('--secs-per-line', type=float, default=1.2, help='--once: the estimate of the time a line takes (for --dry-run)')
+    ap.add_argument('--force', action='store_true', help='--once: run even while a game\'s speech service is alive on the cache')
     ap.add_argument('--parent', type=int, default=0, help='exit when this process (the game) exits')
     # the writer is opt-in: a 14B model on the CPU next to the game costs it half its frame rate (bench 2026-11-13: 111.7 -> 49 fps)
     ap.add_argument('--writer', default='', help="the booth writer: claude:<model> (Claude API, key from ANTHROPIC_API_KEY) or an Ollama model ('' = none)")

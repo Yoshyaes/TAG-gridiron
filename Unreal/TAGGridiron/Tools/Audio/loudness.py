@@ -205,8 +205,12 @@ def log_time(line):
     return dt.datetime(y, mo, d, h, mi, s, ms * 1000)
 
 
+ENERGY = re.compile(r" e(\d) \[voice\]")
+
+
 def voice_windows(log_path, rec_secs):
-    """[(start, end)] seconds into the recording when a booth line was voiced (end estimated from its word count)."""
+    """[(start, end, energy)] seconds into the recording when a booth line was voiced (end estimated from its word
+    count; energy 0..3 from the line, -1 when the log does not say)."""
     rec0 = None
     lines = []
     with open(log_path, encoding="utf-8", errors="replace") as fh:
@@ -216,16 +220,17 @@ def voice_windows(log_path, rec_secs):
             elif "TAG booth " in ln and "[voice]" in ln:
                 t = log_time(ln)
                 text = ln.split("|", 1)[1].strip() if "|" in ln else ""
+                m = ENERGY.search(ln)
                 if t:
-                    lines.append((t, len(text.split())))
+                    lines.append((t, len(text.split()), int(m.group(1)) if m else -1))
     if rec0 is None:
         return None, len(lines)
     win = []
-    for t, words in lines:
+    for t, words, energy in lines:
         a = (t - rec0).total_seconds()
         b = a + 0.3 + words / WORDS_PER_SEC
         if b > 0 and a < rec_secs:
-            win.append((max(0.0, a), min(rec_secs, b)))
+            win.append((max(0.0, a), min(rec_secs, b), energy))
     return win, len(lines)
 
 
@@ -307,11 +312,14 @@ def main():
             elif not nlines:
                 rows.append(("voice on", "0 lines", "no '[voice]' booth lines (run with -TagBoothLog and the speech service)", "INFO"))
             else:
-                mask = np.zeros(int(math.ceil(m["seconds"] * 10)) + 1, bool)
-                for s, e in win:
+                nhop = int(math.ceil(m["seconds"] * 10)) + 1
+                mask = np.zeros(nhop, bool)
+                level = np.full(nhop, -1, int)  # the energy of the line on the air at each 0.1 s (-1 none)
+                for s, e, en in win:
                     s, e = s - a.skip, e - a.skip
                     if e > 0:
                         mask[int(max(0, s) * 10): int(e * 10) + 1] = True
+                        level[int(max(0, s) * 10): int(e * 10) + 1] = max(en, 0)
                 share = float(mask[: int(m["seconds"] * 10)].mean())
                 # short-term loudness while the booth talks vs the rest (3 s windows that end inside / outside)
                 st = m["_st"]
@@ -319,9 +327,19 @@ def main():
                 inside = mask[np.minimum(ends, len(mask) - 1)]
                 on = float(lufs_of(st[inside].mean())) if inside.any() else float("nan")
                 off = float(lufs_of(st[~inside].mean())) if (~inside).any() else float("nan")
-                voice = {"lines": nlines, "share": share, "st_voice": on, "st_rest": off}
+                # the broadcast mix (05 A3): calm lines over a ducked bed, the big calls inside the roar. A 3 s window counts
+                # for calm talk when it starts and ends in it; for a call (a second or two) when it ends in one
+                full = {}
+                lev_end = level[np.minimum(ends, len(level) - 1)]
+                lev_start = level[np.minimum(np.arange(len(st)), len(level) - 1)]
+                calm = lambda v: (v >= 0) & (v <= 1)
+                for name, pick in (("e0-1", calm(lev_end) & calm(lev_start)), ("e2", lev_end == 2), ("e3", lev_end == 3)):
+                    full[name] = float(lufs_of(st[pick].mean())) if pick.any() else float("nan")
+                voice = {"lines": nlines, "share": share, "st_voice": on, "st_rest": off, "st_by_energy": full}
                 rows.append(("voice on (estimated)", "%.0f %%" % (100 * share), "%d voiced lines, %.1f words/s" % (nlines, WORDS_PER_SEC), "INFO"))
                 rows.append(("short-term voice / rest", "%s / %s" % (fmt(on, " LUFS"), fmt(off, " LUFS")), "power mean of 3 s windows", "INFO"))
+                rows.append(("short-term by line energy", "%s / %s / %s" % (fmt(full["e0-1"]), fmt(full["e2"]), fmt(full["e3"])),
+                             "e0-1 / e2 / e3 LUFS (A3: e0-1 ~4-6 over rest)", "INFO"))
 
     stems = []
     for f in find_stems(a.wav, a.stems):

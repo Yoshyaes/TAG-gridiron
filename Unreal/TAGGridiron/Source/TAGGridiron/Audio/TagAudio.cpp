@@ -8,6 +8,8 @@
 #include "AudioMixerBlueprintLibrary.h"
 #include "AudioMixerDevice.h"
 #include "Sound/SoundSubmix.h"
+#include "SubmixEffects/AudioMixerSubmixEffectDynamicsProcessor.h"
+#include "Game/TagResult.h"
 #include "AudioDevice.h"
 #include "Misc/CommandLine.h"
 #include "Misc/Paths.h"
@@ -25,6 +27,26 @@ namespace
 	// the mix: how loud each crowd layer sits when it is fully up (the assets are all built to one loudness)
 	constexpr float kCalm = 1.0f, kBuzz = 0.95f, kRoar = 1.6f, kNoise = 1.35f, kRain = 0.7f, kWind = 0.6f;
 	constexpr float kField = 1.0f, kCrowdShot = 0.95f, kHouse = 0.42f, kPa = 0.62f, kMusic = 0.72f, kUi = 0.8f;
+
+	// the broadcast mix (Research/NextLevel/05 A3; T18: the A1 keeps the booth on top of calm play and lets the crowd over
+	// the announcers on the big one): how far the crowd's beds and one-shots, the stadium and the music give way to a line
+	constexpr float kDuckTalk = 0.562f, kDuckTalkMusic = 0.398f;  // calm talk, and any line at energy 0-1: -5 / -8 dB
+	constexpr float kDuckCall = 0.794f, kDuckCallMusic = 0.631f;  // a call of the action at energy 2: -2 / -4 dB
+	constexpr float kBloom = 1.12f;                                // the big call over a roaring building: the crowd +1 dB
+	constexpr float kDuckOld = 0.74f, kDuckOldMusic = 0.55f;       // -TagMixLegacy: any voice, the beds only
+	// the voice by its energy (every clip is levelled to -19 dBFS RMS by booth_tts.py): -2, 0, +2, +4 dB
+	constexpr float kVoiceByEnergy[4] = {0.794f, 1.f, 1.259f, 1.585f};
+	// the master (A4; T21: consoles -24 +-2 LUFS integrated, true peak -1 dBTP). The summed mix measured -20.4 to -22.2 LUFS
+	// with sample peaks to -1.0 dBFS (D:/TAGAudio/work final, final2, run4): trimmed 3.5 dB, then a limiter. The booth's
+	// lift stops 2 dB under the ceiling at the output, so a call over the roar leaves the limiter little to do.
+	// (measured 2026-11-25, seed 7 with the booth on - the voice is on ~60% of a game and carries the level - untrimmed:
+	// -22.0 / -22.1 LUFS, true peak -2.0 / -4.2 dBTP; the trim the engine's limiter was to apply never acted)
+	constexpr float kMasterTrimDb = -2.f;
+	constexpr float kLimitDb = -2.5f;
+	constexpr float kVoiceCeiling = 0.708f;                        // -3 dBFS
+	// a bed with several takes (Tools/Audio/build_crowd.py: three of each) moves to another every 2-4 minutes, over a
+	// 5 s equal-power crossfade, only while the building is quiet (05 A9: no 44-64 s cycle to hear)
+	constexpr float kSwapMin = 120.f, kSwapMax = 240.f, kSwapSecs = 5.f;
 
 	const FName NCalm("CrowdCalm"), NBuzz("CrowdBuzz"), NRoar("CrowdRoar"), NNoise("CrowdNoise"), NRain("WxRain"), NWind("WxWind");
 	const FName NCheerBig("CheerBig"), NCheerMed("CheerMed"), NCheerSmall("CheerSmall"), NGroan("Groan"), NGroanBig("GroanBig"), NBoo("Boo"),
@@ -92,6 +114,85 @@ void ATagAudio::Ui(const TCHAR* Bank, float Vol, float Pitch)
 	if (ATagAudio* A = GTagAudio.Get()) A->PlayNow(FLater{0.f, FName(Bank), FVector::ZeroVector, Vol, Pitch, ECat::Ui});
 }
 
+// ---------------------------------------------------------------------------------------------- the broadcast mix
+
+bool ATagAudio::LegacyMix()
+{
+	static const bool bOld = FParse::Param(FCommandLine::Get(), TEXT("TagMixLegacy"));
+	return bOld;
+}
+
+float ATagAudio::MasterTrim()
+{
+	static const float Trim = []
+	{
+		if (FParse::Param(FCommandLine::Get(), TEXT("TagNoLimiter"))) return 1.f;
+		float Db = kMasterTrimDb;
+		FParse::Value(FCommandLine::Get(), TEXT("TagMixTrimDb="), Db);
+		return FMath::Pow(10.f, FMath::Clamp(Db, -24.f, 6.f) / 20.f);
+	}();
+	return Trim;
+}
+
+float ATagAudio::VoiceEnergyGain(int32 Energy, float ClipPeak, float Level)
+{
+	if (LegacyMix()) return 1.f;
+	const float G = kVoiceByEnergy[FMath::Clamp(Energy, 0, 3)];
+	if (G <= 1.f) return G;
+	// (a lift only as far as the clip's peak stays under the ceiling at the output: never below the level it was built at)
+	const float Out = FMath::Max(ClipPeak, 0.01f) * FMath::Max(Level, 0.01f) * MasterTrim();
+	return FMath::Clamp(kVoiceCeiling / Out, 1.f, G);
+}
+
+void ATagAudio::BoothLine(int32 Energy, bool bTalk)
+{
+	if (Energy == VoiceEnergy && bTalk == bVoiceTalk) return;
+	VoiceEnergy = Energy;
+	bVoiceTalk = bTalk;
+	if (bLog)
+	{
+		// the fader the line asks for (TickMix rides it there): what was applied is in the mix test's lines
+		const float CrowdG = Energy < 0 ? 1.f : bLegacyMix ? kDuckOld : Energy >= 3 || Excite > 0.8f ? (Excite > 0.5f ? kBloom : 1.f) : Energy == 2 && !bTalk ? kDuckCall : kDuckTalk;
+		const float MusicG = Energy < 0 ? 1.f : bLegacyMix ? kDuckOldMusic : Energy >= 3 || Excite > 0.8f ? 1.f : Energy == 2 && !bTalk ? kDuckCallMusic : kDuckTalkMusic;
+		UE_LOG(LogTemp, Display, TEXT("TAG mix %.2f line e%d %s -> crowd %+.1f dB, music %+.1f dB (excite %.2f)"), FPlatformTime::Seconds() - T0, Energy,
+			Energy < 0 ? TEXT("off") : bTalk ? TEXT("talk") : TEXT("call"), 20.f * FMath::LogX(10.f, CrowdG), 20.f * FMath::LogX(10.f, MusicG), Excite);
+	}
+}
+
+void ATagAudio::StartLimiter()
+{
+	// the master's trim to the console loudness target and a limiter under the -1 dBTP ceiling (the engine's dynamics
+	// processor on the main submix: peak detection linked across the channels, a fast digital attack, look-ahead so the
+	// gain is down before the peak arrives, a hard knee, a slow enough release not to pump the crowd)
+	if (FParse::Param(FCommandLine::Get(), TEXT("TagNoLimiter")))
+	{
+		UE_LOG(LogTemp, Display, TEXT("TAG audio: no master limiter (-TagNoLimiter)"));
+		return;
+	}
+	Limiter = NewObject<USubmixEffectDynamicsProcessorPreset>(this);
+	FSubmixEffectDynamicsProcessorSettings S;
+	S.DynamicsProcessorType = ESubmixEffectDynamicsProcessorType::Limiter;
+	S.PeakMode = ESubmixEffectDynamicsPeakMode::Peak;
+	S.LinkMode = ESubmixEffectDynamicsChannelLinkMode::Peak;
+	S.InputGainDb = 0.f; // (the trim is in the mix's own gains: SetLevels)
+	float LimitDb = kLimitDb;
+	FParse::Value(FCommandLine::Get(), TEXT("TagLimitDb="), LimitDb); // (a test of the limiter itself: -20 must hold the recording's peaks there)
+	S.ThresholdDb = FMath::Clamp(LimitDb, -60.f, 0.f);
+	S.KneeBandwidthDb = 0.f;
+	S.LookAheadMsec = 10.f;
+	S.AttackTimeMsec = 1.f;
+	S.ReleaseTimeMsec = 200.f;
+	S.OutputGainDb = 0.f;
+	S.bAnalogMode = false;
+	S.bBypass = false;
+	Limiter->SetSettings(S);
+	UAudioMixerBlueprintLibrary::AddMasterSubmixEffect(this, Limiter);
+	// (again, now that the effect exists: an instance takes its preset's settings only when told they changed - set before
+	// it was made, it ran the engine's defaults, and a -15 dB input gain did nothing to the recording)
+	Limiter->SetSettings(S);
+	UE_LOG(LogTemp, Display, TEXT("TAG audio: master trim %+.1f dB, limiter at %.1f dBFS%s"), 20.f * FMath::LogX(10.f, MasterTrim()), S.ThresholdDb, bLegacyMix ? TEXT(" (legacy mix)") : TEXT(""));
+}
+
 void ATagAudio::Screen(const TCHAR* Id)
 {
 	GScreen = FName(Id);
@@ -129,6 +230,10 @@ void ATagAudio::BeginPlay()
 		}
 	SetLevels(GLevels[0] / 4.f, GLevels[1] / 4.f, GLevels[2] / 4.f);
 	bLog = FParse::Param(Cmd, TEXT("TagAudioLog"));
+	bLegacyMix = LegacyMix();
+	bBoothRef = FParse::Param(Cmd, TEXT("TagBoothRef")) && !FParse::Param(Cmd, TEXT("TagNoBooth")) && !FParse::Param(Cmd, TEXT("TagBoothMute"));
+	bMixTest = FParse::Param(Cmd, TEXT("TagMixTest"));
+	StartLimiter();
 	Rand.Initialize(static_cast<int32>(FPlatformTime::Cycles64() & 0x7fffffff));
 	T0 = FPlatformTime::Seconds();
 	FindBanks();
@@ -155,6 +260,8 @@ void ATagAudio::BeginPlay()
 	{
 		Loops[i].Bank = LoopBanks[i];
 		Loops[i].C = MakeComp(false);
+		Loops[i].C2 = MakeComp(false);
+		Loops[i].NextSwap = Rand.FRandRange(kSwapMin, kSwapMax);
 	}
 	Loops[LRoar].Up = 2.6f;  Loops[LRoar].Down = 0.5f;
 	Loops[LNoise].Up = 0.9f; Loops[LNoise].Down = 1.1f;
@@ -188,6 +295,9 @@ void ATagAudio::EndPlay(const EEndPlayReason::Type Reason)
 		UAudioMixerBlueprintLibrary::StopRecordingOutput(this, EAudioRecordingExportType::WavFile, TEXT("tag_audio"), FPaths::ConvertRelativePathToFull(FPaths::ProjectSavedDir() / TEXT("AudioRec")));
 	}
 	MatchEnd();
+	if (Limiter) UAudioMixerBlueprintLibrary::RemoveMasterSubmixEffect(this, Limiter); // (the next world's sound actor adds its own)
+	Limiter = nullptr;
+	Shots.Reset();
 	for (const TSharedPtr<FStreamableHandle>& H : Preloads)
 		if (H.IsValid()) H->CancelHandle(); // (a load still out is dropped; one that landed lets go of its waves)
 	Preloads.Reset();
@@ -311,10 +421,11 @@ USoundWave* ATagAudio::Pick(FName Bank)
 	return B->Waves[i];
 }
 
-void ATagAudio::Note(const TCHAR* Kind, FName Bank, float Vol)
+void ATagAudio::Note(const TCHAR* Kind, FName Bank, float Vol, const USoundWave* Take)
 {
 	Counts.FindOrAdd(Bank)++;
-	if (bLog) UE_LOG(LogTemp, Display, TEXT("TAG audio %.2f %s %s %.2f"), FPlatformTime::Seconds() - T0, Kind, *Bank.ToString(), Vol);
+	if (Take) TakeUses.FindOrAdd(Bank).FindOrAdd(Take->GetFName())++;
+	if (bLog) UE_LOG(LogTemp, Display, TEXT("TAG audio %.2f %s %s %.2f %s"), FPlatformTime::Seconds() - T0, Kind, *Bank.ToString(), Vol, Take ? *Take->GetName() : TEXT(""));
 }
 
 void ATagAudio::PlayNow(const FLater& L)
@@ -327,14 +438,33 @@ void ATagAudio::PlayNow(const FLater& L)
 		// (one-shots nobody holds on to: played straight on the audio device, with no audio component made and
 		// collected for each - the footsteps alone were some thirty a second)
 		UGameplayStatics::PlaySoundAtLocation(this, W, L.Pos, FRotator::ZeroRotator, L.Vol * kField * LevelMaster * LevelStadium, L.Pitch, 0.f, FieldAtt);
-		Note(TEXT("field"), L.Bank, L.Vol);
+		Note(TEXT("field"), L.Bank, L.Vol, W);
 		break;
 	case ECat::Crowd:
 	case ECat::Stadium:
+	{
 		// (not a UI sound: held with the world by the pause menu)
-		UGameplayStatics::PlaySound2D(this, W, L.Vol * (L.Cat == ECat::Crowd ? kCrowdShot : kPa) * LevelMaster * LevelStadium, L.Pitch, 0.f, nullptr, nullptr, false);
-		Note(L.Cat == ECat::Crowd ? TEXT("crowd") : TEXT("stadium"), L.Bank, L.Vol);
+		const float Base = L.Vol * (L.Cat == ECat::Crowd ? kCrowdShot : kPa) * LevelMaster * LevelStadium;
+		if (bLegacyMix)
+		{
+			UGameplayStatics::PlaySound2D(this, W, Base, L.Pitch, 0.f, nullptr, nullptr, false);
+			LastShot.Reset();
+			LastShotBase = LastShotGain = Base;
+		}
+		else if (UAudioComponent* C = UGameplayStatics::CreateSound2D(this, W, Base * Duck, L.Pitch, 0.f, nullptr, false, true))
+		{
+			// the broadcast mix rides these with the beds (a cheer under calm talk gives way like the bed under it): a
+			// component kept by a weak handle until it plays out (CreateSound2D makes a UI sound: this one is the world's)
+			C->bIsUISound = false;
+			C->Play();
+			if (Shots.Num() < 32) Shots.Add(FShot{C, Base, Duck});
+			LastShot = C;
+			LastShotBase = Base;
+			LastShotGain = Base * Duck;
+		}
+		Note(L.Cat == ECat::Crowd ? TEXT("crowd") : TEXT("stadium"), L.Bank, L.Vol, W);
 		break;
+	}
 	case ECat::Ui:
 		UGameplayStatics::PlaySound2D(this, W, L.Vol * kUi * LevelMaster, L.Pitch, 0.f, nullptr, nullptr, true);
 		Note(TEXT("ui"), L.Bank, L.Vol);
@@ -364,7 +494,9 @@ void ATagAudio::StadiumSay(FName Bank, float Vol, float Delay)
 
 void ATagAudio::SetLevels(float Master, float MusicLevel, float Stadium)
 {
-	LevelMaster = Master; LevelMusic = MusicLevel; LevelStadium = Stadium;
+	// (the master trim rides in the mix's own gains: the engine's dynamics processor on the main submix, StartLimiter,
+	// was measured doing nothing - a -15 dB input gain left the recording 0.4 LU from no effect at all, 2026-11-25)
+	LevelMaster = Master * MasterTrim(); LevelMusic = MusicLevel; LevelStadium = Stadium;
 }
 
 // ---------------------------------------------------------------------------------------------- loops and music
@@ -389,8 +521,41 @@ void ATagAudio::TickLoops(float Dt, float CrowdGain)
 			L.bStarted = true;
 			Note(TEXT("loop"), L.Bank, 1.f);
 		}
+		// another take of the bed, in over this one at a quiet moment (a building on its feet is not the time)
+		const FBank* Bk = Banks.Find(L.Bank);
+		if (L.Xf < 0.f && L.C2 && Bk && Bk->Waves.Num() > 1)
+		{
+			L.NextSwap -= Dt;
+			if (L.NextSwap <= 0.f && Excite < 0.35f && Swell < 0.2f && Deflate <= 0.f)
+				if (USoundWave* W = Pick(L.Bank))
+				{
+					W->bLooping = true;
+					W->VirtualizationMode = EVirtualizationMode::PlayWhenSilent;
+					L.C2->SetSound(W);
+					L.C2->SetVolumeMultiplier(0.001f);
+					L.C2->Play(Rand.FRandRange(0.f, FMath::Max(0.f, W->Duration - 1.f)));
+					L.Xf = 0.f;
+					Note(TEXT("loop"), L.Bank, 1.f);
+				}
+		}
 		const float G = i >= LRain ? LevelMaster * LevelStadium : CrowdGain;
-		L.C->SetVolumeMultiplier(FMath::Max(0.001f, L.Vol * Gain[i] * G));
+		const float Vol = FMath::Max(0.001f, L.Vol * Gain[i] * G);
+		if (L.Xf >= 0.f)
+		{
+			L.Xf = FMath::Min(1.f, L.Xf + Dt / kSwapSecs);
+			const float A = FMath::Sin(L.Xf * UE_HALF_PI);
+			L.C->SetVolumeMultiplier(FMath::Max(0.001f, Vol * FMath::Cos(L.Xf * UE_HALF_PI)));
+			L.C2->SetVolumeMultiplier(FMath::Max(0.001f, Vol * A));
+			if (L.Xf >= 1.f)
+			{
+				// the new take is the bed now; the old one's component waits for the next swap
+				L.C->Stop();
+				Swap(L.C, L.C2);
+				L.Xf = -1.f;
+				L.NextSwap = Rand.FRandRange(kSwapMin, kSwapMax);
+			}
+		}
+		else L.C->SetVolumeMultiplier(Vol);
 	}
 }
 
@@ -399,7 +564,9 @@ void ATagAudio::StopLoops()
 	for (FLoop& L : Loops)
 	{
 		if (L.C && L.bStarted) L.C->Stop();
+		if (L.C2 && L.Xf >= 0.f) L.C2->Stop();
 		L.bStarted = false;
+		L.Xf = -1.f;
 		L.Vol = L.Target = 0.f;
 	}
 }
@@ -483,7 +650,7 @@ void ATagAudio::TickMusic(float Dt, float DuckNow)
 		House.Vol = House.Target > House.Vol ? FMath::Min(House.Target, House.Vol + House.Rate * Dt) : FMath::Max(House.Target, House.Vol - House.Rate * Dt);
 		House.Left -= Dt;
 		if ((House.Target <= 0.f && House.Vol <= 0.f) || House.Left <= 0.f) { House.C->Stop(); House.bOn = false; }
-		else House.C->SetVolumeMultiplier(FMath::Max(0.001f, House.Vol * kHouse * LevelMaster * LevelStadium));
+		else House.C->SetVolumeMultiplier(FMath::Max(0.001f, House.Vol * kHouse * LevelMaster * LevelStadium * (bLegacyMix ? 1.f : Duck))); // (the bowl's music: part of the crowd level)
 	}
 }
 
@@ -499,10 +666,15 @@ void ATagAudio::MatchStart(const tag::Game& G)
 	LogSeen = G.log.size();
 	P = FPlay();
 	K = FKickSeen();
-	Excite = 0.25f; ExciteHold = 4.f; // the teams are out: the building is up for the kickoff
+	// the teams are out and the theme plays - but on the first frame the match is on screen (OpenStart), not here: the
+	// match's load comes after this (it ran 26 s), and the open played to a cooled crowd with its music gone
+	Excite = 0.f; ExciteHold = 0.f;
+	bOpenPending = true;
+	OpenT = -1.f;
 	DNoise = Swell = Deflate = 0.f;
 	Queue.Reset();
 	Counts.Reset();
+	TakeUses.Reset();
 	T0 = FPlatformTime::Seconds();
 	// the crowd's beds are heard on the first frame: here now if they are not already. Everything else the match can
 	// play loads in the background (PreloadMatchBanks: the PA, the referee, the cadences and the music with it), and a
@@ -512,7 +684,6 @@ void ATagAudio::MatchStart(const tag::Game& G)
 		FBank* Bk = Banks.Find(B);
 		if (Bk && !Bk->bLoaded) { Pick(B); Bk->Last = -1; }
 	}
-	Music(NMusIntro, 0.9f, 0.05f, 1.2f);
 	PreloadMatchBanks();
 	PreloadBank(FName(*FString::Printf(TEXT("PaTouchdown_%hs"), HomeAbbr.c_str())));
 	PreloadBank(FName(*FString::Printf(TEXT("PaFirstDown_%hs"), HomeAbbr.c_str())));
@@ -527,7 +698,20 @@ void ATagAudio::MatchEnd()
 		Counts.KeySort([](const FName& A, const FName& B) { return A.LexicalLess(B); });
 		for (const auto& It : Counts) S += FString::Printf(TEXT(" %s=%d"), *It.Key.ToString(), It.Value);
 		UE_LOG(LogTemp, Display, TEXT("TAG audio summary:%s"), *S);
+		// how often one take came round: bank=<takes heard>/<takes in the bank>:<most uses of one take> (05 A9 wants the
+		// crowd's reactions at 3 or fewer a take a game)
+		FString T;
+		TakeUses.KeySort([](const FName& A, const FName& B) { return A.LexicalLess(B); });
+		for (const auto& It : TakeUses)
+		{
+			int32 Most = 0;
+			for (const auto& Tk : It.Value) Most = FMath::Max(Most, Tk.Value);
+			const FBank* Bk = Banks.Find(It.Key);
+			T += FString::Printf(TEXT(" %s=%d/%d:%d"), *It.Key.ToString(), It.Value.Num(), Bk ? Bk->Paths.Num() : 0, Most);
+		}
+		UE_LOG(LogTemp, Display, TEXT("TAG audio take uses:%s"), *T);
 	}
+	TakeUses.Reset();
 	Game = nullptr;
 	bHushed = false;
 	P = FPlay();
@@ -553,7 +737,9 @@ void ATagAudio::Hush()
 	for (FLoop& L : Loops)
 	{
 		if (L.C && L.bStarted) L.C->FadeOut(0.8f, 0.f);
+		if (L.C2 && L.Xf >= 0.f) L.C2->FadeOut(0.8f, 0.f);
 		L.bStarted = false;
+		L.Xf = -1.f;
 		L.Vol = L.Target = 0.f;
 	}
 	// kick off, from the menus: the hit, and the crowd coming up as the teams take the field
@@ -877,7 +1063,8 @@ void ATagAudio::OnLog(const tag::Game& G, const tag::PlayLog& L)
 		FString Slug;
 		for (const char C : Name) if (isalpha(static_cast<unsigned char>(C))) Slug.AppendChar(static_cast<TCHAR>(C));
 		const FName Ref(*FString::Printf(TEXT("Ref_%s"), *Slug));
-		StadiumSay(Has(Ref) ? Ref : FName("Ref_Generic"), 1.f, 0.9f);
+		// (with -TagBoothRef the booth's referee says it in full, number and enforcement: the stock sample would double him)
+		if (!bBoothRef) StadiumSay(Has(Ref) ? Ref : FName("Ref_Generic"), 1.f, 0.9f);
 		if (bOnHome) Crowd(NBoo, 0.9f, 3.2f); else Crowd(NCheerSmall, 0.8f, 3.2f);
 		return;
 	}
@@ -1031,10 +1218,10 @@ void ATagAudio::Feed(float Dt, const FTagAudioView& V)
 		if (L.Bank == NHouseMusic) { if (!House.bOn) HouseStart(NHouseMusic, 1.f); }
 		else PlayNow(L);
 	}
-	const float DuckWant = V.bBoothTalking ? 0.74f : 1.f;
-	Duck += (DuckWant - Duck) * FMath::Min(1.f, Dt * 5.f);
-
 	const bool bMatch = Game && V.G == Game && V.Stage != EStage::Menu;
+	if (bMixTest && bMatch) TickMixTest(Dt);
+	TickMix(Dt, V);
+
 	if (!bMatch)
 	{
 		// the menus: the playlist, and under it the building itself - near empty behind the main menu, filling up on
@@ -1055,6 +1242,22 @@ void ATagAudio::Feed(float Dt, const FTagAudioView& V)
 		return;
 	}
 	const tag::Game& G = *V.G;
+	// the open, on its first frame on screen (the match's load is over): the theme, and the building on its feet as the
+	// teams come out, filling as the open runs (the crane, the matchup, the kickoff units) until the ball is kicked
+	if (bOpenPending)
+	{
+		bOpenPending = false;
+		OpenT = 0.f;
+		Music(NMusIntro, 0.9f, 0.8f, 1.2f);
+		Roar(0.35f, 6.f);
+		Crowd(NCheerMed, 0.65f, 0.6f);
+	}
+	if (OpenT >= 0.f)
+	{
+		OpenT += Dt;
+		Roar(FMath::Min(0.55f, 0.3f + 0.012f * OpenT), 0.5f);
+		if (V.Stage == EStage::Live || K.bStruck || OpenT > 45.f) OpenT = -1.f;
+	}
 	if (V.Stage != LastStage)
 	{
 		const EStage Was = LastStage;
@@ -1144,13 +1347,20 @@ void ATagAudio::Feed(float Dt, const FTagAudioView& V)
 	}
 	if (V.Stage == EStage::Replay && V.ReplayT >= 0.f)
 	{
-		// the replay, heard: the play's own hits, catches and kicks at the moments they are shown, slowed like the picture
-		if (TapeSeen < 0.f || V.ReplayT < TapeSeen) TapeSeen = V.ReplayT;
+		// the replay, heard: the play's own hits, catches and kicks at the moments they are shown, slowed like the picture.
+		// A package of angles (Game/MatchBroadcast.cpp): each angle starts back in the play (its hits are heard again,
+		// once, with a soft whoosh under the wipe); a cut that skips ahead plays nothing it skipped (no burst of hits)
+		if (TapeSeen >= 0.f && V.ReplayT < TapeSeen - 0.3f) PlayNow(FLater{0.f, NUiWhoosh, FVector::ZeroVector, 0.35f, 0.9f, ECat::Ui});
+		if (TapeSeen < 0.f || V.ReplayT < TapeSeen || V.ReplayT - TapeSeen > 0.3f) TapeSeen = V.ReplayT;
+		// the pitch follows the replay's speed (its ramp 1x -> 0.35x -> 0.7x): a hit at a third of real speed sounds deeper
+		const float Rate = Dt > 1e-4f ? FMath::Clamp((V.ReplayT - TapeSeen) / Dt, 0.f, 1.5f) : TapeRate;
+		TapeRate += (Rate - TapeRate) * FMath::Min(1.f, Dt * 6.f);
+		const float Slow = FMath::Clamp(0.62f + 0.38f * TapeRate, 0.72f, 1.f);
 		for (const FLater& L : Tape)
-			if (L.T > TapeSeen && L.T <= V.ReplayT) PlayNow(FLater{0.f, L.Bank, L.Pos, L.Vol * 0.85f, L.Pitch * 0.8f, ECat::Field});
+			if (L.T > TapeSeen && L.T <= V.ReplayT) PlayNow(FLater{0.f, L.Bank, L.Pos, L.Vol * 0.85f, L.Pitch * Slow, ECat::Field});
 		TapeSeen = V.ReplayT;
 	}
-	else TapeSeen = -1.f;
+	else { TapeSeen = -1.f; TapeRate = 0.5f; }
 	if (V.Stage == EStage::Kick && V.KickKind >= 0) TickKick(V);
 	else { if (K.bRise && !(V.Sim && P.bReturn)) { K.bRise = false; HouseStop(0.3f); } K.bOn = false; }
 
@@ -1203,5 +1413,132 @@ void ATagAudio::Feed(float Dt, const FTagAudioView& V)
 	Loops[LRain].Target = G.weather.precip == tag::Precip::Rain ? 1.f : 0.f;
 	Loops[LWind].Target = FMath::Clamp((Wind - 8.f) / 14.f, 0.f, 1.f) + (G.weather.precip == tag::Precip::Snow ? 0.35f : 0.f);
 	TickLoops(Dt, LevelMaster * LevelStadium * Duck);
-	TickMusic(Dt, V.bBoothTalking ? 0.55f : 1.f);
+	TickMusic(Dt, MusicDuck);
+}
+
+void ATagAudio::TickMix(float Dt, const FTagAudioView& V)
+{
+	// the line on the air (BoothLine; the director's Talking() too, for a voice that never said what it was)
+	const bool bOnAir = V.bBoothTalking || bTestOnAir;
+	float CrowdWant = 1.f, MusicWant = 1.f;
+	if (bLegacyMix)
+	{
+		CrowdWant = bOnAir ? kDuckOld : 1.f;
+		MusicWant = bOnAir ? kDuckOldMusic : 1.f;
+		Duck += (CrowdWant - Duck) * FMath::Min(1.f, Dt * 5.f);
+		MusicDuck = MusicWant;
+		return;
+	}
+	if (bOnAir)
+	{
+		const int32 E = VoiceEnergy < 0 ? 1 : VoiceEnergy;
+		if (E >= 3 || Excite > 0.8f)
+		{
+			// the big call: the building is not pulled down under him; a roaring one comes up around the call (T18: on
+			// the big play the announcers sit 6-10 dB under the crowd, the call's own lift makes up the rest)
+			CrowdWant = Excite > 0.5f ? kBloom : 1.f;
+		}
+		else if (E == 2 && !bVoiceTalk) { CrowdWant = kDuckCall; MusicWant = kDuckCallMusic; }
+		else { CrowdWant = kDuckTalk; MusicWant = kDuckTalkMusic; }
+	}
+	// in fast, out slow: the crowd is pulled down as the man starts (~0.15 s) and let back up behind him (~0.45 s)
+	auto Ride = [Dt](float& Fader, float Want) { Fader += (Want - Fader) * FMath::Min(1.f, Dt * (Want < Fader ? 7.f : 2.2f)); };
+	Ride(Duck, CrowdWant);
+	Ride(MusicDuck, MusicWant);
+	// the crowd's and the PA's one-shots still sounding ride the same fader as the beds
+	for (int32 i = Shots.Num() - 1; i >= 0; --i)
+	{
+		FShot& S = Shots[i];
+		UAudioComponent* C = S.C.Get();
+		if (!C || !C->IsPlaying()) { Shots.RemoveAtSwap(i); continue; }
+		if (FMath::Abs(S.Set - Duck) > 0.01f)
+		{
+			S.Set = Duck;
+			C->SetVolumeMultiplier(S.Base * Duck);
+		}
+	}
+}
+
+float ATagAudio::LastShotDuck() const
+{
+	if (LastShotBase <= 0.f) return 0.f;
+	if (const UAudioComponent* C = LastShot.Get(); C && C->IsPlaying()) return C->VolumeMultiplier / LastShotBase;
+	return LastShotGain / LastShotBase;
+}
+
+void ATagAudio::MixCheck(const TCHAR* What, float Got, float Want, float Tol)
+{
+	// gains compared in dB (a fader at 0 is -inf: compared as -60)
+	auto Db = [](float G) { return G > 0.001f ? 20.f * FMath::LogX(10.f, G) : -60.f; };
+	const bool bOk = FMath::Abs(Db(Got) - Db(Want)) <= Tol;
+	(bOk ? MixPass : MixFail)++;
+	UE_LOG(LogTemp, Display, TEXT("TAG mix test %s: %+.2f dB (want %+.2f +-%.1f) %s"), What, Db(Got), Db(Want), Tol, bOk ? TEXT("ok") : TEXT("FAIL"));
+}
+
+void ATagAudio::TickMixTest(float Dt)
+{
+	// -TagMixTest: over a CPU game (no booth: the test is the booth), a calm line, an excited call and a touchdown call,
+	// each held until the faders settle; the gains the mix applied are checked against the design (or, with
+	// -TagMixLegacy, against the old fixed duck), then the result for the gate (Tools/QA/gate.ps1)
+	if (MixTestStep < 0) return;
+	if (MixTestT < 0.f) MixTestT = 0.f;
+	MixTestT += Dt;
+	const bool bOld = bLegacyMix;
+	const float Lvl = LevelMaster * LevelStadium;
+	// the building held quiet enough that the calm line and the call are not "the big one" (the CPU game plays on)
+	if (MixTestStep < 3) { Excite = FMath::Min(Excite, 0.3f); ExciteHold = 0.f; }
+	if (MixTestStep == 0 && MixTestT >= 4.f)
+	{
+		MixTestStep = 1;
+		bTestOnAir = true;
+		BoothLine(0, true);                       // a calm read
+		Crowd(NCheerSmall, 0.8f, 0.4f);           // a one-shot that starts under it
+	}
+	else if (MixTestStep == 1 && MixTestT >= 6.5f)
+	{
+		MixTestStep = 2;
+		MixCheck(TEXT("calm talk: crowd beds"), Duck, bOld ? kDuckOld : kDuckTalk, 0.5f);
+		MixCheck(TEXT("calm talk: music"), MusicDuck, bOld ? kDuckOldMusic : kDuckTalkMusic, 0.5f);
+		MixCheck(TEXT("calm talk: crowd one-shot"), LastShotDuck(), bOld ? 1.f : kDuckTalk, 0.6f);
+		MixCheck(TEXT("calm talk: bed component"), Loops[LCalm].bStarted && Loops[LCalm].C ? Loops[LCalm].C->VolumeMultiplier / FMath::Max(0.001f, Loops[LCalm].Vol * kCalm * Lvl) : 0.f,
+			bOld ? kDuckOld : kDuckTalk, 0.5f);
+		MixCheck(TEXT("calm talk: voice e0"), VoiceEnergyGain(0, 0.4f, 1.f), bOld ? 1.f : kVoiceByEnergy[0], 0.1f);
+		BoothLine(2, false);                      // an excited call of the action
+	}
+	else if (MixTestStep == 2 && MixTestT >= 9.f)
+	{
+		MixTestStep = 3;
+		MixCheck(TEXT("live call e2: crowd beds"), Duck, bOld ? kDuckOld : kDuckCall, 0.5f);
+		MixCheck(TEXT("live call e2: music"), MusicDuck, bOld ? kDuckOldMusic : kDuckCallMusic, 0.5f);
+		MixCheck(TEXT("live call e2: voice"), VoiceEnergyGain(2, 0.4f, 1.f), bOld ? 1.f : kVoiceByEnergy[2], 0.1f);
+		// the touchdown: the building erupts with the call
+		Roar(1.f, 9.f);
+		BoothLine(3, false);
+		Crowd(NCheerBig, 1.15f);
+	}
+	else if (MixTestStep == 3 && MixTestT >= 11.5f)
+	{
+		MixTestStep = 4;
+		MixCheck(TEXT("touchdown e3: crowd beds"), Duck, bOld ? kDuckOld : kBloom, 0.5f);
+		MixCheck(TEXT("touchdown e3: crowd one-shot"), LastShotDuck(), bOld ? 1.f : kBloom, 0.6f);
+		MixCheck(TEXT("touchdown e3: voice (quiet clip)"), VoiceEnergyGain(3, 0.25f, 1.f), bOld ? 1.f : kVoiceByEnergy[3], 0.1f);
+		// a hot clip: the lift stops where its peak reaches the ceiling at the output (never under the level it was built at)
+		const float PeakOut = 0.85f * MasterTrim();
+		MixCheck(TEXT("touchdown e3: voice (hot clip) peak at the output"), VoiceEnergyGain(3, 0.85f, 1.f) * PeakOut,
+			bOld ? PeakOut : FMath::Max(PeakOut, FMath::Min(kVoiceCeiling, PeakOut * kVoiceByEnergy[3])), 0.1f);
+		bTestOnAir = false;
+		BoothLine(-1, false);
+	}
+	else if (MixTestStep == 4 && MixTestT >= 14.f)
+	{
+		MixTestStep = 5;
+		MixCheck(TEXT("after the line: crowd beds"), Duck, 1.f, 0.3f);
+		MixCheck(TEXT("after the line: music"), MusicDuck, 1.f, 0.3f);
+		const bool bNoLim = FParse::Param(FCommandLine::Get(), TEXT("TagNoLimiter"));
+		(bNoLim || Limiter ? MixPass : MixFail)++;
+		UE_LOG(LogTemp, Display, TEXT("TAG mix test master limiter: %s, trim %+.1f dB %s"), Limiter ? TEXT("on") : TEXT("off"), 20.f * FMath::LogX(10.f, MasterTrim()),
+			bNoLim || Limiter ? TEXT("ok") : TEXT("FAIL"));
+		MixTestStep = -1;
+		TagResult::Finish(TEXT("TagMixTest"), MixPass, MixFail);
+	}
 }

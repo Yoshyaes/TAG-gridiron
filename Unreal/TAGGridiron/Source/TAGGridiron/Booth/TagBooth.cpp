@@ -1,5 +1,6 @@
 #include "Booth/TagBooth.h"
 #include "Audio/TagAudio.h"
+#include "Game/TagRecent.h"
 
 #include "Async/Async.h"
 #include "Components/AudioComponent.h"
@@ -105,6 +106,12 @@ void ATagBooth::BeginPlay()
 	const uint32 Seed = static_cast<uint32>(FPlatformTime::Cycles64() & 0x7fffffff) | 1u;
 	uint32 Fixed = 0;
 	Core = MakeUnique<tag::booth::Booth>(FParse::Value(Cmd, TEXT("TagBoothSeed="), Fixed) ? Fixed : Seed);
+	// what the booth said in earlier games (Game/TagRecent.h, saved in GameUserSettings [TAG.Recent] booth.*): the next
+	// game picks the wordings heard least recently. -TagBoothNoMemory: every game picks as if it were the first
+	Core->enableMemory(!FParse::Param(Cmd, TEXT("TagBoothNoMemory")));
+	// -TagBoothRef: the referee announces each flag at his microphone in his own voice (Booth::enableReferee; the speech
+	// service's "ref" voice), and the stadium PA's stock referee sample stays quiet (ATagAudio::BoothReferee). Off by default
+	Core->enableReferee(FParse::Param(Cmd, TEXT("TagBoothRef")));
 	CacheDir = FPaths::ConvertRelativePathToFull(FPaths::ProjectSavedDir() / TEXT("BoothVoice"));
 	ReqDir = CacheDir / TEXT("req");
 	IFileManager::Get().MakeDirectory(*ReqDir, true);
@@ -141,7 +148,11 @@ void ATagBooth::Tick(float Dt) { Super::Tick(Dt); }
 
 void ATagBooth::EndPlay(const EEndPlayReason::Type Reason)
 {
+	if (LiveLines > 0)
+		UE_LOG(LogTemp, Display, TEXT("TAG booth live calls %d, voiced %d (%.0f%%), %d of them by the generic stand-in"), LiveLines, LiveVoiced,
+			100.0 * LiveVoiced / LiveLines, AltLines);
 	Silence();
+	if (Core && Core->memoryOn()) tag::Recent::get().flush(); // (what this match said, kept for the next one)
 	if (bLiveFlag) IFileManager::Get().Delete(*(CacheDir / TEXT("_live")), false, true, true);
 	bLiveFlag = false;
 	if (CaptionRoot && GEngine && GEngine->GameViewport) GEngine->GameViewport->RemoveViewportWidgetContent(CaptionRoot.ToSharedRef());
@@ -160,6 +171,7 @@ void ATagBooth::Silence()
 {
 	if (Voice) Voice->Stop();
 	if (Core && CurId) Core->finished(CurId);
+	if (bPlaying) TellMix(-1, false);
 	CurId = 0;
 	bPlaying = bWaitingAudio = false;
 	DropClipWait();
@@ -167,10 +179,31 @@ void ATagBooth::Silence()
 	CaptionAge = 99.f;
 }
 
+bool ATagBooth::IsTalk(tag::booth::Kind K)
+{
+	// the crowd gives way well under talk; a call of the action (a live call, a result) by its energy
+	using KK = tag::booth::Kind;
+	return K != KK::Live && K != KK::Result;
+}
+
+void ATagBooth::TellMix(int32 Energy, bool bTalk) const
+{
+	if (ATagAudio* A = ATagAudio::Get(this)) A->BoothLine(Energy, bTalk);
+}
+
+bool ATagBooth::HasClip(const FString& Key)
+{
+	if (Present.Contains(Key)) return true;
+	if (!FPaths::FileExists(CacheDir / (Key + TEXT(".wav")))) return false;
+	Present.Add(Key);
+	return true;
+}
+
 FString ATagBooth::LineKey(const tag::booth::Line& L)
 {
 	// FNV-1a 64 over "voice|energy|say" (booth_tts.py line_key computes the same)
-	const char* VoiceName = L.who == tag::booth::Who::PBP ? "pbp" : "color";
+	// ("ref": the referee at his microphone, -TagBoothRef; the two broadcasters' keys are as they always were)
+	const char* VoiceName = L.who == tag::booth::Who::PBP ? "pbp" : L.who == tag::booth::Who::Ref ? "ref" : "color";
 	const std::string S = std::string(VoiceName) + "|" + std::to_string(L.energy) + "|" + L.say;
 	uint64 H = 0xcbf29ce484222325ull;
 	for (const unsigned char C : S)
@@ -294,6 +327,11 @@ bool ATagBooth::LoadClip(const FString& Path, FClip& Out)
 			Out.Pcm.SetNumUninitialized(N);
 			FMemory::Memcpy(Out.Pcm.GetData(), B.GetData() + At + 8, N);
 			Out.Secs = static_cast<float>(N / 2) / static_cast<float>(FMath::Max(1, Out.Rate));
+			// its loudest sample (the energy's lift stops before that passes the ceiling)
+			int32 Loudest = 0;
+			const int16* Samples = reinterpret_cast<const int16*>(Out.Pcm.GetData());
+			for (int32 i = 0; i < N / 2; ++i) Loudest = FMath::Max(Loudest, FMath::Abs(static_cast<int32>(Samples[i])));
+			Out.Peak = static_cast<float>(Loudest) / 32768.f;
 			return true;
 		}
 		At += 8 + static_cast<int32>(Len + (Len & 1));
@@ -312,7 +350,7 @@ void ATagBooth::Request(const tag::booth::Line& L, int32 Prio)
 	if (FPaths::FileExists(CacheDir / (Key + TEXT(".wav")))) { Present.Add(Key); return; }
 	Asked.Add(AskKey);
 	const FString Json = FString::Printf(TEXT("{\"key\":\"%s\",\"text\":\"%s\",\"voice\":\"%s\",\"energy\":%d,\"prio\":%d,\"t\":%.3f}"), *Key, *JsonEsc(Utf8(L.say)),
-		L.who == tag::booth::Who::PBP ? TEXT("pbp") : TEXT("color"), L.energy, Prio, FPlatformTime::Seconds());
+		L.who == tag::booth::Who::PBP ? TEXT("pbp") : L.who == tag::booth::Who::Ref ? TEXT("ref") : TEXT("color"), L.energy, Prio, FPlatformTime::Seconds());
 	FFileHelper::SaveStringToFile(Json, *(ReqDir / (Key + TEXT(".json"))), FFileHelper::EEncodingOptions::ForceUTF8WithoutBOM);
 }
 
@@ -369,13 +407,14 @@ void ATagBooth::ShowCaption(const tag::booth::Line* L)
 {
 	if (!L || !CaptionText || !CaptionWho) return;
 	const tag::booth::Crew& C = Core->crew();
-	const std::string& Who = L->who == tag::booth::Who::PBP ? C.pbpLast : C.colorLast;
+	static const std::string RefName = "Referee";
+	const std::string& Who = L->who == tag::booth::Who::PBP ? C.pbpLast : L->who == tag::booth::Who::Ref ? RefName : C.colorLast;
 	CaptionWho->SetText(FText::FromString(Utf8(Who).ToUpper()));
 	CaptionText->SetText(FText::FromString(Utf8(L->text)));
 	CaptionAge = 0.f;
 	if (bLog)
-		UE_LOG(LogTemp, Display, TEXT("TAG booth %.1f %s %s e%d%s | %s"), Core->now(), ANSI_TO_TCHAR(tag::booth::whoName(L->who)), ANSI_TO_TCHAR(tag::booth::kindName(L->kind)),
-			L->energy, bPlaying ? TEXT(" [voice]") : TEXT(" [caption]"), *Utf8(L->text));
+		UE_LOG(LogTemp, Display, TEXT("TAG booth %.1f %s %s e%d%s%s | %s"), Core->now(), ANSI_TO_TCHAR(tag::booth::whoName(L->who)), ANSI_TO_TCHAR(tag::booth::kindName(L->kind)),
+			L->energy, bPlaying ? TEXT(" [voice]") : TEXT(" [caption]"), bAltLine ? TEXT(" [alt]") : TEXT(""), *Utf8(L->text));
 }
 
 void ATagBooth::Feed(float Dt, const tag::Game& G, const tag::booth::View& V)
@@ -403,7 +442,7 @@ void ATagBooth::Feed(float Dt, const tag::Game& G, const tag::booth::View& V)
 			if (!FMath::IsNearlyEqual(Gain, GainSet))
 			{
 				GainSet = Gain;
-				Voice->SetVolumeMultiplier(Gain);
+				Voice->SetVolumeMultiplier(Gain * EnergyGain * ATagAudio::MasterTrim());
 			}
 		}
 		if (FadeT < 0.f && Core->cutCurrent())
@@ -418,6 +457,7 @@ void ATagBooth::Feed(float Dt, const tag::Game& G, const tag::booth::View& V)
 			{
 				if (Voice) Voice->Stop();
 				Core->finished(CurId);
+				if (bPlaying) TellMix(-1, false);
 				CurId = 0;
 				bPlaying = bWaitingAudio = false;
 				DropClipWait();
@@ -450,11 +490,18 @@ void ATagBooth::Feed(float Dt, const tag::Game& G, const tag::booth::View& V)
 				Wave->bLooping = false;
 				Wave->QueueAudio(C.Pcm.GetData(), C.Pcm.Num());
 				Voice->SetSound(Wave);
-				// (the settings' Master x Commentary: the voices went out at full whatever the volume was set to)
+				// (the settings' Master x Commentary: the voices went out at full whatever the volume was set to), and the
+				// line's own lift: an excited call is louder than calm talk (the broadcast mix; 1 with -TagMixLegacy)
 				GainSet = VoiceGain();
-				Voice->SetVolumeMultiplier(GainSet);
+				EnergyGain = ATagAudio::VoiceEnergyGain(CurLine.energy, C.Peak, GainSet);
+				Voice->SetVolumeMultiplier(GainSet * EnergyGain * ATagAudio::MasterTrim()); // (and the mix's master trim, as every sound has)
 				Voice->Play();
-				if (bLog) UE_LOG(LogTemp, Display, TEXT("TAG booth voice gain %.2f (master %d/4, commentary %d/4)"), GainSet, ATagAudio::Get(this) ? ATagAudio::Level(0) : -1, CommentaryLevel());
+				TellMix(CurLine.energy, IsTalk(CurLine.kind));
+				if (CurLine.live) { ++LiveVoiced; AltLines += bAltLine ? 1 : 0; }
+				if (bLog)
+					UE_LOG(LogTemp, Display, TEXT("TAG booth voice gain %.2f x %.2f for e%d (peak %.2f; master %d/4, commentary %d/4) key %s%s"), GainSet, EnergyGain, CurLine.energy, C.Peak,
+						ATagAudio::Get(this) ? ATagAudio::Level(0) : -1, CommentaryLevel(), *CurKey,
+						*(CurLine.live ? FString::Printf(TEXT(", %.0f ms after the call%s"), 1000.0 * (Core->now() - CurLine.notBefore), bAltLine ? TEXT(" (generic stand-in)") : TEXT("")) : FString()));
 				bPlaying = true;
 				PlayT = 0.f;
 				PlaySecs = C.Secs;
@@ -493,6 +540,7 @@ void ATagBooth::Feed(float Dt, const tag::Game& G, const tag::booth::View& V)
 			if (PlayT >= PlaySecs + 0.03f)
 			{
 				Core->finished(CurId);
+				if (bPlaying) TellMix(-1, false);
 				CurId = 0;
 				bPlaying = false;
 				CaptionAge = 0.f;
@@ -505,11 +553,30 @@ void ATagBooth::Feed(float Dt, const tag::Game& G, const tag::booth::View& V)
 			CurLine = *L;
 			CurId = L->id;
 			CurKey = LineKey(*L);
+			bAltLine = false;
+			if (L->live) ++LiveLines;
 			if (!bMute && bService)
 			{
+				// a live call whose own audio is not made yet (a matchup never played, a man just signed): its generic
+				// stand-in ("Caught!" for a named catch) when that is cached, rather than a wait and a silent caption
+				if (L->live && !L->alt.empty() && !HasClip(CurKey))
+				{
+					tag::booth::Line Alt = *L;
+					Alt.text = L->alt;
+					Alt.say = tag::booth::Booth::spoken(L->alt);
+					Alt.energy = L->altEnergy;
+					const FString AltKey = LineKey(Alt);
+					if (HasClip(AltKey))
+					{
+						Request(*L, 0); // (the named call on order for next time)
+						CurLine = MoveTemp(Alt);
+						CurKey = AltKey;
+						bAltLine = true;
+					}
+				}
 				// the clip may already be there (made ahead); if not, ask for it now and give it a moment. A live call that
 				// was not made ahead is too late to make now (it goes on order for next time, behind the game's frames)
-				Request(*L, L->live ? 0 : 2);
+				Request(CurLine, L->live ? 0 : 2);
 				bWaitingAudio = true;
 				DropClipWait();
 				StartClipLoad(); // (made ahead, it is in hand by the next frame)
