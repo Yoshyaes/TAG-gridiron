@@ -1,11 +1,11 @@
 {
  "version": 1,
  "provisional": false,
- "note": "2026-11-26 baseline: overnight 20261126_0039 at 8b9fb6d (+ booth path override), 18 CPU games, 554 plays: seeds 7/11/29 x dry/rain/snow x night/day, 32 teams, -TagQuarterLen=120, -TagHlNoFrames. per100 = 1.25 x the 90th-percentile game's rate, allow = 2 events a game (1 for camera_in_body and clock, 0 for the zero-tolerance classes frozen/tpose/nan_bones/run); high_per100 / high_allow the same for severity-3 events. actor_teleport is set WITHOUT the pile-on fall that flies two men ~60 m (seed 11 clip 6): that bug fails the budget until it is fixed. Re-propose after a deliberate change: python Tools/QA/defects.py <run> --no-budget --propose-budget <file>, or this rule by hand. camera_in_body and clock: at most one a game (each one seen was a real fault).",
+ "note": "2026-11-26 baseline: overnight 20261126_0039 at 8b9fb6d (+ booth path override), 18 CPU games, 554 plays: seeds 7/11/29 x dry/rain/snow x night/day, 32 teams, -TagQuarterLen=120, -TagHlNoFrames. per100 = 1.25 x the 90th-percentile game's rate, allow = 2 events a game (1 for camera_in_body and clock, 0 for the zero-tolerance classes frozen/tpose/nan_bones/run); high_per100 / high_allow the same for severity-3 events. actor_teleport is set WITHOUT the pile-on fall that flies two men ~60 m (seed 11 clip 6): that bug fails the budget until it is fixed. Re-propose after a deliberate change: python Tools/QA/defects.py <run> --no-budget --propose-budget <file>, or this rule by hand. camera_in_body and clock: at most one a game (each one seen was a real fault). 2026-11-26 second matrix (20261126_1521 at 22c330a, 18 games, 544 plays): tightened where the same rule gave a lower number (foot_slide.per100 324.1 -> 306.3; scene_reset.per100 30.4 -> 4.5; interpenetration.per100 43.2 -> 41.7; ball_teleport.per100 29.5 -> 27.5; ball_teleport.high_per100 4.9 -> 0.0; feet_under_turf.per100 3.6 -> 3.1; camera_cut_storm.per100 6.0 -> 0.0); nothing loosened.",
  "unit": "a class fails when count > per100 x plays / 100 + allow (high: severity-3 events, high_per100 / high_allow)",
  "classes": {
   "foot_slide": {
-   "per100": 324.1,
+   "per100": 306.3,
    "allow": 2,
    "high_per100": 0.0,
    "high_allow": 1
@@ -17,7 +17,7 @@
    "high_allow": 1
   },
   "scene_reset": {
-   "per100": 30.4,
+   "per100": 4.5,
    "allow": 2,
    "high_per100": 0.0,
    "high_allow": 1
@@ -35,7 +35,7 @@
    "high_allow": 1
   },
   "interpenetration": {
-   "per100": 43.2,
+   "per100": 41.7,
    "allow": 2,
    "high_per100": 21.3,
    "high_allow": 1
@@ -59,9 +59,9 @@
    "high_allow": 0
   },
   "ball_teleport": {
-   "per100": 29.5,
+   "per100": 27.5,
    "allow": 2,
-   "high_per100": 4.9,
+   "high_per100": 0.0,
    "high_allow": 1
   },
   "ball_off_hand": {
@@ -71,7 +71,7 @@
    "high_allow": 1
   },
   "feet_under_turf": {
-   "per100": 3.6,
+   "per100": 3.1,
    "allow": 2,
    "high_per100": 0.0,
    "high_allow": 1
@@ -95,7 +95,7 @@
    "high_allow": 1
   },
   "camera_cut_storm": {
-   "per100": 6.0,
+   "per100": 0.0,
    "allow": 2,
    "high_per100": 0.0,
    "high_allow": 1
