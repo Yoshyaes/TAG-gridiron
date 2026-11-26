@@ -168,6 +168,14 @@ def parse_log(path):
             if m:
                 info["holds"].append((m.group(1), int(m.group(2))))
                 continue
+            # (a scrimmage play's whistle-to-snap beats: one line a play, the clipped or not - after a clip's game line
+            # the first is that clip's own play, any more are plays the reel did not cut a clip for)
+            m = re.search(r"TAG beats play (\d+)", line)
+            if m:
+                last = max((k for k in clips if "q" in clips[k]), default=None)
+                if last is not None:
+                    clips[last]["beats_after"] = clips[last].get("beats_after", 0) + 1
+                continue
             if "TAG hl done" in line:
                 info["done"] = True
             m = re.search(r"TAG hl final score (\d+)-(\d+)", line)
@@ -559,8 +567,13 @@ def detect_log(info, E, nclips_tele):
                 elif q == pq:
                     if clk > pclk + 0.5:
                         E.add("clock", 3, clk - pclk, "s", c, 0, 0, [], "", "", "clock went up %.0f -> %.0f in Q%d" % (pclk, clk, q))
-                    elif pclk - clk > T["runoff_s"]:
-                        E.add("clock", 2, pclk - clk, "s", c, 0, 0, [], "", "", "clock ran %.0f s between plays (%.0f -> %.0f, Q%d)" % (pclk - clk, pclk, clk, q))
+                    else:
+                        # (plays the reel cut no clip for come between two clips - a third-down stop before the punt, a
+                        # play inside a hold for compiles: each is its own runoff and play, so the limit is per play)
+                        between = 1 + max(0, prev[1].get("beats_after", 1) - 1)
+                        if (pclk - clk) / between > T["runoff_s"]:
+                            E.add("clock", 2, pclk - clk, "s", c, 0, 0, [], "", "",
+                                  "clock ran %.0f s between plays (%.0f -> %.0f, Q%d%s)" % (pclk - clk, pclk, clk, q, ", %d plays without a clip" % (between - 1) if between > 1 else ""))
                 for side, now, was in (("away", a, pa), ("home", h, ph)):
                     dlt = now - was
                     if dlt < 0:

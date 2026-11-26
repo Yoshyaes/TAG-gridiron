@@ -153,6 +153,10 @@ class Game {
    *  the clock stays stopped until the next snap (twoMinStop: preSnap runs nothing off). */
   bool twoMinPending = false;
   bool twoMinStop = false;
+  /** A defensive personal foul on the offense's touchdown: enforced on the kickoff that follows (yards the scoring team
+   *  kicks off from further up the field, and that team; 0: none). */
+  double koPenYds = 0;
+  TeamKey koPenFor = TeamKey::Home;
   bool lastOOB = false;
   int otPossDone = 0;
   double driveStartBallOn = 25;
@@ -258,6 +262,9 @@ class Game {
     KickReturnSpec spec;
     std::string kickDesc;
     bool punt = false;
+    /** Seconds already run off for the kick before the return went live (a punt's 5-9 s): the played return's own
+     *  duration covers them (it starts at the snap), so finishKickReturn takes them back out of it. */
+    double preRun = 0;
   };
   std::optional<PendingReturn> pendingReturn;
   /** A kick the user swung on the meter: power 0..1.15 (past 1 is the red: no farther, only wilder), aim in degrees

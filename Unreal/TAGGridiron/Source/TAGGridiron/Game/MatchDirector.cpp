@@ -1958,7 +1958,12 @@ void AMatchDirector::StartPileOn(AAthlete* As, AAthlete* Cr)
 	// slot of his own. The tackler already lies on one side of the carrier: the first man in lands on the far side of
 	// the carrier from him, a second one beside the first (two men landing their chests on the same point from two sides
 	// lay inside each other, 33 cm of torso overlap, -TagTackleCam)
-	const FVector Pile0 = Cr->IsFalling() ? Cr->PileBodyEnd : Cr->GetActorLocation();
+	// (a pile spot more than 4 m off the carrier is not his: the actor then - see AAthlete::BeginPairedFall's PileBodyEnd)
+	const bool bPileFar = Cr->IsFalling() && FVector::Dist2D(Cr->PileBodyEnd, Cr->GetActorLocation()) >= 400.f;
+	if (bPileFar)
+		UE_LOG(LogTemp, Warning, TEXT("TAG pile-on #%d on #%d: the carrier's pile spot %.0f cm off him, landing on his body instead"), As->Player ? As->Player->number : -1,
+			Cr->Player ? Cr->Player->number : -1, FVector::Dist2D(Cr->PileBodyEnd, Cr->GetActorLocation()));
+	const FVector Pile0 = Cr->IsFalling() && !bPileFar ? Cr->PileBodyEnd : Cr->GetActorLocation();
 	FVector ToPile = Pile0 - As->GetActorLocation();
 	ToPile.Z = 0.f;
 	if (!ToPile.Normalize()) ToPile = As->GetActorForwardVector();
@@ -4561,6 +4566,10 @@ void AMatchDirector::StartLiveReturn(const std::vector<tag::Player*>& KickTeam, 
 	}
 	Sim = G.kickReturnSim(RecvTeam, KickTeam, US);
 	SetupHumans();
+	// (the umpire's ball from the last play is not this one: still marked spotted, the kick was drawn on the tee through its
+	// whole flight and the returner's catch pulled it 60-110 m into his hands - 26 Nov overnight, 7 held-ball jumps of 4-11 m)
+	bUmpHasBall = false;
+	bUmpSpotted = false;
 	bLiveReturn = true;
 	bKickCatchLogged = false;
 	Dir = G.worldDir();
@@ -6764,13 +6773,13 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 			Ball->SetActorRotation(A->GetActorRotation());
 		}
 	}
-	else if (bUmpHasBall && Umpire)
+	else if (bUmpHasBall && Umpire && !Sim->isLive())
 	{
 		FVector HoldLoc;
 		FRotator HoldRot;
 		if (Umpire->GetBallHold(HoldLoc, HoldRot)) { Ball->SetActorLocation(HoldLoc); Ball->SetActorRotation(HoldRot); }
 	}
-	else if (bUmpSpotted && Game)
+	else if (bUmpSpotted && Game && !Sim->isLive()) // (a live ball is never the umpire's: see StartLiveReturn)
 	{
 		// spotted for the next play: on the turf at the new line, laces up, nose downfield
 		const int32 NewDir = Game->worldDir();
@@ -8323,7 +8332,19 @@ void AMatchDirector::Tick(float Dt)
 					UE_LOG(LogTemp, Display, TEXT("TAG booth hold skipped by the player"));
 				}
 			}
-			if (Timer <= 0 && !bBoothHeld) Next();
+			if (Timer <= 0 && !bBoothHeld)
+			{
+				Next();
+				// the next play set up this frame (StartPresnap / StartLiveReturn put the men on their spots, SyncPlay): the
+				// camera goes to it in the same frame. It had been updated above for the old scene, so the frame drawn showed the
+				// men on their new spots in the last shot and the cut came a frame later (defects.py scene_reset, 17 per 100
+				// plays on the 26 Nov overnight). (A staged kick's camera is UpdateKick's.)
+				if (State == EMatchState::Presnap || State == EMatchState::Live)
+				{
+					BroadcastEndShotForPlay(); // (a between-play shot still up: ended here, not after the camera - MatchBroadcast.cpp)
+					UpdateCamera(Dt, Sim ? FocusPoint() : IdleFocus);
+				}
+			}
 		}
 		break;
 	case EMatchState::Presnap:

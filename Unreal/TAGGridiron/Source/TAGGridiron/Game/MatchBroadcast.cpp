@@ -2182,6 +2182,15 @@ void AMatchDirector::EndShot(const TCHAR* How)
 	bCutNext = true; // (back to the game camera at its framing, unless the next shot is placed first)
 }
 
+void AMatchDirector::BroadcastEndShotForPlay()
+{
+	// (as TickBroadcast's "shots belong between the whistle and the call" check, a frame earlier)
+	if (!ShotView.bOn || !BcState || PregameView.bOn || BcState->Show.bOn || State == EMatchState::Post || State == EMatchState::Wait) return;
+	EndShot(TEXT("moved on"));
+	BcState->Queue.Reset();
+	BcState->bProgram = false;
+}
+
 bool AMatchDirector::BroadcastSkipPress(APlayerController* PC)
 {
 	if (!PC) return false;

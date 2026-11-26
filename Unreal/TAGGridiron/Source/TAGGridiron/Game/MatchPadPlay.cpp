@@ -37,6 +37,15 @@ void AMatchDirector::TickPadPlayTest(float Dt)
 	};
 	if (T.Clock > 600.f) { Check(false, TEXT("the test ran out of time")); Done(); T.Clock = -1e9f; return; }
 	tag::PlaySim* S = Sim.get();
+	if (!S || !S->isLive()) { if (PadPlay.Step == 0 && PadPlay.HoldT > 0.f) { PadKey(EKeys::Gamepad_RightShoulder, false); PadPlay.HoldT = 0.f; } }
+	// a tackler on him: a defender within 1.5 yd of the carrier (closing at 8 yd/s the next 0.15 s may wrap him up, and then no move comes)
+	auto TackleNear = [S](const tag::Ent* U)
+	{
+		if (!S || !U) return false;
+		for (const tag::Ent* E : S->ents)
+			if (E->side != U->side && E->state != tag::EntState::Down && tag::dist(E->pos, U->pos) < 1.5) return true;
+		return false;
+	};
 	// the snap: CROSS once the men are set (the user's offense), once a play. (It was once until the next snap: a press
 	// that drew a pre-snap flag - a false start on the cadence - never went live, so the replayed down was never snapped
 	// and the user's offense took a delay of game every 40 s until the gate's timeout: padplay 2026-11-24 13:23.)
@@ -124,7 +133,15 @@ void AMatchDirector::TickPadPlayTest(float Dt)
 			case 0: PadKey(EKeys::F, true); BT.Serial = S->serial; BT.T = 0.f; BT.Stage = 1; break;
 			case 1: PadKey(EKeys::F, false); BT.Stage = 2; break;
 			case 2: // the truck on: wait for the window
-				if (U->move == tag::Move::Truck && U->animT >= 0.47 && U->animT <= 0.55)
+				// (a carrier a tackle has wrapped up - or about to: a tackler within 1.5 yd - gets no move from the sim at all,
+				// PlaySim::startMove; a press then is rightly refused and proves nothing about the buffer. Seed 7's first run
+				// was wrapped 0.23 s into the truck and the check failed, 26 Nov overnight: wait for a free carrier instead)
+				if (S->inWrap(U) || U->engaged || U->stun > 0)
+				{
+					BT.Stage = 0;
+					break;
+				}
+				if (U->move == tag::Move::Truck && U->animT >= 0.47 && U->animT <= 0.55 && !TackleNear(U))
 				{
 					BT.PressAnimT = U->animT;
 					PadKey(EKeys::G, true);
@@ -135,7 +152,14 @@ void AMatchDirector::TickPadPlayTest(float Dt)
 				break;
 			case 3: PadKey(EKeys::G, false); BT.Stage = 4; break;
 			case 4:
-				if (U->move == tag::Move::StiffArm)
+				if (U->move != tag::Move::StiffArm && (S->inWrap(U) || U->engaged || U->stun > 0))
+				{
+					// (wrapped up inside the buffer's 150 ms: the sim refuses any move then, rightly - not a lost press)
+					UE_LOG(LogTemp, Display, TEXT("TAG padplaytest: the carrier was wrapped up before the buffered stiff arm could come; again on a free run"));
+					BT.Stage = 0;
+					if (++BT.Tries >= 6) { Check(false, TEXT("the move buffer: no free run long enough to press a second move in 6 tries")); BT.Stage = 9; }
+				}
+				else if (U->move == tag::Move::StiffArm)
 				{
 					Check(true, *FString::Printf(TEXT("a stiff arm pressed %.2f s into the truck (refused before 0.60) came from the move buffer %.0f ms later"), BT.PressAnimT, BT.T * 1000.f));
 					BT.Stage = 9;
@@ -157,6 +181,13 @@ void AMatchDirector::TickPadPlayTest(float Dt)
 	case 0: // R1 with the ball: the carrier covers up
 		if (State == EMatchState::Live && S && UserOff() && S->user && S->user->hasBall && S->user != S->qb)
 		{
+			// (a carrier wrapped up or down takes no stick input from the sim: hold R1 on a free carrier, and if a tackle takes
+			// him during the hold, let go and try again on the next run - seed 7's rerun was wrapped mid-hold, 26 Nov)
+			if (S->inWrap(S->user) || S->user->state == tag::EntState::Down)
+			{
+				if (T.HoldT > 0.f) { PadKey(EKeys::Gamepad_RightShoulder, false); T.HoldT = 0.f; }
+				break;
+			}
 			if (T.HoldT == 0.f) PadKey(EKeys::Gamepad_RightShoulder, true);
 			if ((T.HoldT += Dt) > 0.3f)
 			{

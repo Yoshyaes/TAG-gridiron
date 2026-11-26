@@ -656,6 +656,10 @@ private:
 	float BroadcastAfterPlay();
 	bool StartShot(const FTagBcBeat& B);
 	void EndShot(const TCHAR* How);
+	/** The next play was set up this frame (Next): a between-play shot still up ends now ("moved on"), so the game camera
+	 *  cuts to the new scene in the same frame the men are put on their spots (TickBroadcast's own check came after the
+	 *  camera's update: the frame showed the men re-placed in the old shot). */
+	void BroadcastEndShotForPlay();
 	bool PlaceShot(bool bRecut);
 	/** UpdateCamera: the shot on screen sets the lens (OutP; CamLook) - false when there is none. A shot whose subject or
 	 *  lens fails is cut away from that frame, to the game camera's framing (GameT, GameLook). */

@@ -2013,6 +2013,37 @@ int main() {
     check(notAt2 == 0, std::to_string(notAt2) + " warnings logged far from 2:00");
   });
 
+  t("clock: a live punt return takes its own seconds off once (the kick's are in it), not the drawn punt time as well", [&] {
+    // a live return is played from the snap (the punter's catch and kick, the hang, the return): the clock that comes off
+    // the punt and its return is that play's duration; it was the drawn 5-9 s for the kick on top of it
+    int n = 0, over = 0;
+    double worst = 0;
+    for (int i = 0; i < 120 && n < 40; i++) {
+      auto g = scrimmage(9900 + i, i % 32, (i + 9) % 32);
+      g->q = 2;
+      g->clock = 600;
+      g->down = 4;
+      g->toGo = 8;
+      g->ballOn = 35;
+      const double c0 = g->clock;
+      g->punt(true);
+      if (!g->pendingReturn) continue;
+      const TeamKey rt = g->poss, pt = other(rt);
+      std::vector<Player*> kickU = g->fgUnit(pt, true), recvU = g->fgUnit(rt, false);
+      auto sim = g->kickReturnSim(recvU, kickU);
+      const PlayResult& r = sim->runToEnd();
+      if (r.endX <= 0 || r.td || r.turnover) continue;
+      g->finishKickReturn(*sim);
+      n++;
+      const double took = c0 - g->clock;
+      worst = (std::max)(worst, took - r.duration);
+      over += took > r.duration + 0.05;
+    }
+    std::printf("       (%d live punt returns: the clock took the return's duration on %d, worst %+.1f s over it)\n", n, n - over, worst);
+    check(n >= 10, "too few live punt returns: " + std::to_string(n));
+    check(over == 0, std::to_string(over) + " live punts took more than the return's own seconds (worst " + fx(worst, 1) + " s over)");
+  });
+
   t("catches: a completion is the target's, or went off somebody first (a tip the result carries)", [&] {
     int comps = 0, other = 0, untouched = 0;
     Rng rng(979);
@@ -2292,6 +2323,41 @@ int main() {
       if (g.log[i].desc.find(s) != std::string::npos) return true;
     return false;
   };
+
+  t("rules: a personal foul on a touchdown is walked off on the kickoff, not declined", [&] {
+    int done = 0;
+    for (uint32_t s = 1; s <= 200 && done < 5; ++s) {
+      auto g = newGame(1500 + s);
+      setScrim(*g, TeamKey::Home, 98, 1, 2, 1, 600);
+      GameInvariants inv(*g);
+      Penalty p;
+      p.name = "Roughing the Passer";
+      p.on = Side::Def;
+      p.yards = 15;
+      p.autoFirst = true;
+      p.spot = PenaltySpot::End;
+      g->forcedFlag = p;
+      const PlayLog l = playDown(*g, *playById("gl_dive"), *defById("base_c3"));
+      g->forcedFlag.reset();
+      inv.afterStep(*g);
+      clean(inv);
+      if (l.big != LogTag::Td) continue;
+      done++;
+      check(l.desc.find("enforced on the kickoff") != std::string::npos && l.desc.find("declined") == std::string::npos, "the foul on the touchdown: " + l.desc);
+      g->extraPoint();
+      check(g->phase == GamePhase::Kickoff && g->kicking == TeamKey::Home, "no kickoff by the scoring team after the try");
+      const SpecialResult k = g->kickoff();
+      check(k.flight && std::fabs(k.flight->fromX - 50) < 0.5, "the kickoff after the foul was not from the 50: " + (k.flight ? fx(k.flight->fromX, 1) : std::string("no flight")));
+      // (and the next kickoff is from the 35 again)
+      setScrim(*g, TeamKey::Away, 98, 1, 2, 1, 500);
+      g->kicking = TeamKey::Away;
+      g->phase = GamePhase::Kickoff;
+      const SpecialResult k2 = g->kickoff();
+      check(k2.flight && std::fabs(k2.flight->fromX - 35) < 0.5, "the next kickoff carried the walk-off: " + (k2.flight ? fx(k2.flight->fromX, 1) : std::string("no flight")));
+    }
+    std::printf("       (%d touchdowns with roughing the passer on them)\n", done);
+    check(done >= 3, "too few touchdowns to judge: " + std::to_string(done));
+  });
 
   t("rules: backed up at the 1 - a safety is 2, and the team scored on free-kicks from its 20", [&] {
     int safeties = 0;

@@ -4682,6 +4682,11 @@ void AAthlete::BeginPairedFall(UAnimationAsset* Clip, const FVector& From, const
 	FallFromYaw = GetActorRotation().Yaw;
 	AnchorA = FVector(From.X, From.Y, FallFrom.Z);
 	AnchorB = FVector(To.X, To.Y, FallFrom.Z);
+	// where his body comes to rest, until the paired / gang tackle that started this fall says better (StartPairedTackle,
+	// StartGangTackle set it after this call). Left alone, a man down any other way - a solo fall, a catch going down - kept
+	// the last pile's spot or the world origin, and a pile-on aimed at him flew two men 60 m to the origin in 0.6 s
+	// (26 Nov overnight, seed 11 clip 6: StartPileOn lands on PileBodyEnd)
+	PileBodyEnd = AnchorB;
 	FallYaw = YawW;
 	bFallEase = bEaseIn;
 	FallEaseT = 0.2f;

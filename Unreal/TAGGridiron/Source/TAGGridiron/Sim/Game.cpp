@@ -952,6 +952,15 @@ PlayLog Game::finishPlay(PlaySim& sim) {
       addLog(line, LogTag::Penalty);
       // half-distance etc handled; stats for the nullified play are not counted
       return log.back();
+    } else if (pen->on == Side::Def && res.td == Side::Off && pen->spot == PenaltySpot::End && pen->yards >= 15) {
+      // a personal foul by the defense on a touchdown (roughing the passer, unnecessary roughness, a face mask): the score
+      // stands and the 15 yd are walked off on the kickoff - the scoring team kicks from further up the field (the NFL
+      // lets it take them on the try instead; the kickoff is the usual choice). It was declined.
+      team[dk].penalties++;
+      team[dk].penYds += jsRoundI(pen->yards);
+      koPenYds = pen->yards;
+      koPenFor = ok;
+      pen->name = pen->name + " on " + D.abbr + ", enforced on the kickoff";
     } else {
       const Team& pt = pen->on == Side::Off ? O : D;
       pen->name = pen->name + " on " + pt.abbr + " (declined)";
@@ -1279,7 +1288,11 @@ SpecialResult Game::kickoff(bool onside, bool liveReturn) {
   const Player* kos = chartSpecialist(teamOf(kt), DSlot::KOS);
   const Player* k = kos ? kos : kicker(kt);
   const Ratings kickRt = kickR(*k, kt, false);
-  const double fromX = safetyKick ? 20 : 35;
+  // (a personal foul on the touchdown before it is walked off here, for the team it was against; any other kickoff - the
+  // second half's - drops it)
+  const double penUp = koPenYds > 0 && koPenFor == kt && !safetyKick ? koPenYds : 0.0;
+  koPenYds = 0;
+  const double fromX = (safetyKick ? 20 : 35) + penUp;
   safetyKick = false;
   phase = GamePhase::Scrimmage;
   const int m = margin(kt);
@@ -1438,7 +1451,10 @@ SpecialResult Game::punt(bool liveReturn) {
   T.punts++;
   const double los = ballOn;
   PlayerLine& l = stats.line(*p, offense().abbr);
-  runClock(rng.range(5, 9), true);
+  const double puntRun = rng.range(5, 9);  // (the kick and its return; a live return's own duration replaces it)
+  const double clockBefore = clock;
+  const bool warnBefore = twoMinPending;
+  runClock(puntRun, true);
   const std::optional<UserKick> uk = userKick;
   userKick.reset();
   if (rng.chance(tune().kickBlock > 0 ? tune().kickBlock : 0.006)) {
@@ -1530,7 +1546,14 @@ SpecialResult Game::punt(bool liveReturn) {
       l.punts++;
       l.puntYds += jsRoundI(gross);
       poss = other(kt);
-      pendingReturn = PendingReturn{s, nm(p) + " punts " + SR(gross) + " yards", true};
+      // (the return is played from the snap: its own seconds are the punt's. The drawn ones go back on the clock, unless
+      // they took it through the two-minute mark - then the return's are taken net of them, finishKickReturn)
+      double preRun = puntRun;
+      if (twoMinPending == warnBefore) {
+        clock = clockBefore;
+        preRun = 0;
+      }
+      pendingReturn = PendingReturn{s, nm(p) + " punts " + SR(gross) + " yards", true, preRun};
       KickFlight lf = mkFlight(los - 14, (std::min)(land, 105.0), FIELD_W / 2, hang, 26);
       if (uk) lf.endY = clamp(landY, 1, FIELD_W - 1);
       return SpecialResult{pendingReturn->kickDesc, lf};
@@ -1619,8 +1642,9 @@ PlayLog Game::finishKickReturn(PlaySim& sim) {
   pendingReturn.reset();
   const TeamKey rt = poss, kt = other(rt);
   Player* kr = sim.returner ? sim.returner->p : nullptr;
-  // (a kick downed in the end zone takes no time off the clock)
-  if (!(r.endX <= 0 && !r.turnover && !r.td)) runClock(r.duration, true);
+  // (a kick downed in the end zone takes no time off the clock; a punt's return was played from the snap, and the
+  // seconds punt() ran off for the kick are in its duration: the punt took both, 8-14 s too many on every live return)
+  if (!(r.endX <= 0 && !r.turnover && !r.td)) runClock((std::max)(0.0, r.duration - pr.preRun), true);
   for (Ent* e : sim.ents)
     e->p->fatigue = clamp(e->p->fatigue + (0.028 + r.duration * 0.0035) * (1.25 - e->p->r.stamina / 120), 0, 1);
   const std::string who = kr ? nm(kr) : std::string("the returner");

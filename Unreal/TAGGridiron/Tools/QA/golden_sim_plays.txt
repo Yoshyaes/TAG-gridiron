@@ -3406,7 +3406,7 @@ box A 47 234 135 99 28 16 12 11 11 3 6 50 1 7 5 1 1 1 0 3 1054.6666666666663 H 7
 1 590.09626835204381 H 1 10 84.397681640267393 7-0 penalty | J.Abernathy pass short right to E.Estrada incomplete. PENALTY on ABQ: Roughing the Passer (#93 G.Iverson), enforced. 1st & 10 at ABQ 16.
 1 584.84626835204381 H 1 10 89.397681640267393 7-0 penalty | J.Abernathy throws it away under pressure. PENALTY on ABQ: Illegal Contact (#27 T.Winslow), enforced. 1st & 10 at ABQ 11.
 1 580.66293501871053 H 2 0.44365109181399021 98.954030548453403 7-0 - | J.Abernathy pass short right to E.Estrada for 10 yards (J.McBride).
-1 547.47026422065721 H 2 0.44365109181399021 98.954030548453403 7-0 td | E.Langford iso for 1 yard. Unnecessary Roughness (#27 T.Winslow) on ABQ (declined). TOUCHDOWN ELP!
+1 547.47026422065721 H 2 0.44365109181399021 98.954030548453403 7-0 td | E.Langford iso for 1 yard. Unnecessary Roughness (#27 T.Winslow) on ABQ, enforced on the kickoff. TOUCHDOWN ELP!
 1 547.47026422065721 H 1 2 98 7-8 td | Two-point attempt: J.Abernathy pass short left to B.Kowalski for 6 yards. GOOD!
 1 540.57557747494468 A 1 10 29.140241769178651 7-8 - | B.Mabry kicks 66 yards, returned by B.Driscoll to the ABQ 29.
 1 504.43904498002223 A 2 5.2185326147424362 33.921709154436215 7-8 - | A.Nakamura qb draw for 5 yards (J.Castellanos, B.Langford, N.Gaines).
@@ -3582,7 +3582,7 @@ box A 47 234 135 99 28 16 12 11 11 3 6 50 1 7 5 1 1 1 0 3 1054.6666666666663 H 7
 4 16.850293212772083 A 4 13 68.657918515259169 41-34 - | A.Nakamura kneels.
 4 0 A 4 13 68.657918515259169 41-34 info | End of 4th quarter.
 4 0 A 4 13 68.657918515259169 41-34 info | FINAL: ABQ 41 - ELP 34
-box A 74 555 429 126 48 36 23 30 11 5 12 125 0 0 3 1 1 0 0 3 1560.9666666666658 H 56 483 402 81 37 25 18 26 8 3 4 30 4 0 2 2 2 2 2 0 1237.6666666666661
+box A 74 555 429 126 48 36 23 30 11 5 13 140 0 0 3 1 1 0 0 3 1560.9666666666658 H 56 483 402 81 37 25 18 26 8 3 4 30 4 0 2 2 2 2 2 0 1237.6666666666661
 = 20 RIC at SPO
 1 900 H 1 10 35 0-0 info | Coin toss: RIC wins and defers. Rain, 41F, wind 0 mph.
 1 900 H 1 10 35 0-0 - | I.Zeller kicks 68 yards into the end zone. Touchback.
@@ -8098,7 +8098,7 @@ box A 44 209 193 16 37 26 5 13 11 7 2 20 1 1 2 1 1 0 1 2 837.18333333333283 H 27
 3 121.54958664222315 A 1 10 72.686533759558529 3-0 - | J.Jessup inside zone for 12 yards (S.Crenshaw).
 3 83.18305154411749 A 1 10 83.597630753572375 3-0 - | T.Washington scrambles for 11 yards (A.Jefferson, T.Thibodeaux).
 3 42.835956123285072 A 1 3.6737399857686057 96.326260014231394 3-0 - | T.Washington scrambles for 13 yards and slides.
-3 8.6989080772425549 A 1 3.6737399857686057 96.326260014231394 3-0 td | J.Jessup buck sweep for 4 yards. Unnecessary Roughness (#50 H.Carter) on MEX (declined). TOUCHDOWN TUC!
+3 8.6989080772425549 A 1 3.6737399857686057 96.326260014231394 3-0 td | J.Jessup buck sweep for 4 yards. Unnecessary Roughness (#50 H.Carter) on MEX, enforced on the kickoff. TOUCHDOWN TUC!
 3 8.6989080772425549 A 1 3.6737399857686057 85 10-0 - | C.McBride extra point is GOOD.
 3 0.84602156017604635 H 1 10 32.347568114788871 10-0 - | C.McBride kicks 67 yards, returned by O.Ashford to the MEX 32.
 3 0 H 1 10 32.347568114788871 10-0 info | End of 3rd quarter.
@@ -8128,7 +8128,7 @@ box A 44 209 193 16 37 26 5 13 11 7 2 20 1 1 2 1 1 0 1 2 837.18333333333283 H 27
 4 6.811779109497305 A 3 0.51222457227184748 74.112635380631019 17-0 - | J.Jessup hb dive for 4 yards (X.Zeller).
 4 0 A 3 0.51222457227184748 74.112635380631019 17-0 info | End of 4th quarter.
 4 0 A 3 0.51222457227184748 74.112635380631019 17-0 info | FINAL: TUC 17 - MEX 0
-box A 30 254 83 171 9 5 19 16 2 0 2 15 0 1 1 1 1 0 0 3 602.81666666666626 H 25 57 28 29 14 9 7 5 5 0 2 15 0 4 3 0 0 0 0 2 514.31666666666638
+box A 30 254 83 171 9 5 19 16 2 0 2 15 0 1 1 1 1 0 0 3 602.81666666666626 H 25 57 28 29 14 9 7 5 5 0 3 30 0 4 3 0 0 0 0 2 514.31666666666638
 = 60 SDT at VAB
 1 300 A 1 10 35 0-0 info | Coin toss: VAB wins and defers. Clear, 44F, wind 1 mph.
 1 292.23957107169554 A 1 10 28.604033601754146 0-0 - | L.Nakamura kicks 64 yards, returned by A.Oduya to the SDT 29.

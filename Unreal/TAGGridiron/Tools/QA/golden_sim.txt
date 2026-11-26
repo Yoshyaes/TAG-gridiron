@@ -1,6 +1,6 @@
 # TAG Gridiron golden sim digest (Tools/SimDigest.cpp): 64 headless games, every play-by-play line hashed.
 # Check: build\SimDigest.exe   Re-bless on purpose: build\SimDigest.exe --bless "<one-line reason>"
-# blessed: 2026-11-25: two-minute warning logged after the play that reaches it and the clock held to the snap; a catch by a man the pass was not thrown to is his target unless touched first (tippedBy)
+# blessed: 2026-11-26: a defensive personal foul on a touchdown is walked off on the kickoff (was declined); a live punt return's clock is its own duration (the drawn punt time no longer comes off on top)
 # game seed home away quarter_s lines away-home fnv1a64
 0 104729 AUS OMA 900 164 45-12 66523d1513219512
 1 112648 POR BOI 900 176 24-34 b60183e415d97e89
@@ -21,7 +21,7 @@
 16 231433 BOI MEX 900 190 24-19 82b55b1540a45fc1
 17 239352 ANC AUS 900 174 21-14 4c1e30d197434951
 18 247271 TUC CLB 900 175 17-37 7569c096ad707abf
-19 255190 ELP ABQ 900 194 41-34 0d5149229bf7f418
+19 255190 ELP ABQ 900 194 41-34 a03ad02956768768
 20 263109 SPO RIC 900 168 10-23 e5790c21d3d524cc
 21 271028 MKE SPO 900 149 6-29 4a980bdf72a675a0
 22 278947 STL BKN 900 174 21-24 7031da1bf3bbfad2
@@ -61,7 +61,7 @@
 56 548193 ORL OKC 300 83 17-7 9d8aa26764a68f8b
 57 556112 BKN LOU 300 85 7-0 b9d0aee4b96c52ca
 58 564031 TOR HFD 300 110 10-3 1a34f4636d872fdc
-59 571950 MEX TUC 300 85 17-0 6c21b1e6cce2c1c1
+59 571950 MEX TUC 300 85 17-0 ba0ceba926fcd6af
 60 579869 VAB SDT 300 80 6-7 aba8dc267dcfefa7
 61 587788 DSM VAB 300 97 10-7 e3d2f833903a2ebc
 62 595707 CHS POR 300 93 10-17 86866c37b52ca406
