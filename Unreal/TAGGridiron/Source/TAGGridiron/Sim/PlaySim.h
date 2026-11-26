@@ -123,7 +123,7 @@ struct Tune {
   double lateOpen = -0.5;     // a late quarterback throws to his most open man above this openness
   double holdCall = 0.46;     // offensive holding: x the play's holding risk the officials flag (0.54 gave 1.2 a team game; 2023 NFL 0.88)
   double driveBase = 1.3;     // yards after contact: the pile drive's base (yd, before ratings, mass, speed, help)
-  double engArmK = 2.0;       // (fit 2026-11-20: first contact earlier, at the line) x a blocked defender's chance to reach out for a runner going by him
+  double engArmK = 1.5;       // (2.0 until 2026-11-25, when the run doubles began to hold: comboHold 0.8 with 1.5, 4 held-out seeds 53/67/71/83 mean loss 1.21 -> 1.16) (fit 2026-11-20: first contact earlier, at the line) x a blocked defender's chance to reach out for a runner going by him
   double runPress = 1.0;      // a ball carrier's tempo behind the line on a run (x top speed; 1 = flat out)
   double mesh = 1.0;          // > 0: the run exchange is a mesh both men arrive at together (PlaySim::mesh); 0: the old exchange
                               // (the back runs at the quarterback and takes it at his hip, standing; A/B and Tools/HandoffCal)
@@ -294,6 +294,19 @@ struct Tune {
   double comboLate = 1.0;
   double comboDeclare = 1.5;  // ... or the backer comes downhill faster than this (yd/s; 0: not read)
   double comboReach = 0.9;    // yd past touching at which the climber's block on the backer lands (a run block's: 0.3)
+  // the double's hold (> 0: a real combo): the two stay on the down lineman at least comboHold s, then one climbs once the
+  // lineman is controlled (driven comboDrive yd off his spot, or losing the rep by comboPush), the backer commits (the
+  // comboNear / comboFill / comboDeclare reads above) or the ball gets to the line - and by comboMax s at the latest.
+  // 0: the old rule (comboT s after the double formed, or the backer's read, whichever first).
+  // (2026-11-25, 200 games x seeds 53/67/71/83 with engArmK 1.5: the double holds 0.82 s - it was 0.07 - middle runs 1.58 ->
+  // 1.77 yd, stuffed 18.8 -> 17.4 %, edge share 36.9 -> 34.9 %, the climber on his man 49 -> 40 %. A blocked man's arm tackles
+  // still end about half of the middle runs, by the single-blocked men beside the double: dblArm 0 changed nothing)
+  double comboHold = 0.8;
+  double comboMax = 1.1;
+  double comboDrive = 0.6;
+  double comboPush = 0.4;
+  // x a blocked man's arm-tackle chance with two blockers on him (both his arms are taken up; 1: as with one)
+  double dblArm = 1.0;
   // backs read their blocks (Research/NextLevel/02 A7): a blocked defender is a danger to the runner on the side of him
   // his blocker is not on (his head is free there: readOpen x the free defender's weight) and hardly at all behind the
   // block (readShut), more when he is winning the rep; a back presses the play's aiming point (readPress x the yards he
@@ -716,6 +729,7 @@ struct PlayResult {
   // and those an offensive lineman got a block on, and the seconds a down lineman had two run blockers on him (summed)
   int comboSet = 0, comboDbl = 0, comboClimb = 0, comboHit = 0;
   double comboHitT = 0;
+  double comboHoldT = 0;  // (s the doubles held before the climb, summed over the climbs)
   int lbN = 0, lbBlocked = 0;
   double runDblT = 0;
   // a designed run's path (A7 / A8 telemetry): the play's aiming point (y from the ball, offense frame), where the carrier
@@ -1368,13 +1382,14 @@ class PlaySim {
     Ent* lb = nullptr;
     Ent* uncovered = nullptr;
     double formT = -1;
+    V2 dlAt{0, 0};  // (where the down lineman was when the double formed)
     bool done = false;
   };
   std::vector<Combo> combos_;
   void setupCombos();
   bool thinkCombo(Ent* e);
   int comboDbl_ = 0, comboClimb_ = 0, comboHit_ = 0;
-  double comboHitT_ = 0, runDblT_ = 0;
+  double comboHitT_ = 0, runDblT_ = 0, comboHoldT_ = 0;
   std::vector<const Ent*> lbBlocked_;
   // a designed run's path (PlayResult::runCrossDy ..): tracked in step()
   double runCrossDy_ = 0, runCrossT_ = -1, runHandT_ = -1, runContactX_ = -99, runDist_ = 0, runDist0_ = 0;

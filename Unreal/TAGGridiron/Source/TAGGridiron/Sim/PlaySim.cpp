@@ -198,6 +198,11 @@ bool setTune(const std::string& name, double v) {
   if (name == "downBlock") return t.downBlock = v, true;
   if (name == "comboBlock") return t.comboBlock = v, true;
   if (name == "comboT") return t.comboT = v, true;
+  if (name == "comboHold") return t.comboHold = v, true;
+  if (name == "comboMax") return t.comboMax = v, true;
+  if (name == "comboDrive") return t.comboDrive = v, true;
+  if (name == "comboPush") return t.comboPush = v, true;
+  if (name == "dblArm") return t.dblArm = v, true;
   if (name == "comboNear") return t.comboNear = v, true;
   if (name == "comboFill") return t.comboFill = v, true;
   if (name == "comboLate") return t.comboLate = v, true;
@@ -1670,6 +1675,7 @@ bool PlaySim::thinkCombo(Ent* e) {
   const bool eOn = e->engaged == dl, oOn = other->engaged == dl;
   if (eOn && oOn && k.formT < 0) {
     k.formT = t;
+    k.dlAt = dl->pos;
     comboDbl_++;
   }
   // the backer: his, or once he is out of it (blocked, on the turf) the free one nearest the double that nobody has
@@ -1693,8 +1699,15 @@ bool PlaySim::thinkCombo(Ent* e) {
   bool go = false;
   if (k.formT >= 0) {
     // (the backer declares: he comes downhill, or near the double, or into the line)
-    go = t - k.formT > tune().comboT || (c && c->pos.x > los - 1.0) ||
-         (lb && (dist(lb->pos, dl->pos) < tune().comboNear || lb->pos.x < los + tune().comboFill || (tune().comboDeclare > 0 && lb->vel.x < -tune().comboDeclare)));
+    const bool commits = lb && (dist(lb->pos, dl->pos) < tune().comboNear || lb->pos.x < los + tune().comboFill || (tune().comboDeclare > 0 && lb->vel.x < -tune().comboDeclare));
+    const double held = t - k.formT;
+    if (tune().comboHold > 0) {
+      // a real double: the lineman is moved (or beaten in the rep) before one comes off him, unless the backer forces it
+      const bool moved = dist(dl->pos, k.dlAt) > tune().comboDrive || dl->linePush < -tune().comboPush;
+      go = held > tune().comboMax || (held > tune().comboHold && (moved || commits || (c && c->pos.x > los - 1.0)));
+    } else {
+      go = held > tune().comboT || (c && c->pos.x > los - 1.0) || commits;
+    }
   } else if (t > tune().comboLate) {
     go = true;  // (the double never formed: the helper goes on up)
   }
@@ -1718,7 +1731,7 @@ bool PlaySim::thinkCombo(Ent* e) {
     if (up->engaged == dl) disengage(up);
     up->blockTarget = lb;
     up->climbFor = lb;
-    if (k.formT >= 0) comboClimb_++;
+    if (k.formT >= 0) comboClimb_++, comboHoldT_ += t - k.formT;
     over();
     return false;
   }
@@ -7123,7 +7136,8 @@ void PlaySim::checkTackles() {
       // engaged defenders can still reach out for a nearby carrier
       // a hazard per second (a blocked man gets an arm free now and then), not a per-tick roll
       // against a runner the shed-and-tackle stays a per-tick roll (calibrated for run defence)
-      const double armP = (qbPocket ? (0.5 + d->r().blockShed * 0.01) * SIM_DT * d->fx.sackArm : (0.06 + d->r().blockShed * 0.0012) * tune().engArmK);
+      const double armP = (qbPocket ? (0.5 + d->r().blockShed * 0.01) * SIM_DT * d->fx.sackArm : (0.06 + d->r().blockShed * 0.0012) * tune().engArmK) *
+                          (d->engagedBy.size() >= 2 ? tune().dblArm : 1.0);  // (a double team takes up both his arms)
       // (his free side only: the runner going by on his blocker's side is behind the block - Tune::armSide)
       bool freeSide = true;
       if (tune().armSide > 0 && !qbPocket && dd > 1e-6) {
@@ -7603,6 +7617,7 @@ void PlaySim::endPlay(const std::string& reason) {
   r.comboClimb = comboClimb_;
   r.comboHit = comboHit_;
   r.comboHitT = comboHitT_;
+  r.comboHoldT = comboHoldT_;
   r.runDblT = runDblT_;
   if (play.type == PlayType::Run && !cfg.kick && !cfg.place)
     for (const Ent* d : def) r.lbN += isLB(d);

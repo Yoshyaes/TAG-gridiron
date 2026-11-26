@@ -63,6 +63,9 @@ std::string bTimes(int n) {
   return (n <= 12 ? std::string(bCountWord(n)) : std::to_string(n)) + " times";
 }
 
+// a team's giveaways in words: "Austin has turned it over twice", "Fresno hasn't turned it over"
+std::string bGiveaways(const std::string& city, int n) { return n <= 0 ? city + " hasn't turned it over" : city + " has turned it over " + bTimes(n); }
+
 std::string bDist(double toGo, double ballOn) {
   if (ballOn + toGo >= 99.5) return "goal";
   if (toGo < 0.6) return "inches";
@@ -103,7 +106,7 @@ std::string bCoverageWords(Coverage c) {
     case Coverage::C3: return "Cover 3";
     case Coverage::C4: return "quarters coverage";
     case Coverage::C2M: return "two-man";
-    case Coverage::C3Fire: return "a fire zone";
+    case Coverage::C3Fire: return "fire zone coverage";  // (no article: "in {cov}", "against {cov}")
     case Coverage::C2T: return "Tampa 2";
     case Coverage::C6: return "Cover 6";
   }
@@ -175,6 +178,26 @@ std::string bJoin(const std::string& line, const std::string& tail) {
     return a == std::string::npos ? line : line + " " + bCap(tail.substr(a));
   }
   return line + tail;
+}
+
+// the side an analysis angle credits: +1 the offense, -1 the defense (or the offense's own failure), 0 neither. An
+// angle is only said when the play's outcome fits its side (an offense praised on a failed third down was the
+// reviewers' worst complaint)
+int bSide(const std::string& topic) {
+  static const char* const kOff[] = {"a_route",  "a_open",   "a_tight",   "a_yacb",  "a_yac",    "a_deep",    "a_hot",     "a_time",    "a_hitthrow", "a_pa",
+                                     "a_screen", "a_brk",    "a_3rdconv", "a_scr",   "a_pancake", "a_second", "a_rbrk",    "a_spin",    "a_truck",    "a_stiff",
+                                     "a_juke",   "a_gap",    "a_stretch", "a_draw",  "a_zone",   "a_short",   "a_bigrun",  "a_ahead",   "a_readcov",  "a_contact",
+                                     "a_3rdrun", "a_tddrive", "a_tdgen",  "a_readc0w", "a_read4thy", "a_readblitz1"};
+  static const char* const kDef[] = {"a_intp",    "a_intd",   "a_intr",      "a_drop",   "a_pbu",    "a_hurry",  "a_over",     "a_sackmove", "a_sackblitz",
+                                     "a_sackblitz2", "a_cov", "a_sackgen",   "a_stuff",  "a_shortstop", "a_hit",  "a_behind",   "a_short3",   "a_deftd",
+                                     "a_to",      "a_readc0s", "a_read4thn", "a_readblitz2"};
+  if (topic.rfind("a_readwin", 0) == 0) return 1;
+  if (topic.rfind("a_readlost", 0) == 0) return -1;
+  for (const char* k : kDef)
+    if (topic == k) return -1;
+  for (const char* k : kOff)
+    if (topic == k) return 1;
+  return 0;
 }
 
 // a line that says back four words in a row of another ("...will want that one back" from both men); runs with a
@@ -527,9 +550,15 @@ std::string Booth::pickFrom(const std::string& bank, const std::vector<std::stri
   auto inText = [this](const std::string& s) {
     return spokenSet_.count(s) > 0 || std::find(recentText_.begin(), recentText_.end(), s) != recentText_.end();
   };
+  // first the wordings this game has not used at all (a bank used thirty times a game comes back to a wording only after
+  // every one has had its turn: the ear hears the frame, not the name in it), then the older rules
+  std::set<int>& used = usedIds_[bank];
   std::vector<int> ok;
   for (size_t i = 0; i < n; ++i)
-    if (!inRec(static_cast<int>(i)) && !inText(opts[i])) ok.push_back(static_cast<int>(i));
+    if (!used.count(ids[i]) && !inText(opts[i])) ok.push_back(static_cast<int>(i));
+  if (ok.empty())
+    for (size_t i = 0; i < n; ++i)
+      if (!inRec(static_cast<int>(i)) && !inText(opts[i])) ok.push_back(static_cast<int>(i));
   if (ok.empty())
     for (size_t i = 0; i < n; ++i)
       if (!inRec(static_cast<int>(i))) ok.push_back(static_cast<int>(i));
@@ -547,6 +576,8 @@ std::string Booth::pickFrom(const std::string& bank, const std::vector<std::stri
   }
   rec.push_back(ids[static_cast<size_t>(i)]);
   while (rec.size() > keep) rec.pop_front();
+  used.insert(ids[static_cast<size_t>(i)]);
+  if (used.size() >= n) used.clear();  // (every wording has had its turn: a new round)
   // heard when its line is said (next()); a wording written into a line that is dropped stays unheard
   if (memory_) {
     pendingPicks_.push_back({bank, ids[static_cast<size_t>(i)], opts[i]});
@@ -972,6 +1003,20 @@ void Booth::onZone(const Game& g, const AbilityEvent& e) {
 }
 
 void Booth::flushDeferred(const Game& g) {
+  // the breaks the snap overtook, now that the play is called
+  while (!heldBreaks_.empty()) {
+    Line l = heldBreaks_.front();
+    heldBreaks_.pop_front();
+    if (bHas(l.text, "two-minute warning") && (g.q == 2 || g.q >= 4) && g.clock < 115) {
+      // (the play ran on past it: said as the warning that play took us through)
+      l.text = say("2min_late", facts(g, {}));
+      l.say = spoken(l.text);
+      l.estSecs = estimate(l.say, l.who, l.energy);
+    }
+    l.notBefore = now_;
+    l.expireAt = now_ + 20;
+    q_.push_back(l);
+  }
   if (deferredLogs_.empty()) return;
   const std::vector<size_t> held = deferredLogs_;
   deferredLogs_.clear();
@@ -1000,7 +1045,9 @@ void Booth::onLog(const Game& g, const PlayLog& l, size_t index) {
     return;
   }
   if (bHas(d, "Two-minute warning")) {
-    push(Who::PBP, Kind::Break, say("2min", facts(g, {})), 1, 4, 0.2, 30).snapSafe = true;
+    // (the sim stops the clock for it after the play that ran through 2:00: at 1:45 it is "that play took us through
+    // the two-minute warning", not an announcement at 2:00)
+    push(Who::PBP, Kind::Break, say(g.clock < 115 ? "2min_late" : "2min", facts(g, {})), 1, 4, 0.2, 30).snapSafe = true;
     const int to = g.timeouts[g.poss];
     const int m = g.margin();
     const std::string tail = say(to >= 2 ? "2min4tail2" : "2min4tail1", facts(g, {}));
@@ -1108,6 +1155,7 @@ void Booth::onLog(const Game& g, const PlayLog& l, size_t index) {
   }
   if (bHas(d, "Two-point attempt")) {
     const bool good = bHas(d, "GOOD!");
+    if (good && unansweredBy_ == tdBy_) unanswered_ += 2;
     push(Who::PBP, Kind::Score, scoreSay(g, tdBy_, say(good ? "pt2_good" : "pt2_fail", facts(g, {{"team", g.teamOf(tdBy_).city}}))), good ? 2 : 1, 4, 0.4, 20).snapSafe = true;
     if (driveAfterTry_) {
       driveAfterTry_ = false;
@@ -1582,10 +1630,15 @@ void Booth::onSnap(const Game& g, const PlaySim& s) {
   if (s.isReturn()) return;
   // the analyst's word on a break the snap overtook ("two minutes before the half is a big window") is stale after
   // the play: dropped, not said after the next result
+  // (and the play-by-play man's - a timeout, the two-minute warning - waits for the play's call: it came between
+  // "He's in! Touchdown!" and the result)
   for (auto it = q_.begin(); it != q_.end();)
     if (!it->live && it->who == Who::Color && it->kind == Kind::Break) {
       it = q_.erase(it);
       st_.expired++;
+    } else if (!it->live && it->who == Who::PBP && it->kind == Kind::Break) {
+      heldBreaks_.push_back(*it);
+      it = q_.erase(it);
     } else
       ++it;
   const OffPlay* op = s.cfg.offPlay;
@@ -2057,9 +2110,14 @@ std::string Booth::resultLine(const Game& g, const PlaySim& s, const PlayResult&
       return out + later(nextDown());
     }
     case PlayKind::Scramble: {
+      if (r.td) {
+        // (a quarterback who runs it in: the touchdown, not "out to the 1")
+        energy = 3;
+        return say("r_scrtd", rs);
+      }
       if (y >= 10) out = say("r_scrbig", rs);
       else if (y > 0) out = say("r_scr", rs);
-      else out = say(y == 0 ? "r_scr0" : "r_scrneg", rs);
+      else out = say(y == 0 ? "r_scr0" : tk.empty() ? "r_scrneg" : "r_scrnegtk", rs);  // (the man who ran him down is named)
       if (y >= 10) energy = 2;
       return out + later(firstTag() + nextDown());
     }
@@ -2222,8 +2280,17 @@ std::optional<std::string> Booth::analysis(const Game& g, const PlaySim& s, cons
   };
   std::vector<Angle> c;
   creditRead_ = false;  // (a credit is for this play's read, and only when the breakdown is about it: decided below)
+  // what the play came to, as the result line said it: a conversion is the ball past the line to gain, not the yards
+  // rounded ("no gain" on 4th and 1 with r.yards 1 was praised as "they still get it")
+  const bool conv = !r.td && !r.turnover && !r.safety && r.endX - losBefore_ >= toGoBefore_ - 1e-6;
+  const bool worked = (r.td && *r.td == Side::Off) || (downBefore_ >= 3 && conv);
+  const bool failed = r.turnover || r.kind == PlayKind::Sack || r.yards < 0 || (downBefore_ >= 3 && !conv && !r.td) || (r.td && *r.td == Side::Def);
+  const bool blitzOnPlay = s.cfg.defCall && !s.cfg.defCall->blitz.empty();
   auto add = [&](double sc, const std::string& topic, const std::string& text, double cool = 1300) {
     if (text.empty() || !cooled(topic, cool) || spokenSet_.count(text)) return;
+    // the side the angle credits must fit the outcome: no offense praised on a play that failed, no defense on one that worked
+    const int side = topic == "a_readblitz" ? (blitzOnPlay ? (r.yards >= 8 ? 1 : -1) : 0) : bSide(topic);
+    if ((side > 0 && failed) || (side < 0 && worked)) return;
     // (the analyst does not say back what the play-by-play man just said: "...will want that one back" twice)
     if (bEcho(text, resultSaid_)) return;
     if (s.cfg.defCall && text.find(bCoverageWords(s.cfg.defCall->coverage)) != std::string::npos && !cooled("covname", 420)) return;
@@ -2277,7 +2344,7 @@ std::optional<std::string> Booth::analysis(const Game& g, const PlaySim& s, cons
         }
         if (op && op->type == PlayType::Screen && r.yards >= 6) add(1.0, "a_screen", w("a_screen"));
         if (r.brokenTackles > 0 && r.yards >= 10) add(1.0, "a_brk", w(r.brokenTackles >= 2 ? "a_brk2" : "a_brk1"));
-        if (downBefore_ == 3 && r.yards >= toGoBefore_) add(tier(g) == 0 && r.yards >= 5 ? 0.95 : 0.0, "a_3rdconv", w("a_3rdconv"));
+        if (downBefore_ == 3 && conv && tier(g) == 0 && r.yards >= 5) add(0.95, "a_3rdconv", w("a_3rdconv"));
       } else if (r.interception) {
         if (!r.turnover) add(2.2, "a_intback", w("a_intback"));
         if (r.pressured) add(1.4, "a_intp", w("a_intp"));
@@ -2317,7 +2384,8 @@ std::optional<std::string> Booth::analysis(const Game& g, const PlaySim& s, cons
       if (r.yards >= 8 && pancake) add(1.2, "a_pancake", w("a_pancake"));
       if (r.yards >= 10 && r.olBlockDepth >= 3.5) add(1.1, "a_second", w("a_second"));
       if (r.yards <= 0 && shed && shed->d) {
-        const bool tackled = std::find(r.tacklers.begin(), r.tacklers.end(), shed->d) != r.tacklers.end();
+        // (the man the result credits with the tackle: an assist named here read as a second tackler for one stop)
+        const bool tackled = !r.tacklers.empty() && r.tacklers[0] == shed->d;
         if (tackled) add(1.2, "a_stuff", w(shed->b ? "a_stuff" : "a_stuff0"), 1500);
       }
       if (r.brokenTackles > 0 && r.yards >= 8) add(1.0, "a_rbrk", w("a_rbrk"));
@@ -2335,8 +2403,8 @@ std::optional<std::string> Booth::analysis(const Game& g, const PlaySim& s, cons
         if (st == RunStyle::Draw) add(1.0, "a_draw", w("a_draw"));
         if (st == RunStyle::Zone) add(0.7, "a_zone", w("a_zone"));
       }
-      if (toGoBefore_ <= 2 && r.yards >= toGoBefore_ && (downBefore_ >= 3)) add(1.1, "a_short", w("a_short"));
-      if (toGoBefore_ <= 2 && r.yards < toGoBefore_ && downBefore_ >= 3) add(1.1, "a_shortstop", w("a_shortstop"));
+      if (toGoBefore_ <= 2 && conv && downBefore_ >= 3) add(1.1, "a_short", w("a_short"));
+      if (toGoBefore_ <= 2 && !conv && !r.td && downBefore_ >= 3) add(1.1, "a_shortstop", w("a_shortstop"));
       if (r.yards >= 20) add(0.8, "a_bigrun", w("a_bigrun"));
       if (hitBy_) add(1.3, "a_hit", w("a_hit"));
       break;
@@ -2353,7 +2421,7 @@ std::optional<std::string> Booth::analysis(const Game& g, const PlaySim& s, cons
   if (lastRead_ == "r_blitz" && !dropped && (pressureShowed || !blitz))
     add(1.6, "a_readblitz", w(blitz ? (r.yards >= 8 ? "a_readblitz1" : "a_readblitz2") : "a_readblitz0"), 0);
   if (lastRead_ == "r_c0" && (r.yards >= 15 || r.incomplete || r.kind == PlayKind::Sack)) add(1.5, "a_readc0", w(r.yards >= 15 ? "a_readc0w" : "a_readc0s"), 0);
-  if (lastRead_ == "r_4th") add(1.4, "a_read4th", w(r.yards >= toGoBefore_ ? "a_read4thy" : "a_read4thn"), 0);
+  if (lastRead_ == "r_4th") add(1.4, "a_read4th", w(conv || (r.td && *r.td == Side::Off) ? "a_read4thy" : "a_read4thn"), 0);
   if (const size_t hashAt = lastRead_.find('#'); hashAt != std::string::npos && r.kind == PlayKind::Pass) {
     const std::string topic = lastRead_.substr(0, hashAt);
     const int subj = std::atoi(lastRead_.c_str() + hashAt + 1);
@@ -2372,11 +2440,11 @@ std::optional<std::string> Booth::analysis(const Game& g, const PlaySim& s, cons
   const int runsInRow = (runStreakTeam_ == possBefore_ ? runStreak_ : 0) + (runKind ? 1 : 0);
   if (runKind && downBefore_ == 1 && r.yards >= 4 && r.yards < 10) add(0.55, "a_ahead", w("a_ahead"));
   if ((runKind || r.kind == PlayKind::Sack) && downBefore_ <= 2 && r.yards <= -1) add(0.6, "a_behind", w("a_behind"));
-  if (r.kind == PlayKind::Pass && r.complete && downBefore_ == 3 && toGoBefore_ >= 5 && r.yards < toGoBefore_ && !r.td) add(0.75, "a_short3", w("a_short3"));
+  if (r.kind == PlayKind::Pass && r.complete && downBefore_ == 3 && toGoBefore_ >= 5 && !conv && !r.td && !r.turnover) add(0.75, "a_short3", w("a_short3"));
   if (runKind && runsInRow >= 4 && r.yards >= 3) add(0.65, "a_runstreak", say("a_runstreak", with({{"runs", bCountWord(runsInRow)}})), 300);
   if (r.kind == PlayKind::Pass && r.complete && r.yards >= 6 && r.yards < 20 && dc) add(0.5, "a_readcov", w("a_readcov"));
   if (r.kind == PlayKind::Pass && r.complete && r.catchSep >= 0 && r.catchSep < 1.0 && r.yards >= 5 && !r.td) add(0.6, "a_contact", w("a_contact"));
-  if (r.kind == PlayKind::Run && r.yards >= 3 && r.yards < 8 && downBefore_ == 3 && r.yards >= toGoBefore_) add(0.7, "a_3rdrun", w("a_3rdrun"));
+  if (r.kind == PlayKind::Run && r.yards >= 3 && r.yards < 8 && downBefore_ == 3 && conv) add(0.7, "a_3rdrun", w("a_3rdrun"));
   // (a game already decided gets no "momentum" or "statement": the score says what a touchdown or a turnover means now)
   const bool decided = tier(g) >= 2;
   if (r.td && *r.td == Side::Def) add(1.2, "a_deftd", w(decided ? "a_tdlate" : "a_deftd"));
@@ -2452,7 +2520,7 @@ void Booth::afterApply(const Game& g, const PlaySim& s, const PlayResult& r, con
     pendingResult_.clear();
   }
   if (bHas(l.desc, "(declined)")) {
-    if (ref_) {
+    {
       // "... Offensive Holding (#72 J.Smith) on ABQ (declined)."
       const std::string& d = l.desc;
       const size_t dec = d.rfind(" (declined)");
@@ -2480,11 +2548,21 @@ void Booth::afterApply(const Game& g, const PlaySim& s, const PlayResult& r, con
       const Player* man = bLogMan(t, who);
       if (man && man->pos == Pos::QB && bHas(name, "Holding")) man = nullptr;
       if (name == "Intentional Grounding" && r.passer) man = r.passer;
-      std::string ref = refFoul(name, &t == &g.teamOf(possBefore_), man) + ". The penalty is declined.";
-      if (g.poss == possBefore_ && !r.td && g.phase == GamePhase::Scrimmage) ref += g.down == 1 ? " First down." : " " + bCap(bOrdWord(g.down)) + " down.";
-      refSay(ref, 0.2);
-    } else
-      push(Who::PBP, Kind::Result, say("declined", facts(g, {})), 1, 4, 0, 10);
+      if (ref_) {
+        std::string ref = refFoul(name, &t == &g.teamOf(possBefore_), man) + ". The penalty is declined.";
+        if (g.poss == possBefore_ && !r.td && g.phase == GamePhase::Scrimmage) ref += g.down == 1 ? " First down." : " " + bCap(bOrdWord(g.down)) + " down.";
+        refSay(ref, 0.2);
+      } else {
+        // the play-by-play man names the foul he is waving off ("holding on Austin, declined")
+        const RefFoul* rf = bRefFoul(name);
+        std::string fw = rf ? std::string(rf->words) : name;
+        const size_t comma = fw.rfind(", ");  // ("Personal foul, face mask": the foul itself)
+        if (comma != std::string::npos) fw = fw.substr(comma + 2);
+        for (char& ch : fw) ch = static_cast<char>(std::tolower(static_cast<unsigned char>(ch)));
+        push(Who::PBP, Kind::Result, say(fw.empty() ? "declined0" : "declined", facts(g, {{"foul", fw}, {"team", t.city}, {"name", man ? nm(man) : std::string()}})), 1, 4,
+             0, 10);
+      }
+    }
   }
   // a flag that is the play's whole story: grounding on fourth down (the ball goes over), or in the end zone (a safety)
   if (bHas(l.desc, "PENALTY on ") && (bHas(l.desc, "Turnover on downs") || bHas(l.desc, "SAFETY"))) {
@@ -2501,7 +2579,7 @@ void Booth::afterApply(const Game& g, const PlaySim& s, const PlayResult& r, con
   }
   if (risky4th_ && downBefore_ == 4 && lastRead_ == "r_4th") {
     // the analyst said he would have punted: now they both know how it went
-    const bool got = r.yards >= toGoBefore_ && !r.turnover;
+    const bool got = (r.endX - losBefore_ >= toGoBefore_ - 1e-6 && !r.turnover) || (r.td && *r.td == Side::Off);
     const Slots fs = facts(g, {});
     push(Who::PBP, Kind::Analysis, say(got ? "r4_ok" : "r4_no", fs), 1, 3, 0, 15);
     push(Who::Color, Kind::Analysis, say(got ? "r4_oka" : "r4_noa", fs), 1, 3, 0, 15);
@@ -2586,13 +2664,24 @@ void Booth::afterApply(const Game& g, const PlaySim& s, const PlayResult& r, con
     askWriter(g, "exchange");
   }
   // the plays the close will remember
-  if (r.td && r.yards >= 25 && bigPlays_.size() < 6) bigPlays_.push_back("The " + bS(r.yards) + "-yard touchdown" + (r.receiver ? " to " + nm(r.receiver) : r.rusher ? " run by " + nm(r.rusher) : std::string()) + ".");
-  if (r.interception && r.td && r.intBy) bigPlays_.push_back("The pick six by " + nm(r.intBy) + ".");
+  // (each with the side it was for: the close names the winner's; a touchdown's yards as the call gave them, to the goal line)
+  const int tdYards = (std::max)(1, bRound(100 - losBefore_));
+  if (r.td && *r.td == Side::Off && tdYards >= 25 && bigPlays_.size() < 8) {
+    bigPlays_.push_back("The " + bS(tdYards) + "-yard touchdown" + (r.receiver ? " to " + nm(r.receiver) : r.rusher ? " run by " + nm(r.rusher) : std::string()) + ".");
+    bigPlayTeam_.push_back(possBefore_);
+  }
+  if (r.interception && r.td && r.intBy) {
+    bigPlays_.push_back("The pick six by " + nm(r.intBy) + ".");
+    bigPlayTeam_.push_back(other(possBefore_));
+  }
   {
     // a fourth-down stop "sealed it" only when the offense was within one score, behind
     const int mBefore = possBefore_ == TeamKey::Home ? scoreBefore_.home - scoreBefore_.away : scoreBefore_.away - scoreBefore_.home;
     if (downBefore_ == 4 && toGoBefore_ <= 10 && !r.td && r.yards < toGoBefore_ && g.q >= 4 && g.clock < 240 && mBefore < 0 && mBefore >= -8)
+    {
       bigPlays_.push_back("And that fourth-down stop that sealed it.");
+      bigPlayTeam_.push_back(other(possBefore_));
+    }
   }
   // the man, the first time he makes a play: what the viewer should know about him
   {
@@ -2637,7 +2726,7 @@ void Booth::onScored(const Game& g, TeamKey scorer, int pts, const PlayResult& r
   // a touchdown's score is read after the try (the extra point / two-point line); a field goal's right away
   if (pts != 6 && announce) push(Who::PBP, Kind::Score, scoreSay(g, scorer, ""), 1, 4, 0, 25).snapSafe = true;
   else tdBy_ = scorer;
-  if (unanswered_ >= 14 && chance(0.7) && cooled("unanswered", 300)) {
+  if (unanswered_ >= 14 && tier(g) == 0 && chance(0.7) && cooled("unanswered", 300)) {
     mark("unanswered");
     push(Who::Color, Kind::Story, say("unanswered", facts(g, {{"n", bS(unanswered_)}, {"team", T.city}, {"nick", nick(T)}})), 1, 3, 0, 25);
   }
@@ -2784,7 +2873,16 @@ void Booth::onKickTick(const Game& g, const View& v) {
 
 void Booth::kickResult(const Game& g, const std::string& d) {
   if (!bHas(d, "extra point") && !bHas(d, "field goal")) drive_.active = false;  // a kickoff or punt: the next snap starts a new drive
-  const std::string kn = d.substr(d.find('.') + 1, d.find(' ') - d.find('.') - 1);  // "J.Smith kicks" -> "Smith"
+  std::string kn = d.substr(d.find('.') + 1, d.find(' ') - d.find('.') - 1);  // "J.Smith kicks" -> "Smith"
+  {
+    // the kicker as the booth names any man (a surname two men in the game share is said in full)
+    const std::string logNm = d.substr(0, d.find(' '));
+    const Player* k = nullptr;
+    for (const Team* t : {g.home, g.away})
+      for (const auto& p : t->roster)
+        if (!p->first.empty() && logNm == std::string(1, p->first[0]) + "." + p->last && (!k || p->pos == Pos::K || p->pos == Pos::P)) k = p.get();
+    if (k) kn = nm(k);
+  }
   const int dist = std::atoi(d.c_str() + d.find(' ') + 1);
   const Slots ks = facts(g, {{"kicker", kn}, {"dist", dist > 0 ? bS(dist) : std::string()}, {"at", spot(g, g.ballOn, g.poss)}, {"yl", bS(bRound(g.ballOn))},
                              {"team", g.offense().city}, {"nick", nick(g.offense())}});
@@ -2801,6 +2899,7 @@ void Booth::kickResult(const Game& g, const std::string& d) {
         }
       }
     } after{this, g};
+    if (good && unansweredBy_ == tdBy_) unanswered_ += 1;  // (a run of unanswered points counts the tries: 24 was 27)
     if (good) push(Who::PBP, Kind::Score, scoreSay(g, tdBy_, say("k_pat", ks)), 0, 4, 0.1, 15).snapSafe = true;
     else {
       push(Who::PBP, Kind::Score, scoreSay(g, tdBy_, say("k_patmiss", ks)), 2, 4, 0.1, 15).snapSafe = true;
@@ -2885,7 +2984,9 @@ void Booth::returnFoul(const Game& g, const std::string& d) {
   const std::string name = d.substr(colon + 2, comma - colon - 2);
   const int y = std::atoi(d.c_str() + comma + 2);
   const RefFoul* rf = bRefFoul(name);
-  const Slots fs = facts(g, {{"foul", rf ? lowerFirst(rf->words) : std::string("a block")}, {"yds", bS(y)}, {"team", g.offense().city}});
+  std::string fw = rf ? std::string(rf->words) : name;  // (the log's own name when the table does not know it)
+  for (char& ch : fw) ch = static_cast<char>(std::tolower(static_cast<unsigned char>(ch)));
+  const Slots fs = facts(g, {{"foul", fw.empty() ? std::string("a block") : fw}, {"yds", bS(y)}, {"team", g.offense().city}});
   if (!ref_) {
     push(Who::PBP, Kind::Result, say("ret_flag", fs), 1, 3, 0, 12).snapSafe = true;
     return;
@@ -2916,14 +3017,18 @@ void Booth::onPresnapEnter(const Game& g, const View& v) {
     return;
   }
   // a new quarterback (the starter hurt, or pulled): introduced the first time he lines up
-  if (s && s->qb && s->qb->p) {
+  // (only a quarterback: a back taking a direct snap in a wildcat look is not a change at quarterback)
+  if (s && s->qb && s->qb->p && s->qb->p->pos == Pos::QB) {
     const Player*& was = qbOnField_[g.poss == TeamKey::Home ? 0 : 1];
     const Player* now = s->qb->p;
-    if (was && was != now && once("newqb" + bS(now->id))) {
-      const Team& T = g.offense();
-      push(Who::PBP, Kind::Setup,
-           say(was->injuredWeeks > 0 ? "qb_new_hurt" : "qb_new", facts(g, {{"full", now->first + " " + now->last}, {"old", nm(was)}, {"team", T.city}, {"nick", nick(T)}})), 1,
-           3, 0, 12);
+    const Team& T = g.offense();
+    const Slots qs = facts(g, {{"full", now->first + " " + now->last}, {"old", was ? nm(was) : std::string()}, {"team", T.city}, {"nick", nick(T)}});
+    if (!was && once("firstqb" + bS(now->id))) {
+      // each starter by his full name on his first snap (the live calls use the surname)
+      push(Who::PBP, Kind::Setup, say("qb_first", qs), 0, 3, 0, 12);
+      mentions_[now->id]++;
+    } else if (was && was != now && once("newqb" + bS(now->id))) {
+      push(Who::PBP, Kind::Setup, say(was->injuredWeeks > 0 ? "qb_new_hurt" : "qb_new", qs), 1, 3, 0, 12);
       mentions_[now->id]++;  // (introduced: the next mention is the short name)
     }
     was = now;
@@ -3028,6 +3133,7 @@ std::optional<std::string> Booth::presnapRead(const Game& g, const PlaySim& s) {
   const DefCall* dc = s.cfg.defCall;
   const OffPlay* op = s.cfg.offPlay;
   if (!dc || !op || op->type == PlayType::Kneel || op->type == PlayType::Spike) return std::nullopt;
+  if (g.phase == GamePhase::Pat) return std::nullopt;  // (a two-point try is not "1st and goal")
   readSubj_.clear();
   const Team& D = g.defense();
   const Team& O = g.offense();
@@ -3045,7 +3151,11 @@ std::optional<std::string> Booth::presnapRead(const Game& g, const PlaySim& s) {
   // the facts a read can name: the down, the men where they line up
   const Ent* fsE = s.defRole("FS");
   const Ent* ssE = s.defRole("SS");
-  const Slots rs = facts(g, {{"qb", qbn}, {"togo", bDist(g.toGo, g.ballOn)}, {"fs", fsE ? nm(fsE->p) : std::string()}, {"ss", ssE ? nm(ssE->p) : std::string()}});
+  // (most reads leave the down and distance to the setup that was just said: "... on 3rd and 4" in two reads of three
+  // was a formula the ear caught)
+  const bool sayDd = chance(0.35);
+  const Slots rs = facts(g, {{"dd", sayDd ? bDownDist(g.down, g.toGo, g.ballOn) : std::string()}, {"qb", qbn}, {"togo", bDist(g.toGo, g.ballOn)},
+                             {"fs", fsE ? nm(fsE->p) : std::string()}, {"ss", ssE ? nm(ssE->p) : std::string()}});
   auto with = [&rs](Slots e) {
     e.insert(e.end(), rs.begin(), rs.end());
     return e;
@@ -3124,7 +3234,7 @@ std::optional<std::string> Booth::presnapRead(const Game& g, const PlaySim& s) {
   int wrs = 0;
   for (const Ent* e : s.off) wrs += e->p->pos == Pos::WR ? 1 : 0;
   if (wrs >= 4) add(0.6, "r_4wide", say("r_4wide", rs), 400);
-  if (tes >= 2 && g.toGo >= 5) add(0.6, "r_2te", say("r_2te", rs), 400);
+  if (tes >= 2 && g.toGo >= 5 && tier(g) == 0) add(0.6, "r_2te", say("r_2te", rs), 400);  // (no play-fake advice down two scores late)
   // the situation
   if (g.down == 3 && g.toGo <= 2) add(0.8, "r_3short", say("r_3short", rs), 300);
   if (g.down == 2 && g.toGo >= 8) add(0.6, "r_2long", say("r_2long", rs), 400);
@@ -3202,7 +3312,7 @@ void Booth::idle(const Game& g, const View& v) {
   }
   if (g.q >= 4 && g.clock < 300 && std::abs(g.margin()) <= 8 && g.down >= 3) return;  // (the deciding snaps: nothing in the way)
   // a game that is decided: talk of what it is now (the clock, the backups, a long day), now and then
-  if (g.q >= 4 && tier(g) >= 2 && g.score.home != g.score.away && cooled("garbage", 240)) {
+  if (g.q >= 4 && tier(g) >= 2 && g.score.home != g.score.away && g.clock > 90 && !g.shouldKneel() && cooled("garbage", 240)) {
     mark("garbage");
     lastStoryT_ = now_;
     const TeamKey lk = g.score.home > g.score.away ? TeamKey::Home : TeamKey::Away;
@@ -3380,8 +3490,8 @@ std::optional<std::string> Booth::quarterStory(const Game& g) {
   if (std::abs(h.yards - a.yards) >= 60 && once("qcontrol"))
     return say("qstory_yds", facts(g, {{"team", h.yards > a.yards ? H.city : A.city}, {"big", bS((std::max)(h.yards, a.yards))}, {"small", bS((std::min)(h.yards, a.yards))},
                                        {"qn", bQuarterName(qEnded)}}));
-  if (giveaways(g, h) + giveaways(g, a) >= 2)
-    return say("qstory_to", facts(g, {{"home", H.city}, {"away", A.city}, {"hto", bS(giveaways(g, h))}, {"ato", bS(giveaways(g, a))}}));
+  if (giveaways(g, h) + giveaways(g, a) >= 2 && once("qstory_to"))  // (the tally explains one break, not every one)
+    return say("qstory_to", facts(g, {{"hphr", bGiveaways(H.city, giveaways(g, h))}, {"aphr", bGiveaways(A.city, giveaways(g, a))}}));
   if (std::abs(m) >= 9)
     return say("qstory_lead", facts(g, {{"team", m > 0 ? H.city : A.city}, {"lead", std::abs(m) >= 17 ? "three-score" : "two-score"}}));
   return say("qstory_even", facts(g, {{"qn", bQuarterName(qEnded)}}));
@@ -3417,7 +3527,9 @@ std::optional<std::string> Booth::halftimeStory(const Game& g) {
     else s += say("hs_keyquiet", ks) + " ";
   }
   if (giveaways(g, lt) + giveaways(g, tt) > 0)
-    s += say("hs_to", facts(g, {{"team", giveaways(g, tt) > giveaways(g, lt) ? L.city : std::string()}, {"won", bS(giveaways(g, tt))}, {"lost", bS(giveaways(g, lt))}})) + " ";
+    s += say("hs_to", facts(g, {{"team", giveaways(g, tt) > giveaways(g, lt) ? L.city : std::string()}, {"lphr", bGiveaways(L.city, giveaways(g, lt))},
+                                {"tphr", bGiveaways((&L == g.home ? *g.away : *g.home).city, giveaways(g, tt))}})) +
+         " ";
   s += say("half2", facts(g, {}));
   return s;
 }
@@ -3434,9 +3546,14 @@ void Booth::onFinal(const Game& g) {
   push(Who::PBP, Kind::Close, say(ws == ls ? "final_tie" : "final", fs), 2, 5, 0.6, 60).snapSafe = true;
   pendingInjury_.clear();  // (the game is over: a man hurt is for the postgame, not the final call)
   // the plays that decided it
-  if (!bigPlays_.empty()) {
-    std::string r = say("close_big", fs) + " ";
-    for (size_t i = 0; i < bigPlays_.size() && i < 3; ++i) r += bigPlays_[i] + (i + 1 < (std::min)(bigPlays_.size(), static_cast<size_t>(3)) ? " " : "");
+  // (only the winner's: the loser's touchdown did not decide it)
+  std::vector<std::string> won;
+  const TeamKey wk = homeWin ? TeamKey::Home : TeamKey::Away;
+  for (size_t i = 0; i < bigPlays_.size() && i < bigPlayTeam_.size(); ++i)
+    if (ws != ls && bigPlayTeam_[i] == wk && won.size() < 3) won.push_back(bigPlays_[i]);
+  if (!won.empty()) {
+    std::string r = say("close_big", fs);
+    for (const std::string& bp : won) r += " " + bp;
     push(Who::PBP, Kind::Close, r, 1, 4, 0, 60).snapSafe = true;
   }
   // the player of the game: the winner's best day, said by what made it (passing, running, catching, the pass rush)

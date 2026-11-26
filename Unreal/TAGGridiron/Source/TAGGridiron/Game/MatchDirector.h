@@ -21,6 +21,7 @@
 
 struct FTagBcState;
 struct FTagBcBeat;
+struct FTagBcHighlight;
 class STagWipe;
 class AAthlete;
 class AStadium;
@@ -695,6 +696,15 @@ private:
 	float BeginSubsOff(const std::map<tag::Player*, FVector>& From);
 	void TickLeavers(float Dt);
 	void BroadcastAtSnap();
+	/** Stored highlights (04 A10): at each play's book (ApplyPlay) the film of a play worth seeing again is copied out
+	 *  (the stretch around its key moment), the best few of each half kept under a memory cap (-TagHighlightMB=, 192);
+	 *  the halftime show replays the half's best, the postgame the game's, through the replay package (one angle, the
+	 *  ramp). -TagNoHighlights: none kept. ReplayDirOverride: the stored play's direction for its replay's cameras. */
+	void CaptureHighlight();
+	void BeginHighlight(int32 Idx);
+	void TickHighlight(float Dt);
+	void EndHighlight();
+	int32 ReplayDirOverride = 0;
 	/** -TagRecentTest, -TagReplayTest, -TagShotTest, -TagPaceTest, -TagOpenTest, -TagHalftimeTest, -TagPostgameTest (BeginPlay):
 	 *  true when one started. */
 	bool BeginBroadcastTest();
@@ -1085,4 +1095,6 @@ private:
 	void TickHitStopTest();
 
 	friend class SGridironOverlay;
+	friend struct FTagBcState;     // (the broadcast's state keeps films: FReplayFrame)
+	friend struct FTagBcHighlight;
 };

@@ -23,6 +23,7 @@
 #include <vector>
 
 #include "Booth/Booth.h"
+#include "BoothAudit.h"
 #include "Sim/Game.h"
 #include "Sim/League.h"
 
@@ -206,6 +207,63 @@ struct Show {
   }();
   std::set<std::string> staticSet;
   std::vector<std::string> playCalls;  // what PBP said since the snap (checked against the play's result)
+  audit::Audit audit;                  // everything else said, checked against the play and the game (BoothAudit.h)
+  // the talk's sentence frames: a sentence with its names and numbers masked ("N picks up # yards, out to the #."), what
+  // an ear hears as the same line said again even when the man or the yard line differs
+  std::set<std::string> properWords;
+  std::map<std::string, int> frameCount;
+  void learnNames() {
+    auto addWords = [this](const std::string& s) {
+      std::string w;
+      for (const char c : s + " ") {
+        if (std::isalpha(static_cast<unsigned char>(c)) || c == '\'' || c == '.') w += c;
+        else if (!w.empty()) {
+          properWords.insert(w);
+          w.clear();
+        }
+      }
+    };
+    for (const Team* t : {g.home, g.away}) {
+      addWords(t->city);
+      addWords(t->name);
+      for (const auto& p : t->roster) {
+        addWords(p->first);
+        addWords(p->last);
+      }
+    }
+    addWords(b.crew().pbpFirst + " " + b.crew().pbpLast + " " + b.crew().colorFirst + " " + b.crew().colorLast);
+  }
+  std::vector<std::string> frames(const std::string& text) const {
+    std::vector<std::string> out;
+    std::string cur, w;
+    auto flushWord = [&]() {
+      if (w.empty()) return;
+      std::string k = w;
+      while (!k.empty() && (k.back() == '.' || k.back() == '\'')) k.pop_back();
+      if (k.size() > 2 && k.compare(k.size() - 2, 2, "'s") == 0) k.erase(k.size() - 2);
+      cur += properWords.count(k) ? std::string("N") : w;
+      w.clear();
+    };
+    for (size_t i = 0; i < text.size(); ++i) {
+      const char c = text[i];
+      if (std::isalpha(static_cast<unsigned char>(c)) || c == '\'') w += c;
+      else {
+        flushWord();
+        if (std::isdigit(static_cast<unsigned char>(c))) {
+          if (cur.empty() || cur.back() != '#') cur += '#';
+        } else cur += c;
+        if ((c == '.' || c == '!' || c == '?') && (i + 1 == text.size() || text[i + 1] == ' ')) {
+          while (!cur.empty() && cur[0] == ' ') cur.erase(0, 1);
+          if (cur.size() > 3) out.push_back(cur);
+          cur.clear();
+        }
+      }
+    }
+    flushWord();
+    while (!cur.empty() && cur[0] == ' ') cur.erase(0, 1);
+    if (cur.size() > 3) out.push_back(cur);
+    return out;
+  }
   int checked = 0, contradictions = 0;
   std::map<std::string, double> firstSeen;  // when a line was first offered to the voice (queued or forecast)
   int predVoiced = 0, predLines = 0;
@@ -297,6 +355,7 @@ struct Show {
         ++lines;
         textCount[l->text]++;
         if (l->who == booth::Who::PBP && (l->live || l->kind == booth::Kind::Result)) playCalls.push_back(l->text);
+        audit.line(*l, g, v.stage);
         {
           // would the voice have it? cached for good (generic / roster), or offered long enough ahead to be made
           // (2 s under game load) plus the wait the presentation allows this kind
@@ -319,6 +378,8 @@ struct Show {
             bareTags[l->tag.substr(0, l->tag.find(':'))]++;
           }
         }
+        if (!l->live && l->kind != booth::Kind::Ref)
+          for (const std::string& f : frames(l->text)) frameCount[f]++;
         if (l->kind == booth::Kind::Ref) refCount[l->text]++;  // (the referee's formula is the same every time, like a live call)
         else if (!l->live) {
           talkCount[l->text]++;
@@ -360,6 +421,8 @@ struct Show {
   }
   void livePlay(PlaySim& sim) {
     playCalls.clear();
+    if (sim.isReturn()) audit.kick();
+    else audit.snap(g);
     stage(View::Stage::Live, &sim);
     int n = 0;
     while (sim.isLive() && n++ < 60 * 40) {
@@ -369,6 +432,7 @@ struct Show {
     ++plays;
   }
   void kick(const SpecialResult& r, int kind) {
+    audit.kick();
     v.kickKind = kind;
     v.kickT = 0;
     v.kickLead = kind == 0 ? 0.35 : kind == 1 ? 1.0 : 0.9;
@@ -508,6 +572,9 @@ int main(int argc, char** argv) {
   std::map<std::string, std::string> crossKind;  // ... and the voice and kind of the line it was in
   std::map<std::string, int> totWords;           // words per voice, every game
   int totRef = 0;                                // the referee's announcements, every game
+  int totAudit[audit::kClasses] = {};            // the audit's failures by class, every game
+  std::set<std::string> framesBefore;            // sentence frames an earlier game said
+  int totFrames = 0, totFrameRep = 0, totFrameOld = 0, totFrameCross = 0;
   auto sentences = [](const std::string& text) {
     std::vector<std::string> out;
     std::string cur;
@@ -546,6 +613,9 @@ int main(int argc, char** argv) {
     sh.jsonl = jf;
     sh.v.canHold = hold;
     sh.v.night = (seed + gi) % 3 == 0;
+    sh.audit.quiet = quiet;
+    sh.audit.start(g);
+    sh.learnNames();
     if (!quiet) std::printf("==== GAME %d: %s %s at %s %s ====\n", gi, g.away->city.c_str(), g.away->name.c_str(), g.home->city.c_str(), g.home->name.c_str());
     sh.stage(View::Stage::Wait, nullptr);
     sh.run(0.5);
@@ -640,6 +710,7 @@ int main(int argc, char** argv) {
         sh.run(5.0);
       }
       sh.factCheck(r);
+      sh.audit.play(r, *sim);
       g.finishPlay(*sim);
       sh.stage(View::Stage::Wait, sim.get());
       sh.run(0.6);
@@ -655,6 +726,39 @@ int main(int argc, char** argv) {
       if (kv.second > 1) talkRepeats += kv.second - 1;
     }
     std::printf("fact check: %d plays, %d contradictions\n", sh.checked, sh.contradictions);
+    sh.audit.finish();
+    {
+      std::printf("audit:");
+      for (int c = 0; c < audit::kClasses; ++c) {
+        std::printf(" %s %d", audit::clsName(c), sh.audit.fails[c]);
+        totAudit[c] += sh.audit.fails[c];
+      }
+      std::printf(" | total %d (catches by a man the throw was not aimed at, untouched: %d)\n", sh.audit.total(), sh.audit.nonTargetCatches);
+      // repeated frames: within this game, and heard in an earlier game of the run
+      int fr = 0, frAll = 0, frOld = 0;
+      for (const auto& kv : sh.frameCount) {
+        frAll += kv.second;
+        if (kv.second > 1) fr += kv.second - 1;
+        if (framesBefore.count(kv.first)) frOld += kv.second;
+      }
+      totFrames += frAll;
+      totFrameRep += fr;
+      if (gi > 0) {
+        totFrameOld += frOld;
+        totFrameCross += frAll;
+      }
+      for (const auto& kv : sh.frameCount) framesBefore.insert(kv.first);
+      std::printf("frames: %d talk sentences, repeated in this game %d (%.1f%%), heard in an earlier game %s\n", frAll, fr, 100.0 * fr / (std::max)(1, frAll),
+                  gi == 0 ? "n/a" : (std::to_string(frOld) + " (" + std::to_string(static_cast<int>(1000.0 * frOld / (std::max)(1, frAll)) / 10.0).substr(0, 4) + "%)").c_str());
+      if (!quiet) {
+        std::vector<std::pair<int, std::string>> top;
+        for (const auto& kv : sh.frameCount)
+          if (kv.second > 1) top.push_back({kv.second, kv.first});
+        std::sort(top.rbegin(), top.rend());
+        std::printf("most repeated frames:\n");
+        for (size_t i = 0; i < top.size() && i < 15; ++i) std::printf("  %2d x %s\n", top[i].first, top[i].second.c_str());
+      }
+    }
     if (b.writerOn()) {
       const auto ws = b.writerStats();
       std::printf("writer: asked %d, used %d, rejected %d (fact-check veto %d), stale %d; %d calls, %.0f s wall (%.1f s each)\n", ws.asked, ws.used, ws.rejected,
@@ -742,6 +846,18 @@ int main(int argc, char** argv) {
     for (const auto& kv : totWords) all += kv.second;
     std::printf("WORDS analyst %.1f%% of %d, referee %d (%.1f%%) in %d announcements\n", 100.0 * totWords["COLOR"] / (std::max)(1, all), all, totWords["REF"],
                 100.0 * totWords["REF"] / (std::max)(1, all), totRef);
+  }
+  {
+    int all = 0;
+    std::printf("AUDIT");
+    for (int c = 0; c < audit::kClasses; ++c) {
+      std::printf(" %s %d", audit::clsName(c), totAudit[c]);
+      all += totAudit[c];
+    }
+    std::printf(" | total %d\n", all);
+    std::printf("FRAMES repeated in-game %.1f%% of %d", 100.0 * totFrameRep / (std::max)(1, totFrames), totFrames);
+    if (games > 1) std::printf(", heard in an earlier game %.1f%%", 100.0 * totFrameOld / (std::max)(1, totFrameCross));
+    std::printf("\n");
   }
   if (games > 1)
     std::printf("CROSS-GAME games 2..%d: %d talk sentences, %d said in an earlier game (%.1f%%), memory %s\n", games, crossSentences, crossHeard,

@@ -20,7 +20,7 @@ COLS, ROWS = 8, 4
 
 # team names in League.cpp order (id 0..31)
 TEAMS = ["Outlaws", "Lumberjacks", "Vaqueros", "Twisters", "Summit", "Ironclads", "Goldrush", "Kings", "Thoroughbreds",
-         "Forge", "Roadrunners", "Stampede", "Waves", "Whalers FC", "Oaks", "Ironhorses", "Bison", "Aurora", "Scorpions",
+         "Forge", "Roadrunners", "Stampede", "Waves", "Kestrels", "Oaks", "Ironhorses", "Bison", "Aurora", "Scorpions",
          "Sundogs", "Timberwolves", "Brewmasters", "Archers", "Tritons", "Comets", "Bridges", "Huskies", "Aztecas",
          "Mariners", "Cyclones FC", "Palmettos", "Raptors"]
 BADGES = ["none", "circle", "shield", "diamond", "hex"]

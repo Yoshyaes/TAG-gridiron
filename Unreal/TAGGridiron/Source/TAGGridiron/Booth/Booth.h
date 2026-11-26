@@ -335,6 +335,9 @@ class Booth {
   const Player* qbOnField_[2] = {nullptr, nullptr};  // each side's quarterback at its last snap (home, away): a new one is introduced
   std::string resultSaid_;     // the play's call (the breakdown does not say it back)
   std::vector<size_t> deferredLogs_;  // clock stops logged before the play's own line: heard after it (flushDeferred)
+  std::vector<TeamKey> bigPlayTeam_;  // the side each of bigPlays_ was for (the close names the winner's)
+  std::unordered_map<std::string, std::set<int>> usedIds_;  // a bank's wordings picked this round of the game (pickFrom)
+  std::deque<Line> heldBreaks_;       // a timeout or the two-minute warning the snap overtook: said after the play's call
   bool flushingLogs_ = false;
   void flushDeferred(const Game& g);
   std::string creditFor_;      // the held breakdown a held credit belongs to (said together, or not at all)

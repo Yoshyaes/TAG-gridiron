@@ -844,6 +844,8 @@ void SGridironOverlay::ShowMainMenu()
 	if (bTeamSelectShot)
 	{
 		bTeamSelectShot = false;
+		FParse::Value(FCommandLine::Get(), TEXT("TagHome="), SelHome); // (-TagHome= / -TagAway=: the matchup it opens on, league indexes)
+		FParse::Value(FCommandLine::Get(), TEXT("TagAway="), SelAway);
 		ShowTeamSelect(true);
 	}
 	// -TagInputTest: every press sent twice, as an Xbox pad's comes, must move the menus once (UI/InputTest.cpp)

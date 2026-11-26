@@ -10,6 +10,8 @@
 #include <algorithm>
 #include <cctype>
 #include <cmath>
+#include <cstdint>
+#include <cstring>
 #include <random>
 #include <set>
 
@@ -634,6 +636,33 @@ static std::string onWho(const std::string& name, const Player* p) {
   return p ? name + " (#" + std::to_string(p->number) + " " + nm(p) + ")" : name;
 }
 
+/** The man a foul the play did not pin on anyone is called on: one of the starters at the spots that commit it, picked
+ *  off a hash of the play's result (not the game's rng, so naming him moves no other draw). */
+static uint64_t foulHash(std::initializer_list<double> vals, uint64_t extra, unsigned salt) {
+  uint64_t h = 1469598103934665603ull ^ salt;
+  for (double v : vals) {
+    uint64_t b = 0;
+    std::memcpy(&b, &v, sizeof b);
+    h = (h ^ b) * 1099511628211ull;
+  }
+  h ^= extra * 0x9e3779b97f4a7c15ull;
+  h ^= h >> 29;
+  return h;
+}
+
+static Player* foulManH(const Team& t, std::initializer_list<Pos> spots, int per, uint64_t h) {
+  std::vector<Player*> c;
+  for (Pos ps : spots) {
+    const std::vector<Player*> d = depth(t, ps);
+    for (int i = 0; i < per && i < static_cast<int>(d.size()); i++) c.push_back(d[i]);
+  }
+  return c.empty() ? nullptr : c[static_cast<size_t>(h % c.size())];
+}
+
+static Player* foulMan(const Team& t, std::initializer_list<Pos> spots, int per, const PlayResult& res, unsigned salt) {
+  return foulManH(t, spots, per, foulHash({res.endX, res.endY, res.duration}, res.events.size(), salt));
+}
+
 std::optional<Penalty> Game::rollPresnap() {
   const double r = rng.next();
   const double road = poss == TeamKey::Away ? 0.004 : 0;  // crowd noise
@@ -677,14 +706,27 @@ std::optional<Penalty> Game::rollPostsnap(const PlayResult& res, const OffPlay& 
   if (call(res.foulMask)) return mkPen(onWho("Face Mask", res.foulMask.by), Side::Def, 15, true, PenaltySpot::End, false);
   // a ball thrown away from the pocket with the rush on him and nobody near it: loss of down and ten yards (nflverse
   // 2023: 0.10 a team game - it was never called, and every throwaway was a free incompletion)
-  if (isPass && res.thrownAway && res.pressured && roll(0.06)) return mkPen("Intentional Grounding", Side::Off, 10, false, PenaltySpot::Los, false);
+  if (isPass && res.thrownAway && res.pressured && roll(0.06)) return mkPen(onWho("Intentional Grounding", res.passer), Side::Off, 10, false, PenaltySpot::Los, false);
   // the rest, at the 2023 rates (accepted flags a team game: unnecessary roughness 0.24 on the defense and 0.06 on the
   // offense, illegal use of hands 0.08; an illegal block on a scrimmage play is rare - 0.002 a play made it 0.13 a game
   // on top of the returns' own)
-  if (roll(0.0037)) return mkPen("Unnecessary Roughness", Side::Def, 15, true, PenaltySpot::End, false);
-  if (roll(0.001)) return mkPen("Unnecessary Roughness", Side::Off, 15, false, PenaltySpot::Los, true);
-  if (roll(0.0013)) return mkPen("Illegal Use of Hands", Side::Def, 5, true, PenaltySpot::Los, false);
-  if (roll(0.0005)) return mkPen("Illegal Block in the Back", Side::Off, 10, false, PenaltySpot::Los, true);
+  // (each named: the defense's late hit on the man who made the tackle, else a defender in pursuit; the offense's on a
+  // lineman; hands to the face on a rusher on a pass, a front man on a run; a block in the back on a receiver or tight end
+  // downfield on a pass or long run, a lineman otherwise - off a hash of the play, no draw from the rng)
+  const bool longGain = res.yards >= 10;
+  if (roll(0.0037)) {
+    const Player* who = !res.tacklers.empty() ? res.tacklers[0] : foulMan(defense(), {Pos::LB, Pos::S, Pos::CB, Pos::DE}, 2, res, 1);
+    return mkPen(onWho("Unnecessary Roughness", who), Side::Def, 15, true, PenaltySpot::End, false);
+  }
+  if (roll(0.001)) return mkPen(onWho("Unnecessary Roughness", foulMan(offense(), {Pos::OT, Pos::OG, Pos::C, Pos::TE}, 2, res, 2)), Side::Off, 15, false, PenaltySpot::Los, true);
+  if (roll(0.0013)) {
+    const Player* who = isPass ? foulMan(defense(), {Pos::DE, Pos::DT, Pos::CB}, 2, res, 3) : foulMan(defense(), {Pos::DE, Pos::DT, Pos::LB}, 2, res, 3);
+    return mkPen(onWho("Illegal Use of Hands", who), Side::Def, 5, true, PenaltySpot::Los, false);
+  }
+  if (roll(0.0005)) {
+    const Player* who = (isPass && res.complete) || longGain ? foulMan(offense(), {Pos::WR, Pos::TE}, 2, res, 4) : foulMan(offense(), {Pos::OT, Pos::OG, Pos::C, Pos::TE}, 2, res, 4);
+    return mkPen(onWho("Illegal Block in the Back", who), Side::Off, 10, false, PenaltySpot::Los, true);
+  }
   return std::nullopt;
 }
 
@@ -697,8 +739,11 @@ bool Game::returnFoul(TeamKey rt, double& spot, std::string& desc) {
   spot -= y;
   team[rt].penalties++;
   team[rt].penYds += jsRoundI(y);
-  desc += " PENALTY on " + teamOf(rt).abbr + ": " + (rng.chance(0.3) ? "Illegal Block in the Back" : "Holding") + ", " + S(jsRoundI(y)) +
-          " yards from the end of the return.";
+  // (the man flagged: one of the return unit's blockers - the backups at the spots that make up a return team - off a
+  // hash of the return, no draw from the rng)
+  const std::string foul = rng.chance(0.3) ? "Illegal Block in the Back" : "Holding";
+  const Player* by = foulManH(teamOf(rt), {Pos::LB, Pos::TE, Pos::S, Pos::CB, Pos::WR}, 3, foulHash({spot, y}, desc.size(), 5));
+  desc += " PENALTY on " + teamOf(rt).abbr + ": " + onWho(foul, by) + ", " + S(jsRoundI(y)) + " yards from the end of the return.";
   return true;
 }
 

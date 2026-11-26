@@ -1671,8 +1671,10 @@ void SGridironOverlay::StartRosterShots()
 			return false;
 		}
 		const FStep& S = Steps[I];
-		if (S.Screen == 1) O->ShowDepthChart(0, [W = Weak] { if (auto P = W.Pin()) P->ShowMainMenu(); });
-		if (S.Screen == 2) O->ShowCreatePlayer(0, [W = Weak] { if (auto P = W.Pin()) P->ShowMainMenu(); });
+		int32 ShotTeam = 0; // (-TagHome=<league index>: another team's chart and kit)
+		FParse::Value(FCommandLine::Get(), TEXT("TagHome="), ShotTeam);
+		if (S.Screen == 1) O->ShowDepthChart(ShotTeam, [W = Weak] { if (auto P = W.Pin()) P->ShowMainMenu(); });
+		if (S.Screen == 2) O->ShowCreatePlayer(ShotTeam, [W = Weak] { if (auto P = W.Pin()) P->ShowMainMenu(); });
 		if (S.Screen == 3 && S.Text && FSlateApplication::IsInitialized())
 		{
 			// as the keyboard would: the characters to the focused widget, then Enter

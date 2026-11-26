@@ -307,7 +307,8 @@ struct FTagBcShowStage
 {
 	const TCHAR* Name = TEXT("");
 	float Secs = 0.f;
-	int32 Act = 0;   // 1 leaving, 2 the half's stats, 3 the leading bench, 4 the crowd, 5 the kickoff units;
+	int32 Act = 0;   // 1 leaving, 2 the half's stats, 3 the leading bench, 4 the crowd, 5 the kickoff units, 6 a highlight;
+	int32 Hl = -1;   // (6: which stored highlight)
 	                 // 11 the celebration, 12 the final score, 13 the player of the game, 14 the final stats
 };
 
@@ -325,7 +326,19 @@ struct FTagBcShow
 	// (measured)
 	TArray<float> StageSecs;
 	int32 Frames = 0, BadFrames = 0, GfxAsked = 0, GfxShown = 0, MostKickSeen = 0, MostRecvSeen = 0, FieldMenAtUnits = -1;
+	int32 HlWant = 0, HlShown = 0;      // highlights planned, shown
 	bool bHeldClock = true;
+};
+
+/** A stored highlight: the film of a play around its key moment (AMatchDirector's replay frames, copied out). */
+struct FTagBcHighlight
+{
+	TArray<AMatchDirector::FReplayFrame> Frames;
+	double KeySim = 0.0;                 // (the key moment on the sim's clock, until the film is copied)
+	float KeyT = 0.f, T0 = 0.f, T1 = 0.f, Score = 0.f;
+	int32 Half = 1, Q = 1, PlayN = 0, SubjectId = -1, Dir = 1;
+	FString Class, Desc;
+	int64 Bytes = 0;
 };
 
 struct FTagBcState
@@ -371,6 +384,15 @@ struct FTagBcState
 	// the halftime and postgame shows, the men walking off
 	FTagBcShow Show;
 	bool bHalftimeDone = false, bPostgameDone = false;
+	// the stored highlights
+	TArray<FTagBcHighlight> Highlights;
+	FTagBcHighlight HlPending;
+	bool bHlPending = false, bHlOn = false, bHlBallHidden = true, bRefsHidden = false;
+	int64 HlBytes = 0, HlBytesPeak = 0, HlCapBytes = 0;
+	int32 HlKept = 0, HlDropped = 0;
+	TSet<int32> HlVisible;               // (the men shown before a highlight took the field)
+	TArray<FVector> SubStarts;           // (this play's substitutes' starting spots: none on another's)
+	unsigned long long SubStartsSerial = 0;
 	TArray<FTagBcLeaver> Leavers;
 	int32 SubsIn = 0, SubsOut = 0, SubsPulled = 0, Snaps = 0, SnapBad = 0, SnapWalking = 0;
 	// the self-checks (kept across StartMatch)
@@ -1087,6 +1109,7 @@ void AMatchDirector::ReplayCameraFrame(float Dt, const FVector& BallAt, const FV
 	FVector Focus = FMath::Lerp(BallAt, Subj, bSubj ? 0.4f : 0.f);
 	Focus.Z = 100.0;
 	const bool bPlace = bCutNow || !St.bRPlaced;
+	const int32 RDir = ReplayDirOverride != 0 ? ReplayDirOverride : Dir; // (a stored highlight: its own play's direction)
 	FVector P, Look;
 	float Focal = 50.f, Aperture = 5.6f;
 	switch (R.Type)
@@ -1096,7 +1119,7 @@ void AMatchDirector::ReplayCameraFrame(float Dt, const FVector& BallAt, const FV
 		// high behind the offense's end zone, wide, the play coming at the lens (a fixed head: it pans and zooms)
 		if (bPlace)
 		{
-			const double BehindX = (Dir > 0 ? 0.0 : 100.0) * Y - Dir * 13.0 * Y;
+			const double BehindX = (RDir > 0 ? 0.0 : 100.0) * Y - RDir * 13.0 * Y;
 			St.RCam = FVector(BehindX, FMath::Clamp(Focus.Y * 0.35, -12.0 * Y, 12.0 * Y), 15.0 * Y);
 			St.RLook = Focus;
 			St.RLookVel = FVector::ZeroVector;
@@ -1111,7 +1134,7 @@ void AMatchDirector::ReplayCameraFrame(float Dt, const FVector& BallAt, const FV
 	{
 		// the sideline cart on the key man, a long lens, chest high: 2 yd inside the sideline (on it, the cart ran
 		// through the photographers and the crews standing there - 641 of 825 frames with a body at the lens)
-		const FVector Want(Subj.X - Dir * 3.0 * Y, R.Side * (tag::FIELD_W / 2 - 2.0) * Y, 180.0);
+		const FVector Want(Subj.X - RDir * 3.0 * Y, R.Side * (tag::FIELD_W / 2 - 2.0) * Y, 180.0);
 		if (bPlace)
 		{
 			St.RCam = Want;
@@ -1132,7 +1155,7 @@ void AMatchDirector::ReplayCameraFrame(float Dt, const FVector& BallAt, const FV
 		// low at the front corner of the end zone he scores in, looking back up the field
 		if (bPlace)
 		{
-			St.RCam = FVector((Dir > 0 ? 100.0 : 0.0) * Y + Dir * 0.6 * Y, R.Side * (tag::FIELD_W / 2 + 0.4) * Y, 45.0);
+			St.RCam = FVector((RDir > 0 ? 100.0 : 0.0) * Y + RDir * 0.6 * Y, R.Side * (tag::FIELD_W / 2 + 0.4) * Y, 45.0);
 			St.RLook = FVector(Focus.X, Focus.Y, 90.0);
 			St.RLookVel = FVector::ZeroVector;
 		}
@@ -1599,6 +1622,37 @@ void AMatchDirector::BroadcastPlayDead(const tag::PlayResult& R, const tag::Ent*
 		UE_LOG(LogTemp, Display, TEXT("TAG replay passed over: the pace is Quick (%s)"), *ReplayWhyNow);
 	}
 	C.bReplay = bReplayWorthy;
+	{
+		// a highlight in the making: a play worth seeing again at the half or the end (scores, takeaways, explosives,
+		// sacks, a fourth down stopped), its key moment from the sim's events; its film is copied when the play is in the
+		// book (CaptureHighlight). (The halftime and postgame tests keep every play: a short half has few big ones.)
+		static const bool bNoHl = FParse::Param(FCommandLine::Get(), TEXT("TagNoHighlights"));
+		const float HlScore = ReplayScoreNow + (C.bTd ? 3.f : 0.f) + (C.bTake ? 2.5f : 0.f) + (C.bSack ? 0.8f : 0.f) + (R.yards >= 20 ? 1.f : 0.f) +
+			(C.bFourth && C.bStop ? 1.5f : 0.f);
+		St.bHlPending = !bNoHl && HlScore >= (St.Test.Mode >= 5 ? -100.f : 1.f);
+		if (St.bHlPending)
+		{
+			FTagBcHighlight& Hp = St.HlPending;
+			Hp = FTagBcHighlight();
+			Hp.Score = HlScore;
+			Hp.Half = G.q <= 2 ? 1 : 2;
+			Hp.Q = G.q;
+			Hp.PlayN = St.PlayN;
+			Hp.Dir = Dir;
+			Hp.Class = C.bTd ? TEXT("td") : C.bTake ? TEXT("take") : C.bSack ? TEXT("sack") : R.complete ? TEXT("pass") : TEXT("run");
+			Hp.KeySim = St.WhistleSimT - (C.bTd ? 0.3 : 0.6);
+			const tag::Ent* HlWho = Sim->ball.holder;
+			for (const tag::PlayEvent& Ev : Sim->events)
+				if (Ev.type == "catch" || Ev.type == "divecatch" || Ev.type == "int" || Ev.type == "fumble" || Ev.type == "bighit" || (C.bSack && Ev.type == "tackle"))
+				{
+					if (C.bTd && !C.bTake && St.WhistleSimT - Ev.t > 2.5) continue; // (a long score: its last strides, not the catch upfield)
+					Hp.KeySim = Ev.t;
+					HlWho = Ev.a ? Ev.a : HlWho;
+				}
+			Hp.SubjectId = HlWho && HlWho->p ? HlWho->p->id : -1;
+			Hp.Desc = FString::Printf(TEXT("Q%d %s, %d yd"), G.q, *Hp.Class, R.yards);
+		}
+	}
 	if (!BeatsAllowed() || Pace == ETagPace::Quick) return;
 	const bool bBigOne = C.bTd || C.bTake || C.bSack || R.yards >= BigGain;
 	const bool bLead = bBigOne || (Pace == ETagPace::Full && (C.bConv || C.bStop || C.bBigHit));
@@ -1612,6 +1666,15 @@ void AMatchDirector::BroadcastPlayDead(const tag::PlayResult& R, const tag::Ent*
 	B.Why = C.bTd ? TEXT("touchdown") : C.bTake ? TEXT("takeaway") : C.bSack ? TEXT("sack") : R.yards >= BigGain ? TEXT("big gain")
 		: C.bBigHit ? TEXT("big hit") : C.bConv ? TEXT("conversion") : TEXT("stop");
 	B.Fixed = C.Spot;
+	// (never one kind three shots running: after two heroes the man he beat leads, or nothing does. Two short-yardage
+	// conversions and a touchdown, each led by its hero with no capper between: shots, gate 2026-11-25 16:17.)
+	if (const int32 N = St.Seq.Num(); N >= 2 && St.Seq[N - 1] == ETagShot::Hero && St.Seq[N - 2] == ETagShot::Hero)
+	{
+		if (!C.Beaten.IsValid()) return;
+		B.Type = ETagShot::Opponent;
+		B.Subject = C.Beaten;
+		B.Team = 1 - B.Team;
+	}
 	if (StartShot(B))
 	{
 		St.bLeadThisPlay = true;
@@ -1626,6 +1689,7 @@ float AMatchDirector::BroadcastAfterPlay()
 	St.bProgram = false;
 	St.GapLeft = 0.f;
 	FTagBcPlay& C = St.Ctx;
+	CaptureHighlight(); // (the play's film, if it is one to keep: before anything below can return)
 	static const bool bOldShots = FParse::Param(FCommandLine::Get(), TEXT("TagShotsOld"));
 	if (bOldShots || !C.bValid || !BeatsAllowed() || bHurryNext || bSpikeNext || !Game) return 0.f;
 	C.bValid = false; // (once a play)
@@ -1761,7 +1825,14 @@ bool AMatchDirector::StartShot(const FTagBcBeat& B)
 	St.LastShotT = FPlatformTime::Seconds();
 	if (!BcIsOpen(B.Type) && !PlaceShot(false))
 	{
-		// never a broken frame: no posed subject, no clear lens - the wide reset instead
+		// never a broken frame: no posed subject, no clear lens - the wide reset instead (but not a third wide running:
+		// a lead shot with no lens after two wides is not shown at all)
+		if (const int32 N = St.Seq.Num(); B.bLead && N >= 2 && St.Seq[N - 1] == ETagShot::Wide && St.Seq[N - 2] == ETagShot::Wide)
+		{
+			UE_LOG(LogTemp, Display, TEXT("TAG shot dropped: %s %s (no lens, and the last two shots were wides)"), BcShotName(B.Type), *BcWho(B.Subject.Get()));
+			St.Shot = FTagBcShot();
+			return false;
+		}
 		UE_LOG(LogTemp, Display, TEXT("TAG shot fallback wide: %s %s (%s)"), BcShotName(B.Type), *BcWho(B.Subject.Get()), *St.Shot.Variant);
 		++St.Fallbacks;
 		St.Shot = FTagBcShot();
@@ -1977,9 +2048,11 @@ bool AMatchDirector::ShotCamera(float Dt, FVector& OutP, const FVector& GameT, c
 		else if (O.Stage == 2)
 		{
 			// the matchup card over a slow push across the field toward the home bench and the stand behind it
-			Lens = FMath::Lerp(FVector(42.0 * Y, 8.0 * Y, 220.0), FVector(46.0 * Y, 14.0 * Y, 200.0), E);
-			LookAt = FVector(50.0 * Y, (tag::FIELD_W / 2 + 3.0) * Y, 160.0);
-			Focal = 28.f;
+			// (from high behind the near sideline, the field and the far stand beyond: low on the field the lens framed the
+			// stand behind the home bench close up, its painted rows flat - tag_open_10)
+			Lens = FMath::Lerp(FVector(40.0 * Y, -(tag::FIELD_W / 2 + 18.0) * Y, 16.0 * Y), FVector(60.0 * Y, -(tag::FIELD_W / 2 + 18.0) * Y, 15.0 * Y), E);
+			LookAt = FVector(FMath::Lerp(44.0, 56.0, static_cast<double>(E)) * Y, 8.0 * Y, 0.0);
+			Focal = 26.f;
 		}
 		else if (O.Stage == 3 && O.bLong && O.Men.Num() == O.At.Num() && O.Men.Num() > 0)
 		{
@@ -2603,11 +2676,73 @@ namespace
 		return nullptr;
 	}
 
-	/** A man's bench: his team's sideline (home far, visitors near), between the 35s, a step behind the front row. */
+	/** A man's bench: his team's sideline (home far, visitors near), between the 35s, just in front of its front row
+	 *  (he is put away there). */
 	FVector BcBenchSpot(bool bHome, double AtX)
 	{
 		const double Y = YD;
-		return FVector(FMath::Clamp(AtX, 35.0 * Y, 65.0 * Y), (bHome ? 1.0 : -1.0) * (tag::FIELD_W / 2 + 3.5) * Y, 0.0);
+		return FVector(FMath::Clamp(AtX, 35.0 * Y, 65.0 * Y), (bHome ? 1.0 : -1.0) * (tag::FIELD_W / 2 + 1.6) * Y, 0.0);
+	}
+
+	/** P moved along the sideline (X) by StepCm at a time, either way in turn, until it is MinCm from every spot in Taken:
+	 *  no two men start from or walk to the same spot (two substitutes stood inside each other). */
+	FVector BcSpread(const FVector& P, const TArray<FVector>& Taken, double MinCm, double StepCm)
+	{
+		for (int32 k = 0; k < 32; ++k)
+		{
+			const double Off = (k % 2 ? 1.0 : -1.0) * ((k + 1) / 2) * StepCm;
+			const FVector C(P.X + Off, P.Y, P.Z);
+			bool bFree = true;
+			for (const FVector& Tk : Taken)
+				if (FVector::Dist2D(Tk, C) < MinCm) { bFree = false; break; }
+			if (bFree) return C;
+		}
+		return P;
+	}
+
+	/** A stored highlight's one angle: the wide look (the high end zone; a pass or a takeaway the reverse), the ramp at a
+	 *  quick pace. */
+	FTagReplayRun BcHighlightRun(const FTagBcHighlight& H)
+	{
+		FTagReplayRun R;
+		R.Type = H.Class == TEXT("pass") || H.Class == TEXT("take") ? ETagReplayAngle::Reverse : ETagReplayAngle::HighEndZone;
+		R.T0 = H.T0;
+		R.T1 = H.T1;
+		R.KeyT = FMath::Clamp(H.KeyT, H.T0, H.T1);
+		R.Pre = 1.f;
+		R.Slow = 0.4f;
+		R.Post = 0.8f;
+		R.SubjectId = H.SubjectId;
+		return R;
+	}
+
+	/** Seconds on screen of a run of the film (through its ramp). */
+	float BcRunSecs(const FTagReplayRun& R)
+	{
+		float Secs = 0.f;
+		const float Step = (R.T1 - R.T0) / 60.f;
+		for (int32 k = 0; k < 60; ++k) Secs += Step / FMath::Max(0.05f, BcRampRate(R, R.T0 + (k + 0.5f) * Step));
+		return Secs;
+	}
+
+	/** The show's highlight stages: the top N stored (Half 1: the first half's; 0: the game's), best first, from InsertAt. */
+	int32 BcAddHighlightStages(FTagBcState& St, int32 N, int32 Half, int32 InsertAt)
+	{
+		TArray<int32> Idx;
+		for (int32 i = 0; i < St.Highlights.Num(); ++i)
+			if (Half == 0 || St.Highlights[i].Half == Half) Idx.Add(i);
+		Idx.Sort([&St](int32 X, int32 Z) { return St.Highlights[X].Score > St.Highlights[Z].Score; });
+		const int32 Num = FMath::Min(N, Idx.Num());
+		for (int32 k = 0; k < Num; ++k)
+		{
+			FTagBcShowStage Sg;
+			Sg.Name = TEXT("a highlight");
+			Sg.Act = 6;
+			Sg.Hl = Idx[k];
+			Sg.Secs = BcRunSecs(BcHighlightRun(St.Highlights[Idx[k]])) + 0.2f;
+			St.Show.Stages.Insert(Sg, FMath::Clamp(InsertAt + k, 0, St.Show.Stages.Num()));
+		}
+		return Num;
 	}
 }
 
@@ -2648,6 +2783,18 @@ bool AMatchDirector::BeginHalftimeShow()
 		Add(TEXT("the kickoff units"), 2.f, 5);
 	}
 	{
+		// the half's best plays again, before the units (in place of the bench, and of the crowd but in the long show)
+		const int32 Want = Pace == ETagPace::Full ? 3 : Pace == ETagPace::Standard ? 2 : 1;
+		int32 Have = 0;
+		for (const FTagBcHighlight& H : St.Highlights) Have += H.Half == 1 ? 1 : 0;
+		if (Have > 0)
+		{
+			const bool bFullShow = Pace == ETagPace::Full;
+			Sh.Stages.RemoveAll([bFullShow](const FTagBcShowStage& Sg) { return Sg.Act == 3 || (!bFullShow && Sg.Act == 4); });
+			Sh.HlWant = BcAddHighlightStages(St, Want, 1, Sh.Stages.Num() - 1);
+		}
+	}
+	{
 		const std::vector<std::string> Names = {"corner", "end rise", "sideline sweep"};
 		Sh.CraneVar = FMath::Max(0, tag::Recent::get().leastRecent("show.crane", Names, BroadcastSeed ^ 0x51u));
 		tag::Recent::get().use("show.crane", Names[Sh.CraneVar]);
@@ -2663,7 +2810,11 @@ bool AMatchDirector::BeginHalftimeShow()
 			L.P = E->p;
 			L.At = A->GetActorLocation();
 			L.At.Z = 0.0;
-			L.To = BcBenchSpot(Game->home->hasPlayer(E->p), L.At.X);
+			{
+				TArray<FVector> Taken;
+				for (const FTagBcLeaver& O : St.Leavers) Taken.Add(O.To);
+				L.To = BcSpread(BcBenchSpot(Game->home->hasPlayer(E->p), L.At.X), Taken, 130.0, 120.0);
+			}
 			L.Speed = 480.f;
 			L.bShow = true;
 			St.Leavers.Add(L);
@@ -2728,6 +2879,12 @@ bool AMatchDirector::BeginPostgameShow()
 		Add(TEXT("the final stats"), 3.f, 14);
 	}
 	{
+		// the game's best plays again, before the player of the game
+		int32 At = 0;
+		while (At < Sh.Stages.Num() && Sh.Stages[At].Act != 13) ++At;
+		Sh.HlWant = BcAddHighlightStages(St, Pace == ETagPace::Full ? 2 : 1, 0, At);
+	}
+	{
 		const std::vector<std::string> Names = {"corner", "end rise", "sideline sweep"};
 		Sh.CraneVar = FMath::Max(0, tag::Recent::get().leastRecent("show.crane", Names, BroadcastSeed ^ 0x52u));
 		tag::Recent::get().use("show.crane", Names[Sh.CraneVar]);
@@ -2756,6 +2913,7 @@ void AMatchDirector::StartShowStage()
 {
 	FTagBcState& St = Bc();
 	FTagBcShow& Sh = St.Show;
+	if (St.bHlOn) EndHighlight(); // (the highlight before this stage, over)
 	if (!Sh.Stages.IsValidIndex(Sh.Stage) || !Game) return;
 	const FTagBcShowStage Sg = Sh.Stages[Sh.Stage];
 	const tag::Game& G = *Game;
@@ -2867,9 +3025,20 @@ void AMatchDirector::StartShowStage()
 		PostgameView.bPlayerUp = true;
 		break;
 	}
+	case 6:
+		// a stored highlight, through the replay package (TickHighlight plays it; no shot of the show's own)
+		if (St.Highlights.IsValidIndex(Sg.Hl)) BeginHighlight(Sg.Hl);
+		break;
 	default:
 		B.Type = ETagShot::Wide;
 		break;
+	}
+	if (Sg.Act == 6)
+	{
+		if (Sh.Kind == 1) { HalftimeView.Stage = 3; HalftimeView.StageName = Sg.Name; }
+		else { PostgameView.Stage = 2; PostgameView.StageName = Sg.Name; }
+		UE_LOG(LogTemp, Display, TEXT("TAG show %s stage %d: %s, %.1f s"), Sh.Kind == 1 ? TEXT("halftime") : TEXT("postgame"), Sh.Stage + 1, Sg.Name, Sg.Secs);
+		return;
 	}
 	if (bGfxAsked)
 	{
@@ -2884,12 +3053,12 @@ void AMatchDirector::StartShowStage()
 	St.Shot.bJustPlaced = true;
 	if (Sh.Kind == 1)
 	{
-		HalftimeView.Stage = Sg.Act <= 2 ? Sg.Act : Sg.Act <= 4 ? 3 : 4; // (1 leaving, 2 the stats, 3 the moments, 4 the units)
+		HalftimeView.Stage = Sg.Act <= 2 ? Sg.Act : Sg.Act == 5 ? 4 : 3; // (1 leaving, 2 the stats, 3 the moments and highlights, 4 the units)
 		HalftimeView.StageName = Sg.Name;
 	}
 	else
 	{
-		PostgameView.Stage = Sg.Act - 10;
+		PostgameView.Stage = Sg.Act == 6 ? 2 : Sg.Act - 10; // (a highlight: with the final score)
 		PostgameView.StageName = Sg.Name;
 	}
 	UE_LOG(LogTemp, Display, TEXT("TAG show %s stage %d: %s, %.1f s (%s shot)"), Sh.Kind == 1 ? TEXT("halftime") : TEXT("postgame"), Sh.Stage + 1, Sg.Name, Sg.Secs,
@@ -2909,6 +3078,7 @@ void AMatchDirector::TickShow(float InDt)
 	const bool bInStages = Sh.Stages.IsValidIndex(Sh.Stage);
 	const int32 Act = bInStages ? Sh.Stages[Sh.Stage].Act : 0;
 	// the second half's units stand where they were put; the long version's cut from one unit to the other
+	if (Act == 6) TickHighlight(Dt); // (a stored highlight playing)
 	if (Sh.Kind == 1 && (Act == 5 || !bInStages))
 	{
 		DriveStagedUnits(Dt);
@@ -2994,6 +3164,7 @@ void AMatchDirector::EndShow(const TCHAR* How)
 	UE_LOG(LogTemp, Display, TEXT("TAG show done: %s, %s after %.2f s (%s version, stages%s; graphics %d of %d shown; lens bad %d of %d frames; clocks held %s%s)"),
 		Sh.Kind == 1 ? TEXT("halftime") : TEXT("postgame"), How, Sh.T, *Sh.Version, *Stages, Sh.GfxShown, Sh.GfxAsked, Sh.BadFrames, Sh.Frames, Sh.bHeldClock ? TEXT("yes") : TEXT("no"),
 		Sh.Kind == 1 ? *FString::Printf(TEXT("; units on screen %d / %d; others on the field at the units %d"), Sh.MostKickSeen, Sh.MostRecvSeen, Sh.FieldMenAtUnits) : TEXT(""));
+	if (St.bHlOn) EndHighlight();
 	if (ShotView.bOn) EndShot(How);
 	// the player of the game stood on his sideline for the show goes back where he was (off: the menus are up)
 	if (Sh.Kind == 2 && Sh.Pog)
@@ -3014,7 +3185,162 @@ void AMatchDirector::EndShow(const TCHAR* How)
 
 bool AMatchDirector::BroadcastDrivesMen() const
 {
-	return BcState && BcState->Show.bOn && BcState->Show.Kind == 1;
+	return BcState && BcState->Show.bOn && (BcState->Show.Kind == 1 || BcState->bHlOn); // (the half's men walking off; a highlight's film)
+}
+
+// ------------------------------------------------------------------ stored highlights (04 A10)
+void AMatchDirector::CaptureHighlight()
+{
+	FTagBcState& St = Bc();
+	if (!St.bHlPending) return;
+	St.bHlPending = false;
+	if (ReplayBuf.Num() < 20) return;
+	// the cap on what is kept (the films of the best plays of both halves)
+	static int32 CapMB = FParse::Value(FCommandLine::Get(), TEXT("TagHighlightMB="), CapMB) ? FMath::Clamp(CapMB, 16, 2048) : 192;
+	St.HlCapBytes = static_cast<int64>(CapMB) * 1024 * 1024;
+	FTagBcHighlight H = St.HlPending;
+	// the stretch around the key moment (the sim's clock to the film's), 4.5 s before it to 1.5 s after
+	H.KeyT = ReplayBuf.Last().T - 1.5f;
+	for (const FReplayFrame& F : ReplayBuf)
+		if (F.SimT >= H.KeySim - 1e-4) { H.KeyT = F.T; break; }
+	H.T0 = FMath::Max(ReplayBuf[0].T, H.KeyT - 4.5f);
+	H.T1 = FMath::Min(ReplayBuf.Last().T, H.KeyT + 1.5f);
+	int64 Bytes = 0;
+	for (const FReplayFrame& F : ReplayBuf)
+	{
+		if (F.T < H.T0 - 0.05f || F.T > H.T1 + 0.05f) continue;
+		H.Frames.Add(F);
+		Bytes += sizeof(FReplayFrame);
+		for (const FReplayAth& RA : F.Ath) Bytes += sizeof(FReplayAth) + RA.Rot.Num() * sizeof(FQuat4f) + RA.Pos.Num() * sizeof(FVector3f);
+	}
+	H.Bytes = Bytes;
+	if (H.Frames.Num() < 10) return;
+	if (Bytes > St.HlCapBytes / 3)
+	{
+		++St.HlDropped;
+		UE_LOG(LogTemp, Warning, TEXT("TAG highlight not kept: %.1f MB for one play, over a third of the %d MB cap"), Bytes / 1048576.0, CapMB);
+		return;
+	}
+	const int32 Half = H.Half;
+	St.HlBytes += Bytes;
+	St.Highlights.Add(MoveTemp(H));
+	++St.HlKept;
+	// six a half at most, and under the cap: the lowest score goes (of the half that has too many, else of all)
+	for (;;)
+	{
+		int32 InHalf = 0;
+		for (const FTagBcHighlight& Kh : St.Highlights) InHalf += Kh.Half == Half ? 1 : 0;
+		if (InHalf <= 6 && St.HlBytes <= St.HlCapBytes) break;
+		int32 Worst = -1;
+		for (int32 i = 0; i < St.Highlights.Num(); ++i)
+			if ((InHalf <= 6 || St.Highlights[i].Half == Half) && (Worst < 0 || St.Highlights[i].Score < St.Highlights[Worst].Score)) Worst = i;
+		if (Worst < 0) break;
+		St.HlBytes -= St.Highlights[Worst].Bytes;
+		St.Highlights.RemoveAt(Worst);
+		++St.HlDropped;
+	}
+	St.HlBytesPeak = FMath::Max(St.HlBytesPeak, St.HlBytes);
+	UE_LOG(LogTemp, Display, TEXT("TAG highlight kept: play %d (%s, score %.2f), %d frames %.1f MB; %d kept, %.1f MB of the %d MB cap (%d dropped)"), St.HlPending.PlayN,
+		*St.HlPending.Desc, St.HlPending.Score, St.Highlights.Num() ? St.Highlights.Last().Frames.Num() : 0, Bytes / 1048576.0, St.Highlights.Num(), St.HlBytes / 1048576.0, CapMB,
+		St.HlDropped);
+}
+
+void AMatchDirector::BeginHighlight(int32 Idx)
+{
+	FTagBcState& St = Bc();
+	if (!St.Highlights.IsValidIndex(Idx)) return;
+	if (St.bHlOn) EndHighlight();
+	if (ShotView.bOn) EndShot(TEXT("highlight"));
+	const FTagBcHighlight& H = St.Highlights[Idx];
+	// the men of the film on the field, everyone else off it (put back after: EndHighlight)
+	St.HlVisible.Reset();
+	for (const auto& KV : Athletes)
+		if (KV.Value && !KV.Value->IsHidden())
+		{
+			St.HlVisible.Add(KV.Key);
+			KV.Value->SetActorHiddenInGame(true);
+		}
+	TSet<int32> InFilm;
+	for (const FReplayFrame& F : H.Frames)
+		for (const FReplayAth& RA : F.Ath) InFilm.Add(RA.Id);
+	for (const int32 Id : InFilm)
+		if (AAthlete* A = Athletes.FindRef(Id).Get())
+		{
+			A->SetActorHiddenInGame(false);
+			A->SetDormant(false);
+		}
+	St.bHlBallHidden = Ball ? Ball->IsHidden() : true;
+	ReplayBuf = H.Frames;
+	ReplayEnd = ReplayBuf.Last().T;
+	ReplayDirOverride = H.Dir;
+	St.Runs.Reset();
+	St.Runs.Add(BcHighlightRun(H));
+	St.Run = 0;
+	St.RKeyKind = TEXT("highlight");
+	SetupReplayRun();
+	const int32 Ser = ReplayView.Serial + 1;
+	ReplayView.bOn = true;
+	ReplayView.Serial = Ser;
+	ReplayView.NumAngles = 1;
+	ReplayView.Why = FString::Printf(TEXT("highlight: %s"), *H.Desc);
+	St.bHlOn = true;
+	FVector BallAt, SubjAt;
+	bool bSubj = false;
+	ApplyReplayAt(ReplayT, BallAt, SubjAt, bSubj);
+	ReplayCameraFrame(0.f, BallAt, SubjAt, bSubj, true);
+	MarkCameraCut(TEXT("highlight"));
+	++St.Show.HlShown;
+	UE_LOG(LogTemp, Display, TEXT("TAG highlight shown: %s (score %.2f, %s angle, film %.1f-%.1f s, key %.1f, %d men)"), *H.Desc, H.Score, BcAngleName(St.Runs[0].Type), H.T0, H.T1,
+		H.KeyT, InFilm.Num());
+}
+
+void AMatchDirector::TickHighlight(float Dt)
+{
+	if (!BcState || !BcState->bHlOn || BcState->Runs.Num() == 0) return;
+	FTagBcState& St = *BcState;
+	FTagReplayRun& R = St.Runs[0];
+	const float Rate = BcRampRate(R, ReplayT);
+	ReplayT = FMath::Min(ReplayT + Dt * Rate, FMath::Min(R.T1, ReplayEnd));
+	FVector BallAt, SubjAt;
+	bool bSubj = false;
+	ApplyReplayAt(ReplayT, BallAt, SubjAt, bSubj);
+	ReplayCameraFrame(Dt, BallAt, SubjAt, bSubj, false); // (after the game camera's: UpdateCamera ran in the Wait before)
+	ReplayView.Rate = Rate;
+	ReplayView.KeyIn = R.KeyT - ReplayT;
+	ReplayView.bAtKey = FMath::Abs(ReplayView.KeyIn) < 0.45f;
+}
+
+void AMatchDirector::EndHighlight()
+{
+	if (!BcState || !BcState->bHlOn) return;
+	FTagBcState& St = *BcState;
+	St.bHlOn = false;
+	for (auto& KV : Athletes)
+		if (KV.Value) KV.Value->EndReplay();
+	// everyone as he was before the film
+	for (auto& KV : Athletes)
+	{
+		AAthlete* A = KV.Value.Get();
+		if (!A) continue;
+		const bool bWas = St.HlVisible.Contains(KV.Key);
+		if (!bWas && !A->IsHidden())
+		{
+			A->ResetPose();
+			A->SetActorHiddenInGame(true);
+			A->SetDormant(true);
+		}
+		else if (bWas && A->IsHidden())
+		{
+			A->SetActorHiddenInGame(false);
+			A->SetDormant(false);
+		}
+	}
+	if (Ball) Ball->SetActorHiddenInGame(St.bHlBallHidden);
+	ReplayDirOverride = 0;
+	const int32 Ser = ReplayView.Serial;
+	ReplayView = FTagReplayView();
+	ReplayView.Serial = Ser;
+	bCutNext = true;
 }
 
 // ------------------------------------------------------------------ substitutes on and off (04 A11)
@@ -3028,10 +3354,18 @@ bool AMatchDirector::SubEntrySpot(const tag::Ent* E, double MaxYd, tag::V2& Out)
 	// from his own sideline, level with his spot; a spot on the far side of the field from his bench, the nearer one
 	double SideY = (bHome ? 1.0 : -1.0) * (tag::FIELD_W / 2 + 1.0) * Y;
 	if (FMath::Abs(W.Y - SideY) > 30.0 * Y) SideY = -SideY;
-	const FVector Start(W.X - Dir * 1.5 * Y, SideY, 0.0);
+	FTagBcState& St = Bc();
+	if (Sim && St.SubStartsSerial != Sim->serial)
+	{
+		St.SubStartsSerial = Sim->serial;
+		St.SubStarts.Reset();
+	}
+	// (each from his own spot on the sideline: two men level with the same spot stood inside each other)
+	const FVector Start = BcSpread(FVector(W.X - Dir * 1.5 * Y, SideY, 0.0), St.SubStarts, 150.0, 120.0);
 	if (FVector::Dist2D(Start, W) > MaxYd * Y) return false;
+	St.SubStarts.Add(Start);
 	Out = TagCoords::FromWorld(Start, Dir);
-	++Bc().SubsIn;
+	++St.SubsIn;
 	return true;
 }
 
@@ -3062,7 +3396,11 @@ float AMatchDirector::BeginSubsOff(const std::map<tag::Player*, FVector>& From)
 		L.P = P;
 		L.At = KV.second;
 		L.At.Z = 0.0;
-		L.To = BcBenchSpot(Game->home->hasPlayer(P), L.At.X);
+		{
+			TArray<FVector> Taken;
+			for (const FTagBcLeaver& O : St.Leavers) Taken.Add(O.To);
+			L.To = BcSpread(BcBenchSpot(Game->home->hasPlayer(P), L.At.X), Taken, 130.0, 120.0); // (each to a spot of his own)
+		}
 		L.Speed = 600.f;
 		const FVector D = L.To - L.At;
 		const double Dist = D.Size2D();
@@ -3396,12 +3734,22 @@ void AMatchDirector::TickBroadcastTests(float Dt)
 			Check(Sh.bHeldClock, TEXT("the clocks held through the show"), Tg);
 			Check(Sh.GfxAsked >= (Sh.Kind == 1 ? 1 : 2), FString::Printf(TEXT("the graphics asked for their panels (%d asked, %d there)"), Sh.GfxAsked, Sh.GfxShown), Tg);
 		};
+		// the stored highlights: shown in the show, their films under the memory cap
+		auto CheckHighlights = [&Sh, &Check, &St, Tg]()
+		{
+			const double PerPlay = St.HlKept > 0 ? static_cast<double>(St.HlBytesPeak) / FMath::Max(1, St.Highlights.Num()) / 1048576.0 : 0.0;
+			Check(Sh.HlWant >= 1 && Sh.HlShown >= Sh.HlWant, FString::Printf(TEXT("highlights shown (%d of %d planned; %d kept so far, %d dropped)"), Sh.HlShown, Sh.HlWant,
+				St.HlKept, St.HlDropped), Tg);
+			Check(St.HlCapBytes > 0 && St.HlBytesPeak <= St.HlCapBytes, FString::Printf(TEXT("the films under the cap (peak %.1f MB of %.0f MB, about %.1f MB a play)"),
+				St.HlBytesPeak / 1048576.0, St.HlCapBytes / 1048576.0, PerPlay), Tg);
+		};
 		if (T.Mode == 5 && Sh.bOn && bMine && !T.bShowChecked && Sh.Stages.IsValidIndex(Sh.Stage) && Sh.Stages[Sh.Stage].Act == 5 &&
 			Sh.StageT >= Sh.Stages[Sh.Stage].Secs * 0.7f)
 		{
 			// in the last stage (the units): the checks so far; the show then runs out by itself and hands on to the kickoff
 			T.bShowChecked = true;
 			CheckShow(Sh.Stages.Num() - 1);
+			CheckHighlights();
 			Check(Sh.FieldMenAtUnits == 0, FString::Printf(TEXT("the last play's men off the field for the units (%d left on it)"), Sh.FieldMenAtUnits), Tg);
 			Check(Sh.MostKickSeen >= 9 && Sh.MostRecvSeen >= 9, FString::Printf(TEXT("both kickoff units on screen (at most %d and %d of 11)"), Sh.MostKickSeen, Sh.MostRecvSeen), Tg);
 			Check(HalftimeView.bOn && HalftimeView.Stage == 4 && HalftimeView.bStatsUp, FString::Printf(TEXT("HalftimeNow: on, stage %d, stats asked %d"), HalftimeView.Stage, HalftimeView.bStatsUp ? 1 : 0), Tg);
@@ -3426,6 +3774,7 @@ void AMatchDirector::TickBroadcastTests(float Dt)
 			// the show over: the final box score is up, as before it
 			T.bShowChecked = true;
 			CheckShow(Sh.Stages.Num());
+			CheckHighlights();
 			Check(Sh.Pog != nullptr, FString::Printf(TEXT("a player of the game (%s, %s)"), Sh.Pog ? *BcS(Sh.Pog->last) : TEXT("-"), *Sh.PogLine), Tg);
 			Check(Overlay && Overlay->HasModal(), TEXT("handed on to the final box score"), Tg);
 			T.bDone = true;
@@ -3579,7 +3928,7 @@ void AMatchDirector::TickFieldOverlays(float Dt)
 	}
 	// nothing of it in a replay (the lines mark the next play, not the one on the film), a cut-in, a close shot, a
 	// between-play shot, the open or a break's wide shot. (Hidden in game: SetLines' own showing and hiding is left as it is.)
-	const bool bHide = State == EMatchState::Replay || (CutInTarget && CutInLeft > 0.f) || CloseupTarget || BreakLeft > 0.f || bSetAfterBreak || ShotView.bOn ||
+	const bool bHide = State == EMatchState::Replay || ReplayView.bOn || (CutInTarget && CutInLeft > 0.f) || CloseupTarget || BreakLeft > 0.f || bSetAfterBreak || ShotView.bOn ||
 		PregameView.bOn;
 	if (bHide != bOverlayHidden)
 	{
@@ -3661,6 +4010,19 @@ void AMatchDirector::TickBroadcast(float Dt)
 	TickOpen(Dt);
 	TickShow(Dt);    // (the halftime and postgame shows)
 	TickLeavers(Dt); // (the men walking off: substitutes, the half)
+	if (BcState)
+	{
+		// the officials out of the open's, the halftime show's and a highlight's pictures (the umpire stood between the
+		// kickoff units, in the second unit's shot)
+		const bool bHideRefs = PregameView.bOn || HalftimeView.bOn || BcState->bHlOn;
+		if (bHideRefs != BcState->bRefsHidden)
+		{
+			BcState->bRefsHidden = bHideRefs;
+			if (Umpire) Umpire->SetActorHiddenInGame(bHideRefs);
+			for (AAthlete* O : Crew)
+				if (O) O->SetActorHiddenInGame(bHideRefs);
+		}
+	}
 	TickBeats(Dt * (bWatch ? Speed : 1.f));
 	TickBroadcastTests(Dt);
 	{

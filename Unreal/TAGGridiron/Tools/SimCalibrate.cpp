@@ -173,7 +173,7 @@ int main(int argc, char** argv) {
   Rate ypcStyle[5];
   // combo blocks (Tune::comboBlock, 01 #4): per designed run carried, the pairs set, doubles formed, climbs, climbs that
   // got a block on their man (and when), run double-team seconds, linebackers a lineman blocked; yards a carry with one
-  double cbRuns = 0, cbSet = 0, cbDbl = 0, cbClimb = 0, cbHit = 0, cbHitT = 0, cbDblT = 0, cbLb = 0, cbLbHit = 0;
+  double cbRuns = 0, cbSet = 0, cbDbl = 0, cbClimb = 0, cbHit = 0, cbHitT = 0, cbHoldT = 0, cbDblT = 0, cbLb = 0, cbLbHit = 0;
   Rate cbYpc[2];
   // a designed run's path (A7 backs read blocks / A8 gap integrity): by where it crossed the line - nflverse's run_gap
   // classes, middle (inside the guards), guard, tackle, end - the share, yards a carry, stuffed, 10+, and the depth of
@@ -418,6 +418,7 @@ int main(int argc, char** argv) {
             cbClimb += r.comboClimb;
             cbHit += r.comboHit;
             cbHitT += r.comboHitT;
+            cbHoldT += r.comboHoldT;
             cbDblT += r.runDblT;
             cbLb += r.lbN;
             cbLbHit += r.lbBlocked;
@@ -1314,6 +1315,7 @@ int main(int argc, char** argv) {
       J["combo.dbl_pct"] = 100 * cbDbl / (std::max)(1.0, cbSet);
       J["combo.climb_pct"] = 100 * cbClimb / (std::max)(1.0, cbDbl);
       J["combo.hit_pct"] = 100 * cbHit / (std::max)(1.0, cbClimb);
+      J["combo.hold_s"] = cbHoldT / (std::max)(1.0, cbClimb);
       J["combo.dbl_secs_per_run"] = cbDblT / rn;
       J["combo.lb_blocked_pct"] = 100 * cbLbHit / (std::max)(1.0, cbLb);
     }

@@ -241,7 +241,10 @@ void AMatchDirector::TickPadPlayTest(float Dt)
 		}
 		break;
 	case 8: // on defense: R1 goes for the strip
-		if (State == EMatchState::Live && S && UserDef() && S->user && S->t > 0.5)
+		// (a scrimmage down's defense: the side switched to punted on the next snap, the user then had the ball for a
+		// 15-play drive, and the two checks landed on his kickoff's cover men, who do not strafe - gate 2026-11-25 16:17)
+		if (State == EMatchState::Presnap && UserOff() && Game->phase == tag::GamePhase::Scrimmage) UserTeam = tag::other(Game->poss);
+		if (State == EMatchState::Live && S && UserDef() && S->user && S->t > 0.5 && Game->phase == tag::GamePhase::Scrimmage && S->user->side == tag::Side::Def)
 		{
 			if (T.HoldT == 0.f) PadKey(EKeys::Gamepad_RightShoulder, true);
 			if ((T.HoldT += Dt) > 0.1f)

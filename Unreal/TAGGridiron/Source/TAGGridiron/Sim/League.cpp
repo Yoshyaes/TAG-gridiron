@@ -34,7 +34,7 @@ const std::vector<TeamSeed> kTeamSeeds = {
     {"Albuquerque", "Roadrunners", "ABQ", "#00827F", "#F4A259", "#FFFFFF"},
     {"Omaha", "Stampede", "OMA", "#2E4057", "#D1495B", "#FFFFFF"},
     {"Honolulu", "Waves", "HNL", "#0081A7", "#FED9B7", "#F07167"},
-    {"Hartford", "Whalers FC", "HFD", "#003F5C", "#7FB800", "#FFFFFF"},
+    {"Hartford", "Kestrels", "HFD", "#003F5C", "#7FB800", "#FFFFFF"},
     {"Raleigh", "Oaks", "RAL", "#2D6A4F", "#B7472A", "#FFFFFF"},
     {"Richmond", "Ironhorses", "RIC", "#22223B", "#C9ADA7", "#F2E9E4"},
     {"Boise", "Bison", "BOI", "#6F1D1B", "#BB9457", "#FFFFFF"},

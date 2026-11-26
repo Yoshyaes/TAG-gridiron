@@ -17,7 +17,7 @@ import audiolib as al  # noqa: E402
 
 SR = al.SR
 TEAMS = "Outlaws:AUS Lumberjacks:POR Vaqueros:SAT Twisters:OKC Summit:SLC Ironclads:CLB Goldrush:SAC Kings:MEM Thoroughbreds:LOU Forge:BHM Roadrunners:ABQ " \
-        "Stampede:OMA Waves:HNL Whalers:HFD Oaks:RAL Ironhorses:RIC Bison:BOI Aurora:ANC Scorpions:TUC Sundogs:ELP Timberwolves:SPO Brewmasters:MKE Archers:STL " \
+        "Stampede:OMA Waves:HNL Kestrels:HFD Oaks:RAL Ironhorses:RIC Bison:BOI Aurora:ANC Scorpions:TUC Sundogs:ELP Timberwolves:SPO Brewmasters:MKE Archers:STL " \
         "Tritons:SDT Comets:ORL Bridges:BKN Huskies:TOR Aztecas:MEX Mariners:VAB Cyclones:DSM Palmettos:CHS Raptors:FRE".split()
 
 QB_VOICES = ['am_adam', 'am_eric', 'am_liam', 'am_echo']
