@@ -34,6 +34,7 @@ struct FTagKitWeather
 {
 	float Grime[5] = {0.f, 0.f, 0.f, 0.f, 0.f}; // knees and shins, elbows and forearms, chest and front, back and seat, helmet
 	float Wet = 0.f, Snow = 0.f, Sweat = 0.f, Mud = 0.f;
+	float Exert = 0.f;                           // his exertion from his own running (the face's comes only with a close face)
 	bool bWasDown = false;
 	FVector LastPush = FVector::ZeroVector;     // the last hit's push on him (a fall forward lands him on his front)
 	float PushAge = 99.f;

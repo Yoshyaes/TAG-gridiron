@@ -156,8 +156,9 @@ struct FStadiumLook
 	bool bOldWear = false;
 
 	// A6, the men's kits (-TagOldKit: none of it; -TagKitForce=x every man at grime x, wet x, snow x, sweat x)
-	float GrimeTackle = 0.05f;       // -TagGrimeTackle=   the tackler's front and arms, the carrier's arms, per tackle
-	float GrimeFall = 0.07f;         // -TagGrimeFall=     a man going down: the side he lands on, his knees or seat, arms
+	float GrimeTackle = 0.03f;       // -TagGrimeTackle=   the tackler's front and arms, the carrier's arms, per tackle (0.05: a
+	                                 //                    few men fully soiled by the second quarter, 11-26)
+	float GrimeFall = 0.05f;         // -TagGrimeFall=     a man going down: the side he lands on, his knees or seat, arms (0.07)
 	float GrimeLine = 0.0007f;       // -TagGrimeLine=     a lineman's knees (x 0.6 hands) per pass at the line, as long as
 	                                 //                    the line's wear budget lasts (WearLineMax / WearLine passes a snap)
 	float WetRate = 0.02f;           // -TagWetRate=       wetness per second in full rain (a minute to soak), x the rain's strength
@@ -174,16 +175,38 @@ struct FStadiumLook
 	float Latitude = 40.f;           // -TagLatitude=      degrees north (one for the league)
 	float GameHours = 3.1f;          // -TagGameHours=     the broadcast's length, kickoff to the final whistle
 	float LateShare = 0.35f;         // -TagLateShare=     share of day games that kick off late
-	float SunMaxEVComp = 1.5f;       // -TagSunEVComp=     at most this many stops the day camera may open up as the sun gets low ...
-	float SunEVK = 1.f;              // -TagSunEVK=        ... SunEVK x log2(sin 48 / sin elevation) (2.5 tried: too bright once the floor alone moves)
-	                                 //                    as the roof's shadow takes more of the field (a shaded late-season
-	                                 //                    field still reads a little darker: a 32 deg sun filmed 0.083 vs 0.165)
+	// The day camera with the moving sun is set for the light on the field, as a camera operator rides the iris for the
+	// grass rather than metering the frame. NB the project's exposure "EV" values are scene luminance (cd/m2: the
+	// engine's r.DefaultFeature.AutoExposure.ExtendDefaultLuminanceRange is 0), so exposure goes as 1 / value; the first
+	// cuts' negative "EV" floors (rain, low sun) left the auto exposure unbounded, the cause of the dark and the
+	// white-washed films of 11-25. Measured 11-26 with the camera pinned at 0.6 (-TagDayEV=0.6): the sunlit field's
+	// median reads SunL x sin(elevation), the field in the roof's shadow ShadeL for each unit of sky light (the overcast
+	// rain field the same), the night banks BankL (0.31 at the night's 4.5). The pinned value puts the field's median at
+	// the target for its light: sun and shade mixed by how much of the field the sun reaches past the roof
+	// (SunlitFraction), and the banks as a late game runs into the dusk.
+	float SunL = 0.14f;              // -TagSunL=
+	float ShadeL = 0.0075f;          // -TagShadeL=        (0.003 from the pinned film filmed the shade at 0.27-0.36)
+	float OvercastK = 0.18f;         // -TagOvercastK=     an overcast field's light against a dry shaded one's, sky for sky (wet turf,
+	                                 //                    cloud, rain: 0.03-0.09 filmed at 1.0, 0.13-0.23 at 0.13)
+	float DaySky = 2.f;              // -TagDaySky=        the sky light on a dry day with the moving sun (was 1): the roof's shadow
+	                                 //                    sat 5-6 stops under the sunlit field (a real stand's shade is 2-3)
+	float BankL = 2.33f;             // -TagBankL=
+	float SnowL = 10.f;              // -TagSnowL=         a snow-covered field returns this much more light than grass
+	float SunTarget = 0.165f;        // -TagSunTarget=     field median, linear: a sunny field (the A1-approved day)
+	float ShadeTarget = 0.15f;       // -TagShadeTarget=   a field in the stands' shadow: a little darker (0.12: dim at kickoff)
+	float OvercastTarget = 0.15f;    // -TagOvercastTarget= an overcast field (0.13: dim at kickoff)
+	float SnowTarget = 0.5f;         // -TagSnowTarget=    a snow field by day
+	float NightTarget = 0.31f;       // -TagNightTarget=   under the banks (the night games' field)
 	float ProgressFixed = -1.f;      // -TagProgress=      look tests: the game's progress 0..1 held there (sun, weather)
+	float DayEVFixed = -99.f;        // -TagDayEV=         measurements: the day camera pinned at this EV100 (bias 0)
+	float ProgressRate = 0.f;        // -TagProgressRate=  look tests: the progress runs at this much a second from -TagProgress
+	                                 //                    (or 0), whatever the game clock says: a whole day's light in one clip
 	// Phase 4, A10: breath (-TagNoBreath: none)
 	bool bNoBreath = false;
 	float BreathTempF = 45.f;        // -TagBreathTemp=    colder than this (or snowing) and breath shows
-	float BreathDist = 2600.f;       // -TagBreathDist=    only men this near the lens (cm): the close shots
-	float BreathOpacity = 0.2f;      // -TagBreathOpacity= (0.35 first cut: a solid white blob at the mouth in the lineup close-up)
+	float BreathDist = 4500.f;       // -TagBreathDist=    only men this near the lens (cm): close shots and the game camera
+	                                 //                    behind the play (2600 first cut: the close shots only)
+	float BreathOpacity = 0.6f;      // -TagBreathOpacity= (0.35 first cut, 0.4 faint in the 11-26 snow lineup; the 'white blob' at the mouth was the facemask's chin cup)
 	// Phase 4, A13 (shader version): -TagNoCrowdAnim keeps the still painted crowd (M_TagCrowd)
 	bool bNoCrowdAnim = false;
 	float CrowdAlbedoNight = 0.6f;   // -TagCrowdNight=    the painted crowd's colour under the lights (was 1): the bowl falls
@@ -315,9 +338,20 @@ struct FStadiumLook
 			FParse::Value(Cmd, TEXT("TagLatitude="), L.Latitude);
 			FParse::Value(Cmd, TEXT("TagGameHours="), L.GameHours);
 			FParse::Value(Cmd, TEXT("TagLateShare="), L.LateShare);
-			FParse::Value(Cmd, TEXT("TagSunEVComp="), L.SunMaxEVComp);
-			FParse::Value(Cmd, TEXT("TagSunEVK="), L.SunEVK);
+			FParse::Value(Cmd, TEXT("TagSunL="), L.SunL);
+			FParse::Value(Cmd, TEXT("TagShadeL="), L.ShadeL);
+			FParse::Value(Cmd, TEXT("TagDaySky="), L.DaySky);
+			FParse::Value(Cmd, TEXT("TagSnowL="), L.SnowL);
+			FParse::Value(Cmd, TEXT("TagOvercastK="), L.OvercastK);
+			FParse::Value(Cmd, TEXT("TagSnowTarget="), L.SnowTarget);
+			FParse::Value(Cmd, TEXT("TagBankL="), L.BankL);
+			FParse::Value(Cmd, TEXT("TagSunTarget="), L.SunTarget);
+			FParse::Value(Cmd, TEXT("TagShadeTarget="), L.ShadeTarget);
+			FParse::Value(Cmd, TEXT("TagOvercastTarget="), L.OvercastTarget);
+			FParse::Value(Cmd, TEXT("TagNightTarget="), L.NightTarget);
 			FParse::Value(Cmd, TEXT("TagProgress="), L.ProgressFixed);
+			FParse::Value(Cmd, TEXT("TagProgressRate="), L.ProgressRate);
+			FParse::Value(Cmd, TEXT("TagDayEV="), L.DayEVFixed);
 			L.bNoBreath = bOldAll || FParse::Param(Cmd, TEXT("TagNoBreath"));
 			FParse::Value(Cmd, TEXT("TagBreathTemp="), L.BreathTempF);
 			FParse::Value(Cmd, TEXT("TagBreathDist="), L.BreathDist);
@@ -699,11 +733,12 @@ void AStadium::BuildBowl(const tag::Team& Home, const tag::Team& Away, bool bNig
 		D->SetScalarParameterValue(TEXT("Roughness"), Rough);
 		return D;
 	};
-	// (a late game builds the day's values and cross-fades each of these to the night's as the sun sets: UpdateSun)
+	// (a day game with the moving sun keeps these: each glow follows the day camera's exposure, so a board does not
+	// flare when the camera opens up for a shaded field, and a late game cross-fades them to the night's: UpdateSun)
 	auto Dusk = [&](UMaterialInterface* Mi, const TCHAR* Param, float DayV, float NightV)
 	{
 		if (UMaterialInstanceDynamic* Mid = Cast<UMaterialInstanceDynamic>(Mi))
-			if (bDuskGame)
+			if (bMovingSun)
 			{
 				DuskMIDs.Add(Mid);
 				DuskMIDParam.Add(FName(Param));
@@ -750,7 +785,7 @@ void AStadium::BuildBowl(const tag::Team& Home, const tag::Team& Away, bool bNig
 	// suites: dark reflective glass, warm interiors that read at night
 	Add(Glass, Dusk(LED(FLinearColor(1.f, 0.82f, 0.6f), FLinearColor(1.f, 0.82f, 0.6f), bNight ? 0.35f : 0.03f, 0, 0, 0.02f, 0.08f), TEXT("Intensity"), 0.03f, 0.35f));
 	// ribbon board: 12.5 m panels alternating the home colours, scrolling slowly around the bowl
-	Add(Ribbon, LED(HomeC, HomeC2, bNight ? 3.f : 5.f, 0.08f, 0.12f, 0.1f, 0.3f));
+	Add(Ribbon, Dusk(LED(HomeC, HomeC2, bNight ? 3.f : 5.f, 0.08f, 0.12f, 0.1f, 0.3f), TEXT("Intensity"), 5.f, 3.f));
 	Add(Roof, StandMat(FLinearColor(0.34f, 0.35f, 0.37f), 0.6f));
 	Add(Edge, TagColorMat(this, HomeC * 0.5f, 0.4f));
 
@@ -765,9 +800,9 @@ void AStadium::BuildBowl(const tag::Team& Home, const tag::Team& Away, bool bNig
 		for (double LegY : {-1600.0, 1600.0}) // legs down to the canopy
 			AddMesh(A.Cube, FVector(X, LegY, Z - 1100), FVector(1.2, 1.2, 4), FLinearColor(0.2f, 0.2f, 0.22f), 0.6f, R);
 		UStaticMeshComponent* Screen = AddMesh(A.Cube, FVector(X, 0, Z) + In * 125, FVector(0.05, 47, 16.4), FLinearColor::Black, 0.5f, R, false);
-		Screen->SetMaterial(0, LED(FLinearColor(0.02f, 0.04f, 0.12f), FLinearColor(0.02f, 0.04f, 0.12f), bNight ? 1.5f : 1.1f, 0, 0, 0.02f, 0.2f));
+		Screen->SetMaterial(0, Dusk(LED(FLinearColor(0.02f, 0.04f, 0.12f), FLinearColor(0.02f, 0.04f, 0.12f), bNight ? 1.5f : 1.1f, 0, 0, 0.02f, 0.2f), TEXT("Intensity"), 1.1f, 1.5f));
 		UStaticMeshComponent* Band = AddMesh(A.Cube, FVector(X, 0, Z + 640) + In * 128, FVector(0.05, 47, 2.2), FLinearColor::Black, 0.5f, R, false);
-		Band->SetMaterial(0, LED(HomeC, AwayC, bNight ? 3.f : 6.f, 0.5f / 47, 0, 0.05f, 0.3f));
+		Band->SetMaterial(0, Dusk(LED(HomeC, AwayC, bNight ? 3.f : 6.f, 0.5f / 47, 0, 0.05f, 0.3f), TEXT("Intensity"), 6.f, 3.f));
 		for (int32 Line = 0; Line < 2; ++Line)
 		{
 			UTextRenderComponent* T = NewObject<UTextRenderComponent>(this);
@@ -1212,7 +1247,7 @@ void AStadium::Build(const tag::Team& Home, const tag::Team& Away, const tag::We
 	USkyLightComponent* Sky = NewObject<USkyLightComponent>(this);
 	Sky->SetupAttachment(RootComponent);
 	Sky->bRealTimeCapture = true;
-	Sky->SetIntensity(bNight ? 0.04f : (bOvercast ? Look.RainSky : 1.0f)); // night: the sky above the bowl goes near black
+	Sky->SetIntensity(bNight ? 0.04f : (bOvercast ? Look.RainSky : bMovingSun ? Look.DaySky : 1.0f)); // night: the sky above the bowl goes near black
 	Sky->RegisterComponent();
 	SkyC = Sky;
 	SkyDayIntensity = Sky->Intensity;
@@ -1252,7 +1287,7 @@ void AStadium::Build(const tag::Team& Home, const tag::Team& Away, const tag::We
 			LampMat->SetVectorParameterValue(TEXT("ColorB"), FLinearColor(1.f, 0.97f, 0.92f));
 			LampMat->SetScalarParameterValue(TEXT("Intensity"), bNight ? Look.LampGlow : 0.4f);
 			LampMat->SetScalarParameterValue(TEXT("Diffuse"), 0.6f);
-			if (bDuskGame)
+			if (bMovingSun)
 			{
 				DuskMIDs.Add(LampMat);
 				DuskMIDParam.Add(TEXT("Intensity"));
@@ -1373,7 +1408,7 @@ void AStadium::Build(const tag::Team& Home, const tag::Team& Away, const tag::We
 	{
 		UMaterialInterface* BreathMat = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/TAG/Materials/M_TagBreath.M_TagBreath"), nullptr, LOAD_NoWarn | LOAD_Quiet);
 		if (!BreathMat || !A.Sphere) bBreath = false;
-		for (int32 i = 0; bBreath && i < 16; ++i)
+		for (int32 i = 0; bBreath && i < 24; ++i)
 		{
 			UStaticMeshComponent* Pc = AddMesh(A.Sphere, FVector::ZeroVector, FVector(0.1), FLinearColor::White, 0.9f, FRotator::ZeroRotator, false);
 			UMaterialInstanceDynamic* Pm = UMaterialInstanceDynamic::Create(BreathMat, this);
@@ -1385,7 +1420,7 @@ void AStadium::Build(const tag::Team& Home, const tag::Team& Away, const tag::We
 			PuffMIDs.Add(Pm);
 			PuffState.AddDefaulted();
 		}
-		UE_LOG(LogTemp, Display, TEXT("TAG breath: %s (%.0f F%s)"), bBreath ? TEXT("16 puffs") : TEXT("no M_TagBreath (Tools/Art/ue_build_stadium_mats.py)"), W.tempF, bSnowy ? TEXT(", snow") : TEXT(""));
+		UE_LOG(LogTemp, Display, TEXT("TAG breath: %s (%.0f F%s)"), bBreath ? TEXT("24 puffs") : TEXT("no M_TagBreath (Tools/Art/ue_build_stadium_mats.py)"), W.tempF, bSnowy ? TEXT(", snow") : TEXT(""));
 	}
 }
 
@@ -2215,6 +2250,13 @@ void AStadium::Tick(float Dt)
 	if (WeatherT >= 1.f)
 	{
 		WeatherT = 0.f;
+		const FStadiumLook& SweepLook = FStadiumLook::Get();
+		if (SweepLook.ProgressRate > 0.f)
+		{
+			// (-TagProgressRate: the day's light swept through in one clip, for exposure measurements)
+			GameProgress = FMath::Min(FMath::Max(SweepLook.ProgressFixed, 0.f) + Time * SweepLook.ProgressRate, 1.f);
+			UpdateSun(false);
+		}
 		ApplyWeather();
 	}
 	// the men on the field (A5 wear stamps, A6 kits), every WearStep seconds
@@ -2243,7 +2285,7 @@ void AStadium::SetGameClock(int32 Quarter, double ClockLeft, double QuarterLen)
 	const double Len = FMath::Max(QuarterLen, 1.0);
 	const double Done = (FMath::Clamp(Quarter, 1, 4) - 1) * Len + (Len - FMath::Clamp(ClockLeft, 0.0, Len));
 	GameProgress = Quarter > 4 ? 1.f : static_cast<float>(FMath::Clamp(Done / (4.0 * Len), 0.0, 1.0));
-	if (FStadiumLook::Get().ProgressFixed >= 0.f) GameProgress = FMath::Min(FStadiumLook::Get().ProgressFixed, 1.f);
+	if (FStadiumLook::Get().ProgressFixed >= 0.f || FStadiumLook::Get().ProgressRate > 0.f) GameProgress = FMath::Min(FMath::Max(FStadiumLook::Get().ProgressFixed, 0.f) + Time * FStadiumLook::Get().ProgressRate, 1.f);
 	GameQuarter = Quarter;
 	ApplyWeather();
 	UpdateSun(false);
@@ -2252,6 +2294,19 @@ void AStadium::SetGameClock(int32 Quarter, double ClockLeft, double QuarterLen)
 	{
 		WearDumpedQ = Quarter;
 		DumpWear(*FString::Printf(TEXT("q%d"), Quarter));
+		// the kits so far (players only): mean and most of each grime region, wet, snow (a quarter's check in the log)
+		float Sum[8] = {0, 0, 0, 0, 0, 0, 0, 0}, Most[5] = {0, 0, 0, 0, 0};
+		int32 Men = 0;
+		for (const TPair<int32, FTagKitWeather>& KV : Kits)
+		{
+			if (KV.Key < 0) continue;
+			++Men;
+			for (int32 g = 0; g < 5; ++g) { Sum[g] += KV.Value.Grime[g]; Most[g] = FMath::Max(Most[g], KV.Value.Grime[g]); }
+			Sum[5] += KV.Value.Wet; Sum[6] += KV.Value.Snow; Sum[7] += KV.Value.Sweat;
+		}
+		const float Div = static_cast<float>(FMath::Max(Men, 1));
+		UE_LOG(LogTemp, Display, TEXT("TAG kits q%d: %d men, grime mean/most knees %.2f/%.2f arms %.2f/%.2f front %.2f/%.2f back %.2f/%.2f helmet %.2f/%.2f, wet %.2f snow %.2f sweat %.2f"),
+			Quarter, Men, Sum[0] / Div, Most[0], Sum[1] / Div, Most[1], Sum[2] / Div, Most[2], Sum[3] / Div, Most[3], Sum[4] / Div, Most[4], Sum[5] / Div, Sum[6] / Div, Sum[7] / Div);
 	}
 }
 
@@ -2442,6 +2497,13 @@ void AStadium::BuildWallDressing(const tag::Team& Home, const tag::Team& Away, b
 			D->SetScalarParameterValue(TEXT("Roughness"), 0.3f);
 			Ism->SetMaterial(0, D);
 		}
+		if (bMovingSun)
+			if (UMaterialInstanceDynamic* Bm = Cast<UMaterialInstanceDynamic>(Ism->GetMaterial(0)))
+			{
+				DuskMIDs.Add(Bm);
+				DuskMIDParam.Add(TEXT("Intensity"));
+				DuskMIDRange.Add(FVector2f(Look.WallPanelDay, Look.WallPanelNight));
+			}
 		Backs.Add(Key, Ism);
 		return Ism;
 	};
@@ -2534,6 +2596,12 @@ void AStadium::BuildSidelineProps(const tag::Team& Home, const tag::Team& Away, 
 		Glow->SetVectorParameterValue(TEXT("ColorB"), FLinearColor(1.f, 0.35f, 0.06f));
 		Glow->SetScalarParameterValue(TEXT("Intensity"), bNightGame ? 30.f : 3.f);
 		Glow->SetScalarParameterValue(TEXT("Count"), 0.f);
+		if (bMovingSun)
+		{
+			DuskMIDs.Add(Glow);
+			DuskMIDParam.Add(TEXT("Intensity"));
+			DuskMIDRange.Add(FVector2f(3.f, 30.f));
+		}
 	}
 	UInstancedStaticMeshComponent* Heaters = nullptr;
 	int32 Count = 0;
@@ -2895,7 +2963,10 @@ void AStadium::StepPlayers(float StepDt)
 			K.Wet = FMath::Min(0.45f, K.Wet + 0.004f * Strength * StepDt);
 		}
 		// sweat: his exertion (the face's breathing), quick to come, slow to dry; less in the cold
-		const float SweatTo = FMath::Clamp(Ath->GetExertion(), 0.f, 1.f) * Look.SweatHot * (bHot ? 1.f : TempF < 45.f ? 0.4f : 0.7f);
+		// (the face's exertion is only kept up while the face is drawn close: the 11-26 fourth-quarter runs had no sweat
+		// at all; the same rule here from his running: up 0.12 a second over 5 m/s, down 0.04 a second otherwise)
+		K.Exert = FMath::Clamp(K.Exert + (Speed > 500.f ? 0.12f : -0.04f) * StepDt, 0.f, 1.f);
+		const float SweatTo = FMath::Clamp(FMath::Max(Ath->GetExertion(), K.Exert), 0.f, 1.f) * Look.SweatHot * (bHot ? 1.f : TempF < 45.f ? 0.4f : 0.7f);
 		K.Sweat = SweatTo > K.Sweat ? FMath::FInterpTo(K.Sweat, SweatTo, StepDt, 0.5f) : FMath::Max(SweatTo, K.Sweat - 0.004f * StepDt);
 		// to his meshes, when a value has moved by a 64th (custom primitive data: no material instance is touched)
 		float V[KitDataCount] = {K.Grime[0], K.Grime[1], K.Grime[2], K.Grime[3], K.Grime[4], K.Wet, K.Snow, K.Sweat, K.Mud, Look.bOldHelmet ? 1.f : 0.f};
@@ -2917,6 +2988,37 @@ void AStadium::StepPlayers(float StepDt)
 }
 
 // ---------------------------------------------------------------------------------------------------- Phase 4 A7 sun
+
+/**
+ * How much of the field the sun reaches past the bowl (0..1): from a grid of points on the field, does the line to the
+ * sun clear the roof canopy's front edge (BowlRoofEdgeZ high, BowlRoofEdgeD out from the bowl's front edge, which
+ * runs round the rounded rectangle of the stands)? The canopy is the top of the bowl: a line that clears its edge
+ * clears the stands under it. YawToSun is the sun's direction in the stadium's frame (degrees, UE yaw).
+ */
+static float SunlitFraction(float ElevDeg, float YawToSunDeg)
+{
+	if (ElevDeg <= 0.f) return 0.f;
+	const double TanE = FMath::Tan(FMath::DegreesToRadians(static_cast<double>(ElevDeg)));
+	const FVector2D Dir(FMath::Cos(FMath::DegreesToRadians(static_cast<double>(YawToSunDeg))), FMath::Sin(FMath::DegreesToRadians(static_cast<double>(YawToSunDeg))));
+	// the canopy edge: the bowl's rounded rectangle grown by BowlRoofEdgeD
+	const double Cx = 50 * YD, HalfX = BowlHalfX + BowlRoofEdgeD, HalfY = BowlSideY + BowlRoofEdgeD, R = BowlCornerR + BowlRoofEdgeD;
+	auto Inside = [&](const FVector2D& P)
+	{
+		const double Dx = FMath::Max(FMath::Abs(P.X - Cx) - (HalfX - R), 0.0), Dy = FMath::Max(FMath::Abs(P.Y) - (HalfY - R), 0.0);
+		return Dx * Dx + Dy * Dy < R * R;
+	};
+	int32 Lit = 0, N = 0;
+	for (int32 i = 0; i < 6; ++i)
+		for (int32 j = 0; j < 3; ++j)
+		{
+			const FVector2D P((5.0 + i * 18.0) * YD, (j - 1) * 18.0 * YD);
+			double T = 0.0;
+			while (Inside(P + Dir * T) && T < 40000.0) T += 150.0;
+			Lit += T * TanE + 100.0 > BowlRoofEdgeZ ? 1 : 0; // (from chest height)
+			++N;
+		}
+	return static_cast<float>(Lit) / N;
+}
 
 void AStadium::UpdateSun(bool bForce)
 {
@@ -2944,14 +3046,25 @@ void AStadium::UpdateSun(bool bForce)
 	// Under the horizon it stays at 1 degree and fades out (the atmosphere has reddened and dimmed it on the way down).
 	SunC->SetRelativeRotation(FRotator(-FMath::Max(ElevDeg, 1.f), AzDeg - FieldNorthYaw + 180.f, 0.f));
 	SunC->SetIntensity(SunBaseIntensity * FMath::SmoothStep(-2.f, 3.f, ElevDeg));
-	// the day camera opens up as the sun gets low (the window was set for a sun 48 degrees up), then a late game's
-	// crosses to the night rig: the pinned night exposure, the banks, the near-black sky, the bowl's glow
-	const float Comp = bOvercastDay ? 0.f : FMath::Clamp(Look.SunEVK * FMath::Log2(0.743f / FMath::Max(FMath::Sin(FMath::DegreesToRadians(FMath::Max(ElevDeg, 0.5f))), 0.03f)), 0.f, Look.SunMaxEVComp);
+	// the day camera is set for the light on the field (FStadiumLook SunL..), then a late game's crosses to the night
+	// rig: the pinned night exposure, the banks, the near-black sky, the bowl's glow
+	float Ev = 0.6f;
 	if (PPC)
 	{
-		PPC->Settings.AutoExposureMinBrightness = FMath::Lerp(DayEV.X - Comp, NightEV2.X, Up);
-		PPC->Settings.AutoExposureMaxBrightness = FMath::Lerp(DayEV.Y, NightEV2.Y, Up);
-		PPC->Settings.AutoExposureBias = FMath::Lerp(DayBias, 0.f, Up);
+		// the light on the field as the camera pinned at 0.6 would read it, and the median wanted for it
+		const float Lit = SunlitFraction(ElevDeg, AzDeg - FieldNorthYaw);
+		const float SunPart = bOvercastDay ? 0.f : Look.SunL * FMath::Max(FMath::Sin(FMath::DegreesToRadians(ElevDeg)), 0.f) * Lit * FMath::SmoothStep(-2.f, 3.f, ElevDeg);
+		const float SkyPart = Look.ShadeL * SkyDayIntensity * FMath::Max(FMath::SmoothStep(-6.f, 6.f, ElevDeg), 0.02f); // (to 12 deg: the Q4 shade filmed 0.06)
+		const float DayLight = (SunPart + SkyPart) * (bSnow ? Look.SnowL : 1.f) * (bOvercastDay && !bSnow ? Look.OvercastK : 1.f);
+		const float DayWant = bSnow ? Look.SnowTarget : bOvercastDay ? Look.OvercastTarget : FMath::Lerp(Look.ShadeTarget, Look.SunTarget, Lit);
+		const float Light = DayLight + Look.BankL * Up;
+		const float Want = FMath::Lerp(DayWant, Look.NightTarget, Up);
+		// (the night's weather factor, a snow field's or a wet one's, as the banks take over)
+		const float Pinned = FMath::Clamp(0.6f * Light / Want * FMath::Lerp(1.f, NightEV2.X / 4.5f, Up), 0.004f, 60.f);
+		Ev = Look.DayEVFixed > -50.f ? FMath::Lerp(Look.DayEVFixed, NightEV2.X, Up) : Pinned;
+		PPC->Settings.AutoExposureMinBrightness = Ev;
+		PPC->Settings.AutoExposureMaxBrightness = Ev;
+		PPC->Settings.AutoExposureBias = 0.f;
 		PPC->Settings.BloomIntensity = FMath::Lerp(0.5f, 0.9f, Up);
 		PPC->Settings.BloomThreshold = Up > 0.5f ? Look.BloomThrNight : Look.BloomThrDay;
 	}
@@ -2962,10 +3075,15 @@ void AStadium::UpdateSun(bool bForce)
 			Bank->SetVisibility(Up > 0.01f); // (dark banks cost nothing: off, not at 0)
 			Bank->SetIntensity(BankCandela[i] * Up);
 		}
+	// the glows (boards, ribbons, lamps, the painted crowd's) and the fog's own glow keep their look on screen as the day
+	// camera opens up for a shaded field (they were set for a sunny day's 0.40), then cross-fade to the night's
+	const float Gain = FMath::Clamp(Ev / 0.40f, 0.02f, 2.f);
 	for (int32 i = 0; i < DuskMIDs.Num(); ++i)
 		if (UMaterialInstanceDynamic* Mid = DuskMIDs[i])
-			Mid->SetScalarParameterValue(DuskMIDParam[i], FMath::Lerp(DuskMIDRange[i].X, DuskMIDRange[i].Y, Up));
-	UE_LOG(LogTemp, Display, TEXT("TAG sun: %.2f h, elevation %.1f azimuth %.0f deg, camera +%.1f stops, lights %.2f"), Hour, ElevDeg, AzDeg, Comp, Up);
+			Mid->SetScalarParameterValue(DuskMIDParam[i], FMath::Lerp(DuskMIDRange[i].X * Gain, DuskMIDRange[i].Y, Up));
+	if (FogC) FogC->SetFogInscatteringColor(FogInscatterBase * FMath::Lerp(FMath::Min(Gain, 1.f), 1.f, Up));
+	UE_LOG(LogTemp, Display, TEXT("TAG sun: %.2f h, elevation %.1f azimuth %.0f deg, lights %.2f, field sunlit %.2f, EV %.2f..%.2f"), Hour, ElevDeg, AzDeg, Up,
+		SunlitFraction(ElevDeg, AzDeg - FieldNorthYaw), PPC ? PPC->Settings.AutoExposureMinBrightness : 0.f, PPC ? PPC->Settings.AutoExposureMaxBrightness : 0.f);
 }
 
 // ---------------------------------------------------------------------------------------------------- Phase 4 A10 breath
@@ -2993,7 +3111,7 @@ void AStadium::UpdateBreath(float Dt)
 		P.At += P.Vel * Dt;
 		P.Vel *= FMath::Max(0.f, 1.f - 1.5f * Dt);
 		Puffs[i]->SetWorldLocation(P.At);
-		Puffs[i]->SetWorldScale3D(FVector(P.Size * (0.08f + 0.3f * FMath::Sqrt(T))));
+		Puffs[i]->SetWorldScale3D(FVector(P.Size * (0.1f + 0.4f * FMath::Sqrt(T))));
 		PuffMIDs[i]->SetScalarParameterValue(TEXT("Puff"), Look.BreathOpacity * FMath::Min(1.f, T * 6.f) * FMath::Pow(1.f - T, 1.5f));
 	}
 	if (!CamMgr) return;
@@ -3006,7 +3124,7 @@ void AStadium::UpdateBreath(float Dt)
 		if (!Ath || Ath->IsDormant() || Ath->IsHidden()) continue;
 		if (FVector::DistSquared(Ath->GetActorLocation(), Cam) > FMath::Square(static_cast<double>(Look.BreathDist))) continue;
 		const float Ex = FMath::Clamp(Ath->GetExertion(), 0.f, 1.f);
-		const float Hz = 0.25f + Ex * 0.45f;
+		const float Hz = 0.4f + Ex * 0.45f; // (a man at rest breathes out every 2.5 s; 0.25 Hz left a puff in a quarter of the frames)
 		float& Next = BreathClock.FindOrAdd(TWeakObjectPtr<AActor>(Ath), Now + FMath::Frac(static_cast<float>(Ath->GetUniqueID()) * 0.618f) / Hz);
 		if (Now < Next) continue;
 		Next = Now + 1.f / Hz;
@@ -3021,7 +3139,7 @@ void AStadium::UpdateBreath(float Dt)
 		P.At = Head + Fwd * 14.0 - FVector(0, 0, 6);
 		P.Vel = Fwd * (50.0 + 70.0 * Ex) + FVector(0, 0, 12) + Wind * 0.3;
 		P.Age = 0.f;
-		P.Life = 0.9f + 0.6f * Ex;
+		P.Life = 1.3f + 0.6f * Ex;
 		P.Size = 1.f + 0.8f * Ex;
 		Puffs[Free]->SetWorldLocation(P.At);
 		Puffs[Free]->SetWorldScale3D(FVector(0.08f * P.Size));
