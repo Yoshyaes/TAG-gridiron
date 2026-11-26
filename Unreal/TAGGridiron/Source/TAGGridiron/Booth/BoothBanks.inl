@@ -931,6 +931,12 @@ const std::vector<BkBank>& bkResult() {
         "The interception is by {who}, and {def} starts at {intat}.",
         "{Who} brings it out to {intat}, a big takeaway for {def}.",
         "{Who} with the pick, and {def} gets it at {intat}."}},
+      // a pass batted down at the line (the live call said so): the man at the line, not coverage downfield
+      {"r_bat",
+       {"{Pbu} gets a hand up at the line, and it's incomplete.",
+        "Batted down by {pbu}, intended for {tg}.",
+        "{Pbu} gets a piece of it at the line.",
+        "Knocked down at the line by {pbu}, and the pass for {tg} never gets there."}},
       {"r_pbu2",
        {"{pbu} with the breakup.",
         "That's {pbu} getting a hand in there.",

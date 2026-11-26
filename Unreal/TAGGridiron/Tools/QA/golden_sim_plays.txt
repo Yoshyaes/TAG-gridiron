@@ -1150,8 +1150,8 @@ box A 72 365 135 230 27 15 39 22 14 4 2 15 1 4 4 3 2 0 1 3 1503.0333333333324 H 
 2 194.8026030952422 A 2 7.6038124042454172 85.979426234996424 9-0 - | M.Whitfield qb power for 2 yards (Z.Okafor).
 2 159.21572338612759 A 3 8.8538818558698438 84.729356783371998 9-0 - | N.Branson inside zone weak for a loss of 1 (D.Thibodeaux).
 2 120.94909571542725 A 4 8.8538818558698438 84.729356783371998 9-0 - | M.Whitfield pass short right to E.Crenshaw incomplete, broken up by M.Kingsley.
-2 115.59873042966559 A 4 8.8538818558698438 84.729356783371998 9-0 info | Two-minute warning.
 2 115.59873042966559 A 4 8.8538818558698438 84.729356783371998 12-0 fg | D.Dunbar 32-yard field goal is GOOD.
+2 115.59873042966559 A 4 8.8538818558698438 84.729356783371998 12-0 info | Two-minute warning.
 2 115.59873042966559 H 1 10 35 12-0 - | D.Dunbar kicks 65 yards into the end zone. Touchback.
 2 113.84873042966559 H 2 5.3930226308308065 39.606977369169194 12-0 - | M.Delgado pass short middle to J.Delgado for 5 yards (D.Delgado, M.Delgado).
 2 95.568116534998126 H 3 0.66616118730794227 44.333838812692058 12-0 - | J.Hightower trap for 5 yards (C.Sutton).
@@ -1318,8 +1318,8 @@ box A 69 443 233 210 33 19 36 20 16 8 2 15 2 0 4 3 3 2 0 3 1450.3666666666666 H 
 2 228.33457857264824 H 1 10 49.676702635772045 0-7 - | H.Ashford pass short middle to X.Quarles for 5 yards (E.Castellanos, E.Langford).
 2 187.60403188560156 H 1 10 60.40283663693004 0-7 - | N.Castellanos outside zone for 11 yards (A.Delgado).
 2 154.75903673376885 H 1 10 71.078553920761678 0-7 - | N.Castellanos inside zone weak for 11 yards (S.Driscoll, O.Estrada, E.Castellanos).
-2 116.93361715705443 H 1 10 71.078553920761678 0-7 info | Two-minute warning.
 2 116.93361715705443 H 2 10 71.078553920761678 0-7 - | H.Ashford pass short left to M.Ramsey incomplete, broken up by E.Castellanos.
+2 116.93361715705443 H 2 10 71.078553920761678 0-7 info | Two-minute warning.
 2 112.43361715705444 H 3 6.9598950918867644 74.118658828874914 0-7 - | H.Ashford pass short middle to N.Castellanos for 3 yards (K.Pemberton, Z.Underwood).
 2 95.889249949716032 H 4 6.9598950918867644 74.118658828874914 0-7 - | H.Ashford pass deep right to R.Ochoa incomplete.
 2 91.405784220434725 H 4 6.9598950918867644 74.118658828874914 0-10 fg | K.Blackwell 43-yard field goal is GOOD.
@@ -3372,13 +3372,22 @@ box A 63 333 217 116 35 26 24 25 11 6 2 10 0 3 4 0 0 0 0 3 1407.8666666666657 H 
 4 180.8778128646004 A 4 26.290317407600227 32.377752257647437 10-34 - | K.Whitaker SACKED by Z.Hightower for a loss of 9.
 4 161.55245665643989 A 5 19.581731956440258 39.086337708807406 10-34 turnover | K.Whitaker pass short left to D.Thibodeaux for 7 yards (J.Treadwell, B.Blackwell). Turnover on downs.
 4 159.26912332310656 H 2 7.9927271316176274 62.920935159574967 10-34 - | E.Gentry power for 2 yards (T.Blackwell).
-4 118.5597832370705 H 2 7.9927271316176274 62.920935159574967 10-34 info | Two-minute warning.
 4 118.5597832370705 H 1 10 74.70480486925166 10-34 - | D.Castellanos pass short middle to K.Treadwell for 12 yards (R.Pruitt, G.Ingram).
-4 77.061207803742377 H 2 10.372903892536442 74.331900976715218 10-34 - | E.Gentry dart for no gain (E.Winslow).
-4 37.619583217520308 H 3 9.6836570002634517 75.021147868988209 10-34 - | E.Gentry trap for 1 yard (T.Blackwell).
-4 0 H 3 9.6836570002634517 75.021147868988209 10-34 info | End of 4th quarter.
-4 0 H 3 9.6836570002634517 75.021147868988209 10-34 info | FINAL: CLB 10 - TUC 34
-box A 44 215 116 99 25 13 12 9 11 3 6 50 1 7 5 1 1 1 0 3 968.48333333333312 H 75 455 321 134 35 25 38 30 12 6 4 30 0 2 3 0 0 0 0 3 1671.2333333333336
+4 118.5597832370705 H 1 10 74.70480486925166 10-34 info | Two-minute warning.
+4 115.62644990373718 H 2 10 74.70480486925166 10-34 - | D.Castellanos pass short right to G.Rutledge incomplete.
+4 109.44311657040386 H 3 10 74.70480486925166 10-34 - | D.Castellanos pass short right to D.Crenshaw incomplete.
+4 105.60978323707053 H 4 10 74.70480486925166 10-34 - | D.Castellanos throws it away under pressure.
+4 100.07934322088653 H 4 10 74.70480486925166 10-37 fg | C.McBride 42-yard field goal is GOOD.
+4 93.558493863993078 A 1 10 81.021358790700447 10-37 - | C.McBride kicks 64 yards, returned by M.Kowalski to the CLB 19.
+4 74.020832052438905 A 1 4.0421341067190752 95.957865893280925 10-37 - | K.Whitaker pass short middle to L.Thibodeaux for 15 yards (A.Zeller).
+4 54.461944363778535 A 2 1.5478782362391996 98.4521217637608 10-37 - | K.Whitaker pass short left to T.Valdez for 2 yards (J.Treadwell).
+4 38.735722250289676 A 2 1.5478782362391996 98.4521217637608 10-37 td | K.Whitaker pass short middle to L.Thibodeaux for 2 yards. TOUCHDOWN CLB!
+4 38.735722250289676 A 2 1.5478782362391996 85 17-37 - | K.Kowalski extra point is GOOD.
+4 38.735722250289676 H 1 10 35 17-37 - | K.Kowalski kicks 66 yards into the end zone. Touchback.
+4 36.202388916956345 H 2 8.7760707280652355 36.223929271934765 17-37 - | J.Northcutt buck sweep for 1 yard (E.Abernathy).
+4 0 H 2 8.7760707280652355 36.223929271934765 17-37 info | End of 4th quarter.
+4 0 H 2 8.7760707280652355 36.223929271934765 17-37 info | FINAL: CLB 17 - TUC 37
+box A 47 234 135 99 28 16 12 11 11 3 6 50 1 7 5 1 1 1 0 3 1054.6666666666663 H 77 455 321 134 38 25 37 30 13 6 4 30 0 2 3 1 1 0 0 3 1631.8000000000002
 = 19 ABQ at ELP
 1 900 A 1 10 35 0-0 info | Coin toss: ELP wins and defers. Clear, 65F, wind 10 mph.
 1 900 A 1 10 35 0-0 - | B.Mabry kicks 69 yards into the end zone. Touchback.
@@ -3448,121 +3457,132 @@ box A 44 215 116 99 25 13 12 9 11 3 6 50 1 7 5 1 1 1 0 3 968.48333333333312 H 75
 2 233.92770708980993 A 2 6.533542588699774 81.257140019172155 16-11 - | R.Northcutt hb draw for 3 yards (K.Sutton).
 2 190.53725583523848 A 1 10 89.495440791875183 16-11 - | A.Nakamura scrambles for 8 yards (G.Washington).
 2 157.07383513532915 A 2 8.3859894698534987 91.109451322021684 16-11 - | A.Nakamura qb draw for 2 yards (B.Whitaker, N.Gaines).
-2 117.93671671197156 A 2 8.3859894698534987 91.109451322021684 16-11 info | Two-minute warning.
 2 117.93671671197156 A 3 1.0010258939583423 98.49441489791684 16-11 - | A.Nakamura pass short middle to H.Vickers for 7 yards (S.Holloway, J.Kincaid).
-2 99.953444601611196 A 4 11.840043338686598 87.655397453188584 16-11 - | A.Nakamura SACKED by M.Kingsley for a loss of 11.
-2 80.468548600205182 A 4 11.840043338686598 87.655397453188584 19-11 fg | C.Ramsey 29-yard field goal is GOOD.
-2 80.468548600205182 H 1 10 35 19-11 - | C.Ramsey kicks 69 yards into the end zone. Touchback.
-2 73.935215266871865 H 2 10 35 19-11 - | J.Abernathy throws it away under pressure.
-2 69.33521526687187 H 3 5.8980746442839518 39.101925355716048 19-11 - | J.Abernathy pass short middle to E.Langford for 4 yards (G.Iverson, Z.Merriweather).
-2 46.931000108442895 H 1 10 86.425220260161439 19-11 - | J.Abernathy pass deep right to B.Kowalski for 47 yards (R.Washington, J.Ochoa).
-2 46.931000108442895 H 1 10 86.425220260161439 19-11 info | Timeout ELP (2 left).
-2 41.647666775109577 H 1 10 86.425220260161439 19-11 td | J.Abernathy pass short right to E.Langford for 14 yards. TOUCHDOWN ELP!
-2 41.647666775109577 H 1 10 85 19-17 info | B.Mabry extra point is NO GOOD.
-2 34.713791379891667 A 1 10 20.748941232153761 19-17 - | B.Mabry kicks 66 yards, returned by B.Driscoll to the ABQ 21.
-2 34.713791379891667 A 1 10 20.748941232153761 19-17 info | Timeout ABQ (2 left).
-2 32.597124713225 A 2 6.1296324193265974 24.619308812827164 19-17 - | R.Northcutt inside zone for 4 yards (J.Castellanos, M.Kingsley).
-2 32.597124713225 A 2 6.1296324193265974 24.619308812827164 19-17 info | Timeout ABQ (1 left).
-2 28.580458046558341 A 1 10 31.282577756368624 19-17 - | T.Yancey wildcat jet sweep for 7 yards (K.Whitfield, S.Holloway).
-2 11.89211273047486 A 2 11 30.282577756368624 19-17 - | A.Nakamura kneels.
-2 0 A 2 11 30.282577756368624 19-17 info | End of 2nd quarter.
-3 900 H 2 11 30.282577756368624 19-17 info | Halftime.
-3 893.65159529354423 H 1 10 41.066462935306035 19-17 - | C.Ramsey kicks 59 yards, returned by T.Delgado to the ELP 41.
-3 856.58604384195064 H 2 14.131546712155647 36.934916223150388 19-17 - | J.Abernathy SACKED by T.Treadwell for a loss of 4.
-3 819.70788184435423 H 3 7.6080140386931987 43.458448896612836 19-17 - | J.Abernathy pass short left to S.Nwosu for 7 yards (S.Bartholomew, E.Iverson).
-3 786.10661371530352 H 4 16.271904517337305 34.79455841796873 19-17 - | J.Abernathy SACKED by G.Iverson for a loss of 9.
-3 750.16086014000086 H 4 16.271904517337305 34.79455841796873 19-17 - | T.Driscoll punts 45 yards, returned 4 yards. PENALTY on ABQ: Illegal Block in the Back (#12 R.Vance), 10 yards from the end of the return.
-3 746.56086014000084 A 2 8.4300643703649918 16.195925319042193 19-17 - | A.Nakamura qb draw for 2 yards (N.Gaines).
-3 707.46698583289992 A 3 8.4300643703649918 16.195925319042193 19-17 - | A.Nakamura pass short left to B.Driscoll incomplete.
-3 703.23365249956657 A 4 8.4300643703649918 16.195925319042193 19-17 - | A.Nakamura pass short middle to R.Vance incomplete.
-3 695.13133929489811 A 4 8.4300643703649918 16.195925319042193 19-17 - | T.Hargrove punts 54 yards, fair catch at the ELP 30.
-3 691.69800596156483 H 2 18.134696375955329 21.729864887582906 19-17 - | J.Abernathy SACKED by G.Iverson for a loss of 8.
-3 661.82798683488136 H 2 13.134696375955329 26.729864887582906 19-17 penalty | PENALTY on ABQ: Neutral Zone Infraction (#55 J.Ochoa), 5 yards. 2nd & 13 at ELP 27.
-3 659.96132016821468 H 3 11.497905170536296 28.366656093001939 19-17 - | E.Langford trap for 2 yards (T.Treadwell, J.Ochoa).
-3 626.32683045497799 H 4 5.4632126302139312 34.401348633324304 19-17 - | J.Abernathy pass short right to E.Langford for 6 yards (Z.Merriweather, D.Whitaker).
-3 586.19726564070845 H 4 5.4632126302139312 34.401348633324304 19-17 - | T.Driscoll punts 49 yards, returned 12 yards.
-3 545.46047927097743 A 1 10 39.781047073146418 19-17 - | A.Nakamura pass short right to C.Yeager for 11 yards (S.Holloway).
-3 512.58391745792096 A 2 10 39.781047073146418 19-17 - | A.Nakamura pass short left to B.Driscoll incomplete, broken up by M.Kingsley.
-3 509.56725079125431 A 2 20 29.781047073146418 19-17 penalty | R.Northcutt inside zone weak for 3 yards (N.Mabry, C.Carter). PENALTY on ABQ: Offensive Holding (#54 Q.Ashford), enforced. 2nd & 20 at ABQ 30.
-3 503.65058412458768 A 3 11.871675113685797 37.909371959460621 19-17 - | A.Nakamura scrambles for 8 yards and slides.
-3 467.81863330459862 A 4 11.871675113685797 37.909371959460621 19-17 - | A.Nakamura pass short middle to R.Vance incomplete.
-3 459.45532797897874 A 4 11.871675113685797 37.909371959460621 19-17 - | T.Hargrove punts 48 yards, returned 15 yards.
-3 428.69706843296706 H 1 15 24.075952952505446 19-17 penalty | PENALTY on ELP: Delay of Game, 5 yards. 1st & 15 at ELP 24.
-3 424.51373509963372 H 2 15 24.075952952505446 19-17 - | J.Abernathy pass deep right to S.Nwosu incomplete.
-3 420.79706843296708 H 3 13.299845578870947 25.776107373634499 19-17 - | E.Langford inside zone for 2 yards (T.Winslow, E.Iverson).
-3 383.75319729857171 H 4 2.7634719536274091 36.312480998878037 19-17 - | J.Abernathy pass short left to E.Langford for 11 yards (S.Bartholomew, R.Washington).
-3 346.18596625346714 H 4 2.7634719536274091 36.312480998878037 19-17 - | T.Driscoll punts 53 yards, downed at the ABQ 11.
-3 342.33596625346718 A 1 10 22.447997555489454 19-17 - | R.Northcutt zone read for 11 yards (N.Gaines, M.Kingsley).
-3 305.3118705845751 A 1 10 22.447997555489454 19-17 turnover | A.Nakamura pass short left INTERCEPTED by K.Whitfield, returned to the ABQ 25.
-3 302.22853725124179 H 2 3.8028963969232308 81.69493562540508 19-17 - | E.Langford trap for 6 yards (G.Iverson).
-3 268.93417757619198 H 3 0.53375571918911646 84.964076303139194 19-17 - | E.Langford counter gt for 3 yards (G.Iverson, J.McBride).
-3 235.507871301162 H 4 0.68610859122826184 84.811723431100049 19-17 - | E.Langford stretch for no gain (X.Driscoll).
-3 201.65633566472704 H 1 10 86.240812499076853 19-17 - | E.Langford power for 1 yard (T.Treadwell).
-3 161.82337583893315 H 2 2.4657217655227015 93.775090733554151 19-17 - | E.Langford hb draw for 8 yards (J.McBride, R.Washington).
-3 124.46460410859461 H 3 4.2658245664588748 91.974987932617978 19-17 - | J.Abernathy pass short right to S.Nwosu for a loss of 2 (S.Bartholomew).
-3 89.882196963640808 H 4 9.9506976048779023 86.29011489419895 19-17 - | J.Abernathy SACKED by Z.Merriweather for a loss of 6.
-3 55.302697410683095 H 4 9.9506976048779023 86.29011489419895 19-20 fg | B.Mabry 31-yard field goal is GOOD.
-3 49.346438108586653 A 1 10 21.299941677247535 19-20 - | B.Mabry kicks 60 yards, returned by B.Driscoll to the ABQ 21.
-3 11.795015832735498 A 1 10 35.322644264506764 19-20 - | A.Nakamura pass short right to T.Yancey for 14 yards (M.Kingsley).
-3 0 A 1 10 35.322644264506764 19-20 info | End of 3rd quarter.
-4 894.48333333333335 A 2 18.720532292783627 26.602111971723136 19-20 - | A.Nakamura SACKED by B.Whitaker for a loss of 9.
-4 854.35819239405294 A 3 5.9616985177964565 39.360945746710307 19-20 - | R.Northcutt inside zone weak for 13 yards (N.Gaines).
-4 819.98489500458038 A 4 2.6484872928986221 42.674156971608141 19-20 - | A.Nakamura pass short left to R.Northcutt for 3 yards (K.Whitfield).
-4 781.45178275151795 A 4 2.6484872928986221 42.674156971608141 19-20 - | T.Hargrove punts 36 yards, returned 10 yards.
-4 748.13413699151329 H 2 7.9802998244021985 33.541558127255286 19-20 - | E.Langford hb draw for 2 yards (M.Blackwell).
-4 710.53832435465108 H 3 6.9183974296944974 34.603460521962987 19-20 - | E.Langford inside zone for 1 yard (E.Iverson).
-4 675.36790708620106 H 4 5.8021660523875376 35.719691899269947 19-20 - | J.Abernathy pass short middle to E.Langford for 1 yard (Z.Merriweather).
-4 637.52580847386275 H 4 5.8021660523875376 35.719691899269947 19-20 - | T.Driscoll punts 62 yards, downed at the ABQ 2.
-4 631.92580847386273 A 1 10 21.955629329953133 19-20 - | A.Nakamura pass short middle to B.Driscoll for 20 yards (C.Carter, G.Washington).
-4 593.07011928788074 A 2 6.5216516105542865 25.433977719398847 19-20 - | R.Northcutt wildcat zone for 3 yards (K.Sutton).
-4 558.65383206798379 A 3 6.1296408822322128 25.825988447720921 19-20 - | H.Vickers outside zone for no gain (K.Whitfield).
-4 524.00027149288599 A 3 11.129640882232213 20.825988447720921 19-20 penalty | PENALTY on ABQ: False Start (#82 B.Driscoll), 5 yards. 3rd & 11 at ABQ 21.
-4 520.35027149288601 A 4 3.2539990784730968 28.701630251480037 19-20 - | A.Nakamura qb counter for 8 yards (N.Gaines, C.Carter).
-4 484.42846696233994 A 4 3.2539990784730968 28.701630251480037 19-20 - | T.Hargrove punts 51 yards, returned 26 yards.
-4 445.96698828608106 H 1 10 61.950150952869848 19-20 penalty | E.Langford hb dive for 1 yard (M.Blackwell). PENALTY on ABQ: Face Mask (#58 M.Blackwell), enforced. 1st & 10 at ABQ 38.
-4 443.26698828608107 H 2 6.5795008163398876 65.37065013652996 19-20 - | E.Langford power for 3 yards (T.Treadwell).
-4 398.96890084987194 H 1 10 76.157258169776085 19-20 - | J.Abernathy pass short middle to E.Langford for 11 yards (E.Iverson, R.Washington).
-4 355.60725246908453 H 1 10 76.157258169776085 19-20 turnover | T.Delgado iso for 11 yards. FUMBLE by T.Delgado, recovered by ABQ X.Driscoll.
-4 348.27391913575121 A 2 10 13.320700529220005 19-20 - | A.Nakamura throws it away under pressure.
-4 348.27391913575121 A 2 10 13.320700529220005 19-20 info | Injury: DT J.Kincaid (ELP) is down and will not return.
-4 343.27391913575121 A 1 10 23.705537742763021 19-20 - | A.Nakamura pass short left to R.Vance for 10 yards (K.Sutton).
-4 326.20671492465772 A 2 10 23.705537742763021 19-20 - | A.Nakamura pass short left to B.Driscoll incomplete.
-4 323.07338159132439 A 3 10 23.705537742763021 19-20 - | A.Nakamura pass short left to J.Calloway incomplete.
-4 318.94004825799107 A 4 1.056676669079728 32.648861073683292 19-20 - | A.Nakamura pass short right to B.Driscoll for 9 yards (B.Langford).
-4 297.13707503926321 A 4 1.056676669079728 32.648861073683292 19-20 - | T.Hargrove punts 50 yards, returned 10 yards.
-4 255.89742681509816 H 2 6.6489227379178999 30.80880164308531 19-20 - | E.Langford glance rpo for 3 yards (G.Iverson).
-4 212.88423348042807 H 3 2.4464435915603318 35.011280789442878 19-20 - | J.Abernathy scrambles for 4 yards and slides.
-4 170.87619531609431 H 4 4.5450170524555276 32.912707328547683 19-20 - | E.Langford hb draw for a loss of 2 (Z.Merriweather).
-4 125.18864743633509 H 4 4.5450170524555276 32.912707328547683 19-20 - | T.Driscoll punts 56 yards, downed at the ABQ 11.
-4 119.40531410300177 A 1 10 10.974685388880658 19-20 info | Two-minute warning.
-4 119.40531410300177 A 2 4.4465951578341212 16.528090231046537 19-20 - | A.Nakamura pass short middle to R.Northcutt for 6 yards (K.Whitfield).
-4 99.968190457842681 A 1 10 35.559948402271125 19-20 - | A.Nakamura pass short right to B.Driscoll for 19 yards (N.Gaines).
-4 78.341731340236407 A 2 10 35.559948402271125 19-20 - | A.Nakamura pass short middle to R.Vance incomplete.
-4 74.525064673569744 A 3 10 35.559948402271125 19-20 - | A.Nakamura throws it away under pressure.
-4 74.525064673569744 A 3 5 40.559948402271125 19-20 penalty | PENALTY on ELP: Offside (#74 K.Pemberton), 5 yards. 3rd & 5 at ABQ 41.
-4 69.891731340236419 A 4 5 40.559948402271125 19-20 - | A.Nakamura pass short right to B.Driscoll incomplete.
-4 66.775064673569759 A 1 10 51.179763636707875 19-20 - | A.Nakamura pass short left to H.Vickers for 11 yards (N.Gaines).
-4 44.531358975498108 A 2 4.6556545021432143 56.524109134564661 19-20 - | A.Nakamura pass short middle to H.Vickers for 5 yards (K.Sutton, K.Pemberton, M.Kingsley).
-4 44.531358975498108 A 2 4.6556545021432143 56.524109134564661 19-20 info | Timeout ABQ (2 left).
-4 41.914692308831448 A 3 4.6556545021432143 56.524109134564661 19-20 - | A.Nakamura pass short middle to H.Vickers incomplete, dropped.
-4 37.248025642164791 A 1 10 71.148415518840864 19-20 - | A.Nakamura pass short left to T.Yancey for 15 yards (K.Whitfield, C.Carter).
-4 37.248025642164791 A 1 10 71.148415518840864 19-20 info | Timeout ABQ (1 left).
-4 30.864692308831476 A 1 10 83.067964519249514 19-20 - | A.Nakamura scrambles for 12 yards and slides.
-4 30.864692308831476 A 1 10 83.067964519249514 19-20 info | Timeout ABQ (0 left).
-4 26.131358975498152 A 1 10 83.067964519249514 19-20 td | A.Nakamura pass short left to T.Yancey for 17 yards. TOUCHDOWN ABQ!
-4 26.131358975498152 A 1 2 98 27-20 td | Two-point attempt: A.Nakamura pass short right to R.Vance for 10 yards. GOOD!
-4 26.131358975498152 H 1 10 35 27-20 - | C.Ramsey kicks 70 yards into the end zone. Touchback.
-4 20.3146923088315 H 1 10 49.850251997120949 27-20 - | J.Abernathy pass short right to S.Nwosu for 15 yards (J.McBride, Z.Merriweather).
-4 20.3146923088315 H 1 10 49.850251997120949 27-20 info | Timeout ELP (2 left).
-4 17.231358975498171 H 2 0.64625295757437584 59.203999039546574 27-20 - | J.Abernathy pass short middle to E.Langford for 9 yards (Z.Merriweather, J.Ochoa).
-4 17.231358975498171 H 2 0.64625295757437584 59.203999039546574 27-20 info | Timeout ELP (1 left).
-4 13.764692308831512 H 1 10 74.332714146454705 27-20 - | J.Abernathy pass short left to J.Treadwell for 15 yards (D.Whitaker, Z.Merriweather).
-4 13.764692308831512 H 1 10 74.332714146454705 27-20 info | Timeout ELP (0 left).
-4 13.331358975498178 H 2 10 74.332714146454705 27-20 - | J.Abernathy spikes the ball to stop the clock.
-4 7.5813589754981932 H 3 14.795572811188592 69.537141335266114 27-20 - | J.Abernathy scrambles for a loss of 5 (T.Treadwell).
-4 0 H 3 14.795572811188592 69.537141335266114 27-20 info | End of 4th quarter.
-4 0 H 3 14.795572811188592 69.537141335266114 27-20 info | FINAL: ABQ 27 - ELP 20
-box A 70 442 302 140 44 28 23 25 11 2 11 129 1 2 6 2 2 1 0 0 1428.9666666666651 H 49 261 207 54 23 20 21 15 10 1 2 10 2 4 6 2 2 0 2 0 1166.0666666666666
+2 117.93671671197156 A 3 1.0010258939583423 98.49441489791684 16-11 info | Two-minute warning.
+2 115.3200500453049 A 4 1.0010258939583423 98.49441489791684 16-11 - | A.Nakamura pass short left to T.Yancey incomplete.
+2 112.23671671197157 A 5 1.0010258939583423 98.49441489791684 16-11 turnover | A.Nakamura pass short right to T.Yancey incomplete, broken up by J.Castellanos. Turnover on downs.
+2 109.40338337863824 H 2 10 1.5055851020831597 16-11 - | J.Abernathy pass deep right to J.Treadwell incomplete.
+2 102.75338337863826 H 1 10 25.783161180969881 16-11 - | J.Abernathy pass short left to S.Nwosu for 24 yards (T.Winslow).
+2 80.239212482966181 H 2 8.7185148008839626 27.064646380085918 16-11 - | J.Abernathy pass short middle to E.Langford for 1 yard (Z.Merriweather, J.Ochoa).
+2 60.61752467939354 H 1 10 58.404679432144725 16-11 - | J.Abernathy pass deep middle to M.McBride for 31 yards (X.Driscoll).
+2 38.957471695309863 H 2 2.2617376659376518 66.142941766207073 16-11 - | J.Abernathy scrambles for 8 yards (D.Whitaker, S.Bartholomew).
+2 38.957471695309863 H 2 2.2617376659376518 66.142941766207073 16-11 info | Timeout ELP (2 left).
+2 35.424138361976539 H 1 10 69.484068990721283 16-11 - | J.Abernathy pass short right to E.Langford for 3 yards (Z.Merriweather).
+2 35.424138361976539 H 1 10 69.484068990721283 16-11 info | Timeout ELP (1 left).
+2 30.207471695309884 H 1 10 88.82473189058372 16-11 - | J.Abernathy pass short middle to E.Estrada for 19 yards (X.Driscoll, T.Winslow).
+2 30.207471695309884 H 1 10 88.82473189058372 16-11 info | Timeout ELP (0 left).
+2 24.074138361976566 H 1 6.1752681094162796 93.82473189058372 16-11 penalty | J.Abernathy pass deep middle to J.Treadwell incomplete, broken up by D.Whitaker. PENALTY on ABQ: Defensive Holding (#20 D.Whitaker), enforced. 1st & Goal at ABQ 6.
+2 21.890805028643236 H 2 3.1520543644341785 96.847945635565821 16-11 - | T.Delgado inside zone for 3 yards (E.Iverson, T.Treadwell, Z.Merriweather).
+2 7.3452273337640115 H 3 3.1520543644341785 96.847945635565821 16-11 - | J.Abernathy spikes the ball to stop the clock.
+2 4.0452273337640179 H 4 3.1520543644341785 96.847945635565821 16-11 - | J.Abernathy throws it away under pressure.
+2 0 H 4 3.1520543644341785 96.847945635565821 16-14 fg | B.Mabry 20-yard field goal is GOOD.
+2 0 H 4 3.1520543644341785 96.847945635565821 16-14 info | End of 2nd quarter.
+3 900 H 4 3.1520543644341785 96.847945635565821 16-14 info | Halftime.
+3 900 H 1 10 35 16-14 - | C.Ramsey kicks 79 yards into the end zone. Touchback.
+3 893.20000000000005 H 1 10 35 16-14 turnover | J.Abernathy pass short middle to B.Kowalski for 20 yards (R.Washington). FUMBLE, recovered by ABQ.
+3 891.25 A 2 5.7870265486405046 48.849402549696578 16-14 - | A.Nakamura pass short left to B.Driscoll for 4 yards (B.Langford).
+3 856.17928362302484 A 3 5.7870265486405046 48.849402549696578 16-14 - | A.Nakamura pass short middle to R.Vance incomplete.
+3 849.11261695635824 A 1 10 79.54664546414179 16-14 - | A.Nakamura pass short right to T.Yancey for 31 yards (M.Kingsley, C.Carter).
+3 810.1086382621279 A 2 6.7104379881064062 82.836207476035383 16-14 - | R.Northcutt outside zone for 3 yards (S.Holloway).
+3 768.12874938547623 A 1 7.4702111283130819 92.529788871686918 16-14 - | A.Nakamura scrambles for 10 yards (B.Langford, S.Holloway).
+3 733.44500238075864 A 1 12.470211128313082 87.529788871686918 16-14 penalty | PENALTY on ABQ: False Start (#71 V.Castellanos), 5 yards. 1st & Goal at ELP 12.
+3 730.04500238075866 A 2 5.4608456975495159 94.539154302450484 16-14 - | H.Vickers outside zone for 7 yards (C.Carter, M.Kingsley).
+3 690.54005127698201 A 3 5.4608456975495159 94.539154302450484 16-14 - | A.Nakamura throws it away under pressure.
+3 687.60671794364873 A 3 5.4608456975495159 94.539154302450484 16-14 td | A.Nakamura pass short middle to R.Vance for 5 yards. TOUCHDOWN ABQ!
+3 687.60671794364873 A 1 2 98 22-14 info | Two-point attempt: A.Nakamura pass short left to B.Driscoll incomplete, broken up by B.Langford. FAILED.
+3 679.9695990087622 H 1 10 27.742074184628922 22-14 - | C.Ramsey kicks 67 yards, returned by T.Delgado to the ELP 28.
+3 649.40581255749203 H 2 11.714050045593993 26.02802413903493 22-14 - | E.Langford hb toss for a loss of 2 (M.Blackwell).
+3 606.33049471237098 H 3 11.714050045593993 26.02802413903493 22-14 - | J.Abernathy throws it away under pressure.
+3 600.23049471237096 H 4 11.714050045593993 26.02802413903493 22-14 - | J.Abernathy pass deep left to E.Estrada incomplete.
+3 592.86124447163525 H 4 11.714050045593993 26.02802413903493 22-14 - | T.Driscoll punts 52 yards, fair catch at the ABQ 22.
+3 589.71124447163527 A 2 5.5961425787712216 26.4741877514019 22-14 - | A.Nakamura pass short right to B.Driscoll for 4 yards (G.Washington).
+3 550.30352979713768 A 1 10 34.514369387082638 22-14 - | A.Nakamura pass short right to R.Vance for 8 yards (T.Jessup).
+3 514.92724473639419 A 1 10 50.899910843020727 22-14 - | A.Nakamura pass short middle to R.Vance for 16 yards (B.Langford, M.Kingsley).
+3 480.74249760981985 A 2 3.603223781604278 57.296687061416449 22-14 - | A.Nakamura qb draw for 6 yards (N.Gaines).
+3 442.74214542596627 A 1 10 76.747021484505524 22-14 - | A.Nakamura pass short left to B.Driscoll for 19 yards (M.Kingsley).
+3 401.6412846567888 A 2 6.7313021758558733 80.015719308649651 22-14 - | A.Nakamura pass short middle to H.Vickers for 3 yards (M.Kingsley).
+3 366.78292062606999 A 2 16.731302175855873 70.015719308649651 22-14 penalty | H.Vickers inside zone weak for 2 yards (B.Whitaker, S.Holloway, B.Langford). PENALTY on ABQ: Offensive Holding (#81 T.Yancey), enforced. 2nd & 17 at ELP 30.
+3 360.7995872927367 A 3 16.731302175855873 70.015719308649651 22-14 - | A.Nakamura pass short left to B.Driscoll incomplete.
+3 353.38292062607007 A 1 3.827827455982117 96.172172544017883 22-14 - | A.Nakamura pass short left to C.Yeager for 26 yards (B.Langford, M.Kingsley).
+3 314.78926505025822 A 1 3.827827455982117 96.172172544017883 22-14 td | A.Nakamura pass short left to T.Yancey for 4 yards. TOUCHDOWN ABQ!
+3 314.78926505025822 A 1 3.827827455982117 85 28-14 info | C.Ramsey extra point is NO GOOD.
+3 314.78926505025822 H 1 10 35 28-14 - | C.Ramsey kicks 69 yards into the end zone. Touchback.
+3 309.68926505025826 H 1 10 59.012872789041275 28-14 - | E.Langford counter gt for 24 yards (R.Washington).
+3 269.55861324011391 H 1 0.6979282520318435 99.302071747968157 28-14 - | J.Abernathy pass deep middle to M.McBride for 40 yards (S.Bartholomew, D.Whitaker).
+3 236.24482804910943 H 1 0.6979282520318435 99.302071747968157 28-14 td | E.Langford hb lead for 1 yard. TOUCHDOWN ELP!
+3 236.24482804910943 H 1 0.6979282520318435 85 28-21 - | B.Mabry extra point is GOOD.
+3 230.55787246256799 A 1 10 28.954611975308161 28-21 - | B.Mabry kicks 64 yards, returned by B.Driscoll to the ABQ 29.
+3 192.68712498835953 A 1 10 53.036260156070568 28-21 - | A.Nakamura pass deep left to B.Driscoll for 24 yards (T.Jessup, N.Gaines).
+3 158.27776474535199 A 2 3.8552232699620248 59.181036886108544 28-21 - | A.Nakamura pass short left to R.Northcutt for 6 yards (G.Washington).
+3 115.97848617973163 A 1 10 73.987688262503625 28-21 - | A.Nakamura pass short left to R.Northcutt for 15 yards (B.Langford).
+3 82.646264471533257 A 1 10 84.662537718149082 28-21 - | R.Northcutt hb draw for 11 yards (C.Carter, B.Langford, N.Gaines).
+3 47.227802432996398 A 2 10 84.662537718149082 28-21 - | A.Nakamura pass short right to R.Fitzgerald incomplete.
+3 42.261135766329744 A 2 10 84.662537718149082 28-21 td | A.Nakamura pass short middle to T.Yancey for 15 yards. TOUCHDOWN ABQ!
+3 42.261135766329744 A 2 10 85 34-21 info | C.Ramsey extra point is BLOCKED by K.Pemberton, recovered by C.Ramsey.
+3 36.924102591397741 H 1 10 32.375216315894306 34-21 - | C.Ramsey kicks 64 yards, returned by T.Delgado to the ELP 32.
+3 0 H 1 10 58.630469309370248 34-21 - | J.Abernathy pass deep right to J.Treadwell for 26 yards (D.Whitaker, J.McBride).
+3 0 H 1 10 58.630469309370248 34-21 info | End of 3rd quarter.
+4 893.25 H 2 2.3056903980853107 66.324778911284938 34-21 - | J.Abernathy scrambles for 8 yards (S.Bartholomew).
+4 856.43097549354036 H 1 10 76.478895467148476 34-21 - | J.Abernathy pass short right to E.Estrada for 10 yards (J.McBride).
+4 822.88628178139527 H 2 12.10667986748453 74.372215599663946 34-21 - | E.Langford counter gt for a loss of 2 (J.Ochoa).
+4 784.45526654894149 H 2 22.10667986748453 64.372215599663946 34-21 penalty | E.Langford hb draw for 12 yards (Z.Merriweather, R.Washington, D.Whitaker). PENALTY on ELP: Offensive Holding (#86 E.Estrada), enforced. 2nd & 22 at ABQ 36.
+4 777.20526654894149 H 3 22.10667986748453 64.372215599663946 34-21 - | J.Abernathy throws it away under pressure.
+4 770.88859988227489 H 3 22.10667986748453 64.372215599663946 34-21 td | J.Abernathy pass deep right to E.Estrada for 44 yards. Defensive Holding (#4 J.McBride) on ABQ (declined). TOUCHDOWN ELP!
+4 770.88859988227489 H 3 22.10667986748453 85 34-28 - | B.Mabry extra point is GOOD.
+4 770.88859988227489 A 1 10 35 34-28 - | B.Mabry kicks 72 yards into the end zone. Touchback.
+4 768.87193321560824 A 2 7.9341304637999031 37.065869536200097 34-28 - | R.Northcutt inside zone for 2 yards (J.Castellanos, M.Kingsley).
+4 731.27100732177496 A 3 5.4780627865618996 39.5219372134381 34-28 - | A.Nakamura pass short right to J.Calloway for 2 yards (M.Kingsley, S.Holloway).
+4 701.7341693919152 A 3 10.4780627865619 34.5219372134381 34-28 penalty | PENALTY on ABQ: False Start (#71 V.Castellanos), 5 yards. 3rd & 10 at ABQ 35.
+4 698.7008360585819 A 4 10.4780627865619 34.5219372134381 34-28 - | A.Nakamura throws it away under pressure.
+4 692.59255642152084 A 4 10.4780627865619 34.5219372134381 34-28 - | T.Hargrove punts 47 yards, fair catch at the ELP 18.
+4 687.32588975485419 H 1 10 40.778969253838341 34-28 - | J.Abernathy pass deep right to J.Treadwell for 23 yards (J.McBride, R.Washington).
+4 649.43858725260952 H 2 10 40.778969253838341 34-28 - | J.Abernathy throws it away under pressure.
+4 646.15525391927622 H 3 5.2918310441338505 45.48713820970449 34-28 - | E.Langford counter gt for 5 yards (J.Ochoa, Z.Merriweather).
+4 611.17532290611427 H 1 10 52.601922358476479 34-28 - | J.Abernathy pass short right to B.Kowalski for 7 yards (J.Ochoa, Z.Merriweather).
+4 569.12496743456779 H 2 10 52.601922358476479 34-28 - | J.Abernathy throws it away under pressure.
+4 569.12496743456779 H 2 15 47.601922358476479 34-28 penalty | PENALTY on ELP: Illegal Shift, 5 yards. 2nd & 15 at ELP 48.
+4 563.64163410123444 H 1 10 52.601922358476479 34-28 penalty | J.Abernathy throws it away under pressure. PENALTY on ABQ: Defensive Holding (#4 J.McBride), enforced. 1st & 10 at ABQ 47.
+4 560.92496743456775 H 2 4.8769827791256475 57.724939579350831 34-28 - | T.Delgado hb draw for 5 yards (X.Driscoll).
+4 523.69643351131435 H 3 0.97980528454655769 61.622117073929921 34-28 - | E.Langford trap for 4 yards (T.Winslow).
+4 489.24454717679578 H 1 10 70.448390506877715 34-28 - | E.Langford hb dive for 9 yards (T.Winslow).
+4 455.78510825118678 H 1 15 65.448390506877715 34-28 penalty | PENALTY on ELP: False Start (#1 S.Nwosu), 5 yards. 1st & 15 at ABQ 35.
+4 451.0851082511868 H 2 3.3494582425564801 77.098932264321235 34-28 - | J.Abernathy pass short right to S.Nwosu for 12 yards (J.McBride).
+4 409.89076132172107 H 1 10 88.549466132160617 34-28 penalty | J.Abernathy throws it away under pressure. PENALTY on ABQ: Roughing the Passer (#70 W.Winslow), enforced. 1st & 10 at ABQ 11.
+4 404.54076132172111 H 2 6.6809369748905283 91.868529157270089 34-28 - | J.Abernathy scrambles for 3 yards and slides.
+4 382.04359533339755 H 2 6.6809369748905283 91.868529157270089 34-28 td | J.Abernathy pass short left to E.Estrada for 14 yards. TOUCHDOWN ELP!
+4 382.04359533339755 H 1 2 98 34-34 info | Two-point attempt: E.Langford hb dive for 1 yard (T.Winslow). FAILED.
+4 382.04359533339755 A 1 10 35 34-34 - | B.Mabry kicks 72 yards into the end zone. Touchback.
+4 374.71026200006423 A 1 10 48.784897203416882 34-34 - | A.Nakamura pass short left to T.Yancey for 14 yards (M.Kingsley, C.Carter).
+4 335.74581780632354 A 2 5.4287462220931388 53.356150981323744 34-34 - | R.Northcutt power pop rpo for 5 yards (N.Gaines, K.Whitfield).
+4 302.02264121671539 A 3 1.4742119936131459 57.310685209803736 34-34 - | R.Northcutt hb draw for 4 yards (N.Gaines).
+4 261.96774062936527 A 1 10 78.811407064729906 34-34 - | A.Nakamura pass short left to T.Yancey for 22 yards (G.Washington).
+4 227.36420988962078 A 1 4.1917240840019048 95.808275915998095 34-34 - | A.Nakamura pass short right to T.Yancey for 17 yards (T.Jessup, M.Kingsley).
+4 185.08197801945136 A 2 4.1917240840019048 95.808275915998095 34-34 - | A.Nakamura throws it away under pressure.
+4 181.39864468611802 A 2 4.1917240840019048 95.808275915998095 34-34 td | A.Nakamura pass short right to J.Calloway for 9 yards. TOUCHDOWN ABQ!
+4 181.39864468611802 A 2 4.1917240840019048 85 41-34 - | C.Ramsey extra point is GOOD.
+4 181.39864468611802 H 1 10 35 41-34 - | C.Ramsey kicks 71 yards into the end zone. Touchback.
+4 175.74864468611804 H 2 10 35 41-34 - | J.Abernathy pass deep left to S.Nwosu incomplete.
+4 169.18197801945138 H 3 10 35 41-34 - | J.Abernathy throws it away under pressure.
+4 164.23197801945139 H 3 20 25 41-34 penalty | J.Abernathy pass short left to S.Nwosu for 12 yards (R.Washington). PENALTY on ELP: Offensive Pass Interference (#1 S.Nwosu), enforced. 3rd & 20 at ELP 25.
+4 159.26531135278475 H 4 4.0538006350899778 40.946199364910022 41-34 - | J.Abernathy pass short left to J.Treadwell for 16 yards (D.Whitaker).
+4 137.66693577154882 H 1 10 50.965716181692486 41-34 - | J.Abernathy pass short left to B.Kowalski for 10 yards (D.Whitaker, T.Winslow).
+4 121.47870239652727 H 2 4.4412743031126283 56.524441878579857 41-34 - | J.Abernathy pass short left to B.Kowalski for 6 yards (S.Bartholomew).
+4 120 H 2 4.4412743031126283 56.524441878579857 41-34 info | Two-minute warning.
+4 115.48333333333335 H 2 4.4412743031126283 56.524441878579857 41-34 turnover | J.Abernathy pass short left INTERCEPTED by S.Bartholomew, returned to the ABQ 33.
+4 113.16666666666669 A 2 8.4279616284337706 34.178947281440706 41-34 - | R.Northcutt inside zone for 2 yards (B.Langford).
+4 113.16666666666669 A 2 8.4279616284337706 34.178947281440706 41-34 info | Timeout ELP (2 left).
+4 110.93333333333335 A 3 4.2659262178434361 38.340982692031041 41-34 - | R.Northcutt power for 4 yards (M.Kingsley, K.Whitfield).
+4 110.93333333333335 A 3 4.2659262178434361 38.340982692031041 41-34 info | Timeout ELP (1 left).
+4 108.23333333333336 A 4 1.6233214236866615 40.983587486187815 41-34 - | A.Nakamura pass short right to R.Vance for 3 yards (T.Jessup).
+4 108.23333333333336 A 4 1.6233214236866615 40.983587486187815 41-34 info | Timeout ELP (0 left).
+4 101.22619997238122 A 4 1.6233214236866615 40.983587486187815 41-34 - | T.Hargrove punts 45 yards, fair catch at the ELP 14.
+4 93.409533305714575 H 1 10 14.424402894385935 41-34 turnover | J.Abernathy pass short right INTERCEPTED by D.Whitaker, returned to the ELP 28.
+4 93.226199972381238 A 2 11 70.657918515259169 41-34 - | A.Nakamura kneels.
+4 54.322716355975764 A 3 12 69.657918515259169 41-34 - | A.Nakamura kneels.
+4 16.850293212772083 A 4 13 68.657918515259169 41-34 - | A.Nakamura kneels.
+4 0 A 4 13 68.657918515259169 41-34 info | End of 4th quarter.
+4 0 A 4 13 68.657918515259169 41-34 info | FINAL: ABQ 41 - ELP 34
+box A 74 555 429 126 48 36 23 30 11 5 12 125 0 0 3 1 1 0 0 3 1560.9666666666658 H 56 483 402 81 37 25 18 26 8 3 4 30 4 0 2 2 2 2 2 0 1237.6666666666661
 = 20 RIC at SPO
 1 900 H 1 10 35 0-0 info | Coin toss: RIC wins and defers. Rain, 41F, wind 0 mph.
 1 900 H 1 10 35 0-0 - | I.Zeller kicks 68 yards into the end zone. Touchback.
@@ -4560,13 +4580,14 @@ box A 46 167 148 19 33 23 9 9 10 3 6 61 1 3 4 2 2 1 0 0 950.8499999999998 H 70 3
 4 205.71858555612474 A 1 10 35 30-10 - | G.Stanton kicks 65 yards into the end zone. Touchback.
 4 203.05191888945808 A 2 5.4792745082378929 39.520725491762107 30-10 - | E.Calloway hb draw for 5 yards (J.Underwood).
 4 161.05553880495341 A 3 3.0461843072468895 41.953815692753111 30-10 - | E.Calloway hb draw for 2 yards (H.Calloway, L.Abernathy, R.Castellanos).
-4 117.87122261153236 A 3 3.0461843072468895 41.953815692753111 30-10 info | Two-minute warning.
 4 117.87122261153236 A 1 10 52.829559400296489 30-10 - | W.Estrada pass short middle to E.Calloway for 11 yards (G.Ashford, H.Calloway).
-4 76.206562419748067 A 2 6.8381332111691222 55.991426189127367 30-10 - | E.Calloway iso for 3 yards (H.Calloway, A.Ingram).
-4 35.004637924845781 A 3 3.5734213397603654 59.256138060536124 30-10 - | E.Calloway hb dive for 3 yards (H.Calloway, A.Ingram).
-4 0 A 3 3.5734213397603654 59.256138060536124 30-10 info | End of 4th quarter.
-4 0 A 3 3.5734213397603654 59.256138060536124 30-10 info | FINAL: LOU 30 - BKN 10
-box A 58 329 189 140 27 18 29 21 10 6 5 45 1 0 3 1 1 1 0 3 1384.8666666666652 H 58 225 157 68 29 19 26 13 14 3 7 60 1 3 6 1 1 0 1 3 1292.3499999999995
+4 117.87122261153236 A 1 10 52.829559400296489 30-10 info | Two-minute warning.
+4 115.23788927819903 A 2 6.1829638985031963 56.646595501793293 30-10 - | E.Calloway power for 4 yards (H.Calloway).
+4 68.230149921588747 A 1 10 71.773634054663546 30-10 - | W.Estrada scrambles for 15 yards (L.Abernathy).
+4 27.051564605130658 A 2 3.7752417998824939 77.998392254781052 30-10 - | E.Calloway hb dive for 6 yards (L.Abernathy).
+4 0 A 2 3.7752417998824939 77.998392254781052 30-10 info | End of 4th quarter.
+4 0 A 2 3.7752417998824939 77.998392254781052 30-10 info | FINAL: LOU 30 - BKN 10
+box A 59 348 189 159 27 18 30 22 10 6 5 45 1 0 3 1 1 1 0 3 1393.483333333332 H 58 225 157 68 29 19 26 13 14 3 7 60 1 3 6 1 1 0 1 3 1292.3499999999995
 = 26 HFD at TOR
 1 900 A 1 10 35 0-0 info | Coin toss: TOR wins and defers. Clear, 74F, wind 6 mph.
 1 892.92621214827523 A 1 10 40.204518959258806 0-0 - | C.Ashford kicks 63 yards, returned by Z.Pippen to the HFD 40.
@@ -5225,27 +5246,27 @@ box A 53 369 222 147 26 17 26 21 8 4 2 10 1 0 4 0 0 1 0 3 1158.6999999999994 H 6
 4 145.16980115165944 A 1 0.5 99.5 10-13 td | M.Pippen inside zone for 1 yard. TOUCHDOWN VAB!
 4 145.16980115165944 A 1 0.5 85 17-13 - | L.Nakamura extra point is GOOD.
 4 140.04238826204102 H 1 10 35.817925797516565 17-13 - | L.Nakamura kicks 57 yards, returned by A.Iverson to the DSM 36.
-4 117.4833677796648 H 1 10 35.817925797516565 17-13 info | Two-minute warning.
 4 117.4833677796648 H 1 10 52.166791816691521 17-13 - | E.Mabry pass short right to K.Washington for 16 yards (D.Quarles, S.Kowalski).
-4 97.225230445402474 H 2 4.6894279864467379 57.477363830244784 17-13 - | E.Mabry pass short right to L.Delgado for 5 yards (D.Quarles).
-4 82.903219019776941 H 1 10 63.588411477627048 17-13 - | E.Mabry pass short middle to E.Gentry for 6 yards (D.Quarles).
-4 63.239241148873049 H 2 7.911861587531817 65.676549890095231 17-13 - | E.Mabry pass short left to E.Sorensen for 2 yards (B.Ingram, T.Tolliver).
-4 42.230645971031372 H 3 5.6374639123046677 67.95094756532238 17-13 - | E.Mabry pass short right to M.Estrada for 2 yards (D.Quarles).
-4 42.230645971031372 H 3 5.6374639123046677 67.95094756532238 17-13 info | Timeout DSM (2 left).
-4 40.180645971031375 H 4 13.916716705760592 59.671694771866456 17-13 - | E.Mabry SACKED by C.Kincaid for a loss of 8.
-4 40.180645971031375 H 4 13.916716705760592 59.671694771866456 17-13 info | Timeout DSM (1 left).
-4 34.263979304364724 H 1 10 84.562809775866114 17-13 - | E.Mabry pass deep left to M.Estrada for 25 yards (K.Reyes).
-4 34.263979304364724 H 1 10 84.562809775866114 17-13 info | Timeout DSM (0 left).
-4 28.630645971031406 H 2 0.84251588976520964 93.720293886100905 17-13 - | E.Mabry pass short left to K.Washington for 9 yards (M.Quarles).
-4 15.665944087784904 H 3 0.84251588976520964 93.720293886100905 17-13 - | E.Mabry spikes the ball to stop the clock.
-4 12.699277421118243 H 3 0.84251588976520964 93.720293886100905 17-13 td | E.Mabry pass short left to K.Washington for 6 yards. TOUCHDOWN DSM!
-4 12.699277421118243 H 3 0.84251588976520964 85 17-20 - | J.Fitzgerald extra point is GOOD.
-4 6.0825353668849154 A 1 10 24.98172676003567 17-20 - | J.Fitzgerald kicks 59 yards, returned by G.Blackwell to the VAB 25.
-4 6.0825353668849154 A 1 10 24.98172676003567 17-20 info | Timeout VAB (2 left).
-4 0 A 1 10 37.519953864387617 17-20 - | J.Sutton pass short left to T.Thibodeaux for 13 yards (G.Gaines, M.Crenshaw).
-4 0 A 1 10 37.519953864387617 17-20 info | End of 4th quarter.
-4 0 A 1 10 37.519953864387617 17-20 info | FINAL: VAB 17 - DSM 20
-box A 61 370 286 84 36 25 25 22 12 3 1 5 2 0 6 1 1 1 1 2 1361.9499999999991 H 63 383 218 165 32 21 25 20 13 4 7 48 1 4 6 2 2 0 1 0 1340.5833333333326
+4 117.4833677796648 H 1 10 52.166791816691521 17-13 info | Two-minute warning.
+4 115.18336777966481 H 2 12.330321805992497 49.836470010699024 17-13 - | E.Sorensen inside zone jet fake for a loss of 2 (D.Quarles).
+4 94.331779448532942 H 3 12.330321805992497 49.836470010699024 17-13 - | E.Mabry throws it away under pressure.
+4 89.581779448532956 H 4 5.6740905820299616 56.49270123466156 17-13 - | E.Mabry pass short middle to E.Sorensen for 7 yards (K.Reyes).
+4 72.281132997510483 H 1 10 65.222086609739733 17-13 - | E.Mabry pass short left to S.Delgado for 9 yards (K.Reyes).
+4 54.895365967508567 H 1 10 70.222086609739733 17-13 penalty | E.Mabry pass short middle to E.Sorensen for 1 yard (K.Reyes). PENALTY on VAB: Defensive Holding (#48 M.Quarles), enforced. 1st & 10 at VAB 30.
+4 52.562032634175239 H 2 8.4017720708489065 71.820314538890827 17-13 - | E.Sorensen hb dive for 2 yards (G.Yancey, S.Kowalski).
+4 31.900296343925273 H 3 8.4017720708489065 71.820314538890827 17-13 - | E.Mabry pass short left to K.Washington incomplete.
+4 26.950296343925285 H 4 8.4017720708489065 71.820314538890827 17-13 - | E.Mabry pass short right to A.Iverson incomplete.
+4 24.733629677258619 H 5 1.8395513692758669 78.382535240463866 17-13 turnover | E.Mabry pass short middle to E.Gentry for 7 yards (K.Reyes, D.Quarles). Turnover on downs.
+4 21.316963010591959 A 2 3.2167122226410996 28.400752536895034 17-13 - | M.Pippen outside zone for 7 yards (M.Ramsey, E.Carter).
+4 21.316963010591959 A 2 3.2167122226410996 28.400752536895034 17-13 info | Timeout DSM (2 left).
+4 18.750296343925296 A 3 0.29227458091062175 31.325190178625512 17-13 - | M.Pippen inside zone for 3 yards (E.Kincaid).
+4 18.750296343925296 A 3 0.29227458091062175 31.325190178625512 17-13 info | Timeout DSM (1 left).
+4 17.150296343925298 A 4 1.6871223242556148 29.930342435280519 17-13 - | M.Pippen inside zone weak for a loss of 1 (G.Gaines).
+4 17.150296343925298 A 4 1.6871223242556148 29.930342435280519 17-13 info | Timeout DSM (0 left).
+4 8.6608390151214607 A 4 1.6871223242556148 29.930342435280519 17-13 - | C.Rutledge punts 45 yards, returned 35 yards.
+4 0 H 1 10 59.776624170715621 17-13 info | End of 4th quarter.
+4 0 H 1 10 59.776624170715621 17-13 info | FINAL: VAB 17 - DSM 13
+box A 63 366 273 93 35 24 28 21 13 3 2 10 2 0 7 1 1 1 1 3 1388.3999999999992 H 62 359 194 165 31 17 27 19 13 3 7 48 1 3 6 2 2 0 1 0 1243.9166666666658
 = 30 POR at CHS
 1 900 H 1 10 35 0-0 info | Coin toss: POR wins and defers. Clear, 79F, wind 5 mph.
 1 894.74077018932439 H 1 10 19.379287444060534 0-0 - | D.Calloway kicks 64 yards, returned by N.Mabry to the CHS 19.
@@ -5710,8 +5731,8 @@ box A 25 180 152 28 16 13 6 11 4 2 1 5 0 0 0 1 1 0 0 3 516.84999999999957 H 22 2
 2 224.20583028532565 H 2 8.5340524556547273 27.573553352325163 0-0 - | K.Whitfield pass short middle to A.Ochoa for 1 yard (O.Carter, K.Pemberton).
 2 191.22857321090996 H 3 4.9945024106743503 31.11310339730554 0-0 - | A.Ochoa wham for 4 yards (O.Rutledge).
 2 156.77845692224801 H 4 1.5081852806117659 34.599420527368125 0-0 - | K.Whitfield pass short middle to A.Ochoa for 3 yards (K.Pemberton, K.Faulkner).
-2 117.95060383025557 H 4 1.5081852806117659 34.599420527368125 0-0 info | Two-minute warning.
 2 117.95060383025557 H 4 1.5081852806117659 34.599420527368125 0-0 - | A.Lockhart punts 42 yards, returned 2 yards. PENALTY on BOI: Holding (#5 J.Gentry), 10 yards from the end of the return.
+2 117.95060383025557 H 4 1.5081852806117659 34.599420527368125 0-0 info | Two-minute warning.
 2 112.91727049692226 A 1 17.690653005918353 7.6906530059183531 0-0 penalty | M.Washington pass short middle to O.Sutton for 1 yard (J.Whitfield). PENALTY on BOI: Offensive Holding (#75 M.Washington), enforced. 1st & 18 at BOI 8.
 2 108.4506038302556 A 2 16.565750819399945 8.8155551924367614 0-0 - | M.Washington pass short middle to O.Sutton for 1 yard (N.Pemberton).
 2 90.220970476418771 A 3 16.565750819399945 8.8155551924367614 0-0 - | M.Washington pass short left to M.Vickers incomplete.
@@ -5972,8 +5993,8 @@ box A 27 110 90 20 16 8 11 6 6 2 6 34 0 0 2 1 0 0 0 0 528.09999999999991 H 34 20
 2 192.83709066423282 H 2 20 38.582518889237072 0-3 - | B.Pippen pass deep right to N.Ashford incomplete.
 2 189.38709066423283 H 3 12.711553867924501 45.870965021312571 0-3 - | B.Pippen pass short left to N.Ashford for 7 yards (J.Castellanos, T.Carter, B.Ochoa).
 2 157.46286449084684 H 4 18.36625002581637 40.216268863420702 0-3 - | B.Pippen SACKED by T.Carter for a loss of 6.
-2 119.40688414933786 H 4 18.36625002581637 40.216268863420702 0-3 info | Two-minute warning.
 2 119.40688414933786 H 4 18.36625002581637 40.216268863420702 0-3 - | M.Branson punts 47 yards, fair catch at the FRE 13.
+2 119.40688414933786 H 4 18.36625002581637 40.216268863420702 0-3 info | Two-minute warning.
 2 114.09021748267121 A 1 10 23.103308644646294 0-3 - | M.Bartholomew pass short left to G.Driscoll for 10 yards (J.Branson).
 2 91.454683271329941 A 1 10 28.103308644646294 0-3 penalty | M.Bartholomew pass short left to G.Driscoll for 6 yards (T.Abernathy). FUMBLE, recovered by SLC. PENALTY on SLC: Illegal Contact (#8 T.Faulkner), enforced. 1st & 10 at FRE 28.
 2 88.121349937996612 A 2 6.8001930630475513 31.303115581598743 0-3 - | G.Driscoll hb draw for 3 yards (L.Pippen).
@@ -6105,24 +6126,25 @@ box A 31 242 89 153 13 9 14 12 7 4 4 45 0 0 1 0 0 0 0 3 627.39999999999952 H 21 
 4 136.64759366412972 H 1 0.5333602099609891 99.466639790039011 6-3 - | K.Whitaker pass short middle to M.Kowalski for 7 yards (J.Branson, K.Dunbar).
 4 121.00585209829747 H 1 0.5333602099609891 99.466639790039011 6-3 td | M.Kowalski hb dive for 1 yard. TOUCHDOWN CLB!
 4 121.00585209829747 H 1 2 98 6-9 info | Two-point attempt: M.Kowalski counter gt for a loss of 2 (K.Crenshaw). FAILED.
-4 113.45644750162042 H 1 2 98 6-9 info | Two-minute warning.
 4 113.45644750162042 A 1 10 36.693501788895809 6-9 - | K.Kowalski kicks 61 yards, returned by M.Sorensen to the SLC 37.
-4 92.426824742012499 A 2 1.1608506183269398 45.532651170568869 6-9 - | M.Sorensen inside zone jet fake for 9 yards (K.Langford).
-4 68.561076941170597 A 2 1.1608506183269398 45.532651170568869 6-9 turnover | B.Pippen pass short right to C.Gentry for 17 yards (H.Nakamura). FUMBLE, recovered by CLB.
-4 66.211076941170603 H 2 10.355145365711593 36.893570654713919 6-9 - | M.Kowalski power pop rpo for no gain (J.Whitfield).
-4 66.211076941170603 H 2 10.355145365711593 36.893570654713919 6-9 info | Timeout SLC (2 left).
-4 63.111076941170609 H 3 5.8000601930812934 41.448655827344218 6-9 - | M.Kowalski inside zone weak for 5 yards (V.Faulkner).
-4 63.111076941170609 H 3 5.8000601930812934 41.448655827344218 6-9 info | Timeout SLC (1 left).
-4 60.844410274503943 H 4 14.716738179945175 32.531977840480337 6-9 - | K.Whitaker SACKED by E.Vickers for a loss of 9.
-4 60.844410274503943 H 4 14.716738179945175 32.531977840480337 6-9 info | Timeout SLC (0 left).
-4 54.442637053644475 H 4 14.716738179945175 32.531977840480337 6-9 - | Z.Ashford punts 34 yards, returned 16 yards. PENALTY on SLC: Holding (#16 R.Gentry), 10 yards from the end of the return.
-4 50.625970386977819 A 2 6.2219181120521867 42.898336997475916 6-9 - | B.Pippen pass short right to M.Sorensen for 4 yards (E.Abernathy).
-4 32.086191322856486 A 3 10.074193296574904 39.046061812953198 6-9 - | B.Pippen scrambles for a loss of 4 (C.Estrada).
-4 18.309490183166755 A 4 17.549911057454892 31.57034405207321 6-9 - | B.Pippen SACKED by C.Estrada for a loss of 7.
-4 0 A 5 17.549911057454892 31.57034405207321 6-9 turnover | B.Pippen pass short left to G.Sutton incomplete. Turnover on downs.
-4 0 H 1 10 68.42965594792679 6-9 info | End of 4th quarter.
-4 0 H 1 10 68.42965594792679 6-9 info | FINAL: SLC 6 - CLB 9
-box A 28 145 122 23 18 13 7 7 6 3 2 15 1 2 0 2 2 0 1 0 634.58333333333303 H 26 145 102 43 13 8 12 9 5 2 2 15 0 1 2 1 1 0 0 3 588.61666666666645
+4 113.45644750162042 A 1 10 36.693501788895809 6-9 info | Two-minute warning.
+4 109.18978083495377 A 1 10 48.17984978027382 6-9 - | B.Pippen pass short right to A.Nwosu for 11 yards (F.Fitzgerald).
+4 85.789676086930726 A 1 10 63.369000520001201 6-9 - | B.Pippen pass short right to G.Sutton for 15 yards (L.Gaines, G.Ingram).
+4 71.764838725561447 A 2 9.2761910724603709 64.09280944754083 6-9 - | M.Sorensen inside zone for 1 yard (N.Ingram, F.Fitzgerald).
+4 48.432179753839534 A 3 9.2761910724603709 64.09280944754083 6-9 - | B.Pippen pass deep left to N.Ashford incomplete.
+4 44.132179753839544 A 1 10 74.194532714142071 6-9 - | B.Pippen pass short right to N.Ashford for 10 yards.
+4 44.132179753839544 A 1 10 74.194532714142071 6-9 info | Timeout SLC (2 left).
+4 39.715513087172887 A 2 10 74.194532714142071 6-9 - | B.Pippen pass deep middle to R.Gentry incomplete.
+4 37.082179753839561 A 3 5.0880002574796066 79.106532456662464 6-9 - | B.Pippen pass short middle to G.Sutton for 5 yards (E.Abernathy).
+4 37.082179753839561 A 3 5.0880002574796066 79.106532456662464 6-9 info | Timeout SLC (1 left).
+4 33.698846420506236 A 1 10 85.446951357723179 6-9 - | C.Yancey hb stretch for 6 yards (F.Fitzgerald, H.Nakamura).
+4 33.698846420506236 A 1 10 85.446951357723179 6-9 info | Timeout SLC (0 left).
+4 31.182179753839574 A 2 7.9940676951379572 87.452883662585222 6-9 - | C.Yancey outside zone weak for 2 yards (E.Fitzgerald, F.Fitzgerald).
+4 16.523525263602139 A 3 7.9940676951379572 87.452883662585222 6-9 - | B.Pippen spikes the ball to stop the clock.
+4 10.740191930268821 A 4 1.5469069249684821 93.900044432754697 6-9 - | B.Pippen scrambles for 6 yards (D.Calloway, K.Langford, F.Fitzgerald).
+4 0 A 4 1.5469069249684821 93.900044432754697 6-9 info | End of 4th quarter.
+4 0 A 4 1.5469069249684821 93.900044432754697 6-9 info | FINAL: SLC 6 - CLB 9
+box A 33 182 149 33 21 15 9 11 8 5 1 5 0 1 0 2 2 0 0 0 700.06666666666615 H 23 149 111 38 13 8 10 9 4 2 2 15 0 0 1 1 1 0 0 3 530.89999999999975
 = 38 BHM at SAC
 1 300 H 1 10 35 0-0 info | Coin toss: BHM wins and defers. Clear, 53F, wind 7 mph.
 1 292.98123729671352 H 1 10 34.604323984750494 0-0 - | D.Dunbar kicks 63 yards, returned by M.Merriweather to the SAC 35.
@@ -6409,23 +6431,28 @@ box A 30 222 150 72 18 10 12 13 4 2 8 59 1 0 1 0 0 1 0 2 682.74999999999955 H 34
 4 208.14700038686092 H 3 4.6598401490482075 80.0340915526846 3-14 - | E.Calloway counter gt for a loss of 1 (G.Washington).
 4 165.22340229780733 H 4 11.053252715170132 73.640678986562676 3-14 - | W.Estrada SACKED by K.Sutton for a loss of 6.
 4 120.22586415869503 H 4 11.053252715170132 73.640678986562676 3-17 fg | W.Hightower 43-yard field goal is GOOD.
-4 113.68044954955897 H 4 11.053252715170132 73.640678986562676 3-17 info | Two-minute warning.
 4 113.68044954955897 A 1 10 24.695196219389466 3-17 - | W.Hightower kicks 62 yards, returned by T.Delgado to the ELP 25.
-4 92.834463976835934 A 1 20 14.695196219389466 3-17 penalty | J.Abernathy pass short right to E.Estrada incomplete. PENALTY on ELP: Offensive Holding (#65 O.Stanton), enforced. 1st & 20 at ELP 15.
-4 89.901130643502611 A 2 20 14.695196219389466 3-17 - | J.Abernathy pass short middle to E.Langford incomplete, dropped.
-4 83.917797310169291 A 3 3.9236393380468186 30.771556881342647 3-17 - | J.Abernathy pass short left to B.Kowalski for 16 yards (R.Marsh, J.Reyes).
-4 63.588338425398632 A 3 3.9236393380468186 30.771556881342647 3-17 turnover | J.Abernathy pass short left to S.Nwosu for 18 yards (R.Marsh). FUMBLE, recovered by LOU.
-4 60.505005092065304 H 2 0.94816813837768876 60.171921213677962 3-17 - | E.Calloway hb dive for 9 yards (M.Kingsley, K.Whitfield).
-4 60.505005092065304 H 2 0.94816813837768876 60.171921213677962 3-17 info | Timeout ELP (2 left).
-4 57.838338425398639 H 1 10 62.319125618378266 3-17 - | E.Calloway iso for 2 yards (G.Washington, B.Langford).
-4 57.838338425398639 H 1 10 62.319125618378266 3-17 info | Timeout ELP (1 left).
-4 57.655005092065309 H 2 11 61.319125618378266 3-17 - | W.Estrada kneels.
-4 57.655005092065309 H 2 11 61.319125618378266 3-17 info | Timeout ELP (0 left).
-4 57.471671758731979 H 3 12 60.319125618378266 3-17 - | W.Estrada kneels.
-4 19.713694939219234 H 4 13 59.319125618378266 3-17 - | W.Estrada kneels.
-4 0 H 4 13 59.319125618378266 3-17 info | End of 4th quarter.
-4 0 H 4 13 59.319125618378266 3-17 info | FINAL: ELP 3 - LOU 17
-box A 23 107 31 76 10 5 9 4 4 0 2 20 3 3 0 1 1 1 2 0 452.68333333333322 H 31 130 85 45 18 12 8 8 7 3 5 40 1 2 2 1 1 1 0 3 616.28333333333285
+4 113.68044954955897 A 1 10 24.695196219389466 3-17 info | Two-minute warning.
+4 109.13044954955899 A 2 10 24.695196219389466 3-17 - | J.Abernathy pass short left to S.Nwosu incomplete.
+4 109.13044954955899 A 2 15 19.695196219389466 3-17 penalty | PENALTY on ELP: False Start (#62 M.Pemberton), 5 yards. 2nd & 15 at ELP 20.
+4 105.180449549559 A 3 7.4160111328362248 27.279185086553241 3-17 - | J.Abernathy pass short left to E.Langford for 8 yards (K.Yeager, S.Dunbar).
+4 85.112006252554053 A 4 9.0378742265032663 25.6573219928862 3-17 - | J.Abernathy pass short right to E.Langford for a loss of 2 (N.Zeller).
+4 72.787760338668519 A 4 14.037874226503266 20.6573219928862 3-17 penalty | PENALTY on ELP: False Start (#70 B.Hightower), 5 yards. 4th & 14 at ELP 21.
+4 68.137760338668528 A 5 5.4902867385389946 29.204909480850471 3-17 turnover | J.Abernathy pass short right to D.Driscoll for 9 yards (S.Pippen). Turnover on downs.
+4 66.654427005335194 H 2 7.85288232786084 72.942208191288685 3-17 - | E.Calloway hb dive for 2 yards (J.Kincaid).
+4 66.654427005335194 H 2 7.85288232786084 72.942208191288685 3-17 info | Timeout ELP (2 left).
+4 64.654427005335194 H 3 5.6613436594215614 75.133746859727964 3-17 - | E.Calloway counter gt for 2 yards (K.Sutton).
+4 64.654427005335194 H 3 5.6613436594215614 75.133746859727964 3-17 info | Timeout ELP (1 left).
+4 59.754427005335202 H 4 3.9165236837601327 76.878566835389393 3-17 - | W.Estrada pass short middle to E.Calloway for 2 yards (G.Washington, K.Whitfield).
+4 59.754427005335202 H 4 3.9165236837601327 76.878566835389393 3-17 info | Timeout ELP (0 left).
+4 54.653425489350667 H 4 3.9165236837601327 76.878566835389393 3-20 fg | W.Hightower 40-yard field goal is GOOD.
+4 46.778335164099445 A 1 10 40.045365367685463 3-20 - | W.Hightower kicks 54 yards, returned by T.Delgado to the ELP 40.
+4 26.930074054111564 A 1 10 50.823171523104342 3-20 - | J.Abernathy scrambles for 11 yards (R.Whitfield).
+4 10.878206268962 A 2 10 50.823171523104342 3-20 - | J.Abernathy spikes the ball to stop the clock.
+4 6.52820626896201 A 3 3.8386330225165253 56.984538500587817 3-20 - | J.Abernathy pass short right to E.Estrada for 6 yards (J.Reyes).
+4 0 A 3 3.8386330225165253 56.984538500587817 3-20 info | End of 4th quarter.
+4 0 A 3 3.8386330225165253 56.984538500587817 3-20 info | FINAL: ELP 3 - LOU 20
+box A 27 105 18 87 12 7 10 5 4 0 3 20 2 3 0 1 1 1 1 0 485.38333333333321 H 29 125 87 38 19 13 8 7 7 3 5 40 1 2 2 2 2 1 0 3 568.36666666666633
 = 41 ORL at BHM
 1 300 H 1 10 35 0-0 info | Coin toss: ORL wins and defers. Snow, 19F, wind 6 mph.
 1 294.42894353740849 H 1 10 32.050361932881884 0-0 - | E.Castellanos kicks 59 yards, returned by N.Branson to the BHM 32.
@@ -6966,8 +6993,8 @@ box A 41 228 184 44 30 22 10 14 9 4 2 15 0 0 4 0 0 0 0 2 836.69999999999959 H 28
 2 224.07413208944104 A 2 9.5757399142284072 35.424260085771593 3-7 - | K.Mabry inside zone for no gain (M.Reyes).
 2 186.21245914486551 A 1 10 50.831746600060974 3-7 - | F.Rutledge pass short right to D.Valdez for 15 yards (R.Reyes).
 2 152.36013400331143 A 2 9.3596702788439359 51.472076321217038 3-7 - | K.Mabry inside zone jet fake for 1 yard (T.Calloway).
-2 118.42291815442347 A 2 9.3596702788439359 51.472076321217038 3-7 info | Two-minute warning.
 2 118.42291815442347 A 3 9.3596702788439359 51.472076321217038 3-7 - | F.Rutledge pass short middle to K.Mabry incomplete, dropped.
+2 118.42291815442347 A 3 9.3596702788439359 51.472076321217038 3-7 info | Two-minute warning.
 2 113.70625148775682 A 1 10 63.947035146723884 3-7 - | F.Rutledge pass short right to K.Mabry for 12 yards (M.Carter, L.Zeller).
 2 92.470679491292742 A 2 10 63.947035146723884 3-7 - | F.Rutledge pass deep right to G.Vance incomplete.
 2 87.037346157959419 A 3 10 63.947035146723884 3-7 - | F.Rutledge pass short right to D.Valdez incomplete.
@@ -7005,26 +7032,24 @@ box A 41 228 184 44 30 22 10 14 9 4 2 15 0 0 4 0 0 0 0 2 836.69999999999959 H 28
 4 159.94427425066633 A 2 2.1816529100437236 77.285451524583678 6-7 - | F.Rutledge pass short right to G.Vance for 8 yards (H.Kingsley).
 4 142.29143593301998 A 3 2.6504890578322886 76.816615376795113 6-7 - | K.Mabry duo for no gain (M.Reyes, L.Zeller).
 4 120.8605216668919 A 4 2.6504890578322886 76.816615376795113 6-7 - | F.Rutledge pass deep middle to B.Hargrove incomplete.
-4 115.25763877732682 A 4 2.6504890578322886 76.816615376795113 6-7 info | Two-minute warning.
 4 115.25763877732682 A 4 2.6504890578322886 76.816615376795113 9-7 fg | D.Ochoa 40-yard field goal is GOOD.
+4 115.25763877732682 A 4 2.6504890578322886 76.816615376795113 9-7 info | Two-minute warning.
 4 107.6697601463646 H 1 10 31.080033329269284 9-7 - | D.Ochoa kicks 71 yards, returned by O.Vickers to the RIC 31.
-4 90.233956329400371 H 2 8.3912298502175489 32.688803479051735 9-7 - | O.Vickers counter gt for 2 yards (N.Gaines, N.Winslow).
-4 74.858749446055569 H 1 10 44.161828040776037 9-7 - | K.Vickers pass short right to J.Mabry for 11 yards (J.Castellanos).
-4 59.026347768430945 H 2 10 44.161828040776037 9-7 - | K.Vickers pass short middle to O.Vickers incomplete, dropped.
-4 54.809681101764291 H 3 10 44.161828040776037 9-7 - | K.Vickers pass short middle to J.Mabry incomplete.
-4 51.643014435097633 H 4 10 44.161828040776037 9-7 - | K.Vickers pass short left to J.Mabry incomplete.
-4 48.109681101764309 H 5 10 44.161828040776037 9-7 turnover | K.Vickers throws it away under pressure. Turnover on downs.
-4 45.026347768430981 A 2 0.34653704500802718 65.491634914215936 9-7 - | K.Mabry wham for 10 yards (Q.McBride, K.Washington).
-4 45.026347768430981 A 2 0.34653704500802718 65.491634914215936 9-7 info | Timeout RIC (2 left).
-4 40.843014435097658 A 1 10 79.685650600733211 9-7 - | K.Mabry iso for 14 yards (T.Calloway, K.Washington).
-4 40.843014435097658 A 1 10 79.685650600733211 9-7 info | Timeout RIC (1 left).
-4 40.659681101764328 A 2 11 78.685650600733211 9-7 - | F.Rutledge kneels.
-4 40.659681101764328 A 2 11 78.685650600733211 9-7 info | Timeout RIC (0 left).
-4 40.476347768430998 A 3 12 77.685650600733211 9-7 - | F.Rutledge kneels.
-4 0 A 3 12 77.685650600733211 12-7 fg | D.Ochoa 39-yard field goal is GOOD.
-4 0 A 3 12 77.685650600733211 12-7 info | End of 4th quarter.
-4 0 A 3 12 77.685650600733211 12-7 info | FINAL: STL 12 - RIC 7
-box A 32 188 140 48 18 9 12 8 7 3 4 40 0 0 1 4 4 0 0 3 622.74999999999966 H 21 81 69 12 13 5 6 5 5 2 1 5 1 0 1 0 0 1 0 0 376.93333333333317
+4 106.20309347969793 H 2 8.332865867968998 32.747167461300286 9-7 - | O.Vickers wham for 2 yards (J.Langford).
+4 89.755205247489144 H 3 14.232797833521332 26.847235495747952 9-7 - | K.Vickers SACKED by N.Winslow for a loss of 6.
+4 70.98947023653119 H 4 14.232797833521332 26.847235495747952 9-7 - | K.Vickers pass deep right to M.Kingsley incomplete.
+4 67.272803569864536 H 5 6.8471358834394351 34.232897445829849 9-7 turnover | K.Vickers pass short right to C.Lockhart for 7 yards (J.Kingsley, K.Bartholomew). Turnover on downs.
+4 65.039470236531201 A 2 8.70047839306919 67.066624161100961 9-7 - | K.Mabry zone read for 1 yard (Q.McBride).
+4 65.039470236531201 A 2 8.70047839306919 67.066624161100961 9-7 info | Timeout RIC (2 left).
+4 61.256136903197877 A 1 10 79.130998744274592 9-7 - | K.Mabry outside zone weak for 12 yards (Q.McBride).
+4 61.256136903197877 A 1 10 79.130998744274592 9-7 info | Timeout RIC (1 left).
+4 61.072803569864547 A 2 11 78.130998744274592 9-7 - | F.Rutledge kneels.
+4 61.072803569864547 A 2 11 78.130998744274592 9-7 info | Timeout RIC (0 left).
+4 60.889470236531217 A 3 12 77.130998744274592 9-7 - | F.Rutledge kneels.
+4 21.61460578481984 A 4 13 76.130998744274592 9-7 - | F.Rutledge kneels.
+4 0 A 4 13 76.130998744274592 9-7 info | End of 4th quarter.
+4 0 A 4 13 76.130998744274592 9-7 info | FINAL: STL 9 - RIC 7
+box A 33 177 140 37 18 9 12 8 8 3 4 40 0 0 1 3 3 0 0 3 646.68333333333294 H 19 71 59 12 10 5 6 4 5 2 1 5 1 1 1 0 0 1 0 0 346.94999999999987
 = 48 MEX at BOI
 1 300 A 1 10 35 0-0 info | Coin toss: BOI wins and defers. Clear, 83F, wind 12 mph.
 1 292.96288595930673 A 1 10 19.275808390928105 0-0 - | K.Jessup kicks 65 yards, returned by O.Ashford to the MEX 29. PENALTY on MEX: Holding (#24 T.Thibodeaux), 10 yards from the end of the return.
@@ -7667,68 +7692,76 @@ box A 20 75 39 36 10 7 9 4 5 1 2 15 1 1 2 0 0 0 1 0 410.04999999999978 H 31 160 
 2 193.77756260652083 H 1 10 46.037611213805356 14-7 - | D.Crenshaw pass short right to N.Ramsey for 6 yards (A.Ellison).
 2 152.37998638345539 H 1 10 46.037611213805356 14-7 turnover | D.Crenshaw pass short right to M.Yeager for 20 yards (J.Marsh). FUMBLE, recovered by CHS.
 2 150.91331971678872 A 2 8.4355951491343788 35.313527293174538 14-7 - | F.Carter trap for 2 yards (G.Yeager).
-2 117.15455229300996 A 2 8.4355951491343788 35.313527293174538 14-7 info | Two-minute warning.
 2 117.15455229300996 A 1 10 46.887731253622512 14-7 - | F.Carter inside zone for 12 yards (K.Pemberton, C.Bartholomew).
-2 94.216897365761213 A 1 10 62.901684087419696 14-7 - | E.Ellison pass short left to F.Driscoll for 16 yards (C.Bartholomew).
-2 73.962268983138031 A 2 3.2733069500971936 69.628377137322502 14-7 - | F.Carter duo for 7 yards (K.Pemberton, E.Ingram).
-2 58.431387191514105 A 3 3.2733069500971936 69.628377137322502 14-7 - | E.Ellison pass short middle to J.Merriweather incomplete, broken up by T.Ochoa.
-2 53.748053858180782 A 4 0.11910919155930344 72.782574895860392 14-7 - | E.Ellison pass short middle to F.Carter for 3 yards (I.Branson).
-2 36.112747051256349 A 1 10 87.965958225470132 14-7 penalty | E.Ellison pass short right to J.Abernathy for 3 yards (L.Ellison). PENALTY on SDT: Unnecessary Roughness (#0 L.Ellison), enforced. 1st & 10 at SDT 12.
-2 29.162747051256368 A 2 10 87.965958225470132 14-7 - | E.Ellison throws it away under pressure.
-2 29.162747051256368 A 2 15 82.965958225470132 14-7 penalty | PENALTY on CHS: False Start (#74 V.Tolliver), 5 yards. 2nd & 15 at SDT 17.
-2 24.796080384589711 A 3 10.593961425788194 87.371996799681938 14-7 - | E.Ellison pass short left to F.Carter for 4 yards (I.Branson, L.Ellison).
-2 24.796080384589711 A 3 10.593961425788194 87.371996799681938 14-7 info | Timeout CHS (2 left).
-2 23.029413717923045 A 4 16.15117323619377 81.814784989276362 14-7 - | E.Ellison SACKED by G.Yeager for a loss of 6.
-2 23.029413717923045 A 4 16.15117323619377 81.814784989276362 14-7 info | Timeout CHS (1 left).
-2 17.618901433081657 A 4 16.15117323619377 81.814784989276362 17-7 fg | D.Lockhart 35-yard field goal is GOOD.
-2 17.618901433081657 H 1 10 35 17-7 - | D.Lockhart kicks 67 yards into the end zone. Touchback.
-2 11.435568099748341 H 1 10 76.746175577172394 17-7 - | D.Crenshaw pass deep middle to C.Sorensen for 42 yards (G.Zeller).
-2 11.435568099748341 H 1 10 76.746175577172394 17-7 info | Timeout SDT (2 left).
-2 7.8855680997483493 H 2 1.6029998469181095 85.143175730254285 17-7 - | D.Crenshaw pass short right to N.Ramsey for 8 yards (C.Delgado, A.Ellison).
-2 7.8855680997483493 H 2 1.6029998469181095 85.143175730254285 17-7 info | Timeout SDT (1 left).
-2 4.1689014330816914 H 1 9.0993430342191033 90.900656965780897 17-7 - | D.Crenshaw pass short middle to A.Oduya for 6 yards (I.Hightower).
-2 4.1689014330816914 H 1 9.0993430342191033 90.900656965780897 17-7 info | Timeout SDT (0 left).
-2 3.7355680997483582 H 2 9.0993430342191033 90.900656965780897 17-7 - | D.Crenshaw spikes the ball to stop the clock.
-2 3.7355680997483582 H 2 4.5496715171095445 95.450328482890455 17-7 penalty | PENALTY on CHS: Neutral Zone Infraction (#50 E.Sutton), 5 yards. 2nd & Goal at CHS 5.
-2 0 H 3 10.028384256329517 89.971615743670483 17-7 - | D.Crenshaw SACKED by E.Sutton for a loss of 5.
-2 0 H 3 10.028384256329517 89.971615743670483 17-7 info | End of 2nd quarter.
-3 300 A 3 10.028384256329517 89.971615743670483 17-7 info | Halftime.
-3 293.24310066434555 A 1 10 40.226692718317771 17-7 - | T.Marsh kicks 59 yards, returned by N.Mabry to the CHS 40.
-3 259.94609921942464 A 2 7.5777081803427464 42.648984537975025 17-7 - | F.Carter trap for 2 yards (T.Ochoa).
-3 226.49756607023687 A 3 4.0264839502234295 46.200208768094342 17-7 - | F.Carter counter gt for 4 yards (I.Branson).
-3 194.31282634867043 A 1 10 55.905302393164867 17-7 - | E.Ellison pass short right to G.Rutledge for 10 yards (I.Branson, C.Bartholomew).
-3 160.81156443899184 A 2 7.4346967183534147 58.470605674811452 17-7 - | F.Carter counter gt for 3 yards (T.Ochoa, D.Pruitt).
-3 125.21201685364356 A 3 2.6666518522219249 63.238650540942942 17-7 - | E.Ellison scrambles for 5 yards (L.Ellison).
-3 92.705990121839548 A 4 0.67565388076558719 65.22964851239928 17-7 - | F.Carter trap for 2 yards (T.Ochoa).
-3 57.230421302296826 A 1 10 66.38141585238094 17-7 - | D.Gentry fb dive for 1 yard (J.Thibodeaux, I.Branson).
-3 20.417380740819485 A 2 8.5618724908535029 67.819543361527437 17-7 - | T.Yeager duo for 1 yard (J.Thibodeaux).
-3 0 A 2 8.5618724908535029 67.819543361527437 17-7 info | End of 3rd quarter.
-4 297.80000000000001 A 3 5.8287954054277122 70.552620446953227 17-7 - | F.Carter power o for 3 yards (I.Branson).
-4 256.64012719442451 A 4 2.8548253409135071 73.526590511467433 17-7 - | E.Ellison pass short right to F.Driscoll for 3 yards (C.Bartholomew).
-4 213.4973209810754 A 4 2.8548253409135071 73.526590511467433 20-7 fg | D.Lockhart 43-yard field goal is GOOD.
-4 213.4973209810754 H 1 10 35 20-7 - | D.Lockhart kicks 70 yards into the end zone. Touchback.
-4 209.63065431440876 H 2 2.9377776775991933 42.062222322400807 20-7 - | D.Crenshaw qb counter for 7 yards (K.Dunbar).
-4 188.31008685606849 H 1 10 51.698429056835707 20-7 - | D.Crenshaw pass short right to N.Ramsey for 10 yards (G.Lockhart).
-4 171.25300377057874 H 2 6.3460892659790389 55.352339790856668 20-7 - | D.Crenshaw pass short right to M.Yeager for 4 yards (G.Lockhart, G.Zeller).
-4 150.7395926247352 H 1 10 60.352339790856668 20-7 penalty | D.Crenshaw throws it away under pressure. PENALTY on CHS: Illegal Use of Hands (#78 N.Estrada), enforced. 1st & 10 at CHS 40.
-4 147.77292595806853 H 2 10 60.352339790856668 20-7 - | D.Crenshaw pass short right to C.Sorensen incomplete.
-4 142.02292595806856 H 3 3.3036796532179338 67.048660137638734 20-7 - | D.Crenshaw scrambles for 7 yards (A.Ellison, G.Lockhart).
-4 122.70291088195532 H 4 3.3036796532179338 67.048660137638734 20-7 - | D.Crenshaw pass short left to M.Yeager incomplete, dropped.
-4 119.75291088195533 H 4 3.3036796532179338 67.048660137638734 20-7 info | Two-minute warning.
-4 119.75291088195533 H 5 0.79103863644727568 69.561301154409392 20-7 turnover | A.Upshaw hb draw for 3 yards (T.Underwood). Turnover on downs.
-4 117.53624421528866 A 2 5.656881151467978 34.78181769412263 20-7 - | F.Carter wham for 4 yards (G.Yeager).
-4 117.53624421528866 A 2 5.656881151467978 34.78181769412263 20-7 info | Timeout SDT (2 left).
-4 117.53624421528866 A 2 10.656881151467978 29.78181769412263 20-7 penalty | PENALTY on CHS: False Start (#53 D.Faulkner), 5 yards. 2nd & 11 at CHS 30.
-4 114.75291088195533 A 3 4.2281533114701872 36.210545534120421 20-7 - | F.Carter duo for 6 yards (E.Ingram, I.Branson).
-4 114.75291088195533 A 3 4.2281533114701872 36.210545534120421 20-7 info | Timeout SDT (1 left).
-4 112.269577548622 A 1 10 41.141128822965221 20-7 - | E.Ellison pass short right to G.Rutledge for 5 yards (G.Yeager).
-4 112.269577548622 A 1 10 41.141128822965221 20-7 info | Timeout SDT (0 left).
-4 112.08624421528866 A 2 11 40.141128822965221 20-7 - | E.Ellison kneels.
-4 72.059022092772793 A 3 12 39.141128822965221 20-7 - | E.Ellison kneels.
-4 32.952926633476118 A 4 13 38.141128822965221 20-7 - | E.Ellison kneels.
-4 0 A 4 13 38.141128822965221 20-7 info | End of 4th quarter.
-4 0 A 4 13 38.141128822965221 20-7 info | FINAL: CHS 20 - SDT 7
-box A 29 165 30 135 9 6 15 7 7 2 4 20 2 2 0 2 2 1 1 3 595.3499999999998 H 27 145 107 38 18 10 7 7 4 1 2 22 2 1 2 0 0 1 1 0 480.24999999999983
+2 117.15455229300996 A 1 10 46.887731253622512 14-7 info | Two-minute warning.
+2 109.68788562634332 A 1 10 65.934762023389297 14-7 - | E.Ellison pass short left to D.Gentry for 19 yards (E.Hargrove, T.Calloway, K.Pemberton).
+2 93.36492830294489 A 2 5.259053106541586 70.675708916847711 14-7 - | E.Ellison pass short middle to F.Carter for 5 yards (L.Ellison).
+2 73.431761193710017 A 2 5.259053106541586 70.675708916847711 14-7 turnover | E.Ellison pass short right INTERCEPTED by C.Bartholomew, returned to the SDT 20.
+2 70.431761193710017 H 2 3.9418337596125603 26.439058056429051 14-7 - | D.Crenshaw pass short right to D.Washington for 6 yards (D.Estrada, G.Zeller).
+2 52.146454386785585 H 1 10 39.350290469246893 14-7 - | D.Crenshaw pass short right to M.Yeager for 13 yards (G.Lockhart).
+2 34.879630455995567 H 1 10 55.943260125382011 14-7 - | D.Crenshaw pass short right to D.Washington for 17 yards (A.Ellison).
+2 34.879630455995567 H 1 10 55.943260125382011 14-7 info | Timeout SDT (2 left).
+2 34.879630455995567 H 1 15 50.943260125382011 14-7 penalty | PENALTY on SDT: False Start (#78 D.Castellanos), 5 yards. 1st & 15 at CHS 49.
+2 29.946297122662244 H 2 3.1560723732652178 62.787187752116793 14-7 - | D.Crenshaw pass short left to D.Washington for 12 yards (I.Hightower, K.Dunbar, J.Marsh).
+2 29.946297122662244 H 2 3.1560723732652178 62.787187752116793 14-7 info | Timeout SDT (1 left).
+2 25.162963789328924 H 1 10 72.775721012900561 14-7 - | D.Crenshaw pass short right to D.Washington for 10 yards (A.Ellison).
+2 25.162963789328924 H 1 10 72.775721012900561 14-7 info | Timeout SDT (0 left).
+2 24.72963045599559 H 2 10 72.775721012900561 14-7 - | D.Crenshaw spikes the ball to stop the clock.
+2 22.246297122662259 H 1 10 83.113431880433254 14-7 - | D.Crenshaw pass short right to A.Upshaw for 10 yards (C.Delgado, I.Hightower).
+2 9.2451394353993166 H 2 10 83.113431880433254 14-7 - | D.Crenshaw spikes the ball to stop the clock.
+2 6.2618061020659894 H 3 10 83.113431880433254 14-7 - | D.Crenshaw pass deep right to N.Ramsey incomplete.
+2 0.16180610206600576 H 1 1.7899739425004242 98.210026057499576 14-7 - | D.Crenshaw pass short left to D.Washington for 15 yards (I.Hightower, K.Dunbar, V.Upshaw).
+2 0 H 1 1.7899739425004242 98.210026057499576 14-7 info | End of 2nd quarter.
+3 300 A 1 1.7899739425004242 98.210026057499576 14-7 info | Halftime.
+3 292.88371959142387 A 1 10 35.488508737746798 14-7 - | T.Marsh kicks 60 yards, returned by N.Mabry to the CHS 35.
+3 253.32380275987092 A 2 10 35.488508737746798 14-7 - | E.Ellison pass deep middle to J.Abernathy incomplete, broken up by D.Lockhart.
+3 249.0904694265376 A 1 10 46.894222418394094 14-7 - | E.Ellison pass short right to J.Abernathy for 11 yards (D.Pruitt, K.Pemberton).
+3 213.17712943467006 A 2 8.1802316739545589 48.713990744439535 14-7 - | F.Carter duo for 2 yards (I.Branson).
+3 173.13068687940645 A 3 8.1802316739545589 48.713990744439535 14-7 - | E.Ellison pass deep middle to N.Mabry incomplete, broken up by K.Pemberton.
+3 169.09735354607312 A 4 8.1802316739545589 48.713990744439535 14-7 - | E.Ellison throws it away under pressure.
+3 162.57787602966039 A 4 8.1802316739545589 48.713990744439535 14-7 - | M.Vance punts 51 yards into the end zone. Touchback.
+3 157.84454269632707 H 1 10 31.159370329844403 14-7 - | D.Crenshaw pass short left to N.Ramsey for 11 yards (C.Delgado, J.Marsh).
+3 122.7772409434121 H 2 8.8004852809420449 32.358885048902359 14-7 - | D.Crenshaw pass short right to A.Oduya for 1 yard (J.Marsh).
+3 86.304219655692705 H 3 8.8004852809420449 32.358885048902359 14-7 - | D.Crenshaw pass deep left to G.Upshaw incomplete.
+3 84.304219655692705 H 4 6.317265436383412 34.842104893460991 14-7 - | A.Oduya inside zone for 2 yards (N.Estrada, A.Ellison, G.Lockhart).
+3 41.953416295349726 H 4 6.317265436383412 34.842104893460991 14-7 - | C.Whitfield punts 52 yards, returned -1 yards.
+3 9.3035187090437912 A 2 6.9509039448385987 15.267143744017137 14-7 - | F.Carter power for 3 yards (T.Ochoa, D.Pruitt, I.Branson).
+3 0 A 2 6.9509039448385987 15.267143744017137 14-7 info | End of 3rd quarter.
+4 298.55000000000001 A 3 3.9996833402766594 18.218364348579076 14-7 - | F.Carter power o for 3 yards (G.Yeager).
+4 254.74889197874197 A 4 3.9996833402766594 18.218364348579076 14-7 - | E.Ellison pass deep middle to N.Mabry incomplete.
+4 246.51495530198642 A 4 3.9996833402766594 18.218364348579076 14-7 - | M.Vance punts 64 yards, returned 17 yards.
+4 227.64269944612562 H 2 10 35.181697970904665 14-7 - | D.Crenshaw pass short left to N.Ramsey incomplete.
+4 223.37603277945897 H 3 10 35.181697970904665 14-7 - | D.Crenshaw pass deep right to G.Upshaw incomplete, broken up by G.Zeller.
+4 220.84269944612564 H 4 10 35.181697970904665 14-7 - | D.Crenshaw pass short left to M.Yeager incomplete, broken up by G.Lockhart.
+4 215.34269944612566 H 5 10 35.181697970904665 14-7 turnover | D.Crenshaw throws it away under pressure. Turnover on downs.
+4 210.89269944612568 A 2 7.5041653147719813 67.314136714323354 14-7 - | E.Ellison pass short middle to F.Carter for 2 yards (C.Bartholomew).
+4 171.52214649990211 A 3 8.7189622848154187 66.099339744279916 14-7 - | F.Carter hb dive for a loss of 1 (G.Yeager).
+4 127.38371934474767 A 4 8.7189622848154187 66.099339744279916 14-7 - | E.Ellison throws it away under pressure.
+4 122.86492072710158 A 4 8.7189622848154187 66.099339744279916 17-7 fg | D.Lockhart 51-yard field goal is GOOD.
+4 122.86492072710158 H 1 10 35 17-7 - | D.Lockhart kicks 71 yards into the end zone. Touchback.
+4 122.86492072710158 H 1 5 40 17-7 penalty | PENALTY on CHS: Offside (#6 I.Hightower), 5 yards. 1st & 5 at SDT 40.
+4 120.86492072710158 H 2 5 40 17-7 - | D.Crenshaw pass short middle to A.Oduya incomplete, dropped.
+4 117.88158739376824 H 1 10 52 17-7 penalty | D.Crenshaw pass short right to M.Yeager incomplete, broken up by J.Marsh. PENALTY on CHS: Defensive Pass Interference (#7 J.Marsh), enforced. 1st & 10 at CHS 48.
+4 117.88158739376824 H 1 10 52 17-7 info | Two-minute warning.
+4 115.53158739376825 H 2 2.0535205001136703 59.94647949988633 17-7 - | D.Crenshaw pass short middle to D.Washington for 8 yards.
+4 102.09026128314447 H 2 7.0535205001136703 54.94647949988633 17-7 penalty | PENALTY on SDT: False Start (#74 B.Iverson), 5 yards. 2nd & 7 at CHS 45.
+4 98.756927949811143 H 3 3.4314288242793296 58.56857117572067 17-7 - | D.Crenshaw pass short left to M.Yeager for 4 yards (G.Lockhart, A.Ellison).
+4 83.859819337446368 H 1 10 65.365863061966166 17-7 - | D.Crenshaw pass short left to M.Yeager for 7 yards (K.Dunbar).
+4 66.628347234862673 H 2 10 65.365863061966166 17-7 - | D.Crenshaw pass short left to A.Oduya incomplete, dropped.
+4 61.995013901529347 H 3 9.1880205963823443 66.177842465583822 17-7 - | D.Crenshaw pass short middle to A.Upshaw for 1 yard (A.Ellison).
+4 43.339908221829823 H 4 0.6678439816652002 74.698019080300966 17-7 - | D.Crenshaw pass short right to M.Yeager for 9 yards (J.Marsh).
+4 43.339908221829823 H 4 0.6678439816652002 74.698019080300966 17-7 info | Timeout SDT (2 left).
+4 40.539908221829826 H 1 10 78.501118971849976 17-7 - | D.Crenshaw pass short middle to A.Upshaw for 4 yards (T.Underwood).
+4 40.539908221829826 H 1 10 78.501118971849976 17-7 info | Timeout SDT (1 left).
+4 34.206574888496512 H 2 20 68.501118971849976 17-7 penalty | D.Crenshaw throws it away under pressure. PENALTY on SDT: Intentional Grounding (#16 D.Crenshaw), enforced. 2nd & 20 at CHS 31.
+4 30.25657488849652 H 3 9.5884404483323351 78.912678523517641 17-7 - | D.Crenshaw qb draw for 10 yards (K.Dunbar).
+4 30.25657488849652 H 3 9.5884404483323351 78.912678523517641 17-7 info | Timeout SDT (0 left).
+4 27.123241555163194 H 4 8.0087189808690198 80.492399990980957 17-7 - | D.Crenshaw pass short middle to A.Oduya for 2 yards (J.Marsh).
+4 10.967127789122546 H 5 5.3561637248906919 83.144955246959285 17-7 turnover | D.Crenshaw pass short middle to A.Oduya for 3 yards (L.Stanton). Turnover on downs.
+4 10.783794455789213 A 2 11 15.855044753040715 17-7 - | E.Ellison kneels.
+4 0 A 2 11 15.855044753040715 17-7 info | End of 4th quarter.
+4 0 A 2 11 15.855044753040715 17-7 info | FINAL: CHS 17 - SDT 7
+box A 21 136 32 104 11 4 8 4 3 0 2 17 3 1 2 1 1 2 1 3 364.64999999999992 H 44 208 175 33 36 22 6 12 9 3 4 30 2 0 3 0 0 1 1 0 741.45000000000005
 = 56 OKC at ORL
 1 300 H 1 10 35 0-0 info | Coin toss: OKC wins and defers. Clear, 65F, wind 9 mph.
 1 300 H 1 10 35 0-0 - | L.Kincaid kicks 66 yards into the end zone. Touchback.
@@ -7970,31 +8003,46 @@ box A 26 152 108 44 17 12 8 8 5 1 1 10 0 0 2 1 0 0 0 3 561.88333333333321 H 25 4
 4 230.6317362512772 H 2 0.21151867129409752 18.764235497109357 3-3 - | Q.Sorensen hb dive for 10 yards (K.Calloway, I.Driscoll).
 4 194.01557802328216 H 1 10 21.154376997896186 3-3 - | Q.Sorensen power o for 2 yards (E.Castellanos).
 4 157.3194677971924 H 2 8.951372811425518 22.203004186470668 3-3 - | Q.Sorensen power o for 1 yard (E.Castellanos).
-4 116.8020367577051 H 2 8.951372811425518 22.203004186470668 3-3 info | Two-minute warning.
 4 116.8020367577051 H 1 10 37.103149518567278 3-3 - | L.Driscoll pass short right to K.Fitzgerald for 15 yards (R.Kowalski, R.Northcutt, J.McBride).
-4 95.181710638354218 H 2 13.674193205077401 33.428956313489877 3-3 - | L.Driscoll SACKED by R.Northcutt for a loss of 4.
-4 75.692828100423029 H 1 10 54.417558134205258 3-3 - | L.Driscoll pass short right to K.Fitzgerald for 21 yards (T.Jessup, R.Kowalski, K.Calloway).
-4 61.558740164867302 H 2 4.6336303966211005 59.783927737584158 3-3 - | L.Driscoll pass short middle to C.Jessup for 5 yards (I.Driscoll).
-4 41.835623903665713 H 3 4.6336303966211005 59.783927737584158 3-3 - | L.Driscoll throws it away under pressure.
-4 39.935623903665714 H 1 10 67.427051842846865 3-3 - | L.Driscoll pass short middle to D.Kincaid for 8 yards (J.McBride).
-4 39.935623903665714 H 1 10 67.427051842846865 3-3 info | Timeout TOR (2 left).
-4 34.768957236999057 H 1 10 80.54822882486458 3-3 - | L.Driscoll pass short middle to D.Kincaid for 13 yards (I.Treadwell).
-4 34.768957236999057 H 1 10 80.54822882486458 3-3 info | Timeout TOR (1 left).
-4 30.152290570332401 H 1 5.5186152964387958 94.481384703561204 3-3 - | L.Driscoll pass short left to C.Jessup for 14 yards (K.Calloway, A.Merriweather).
-4 30.152290570332401 H 1 5.5186152964387958 94.481384703561204 3-3 info | Timeout TOR (0 left).
-4 27.368957236999073 H 1 5.5186152964387958 94.481384703561204 3-3 td | Q.Sorensen outside zone for 6 yards. TOUCHDOWN TOR!
-4 27.368957236999073 H 1 5.5186152964387958 85 3-10 - | C.Ashford extra point is GOOD.
-4 19.426181977738985 A 1 10 30.989647460473883 3-10 - | C.Ashford kicks 60 yards, returned by Z.Pippen to the HFD 31.
-4 19.426181977738985 A 1 10 30.989647460473883 3-10 info | Timeout HFD (2 left).
-4 16.126181977738991 A 2 0.52677567394910341 40.462871786524779 3-10 - | Z.Pippen hb draw for 9 yards (D.Pemberton, K.Yeager).
-4 16.126181977738991 A 2 0.52677567394910341 40.462871786524779 3-10 info | Timeout HFD (1 left).
-4 12.926181977738997 A 1 10 42.940676385591281 3-10 - | E.Sutton pass short middle to Z.Pippen for 2 yards (R.Jefferson).
-4 12.926181977738997 A 1 10 42.940676385591281 3-10 info | Timeout HFD (0 left).
-4 12.492848644405663 A 2 10 42.940676385591281 3-10 - | E.Sutton spikes the ball to stop the clock.
-4 8.7595153110723381 A 3 5.0274002985527915 47.91327608703849 3-10 - | E.Sutton pass short middle to Z.Pippen for 5 yards (R.Jefferson).
-4 0 A 3 5.0274002985527915 47.91327608703849 3-10 info | End of 4th quarter.
-4 0 A 3 5.0274002985527915 47.91327608703849 3-10 info | FINAL: HFD 3 - TOR 10
-box A 31 130 119 11 27 19 2 8 6 3 2 20 1 1 2 1 1 0 1 0 591.51666666666654 H 27 166 140 26 17 11 8 9 5 2 2 15 0 2 3 1 1 0 0 0 555.08333333333292
+4 116.8020367577051 H 1 10 37.103149518567278 3-3 info | Two-minute warning.
+4 108.53537009103844 H 2 10 37.103149518567278 3-3 - | L.Driscoll throws it away under pressure.
+4 103.65203675770512 H 1 10 58.846213046380292 3-3 - | L.Driscoll pass short left to E.Yancey for 22 yards (T.Jessup, K.Calloway).
+4 82.642220326140531 H 2 9.9165557042404942 58.929657342139798 3-3 - | L.Driscoll pass short middle to K.Fitzgerald for no gain (D.Yancey, J.Nakamura).
+4 67.017486961558475 H 3 12.618651383700353 56.227561662679939 3-3 - | L.Driscoll SACKED by J.Nakamura for a loss of 3.
+4 49.170595806930237 H 4 21.2139334225878 47.632279623792492 3-3 - | L.Driscoll SACKED by J.Nakamura for a loss of 9.
+4 49.170595806930237 H 4 21.2139334225878 47.632279623792492 3-3 info | Timeout TOR (2 left).
+4 43.845321721304231 H 4 21.2139334225878 47.632279623792492 3-3 - | T.Ashford punts 37 yards, returned -2 yards.
+4 43.845321721304231 A 1 10 13.357688716796446 3-3 info | Timeout HFD (2 left).
+4 43.845321721304231 A 1 5 18.357688716796446 3-3 penalty | PENALTY on TOR: Encroachment (#58 A.Hargrove), 5 yards. 1st & 5 at HFD 18.
+4 37.895321721304249 A 1 10 36.474619720411923 3-3 - | E.Sutton pass short middle to H.Ashford for 18 yards (R.Jefferson).
+4 37.895321721304249 A 1 10 36.474619720411923 3-3 info | Timeout HFD (1 left).
+4 35.778655054637582 A 2 8.301233909448662 38.173385810963261 3-3 - | E.Sutton pass short left to D.Pippen for 2 yards (H.Sutton).
+4 35.778655054637582 A 2 8.301233909448662 38.173385810963261 3-3 info | Timeout HFD (0 left).
+4 32.395321721304256 A 3 8.301233909448662 38.173385810963261 3-3 - | E.Sutton pass short left to Z.Pippen incomplete, dropped.
+4 29.345321721304263 A 1 10 46.520867870710227 3-3 - | Z.Pippen inside zone for 8 yards (Z.Kingsley, B.Merriweather).
+4 13.151275797436689 A 2 10 46.520867870710227 3-3 - | E.Sutton spikes the ball to stop the clock.
+4 10.101275797436696 A 3 10 46.520867870710227 3-3 - | E.Sutton pass short left to D.Pippen incomplete.
+4 7.8012757974366984 A 4 0.29667806776165406 56.224189802948572 3-3 - | E.Sutton pass short middle to Z.Pippen for 10 yards (B.Merriweather, A.Hargrove).
+4 0 A 4 0.29667806776165406 56.224189802948572 3-3 info | End of 4th quarter.
+5 600 H 4 0.29667806776165406 56.224189802948572 3-3 info | Overtime! 10:00 period. Both teams are guaranteed a possession.
+5 594.80763041041791 H 1 10 22.201104785184619 3-3 - | O.Branson kicks 64 yards, returned by D.Kincaid to the TOR 22.
+5 561.70023919617131 H 2 8.4762311469477041 23.724873638236915 3-3 - | Q.Sorensen power for 2 yards (J.Nakamura).
+5 524.25505766471224 H 3 15.840061146324391 16.361043638860227 3-3 - | L.Driscoll SACKED by J.Nakamura for a loss of 7.
+5 485.02381878942248 H 4 24.382777738243721 7.8183270469408974 3-3 - | L.Driscoll SACKED by E.Castellanos for a loss of 9.
+5 442.49992234949019 H 4 24.382777738243721 7.8183270469408974 3-3 - | T.Ashford punts 48 yards, fair catch at the HFD 44.
+5 440.26658901615684 A 2 9.0366651727053551 44.777747903768272 3-3 - | Z.Pippen inside zone for 1 yard (R.Jefferson).
+5 407.1086011332149 A 3 0.61710307635872397 53.197310000114904 3-3 - | E.Sutton pass short left to R.Holloway for 8 yards (R.Jefferson).
+5 372.3701115536814 A 1 10 63.778375232871113 3-3 - | E.Sutton pass short left to B.Hightower for 11 yards (B.Merriweather).
+5 338.28110046343261 A 1 10 75.839051364753246 3-3 - | E.Sutton pass short middle to Z.Pippen for 12 yards (Z.Kingsley, K.Yeager).
+5 299.5452801491445 A 2 0.043221494523479009 85.795829870229767 3-3 - | E.Sutton pass short right to H.Ashford for 10 yards (K.Yeager).
+5 263.74619072383899 A 3 0.043221494523479009 85.795829870229767 3-3 - | E.Sutton pass short middle to Z.Pippen incomplete, broken up by I.Whitaker.
+5 260.57952405717231 A 1 10 87.83651432026052 3-3 - | D.Winslow zone hitch rpo for 2 yards (K.Yeager, Z.Kingsley).
+5 222.59985041376211 A 2 7.0043672709097962 90.832147049350723 3-3 - | E.Sutton scrambles for 3 yards and slides.
+5 187.55962633310514 A 3 0.22607031190506177 97.610444008355458 3-3 - | E.Sutton pass short right to D.Winslow for 7 yards (R.Jefferson).
+5 152.63913416694857 A 3 0.22607031190506177 97.610444008355458 3-3 td | E.Sutton pass short middle to D.Pippen for 3 yards. TOUCHDOWN HFD!
+5 152.63913416694857 A 3 0.22607031190506177 85 10-3 - | O.Branson extra point is GOOD.
+5 152.63913416694857 A 3 0.22607031190506177 85 10-3 info | FINAL: HFD 10 - TOR 3
+box A 44 209 193 16 37 26 5 13 11 7 2 20 1 1 2 1 1 0 1 2 837.18333333333283 H 27 99 77 22 14 8 8 5 6 1 3 20 0 5 5 1 1 0 0 2 536.16666666666629
 = 59 TUC at MEX
 1 300 H 1 10 35 0-0 info | Coin toss: TUC wins and defers. Clear, 85F, wind 11 mph.
 1 300 H 1 10 35 0-0 - | C.McBride kicks 72 yards into the end zone. Touchback.
@@ -8099,8 +8147,8 @@ box A 30 254 83 171 9 5 19 16 2 0 2 15 0 1 1 1 1 0 0 3 602.81666666666626 H 25 5
 2 228.73049658536911 A 3 9.1937911559642203 88.832023979779535 0-0 - | D.Crenshaw zone read for 1 yard (K.Reyes).
 2 191.41127685730658 A 1 1.2395130034060742 98.760486996593926 0-0 - | D.Crenshaw pass short left to N.Ramsey for 10 yards (R.Pemberton, M.Blackwell).
 2 158.49223891111714 A 2 5.5432746854844908 94.456725314515509 0-0 - | D.Crenshaw scrambles for a loss of 4 (T.Tolliver).
-2 118.35088358744983 A 2 5.5432746854844908 94.456725314515509 0-0 info | Two-minute warning.
 2 118.35088358744983 A 3 5.5432746854844908 94.456725314515509 0-0 - | D.Crenshaw pass short left to M.Yeager incomplete.
+2 118.35088358744983 A 3 5.5432746854844908 94.456725314515509 0-0 info | Two-minute warning.
 2 116.28421692078317 A 4 2.7184324378367677 97.281567562163232 0-0 - | D.Crenshaw pass short middle to R.Bartholomew for 3 yards (K.Reyes, E.Oduya).
 2 99.55792332341278 A 4 2.7184324378367677 97.281567562163232 3-0 fg | T.Marsh 20-yard field goal is GOOD.
 2 91.737560923614893 H 1 10 34.574164946879051 3-0 - | T.Marsh kicks 63 yards, returned by G.Blackwell to the VAB 35.
@@ -8235,74 +8283,31 @@ box A 36 164 134 30 21 16 13 9 8 4 3 20 0 0 1 2 2 0 0 0 747.54999999999973 H 12 
 4 213.99178298177824 A 2 9.5381801475787071 34.819523371804884 7-7 - | R.Jefferson inside zone for no gain (M.Crenshaw).
 4 173.93581569691506 A 3 1.014209754413919 43.343493764969672 7-7 - | R.Jefferson hb draw for 9 yards (B.Thibodeaux, C.Zeller).
 4 137.63688375217225 A 4 0.76705874890912895 43.590644770474462 7-7 - | R.Jefferson inside zone weak for no gain (R.Sutton, H.Treadwell).
-4 118.07232546989503 A 4 0.76705874890912895 43.590644770474462 7-7 info | Two-minute warning.
 4 118.07232546989503 A 1 10 64.653716594703667 7-7 - | M.Pippen hb toss for 21 yards (B.Thibodeaux, M.Crenshaw).
-4 97.147700630563094 A 2 10 64.653716594703667 7-7 - | J.Sutton pass short left to T.Thibodeaux incomplete.
-4 93.497700630563102 A 3 9.1016821890184332 65.552034405685234 7-7 - | J.Sutton pass short middle to M.Pippen for 1 yard (M.Crenshaw).
-4 75.32975092604768 A 4 9.1016821890184332 65.552034405685234 7-7 - | J.Sutton pass short right to E.Estrada incomplete, dropped.
-4 70.103108434751746 A 4 9.1016821890184332 65.552034405685234 7-7 turnover | L.Nakamura 51-yard field goal is NO GOOD, wide right.
-4 70.103108434751746 H 1 10 41.447965594314766 7-7 info | Injury: DT E.Oduya (VAB) is down and will not return.
-4 65.653108434751758 H 2 10 41.447965594314766 7-7 - | E.Mabry pass deep left to K.Washington incomplete.
-4 63.569775101418429 H 3 2.969733303040563 48.478232291274203 7-7 - | E.Mabry pass short middle to L.Delgado for 7 yards (D.Quarles, K.Reyes).
-4 48.560425623630621 H 4 2.969733303040563 48.478232291274203 7-7 - | E.Mabry pass short left to S.Delgado incomplete.
-4 40.031521508780756 H 4 2.969733303040563 48.478232291274203 7-7 - | T.Sutton punts 52 yards into the end zone. Touchback.
-4 36.031521508780763 A 1 10 30.95859325032071 7-7 - | J.Sutton pass short middle to M.Marsh for 11 yards (A.Washington).
-4 36.031521508780763 A 1 10 30.95859325032071 7-7 info | Timeout VAB (2 left).
-4 32.848188175447433 A 2 4.4594899335759308 36.49910331674478 7-7 - | R.Jefferson outside zone weak for 6 yards (C.Zeller).
-4 32.848188175447433 A 2 4.4594899335759308 36.49910331674478 7-7 info | Timeout VAB (1 left).
-4 31.231521508780766 A 3 4.0787564285460149 36.879836821774695 7-7 - | R.Jefferson outside zone weak for no gain (M.Kowalski).
-4 31.231521508780766 A 3 4.0787564285460149 36.879836821774695 7-7 info | Timeout VAB (0 left).
-4 29.414854842114099 A 4 4.0787564285460149 36.879836821774695 7-7 - | J.Sutton pass short right to D.Delgado incomplete.
-4 21.207390421877452 A 4 4.0787564285460149 36.879836821774695 7-7 - | C.Rutledge punts 55 yards, downed at the DSM 8.
-4 17.307390421877461 H 2 10 7.9381965425695 7-7 - | E.Mabry pass short right to K.Washington incomplete.
-4 15.307390421877463 H 3 5.9856971791909697 11.95249936337853 7-7 - | E.Mabry pass short right to M.Estrada for 4 yards (M.Quarles).
-4 15.307390421877463 H 3 5.9856971791909697 11.95249936337853 7-7 info | Timeout DSM (2 left).
-4 13.007390421877465 H 1 10 24.134836403354981 7-7 - | E.Mabry pass short right to M.Estrada for 12 yards (S.Kowalski).
-4 13.007390421877465 H 1 10 24.134836403354981 7-7 info | Timeout DSM (1 left).
-4 8.2407237552108104 H 2 10 24.134836403354981 7-7 - | E.Mabry throws it away under pressure.
-4 5.3573904218774828 H 3 0.19720105757425443 33.937635345780727 7-7 - | E.Mabry pass short middle to L.Delgado for 10 yards (K.Reyes, D.Quarles, J.Iverson).
-4 5.3573904218774828 H 3 0.19720105757425443 33.937635345780727 7-7 info | Timeout DSM (0 left).
-4 3.2073904218774856 H 4 0.2933212724047678 33.841515130950214 7-7 - | E.Mabry pass short right to M.Estrada for no gain (S.Kowalski).
-4 0 H 4 0.2933212724047678 33.841515130950214 7-7 info | End of 4th quarter.
-5 600 H 4 0.2933212724047678 33.841515130950214 7-7 info | Overtime! 10:00 period. Both teams are guaranteed a possession.
-5 594.24107004818507 H 1 10 39.228471529030365 7-7 - | L.Nakamura kicks 57 yards, returned by A.Iverson to the DSM 39.
-5 557.46870776332605 H 2 10 39.228471529030365 7-7 - | E.Mabry throws it away under pressure.
-5 555.4187077633261 H 3 9.886359351335777 39.342112177694588 7-7 - | A.Iverson inside zone weak for no gain (B.Ingram, D.Quarles).
-5 522.68738493427327 H 4 9.886359351335777 39.342112177694588 7-7 - | E.Mabry pass short left to M.Thibodeaux incomplete.
-5 513.73068179666689 H 4 9.886359351335777 39.342112177694588 7-7 - | T.Sutton punts 59 yards, downed at the VAB 2.
-5 511.66401513000022 A 2 6.5789887884662033 5.4158383372111718 7-7 - | R.Jefferson power pop rpo for 3 yards (M.Ramsey).
-5 472.09600009239904 A 1 10 15.538438511583102 7-7 - | R.Jefferson inside zone weak for 10 yards (B.Thibodeaux).
-5 435.50855063130155 A 2 4.8473576521069006 20.691080859476202 7-7 - | R.Jefferson outside zone for 5 yards (B.Thibodeaux, E.Kincaid).
-5 398.90821720192525 A 3 0.63201127904404686 24.906427232539055 7-7 - | R.Jefferson duo for 4 yards (K.Langford, A.Washington).
-5 365.87341299123756 A 1 10 32.349915603153917 7-7 - | J.Sutton pass short right to T.Thibodeaux for 7 yards (A.Washington, M.Crenshaw).
-5 332.05508583912939 A 2 11.296639178409393 31.053276424744524 7-7 - | T.Thibodeaux wr reverse for a loss of 1 (H.Treadwell).
-5 293.23295534593058 A 3 17.968769685472722 24.381145917681195 7-7 - | J.Sutton SACKED by A.Washington for a loss of 7.
-5 258.58771027492674 A 4 14.003874963090567 28.34604064006335 7-7 - | J.Sutton pass short left to E.Estrada for 4 yards (E.Kincaid).
-5 220.99553461427183 A 4 14.003874963090567 28.34604064006335 7-7 - | C.Rutledge punts 36 yards, fair catch at the DSM 36.
-5 218.02886794760516 H 2 1.9701188365419426 43.696972062842477 7-7 - | E.Sorensen split zone for 8 yards (K.Reyes).
-5 179.87405251952202 H 1 10 46.064758300338788 7-7 - | E.Sorensen split zone for 2 yards (T.Tolliver, D.Quarles).
-5 145.27002616032652 H 2 10 46.064758300338788 7-7 - | E.Mabry pass short right to L.Delgado incomplete.
-5 141.20335949365986 H 3 3.4221289226426492 52.642629377696139 7-7 - | E.Mabry pass short right to S.Delgado for 7 yards (M.Quarles).
-5 121.7211633078289 H 4 3.4221289226426492 52.642629377696139 7-7 - | E.Mabry pass deep left to M.Estrada incomplete.
-5 115.61886385879487 H 4 3.4221289226426492 52.642629377696139 7-7 - | T.Sutton punts 38 yards, downed at the VAB 10.
-5 111.33553052546155 A 2 10 9.5772609147528982 7-7 - | J.Sutton pass short left to G.Blackwell incomplete.
-5 107.10219719212823 A 3 3.3855908808697741 16.191670033883124 7-7 - | J.Sutton pass short middle to R.Jefferson for 7 yards (B.Thibodeaux, M.Crenshaw).
-5 89.298662534092358 A 1 10 23.733359513636366 7-7 - | J.Sutton pass short right to E.Estrada for 8 yards (M.Crenshaw).
-5 66.759968767734364 A 2 10 23.733359513636366 7-7 - | J.Sutton pass short left to B.Sorensen incomplete.
-5 63.609968767734372 A 3 10 23.733359513636366 7-7 - | J.Sutton pass short middle to R.Jefferson incomplete, dropped.
-5 58.826635434401048 A 4 1.1582517287129335 32.575107784923432 7-7 - | J.Sutton pass short right to T.Thibodeaux for 9 yards (E.Kincaid).
-5 36.041221415732814 A 4 1.1582517287129335 32.575107784923432 7-7 - | C.Rutledge punts 50 yards, returned 5 yards.
-5 36.041221415732814 H 1 10 21.838499077919558 7-7 info | Timeout DSM (1 left).
-5 32.074554749066159 H 2 10 21.838499077919558 7-7 - | E.Mabry pass short left to S.Delgado incomplete.
-5 25.374554749066178 H 1 10 35.447426321327846 7-7 - | E.Mabry scrambles for 14 yards and slides.
-5 25.374554749066178 H 1 10 35.447426321327846 7-7 info | Timeout DSM (0 left).
-5 24.941221415732844 H 2 10 35.447426321327846 7-7 - | E.Mabry spikes the ball to stop the clock.
-5 20.157888082399523 H 1 10 40.447426321327846 7-7 penalty | E.Mabry pass short right to S.Delgado incomplete. PENALTY on VAB: Defensive Holding (#1 R.Pemberton), enforced. 1st & 10 at DSM 40.
-5 16.674554749066196 H 2 7.4291735800004091 43.018252741327437 7-7 - | E.Mabry pass short right to E.Sorensen for 3 yards (K.Reyes).
-5 0 H 1 10 52.60881328653673 7-7 - | E.Mabry pass short right to L.Delgado for 10 yards (D.Quarles).
-5 0 H 1 10 52.60881328653673 7-7 info | End of OT quarter.
-5 0 H 1 10 52.60881328653673 7-7 info | FINAL: VAB 7 - DSM 7
-box A 51 180 86 94 31 14 18 12 15 8 2 13 0 2 5 1 0 0 0 2 943.61666666666622 H 40 178 115 63 29 16 10 11 10 4 1 5 0 0 5 0 0 0 0 0 778.84999999999945
+4 118.07232546989503 A 1 10 64.653716594703667 7-7 info | Two-minute warning.
+4 112.15565880322838 A 1 10 76.390183086496535 7-7 - | J.Sutton pass short middle to M.Pippen for 12 yards (R.Sutton, G.Gaines).
+4 90.350626527549181 A 2 10 76.390183086496535 7-7 - | J.Sutton pass deep right to T.Thibodeaux incomplete.
+4 84.267293194215867 A 3 5.677707922289045 80.71247516420749 7-7 - | J.Sutton scrambles for 4 yards and slides.
+4 67.29007707567277 A 1 10 89.589477124019638 7-7 - | J.Sutton pass short left to T.Thibodeaux for 9 yards (E.Kincaid).
+4 48.082212283990174 A 2 10 89.589477124019638 7-7 - | J.Sutton pass short left to B.Sorensen incomplete.
+4 44.448878950656848 A 3 10 89.589477124019638 7-7 - | J.Sutton throws it away under pressure.
+4 41.782212283990184 A 4 10 89.589477124019638 7-7 - | J.Sutton pass short middle to D.Delgado incomplete, broken up by C.Zeller.
+4 37.00117954292039 A 4 10 89.589477124019638 10-7 fg | L.Nakamura 27-yard field goal is GOOD.
+4 30.076623453588063 H 1 10 22.376672000298392 10-7 - | L.Nakamura kicks 62 yards, returned by A.Iverson to the DSM 22.
+4 30.076623453588063 H 1 10 22.376672000298392 10-7 info | Timeout DSM (2 left).
+4 27.093290120254736 H 2 3.4906287200818689 28.886043280216523 10-7 - | E.Sorensen inside zone for 7 yards (K.Reyes).
+4 27.093290120254736 H 2 3.4906287200818689 28.886043280216523 10-7 info | Timeout DSM (1 left).
+4 20.543290120254753 H 3 3.4906287200818689 28.886043280216523 10-7 - | E.Mabry throws it away under pressure.
+4 16.309956786921429 H 1 10 64.364632569123216 10-7 - | E.Mabry pass deep middle to M.Estrada for 35 yards (J.Iverson, M.Quarles).
+4 16.309956786921429 H 1 10 64.364632569123216 10-7 info | Timeout DSM (0 left).
+4 15.876623453588095 H 2 10 64.364632569123216 10-7 - | E.Mabry spikes the ball to stop the clock.
+4 12.843290120254768 H 3 10 64.364632569123216 10-7 - | E.Mabry pass short middle to E.Sorensen incomplete, dropped.
+4 10.959956786921436 H 4 10 64.364632569123216 10-7 - | E.Mabry pass short middle to L.Delgado incomplete.
+4 6.4794892979322025 H 4 10 64.364632569123216 10-7 turnover | J.Fitzgerald 53-yard field goal is NO GOOD, wide left.
+4 6.2961559645988689 A 2 11 41.635367430876784 10-7 - | J.Sutton kneels.
+4 0 A 2 11 41.635367430876784 10-7 info | End of 4th quarter.
+4 0 A 2 11 41.635367430876784 10-7 info | FINAL: VAB 10 - DSM 7
+box A 38 138 67 71 24 9 12 10 11 7 1 8 0 1 2 1 1 0 0 3 628.24999999999943 H 24 143 97 46 16 9 7 7 7 4 1 5 0 0 2 1 0 0 0 0 491.88333333333316
 = 62 POR at CHS
 1 300 A 1 10 35 0-0 info | Coin toss: CHS wins and defers. Clear, 63F, wind 4 mph.
 1 300 A 1 10 35 0-0 - | D.Lockhart kicks 72 yards into the end zone. Touchback.
@@ -8370,25 +8375,33 @@ box A 51 180 86 94 31 14 18 12 15 8 2 13 0 2 5 1 0 0 0 2 943.61666666666622 H 40
 4 172.62992703140102 H 3 3.6572203288407934 17.379193102448482 2-10 - | F.Carter power for 3 yards (J.Carter, J.Whitfield).
 4 130.2045371665931 H 4 3.6572203288407934 17.379193102448482 2-10 - | E.Ellison pass short left to D.Gentry incomplete.
 4 124.15613304575297 H 4 3.6572203288407934 17.379193102448482 2-10 - | M.Vance punts 44 yards, fair catch at the POR 39.
-4 118.18946637908631 A 1 10 38.829680081965975 2-10 info | Two-minute warning.
 4 118.18946637908631 A 1 10 58.14576258155256 2-10 - | K.Whitfield pass deep right to M.Nwosu for 19 yards (C.Delgado).
-4 99.551993012800949 A 2 8.3453068329554725 59.800455748597088 2-10 - | K.Whitfield pass short middle to A.Ochoa for 2 yards (J.Marsh).
-4 80.845842462902411 A 2 18.345306832955472 49.800455748597088 2-10 penalty | K.Whitfield pass short middle to A.Ochoa for 11 yards (A.Ellison, K.Dunbar). PENALTY on POR: Offensive Holding (#74 T.Lockhart), enforced. 2nd & 18 at 50.
-4 76.345842462902425 A 3 10.846017082539873 57.299745499012687 2-10 - | K.Whitfield pass short middle to A.Ochoa for 7 yards (T.Underwood, I.Hightower).
-4 57.454517196087956 A 4 10.846017082539873 57.299745499012687 2-10 - | K.Whitfield pass short right to A.Ochoa incomplete, dropped.
-4 53.3878505294213 A 5 6.1343232740260305 62.01143930752653 2-10 turnover | K.Whitfield pass short left to X.Nakamura for 5 yards (E.Nwosu, N.Estrada). Turnover on downs.
-4 53.3878505294213 H 1 5 42.98856069247347 2-10 penalty | PENALTY on POR: Offside (#1 J.Carter), 5 yards. 1st & 5 at CHS 43.
-4 50.70451719608797 H 2 1.7551128052223248 46.233447887251145 2-10 - | F.Carter inside zone for 3 yards (H.Sorensen, J.Carter).
-4 50.70451719608797 H 2 1.7551128052223248 46.233447887251145 2-10 info | Timeout POR (2 left).
-4 46.971183862754643 H 1 10 50.060130939202594 2-10 - | F.Carter duo for 4 yards (H.Sorensen, J.Holloway).
-4 46.971183862754643 H 1 10 50.060130939202594 2-10 info | Timeout POR (1 left).
-4 46.787850529421313 H 2 11 49.060130939202594 2-10 - | E.Ellison kneels.
-4 46.787850529421313 H 2 11 49.060130939202594 2-10 info | Timeout POR (0 left).
-4 46.604517196087983 H 3 12 48.060130939202594 2-10 - | E.Ellison kneels.
-4 8.1340855185720535 H 4 13 47.060130939202594 2-10 - | E.Ellison kneels.
-4 0 H 4 13 47.060130939202594 2-10 info | End of 4th quarter.
-4 0 H 4 13 47.060130939202594 2-10 info | FINAL: POR 2 - CHS 10
-box A 25 92 61 31 16 10 8 6 4 0 3 20 1 1 2 0 0 1 0 0 515.13333333333298 H 28 126 49 77 5 3 17 8 5 1 3 25 1 1 1 1 1 0 1 3 550.24999999999977
+4 118.18946637908631 A 1 10 58.14576258155256 2-10 info | Two-minute warning.
+4 115.68946637908631 A 2 3.3574104485793868 64.788352132973174 2-10 - | A.Ochoa hb toss for 7 yards (J.Marsh).
+4 92.209626189402144 A 1 3.1858430783496203 96.81415692165038 2-10 - | K.Whitfield pass deep right to E.Ochoa for 32 yards (K.Dunbar, C.Delgado).
+4 75.278681915998618 A 1 3.1858430783496203 96.81415692165038 2-10 td | K.Whitfield pass short right to M.Nwosu for 6 yards. TOUCHDOWN POR!
+4 75.278681915998618 A 1 2 98 10-10 td | Two-point attempt: K.Whitfield pass short left to O.Fitzgerald for 9 yards. GOOD!
+4 75.278681915998618 H 1 10 35 10-10 - | D.Calloway kicks 71 yards into the end zone. Touchback.
+4 75.278681915998618 H 1 5 40 10-10 penalty | PENALTY on POR: Neutral Zone Infraction (#53 R.Marsh), 5 yards. 1st & 5 at CHS 40.
+4 73.628681915998612 H 2 2.8197091167184354 42.180290883281565 10-10 - | F.Carter inside zone for 2 yards (H.Sorensen, Z.Faulkner, J.Carter).
+4 51.564990777118922 H 1 10 63.026613492699305 10-10 - | E.Ellison pass short middle to J.Abernathy for 21 yards (J.Holloway, J.Whitfield).
+4 33.485468939443606 H 2 2.5057034017613304 70.520910090937974 10-10 - | F.Carter iso for 7 yards (J.Holloway).
+4 33.485468939443606 H 2 2.5057034017613304 70.520910090937974 10-10 info | Timeout CHS (2 left).
+4 28.318802272776953 H 1 10 73.795892742954052 10-10 - | E.Ellison pass short middle to F.Carter for 3 yards (J.Whitfield, E.Zeller).
+4 28.318802272776953 H 1 10 73.795892742954052 10-10 info | Timeout CHS (1 left).
+4 21.935468939443638 H 1 10 73.795892742954052 10-10 td | E.Ellison pass deep left to G.Rutledge for 26 yards. TOUCHDOWN CHS!
+4 21.935468939443638 H 1 10 85 10-17 - | D.Lockhart extra point is GOOD.
+4 15.623626885314991 A 1 10 16.505928828554339 10-17 - | D.Lockhart kicks 64 yards, returned by A.Ochoa to the POR 17.
+4 15.623626885314991 A 1 10 16.505928828554339 10-17 info | Timeout POR (2 left).
+4 13.406960218648328 A 2 8.1974662080070821 18.308462620547257 10-17 - | A.Ochoa split zone for 2 yards (D.Estrada).
+4 13.406960218648328 A 2 8.1974662080070821 18.308462620547257 10-17 info | Timeout POR (1 left).
+4 10.106960218648334 A 3 8.1974662080070821 18.308462620547257 10-17 - | K.Whitfield pass short right to E.Okafor incomplete.
+4 4.2069602186483497 A 4 16.967857718296692 9.5380711102576452 10-17 - | K.Whitfield SACKED by T.Underwood for a loss of 9.
+4 4.2069602186483497 A 4 16.967857718296692 9.5380711102576452 10-17 info | Timeout POR (0 left).
+4 0 A 5 16.967857718296692 9.5380711102576452 10-17 turnover | K.Whitfield pass deep left to O.Fitzgerald incomplete. Turnover on downs.
+4 0 H 1 9.538071110257647 90.461928889742353 10-17 info | End of 4th quarter.
+4 0 H 1 9.538071110257647 90.461928889742353 10-17 info | FINAL: POR 10 - CHS 17
+box A 28 116 76 40 16 9 10 8 4 0 2 10 1 2 2 0 0 1 0 0 576.18333333333294 H 28 178 99 79 8 6 17 10 4 1 3 25 1 1 1 1 1 0 1 1 566.14999999999975
 = 63 SAC at FRE
 1 300 A 1 10 35 0-0 info | Coin toss: FRE wins and defers. Clear, 61F, wind 2 mph.
 1 300 A 1 10 35 0-0 - | D.Northcutt kicks 70 yards into the end zone. Touchback.

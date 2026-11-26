@@ -208,6 +208,16 @@ void Game::addLog(const std::string& desc, LogTag big) {
   l.score = score;
   l.big = big;
   log.push_back(std::move(l));
+  // the two-minute mark passed during the play just logged: the warning comes now, after it, and the clock waits for
+  // the snap (it was logged ahead of the play, and the clock then ran on between the plays)
+  if (twoMinPending) {
+    twoMinPending = false;
+    twoMinStop = true;
+    PlayLog w = log.back();
+    w.desc = "Two-minute warning.";
+    w.big = LogTag::Info;
+    log.push_back(std::move(w));
+  }
 }
 
 std::string Game::ydLine(double ballOnArg, TeamKey k) const {
@@ -235,9 +245,14 @@ void Game::runClock(double sec, bool duringPlay) {
   clock -= sec;
   if ((q == 2 || q == 4) && !twoMin[q] && before > 120 && clock <= 120) {
     twoMin[q] = true;
-    if (!duringPlay) clock = 120;
     clockRunning = false;
-    addLog("Two-minute warning.", LogTag::Info);
+    if (duringPlay) {
+      // (the clock runs on to the end of the play; the warning is given then, and the clock stays stopped to the snap)
+      twoMinPending = true;
+    } else {
+      clock = 120;
+      addLog("Two-minute warning.", LogTag::Info);
+    }
   }
   if (clock < 0) clock = 0;
 }
@@ -254,6 +269,11 @@ Tempo Game::tempo() const {
 }
 
 bool Game::preSnap() {
+  // (stopped for the two-minute warning: it starts again on the snap)
+  if (twoMinStop) {
+    twoMinStop = false;
+    clockRunning = false;
+  }
   if (clockRunning && !untimed) {
     const Tempo tp = tempo();
     double run = tp == Tempo::Hurry ? rng.range(12, 18) : tp == Tempo::Milk ? rng.range(37, 40) : rng.range(29, 37);

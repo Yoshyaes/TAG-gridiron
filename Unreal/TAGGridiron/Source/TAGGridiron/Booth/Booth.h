@@ -81,6 +81,9 @@ struct View {
   bool night = false;
   /** The presentation lets the booth hold the snap a few seconds (wantsHold) so a breakdown can finish. */
   bool canHold = false;
+  /** A played game with the CPU's offense on the field (the user defends): its snap waits for the booth (BoothHold), so
+   *  the analyst's breakdown may take a few seconds of the pre-snap. Off: the user's own snap, any moment. */
+  bool cpuOffense = false;
 };
 
 struct Crew {
@@ -170,6 +173,14 @@ class Booth {
     int queued = 0, spoken = 0, expired = 0, cut = 0, liveSpoken = 0;
   };
   const Stats& stats() const { return st_; }
+  /** Keep every line dropped unsaid (expired, flushed by a snap or a kick, overtaken) for takeDropped(): the headless
+   *  audit's view of what the listener never heard. Off by default (the game does not need it). */
+  void enableDropLog(bool on) { dropLog_ = on; }
+  std::vector<Line> takeDropped() {
+    std::vector<Line> v;
+    v.swap(dropped_);
+    return v;
+  }
 
  private:
   struct PlanEntry {
@@ -192,6 +203,7 @@ class Booth {
   void onZone(const Game& g, const AbilityEvent& e);
   void dropKind(Kind k);
   void dropStale();
+  void dropBreaks();
   void snapFlush();
   bool speakingLiveLong() const;
 
@@ -302,6 +314,10 @@ class Booth {
   Who lastWho_ = Who::PBP;
   bool cutForSnap_ = false;
   Stats st_;
+  bool dropLog_ = false;
+  std::vector<Line> dropped_;
+  /** A line leaves the queue unsaid (counted; kept when enableDropLog). */
+  void noteDrop(const Line& l);
   View view_;
 
   // what the booth has seen
@@ -331,6 +347,8 @@ class Booth {
   bool calledThrow_ = false, calledCatch_ = false, calledRun_ = false, breakaway_ = false, calledPressure_ = false;
   bool calledTD_ = false, calledINT_ = false, calledSack_ = false, calledFumble_ = false, calledPbu_ = false, calledGoingToScore_ = false;
   bool calledDrop_ = false, pbuSeen_ = false, dropSeen_ = false, battedSeen_ = false;
+  bool lastTipBatted_ = false;        // the last hand on the throw was at the line (a batted ball), not a man downfield
+  const Player* batter_ = nullptr;    // ... whose hand it was (the result names him, as the live call put it at the line)
   int handoffPid_ = -1;  // the back the play's handoff call was planned for (a handoff to another man is called generically)
   const Player* qbOnField_[2] = {nullptr, nullptr};  // each side's quarterback at its last snap (home, away): a new one is introduced
   std::string resultSaid_;     // the play's call (the breakdown does not say it back)
@@ -373,6 +391,7 @@ class Booth {
   bool clutchSetup_ = false;
   std::string ddSaidKey_;
   int giveBack_[2] = {0, 0};         // takeaways fumbled right back (home, away): a giveaway the sim's net count misses
+  std::string toTally_;              // the giveaway count last said at a break ("home|away"): not said again unchanged
   int giveBackPlay_ = -1;
   int giveaways(const Game& g, const TeamLine& t) const;            // the next down and distance a result or a flag already said         // this setup is a deciding late down (said with the stakes, up a notch)
   // the writer

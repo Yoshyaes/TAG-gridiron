@@ -105,30 +105,32 @@ void FTagLocoSwitchNode::Evaluate_AnyThread(FPoseContext& Output)
 }
 
 FTagMotionMatchProxy::FTagMotionMatchProxy(UAnimInstance* InInstance, FAnimNode_PoseSearchHistoryCollector* InHistory,
-	FAnimNode_OffsetRootBone* InOffset, FAnimNode_MotionMatching* InMatch, FAnimNode_DeadBlending* InDead)
-	: FAnimSingleNodeInstanceProxy(InInstance), History(InHistory), Offset(InOffset), Match(InMatch), Dead(InDead)
+	FAnimNode_OffsetRootBone* InOffset, FAnimNode_MotionMatching* InMatch, FTagOffsetRootNode* InTOffset, FTagMotionMatchNode* InTMatch,
+	FAnimNode_DeadBlending* InDead)
+	: FAnimSingleNodeInstanceProxy(InInstance), History(InHistory), Offset(InOffset), Match(InMatch), TOffset(InTOffset), TMatch(InTMatch), Dead(InDead)
 {
 	Switch.Clip.SetLinkNode(&SingleNode);
 	static const bool bNoOffset = FParse::Param(FCommandLine::Get(), TEXT("TagMMNoOffset")); // A/B: no root offset
-	Switch.Match.SetLinkNode(bNoOffset ? static_cast<FAnimNode_Base*>(&Tap) : static_cast<FAnimNode_Base*>(Offset));
-	Offset->Source.SetLinkNode(&Tap);
+	Switch.Match.SetLinkNode(bNoOffset ? static_cast<FAnimNode_Base*>(&Tap) : OffsetBase());
+	if (TOffset) TOffset->Source.SetLinkNode(&Tap);
+	else Offset->Source.SetLinkNode(&Tap);
 	// (-TagMMDeadBlend: the dead blending node under the tap, so the tap reads the pose and the root motion as blended -
 	// what the body shows - and its pelvis patch sees the transition the node has already smoothed)
 	if (Dead)
 	{
 		Tap.Source.SetLinkNode(Dead);
-		Dead->Source.SetLinkNode(Match);
+		Dead->Source.SetLinkNode(MatchBase());
 	}
-	else Tap.Source.SetLinkNode(Match);
+	else Tap.Source.SetLinkNode(MatchBase());
 	History->Source.SetLinkNode(&Switch);
 }
 
 void FTagMotionMatchProxy::GetCustomNodes(TArray<FAnimNode_Base*>& OutNodes)
 {
 	OutNodes.Add(History);
-	OutNodes.Add(Offset);
+	OutNodes.Add(OffsetBase());
 	if (Dead) OutNodes.Add(Dead);
-	OutNodes.Add(Match);
+	OutNodes.Add(MatchBase());
 }
 
 void FTagMotionMatchProxy::PreUpdate(UAnimInstance* InAnimInstance, float DeltaSeconds)
@@ -195,18 +197,18 @@ void FTagMotionMatchProxy::PreUpdate(UAnimInstance* InAnimInstance, float DeltaS
 		SeenDbSerial = I->DbSerial;
 		if (I->bForceOnDbChange || bForceNow)
 		{
-			Match->SetDatabasesToSearch(I->Databases, EPoseSearchInterruptMode::ForceInterrupt);
+			SetMatchDatabases(I->Databases, EPoseSearchInterruptMode::ForceInterrupt);
 			bForcedNow = true;
 			ForceLeft = FMath::Max(0.15f, I->ForceHoldSecs); // longer than the 66 ms search throttle, so the forced search actually runs
 			I->ForceHoldSecs = 0.f;
 		}
 		else
-			Match->SetDatabasesToSearch(I->Databases, EPoseSearchInterruptMode::DoNotInterrupt);
+			SetMatchDatabases(I->Databases, EPoseSearchInterruptMode::DoNotInterrupt);
 	}
 	else if (ForceLeft > 0.f)
 	{
 		ForceLeft -= GetDeltaSeconds();
-		if (ForceLeft <= 0.f) Match->SetDatabasesToSearch(I->Databases, EPoseSearchInterruptMode::InterruptOnDatabaseChange);
+		if (ForceLeft <= 0.f) SetMatchDatabases(I->Databases, EPoseSearchInterruptMode::InterruptOnDatabaseChange);
 	}
 	// the man a human drives: his own search rate, dwell and blend (UTagMotionMatchInstance::bUserMan)
 	static const bool bUserSame = FParse::Param(FCommandLine::Get(), TEXT("TagUserMMSame"));
@@ -245,8 +247,8 @@ void FTagMotionMatchProxy::PostUpdate(UAnimInstance* InAnimInstance) const
 	FAnimSingleNodeInstanceProxy::PostUpdate(InAnimInstance);
 	// game thread, worker finished: safe to read the blend stack and the search state
 	UTagMotionMatchInstance* I = CastChecked<UTagMotionMatchInstance>(InAnimInstance);
-	I->MatchedAsset = Switch.bMatch ? Match->GetAnimAsset() : nullptr;
-	const FPoseSearchBlueprintResult& R = Match->GetMotionMatchingState().SearchResult;
+	I->MatchedAsset = Switch.bMatch ? (TMatch ? TMatch->GetAnimAsset() : Match->GetAnimAsset()) : nullptr;
+	const FPoseSearchBlueprintResult& R = (TMatch ? TMatch->GetMotionMatchingState() : Match->GetMotionMatchingState()).SearchResult;
 	static const bool bWhy = FParse::Param(FCommandLine::Get(), TEXT("TagMMWhy"));
 	if (bWhy && Switch.bMatch)
 	{
@@ -275,8 +277,8 @@ void FTagMotionMatchProxy::PostUpdate(UAnimInstance* InAnimInstance) const
 		I->DiagPrevTime = R.SelectedTime;
 	}
 	static const bool bNoOffset = FParse::Param(FCommandLine::Get(), TEXT("TagMMNoOffset"));
-	I->bRootRotValid = Switch.bMatch && Switch.bWasMatch && !bNoOffset && Offset != nullptr;
-	if (I->bRootRotValid) I->RootRotW = Offset->GetOffsetRootRotation();
+	I->bRootRotValid = Switch.bMatch && Switch.bWasMatch && !bNoOffset && OffsetBase() != nullptr;
+	if (I->bRootRotValid) I->RootRotW = TOffset ? TOffset->GetOffsetRootRotation() : Offset->GetOffsetRootRotation();
 	I->bRootDeltaValid = Switch.bMatch && Switch.bWasMatch && Tap.bHave && GetDeltaSeconds() > 1e-4f;
 	if (I->bRootDeltaValid)
 	{
@@ -305,9 +307,13 @@ UTagMotionMatchInstance::UTagMotionMatchInstance(const FObjectInitializer& Objec
 	// motion matching (the node's settings are private outside an Anim Blueprint; set them through reflection).
 	// Defaults kept: blend stack transitions (4 active blends, no inertialization node in this graph), 0.3 s
 	// reselect history, reset on becoming relevant.
+	// (the TAG node's settings are its own members; the engine node's are reached through reflection, -TagOldMMHost)
+	const bool bOld = UseOldMMHost();
 	SetMatchSetting(TEXT("BlendTime"), 0.3f);
+	TagMatchNode.BlendTime = 0.3f;
 	BaseBlendTime = 0.3f;
-	if (const FProperty* P = FAnimNode_MotionMatching::StaticStruct()->FindPropertyByName(TEXT("BlendTime")))
+	if (!bOld) BlendTimeSetting = &TagMatchNode.BlendTime;
+	else if (const FProperty* P = FAnimNode_MotionMatching::StaticStruct()->FindPropertyByName(TEXT("BlendTime")))
 		if (P->GetElementSize() == sizeof(float)) BlendTimeSetting = P->ContainerPtrToValuePtr<float>(&MatchNode);
 	// the man a human drives (bUserMan): his own search rate, dwell, turn and blend
 	{
@@ -330,11 +336,14 @@ UTagMotionMatchInstance::UTagMotionMatchInstance(const FObjectInitializer& Objec
 	{
 		SetMatchSetting(TEXT("bUseInertialBlend"), true);
 		MatchNode.SetMaxActiveBlends(0);
+		TagMatchNode.bUseInertialBlend = true;
+		TagMatchNode.SetMaxActiveBlends(0);
 	}
 	// 22 players: search at most every 66 ms (the current clip keeps playing in between; a cut still reads within a
 	// few frames). Searching every frame for every player cost ~25 fps once the linemen joined.
 	static float Throttle = FParse::Value(FCommandLine::Get(), TEXT("TagMMThrottle="), Throttle) ? Throttle : 0.066f;
 	SetMatchSetting(TEXT("SearchThrottleTime"), Throttle);
+	TagMatchNode.SearchThrottleTime = Throttle;
 	BaseThrottle = Throttle;
 	// -TagMMDwell=<s> (0 = off): the minimum dwell of a pick
 	{
@@ -343,14 +352,24 @@ UTagMotionMatchInstance::UTagMotionMatchInstance(const FObjectInitializer& Objec
 		static float Brk = FParse::Value(FCommandLine::Get(), TEXT("TagMMDwellBreak="), Brk) ? Brk : 250.f;
 		DwellBreak = Brk;
 	}
-	if (const FProperty* P = FAnimNode_MotionMatching::StaticStruct()->FindPropertyByName(TEXT("SearchThrottleTime")))
+	if (!bOld) ThrottleSetting = &TagMatchNode.SearchThrottleTime;
+	else if (const FProperty* P = FAnimNode_MotionMatching::StaticStruct()->FindPropertyByName(TEXT("SearchThrottleTime")))
 		if (P->GetElementSize() == sizeof(float)) ThrottleSetting = P->ContainerPtrToValuePtr<float>(&MatchNode);
 	// play rate: fixed, set every update from MatchPlayRate (see PreUpdate)
 	SetMatchSetting(TEXT("PlayRate"), FFloatInterval(1.f, 1.f));
-	if (const FProperty* P = FAnimNode_MotionMatching::StaticStruct()->FindPropertyByName(TEXT("PlayRate")))
-		if (P->GetElementSize() == sizeof(FFloatInterval)) PlayRateSetting = P->ContainerPtrToValuePtr<FFloatInterval>(&MatchNode);
-	if (const FProperty* P = FAnimNode_MotionMatching::StaticStruct()->FindPropertyByName(TEXT("PlayRateMultiplier")))
-		if (P->GetElementSize() == sizeof(float)) RateMultiplierSetting = P->ContainerPtrToValuePtr<float>(&MatchNode);
+	TagMatchNode.PlayRate = FFloatInterval(1.f, 1.f);
+	if (!bOld)
+	{
+		PlayRateSetting = &TagMatchNode.PlayRate;
+		RateMultiplierSetting = &TagMatchNode.PlayRateMultiplier;
+	}
+	else
+	{
+		if (const FProperty* P = FAnimNode_MotionMatching::StaticStruct()->FindPropertyByName(TEXT("PlayRate")))
+			if (P->GetElementSize() == sizeof(FFloatInterval)) PlayRateSetting = P->ContainerPtrToValuePtr<FFloatInterval>(&MatchNode);
+		if (const FProperty* P = FAnimNode_MotionMatching::StaticStruct()->FindPropertyByName(TEXT("PlayRateMultiplier")))
+			if (P->GetElementSize() == sizeof(float)) RateMultiplierSetting = P->ContainerPtrToValuePtr<float>(&MatchNode);
+	}
 	// -TagMMSpeedMatch=min,max (default 0.75,1.25; max 1 turns speed matching off)
 	{
 		FString Range;
@@ -365,6 +384,16 @@ UTagMotionMatchInstance::UTagMotionMatchInstance(const FObjectInitializer& Objec
 	// (translation: only without the follower, -TagNoFollow. With it the actor itself moves by the clip's root travel,
 	// AAthlete::FollowVel, and an offset on top would count that travel twice.)
 	static const bool bFollowMM = FParse::Param(FCommandLine::Get(), TEXT("TagFollowMM")) && !FParse::Param(FCommandLine::Get(), TEXT("TagNoFollow"));
+	TagOffsetNode.TranslationMode = bFollowMM ? EOffsetRootBoneMode::Release : EOffsetRootBoneMode::Interpolate;
+	TagOffsetNode.RotationMode = EOffsetRootBoneMode::Interpolate;
+	TagOffsetNode.TranslationHalflife = 0.15f;
+	TagOffsetNode.RotationHalfLife = 0.25f;
+	TagOffsetNode.MaxTranslationError = 25.f;
+	TagOffsetNode.MaxRotationError = 60.f;
+	TagOffsetNode.bResetOnTeleport = true;
+#if WITH_EDITORONLY_DATA
+	// (the engine node's folded settings: they exist only in editor builds; a packaged game reads them from an anim
+	// blueprint's node data, which a native node does not have - the reason for TagOffsetNode, TagMMNodes.h)
 	OffsetNode.TranslationMode = bFollowMM ? EOffsetRootBoneMode::Release : EOffsetRootBoneMode::Interpolate;
 	OffsetNode.RotationMode = EOffsetRootBoneMode::Interpolate;
 	OffsetNode.TranslationHalflife = 0.15f;
@@ -372,6 +401,7 @@ UTagMotionMatchInstance::UTagMotionMatchInstance(const FObjectInitializer& Objec
 	OffsetNode.MaxTranslationError = 25.f;
 	OffsetNode.MaxRotationError = 60.f;
 	OffsetNode.bResetOnTeleport = true;
+#endif
 }
 
 template <class T>
@@ -391,8 +421,26 @@ void UTagMotionMatchInstance::SetDatabases(TConstArrayView<UPoseSearchDatabase*>
 	++DbSerial;
 }
 
+bool UTagMotionMatchInstance::UseOldMMHost()
+{
+	static const bool bOld = []
+	{
+		const bool bAsked = FParse::Param(FCommandLine::Get(), TEXT("TagOldMMHost"));
+#if WITH_EDITORONLY_DATA
+		if (bAsked) UE_LOG(LogTemp, Display, TEXT("TAG: motion matching on the engine's nodes (-TagOldMMHost)"));
+		return bAsked;
+#else
+		if (bAsked) UE_LOG(LogTemp, Warning, TEXT("TAG: -TagOldMMHost ignored: the engine's motion matching nodes need an Anim Blueprint's node data in a packaged game"));
+		return false;
+#endif
+	}();
+	return bOld;
+}
+
 FAnimInstanceProxy* UTagMotionMatchInstance::CreateAnimInstanceProxy()
 {
 	static const bool bMMDead = TagMMDeadBlendUsable();
-	return new FTagMotionMatchProxy(this, &HistoryNode, &OffsetNode, &MatchNode, bMMDead ? &DeadNode : nullptr);
+	const bool bOld = UseOldMMHost();
+	return new FTagMotionMatchProxy(this, &HistoryNode, bOld ? &OffsetNode : nullptr, bOld ? &MatchNode : nullptr,
+		bOld ? nullptr : &TagOffsetNode, bOld ? nullptr : &TagMatchNode, bMMDead ? &DeadNode : nullptr);
 }

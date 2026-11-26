@@ -755,7 +755,11 @@ void AMatchDirector::TickHitStopTest()
 	auto FileFor = [&OutDir, Seed, N](bool bOn) { return OutDir / FString::Printf(TEXT("digest_seed%d_plays%d_%s.txt"), Seed, N, bOn ? TEXT("stops") : TEXT("nostops")); };
 	// (each file carries the build it came from - the game module's time - and only a same-build run is compared: another
 	// build's sim may play other plays, and the last gate's file of the other half was compared against a new build's)
+#if IS_MONOLITHIC
+	const FString Build = IFileManager::Get().GetTimeStamp(FPlatformProcess::ExecutablePath()).ToString(); // (a packaged game: the module is the exe)
+#else
 	const FString Build = IFileManager::Get().GetTimeStamp(*FModuleManager::Get().GetModuleFilename(TEXT("TAGGridiron"))).ToString();
+#endif
 	FFileHelper::SaveStringToFile(Digest + TEXT(" build ") + Build + TEXT("\n") + Lines, *FileFor(bStops));
 	const FString Other = FileFor(!bStops);
 	FString OtherText, OtherDigest, OtherBuild, Rest;

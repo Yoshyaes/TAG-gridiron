@@ -1982,6 +1982,61 @@ int main() {
     return cfg;
   };
 
+  t("two-minute warning: after the play that reached it, at 2:00 between plays, and the clock stopped to the next snap", [&] {
+    int warns = 0, ranOn = 0, beforePlay = 0, notAt2 = 0;
+    Rng rng(969);
+    for (int i = 0; i < 60; i++) {
+      GameOptions o;
+      o.seed = static_cast<uint32_t>(rng.intRange(1, 1000000000));
+      Game g(*league[(i * 3) % 32], *league[(i * 13 + 5) % 32], o);
+      g.simToEnd();
+      for (size_t k = 0; k < g.log.size(); k++) {
+        const PlayLog& l = g.log[k];
+        if (l.desc != "Two-minute warning.") continue;
+        warns++;
+        // (logged with the clock where the play left it - past 2:00 only by the seconds of a play that ran through it)
+        notAt2 += l.clock < 120 - 10 || l.clock > 120 + 1e-9;
+        // (one past 2:00 comes right after the play that ran through it: the line before it has its clock)
+        beforePlay += l.clock < 120 - 1e-9 && (k == 0 || std::fabs(g.log[k - 1].clock - l.clock) > 1e-9);
+        // the next line on: the clock waited for the snap (only that play's own seconds come off)
+        for (size_t n = k + 1; n < g.log.size(); n++) {
+          if (g.log[n].clock >= l.clock - 1e-9) continue;  // (an extra point, a timeout: no clock)
+          ranOn += l.clock - g.log[n].clock > 12;
+          break;
+        }
+      }
+    }
+    std::printf("       (60 games: %d warnings; the clock ran on past one %d times; logged ahead of the play that reached it %d; not within a play of 2:00 %d)\n", warns, ranOn, beforePlay, notAt2);
+    check(warns >= 110, "too few two-minute warnings: " + std::to_string(warns));
+    check(ranOn == 0, std::to_string(ranOn) + " warnings with the clock running on to the next snap");
+    check(beforePlay == 0, std::to_string(beforePlay) + " warnings logged ahead of the play that reached 2:00");
+    check(notAt2 == 0, std::to_string(notAt2) + " warnings logged far from 2:00");
+  });
+
+  t("catches: a completion is the target's, or went off somebody first (a tip the result carries)", [&] {
+    int comps = 0, other = 0, untouched = 0;
+    Rng rng(979);
+    for (int i = 0; i < 60; i++) {
+      GameOptions o;
+      o.seed = static_cast<uint32_t>(rng.intRange(1, 1000000000));
+      Game g(*league[(i * 7) % 32], *league[(i * 9 + 1) % 32], o);
+      g.onPlayResult = [&](const PlaySim& sim, const PlayResult& r) {
+        if (r.kind != PlayKind::Pass || !r.complete || sim.isReturn()) return;
+        comps++;
+        if (!r.target || r.target == r.receiver) return;
+        other++;
+        bool touched = false;
+        for (const PlayEvent& e : r.events)
+          touched = touched || e.type == "contested_inc" || e.type == "drop" || e.type == "batted" || e.type == "pbu" || e.type == "tip";
+        untouched += !touched || !r.tippedBy;
+      };
+      g.simToEnd();
+    }
+    std::printf("       (60 games: %d completions, %d caught by another man after a touch, %d without one)\n", comps, other, untouched);
+    check(comps > 1000, "too few completions");
+    check(untouched == 0, std::to_string(untouched) + " passes caught by a man they were not thrown to, untouched on the way");
+  });
+
   t("fouls: every player foul names the man it is on (the booth calls his number)", [&] {
     // full games: every flag on a player's act names a player "(#n name)"; only the team fouls (delay of game, too many
     // men, illegal formation / shift) go without one

@@ -686,6 +686,10 @@ struct PlayResult {
   Player* fumbleRecBy = nullptr;
   Player* forcedBy = nullptr;
   Player* pbuBy = nullptr;
+  /** A completion caught by a man the pass was not thrown to: the last man who touched it first (the target it went off,
+   *  a defender's tip or bat); nullptr otherwise. A pass that went untouched to a man on the spot it was thrown to is
+   *  credited to him as the target (the charters' rule: the man who caught it is the man it was thrown to). */
+  Player* tippedBy = nullptr;
   int airYards = 0;
   int yac = 0;
   bool deepContested = false;

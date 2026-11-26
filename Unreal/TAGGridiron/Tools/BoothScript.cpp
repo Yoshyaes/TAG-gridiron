@@ -9,7 +9,13 @@
 //     --nomemory: the booth forgets between games (Booth::enableMemory; the baseline for the cross-game repeat share)
 //     --noref: the play-by-play man reads the flags himself (no referee announcements: Booth::enableReferee, the game's default)
 //     --xrep[=N]: after a run of games, where the cross-game repeats come from and the N sentences heard again most
-//   BoothScript.exe --banks                   the authored phrase banks and their sizes
+//     --game[=dwell]: the shipped director in a played game, the user on the home team (MatchDirector.cpp): the booth
+//              cannot hold for its talk (View::canHold off, userGame on), only for what it always holds for; the call
+//              screen takes dwell seconds (default 6); the user's offense snaps 2 s after the set without waiting for
+//              the booth; against the user's defense the CPU waits 7 s and then for the booth (at most 45 s)
+//     --modes: the same games in each mode - no hold (a player who skips every hold and calls at once), --hold (a
+//              watched game), --game=0, --game=3, --game=6 - and the audit's timing and failures side by side
+//   BoothScript.exe --banks                  the authored phrase banks and their sizes
 //   BoothScript.exe --bake --jsonl=path       every generic live call and each team's regulars' calls (one pairing a team)
 //   BoothScript.exe --bake-all --jsonl=path   the same for every one of the 992 pairings (the calls that name the other
 //                                             side's quarterback differ by opponent): feed it to booth_tts.py --once
@@ -38,6 +44,7 @@
 // delivered --writerlag seconds of booth time after the ask (the in-game CPU latency of the model, ~25 s for 14B)
 static std::string gWriterModel;
 static double gWriterLag = 25;
+static double gDwell = -1;  // --game: seconds on the call screen (-1: not a played game)
 
 static std::string jsonEsc(const std::string& s) {
   std::string o;
@@ -355,7 +362,7 @@ struct Show {
         ++lines;
         textCount[l->text]++;
         if (l->who == booth::Who::PBP && (l->live || l->kind == booth::Kind::Result)) playCalls.push_back(l->text);
-        audit.line(*l, g, v.stage);
+        audit.line(*l, g, v.stage, b.now());
         {
           // would the voice have it? cached for good (generic / roster), or offered long enough ahead to be made
           // (2 s under game load) plus the wait the presentation allows this kind
@@ -402,6 +409,7 @@ struct Show {
                        booth::kindName(l->kind), l->energy, esc(l->text).c_str(), esc(l->say).c_str());
       }
     }
+    for (const booth::Line& d : b.takeDropped()) audit.dropped(d);
   }
   void run(double secs, double dt = 1.0 / 30) {
     for (double t = 0; t < secs; t += dt) frame(dt);
@@ -412,6 +420,15 @@ struct Show {
   }
   /** Hold the snap while the booth asks (as the director does with canHold), at most a few seconds. */
   void presnap(double base) {
+    if (gDwell >= 0) {
+      // a played game (MatchDirector Presnap): the user's offense snaps when he presses, the booth or not; the CPU
+      // offense against him snaps at its timer and only once the booth lets it (BoothHold, at most 45 s here)
+      const bool userOff = g.poss == TeamKey::Home;
+      v.cpuOffense = !userOff;
+      run(userOff ? 2.0 : 7.0);
+      for (double held = 0; !userOff && b.wantsHold() && held < 45; held += 1.0 / 30) frame(1.0 / 30);
+      return;
+    }
     run(base);
     double held = 0;
     while (v.canHold && b.wantsHold() && held < 8) {
@@ -419,10 +436,17 @@ struct Show {
       held += 1.0 / 30;
     }
   }
-  void livePlay(PlaySim& sim) {
+  // the Game before it rolls a kick (preKick): the audit's window for the kick starts there
+  PerTeam<int> kickScore{};
+  size_t kickLog = 0;
+  void preKick() {
+    kickScore = g.score;
+    kickLog = g.log.size();
+  }
+  void livePlay(PlaySim& sim, int kickKind = 0) {
     playCalls.clear();
-    if (sim.isReturn()) audit.kick();
-    else audit.snap(g);
+    if (sim.isReturn()) audit.kick(g, kickKind, kickScore, kickLog, b.now());
+    else audit.snap(g, b.now());
     stage(View::Stage::Live, &sim);
     int n = 0;
     while (sim.isLive() && n++ < 60 * 40) {
@@ -431,8 +455,8 @@ struct Show {
     }
     ++plays;
   }
-  void kick(const SpecialResult& r, int kind) {
-    audit.kick();
+  void kick(const SpecialResult& r, int kind, bool pat = false) {
+    audit.kick(g, pat ? 3 : kind, kickScore, kickLog, b.now());
     v.kickKind = kind;
     v.kickT = 0;
     v.kickLead = kind == 0 ? 0.35 : kind == 1 ? 1.0 : 0.9;
@@ -450,11 +474,11 @@ struct Show {
     stage(View::Stage::Wait, nullptr);
     run(1.5);
   }
-  void liveReturn(std::vector<Player*> kickU, std::vector<Player*> recvU) {
+  void liveReturn(std::vector<Player*> kickU, std::vector<Player*> recvU, int kickKind) {
     auto sim = g.kickReturnSim(recvU, kickU);
     stage(View::Stage::Presnap, sim.get());
     frame(1.0 / 30);
-    livePlay(*sim);
+    livePlay(*sim, kickKind);
     stage(View::Stage::Post, sim.get());
     run(1.8);
     g.finishKickReturn(*sim);
@@ -484,6 +508,9 @@ int main(int argc, char** argv) {
       if (argv[i][6] == '=') xrepN = std::atoi(argv[i] + 7);
     }
     else if (!std::strcmp(argv[i], "--noref")) ref = false;
+    else if (!std::strncmp(argv[i], "--game", 6) && (argv[i][6] == '=' || argv[i][6] == 0)) gDwell = argv[i][6] == '=' ? std::atof(argv[i] + 7) : 6.0;
+    else if (!std::strcmp(argv[i], "--modes")) {
+    }
     else if (!std::strncmp(argv[i], "--teams=", 8)) {
       teamH = std::atoi(argv[i] + 8);
       const char* comma = std::strchr(argv[i] + 8, ',');
@@ -496,6 +523,34 @@ int main(int argc, char** argv) {
     else if (!std::strncmp(argv[i], "--writerlag=", 12)) gWriterLag = std::atof(argv[i] + 12);
     else seed = static_cast<uint32_t>(std::atoi(argv[i]));
   }
+  // --modes: this run again in each mode (one process each: the cross-game memory starts fresh for every mode), the
+  // audit's timing line and failures by class side by side
+  for (int i = 1; i < argc; ++i)
+    if (!std::strcmp(argv[i], "--modes")) {
+      char exe[MAX_PATH] = {};
+      GetModuleFileNameA(nullptr, exe, MAX_PATH);
+      std::string rest;
+      for (int k = 1; k < argc; ++k) {
+        const char* a = argv[k];
+        if (!std::strcmp(a, "--modes") || !std::strcmp(a, "--hold") || !std::strcmp(a, "--quiet") || !std::strncmp(a, "--jsonl=", 8) ||
+            (!std::strncmp(a, "--game", 6) && (a[6] == '=' || a[6] == 0)))
+          continue;
+        rest += std::string(" ") + a;
+      }
+      const char* const modes[] = {"", " --hold", " --game=0", " --game=3", " --game=6"};
+      const char* const names[] = {"no hold", "hold", "game=0", "game=3", "game=6"};
+      for (int m = 0; m < 5; ++m) {
+        const std::string cmd = "\"\"" + std::string(exe) + "\"" + rest + modes[m] + " --quiet\"";
+        FILE* p = _popen(cmd.c_str(), "r");
+        if (!p) continue;
+        char buf[4096];
+        while (std::fgets(buf, sizeof buf, p))
+          if (!std::strncmp(buf, "TIMING", 6) || !std::strncmp(buf, "AUDIT", 5) || !std::strncmp(buf, "SUMMARY", 7)) std::printf("%-8s %s", names[m], buf);
+        _pclose(p);
+        std::fflush(stdout);
+      }
+      return 0;
+    }
   // --banks: the authored phrase banks (Booth/BoothBanks.inl) and their sizes
   for (int i = 1; i < argc; ++i)
     if (!std::strcmp(argv[i], "--banks")) {
@@ -573,6 +628,7 @@ int main(int argc, char** argv) {
   std::map<std::string, int> totWords;           // words per voice, every game
   int totRef = 0;                                // the referee's announcements, every game
   int totAudit[audit::kClasses] = {};            // the audit's failures by class, every game
+  audit::Timing totTiming;                       // ... and its timing counts
   std::set<std::string> framesBefore;            // sentence frames an earlier game said
   int totFrames = 0, totFrameRep = 0, totFrameOld = 0, totFrameCross = 0;
   auto sentences = [](const std::string& text) {
@@ -611,7 +667,12 @@ int main(int argc, char** argv) {
     Show sh{g, b};
     sh.quiet = quiet;
     sh.jsonl = jf;
-    sh.v.canHold = hold;
+    // a played game (--game): the director's Wait holds Next() while the booth asks (what it always holds for: the open,
+    // a break, the referee, a score), the Presnap the CPU's snap; the booth's own talk never holds (canHold off)
+    sh.v.canHold = hold && gDwell < 0;
+    sh.v.userGame = gDwell >= 0;
+    const double waitHold = gDwell >= 0 ? 45.0 : hold ? 6.0 : 0.0, kickHold = gDwell >= 0 || hold ? 45.0 : 0.0;
+    b.enableDropLog(true);
     sh.v.night = (seed + gi) % 3 == 0;
     sh.audit.quiet = quiet;
     sh.audit.start(g);
@@ -622,24 +683,35 @@ int main(int argc, char** argv) {
     sh.run(2.0);
     for (double held = 0; b.wantsHold() && held < 45; held += 1.0 / 30) sh.frame(1.0 / 30);  // the kickoff waits for the open
     int guard = 0;
+    bool twoMinShown[6] = {};
     while (!g.isFinal() && guard++ < 3000) {
       PlaySim* last = sh.holdSim.get();
       if (g.phase == GamePhase::Kickoff) {
         // (the director's Wait holds Next() while the booth finishes: a score, the drive, the free-kick note)
-        for (double held = 0; b.wantsHold() && held < (hold ? 45.0 : 0.0); held += 1.0 / 30) sh.frame(1.0 / 30);
+        for (double held = 0; b.wantsHold() && held < kickHold; held += 1.0 / 30) sh.frame(1.0 / 30);
         if (g.clock <= 0) {
+          const int qWas = g.q;
           g.simStep();
+          if (qWas == 2 && g.q == 3) {
+            // halftime (MatchBroadcast BeginHalftimeShow): the show's stages, then the wide holds on the kickoff units
+            // while the booth finishes (Wait: BoothHold); a player who skips sees the short beat only
+            sh.run(gDwell >= 0 || hold ? 13.5 : 3.0);
+            for (double held = 0; b.wantsHold() && held < kickHold; held += 1.0 / 30) sh.frame(1.0 / 30);
+          }
           continue;
         }
         const TeamKey kt = g.kicking;
         auto kickU = pick11(g.teamOf(kt), g, "K");
         auto recvU = pick11(g.teamOf(other(kt)), g, "KR");
+        sh.preKick();
         const SpecialResult r = g.kickoff(false, true);
-        if (g.pendingReturn) sh.liveReturn(kickU, recvU);
+        if (g.pendingReturn) sh.liveReturn(kickU, recvU, 0);
         else sh.kick(r, 0);
         continue;
       }
       if (g.phase == GamePhase::Pat) {
+        // (the director's Wait after the touchdown holds Next() - the try - as before any snap)
+        for (double held = 0; b.wantsHold() && held < waitHold; held += 1.0 / 30) sh.frame(1.0 / 30);
         if (g.goForTwo()) {
           const OffPlay* op = g.cpuTwoPointPlay();
           const DefCall* dc = g.cpuDefense(*op);
@@ -654,19 +726,28 @@ int main(int argc, char** argv) {
           sh.run(1.0);
           sh.holdSim = std::move(sim);
         } else {
+          sh.preKick();
           const SpecialResult r = g.extraPoint();
-          sh.kick(r, 2);
+          sh.kick(r, 2, true);
         }
         continue;
       }
       const int qBefore = g.q;
       sh.stage(View::Stage::Wait, last);
       // the director's Wait holds Next() while the booth finishes (a watched game; the open and the breaks always)
-      for (double held = 0; b.wantsHold() && held < (hold ? 6.0 : 0.0); held += 1.0 / 30) sh.frame(1.0 / 30);
+      for (double held = 0; b.wantsHold() && held < waitHold; held += 1.0 / 30) sh.frame(1.0 / 30);
+      sh.preKick();  // (a timeout the offense takes now comes before a kick decided on this down)
       if (!g.preSnap()) {
         sh.run(qBefore != g.q ? 3.0 : 1.2);
         for (double held = 0; b.wantsHold() && held < 45; held += 1.0 / 30) sh.frame(1.0 / 30);
         continue;
+      }
+      if ((g.q == 2 || g.q == 4) && g.twoMin[g.q] && !twoMinShown[g.q] && g.phase == GamePhase::Scrimmage) {
+        // the two-minute warning (MatchDirector Next): its break before the next call, the Wait holding for the booth
+        twoMinShown[g.q] = true;
+        sh.stage(View::Stage::Wait, last);
+        sh.run(3.0);
+        for (double held = 0; b.wantsHold() && held < waitHold; held += 1.0 / 30) sh.frame(1.0 / 30);
       }
       if (g.down == 4) {
         const FourthDownCall c = g.fourthDownCall();
@@ -674,7 +755,7 @@ int main(int argc, char** argv) {
           auto kickU = pick11(g.offense(), g, "P");
           auto recvU = pick11(g.defense(), g, "KR");
           const SpecialResult r = g.punt(true);
-          if (g.pendingReturn) sh.liveReturn(kickU, recvU);
+          if (g.pendingReturn) sh.liveReturn(kickU, recvU, 1);
           else sh.kick(r, 1);
           continue;
         }
@@ -694,7 +775,7 @@ int main(int argc, char** argv) {
         continue;
       }
       sh.stage(View::Stage::Call, last);
-      sh.run(0.4);
+      sh.run(gDwell >= 0 ? gDwell : 0.4);
       const OffPlay* op = g.cpuOffense();
       const DefCall* dc = g.cpuDefense(*op);
       auto sim = g.makePlay(*op, *dc);
@@ -734,6 +815,8 @@ int main(int argc, char** argv) {
         totAudit[c] += sh.audit.fails[c];
       }
       std::printf(" | total %d (catches by a man the throw was not aimed at, untouched: %d)\n", sh.audit.total(), sh.audit.nonTargetCatches);
+      sh.audit.tm.print("timing:");
+      totTiming.add(sh.audit.tm);
       // repeated frames: within this game, and heard in an earlier game of the run
       int fr = 0, frAll = 0, frOld = 0;
       for (const auto& kv : sh.frameCount) {
@@ -855,6 +938,8 @@ int main(int argc, char** argv) {
       all += totAudit[c];
     }
     std::printf(" | total %d\n", all);
+    const std::string mode = gDwell >= 0 ? "game=" + std::to_string(static_cast<int>(gDwell)) : hold ? std::string("hold") : std::string("no-hold");
+    totTiming.print(("TIMING " + mode + " |").c_str());
     std::printf("FRAMES repeated in-game %.1f%% of %d", 100.0 * totFrameRep / (std::max)(1, totFrames), totFrames);
     if (games > 1) std::printf(", heard in an earlier game %.1f%%", 100.0 * totFrameOld / (std::max)(1, totFrameCross));
     std::printf("\n");

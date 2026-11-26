@@ -7596,6 +7596,17 @@ void PlaySim::endPlay(const std::string& reason) {
   }
   r.receiver = catcher ? catcher->p : nullptr;
   r.target = tgt ? tgt->p : nullptr;
+  if (catcher && !intBy && tgt && tgt != catcher) {
+    if (ball.target == tgt) {
+      // (untouched on its way: it went to the spot he was on - he is the man it was thrown to)
+      r.target = catcher->p;
+    } else {
+      // (it went off someone first: the last touch before the catch - the man it was thrown to, or a defender's tip)
+      for (const PlayEvent& ev0 : events)
+        if ((ev0.type == "contested_inc" || ev0.type == "drop" || ev0.type == "batted" || ev0.type == "pbu" || ev0.type == "tip") && ev0.a && ev0.a->p)
+          r.tippedBy = ev0.a->p;
+    }
+  }
   for (Ent* tk : tacklers) r.tacklers.push_back(tk->p);
   r.sackedBy = sackBy ? sackBy->p : nullptr;
   r.intBy = intBy ? intBy->p : nullptr;

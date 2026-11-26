@@ -31,7 +31,7 @@ $Fails = 0
 Write-Bake "bake start: $List, chunks of $Chunk"
 while ($true) {
     if (Test-Path $Stop) { Write-Bake "stop file found: ending"; break }
-    if (Get-Process -Name "UnrealEditor*" -ErrorAction SilentlyContinue) {
+    if (Get-Process -Name "UnrealEditor*","TAGGridiron*" -ErrorAction SilentlyContinue) {
         if (-not $Waiting) { Write-Bake "a game or editor is running: waiting"; $Waiting = $true }
         Start-Sleep -Seconds 20
         continue

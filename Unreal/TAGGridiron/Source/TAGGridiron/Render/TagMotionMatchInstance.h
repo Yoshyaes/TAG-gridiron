@@ -3,6 +3,8 @@
 // Game Animation Sample PoseSearch databases for open field locomotion (starts, stops, plants, cuts, backpedals).
 //
 // Graph (no Anim Blueprint): PoseHistory collector -> switch -> { single node clip | OffsetRootBone -> MotionMatching }.
+// The motion matching and root offset nodes are TAG's own copies of the engine's (Render/TagMMNodes.h): the engine's read
+// their folded settings from an Anim Blueprint's node data in a packaged game, which a C++ graph has none of.
 // The history collector sits above the switch so it keeps recording the pose through keyed clips, and motion matching
 // picks up from wherever the last clip left the body (juke -> run, get-off -> run, stop -> stance).
 // OffsetRootBone lets the matched clip's root motion drive the visible turn and stride (a plant-and-go turns the body
@@ -18,6 +20,7 @@
 #include "PoseSearch/AnimNode_PoseSearchHistoryCollector.h"
 #include "BoneControllers/AnimNode_OffsetRootBone.h"
 #include "Animation/AnimNode_DeadBlending.h"
+#include "Render/TagMMNodes.h"
 #include "TagMotionMatchInstance.generated.h"
 
 class UPoseSearchDatabase;
@@ -62,8 +65,9 @@ struct FTagMotionMatchProxy : public FAnimSingleNodeInstanceProxy
 	GENERATED_BODY()
 
 	FTagMotionMatchProxy() = default;
+	/** The TAG nodes (TMatch, TOffset), or with -TagOldMMHost the engine's (Match, Offset): one pair is null. */
 	FTagMotionMatchProxy(UAnimInstance* InInstance, FAnimNode_PoseSearchHistoryCollector* InHistory, FAnimNode_OffsetRootBone* InOffset,
-		FAnimNode_MotionMatching* InMatch, FAnimNode_DeadBlending* InDead);
+		FAnimNode_MotionMatching* InMatch, FTagOffsetRootNode* InTOffset, FTagMotionMatchNode* InTMatch, FAnimNode_DeadBlending* InDead);
 
 	virtual FAnimNode_Base* GetCustomRootNode() override { return History; }
 	virtual void GetCustomNodes(TArray<FAnimNode_Base*>& OutNodes) override;
@@ -75,6 +79,15 @@ struct FTagMotionMatchProxy : public FAnimSingleNodeInstanceProxy
 	FAnimNode_PoseSearchHistoryCollector* History = nullptr;
 	FAnimNode_OffsetRootBone* Offset = nullptr;
 	FAnimNode_MotionMatching* Match = nullptr;
+	FTagOffsetRootNode* TOffset = nullptr;
+	FTagMotionMatchNode* TMatch = nullptr;
+	FAnimNode_Base* MatchBase() const { return TMatch ? static_cast<FAnimNode_Base*>(TMatch) : static_cast<FAnimNode_Base*>(Match); }
+	FAnimNode_Base* OffsetBase() const { return TOffset ? static_cast<FAnimNode_Base*>(TOffset) : static_cast<FAnimNode_Base*>(Offset); }
+	void SetMatchDatabases(TConstArrayView<UPoseSearchDatabase*> InDatabases, EPoseSearchInterruptMode Mode) const
+	{
+		if (TMatch) TMatch->SetDatabasesToSearch(InDatabases, Mode);
+		else Match->SetDatabasesToSearch(InDatabases, Mode);
+	}
 	/** -TagMMDeadBlend: the engine's dead blending node between the root tap and motion matching (null without the flag) */
 	FAnimNode_DeadBlending* Dead = nullptr;
 	FTagLocoSwitchNode Switch;
@@ -196,6 +209,19 @@ protected:
 
 	UPROPERTY(Transient)
 	FAnimNode_MotionMatching MatchNode;
+
+	/** The graph's motion matching and root offset (TAG's copies of the engine nodes, TagMMNodes.h), unless
+	 *  UseOldMMHost: the engine's own above. */
+	UPROPERTY(Transient)
+	FTagOffsetRootNode TagOffsetNode;
+	UPROPERTY(Transient)
+	FTagMotionMatchNode TagMatchNode;
+
+public:
+	/** -TagOldMMHost: the engine's motion matching / root offset nodes as before (editor builds only: in a packaged game they
+	 *  assert on their missing node data, and the flag is ignored there with a warning). */
+	static bool UseOldMMHost();
+protected:
 
 	/** (Not usable yet: the engine node asserts outside an Anim Blueprint in builds with anim tracing, so -TagMMDeadBlend
 	 *  is ignored there - TagMotionMatchInstance.cpp.)

@@ -8595,6 +8595,7 @@ void AMatchDirector::FeedBooth(float Dt)
 	V.night = bBoothNight;
 	// a watched game lets the booth finish its breakdown before the next snap (a user's own pace is his)
 	V.canHold = !UserTeam.has_value() || bWatch;
+	V.cpuOffense = V.userGame && !UserOff(); // (the CPU's snap waits for the booth: the analyst gets a few seconds of it)
 	Booth->Feed(Dt, *Game, V);
 }
 

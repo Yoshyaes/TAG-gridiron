@@ -149,6 +149,10 @@ class Game {
   Rng rng;
   std::optional<TeamKey> userTeam;
   bool twoMin[8] = {false, false, false, false, false, false, false, false};
+  /** The two-minute mark passed during a play: the warning is logged after that play's own line (twoMinPending), and
+   *  the clock stays stopped until the next snap (twoMinStop: preSnap runs nothing off). */
+  bool twoMinPending = false;
+  bool twoMinStop = false;
   bool lastOOB = false;
   int otPossDone = 0;
   double driveStartBallOn = 25;

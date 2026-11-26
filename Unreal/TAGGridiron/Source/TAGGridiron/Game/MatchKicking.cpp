@@ -25,7 +25,9 @@ using namespace TagCoords;
 
 bool AMatchDirector::UserKicks(tag::TeamKey Kicking) const
 {
-	static const bool bAutoKicks = FParse::Param(FCommandLine::Get(), TEXT("TagUserKicks"));
+	// (-TagCallCoachTest too: its pad is Slate's, not the controller's - when the toss had the user kick off, its swing
+	// never reached the meter and the test sat on the kickoff until the gate's timeout, 2026-11-25 17:50 and 20:54)
+	static const bool bAutoKicks = FParse::Param(FCommandLine::Get(), TEXT("TagUserKicks")) || FParse::Param(FCommandLine::Get(), TEXT("TagCallCoachTest"));
 	if (bAutoKicks) return true;
 	// (the look-dev and pad tests drive a user game with nobody at the meter: their kicks are the CPU's)
 	if (bMulti) return TeamHuman(Kicking) && !bAuto && !bMultiTest;
@@ -89,7 +91,9 @@ void AMatchDirector::TickUserKick(float Dt)
 {
 	if (!UK.bOn || UK.Stage >= 3 || !Game) return;
 	APlayerController* PC = GetWorld()->GetFirstPlayerController();
-	static const bool bAutoKicks = FParse::Param(FCommandLine::Get(), TEXT("TagUserKicks"));
+	// (-TagCallCoachTest too: its pad is Slate's, not the controller's - when the toss had the user kick off, its swing
+	// never reached the meter and the test sat on the kickoff until the gate's timeout, 2026-11-25 17:50 and 20:54)
+	static const bool bAutoKicks = FParse::Param(FCommandLine::Get(), TEXT("TagUserKicks")) || FParse::Param(FCommandLine::Get(), TEXT("TagCallCoachTest"));
 	float LX = 0.f, RX = 0.f, RY = 0.f;
 	bool bDown = false, bHit = false;
 	// the swing is the kicking side's: one player's controller, or in a multiplayer game his caller's pad / keys
