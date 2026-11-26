@@ -1,17 +1,23 @@
 {
  "version": 1,
- "provisional": true,
- "note": "PROVISIONAL (2026-11-25): proposed by defects.py --propose-budget from two filmed 40-clip captures of 2026-11-24 (TAGAnim new2 and old1, seed 11, day dry, full quarters). Replace with a budget proposed from Fred's -TagHlNoFrames baseline: python Tools/QA/defects.py <baseline run> --no-budget --propose-budget Tools/QA/defect_budget.json [--also <more runs>/defects.json]",
+ "provisional": false,
+ "note": "2026-11-26 baseline: overnight 20261126_0039 at 8b9fb6d (+ booth path override), 18 CPU games, 554 plays: seeds 7/11/29 x dry/rain/snow x night/day, 32 teams, -TagQuarterLen=120, -TagHlNoFrames. per100 = 1.25 x the 90th-percentile game's rate, allow = 2 events a game (1 for camera_in_body and clock, 0 for the zero-tolerance classes frozen/tpose/nan_bones/run); high_per100 / high_allow the same for severity-3 events. actor_teleport is set WITHOUT the pile-on fall that flies two men ~60 m (seed 11 clip 6): that bug fails the budget until it is fixed. Re-propose after a deliberate change: python Tools/QA/defects.py <run> --no-budget --propose-budget <file>, or this rule by hand. camera_in_body and clock: at most one a game (each one seen was a real fault).",
  "unit": "a class fails when count > per100 x plays / 100 + allow (high: severity-3 events, high_per100 / high_allow)",
  "classes": {
   "foot_slide": {
-   "per100": 231.3,
+   "per100": 324.1,
    "allow": 2,
    "high_per100": 0.0,
    "high_allow": 1
   },
   "pose_pop": {
-   "per100": 12.5,
+   "per100": 5.0,
+   "allow": 2,
+   "high_per100": 0.0,
+   "high_allow": 1
+  },
+  "scene_reset": {
+   "per100": 30.4,
    "allow": 2,
    "high_per100": 0.0,
    "high_allow": 1
@@ -23,22 +29,22 @@
    "high_allow": 1
   },
   "sim_teleport": {
-   "per100": 15.7,
+   "per100": 14.1,
    "allow": 2,
    "high_per100": 0.0,
    "high_allow": 1
   },
   "interpenetration": {
-   "per100": 140.7,
+   "per100": 43.2,
    "allow": 2,
-   "high_per100": 75.0,
+   "high_per100": 21.3,
    "high_allow": 1
   },
   "frozen": {
    "per100": 0.0,
-   "allow": 2,
+   "allow": 0,
    "high_per100": 0.0,
-   "high_allow": 1
+   "high_allow": 0
   },
   "tpose": {
    "per100": 0.0,
@@ -53,43 +59,43 @@
    "high_allow": 0
   },
   "ball_teleport": {
-   "per100": 25.0,
+   "per100": 29.5,
    "allow": 2,
-   "high_per100": 0.0,
+   "high_per100": 4.9,
    "high_allow": 1
   },
   "ball_off_hand": {
-   "per100": 65.7,
+   "per100": 93.8,
    "allow": 2,
    "high_per100": 0.0,
    "high_allow": 1
   },
   "feet_under_turf": {
-   "per100": 3.2,
+   "per100": 3.6,
    "allow": 2,
    "high_per100": 0.0,
    "high_allow": 1
   },
   "facing_backward": {
-   "per100": 3.2,
+   "per100": 4.5,
    "allow": 2,
    "high_per100": 0.0,
    "high_allow": 1
   },
   "official_near": {
-   "per100": 6.3,
+   "per100": 14.5,
    "allow": 2,
    "high_per100": 0.0,
    "high_allow": 1
   },
   "camera_in_body": {
    "per100": 0.0,
-   "allow": 0,
+   "allow": 1,
    "high_per100": 0.0,
-   "high_allow": 0
+   "high_allow": 1
   },
   "camera_cut_storm": {
-   "per100": 0.0,
+   "per100": 6.0,
    "allow": 2,
    "high_per100": 0.0,
    "high_allow": 1
@@ -108,9 +114,9 @@
   },
   "clock": {
    "per100": 0.0,
-   "allow": 0,
+   "allow": 1,
    "high_per100": 0.0,
-   "high_allow": 0
+   "high_allow": 1
   },
   "run": {
    "per100": 0.0,

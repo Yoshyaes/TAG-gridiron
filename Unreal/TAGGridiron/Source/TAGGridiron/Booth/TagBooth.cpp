@@ -45,6 +45,19 @@ namespace
 		}
 		return O;
 	}
+
+	/** Where the voice cache (Saved/BoothVoice) and the speech service (Tools/Booth) are. A packaged build has neither
+	 *  beside its exe: -TagBoothCache=<dir> / -TagBoothTools=<dir>, or [TAG.Booth] CacheDir= / ToolsDir= in Game.ini
+	 *  (a packaged build's Saved/Config/Windows/Game.ini), point at the dev tree's. Absent: the project's own, as always. */
+	FString BoothDir(const TCHAR* Flag, const TCHAR* IniKey, const FString& Default)
+	{
+		FString Dir;
+		if (FParse::Value(FCommandLine::Get(), Flag, Dir) && !Dir.IsEmpty()) return FPaths::ConvertRelativePathToFull(Dir);
+		if (GConfig && GConfig->GetString(TEXT("TAG.Booth"), IniKey, Dir, GGameIni) && !Dir.IsEmpty()) return FPaths::ConvertRelativePathToFull(Dir);
+		return FPaths::ConvertRelativePathToFull(Default);
+	}
+	FString BoothCacheDir() { return BoothDir(TEXT("TagBoothCache="), TEXT("CacheDir"), FPaths::ProjectSavedDir() / TEXT("BoothVoice")); }
+	FString BoothToolsDir() { return BoothDir(TEXT("TagBoothTools="), TEXT("ToolsDir"), FPaths::ProjectDir() / TEXT("Tools/Booth")); }
 }
 
 int32 ATagBooth::CommentaryLevel()
@@ -112,7 +125,7 @@ void ATagBooth::BeginPlay()
 	// -TagBoothRef: the referee announces each flag at his microphone in his own voice (Booth::enableReferee; the speech
 	// service's "ref" voice), and the stadium PA's stock referee sample stays quiet (ATagAudio::BoothReferee). Off by default
 	Core->enableReferee(FParse::Param(Cmd, TEXT("TagBoothRef")));
-	CacheDir = FPaths::ConvertRelativePathToFull(FPaths::ProjectSavedDir() / TEXT("BoothVoice"));
+	CacheDir = BoothCacheDir();
 	ReqDir = CacheDir / TEXT("req");
 	IFileManager::Get().MakeDirectory(*ReqDir, true);
 	if (!bMute) StartService();
@@ -231,7 +244,7 @@ void ATagBooth::WarmService()
 		FCString::Stristr(Cmd, TEXT("-TagSoak=")) != nullptr;
 	if (bTagMode && !bWatched) return;
 	ATagBooth* Cdo = GetMutableDefault<ATagBooth>();
-	Cdo->CacheDir = FPaths::ConvertRelativePathToFull(FPaths::ProjectSavedDir() / TEXT("BoothVoice"));
+	Cdo->CacheDir = BoothCacheDir();
 	Cdo->ReqDir = Cdo->CacheDir / TEXT("req");
 	IFileManager::Get().MakeDirectory(*Cdo->ReqDir, true);
 	Cdo->StartService();
@@ -239,7 +252,7 @@ void ATagBooth::WarmService()
 
 void ATagBooth::StartService()
 {
-	const FString Tools = FPaths::ConvertRelativePathToFull(FPaths::ProjectDir() / TEXT("Tools/Booth"));
+	const FString Tools = BoothToolsDir();
 	const FString Python = Tools / TEXT(".venv/Scripts/python.exe");
 	const FString Script = Tools / TEXT("booth_tts.py");
 	if (!FPaths::FileExists(Python) || !FPaths::FileExists(Script))

@@ -59,7 +59,7 @@ DEFAULT_BUDGET = os.path.join(HERE, "defect_budget.json")
 YD_CM = 91.44
 YD = 0.9144
 
-CLASSES = ["foot_slide", "pose_pop", "actor_teleport", "sim_teleport", "interpenetration", "frozen", "tpose", "nan_bones",
+CLASSES = ["foot_slide", "pose_pop", "scene_reset", "actor_teleport", "sim_teleport", "interpenetration", "frozen", "tpose", "nan_bones",
            "ball_teleport", "ball_off_hand", "feet_under_turf", "facing_backward", "official_near", "camera_in_body",
            "camera_cut_storm", "carrier_off_screen", "stall", "clock", "run"]
 
@@ -94,7 +94,7 @@ THRESH = {
     "offscreen_frames": 15,
     "presnap_s": 40.0,          # a clip's pre-snap longer than this (the walk to the line + the cadence)
     "post_s": 20.0,             # post-whistle longer than this
-    "other_s": 10.0,
+    "other_s": 20.0,            # between plays inside a clip (the huddle and the shots after a replay: 10-14 s is normal)
     "gap_s": 45.0,              # between one play's end and the next's start (game seconds, fixed step)
     "runoff_s": 75.0,           # the clock dropping more than this between two plays of one quarter
     "frozen_clock_plays": 6,
@@ -272,6 +272,10 @@ def detect_clip(clip, d, E, fps):
     down = d.down.fillna(0).values
     edge = same & ((mode != prev_mode) & ((mode == "getup") | (prev_mode == "getup")) | (down != np.r_[0, down[:-1]]))
     edge |= ~same
+    # the frame the state changes (huddle -> pre-snap: the next play's men are put on their spots) re-places men by
+    # design; it is judged on its own (scene_reset: only when no camera cut hides it), not as a pop or a teleport
+    reset = same & (st != np.r_[[""], st[:-1]])
+    edge |= reset
 
     def R(i):
         return d.iloc[int(i)]
@@ -325,6 +329,19 @@ def detect_clip(clip, d, E, fps):
                     a = R(i)
                     E.add("pose_pop", sev3(best[i], 150, 90), best[i], "cm", clip, a.frame, a.frame, [man(a)], a.state, a.anim,
                           "%s jumped %.0f cm in one frame (sim %.1f m/s)" % (best_j[i], best[i], sim_v[i]))
+    if E.want("scene_reset"):
+        # men moved more than a step on the frame the state changes, with no camera cut on that frame (the cut usually
+        # lands a frame later: one frame shows the men on their new spots in the old shot)
+        cut = d.camcut.fillna(0).values.astype(float) > 0
+        m = ok & reset & (body_step > T["teleport_cm"]) & ~cut
+        if m.any():
+            sub = d[m].assign(_jump=body_step[m])
+            for (fr_, st_), g in sub.groupby(["frame", "state"]):
+                cut_next = bool(((d.frame.values == fr_ + 1) & cut).any())
+                a = g.loc[g._jump.idxmax()]
+                E.add("scene_reset", 1, float(g._jump.max()), "cm", clip, fr_, fr_, [man(a)] + (["+%d more" % (len(g) - 1)] if len(g) > 1 else []), st_, "",
+                      "%d men re-placed %.0f cm (max) as the state changed to %s, %s" % (len(g), g._jump.max(), st_,
+                                                                                        "camera cut one frame later" if cut_next else "no camera cut"))
     if E.want("actor_teleport"):
         m = ok & in_play & (d.frame.values > 4) & ~edge & (body_step > T["teleport_cm"]) & (body_step > expect)
         cand = [i for i in np.flatnonzero(m) if i not in pop_rows]
@@ -532,8 +549,9 @@ def detect_log(info, E, nclips_tele):
         for c in order:
             x = clips[c]
             q, clk, a, h = x["q"], x["clock"], x["away"], x["home"]
-            if clk < -0.5 or clk > qlen + 1:
-                E.add("clock", 3, clk, "s", c, 0, 0, [], "", "", "clock %.0f outside 0..%.0f" % (clk, qlen))
+            lim = 600.0 if q >= 5 else qlen  # (overtime is 10 minutes whatever -TagQuarterLen says: Sim/Game.cpp)
+            if clk < -0.5 or clk > lim + 1:
+                E.add("clock", 3, clk, "s", c, 0, 0, [], "", "", "clock %.0f outside 0..%.0f" % (clk, lim))
             if prev is not None:
                 pq, pclk, pa, ph = prev[1]["q"], prev[1]["clock"], prev[1]["away"], prev[1]["home"]
                 if q < pq or q > pq + 1:
