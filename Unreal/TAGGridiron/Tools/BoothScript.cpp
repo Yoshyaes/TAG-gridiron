@@ -19,6 +19,8 @@
 //   BoothScript.exe --bake --jsonl=path       every generic live call and each team's regulars' calls (one pairing a team)
 //   BoothScript.exe --bake-all --jsonl=path   the same for every one of the 992 pairings (the calls that name the other
 //                                             side's quarterback differ by opponent): feed it to booth_tts.py --once
+//                                             (Booth::addedCalls come last: a new list is the old one plus a tail)
+//   BoothScript.exe --bake-added --jsonl=path only Booth::addedCalls (a bake of its own beside a running one)
 #include <algorithm>
 #include <cstdio>
 #include <cstdlib>
@@ -572,6 +574,25 @@ int main(int argc, char** argv) {
   // names the other side's quarterback and a shared surname is said in full only against the team that shares it. The
   // order is what a bake stopped part way should already have: the generics, the default matchup, every team's own
   // calls (one pairing a team), then the calls only other pairings add (a miss on those has its generic stand-in).
+  // --bake-added: only the calls added since the first bake (Booth::addedCalls), for a bake of their own next to the
+  // running one (the cache keys are voice + energy + words: nothing already made is touched)
+  for (int i = 1; i < argc; ++i)
+    if (!std::strcmp(argv[i], "--bake-added")) {
+      if (!jf) {
+        std::printf("--bake-added needs --jsonl=path\n");
+        return 1;
+      }
+      int n = 0;
+      for (const auto& ac : Booth::addedCalls()) {
+        const std::string say = Booth::spoken(ac.first);
+        std::fprintf(jf, "{\"t\":0,\"who\":\"PBP\",\"kind\":\"live\",\"energy\":%d,\"text\":\"%s\",\"say\":\"%s\"}\n", ac.second, Show::esc(ac.first).c_str(),
+                     Show::esc(say).c_str());
+        ++n;
+      }
+      std::fclose(jf);
+      std::printf("baked %d added calls\n", n);
+      return 0;
+    }
   for (int i = 1; i < argc; ++i)
     if (!std::strcmp(argv[i], "--bake") || !std::strcmp(argv[i], "--bake-all")) {
       const bool all = !std::strcmp(argv[i], "--bake-all");
@@ -612,6 +633,11 @@ int main(int argc, char** argv) {
         for (const auto& rc : b.rosterCalls(g)) emit(rc.first, rc.second);
         if (seen.size() == 34 || (!all && seen.size() == pairs.size())) ownCalls = done.size();
       }
+      // the calls added since the first bake (Booth::addedCalls): after every earlier line, so a list made now is the
+      // old one with these at its end - every earlier line, its order and its cache key, as it was
+      const size_t before = done.size();
+      for (const auto& ac : Booth::addedCalls()) emit(ac.first, ac.second);
+      std::printf("(%zu added calls appended after line %zu)\n", done.size() - before, before);
       std::fclose(jf);
       std::printf("baked %zu lines: %zu generic, %zu more for every team's own calls, %zu more only other pairings add (about %zu words)\n", done.size(), generic,
                   ownCalls - generic, done.size() - ownCalls, wordCount);

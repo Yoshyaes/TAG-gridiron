@@ -224,6 +224,7 @@ struct FTagBcShot
 	FVector Off = FVector::ZeroVector;   // lens - subject at the placement (the rig pans after him; it does not hop round him)
 	float Focal = 50.f, Aperture = 1.2f;
 	int32 Recuts = 0, Frames = 0, BadFrames = 0;
+	FString NearWho;                     // (who came nearest the lens)
 };
 
 /** One play's context for the shots (made at the whistle, before the play is in the book). */
@@ -392,6 +393,8 @@ struct FTagBcState
 	int32 HlKept = 0, HlDropped = 0;
 	TSet<int32> HlVisible;               // (the men shown before a highlight took the field)
 	TArray<FVector> SubStarts;           // (this play's substitutes' starting spots: none on another's)
+	TMap<const AAthlete*, FVector> PersonLast, PersonVel; // (each man as drawn last frame, and his velocity: TrackPeople)
+	int32 ShotDepth = 0;                 // (ShotCamera starting the next shot in the frame it dropped one)
 	unsigned long long SubStartsSerial = 0;
 	TArray<FTagBcLeaver> Leavers;
 	int32 SubsIn = 0, SubsOut = 0, SubsPulled = 0, Snaps = 0, SnapBad = 0, SnapWalking = 0;
@@ -525,9 +528,13 @@ namespace
 		if (Head.ContainsNaN() || Pelvis.ContainsNaN()) { Why = TEXT("bones not a number"); return false; }
 		if (Head.Equals(Loc + FVector(0, 0, 120), 0.5)) { Why = TEXT("no body shown"); return false; } // (BoneWorld's stand-in)
 		const double HP = FVector::Dist(Head, Pelvis);
-		if (Head.Z < 5.0 || Head.Z > 240.0 || HP < 20.0 || HP > 120.0 || FVector::Dist2D(Pelvis, Loc) > 250.0)
+		// (a man in a fall or on the turf: his body is carried off the actor's spot by the capture - a tackle's, 4-5 m -
+		// so the spot says nothing of his pose then; the lens frames his bones either way)
+		const double PelvisOff = FVector::Dist2D(Pelvis, Loc);
+		if (Head.Z < 5.0 || Head.Z > 240.0 || HP < 20.0 || HP > 120.0 || (!A->IsDown() && PelvisOff > 250.0))
 		{
-			Why = FString::Printf(TEXT("pose out of shape (head %.0f cm up, %.0f cm from the pelvis)"), Head.Z, HP);
+			Why = FString::Printf(TEXT("pose out of shape (head %.0f cm up, %.0f cm from the pelvis, the pelvis %.0f cm off his spot%s)"), Head.Z, HP, PelvisOff,
+				A->IsDown() ? TEXT(", down") : TEXT(""));
 			return false;
 		}
 		FVector L, R;
@@ -1484,13 +1491,27 @@ AAthlete* AMatchDirector::AthleteOfEnt(const tag::Ent* E)
 	return AthleteFor(E->p, E->side == tag::Side::Off ? Game->poss : tag::other(Game->poss));
 }
 
-float AMatchDirector::NearestPerson(const FVector& At, const AActor* Except) const
+float AMatchDirector::NearestPerson(const FVector& At, const AActor* Except, float Ahead, const AAthlete** OutWho) const
 {
 	float Best = 1e9f;
-	auto Probe = [&Best, &At, Except](const AAthlete* O)
+	if (OutWho) *OutWho = nullptr;
+	const TMap<const AAthlete*, FVector>* Vel = BcState && Ahead > 0.f ? &BcState->PersonVel : nullptr;
+	auto Probe = [&Best, &At, Except, Ahead, Vel, OutWho](const AAthlete* O)
 	{
 		if (!O || O == Except || O->IsHidden()) return;
-		for (const TCHAR* Bn : {TEXT("head"), TEXT("pelvis")}) Best = FMath::Min(Best, static_cast<float>(FVector::Dist(O->BoneWorld(Bn), At)));
+		// (where he will be Ahead s on, at the pace he was drawn moving: the man walking into the lens, before he is in it)
+		const FVector* V = Vel ? Vel->Find(O) : nullptr;
+		const FVector Move = V ? V->GetClampedToMaxSize(1000.0) * Ahead : FVector::ZeroVector;
+		for (const TCHAR* Bn : {TEXT("head"), TEXT("pelvis")})
+		{
+			const FVector B = O->BoneWorld(Bn);
+			const float D = static_cast<float>(FMath::Min(FVector::Dist(B, At), FVector::Dist(B + Move, At)));
+			if (D < Best)
+			{
+				Best = D;
+				if (OutWho) *OutWho = O;
+			}
+		}
 	};
 	for (const auto& KV : Athletes) Probe(KV.Value);
 	for (const AAthlete* O : Sideline) Probe(O);
@@ -1500,6 +1521,22 @@ float AMatchDirector::NearestPerson(const FVector& At, const AActor* Except) con
 	if (BcState)
 		for (const FVector& Pp : BcState->StandPeople) Best = FMath::Min(Best, static_cast<float>(FVector::Dist(Pp, At)));
 	return Best;
+}
+
+void AMatchDirector::TrackPeople(float Dt)
+{
+	if (Dt < 1e-4f) return;
+	FTagBcState& St = Bc();
+	auto Track = [&St, Dt](const AAthlete* O)
+	{
+		if (!O || O->IsHidden()) return;
+		const FVector P = O->GetActorLocation();
+		if (const FVector* L = St.PersonLast.Find(O)) St.PersonVel.Add(O, (P - *L) / Dt);
+		St.PersonLast.Add(O, P);
+	};
+	for (const auto& KV : Athletes) Track(KV.Value);
+	for (const AAthlete* O : Crew) Track(O);
+	Track(Umpire);
 }
 
 bool AMatchDirector::SightClear(const FVector& C, const FVector& At, const AActor* Except, float SubjectR) const
@@ -1939,7 +1976,7 @@ bool AMatchDirector::PlaceShot(bool bRecut)
 		{
 			const FVector D = Face.RotateAngleAxis(Rg.Deg, FVector::UpVector);
 			const FVector Lens = FVector(Tgt.X, Tgt.Y, 0.0) + D * Dist + FVector(0, 0, Rg.Z);
-			if (!FieldOk(Lens) || !ShotSpotOk(Lens) || NearestPerson(Lens, A) < 150.f || !SightClear(Lens, Tgt, A, 150.f)) continue;
+			if (!FieldOk(Lens) || !ShotSpotOk(Lens) || NearestPerson(Lens, A, 0.8f) < 200.f || !SightClear(Lens, Tgt, A, 150.f)) continue;
 			const float S = static_cast<float>(FVector::DotProduct(D, Face) + 0.7 * FVector::DotProduct(D, ToCam));
 			Oks.Add(FOk{Lens, S, Rg.Name});
 			BestS = FMath::Max(BestS, S);
@@ -1980,7 +2017,7 @@ bool AMatchDirector::PlaceShot(bool bRecut)
 			const FVector Mid = Sum / N;
 			const FVector LookAt = Mid + FVector(0, 0, 130);
 			const FVector Lens(Mid.X + ((k + St.PlayN) % 2 ? 2.0 : -2.0) * Y, SideSign * (tag::FIELD_W / 2 - 5.0) * Y, 170.0);
-			if (!ShotSpotOk(Lens) || NearestPerson(Lens, nullptr) < 150.f || !SightClear(Lens, LookAt, nullptr, 400.f)) continue;
+			if (!ShotSpotOk(Lens) || NearestPerson(Lens, nullptr, 0.8f) < 200.f || !SightClear(Lens, LookAt, nullptr, 400.f)) continue;
 			Names.Add(Parts[k]);
 			Lenses.Add(Lens);
 			Looks.Add(LookAt);
@@ -1999,7 +2036,7 @@ bool AMatchDirector::PlaceShot(bool bRecut)
 		{
 			FVector LookAt, Lens;
 			BcCrowdSection(B.Fixed, i, LookAt, Lens);
-			if (BcFansNear(St.StandPeople, LookAt, 450.0) < 6 || !ShotSpotOk(Lens) || NearestPerson(Lens, nullptr) < 150.f || !SightClear(Lens, LookAt, nullptr, 0.f)) continue;
+			if (BcFansNear(St.StandPeople, LookAt, 450.0) < 6 || !ShotSpotOk(Lens) || NearestPerson(Lens, nullptr, 0.8f) < 200.f || !SightClear(Lens, LookAt, nullptr, 0.f)) continue;
 			Names.Add(FString::Printf(TEXT("section %d"), i + 1));
 			Lenses.Add(Lens);
 			Looks.Add(LookAt);
@@ -2098,6 +2135,7 @@ bool AMatchDirector::ShotCamera(float Dt, FVector& OutP, const FVector& GameT, c
 		{
 			// (a man who stops being fit to show - hidden, put to sleep, a pose gone wrong - is cut away from at once)
 			Sh.EndHow = TEXT("subject broke");
+			UE_LOG(LogTemp, Display, TEXT("TAG shot subject broke: %s %s after %.2f s: %s"), BcShotName(Type), *BcWho(A), Sh.T, *Why);
 			bAbort = true;
 		}
 		else
@@ -2112,19 +2150,32 @@ bool AMatchDirector::ShotCamera(float Dt, FVector& OutP, const FVector& GameT, c
 	// a second (a second camera once, else away early)
 	if (!bAbort && !BcIsOpen(Type) && Type != ETagShot::Wide)
 	{
+		// (the bodies here are the ones drawn last frame - they animate after the director - and a man walking in closes
+		// 10-20 cm a frame: so a man within 1.2 m of the lens, or who will be within 0.4 s, is acted on now. At 60 cm, the
+		// frame drawn had him at 47-56 cm: the overnight's three camera_in_body defects, a man crossing an opponent's or
+		// an official's shot)
 		const AAthlete* Subj = Sh.Beat.Subject.Get();
-		float Near = NearestPerson(Sh.CamPos, Subj);
+		const AAthlete* NearMan = nullptr;
+		float Near = NearestPerson(Sh.CamPos, Subj, 0.f, &NearMan);
+		const float Soon = NearestPerson(Sh.CamPos, Subj, 0.4f);
 		const bool bClear = Near >= 60.f && SightClear(Sh.CamPos, Sh.Look, Subj, Type == ETagShot::Bench ? 400.f : 150.f);
 		Sh.BlockedT = bClear ? 0.f : Sh.BlockedT + Dt;
-		if (Sh.BlockedT > 0.5f || Near < 60.f)
+		const bool bAtLens = Near < 120.f || Soon < 120.f;
+		// (a sight line crossed is waited out through the shot's first second: a cut out inside it, after its cut in, was a cut storm)
+		if ((Sh.BlockedT > 0.5f && Sh.T >= 1.f) || bAtLens)
 		{
-			const bool bCanRecut = Sh.Recuts < 1 && Sh.Beat.Secs - Sh.T > 1.2f;
+			// (not in the shot's first second: its cut in, a second camera and a cut away inside one second were a cut storm)
+			const bool bCanRecut = Sh.Recuts < 1 && Sh.Beat.Secs - Sh.T > 1.2f && Sh.T >= 1.f;
 			if (bCanRecut) ++Sh.Recuts;
-			if (bCanRecut && PlaceShot(true)) Near = NearestPerson(Sh.CamPos, Subj); // (the second camera, checked as placed)
-			else if (Near < 60.f) { Sh.EndHow = TEXT("body at the lens"); bAbort = true; }
+			if (bCanRecut && PlaceShot(true)) Near = NearestPerson(Sh.CamPos, Subj, 0.f, &NearMan); // (the second camera, checked as placed)
+			else if (bAtLens) { Sh.EndHow = TEXT("body at the lens"); bAbort = true; }
 			else { Sh.bEndNow = true; Sh.EndHow = TEXT("blocked"); }
 		}
-		Sh.NearMin = FMath::Min(Sh.NearMin, Near);
+		if (Near < Sh.NearMin)
+		{
+			Sh.NearMin = Near;
+			Sh.NearWho = NearMan ? BcWho(NearMan) : FString(TEXT("a stand-side person"));
+		}
 		if (!bAbort && Near < 60.f) ++Sh.BadFrames; // (drawn with a body in the lens: must never be)
 	}
 	else if (!bAbort && (!ShotSpotOk(Sh.CamPos) || NearestPerson(Sh.CamPos, nullptr) < 60.f)) ++Sh.BadFrames;
@@ -2134,6 +2185,21 @@ bool AMatchDirector::ShotCamera(float Dt, FVector& OutP, const FVector& GameT, c
 		EndShot(Sh.EndHow);
 		bCutNext = false; // (the cut is this frame's)
 		if (bLead && State == EMatchState::Post) Timer = FMath::Min(Timer, 0.8f);
+		// the next shot of the program, from this frame (a frame of the game camera between them was a flash)
+		if (St.ShotDepth == 0 && St.bProgram && St.Queue.Num() > 0 && State == EMatchState::Wait)
+		{
+			const FTagBcBeat Nb = St.Queue[0];
+			St.Queue.RemoveAt(0);
+			St.GapLeft = 0.f;
+			StartShot(Nb);
+			if (ShotView.bOn)
+			{
+				++St.ShotDepth;
+				const bool bShown = ShotCamera(Dt, OutP, GameT, GameLook);
+				--St.ShotDepth;
+				if (bShown) return true;
+			}
+		}
 		OutP = CamPos = GameT;
 		CamLook = GameLook;
 		CamVel = LookVel = FVector::ZeroVector;
@@ -2166,8 +2232,9 @@ void AMatchDirector::EndShot(const TCHAR* How)
 		const AAthlete* SA = Sh.Beat.Subject.Get();
 		const FString Who = SA ? BcWho(SA) : Sh.Beat.Type == ETagShot::Bench ? FString::Printf(TEXT("%s bench"), Sh.Beat.Team == 1 ? TEXT("home") : TEXT("away"))
 			: FString(BcShotName(Sh.Beat.Type));
-		UE_LOG(LogTemp, Display, TEXT("TAG shot %s %s %.2f s (%s; variant %s, planned %.1f, %s, lens nearest %.0f cm, lens bad %d of %d frames, recuts %d)"),
-			BcShotName(Sh.Beat.Type), *Who, Sh.T, How, *Sh.Variant, Sh.Beat.Secs, *Sh.Beat.Why, Sh.NearMin, Sh.BadFrames, Sh.Frames, Sh.Recuts);
+		UE_LOG(LogTemp, Display, TEXT("TAG shot %s %s %.2f s (%s; variant %s, planned %.1f, %s, lens nearest %.0f cm%s, lens bad %d of %d frames, recuts %d)"),
+			BcShotName(Sh.Beat.Type), *Who, Sh.T, How, *Sh.Variant, Sh.Beat.Secs, *Sh.Beat.Why, Sh.NearMin,
+			Sh.NearWho.IsEmpty() ? TEXT("") : *FString::Printf(TEXT(" (%s)"), *Sh.NearWho), Sh.BadFrames, Sh.Frames, Sh.Recuts);
 		if (St.Test.Mode == 2 && Sh.Frames > 0)
 		{
 			const bool bOk = Sh.BadFrames == 0;
@@ -2330,7 +2397,10 @@ void AMatchDirector::TickBeats(float SDt)
 		ShotView.Left = FMath::Max(0.f, St.Shot.Beat.Secs - St.Shot.T);
 		// (the lead shot with a replay to come stays up to the end of the beat: StartReplay ends it under the wipe - cut back
 		// to the game camera here, the frame the wipe starts, it was a hard cut with the slats only just coming down)
-		const bool bHoldForReplay = St.Shot.Beat.bLead && State == EMatchState::Post && bReplayWorthy && !bHurryNext && !bSpikeNext && !bTackleCam;
+		// (and whatever comes after the beat - the replay, a capper: ended there, in the frame the next picture is placed. A
+		// cut back to the game camera a frame before the capper's was a one-frame flash and a cut storm)
+		const bool bHoldForReplay = St.Shot.Beat.bLead && State == EMatchState::Post && !bHurryNext && !bSpikeNext && !bTackleCam &&
+			St.Shot.T < St.Shot.Beat.Secs + 1.f; // (a beat held long - a help-up on its way - goes back to the game camera)
 		if ((St.Shot.T >= St.Shot.Beat.Secs && !bHoldForReplay) || St.Shot.bEndNow)
 		{
 			const bool bEarly = St.Shot.bEndNow;
@@ -4019,6 +4089,7 @@ void AMatchDirector::TickBroadcast(float Dt)
 	TickOpen(Dt);
 	TickShow(Dt);    // (the halftime and postgame shows)
 	TickLeavers(Dt); // (the men walking off: substitutes, the half)
+	TrackPeople(Dt); // (each man's drawn velocity: the shots' lens look ahead)
 	if (BcState)
 	{
 		// the officials out of the open's, the halftime show's and a highlight's pictures (the umpire stood between the

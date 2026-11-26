@@ -937,6 +937,27 @@ const std::vector<BkBank>& bkResult() {
         "Batted down by {pbu}, intended for {tg}.",
         "{Pbu} gets a piece of it at the line.",
         "Knocked down at the line by {pbu}, and the pass for {tg} never gets there."}},
+      // a timeout taken just before a kick (logged with it: the kick's own setup says it, short - the ball is in the air
+      // within a second). {team} the side that called it, {kicker} {dist} the try
+      {"k_tokick",
+       {"{Team} takes a timeout first. Here's {kicker}, from {dist} yards.",
+        "Timeout {team}, and now {kicker} lines up from {dist}.",
+        "After a {team} timeout, here's {kicker} from {dist} yards."}},
+      // ... the defense's timeout: icing the kicker
+      {"k_tokick_ice",
+       {"{Team} calls time to ice him. Here's {kicker}, from {dist} yards.",
+        "Timeout {team}, trying to ice {kicker}. Now the {dist}-yard try.",
+        "{Team} makes him wait with a timeout. {Kicker}, from {dist}."}},
+      {"k_topunt",
+       {"{Team} takes a timeout, and now the punt team comes on.",
+        "After a {team} timeout, they'll punt it away.",
+        "Timeout {team}, and here comes the punt."}},
+      // a personal foul by the defense on a touchdown: the score stands, the yards are walked off on the kickoff (the
+      // play-by-play man reads it when the referee does not). {foul} {team} {name}
+      {"pen_ko",
+       {"There's a flag, {foul} on {team}. The touchdown stands, and they'll walk it off on the kickoff.",
+        "A late flag, {foul} on {team}, but the score counts. That'll be enforced on the kickoff.",
+        "{Foul} on {team} after the score. It doesn't take the points away, it moves the kickoff up."}},
       {"r_pbu2",
        {"{pbu} with the breakup.",
         "That's {pbu} getting a hand in there.",

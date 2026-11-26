@@ -554,6 +554,20 @@ std::vector<std::pair<std::string, int>> Booth::genericCalls() {
   return v;
 }
 
+namespace {
+// the drop-back said without his name, and the play fake (addedCalls): new frames for the call heard most often
+const std::vector<std::string> kDropBare = {"In the pocket.", "Sets up to throw.", "Looks downfield.", "Drops back to pass."};
+const std::vector<std::string> kPlayFake = {"Play-action fake...", "Fakes the handoff...", "Play-action, and he sets up."};
+}  // namespace
+
+std::vector<std::pair<std::string, int>> Booth::addedCalls() {
+  // (appended to, never reordered: a bake list ends with these in this order)
+  std::vector<std::pair<std::string, int>> v;
+  for (const std::string& t : kDropBare) v.push_back({t, 1});
+  for (const std::string& t : kPlayFake) v.push_back({t, 1});
+  return v;
+}
+
 std::pair<std::string, int> Booth::genericAlt(const std::string& tag, const std::string& text, const std::string& fallback) {
   static const std::unordered_map<std::string, int> kGeneric = [] {
     std::unordered_map<std::string, int> m;
@@ -1137,7 +1151,12 @@ void Booth::onLog(const Game& g, const PlayLog& l, size_t index) {
     if (sim_ && sim_->cfg.offPlay && sim_->cfg.offPlay->type == PlayType::Kneel && &t == &g.offense() && once("odd_to" + bS(g.q)))
       push(Who::Color, Kind::Break, "I'm not sure what " + t.city + " is doing with those timeouts. They're the ones kneeling it.", 1, 3, 0.4, 15).snapSafe = true;
     const Slots ts = facts(g, {{"team", t.city}, {"nick", nick(t)}, {"left", bCountWord(left)}});
-    push(Who::PBP, Kind::Break, say(left == 0 ? "timeout0" : "timeout", ts), 1, 3, 0.3, 20).snapSafe = true;
+    Line& tl = push(Who::PBP, Kind::Break, say(left == 0 ? "timeout0" : "timeout", ts), 1, 3, 0.3, 20);
+    tl.snapSafe = true;
+    tl.tag = "timeout";
+    timeoutLog_ = static_cast<long>(index);
+    timeoutByOffense_ = k == g.poss;
+    timeoutTeam_ = t.city;
     return;
   }
   if (bHas(d, "End of ")) {
@@ -1228,6 +1247,16 @@ void Booth::onLog(const Game& g, const PlayLog& l, size_t index) {
     kickFootSaid_ = kickLandSaid_ = false;
     kickSetupSaid_ = false;
     kickKind_ = bHas(d, "field goal") || bHas(d, "extra point") ? 2 : bHas(d, "punt") ? 1 : 0;
+    // a timeout logged just before this kick (the same step: the ball is in the air within a second, no room for its own
+    // line - it was dropped at the foot, unheard): the kick's setup says it. A timeout line already being said stays.
+    kickTimeout_ = false;
+    if (timeoutLog_ >= 0 && static_cast<size_t>(timeoutLog_) + 1 == index && kickKind_ >= 1 && !bHas(d, "extra point"))
+      for (auto it = q_.begin(); it != q_.end(); ++it)
+        if (!it->live && it->tag == "timeout") {
+          q_.erase(it);  // (folded into the setup, not dropped: not counted as unsaid)
+          kickTimeout_ = true;
+          break;
+        }
     // a kick that the presentation does not fly (headless, an end-of-half auto kick) is called at once
     if (view_.stage != View::Stage::Kick) onKickTick(g, view_);
     return;
@@ -1508,6 +1537,7 @@ void Booth::onPenalty(const Game& g, const PlayLog& l) {
 
 void Booth::onNewPlay(const Game& g, const PlaySim& s) {
   flushDeferred(g);  // (a play that was never applied: what it held goes now)
+  retTimeoutSim_ = nullptr;  // (a new play: a sim at a freed one's address is not the one checked)
   presnapT_ = 0;
   presnapSaid_ = readSaid_ = false;
   calledThrow_ = calledCatch_ = calledRun_ = breakaway_ = calledPressure_ = liveTalk_ = fumbleCalled_ = false;
@@ -1970,7 +2000,12 @@ void Booth::livePocket(const Game& g, const PlaySim& s) {
   }
   if (!calledDrop_ && !skipDrop_ && s.t > 0.9 && !s.pendingThrow && !s.passThrown && !cur_.id) {
     calledDrop_ = true;
-    live("drop", "Back to throw.", 1, 0.4, "qbdrop");
+    // (his three named ways of saying it came back every few passes, "Jessup, in the pocket." the line heard most: a play
+    // fake is called as one, and now and then the drop goes without his name - the throw call names him next)
+    const OffPlay* op = s.cfg.offPlay;
+    if (op && op->type == PlayType::PlayAction && chance(0.6)) live("", pickFrom("l_pafake", kPlayFake, {0, 1, 2}), 1, 0.4, "qbdrop");
+    else if (chance(0.35)) live("", pickFrom("l_dropbare", kDropBare, {0, 1, 2, 3}), 1, 0.4, "qbdrop");
+    else live("drop", "Back to throw.", 1, 0.4, "qbdrop");
   }
   if (!calledPressure_ && s.pressured && s.t > 0.9 && said("qbdrop")) {
     calledPressure_ = true;
@@ -2641,11 +2676,14 @@ void Booth::afterApply(const Game& g, const PlaySim& s, const PlayResult& r, con
     push(Who::PBP, Kind::Result, pendingResult_, pendingResultEnergy_, 4, 0, 12).snapSafe = r.turnover;
     pendingResult_.clear();
   }
-  if (bHas(l.desc, "(declined)")) {
+  // (a defensive personal foul on a touchdown: the score stands and it is walked off on the kickoff - Game::finishPlay)
+  const bool koFoul = bHas(l.desc, ", enforced on the kickoff");
+  if (bHas(l.desc, "(declined)") || koFoul) {
     {
-      // "... Offensive Holding (#72 J.Smith) on ABQ (declined)."
+      // "... Offensive Holding (#72 J.Smith) on ABQ (declined)."  "... Roughing the Passer (#91 J.Smith) on ABQ, enforced on
+      // the kickoff."
       const std::string& d = l.desc;
-      const size_t dec = d.rfind(" (declined)");
+      const size_t dec = koFoul ? d.rfind(", enforced on the kickoff") : d.rfind(" (declined)");
       const size_t on = d.rfind(" on ", dec);
       const std::string ab = on == std::string::npos ? std::string() : d.substr(on + 4, dec - on - 4);
       const Team& t = g.home->abbr == ab ? *g.home : *g.away;
@@ -2671,7 +2709,7 @@ void Booth::afterApply(const Game& g, const PlaySim& s, const PlayResult& r, con
       if (man && man->pos == Pos::QB && bHas(name, "Holding")) man = nullptr;
       if (name == "Intentional Grounding" && r.passer) man = r.passer;
       if (ref_) {
-        std::string ref = refFoul(name, &t == &g.teamOf(possBefore_), man) + ". The penalty is declined.";
+        std::string ref = refFoul(name, &t == &g.teamOf(possBefore_), man) + (koFoul ? ". The penalty will be enforced on the kickoff." : ". The penalty is declined.");
         if (g.poss == possBefore_ && !r.td && g.phase == GamePhase::Scrimmage) ref += g.down == 1 ? " First down." : " " + bCap(bOrdWord(g.down)) + " down.";
         // (the official's own words on a score: no down and distance after a touchdown)
         else if (r.td) ref += " The result of the play is a touchdown.";
@@ -2683,7 +2721,7 @@ void Booth::afterApply(const Game& g, const PlaySim& s, const PlayResult& r, con
         const size_t comma = fw.rfind(", ");  // ("Personal foul, face mask": the foul itself)
         if (comma != std::string::npos) fw = fw.substr(comma + 2);
         for (char& ch : fw) ch = static_cast<char>(std::tolower(static_cast<unsigned char>(ch)));
-        push(Who::PBP, Kind::Result, say(fw.empty() ? "declined0" : "declined", facts(g, {{"foul", fw}, {"team", t.city}, {"name", man ? nm(man) : std::string()}})), 1, 4,
+        push(Who::PBP, Kind::Result, say(koFoul ? "pen_ko" : fw.empty() ? "declined0" : "declined", facts(g, {{"foul", fw}, {"team", t.city}, {"name", man ? nm(man) : std::string()}})), 1, 4,
              0, 10)
             .tag = "flag";
       }
@@ -2934,6 +2972,23 @@ void Booth::statFollow(const Game& g, const PlayResult& r) {
 void Booth::onKickTick(const Game& g, const View& v) {
   // a live return carries its own play (onEvent / onWhistle); its kick is called here from the sim's foot
   if (!kickPending_) {
+    // a punt played live: its line is logged after the return, so the timeout just before it (the last log line) is
+    // folded into a setup said as the punt team lines up, as for a kick the presentation flies
+    if (sim_ && sim_->isReturn() && sim_ != retTimeoutSim_ && !returnFootSaid_ && sim_->cfg.kick && sim_->cfg.kick->punt) {
+      retTimeoutSim_ = sim_;
+      if (timeoutLog_ >= 0 && static_cast<size_t>(timeoutLog_) + 1 == g.log.size())
+        for (auto it = q_.begin(); it != q_.end(); ++it)
+          if (!it->live && it->tag == "timeout") {
+            const std::string t = say("k_topunt", facts(g, {{"team", timeoutTeam_}}));
+            if (t.empty()) break;
+            q_.erase(it);
+            Line& l = push(Who::PBP, Kind::Live, t, 0, 5, 0, 3.0);
+            l.live = true;
+            l.tag = "kset:to";
+            std::tie(l.alt, l.altEnergy) = genericAlt("kset:punt", l.text, std::string());
+            break;
+          }
+    }
     if (v.stage == View::Stage::Live && sim_ && sim_->isReturn() && sim_->kicked && !returnFootSaid_) {
       returnFootSaid_ = true;
       snapFlush();
@@ -2959,11 +3014,13 @@ void Booth::onKickTick(const Game& g, const View& v) {
     kickSetupSaid_ = true;
     const PreKick& k = preKick_;  // (the Game has already turned the ball over: the decision was made on this down)
     if (kickKind_ == 1 && k.down == 4) {
-      Line& l = push(Who::PBP, Kind::Live, pick("k_puntset", {"Fourth and " + bDist(k.toGo, k.ballOn) + ". They'll punt it away.", "Fourth down, and here comes the punt team.",
+      // (a timeout taken just before it: said with the punt team coming on)
+      const std::string withTo = kickTimeout_ ? say("k_topunt", facts(g, {{"team", timeoutTeam_}})) : std::string();
+      Line& l = push(Who::PBP, Kind::Live, !withTo.empty() ? withTo : pick("k_puntset", {"Fourth and " + bDist(k.toGo, k.ballOn) + ". They'll punt it away.", "Fourth down, and here comes the punt team.",
                                                               "They'll kick it away on fourth and " + bDist(k.toGo, k.ballOn) + "."}),
                      0, 5, 0, presented ? 3.0 : 5);
       l.live = true;
-      l.tag = "kset";
+      l.tag = withTo.empty() ? "kset" : "kset:to";
       std::tie(l.alt, l.altEnergy) = genericAlt("kset:punt", l.text, std::string());
     }
     const Slots kr = facts(g, {{"down", bS(-k.margin)}, {"kdd", "4th and " + bDist(k.toGo, k.ballOn)}});
@@ -2976,9 +3033,12 @@ void Booth::onKickTick(const Game& g, const View& v) {
       // landing, and the kick's own result was said after the kickoff it brought)
       const std::vector<std::string> fo = {"Fourth down, and they'll send out kicker " + kn + " for a " + bS(dist) + "-yard attempt.",
                                            "Kicker " + kn + " lines up from " + bS(dist) + " yards.", "Here's " + kn + ", from " + bS(dist) + " yards."};
-      Line& l = push(Who::PBP, Kind::Live, presented ? pickFrom("k_fgset", {fo[1], fo[2]}, {1, 2}) : pick("k_fgset", fo), 1, 5, 0, presented ? 4.0 : 6);
+      // (a timeout taken just before it - his own side's, or the defense icing him - goes with it, short)
+      const std::string withTo =
+          kickTimeout_ ? say(timeoutByOffense_ ? "k_tokick" : "k_tokick_ice", facts(g, {{"team", timeoutTeam_}, {"kicker", kn}, {"dist", bS(dist)}})) : std::string();
+      Line& l = push(Who::PBP, Kind::Live, !withTo.empty() ? withTo : presented ? pickFrom("k_fgset", {fo[1], fo[2]}, {1, 2}) : pick("k_fgset", fo), 1, 5, 0, presented ? 4.0 : 6);
       l.live = true;
-      l.tag = "kset";
+      l.tag = withTo.empty() ? "kset" : "kset:to";
       std::tie(l.alt, l.altEnergy) = genericAlt("kset:fg", l.text, std::string());
     }
   }

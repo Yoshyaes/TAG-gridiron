@@ -117,6 +117,10 @@ class Booth {
   uint64_t forecastStamp() const;
   /** Every live call that names nobody (yard lines, "Touchdown!", "Dropped!"...): synthesize once, keep. */
   static std::vector<std::pair<std::string, int>> genericCalls();
+  /** Live calls that name nobody, added after the first bake (the drop-back without his name, the play fake): kept out
+   *  of genericCalls() so its order - the bake list's first lines - never changes; a bake appends them after every
+   *  earlier line (BoothScript --bake-all, --bake-added), and the match-start prewarm asks for them after the generics. */
+  static std::vector<std::pair<std::string, int>> addedCalls();
   /** The generic call (and its energy) that stands in for a live call with this tag and words; empty when the call is
    *  generic itself. The fallback the call was made with is used when it is generic. */
   static std::pair<std::string, int> genericAlt(const std::string& tag, const std::string& text, const std::string& fallback);
@@ -444,6 +448,13 @@ class Booth {
   TeamKey possBefore_ = TeamKey::Away;
   int adjHome_ = 0, adjAway_ = 0;  // points on the board the Game has not added yet (a touchdown at the whistle)
 
+  // a timeout logged in the same step as the kick after it (the Game's preSnap writes it just before the kick's line):
+  // the kick's setup says it, there is no time for a line of its own before the ball is in the air
+  long timeoutLog_ = -1;           // the log index of the last timeout line
+  bool timeoutByOffense_ = false;  // ... called by the team with the ball (else the defense: icing the kicker)
+  std::string timeoutTeam_;        // ... its city
+  bool kickTimeout_ = false;       // this kick's setup carries that timeout
+  const PlaySim* retTimeoutSim_ = nullptr;  // the live punt return already checked for it
   // kicks
   PlayLog kickLog_;
   bool kickPending_ = false, kickFootSaid_ = false, kickLandSaid_ = false, kickSetupSaid_ = false;

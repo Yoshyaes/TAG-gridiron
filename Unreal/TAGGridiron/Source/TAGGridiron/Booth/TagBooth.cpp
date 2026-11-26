@@ -380,6 +380,8 @@ void ATagBooth::Prewarm(const tag::Game& G)
 		std::vector<std::pair<std::string, int>> Calls = Core->rosterCalls(G);
 		const std::vector<std::pair<std::string, int>> Generic = tag::booth::Booth::genericCalls();
 		Calls.insert(Calls.end(), Generic.begin(), Generic.end());
+		const std::vector<std::pair<std::string, int>> Added = tag::booth::Booth::addedCalls(); // (the generics added since the first bake)
+		Calls.insert(Calls.end(), Added.begin(), Added.end());
 		const TWeakObjectPtr<ATagBooth> Weak(this);
 		AsyncTask(ENamedThreads::AnyBackgroundThreadNormalTask, [Weak, Dir = CacheDir, Calls = MoveTemp(Calls)]()
 		{

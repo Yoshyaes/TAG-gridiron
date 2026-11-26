@@ -28,6 +28,9 @@
 //   down-dist  arithmetic across lines: the distance said before a play, less the yards said, is not the distance
 //              said after it; a "no gain" at another spot.
 //   analyst-floor  a quarter in which the analyst has under 8% of the words (with 200+ words said).
+//   kick-timeout  a timeout logged in the same step as a punt or a field goal (the Game's preSnap, then the kick) that
+//              is not heard - on its own or in the kick's setup - before the kick's result (heard after the next snap,
+//              it is "late").
 // The play window runs from a snap (or a kick) to the next snap or kick.
 #pragma once
 
@@ -48,10 +51,10 @@ namespace audit {
 
 using namespace tag;
 
-enum Cls { Sentiment, TwoNames, Numbers, RuledOut, Situation, BackRef, TdSpot, NoResult, Late, BreakInPlay, LiveName, EndZone, Clock, DownDist, AnalystFloor, kClasses };
+enum Cls { Sentiment, TwoNames, Numbers, RuledOut, Situation, BackRef, TdSpot, NoResult, Late, BreakInPlay, LiveName, EndZone, Clock, DownDist, AnalystFloor, KickTimeout, kClasses };
 inline const char* clsName(int c) {
   static const char* const k[] = {"sentiment", "two-names", "numbers",  "ruled-out", "situation", "back-ref",  "td-spot",      "no-result",
-                                  "late",      "break-in-play", "live-name", "end-zone", "clock", "down-dist", "analyst-floor"};
+                                  "late",      "break-in-play", "live-name", "end-zone", "clock", "down-dist", "analyst-floor", "kick-timeout"};
   return c >= 0 && c < kClasses ? k[c] : "?";
 }
 
@@ -217,6 +220,7 @@ class Audit {
     if (((l.who == booth::Who::PBP && (l.kind == booth::Kind::Result || l.kind == booth::Kind::Score) && !flagLead) || l.kind == booth::Kind::Ref) &&
         (w_.liveSaid || l.notBefore >= w_.t0))
       w_.resultSaid = true;
+    if (l.tag == "timeout" || l.tag == "kset:to") (w_.resultSaid ? w_.timeoutAfter : w_.timeoutHeard) = true;
     // ---- the play window
     Said s;
     s.text = l.text;
@@ -338,6 +342,8 @@ class Audit {
     bool afterScore = false;  // the window before scored (its score line may come in this one when this is the try)
     bool tryWin = false;
     double t0 = 0;  // booth seconds it opened
+    bool timeoutHeard = false;  // a timeout announced (or folded into the kick's setup) before the result
+    bool timeoutAfter = false;  // ... after it (the stoppage before the next play: a kick's, if a kick is next)
   };
   const Game* g_ = nullptr;
   Play cur_;
@@ -365,7 +371,9 @@ class Audit {
 
   void openWindow(const Game& g, int kind, const PerTeam<int>& score0, size_t log0, double t) {
     const bool prevScored = w_.open && windowScored();
+    const bool prevTimeout = w_.open && w_.timeoutAfter;
     w_ = Window();
+    w_.timeoutHeard = kind >= 0 && prevTimeout;  // (said in the stoppage before the kick)
     w_.open = true;
     w_.t0 = t;
     w_.kick = kind;
@@ -378,7 +386,7 @@ class Audit {
   bool windowScored() const { return g_ && (g_->score.home != w_.score0.home || g_->score.away != w_.score0.away); }
   static bool isFlagLog(const PlayLog& e) {
     const std::string& d = e.desc;
-    return e.big == LogTag::Penalty || has(d, "PENALTY") || has(d, "Penalty") || has(d, "(declined)") || (has(d, " kicks ") && (has(d, "out of bounds") || has(d, "short of the landing zone")));
+    return e.big == LogTag::Penalty || has(d, "PENALTY") || has(d, "Penalty") || has(d, "(declined)") || has(d, "enforced on the kickoff") || (has(d, " kicks ") && (has(d, "out of bounds") || has(d, "short of the landing zone")));
   }
   bool flagInWindow(const Game& g) const {
     for (size_t i = w_.log0; i < g.log.size(); ++i)
@@ -556,6 +564,13 @@ class Audit {
     // ---- timing: the play's result, the scores said in the window
     if (w_.open) {
       const bool scored = windowScored();
+      // a timeout taken just before a punt or a field goal (logged in the kick's step): heard before the kick's result
+      if ((w_.kick == 1 || w_.kick == 2) && g_ && !w_.timeoutHeard)
+        for (size_t i = w_.log0; i < g_->log.size(); ++i)
+          if (has(g_->log[i].desc, "Timeout ")) {
+            fail(KickTimeout, g_->log[i].desc, "a timeout before the kick, never said");
+            break;
+          }
       // (a knee: the first one is called, the rest of the victory formation need not be)
       if (!w_.resultSaid && ((cur_.set && cur_.r.kind != PlayKind::Kneel) || w_.kick >= 0)) {
         ++tm.noResult;

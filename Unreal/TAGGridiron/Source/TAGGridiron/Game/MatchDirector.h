@@ -719,7 +719,10 @@ private:
 	/** CommitCameraFrame: a cut this frame (marked or not), against the wipe's cover (a replay's cuts must be under it). */
 	void NoteCutForBroadcast(bool bMarked);
 	/** The nearest head or pelvis of anybody on the field or the sidelines to At (cm), Except left out. */
-	float NearestPerson(const FVector& At, const AActor* Except) const;
+	float NearestPerson(const FVector& At, const AActor* Except, float Ahead = 0.f, const AAthlete** OutWho = nullptr) const;
+	/** Each man's velocity as drawn (cm/s, from frame to frame), for NearestPerson's look ahead (Ahead s: where each will
+	 *  be by then counts too: a man walking into the lens is seen coming). */
+	void TrackPeople(float Dt);
 	/** Nobody at the lens C or on its line to At (men within SubjectR of At belong to the shot). */
 	bool SightClear(const FVector& C, const FVector& At, const AActor* Except, float SubjectR) const;
 	/** A lens position that is not in the turf, the stands or a stand-side person (the stadium's own people, the fans). */
