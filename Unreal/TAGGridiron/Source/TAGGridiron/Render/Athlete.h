@@ -215,8 +215,7 @@ public:
 	/** The sim says this player just caught the ball: pick the catch for the ball height, his speed, where the ball
 	 *  came from and whether he is at the sideline (SidelineDirW: unit vector toward the nearest sideline, or zero). */
 	void PlayCatch(float BallZCm, float SpeedCm, const FVector& BallVelW, const FVector& SidelineDirW,
-		const FVector& BallPosW = FVector::ZeroVector, bool bContested = false, bool bAggressive = false, float CatchIn = -1.f);
-	// (CatchIn, on the catches / swats / kick catches / dives: seconds until the ball meets his hands. The library
+		const FVector& BallPosW = FVector::ZeroVector, bool bContested = false, bool bAggressive = false, float CatchIn = -1.f);	// (CatchIn, on the catches / swats / kick catches / dives: seconds until the ball meets his hands. The library
 	// capture then starts where its own hands-on-the-ball moment comes that long from now; < 0: from its lead, as before.)
 	/** The sim just released a pass: play the throw that fits it (FAthleteAssets::EThrow). */
 	void PlayThrow(int32 Kind);
@@ -548,6 +547,24 @@ private:
 	bool bPreShot = false;       // the running one-shot was asked for before the snap (PlayPreSnapShot)
 	float OneShotAge = 0.f;
 	float OneShotStart = 0.f;     // seconds into the one-shot's clip it starts at (a library capture's moment less its lead)
+public:
+	/** -TagArmSweepOff: the 27 Nov animation sweep's changes off (A/B: the pack loader's floor, the arm layers over captures
+	 *  that hold the ball, the throw / catch key alignment) - the game as it was before it. */
+	static bool ArmSweepOff();
+	/** The running one-shot's key moment in its own clip (s): a throw's release, a catch's hands on the ball; < 0 unknown. */
+	float OneShotKeyT = -1.f;
+	/** Seconds from now until the running one-shot reaches its key moment as played (+: still to come, -: past); NAN when
+	 *  no one-shot with a known key moment is playing. Telemetry for the key-moment timing check (TAG keytime). */
+	float OneShotKeyIn() const;
+	/** Where the running one-shot is in its clip (s), or -1. */
+	float OneShotClipT() const;
+	/** Time-warp the running timed one-shot so its key moment (OneShotKeyT) comes EventIn seconds from now: its rate is
+	 *  steered within 0.7-1.4 (the sim moved the release, the ball arrives sooner than the flight's plan). */
+	void AlignKey(float EventIn);
+	float OneShotPos = 0.f; // where the one-shot is in its clip (s): its start plus each frame's time at that frame's rate
+	/** The arms against the capture this evaluation (UTagRetargetAnimInstance::Arm), telemetry. */
+	float LastArm[11] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+private:
 	// get-up after a ragdoll: snapshot the lying pose, play the matching keyed get-up where the body lies
 	void StartGetUp(const FVector& SimLoc);
 	// keyed fall to the ground (paired tackle, pancake, solo knockdown): the actor is anchored and the clip carries the
@@ -1054,6 +1071,9 @@ struct FAthleteAssets
 	 *  several MB resident, so the budget, not the bounds, sets how much of the pack a draw holds. */
 	TArray<FSoftObjectPath> PackQueue;
 	int32 PackQueuePos = 0, PackChunk = 0;
+	int32 PackEssentialN = 0; // the queue's first share - the first rounds of every family - loaded unless memory is critical
+	bool bPackDrawn = false;  // a draw has landed (a re-draw with no room beside it keeps it instead of emptying the families)
+	static double PackFloorMB(); // free memory the pack loader leaves the machine (-TagMemFloorMB=, 1500 MB)
 	TSet<FSoftObjectPath> PackPlaced;
 	double PackBudgetMB = 0.0, PackT0 = 0.0;
 	void LoadNextPackChunk();

@@ -3033,7 +3033,8 @@ void AMatchDirector::TickHighlights(float Dt)
 		}();
 		// -TagHlNoFrames (with -TagHlFull, 07 A6): every frame counted and its telemetry row written, no screenshot taken
 		static const bool bHlNoFrames = FParse::Param(FCommandLine::Get(), TEXT("TagHlNoFrames"));
-		if (bHlFull && bHlNoFrames) ++HlFrame;
+		static const bool bHlCamOnly = FParse::Param(FCommandLine::Get(), TEXT("TagHlCamOnly")); // (frames only while a film close shot is on: -TagThrowCam / -TagCatchCam)
+		if (bHlFull && (bHlNoFrames || (bHlCamOnly && !bFilmCloseShot))) ++HlFrame;
 		else FScreenshotRequest::RequestScreenshot(bHlFull ? FString::Printf(TEXT("%s/c%03d_%05d.png"), *HlDir, HlClip, HlFrame++)
 			: FString::Printf(TEXT("%s/c%02d_%05d.png"), *HlDir, HlClip, HlFrame++), true, false);
 	}
@@ -3067,7 +3068,8 @@ void AMatchDirector::HlTelemetry(int32 Frame)
 		: State == EMatchState::Replay ? TEXT("replay") : State == EMatchState::Kick ? TEXT("kick") : TEXT("other");
 	if (HlTele.IsEmpty())
 		HlTele = TEXT("frame,state,simt,ballmode,bx,by,bz,bwx,bwy,bwz,pid,num,pos,side,role,sstate,sanim,sx,sy,svx,svy,face,eng,ball,stun,hidden,wx,wy,wz,yaw,down,")
-			TEXT("flx,fly,flz,frx,fry,frz,pz,hdz,hrx,hry,hrz,hlx,hly,hlz,scrx,scry,refd,refw,slr,sls,dev,dfb,dor,dst,dln,dxf,dft,mmeff,mmstr,mmang,mmor,pvx,pvy,hdx,hdy,voff,rro,plf,anim,")
+			TEXT("flx,fly,flz,frx,fry,frz,pz,hdz,hrx,hry,hrz,hlx,hly,hlz,scrx,scry,refd,refw,slr,sls,dev,dfb,dor,dst,dln,dxf,dft,mmeff,mmstr,mmang,mmor,pvx,pvy,hdx,hdy,voff,rro,plf,")
+			TEXT("ahl,ahr,afl,afr,ael,aer,awl,awr,acl,acr,ajit,lod,anim,")
 			TEXT("camx,camy,camz,camfx,camfy,camfz,camfoc,camang,camcut,camnear,camhold\n");
 	// the camera's columns, the same on every man's row (MatchBroadcast.cpp: CameraTelemetryCols)
 	const FString CamCols = CameraTelemetryCols();
@@ -3151,7 +3153,7 @@ void AMatchDirector::HlTelemetry(int32 Frame)
 			if (PC->ProjectWorldLocationToScreen(W + FVector(0, 0, 90), S2, false)) Scr = S2 / VP;
 		}
 		HlTele += FString::Printf(TEXT("%d,%s,%.3f,%s,%.2f,%.2f,%.2f,%.1f,%.1f,%.1f,%d,%d,%s,%s,%s,%s,%s,%.3f,%.3f,%.3f,%.3f,%.3f,%s,%d,%.2f,%d,%.1f,%.1f,%.1f,%.1f,%d,")
-			TEXT("%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.3f,%.3f,%.1f,%d,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.0f,%.2f,%.0f,%.0f,%.1f,%.1f,%.1f,%.1f,%.1f,%.0f,%d,%s%s\n"),
+			TEXT("%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.3f,%.3f,%.1f,%d,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.0f,%.2f,%.0f,%.0f,%.1f,%.1f,%.1f,%.1f,%.1f,%.0f,%d,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.0f,%.0f,%.0f,%.0f,%.2f,%d,%s%s\n"),
 			Frame, St, Sim->t, UTF8_TO_TCHAR(tag::ballModeName(Sim->ball.mode)), Sim->ball.pos.x, Sim->ball.pos.y, Sim->ball.pos.z, BallW.X, BallW.Y, BallW.Z,
 			E->p->id, E->p->number, UTF8_TO_TCHAR(tag::posName(E->p->pos)), UTF8_TO_TCHAR(tag::sideName(E->side)), UTF8_TO_TCHAR(E->role.c_str()),
 			UTF8_TO_TCHAR(E->stateName()), UTF8_TO_TCHAR(E->animName()), E->pos.x, E->pos.y, E->vel.x, E->vel.y, E->face,
@@ -3159,7 +3161,11 @@ void AMatchDirector::HlTelemetry(int32 Frame)
 			W.X, W.Y, W.Z, A ? A->GetActorRotation().Yaw : 0.f, A && A->IsDown() ? 1 : 0,
 			FL.X, FL.Y, FL.Z, FR.X, FR.Y, FR.Z, Pv.Z, Hd.Z, HR.X, HR.Y, HR.Z, HL.X, HL.Y, HL.Z, Scr.X, Scr.Y, RefD, RefW, A ? A->LastSlideRaw : 0.f, A ? A->LastSlideShown : 0.f,
 			A ? A->LastDev[0] : 0.f, A ? A->LastDev[1] : 0.f, A ? A->LastDev[2] : 0.f, A ? A->LastDev[3] : 0.f, A ? A->LastDev[4] : 0.f, A ? A->LastDev[5] : 0.f,
-			A ? A->LastDev[6] : 0.f, A ? A->TelEff : 0.f, A ? A->TelStride : 1.f, A ? A->TelAng : 0.f, A ? A->TelOrient : 0.f, Pv.X, Pv.Y, Hd.X, Hd.Y, A ? A->VisOffsetCm() : 0.f, A ? A->TelRootOff : 0.f, A ? A->LastPlantFeet : 0, A ? *A->TelemetryAnim() : TEXT(""), *CamCols);
+			A ? A->LastDev[6] : 0.f, A ? A->TelEff : 0.f, A ? A->TelStride : 1.f, A ? A->TelAng : 0.f, A ? A->TelOrient : 0.f, Pv.X, Pv.Y, Hd.X, Hd.Y, A ? A->VisOffsetCm() : 0.f, A ? A->TelRootOff : 0.f, A ? A->LastPlantFeet : 0,
+			A ? A->LastArm[0] : 0.f, A ? A->LastArm[1] : 0.f, A ? A->LastArm[2] : 0.f, A ? A->LastArm[3] : 0.f, A ? A->LastArm[4] : 0.f, A ? A->LastArm[5] : 0.f,
+			A ? A->LastArm[6] : 0.f, A ? A->LastArm[7] : 0.f, A ? A->LastArm[8] : 0.f, A ? A->LastArm[9] : 0.f, A ? A->LastArm[10] : 0.f,
+			M ? M->GetPredictedLODLevel() : -1,
+			A ? *A->TelemetryAnim() : TEXT(""), *CamCols);
 	}
 }
 
@@ -5776,6 +5782,17 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 		if (bCatchCheckOn && Ev.a && (Ev.type == "catch" || Ev.type == "divecatch" || Ev.type == "int" || Ev.type == "pbu" || Ev.type == "drop" ||
 			Ev.type == "contested_inc" || Ev.type == "batted" || Ev.type == "recover" || Ev.type == "oobcatch"))
 			CatchCheckNew.Emplace(Ev.a, FString(UTF8_TO_TCHAR(Ev.type.c_str())));
+		// (telemetry runs: the ball's moment against the capture's - a throw's release, a catch's or a play on the ball's
+		// hands on it - as the shown man has it: + the capture's moment still to come, - already past; "none" when no
+		// capture with a known moment is playing on him then. Tools/Realism/arm_audit.py reads these.)
+		if (bHlFull && Ev.a && (Ev.type == "throw" || Ev.type == "catch" || Ev.type == "divecatch" || Ev.type == "int" || Ev.type == "pbu" || Ev.type == "drop" ||
+			Ev.type == "contested_inc" || Ev.type == "batted" || Ev.type == "oobcatch" || Ev.type == "toss" || Ev.type == "pump"))
+			if (const AAthlete* Ka = AthOf(Ev.a))
+			{
+				const float In = Ka->OneShotKeyIn();
+				UE_LOG(LogTemp, Display, TEXT("TAG keytime %s #%d clip %d frame %d: %s %.3f s (%s, at %.2f, key %.2f)"), UTF8_TO_TCHAR(Ev.type.c_str()), Ev.a->p ? Ev.a->p->number : -1,
+					HlClip, HlFrame, FMath::IsNaN(In) ? TEXT("none") : TEXT("in"), FMath::IsNaN(In) ? 0.f : In, *Ka->TelemetryAnim(), Ka->OneShotClipT(), Ka->OneShotKeyT);
+			}
 		if ((Ev.type == "catch" || Ev.type == "int") && Ev.a)
 		{
 			LastCatcher = Ev.a;
@@ -6181,9 +6198,14 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 				// the sim takes momentum off the catcher as he catches it (x0.45, x0.3 contested): his speed into the catch
 				const double SpeedIn = tag::len(Ev.a->vel) / (bContested ? 0.3 : 0.45);
 				// (already in his catch: started before the ball got there, see the football layer below)
-				if (!(PrimedSerial == Sim->serial && PrimedCatcher == Ev.a) && !(KickCatchSerial == Sim->serial && Sim->cfg.kick))
+				// (primed, but nothing of it playing any more - a ball rolled as a drop and caught after all, a capture that ended
+				// before the ball got there: he caught it on his run with the arm layers alone; arm audit, 27 Nov. Now the
+				// catch from its hands-on-the-ball frame - CatchIn 0 - not a placed clip from its first frame.)
+				const bool bSweep = !AAthlete::ArmSweepOff();
+				const bool bPrimedPlaying = PrimedSerial == Sim->serial && PrimedCatcher == Ev.a && (!bSweep || R->OneShotClipT() >= 0.f);
+				if (!bPrimedPlaying && !(KickCatchSerial == Sim->serial && Sim->cfg.kick))
 					R->PlayCatch(static_cast<float>(Bc.pos.z * YD), static_cast<float>(SpeedIn * YD), BallVelC, Side,
-						ToWorld(Bc.pos.x, Bc.pos.y, Dir, Bc.pos.z), bContested, bAggroCatch && Ev.a->side == tag::Side::Off);
+						ToWorld(Bc.pos.x, Bc.pos.y, Dir, Bc.pos.z), bContested, bAggroCatch && Ev.a->side == tag::Side::Off, bSweep ? 0.f : -1.f);
 			}
 		}
 	}
@@ -6334,11 +6356,14 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 	}
 	// the windup: the throw that fits the pass starts as the sim starts the throw, timed so its release is the sim's
 	// (it used to start at the release itself, from 7 frames before: the ball was away before the arm came through)
-	if (Sim->pendingThrow && !Sim->passThrown && Sim->qb && ThrowTimedSerial != Sim->serial && !Sim->pendingThrow->away && Sim->pendingThrow->tgt)
+	// (a throw-away too: it had no windup, and its keyed throw played from 7 frames before its release at the release - the
+	// arm came through after the ball was gone)
+	const bool bWindAway = Sim->pendingThrow && Sim->pendingThrow->away && !AAthlete::ArmSweepOff();
+	if (Sim->pendingThrow && !Sim->passThrown && Sim->qb && ThrowTimedSerial != Sim->serial && ((!Sim->pendingThrow->away && Sim->pendingThrow->tgt) || bWindAway))
 		if (AAthlete* Q = AthOf(Sim->qb))
 		{
 			const tag::Ent* QE = Sim->qb;
-			const double D = tag::dist(QE->pos, Sim->pendingThrow->tgt->pos);
+			const double D = Sim->pendingThrow->tgt ? tag::dist(QE->pos, Sim->pendingThrow->tgt->pos) : 20.0;
 			const double Sp = tag::len(QE->vel);
 			double Rush = 99.0;
 			for (const tag::Ent* O : Sim->ents)
@@ -6402,6 +6427,27 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 			bThrowTimedTouch = bRtTouch;
 		}
 	}
+	// the captures' key moments on the ball's: the windup's release on the sim's release (it moves - a pass held for the
+	// receiver's break), a primed catch's, swat's or interception's hands on the ball when it meets the man (sooner or later
+	// than the flight's plan). Each capture's own rate is steered for it (AAthlete::AlignKey, 0.7-1.4); the 27 Nov arm audit
+	// had releases and catches up to a quarter second off the ball.
+	if (Sim->pendingThrow && !Sim->passThrown && Sim->qb && ThrowTimedSerial == Sim->serial)
+		if (AAthlete* Aq = AthOf(Sim->qb); Aq && Aq->IsThrowing()) Aq->AlignKey(static_cast<float>(Sim->pendingThrow->at - Sim->t));
+	if (B.mode == tag::BallMode::Air && Sim->isLive() && !Sim->cfg.kick && B.target && !B.away)
+	{
+		auto AlignOn = [&](const tag::Ent* Who)
+		{
+			if (!Who) return;
+			const double In = CcContactIn(Who);
+			if (In > 0.0 && In < 0.8)
+				if (AAthlete* Aw = AthOf(Who)) Aw->AlignKey(static_cast<float>(In));
+		};
+		if (PrimedSerial == Sim->serial) AlignOn(PrimedCatcher);
+		// (not the two-man interception: its two parts run in step from one moment of the capture, at the capture's rate)
+		if (SwatSerial == Sim->serial && SwatBy != PrimedCatcher && !(bIntPaired && FatePrimedSerial == Sim->serial)) AlignOn(SwatBy);
+	}
+	else if (B.mode == tag::BallMode::Air && Sim->isLive() && Sim->cfg.kick && KickCatchSerial == Sim->serial && Sim->returner)
+		if (AAthlete* Ar = AthOf(Sim->returner)) Ar->AlignKey(static_cast<float>(Sim->cfg.kick->hang - B.t));
 	// the pass's outcome, rolled by the sim ~0.4 s before it gets there (PlaySim::preRollCatch): the interaction it is
 	// starts now, in time - the defender and the receiver in one of the pack's two-man interceptions, the named defender's
 	// breakup, the receiver's drop (a catch is primed below as before). An interception's pair is chosen from where the
@@ -6450,6 +6496,15 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 					SwatSerial = Sim->serial;
 					SwatBy = E;
 				}
+				// and the receiver: the pack's ball-off-the-hands capture, timed to the ball - his hands up for it as it is
+				// knocked away (he went into a full catch and tucked a ball the defender had batted down; arm audit, 27 Nov)
+				const double TRecv = CcContactIn(B.target);
+				if (!AAthlete::ArmSweepOff() && B.target->free() && TRecv > 0.0 && PrimedSerial != Sim->serial)
+					if (AAthlete* Rv = AthOf(B.target); Rv && Rv->PlayDrop(static_cast<float>(TRecv)))
+					{
+						PrimedSerial = Sim->serial;
+						PrimedCatcher = B.target;
+					}
 			}
 			else if (B.fate == 2 && AthOf(B.target)->PlayDrop(static_cast<float>(TArr)))
 			{
@@ -6509,7 +6564,10 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 					const double Sp = tag::len(E->vel);
 					const double Fwd = Sp > 0.3 ? (E->vel.x * FMath::Cos(E->face) + E->vel.y * FMath::Sin(E->face)) / Sp : 1.0;
 					const int32 Gait = Sp < 1.5 || Fwd < -0.4 ? 2 : FMath::Abs(Fwd) < 0.5 ? 1 : 0;
-					A->PlayBallDefense(Gait, false);
+					// (timed to the ball meeting the man he covers: untimed, its hands met the ball 4 frames after it started,
+					// up to 0.17 s before the ball was there)
+					const double TSwat = CcContactIn(B.target);
+					A->PlayBallDefense(Gait, false, !AAthlete::ArmSweepOff() && TSwat > 0.0 ? static_cast<float>(TSwat) : -1.f);
 				}
 			}
 			// (timed to when the ball meets him, CcContactIn, and the capture started so its hands are on the ball then:
@@ -7688,6 +7746,34 @@ void AMatchDirector::UpdateCamera(float Dt, const FVector& InFocus)
 			}
 		}
 	}
+	// -TagThrowCam (film only): the quarterback's windup to 0.5 s after the release, from 5.5 m side on (the side he
+	// throws from, the broadcast side when he faces it), chest high - a throw's arm judged on screen. The catch camera
+	// takes over for the ball's last 0.9 s when both are on.
+	static const bool bThrowCam = FParse::Param(FCommandLine::Get(), TEXT("TagThrowCam"));
+	static TWeakObjectPtr<AAthlete> GThrowCamWho;
+	static double GThrowCamUntil = -1.0;
+	static unsigned long long GThrowCamSerial = 0;
+	if (bThrowCam && Sim && Game && State == EMatchState::Live && !bCcCamShot)
+	{
+		if (GThrowCamSerial != Sim->serial) { GThrowCamWho = nullptr; GThrowCamUntil = -1.0; GThrowCamSerial = Sim->serial; }
+		for (const tag::Ent* E : Sim->ents)
+			if (E->side == tag::Side::Off && E->hasBall)
+				if (AAthlete* Qa = AthleteFor(E->p, Game->poss); Qa && Qa->IsThrowing())
+				{
+					GThrowCamWho = Qa;
+					GThrowCamUntil = Sim->t + 0.5;
+				}
+		if (AAthlete* Qa = GThrowCamWho.Get(); Qa && Sim->t <= GThrowCamUntil)
+		{
+			const FVector Fo = Qa->GetActorLocation() + FVector(0, 0, 120.f - Qa->GetActorLocation().Z);
+			FVector Sd = Qa->GetActorRightVector(); // (his throwing side)
+			Sd.Z = 0.f;
+			P = Fo + Sd.GetSafeNormal() * 550.f + Qa->GetActorForwardVector() * 150.f + FVector(0, 0, 60.f);
+			CamLook = Fo;
+			bCcCamShot = true;
+		}
+	}
+	bFilmCloseShot = bCcCamShot;
 	Camera->SetActorLocation(P);
 	Camera->SetActorRotation((CamLook - P).Rotation() + ShakeRot);
 	if (UCineCameraComponent* C = Camera->GetCineCameraComponent())

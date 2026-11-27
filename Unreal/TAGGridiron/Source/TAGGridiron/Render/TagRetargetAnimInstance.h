@@ -104,8 +104,21 @@ struct FTagRetargetProxy : public FAnimInstanceProxy
 	 *  space): [0] in all, then what each layer moved: football layer, orientation, stride, lean, crossfade, foot lock.
 	 *  Measured only in telemetry runs (-TagHlFull / -TagDev). */
 	float DevFrame[7] = {0, 0, 0, 0, 0, 0, 0};
+	/** The arms against the capture as played (telemetry runs only; MeasureArms), left then right:
+	 *  [0,1] hand off the capture's in the chest's frame after every layer (cm), [2,3] what the football layer alone moved it
+	 *  (cm), [4,5] elbow bend the football layer put on the capture's (deg), [6,7] the shown arm's fastest segment turn in the chest's frame
+	 *  (deg/s), [8,9] the capture's own, [10] the layers' jitter: the largest second difference of any of the eleven
+	 *  joints' offset from the capture (cm per frame per frame). */
+	float ArmFrame[11] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 private:
+	void MeasureArms(const FPoseContext& Output, int32 Stage);
+	FTransform ArmT[3][7];                // the chest and both arms (upper, fore, hand) as copied, after the football layer, as shown
+	FVector ArmDirPrev[2][2][2];          // [shown/capture][side][upper/fore]: the segments' last directions in the chest's frame
+	bool bArmPrev = false;
+	FVector JitOff[2][11];                // the eleven joints' offsets from the capture, the last two evaluations
+	int32 JitHave = 0;
+	FVector DevCap[11];                   // the eleven joints as copied (this evaluation)
 	void ApplyFootballLayer(FPoseContext& Output) const;
 	void ApplyStride(FPoseContext& Output) const;
 	void ApplyOrient(FPoseContext& Output) const;
@@ -219,6 +232,7 @@ public:
 	float SlideRaw = 0.f, SlideShown = 0.f;
 	int32 PlantFeet = 0; // feet the capture held planted in the last evaluation
 	float Dev[7] = {0, 0, 0, 0, 0, 0, 0}; // the last evaluation's distance from the capture (FTagRetargetProxy::DevFrame)
+	float Arm[11] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; // the arms against the capture (FTagRetargetProxy::ArmFrame)
 	int32 Touchdowns = 0; // feet that came down on the turf since the game thread last cleared it (gait cadence)
 	/** Transition jerk measured since the game thread last cleared it (FTagRetargetProxy::MeasureJerk): x = xfj, y = kind
 	 *  (0 a clip switch, 1 a matched pick change). AAthlete::XfjStats pools them. */

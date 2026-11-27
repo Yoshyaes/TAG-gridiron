@@ -156,6 +156,80 @@ namespace
 		for (int32 k = 0; k < kDevN; ++k) S += FVector::Dist(A[k], B[k]);
 		return static_cast<float>(S / kDevN);
 	}
+	// the chest and both arms in component space: spine_05, upperarm / lowerarm / hand left, then right
+	void ArmJoints(const FPoseContext& Ctx, FTransform Out[7])
+	{
+		static const FName Names[7] = {TEXT("spine_05"), TEXT("upperarm_l"), TEXT("lowerarm_l"), TEXT("hand_l"), TEXT("upperarm_r"), TEXT("lowerarm_r"), TEXT("hand_r")};
+		const FBoneContainer& BC = Ctx.Pose.GetBoneContainer();
+		for (int32 k = 0; k < 7; ++k)
+		{
+			Out[k] = FTransform::Identity;
+			const int32 Mesh = BC.GetPoseBoneIndexForBoneName(Names[k]);
+			if (Mesh == INDEX_NONE) continue;
+			FCompactPoseBoneIndex I = BC.MakeCompactPoseIndex(FMeshPoseBoneIndex(Mesh));
+			if (!I.IsValid()) continue;
+			FTransform T = Ctx.Pose[I];
+			for (FCompactPoseBoneIndex P = BC.GetParentBoneIndex(I); P.IsValid(); P = BC.GetParentBoneIndex(P)) T = T * Ctx.Pose[P];
+			Out[k] = T;
+		}
+	}
+	FVector InChest(const FTransform A[7], int32 k) { return A[0].InverseTransformPositionNoScale(A[k].GetLocation()); }
+	float ElbowDeg(const FTransform A[7], int32 Side)
+	{
+		const int32 U = 1 + Side * 3;
+		const FVector Up = (A[U + 1].GetLocation() - A[U].GetLocation()).GetSafeNormal();
+		const FVector Fo = (A[U + 2].GetLocation() - A[U + 1].GetLocation()).GetSafeNormal();
+		return FMath::RadiansToDegrees(FMath::Acos(FMath::Clamp(static_cast<float>(FVector::DotProduct(Up, Fo)), -1.f, 1.f)));
+	}
+}
+
+void FTagRetargetProxy::MeasureArms(const FPoseContext& Output, int32 Stage)
+{
+	// Stage 0: as copied (the capture as played), 1: after the football layer, 2: as shown
+	ArmJoints(Output, ArmT[Stage]);
+	if (Stage != 2) return;
+	for (int32 s = 0; s < 2; ++s)
+	{
+		const int32 H = 3 + s * 3;
+		ArmFrame[0 + s] = static_cast<float>(FVector::Dist(InChest(ArmT[2], H), InChest(ArmT[0], H)));
+		ArmFrame[2 + s] = static_cast<float>(FVector::Dist(InChest(ArmT[1], H), InChest(ArmT[0], H)));
+		// (the football layer's own bend: the arm IK. A crossfade between two captures bends it too, and is no code arm)
+		ArmFrame[4 + s] = FMath::Abs(ElbowDeg(ArmT[1], s) - ElbowDeg(ArmT[0], s));
+	}
+	// the segments' turn rates in the chest's frame, shown and captured (a pop: the shown arm whips where the capture does not)
+	for (int32 w = 0; w < 2; ++w)
+	{
+		const FTransform* A = w == 0 ? ArmT[2] : ArmT[0];
+		for (int32 s = 0; s < 2; ++s)
+		{
+			const int32 U = 1 + s * 3;
+			float Fast = 0.f;
+			for (int32 g = 0; g < 2; ++g)
+			{
+				const FVector D = (InChest(A, U + g + 1) - InChest(A, U + g)).GetSafeNormal();
+				if (bArmPrev && Dt > 1e-4f)
+					Fast = FMath::Max(Fast, FMath::RadiansToDegrees(FMath::Acos(FMath::Clamp(static_cast<float>(FVector::DotProduct(D, ArmDirPrev[w][s][g])), -1.f, 1.f))) / Dt);
+				ArmDirPrev[w][s][g] = D;
+			}
+			ArmFrame[(w == 0 ? 6 : 8) + s] = Fast;
+		}
+	}
+	bArmPrev = true;
+	// the layers' jitter: how sharply the offset the layers add to each joint changes (a capture's own motion cancels out).
+	// The upper body only - pelvis, chest, head, elbows, hands: the foot lock holding a planted foot against the capture's
+	// is meant to (the first cut, all eleven, read 30-90 % of frames)
+	FVector Shown[kDevN];
+	DevJoints(Output, Shown);
+	float Jit = 0.f;
+	for (int32 k = 0; k < 7; ++k)
+	{
+		const FVector Off = Shown[k] - DevCap[k];
+		if (JitHave >= 2) Jit = FMath::Max(Jit, static_cast<float>((Off - 2.0 * JitOff[0][k] + JitOff[1][k]).Size()));
+		JitOff[1][k] = JitOff[0][k];
+		JitOff[0][k] = Off;
+	}
+	JitHave = FMath::Min(JitHave + 1, 2);
+	ArmFrame[10] = Jit;
 }
 
 bool FTagRetargetProxy::Evaluate(FPoseContext& Output)
@@ -187,7 +261,8 @@ bool FTagRetargetProxy::Evaluate(FPoseContext& Output)
 	if (bMeasure)
 	{
 		DevJoints(Output, J0);
-		for (int32 k = 0; k < kDevN; ++k) Ja[k] = J0[k];
+		for (int32 k = 0; k < kDevN; ++k) Ja[k] = DevCap[k] = J0[k];
+		MeasureArms(Output, 0);
 	}
 	auto Step = [&](int32 Layer)
 	{
@@ -198,6 +273,7 @@ bool FTagRetargetProxy::Evaluate(FPoseContext& Output)
 	};
 	ApplyFootballLayer(Output);
 	Step(1);
+	if (bMeasure) MeasureArms(Output, 1);
 	ApplyOrient(Output);
 	Step(2);
 	ApplyStride(Output);
@@ -212,6 +288,7 @@ bool FTagRetargetProxy::Evaluate(FPoseContext& Output)
 	ApplyKeepOut(Output);
 	if (bMeasure)
 	{
+		MeasureArms(Output, 2);
 		DevFrame[0] = DevMean(J0, Ja);
 		MeasureJerk(Output);
 	}
@@ -308,6 +385,7 @@ void FTagRetargetProxy::PostUpdate(UAnimInstance* InAnimInstance) const
 		I->SlideShown += SlideShownFrame;
 		I->Touchdowns += TouchdownsFrame;
 		for (int32 k = 0; k < 7; ++k) I->Dev[k] = DevFrame[k];
+		for (int32 k = 0; k < 11; ++k) I->Arm[k] = ArmFrame[k];
 		I->PlantFeet = PlantFeetFrame;
 		if (JerkOutFrame.Num())
 		{
@@ -724,8 +802,21 @@ void FTagRetargetProxy::ApplyFootballLayer(FPoseContext& Output) const
 			// toward a ball still three metres off, both arms locked out straight at it from the shoulders - arms that
 			// looked bolted on - and stayed there through the catch.)
 			const float Near = 1.f - FMath::Clamp((static_cast<float>(FVector::Dist(C, Chest)) - 60.f) / 40.f, 0.f, 1.f);
-			ArmIK(P, B.UL, B.LL, B.HL, C + Side * Spread, PoleL, In.ReachAlpha * Near);
-			ArmIK(P, B.UR, B.LR, B.HR, C - Side * Spread, PoleR, In.ReachAlpha * Near * (1.f - In.CarryAlpha));
+			FVector TL = C + Side * Spread, TR = C - Side * Spread;
+			// a correction to the capture, never a reach of its own: each hand goes at most 10 cm from where the capture puts
+			// it (the catch, the wrap, the hands on a block - the capture was chosen for the job; the arm audit, 27 Nov, had
+			// the reach 30-90 cm off the capture over whole block loops and tackle clips; at 15 cm the elbow still bent ~25 deg
+			// off the catch capture in its last 0.2 s). -TagArmSweepOff: uncapped.
+			static const bool bSweepOff = FParse::Param(FCommandLine::Get(), TEXT("TagArmSweepOff"));
+			if (!bSweepOff)
+			{
+				constexpr float MaxCorr = 10.f;
+				const FVector HL0 = Pos(P, B.HL), HR0 = Pos(P, B.HR);
+				TL = HL0 + (TL - HL0).GetClampedToMaxSize(MaxCorr);
+				TR = HR0 + (TR - HR0).GetClampedToMaxSize(MaxCorr);
+			}
+			ArmIK(P, B.UL, B.LL, B.HL, TL, PoleL, In.ReachAlpha * Near);
+			ArmIK(P, B.UR, B.LR, B.HR, TR, PoleR, In.ReachAlpha * Near * (1.f - In.CarryAlpha));
 		}
 		// --- 3-point stance: down hand on the turf in front of the right foot
 		if (In.StanceAlpha > 0.01f)
