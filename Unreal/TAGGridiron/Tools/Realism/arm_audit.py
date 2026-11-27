@@ -22,7 +22,7 @@ TOL_HAND = 15.0       # cm: hand off the capture by code (football layer) beyond
 TOL_ELBOW = 25.0      # deg
 COLS = ["frame", "state", "simt", "ballmode", "pid", "num", "pos", "side", "role", "sstate", "sanim", "ball", "hidden", "down",
         "ahl", "ahr", "afl", "afr", "ael", "aer", "awl", "awr", "acl", "acr", "ajit", "lod", "scrx", "scry", "anim", "dev", "dxf",
-        "hrx", "hry", "hrz", "hlx", "hly", "hlz", "wx", "wy"]
+        "hrx", "hry", "hrz", "hlx", "hly", "hlz", "wx", "wy", "twl", "twr", "tul", "tur", "hws", "hwc", "sls", "plf", "sanim"]
 KEY = re.compile(r"TAG keytime (\w+) #(\d+) clip (\d+) frame (\d+): (none|in) (-?[\d.]+) s \((.*?), at (-?[\d.]+), key (-?[\d.]+)\)")
 OFF_EV = {"throw", "catch", "divecatch", "drop", "contested_inc", "oobcatch", "toss", "pump"}
 
@@ -65,6 +65,28 @@ def category(r):
     return "other live (" + ss + ")"
 
 
+FAMILIES = [
+    ("carrier move (juke/spin/truck/stiff arm/hurdle)", ("Juke", "Spin_", "_Spin", "Truck", "StiffArm", "Stiff_Arm", "Hurdle")),
+    ("rush move / win / beaten", ("Swim", "Rip", "Club", "LongArm", "Long_Arm", "DipRip", "RushSpin", "Bull", "Win_v", "Win_Aggressive", "Beaten", "Loss_v", "DL_Move")),
+    ("block rep / engage", ("PassBlock", "RunBlock", "Block_Impact", "GetEng", "HeadsUp", "Block_Engaged", "Block_Walk", "DbleTm", "Double")),
+    ("get-up / help-up", ("GetUp", "Getup", "Get_Up", "HelpUp")),
+    ("tackle / tackled / pile", ("Tackle", "Tackled", "PileOn", "Pile_On", "Gang", "_PT_", "Whiff")),
+    ("kick / punt / hold / snap", ("Kick", "Punt", "FG_", "Holder", "Snap", "Field_Goal")),
+    ("celebration", ("Celeb", "Celebrate", "Spike")),
+    ("stumble / bump", ("Stumble", "Bump", "Jam")),
+    ("handoff / play fake / pitch", ("Handoff", "PA_", "Fake", "Pitch", "Toss")),
+]
+
+
+def family(mode, asset):
+    if mode == "mm":
+        return "locomotion (motion matching)"
+    for name, keys in FAMILIES:
+        if any(k in asset for k in keys):
+            return name
+    return mode + " other"
+
+
 def load(run):
     T = []
     for p in sorted(glob.glob(os.path.join(run, "telemetry", "c*.csv"))):
@@ -105,9 +127,24 @@ def main():
     D = D[(D.hidden != 1) & D.state.isin(["presnap", "live", "post", "other", "kick"])].copy()
     for c in ("ahl", "ahr", "afl", "afr", "ael", "aer", "awl", "awr", "acl", "acr", "ajit", "down", "ball"):
         D[c] = pd.to_numeric(D[c], errors="coerce").fillna(0)
+    for c in ("twl", "twr", "tul", "tur", "hws", "hwc", "sls", "plf"):
+        D[c] = pd.to_numeric(D[c], errors="coerce").fillna(0) if c in D.columns else 0.0
+    # twist flips: the hand's or upper arm's twist jumping > 90 deg in a frame (a candy-wrap pop), per man
+    D = D.sort_values(["run", "clip", "pid", "frame"])
+    same = (D.run.values[1:] == D.run.values[:-1]) & (D["clip"].values[1:] == D["clip"].values[:-1]) & (D.pid.values[1:] == D.pid.values[:-1]) & (np.diff(D.frame.values) == 1)
+    flip = np.zeros(len(D), dtype=bool)
+    for c in ("twl", "twr", "tul", "tur"):
+        v = D[c].values.astype(float)
+        dv = np.abs(np.diff(v))
+        dv = np.minimum(dv, 360.0 - dv)
+        flip[1:] |= same & (dv > 90.0)
+    D["twflip"] = flip
+    D["twwrap"] = (np.abs(D.twl) > 120) | (np.abs(D.twr) > 120) | (np.abs(D.tul) > 120) | (np.abs(D.tur) > 120)
+    D["headpop"] = (D.hws - D.hwc) > 400
     D["mode"] = D.anim.map(mode_of)
     D["asset"] = D.anim.map(asset_of)
     D["cat"] = [category(r) for r in D.itertuples()]
+    D["fam"] = [family(m, a_) for m, a_ in zip(D["mode"].values, D["asset"].values)]
     # event windows (throw: windup 0.7 s before the release to 0.3 s after; a catch / play on the ball: 0.4 s before to 0.3 s after)
     D["ev"] = ""
     D["evid"] = -1
@@ -170,7 +207,19 @@ def main():
                         hand_cm=stats(hand), code_hand_cm=stats(code), elbow_deg=stats(elb),
                         code_over_tol=round(float(((code > TOL_HAND) | (elb > TOL_ELBOW)).mean()), 3),
                         pop_share=round(float(pop), 4), jitter_share=round(float((g.ajit > 1.5).mean()), 4), jitter=stats(g.ajit.values),
-                        mm_assets=top)
+                        mm_assets=top, twist_wrap=round(float(g.twwrap.mean()), 4), twist_flip=round(float(g.twflip.mean()), 4),
+                        head_pop=round(float(g.headpop.mean()), 4), slide_cm_s=round(float(g.sls.sum() / max(1.0, len(g) / FPS)), 2))
+    fams = {}
+    for fam, g in D[D.state.isin(["live", "post"])].groupby("fam"):
+        if len(g) < 30:
+            continue
+        code = np.fmax(g.afl.values, g.afr.values)
+        elb = np.fmax(g.ael.values, g.aer.values)
+        fams[fam] = dict(frames=int(len(g)), code_hand_cm=stats(code), elbow_deg=stats(elb),
+                         code_over_tol=round(float(((code > TOL_HAND) | (elb > TOL_ELBOW)).mean()), 4),
+                         pop_share=round(float((((g.awl - g.acl) > POP) | ((g.awr - g.acr) > POP)).mean()), 4),
+                         twist_flip=round(float(g.twflip.mean()), 4), head_pop=round(float(g.headpop.mean()), 4),
+                         slide_cm_s=round(float(g.sls.sum() / max(1.0, len(g) / FPS)), 2))
     E = pd.DataFrame(evs)
     summ = {}
     if len(E):
@@ -201,13 +250,23 @@ def main():
             lodinfo = dict(onscreen_frames=int(len(on)), changes=ch, changes_per_man_min=round(ch / (len(on) / FPS / 60.0), 2),
                            share=on.lod.value_counts(normalize=True).round(3).to_dict())
         print("\nLOD on screen:", lodinfo)
-    json.dump(dict(categories=res, events=summ, worst=worst, lod=lodinfo, all_events=E.to_dict("records") if len(E) else []), open(out, "w"), indent=1, default=str)
+    print("\n%-48s %7s %16s %16s %6s %6s %7s %7s %8s" % ("capture family (live/post)", "frames", "code hand cm", "elbow deg", ">tol%", "pop%", "twFlip%", "head%", "slide"))
+    for fam in sorted(fams, key=lambda f: -fams[f]["frames"]):
+        r = fams[fam]
+        print("%-48s %7d %16s %16s %6.2f %6.2f %7.3f %7.2f %8.2f" % (fam[:48], r["frames"], "/".join(map(str, r["code_hand_cm"])), "/".join(map(str, r["elbow_deg"])),
+              100 * r["code_over_tol"], 100 * r["pop_share"], 100 * r["twist_flip"], 100 * r["head_pop"], r["slide_cm_s"]))
+    json.dump(dict(categories=res, families=fams, events=summ, worst=worst, lod=lodinfo, all_events=E.to_dict("records") if len(E) else []), open(out, "w"), indent=1, default=str)
     # print
     print("%-34s %7s %6s %16s %16s %16s %6s %6s %6s" % ("category", "frames", "noCap", "hand cm m/p95/x", "code cm", "elbow deg", ">tol", "pop%", "jit%"))
     for cat in sorted(res, key=lambda c: -res[c]["frames"]):
         r = res[cat]
         print("%-34s %7d %6.3f %16s %16s %16s %6.3f %6.2f %6.2f" % (cat[:34], r["frames"], r["no_capture_share"], "/".join(map(str, r["hand_cm"])),
               "/".join(map(str, r["code_hand_cm"])), "/".join(map(str, r["elbow_deg"])), r["code_over_tol"], 100 * r["pop_share"], 100 * r["jitter_share"]))
+    print()
+    print("%-34s %8s %8s %8s %10s" % ("category", "twWrap%", "twFlip%", "headPop%", "slide cm/s"))
+    for cat in sorted(res, key=lambda c: -res[c]["frames"]):
+        r = res[cat]
+        print("%-34s %8.2f %8.3f %8.2f %10.2f" % (cat[:34], 100 * r["twist_wrap"], 100 * r["twist_flip"], 100 * r["head_pop"], r["slide_cm_s"]))
     print()
     for ev, s in sorted(summ.items()):
         print("%-14s n %4d  capture %.2f  no key capture %.2f  key err |ms| mean/p95/max %s  signed %+.0f  flagged %d  code hand %s  elbow %s  pops %d" % (

@@ -1558,6 +1558,19 @@ void AMatchDirector::TickUmpire(float Dt)
 		F.Z = 0.f;
 		if (F.Size() > 30.f) Yaw = F.Rotation().Yaw;
 	}
+	// a touchdown: the referee and the wing nearer the ball give the signal - the pack's Ref_Touchdown_Signal (officials
+	// had no capture of their own but locomotion; arm sweep 2)
+	if (!AAthlete::ArmSweepOff() && Sim && Sim->result && Sim->result->td && State == EMatchState::Post && RefTdSerial != Sim->serial)
+		if (UAnimationAsset* Sig = FAthleteAssets::Get().RefTdSignal)
+		{
+			RefTdSerial = Sim->serial;
+			Umpire->PlayOneShot(Sig);
+			AAthlete* Wing = nullptr;
+			for (int32 R = 1; R <= 2 && R < Crew.Num(); ++R)
+				if (Crew[R] && (!Wing || FVector::Dist2D(Crew[R]->GetActorLocation(), BallW) < FVector::Dist2D(Wing->GetActorLocation(), BallW))) Wing = Crew[R];
+			if (Wing) Wing->PlayOneShot(Sig);
+			UE_LOG(LogTemp, Display, TEXT("TAG referee touchdown signal (and the nearer wing)"));
+		}
 	FAthleteFootball F;
 	F.bLook = true;
 	F.LookWorld = bUmpHasBall ? UmpPos + Vel.GetSafeNormal() * 800.f + FVector(0, 0, 150) : (bUmpSpotted || bCall ? Spot : BallW) + FVector(0, 0, 20);
@@ -3069,7 +3082,7 @@ void AMatchDirector::HlTelemetry(int32 Frame)
 	if (HlTele.IsEmpty())
 		HlTele = TEXT("frame,state,simt,ballmode,bx,by,bz,bwx,bwy,bwz,pid,num,pos,side,role,sstate,sanim,sx,sy,svx,svy,face,eng,ball,stun,hidden,wx,wy,wz,yaw,down,")
 			TEXT("flx,fly,flz,frx,fry,frz,pz,hdz,hrx,hry,hrz,hlx,hly,hlz,scrx,scry,refd,refw,slr,sls,dev,dfb,dor,dst,dln,dxf,dft,mmeff,mmstr,mmang,mmor,pvx,pvy,hdx,hdy,voff,rro,plf,")
-			TEXT("ahl,ahr,afl,afr,ael,aer,awl,awr,acl,acr,ajit,lod,anim,")
+			TEXT("ahl,ahr,afl,afr,ael,aer,awl,awr,acl,acr,ajit,lod,twl,twr,tul,tur,hws,hwc,anim,")
 			TEXT("camx,camy,camz,camfx,camfy,camfz,camfoc,camang,camcut,camnear,camhold\n");
 	// the camera's columns, the same on every man's row (MatchBroadcast.cpp: CameraTelemetryCols)
 	const FString CamCols = CameraTelemetryCols();
@@ -3153,7 +3166,7 @@ void AMatchDirector::HlTelemetry(int32 Frame)
 			if (PC->ProjectWorldLocationToScreen(W + FVector(0, 0, 90), S2, false)) Scr = S2 / VP;
 		}
 		HlTele += FString::Printf(TEXT("%d,%s,%.3f,%s,%.2f,%.2f,%.2f,%.1f,%.1f,%.1f,%d,%d,%s,%s,%s,%s,%s,%.3f,%.3f,%.3f,%.3f,%.3f,%s,%d,%.2f,%d,%.1f,%.1f,%.1f,%.1f,%d,")
-			TEXT("%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.3f,%.3f,%.1f,%d,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.0f,%.2f,%.0f,%.0f,%.1f,%.1f,%.1f,%.1f,%.1f,%.0f,%d,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.0f,%.0f,%.0f,%.0f,%.2f,%d,%s%s\n"),
+			TEXT("%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.3f,%.3f,%.1f,%d,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.0f,%.2f,%.0f,%.0f,%.1f,%.1f,%.1f,%.1f,%.1f,%.0f,%d,%.1f,%.1f,%.1f,%.1f,%.1f,%.1f,%.0f,%.0f,%.0f,%.0f,%.2f,%d,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%s%s\n"),
 			Frame, St, Sim->t, UTF8_TO_TCHAR(tag::ballModeName(Sim->ball.mode)), Sim->ball.pos.x, Sim->ball.pos.y, Sim->ball.pos.z, BallW.X, BallW.Y, BallW.Z,
 			E->p->id, E->p->number, UTF8_TO_TCHAR(tag::posName(E->p->pos)), UTF8_TO_TCHAR(tag::sideName(E->side)), UTF8_TO_TCHAR(E->role.c_str()),
 			UTF8_TO_TCHAR(E->stateName()), UTF8_TO_TCHAR(E->animName()), E->pos.x, E->pos.y, E->vel.x, E->vel.y, E->face,
@@ -3164,7 +3177,7 @@ void AMatchDirector::HlTelemetry(int32 Frame)
 			A ? A->LastDev[6] : 0.f, A ? A->TelEff : 0.f, A ? A->TelStride : 1.f, A ? A->TelAng : 0.f, A ? A->TelOrient : 0.f, Pv.X, Pv.Y, Hd.X, Hd.Y, A ? A->VisOffsetCm() : 0.f, A ? A->TelRootOff : 0.f, A ? A->LastPlantFeet : 0,
 			A ? A->LastArm[0] : 0.f, A ? A->LastArm[1] : 0.f, A ? A->LastArm[2] : 0.f, A ? A->LastArm[3] : 0.f, A ? A->LastArm[4] : 0.f, A ? A->LastArm[5] : 0.f,
 			A ? A->LastArm[6] : 0.f, A ? A->LastArm[7] : 0.f, A ? A->LastArm[8] : 0.f, A ? A->LastArm[9] : 0.f, A ? A->LastArm[10] : 0.f,
-			M ? M->GetPredictedLODLevel() : -1,
+			M ? M->GetPredictedLODLevel() : -1, A ? A->LastArm[11] : 0.f, A ? A->LastArm[12] : 0.f, A ? A->LastArm[13] : 0.f, A ? A->LastArm[14] : 0.f, A ? A->LastArm[15] : 0.f, A ? A->LastArm[16] : 0.f,
 			A ? *A->TelemetryAnim() : TEXT(""), *CamCols);
 	}
 }
@@ -5859,6 +5872,14 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 				const FAthleteAssets& AA = FAthleteAssets::Get();
 				if (TossClipSerial != Sim->serial && AA.Pitch) Q->PlayOneShot(AA.Side(AA.Pitch.Get(), bLeft));
 				TossClipSerial = Sim->serial;
+				// the back takes it with the pack's pitch catch for where it comes from, its hands on the ball as it gets there
+				// (the sim's toss flies 0.28-0.3 s: PlaySim mesh tossDur). He ran on with nothing in his arms before.
+				if (Ev.b)
+					if (AAthlete* Rb = AthOf(Ev.b))
+					{
+						const FVector Fly = (Rb->GetActorLocation() - Q->GetActorLocation()).GetSafeNormal2D() * 900.f;
+						Rb->PlayPitchCatch(Fly, 0.29f);
+					}
 			}
 		}
 		else if (Ev.type == "throw" && Ev.a && Ev.b)
@@ -6176,7 +6197,9 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 			const tag::Ball& Bi = Sim->ball;
 			const double Gap = tag::dist(tag::V2{Bi.pos.x, Bi.pos.y}, Ev.a->pos);
 			if (Gap > 1.0 && Gap < 3.5 && tag::len(Ev.a->vel) > 3.0)
-				if (AAthlete* R = AthOf(Ev.a)) R->PlayDiveAttempt();
+				if (AAthlete* R = AthOf(Ev.a))
+					// (not over the drop or catch already playing for this ball: cut into, it switched clips mid-reach)
+					if (AAthlete::ArmSweepOff() || !(PrimedSerial == Sim->serial && PrimedCatcher == Ev.a && R->OneShotClipT() >= 0.f)) R->PlayDiveAttempt();
 		}
 		else if (Ev.type == "catch" && Ev.a)
 		{
@@ -6583,7 +6606,10 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 				A->PlayDiveAttempt(static_cast<float>(TCatch));
 				UE_LOG(LogTemp, Display, TEXT("TAG dive catch primed: #%d, %.2f s out"), E->p->number, TCatch);
 			}
-			if (bTarget && E->side == tag::Side::Off && !B.away && TCatch > 0.0 && TCatch <= 0.3 && PrimedSerial != Sim->serial)
+			// (as soon as the sim has rolled it a catch - 0.4 s before the flight's end, PlaySim::preRollCatch - not 0.3 s out:
+			// the capture runs in to the ball and its time-warp has the time to put the hands on it; arm sweep 2)
+			const bool bEarlyCatch = !AAthlete::ArmSweepOff() && B.fate == 1 && !B.fateDive && TCatch <= 0.6;
+			if (bTarget && E->side == tag::Side::Off && !B.away && TCatch > 0.0 && (TCatch <= 0.3 || bEarlyCatch) && PrimedSerial != Sim->serial)
 			{
 				PrimedSerial = Sim->serial;
 				PrimedCatcher = E;

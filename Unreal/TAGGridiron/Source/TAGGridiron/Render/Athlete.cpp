@@ -134,6 +134,8 @@ void FAthleteAssets::Load()
 		Kneel = Keyed(TEXT("A_TAG_QB_Kneel"));
 		BlockEngaged = Keyed(TEXT("A_TAG_Block_Engaged_Loop"));
 		if (bNativeAnim)
+			RefTdSignal = LoadAsset<UAnimSequence>(*FString::Printf(TEXT("%s/Pack/Celebrations/A_TAG_Pack_Ref_Touchdown_Signal__REF01.A_TAG_Pack_Ref_Touchdown_Signal__REF01"), *AnimRoot), false);
+		if (bNativeAnim)
 		{
 			auto Rep = [&](TArray<FLineRep>& Sink, const TCHAR* N)
 			{
@@ -342,7 +344,9 @@ void FAthleteAssets::Load()
 				// (what the game can have = free now + what it already holds: by here the engine has taken ~4 GB)
 				const FPlatformMemoryStats LaunchMem = FPlatformMemory::GetStats();
 				const double FreeGB = (LaunchMem.AvailablePhysical + LaunchMem.UsedPhysical) / (1024.0 * 1024.0 * 1024.0);
-				const int32 FitScale = FMath::Clamp(FMath::RoundToInt(FreeGB - 13.0), 2, PackScale);
+				// (the cooked game runs in ~3 GB, not the uncooked ~13: its draw is not cut for the editor's size)
+				const double GameGB = FPlatformProperties::RequiresCookedData() && !AAthlete::ArmSweepOff() ? 4.0 : 13.0;
+				const int32 FitScale = FMath::Clamp(FMath::RoundToInt(FreeGB - GameGB), 2, PackScale);
 				if (FitScale < PackScale)
 				{
 					UE_LOG(LogTemp, Display, TEXT("TAG: pack scale %d -> %d (%.1f GB of memory for the game at launch; -TagPackScale= overrides)"), PackScale, FitScale, FreeGB);
@@ -605,6 +609,27 @@ static const FPackAssets& PackAssets(const TCHAR* Category)
 	AR.ScanPathsSynchronous({Path}, true);
 	FPackAssets& Out = Cache.Add(Category);
 	AR.GetAssetsByPath(FName(*Path), Out.Data, FCString::Strcmp(Category, TEXT("")) == 0);
+	// A cooked game's registry keeps only the sequences that carry tags - 128 of the 2292 catches, none of the celebrations
+	// or tackles - so every family drawn from it was empty in the packaged game (throws 0/0/0/0/0, catches 0/0/...). The pack
+	// index names every capture and its folder (cat): the list comes from it there. (arm sweep 2)
+	const FAthleteAssets& AA = FAthleteAssets::Get();
+	if (FPlatformProperties::RequiresCookedData() && AA.PackIndex.Num() && !AAthlete::ArmSweepOff())
+	{
+		const int32 FromRegistry = Out.Data.Num();
+		Out.Data.Reset();
+		const bool bAll = FCString::Strcmp(Category, TEXT("")) == 0;
+		const FTopLevelAssetPath SeqClass = UAnimSequence::StaticClass()->GetClassPathName();
+		for (const auto& KV : AA.PackIndex)
+		{
+			FString Cat;
+			if (!KV.Value.IsValid() || !KV.Value->TryGetStringField(TEXT("cat"), Cat)) continue;
+			if (!bAll && Cat != Category) continue;
+			const FString Dir = FString::Printf(TEXT("%s/Pack/%s"), *AA.AnimRoot, *Cat);
+			Out.Data.Add(FAssetData(FName(*(Dir / KV.Key)), FName(*Dir), FName(*KV.Key), SeqClass));
+		}
+		UE_LOG(LogTemp, Display, TEXT("TAG: pack assets %s: %d from the pack index (the cooked registry has %d)"), *Path, Out.Data.Num(), FromRegistry);
+	}
+	else UE_LOG(LogTemp, Display, TEXT("TAG: pack assets %s: %d in the registry"), *Path, Out.Data.Num());
 	Out.Names.Reserve(Out.Data.Num());
 	for (const FAssetData& D : Out.Data) Out.Names.Add(D.AssetName.ToString());
 	return Out;
@@ -693,7 +718,9 @@ void FAthleteAssets::PackTimed(const TCHAR* Category, std::initializer_list<cons
 	T.Sink = &Sink;
 	for (const FAssetData& D : Hits)
 	{
-		if (T.Clips.Num() >= Max * PackScale) break;
+		// (every capture of the family: what a play needs is chosen from all of them - a draw of Max x scale left the
+		// catches a sixth of the pack's and the choice by gait, direction and height had little to choose from; arm sweep 2)
+		if (T.Clips.Num() >= Max * PackScale && AAthlete::ArmSweepOff()) break;
 		const FString N = D.AssetName.ToString();
 		const TSharedPtr<FJsonObject>* E = PackIndex.Find(N);
 		if (!E || !E->IsValid()) continue;
@@ -862,7 +889,7 @@ void FAthleteAssets::LoadPackPairs(int32 Seed)
 		int32 Taken = 0;
 		for (const TSharedPtr<FJsonObject>& O : L)
 		{
-			if (Taken >= 10 * PackScale) break;
+			if (Taken >= 10 * PackScale && AAthlete::ArmSweepOff()) break; // (all of them: see PackTimed)
 			const FString TN = O->GetStringField(TEXT("T")), CN = O->GetStringField(TEXT("C"));
 			// fouls (facemask, horse collar) are not clean tackles
 			if (TN.Contains(TEXT("Facemask"), ESearchCase::IgnoreCase) || TN.Contains(TEXT("HorseCollar"), ESearchCase::IgnoreCase)) continue;
@@ -1109,7 +1136,9 @@ void FAthleteAssets::SelectPack(int32 Seed)
 			// (captures that end with the catcher on the turf: played on a catch the sim runs on from, he went to the ground,
 			// got up and ran on - "SecureBall_InFront_GoToGround", p73 c035)
 			// ("Knees" in a name is the ball's height, a low catch on the run: kept)
-			TEXT("Ground")};
+			// (and the pack's misses - Catch_NonCatch_*, an overthrow he does not get - named like its catches: picked for a
+			// completed pass by gait and direction; arm sweep 2)
+			TEXT("Ground"), TEXT("NonCatch")};
 		PackTimed(TEXT("Catching"), {TEXT("Catch_Run"), TEXT("InStride"), TEXT("In_Stride")}, {}, CatchNoDive, 16, Seed + 70, TEXT("release"), 4, 0.7f, 0.f, PackCatchStride);
 		PackTimed(TEXT("Catching"), {TEXT("Jump"), TEXT("AboveHead"), TEXT("HighPoint"), TEXT("High_Point")}, {TEXT("Catch")}, CatchNoDive, 12, Seed + 71, TEXT("release"), 4, 0.7f, 0.f, PackCatchHigh);
 		// (the pack names its one-man catches Catch_<Run|Strafe|Stand|Backpedal>_<where the ball comes from, 0 in front to 180
@@ -1124,6 +1153,8 @@ void FAthleteAssets::SelectPack(int32 Seed)
 		PackTimed(TEXT("Catching"), {TEXT("Catch_Stand"), TEXT("Stand_"), TEXT("Strafe"), TEXT("Chest")}, {TEXT("Catch")}, CatchNoDive, 12, Seed + 75, TEXT("release"), 4, 0.7f, 0.f, PackCatchStand);
 		PackTimed(TEXT("Catching"), {TEXT("Bkpd"), TEXT("Comeback"), TEXT("Curl"), TEXT("Catch_Backpedal"), TEXT("Catch_Run_0_"), TEXT("Catch_Run_45")}, {TEXT("Catch")}, CatchNoDive, 12, Seed + 76, TEXT("release"), 4, 0.7f, 0.f, PackCatchComeback);
 		PackTimed(TEXT("Catching"), {TEXT("Dive"), TEXT("Layout")}, {TEXT("Catch")}, CatchNone, 8, Seed + 77, TEXT("release"), 6, 0.9f, 0.f, PackCatchDive);
+		// (the back's side of a toss: Catch_Pitch_<from>_<height>, not the BRANCHING variants that cut away mid-capture)
+		PackTimed(TEXT("Catching"), {TEXT("Catch_Pitch_")}, {}, {TEXT("BRANCHING"), TEXT("2man"), TEXT("Fumble"), TEXT("Drop")}, 12, Seed + 78, TEXT("release"), 4, 0.5f, 0.f, PackCatchPitch);
 		// the quarterback slide: from 0.45 s before its low point (still running in), through the slide and the get-up
 		PackTimed(TEXT("Quarterback"), {TEXT("QB_Slide")}, {}, {}, 2, Seed + 79, TEXT("pelvis_min"), 14, 1.0f, 0.f, PackQBSlide);
 		// (its own exclusions: CatchNoDive's "Tip" took every FingerTip; and these captures end a beat after the ball is
@@ -1150,7 +1181,7 @@ void FAthleteAssets::SelectPack(int32 Seed)
 		}
 		PackTimed(TEXT("Catching"), {TEXT("OneHand"), TEXT("One_Hand"), TEXT("one_hand"), TEXT("FingerTip"), TEXT("Fingertip"), TEXT("Leap")}, {TEXT("Catch")},
 			{TEXT("2man"), TEXT("Drop"), TEXT("Def_"), TEXT("INT"), TEXT("Int_"), TEXT("Swat"), TEXT("Knock"), TEXT("Bobble"), TEXT("Miss"), TEXT("Fumble"), TEXT("Juggl"),
-			 TEXT("Dive"), TEXT("Layout"), TEXT("Slide"), TEXT("Fall"), TEXT("Ground"), TEXT("Celeb"), TEXT("Kick"), TEXT("Punt")}, 16, Seed + 78,
+			 TEXT("Dive"), TEXT("Layout"), TEXT("Slide"), TEXT("Fall"), TEXT("Ground"), TEXT("Celeb"), TEXT("Kick"), TEXT("Punt"), TEXT("NonCatch")}, 16, Seed + 78,
 			TEXT("release"), 4, 0.15f, 0.f, PackCatchSpectacular);
 		const std::initializer_list<const TCHAR*> TackleNone = {TEXT("Dive"), TEXT("Strip"), TEXT("Whiff"), TEXT("Miss"), TEXT("Sack"), TEXT("Pile"), TEXT("Gang"), TEXT("Sideline"), TEXT("Spin"), TEXT("Brkn"), TEXT("Broken"), TEXT("Hurdle"), TEXT("Truck"), TEXT("StiffArm"), TEXT("Celeb"), TEXT("Fumble"),
 			// a facemask tackle is a 15-yard foul, not a clean tackle: kept out until the penalty that calls for it exists
@@ -1245,6 +1276,32 @@ void FAthleteAssets::ReseedPack(int32 Seed)
 	TSet<FSoftObjectPath> Seen;
 	auto Push = [&](const FSoftObjectPath& P) { if (!Seen.Contains(P)) { Seen.Add(P); PackQueue.Add(P); } };
 	bool bMore = true;
+	if (!AAthlete::ArmSweepOff())
+	{
+		// what the plays are made of first and whole - every throw, catch, kick, tackle pair and gang, interleaved - as the
+		// share that loads whatever memory is free (the whole of it is ~0.3 MB a capture uncooked, 0.03 cooked); then the
+		// looks that change every quarter (celebrations, idles, stances) as far as the memory floor allows
+		for (int32 i = 0; bMore; ++i)
+		{
+			bMore = false;
+			for (const FPendingTimed& T : PendingTimed) if (T.Clips.IsValidIndex(i)) { Push(T.Clips[i].Path); bMore = true; }
+			for (int32 k = 0; k < 6; ++k)
+			{
+				int32 n = 0;
+				for (const FPendingPair& Q : PendingPairs)
+					if (Q.Kind == k && n++ == i) { Push(Q.TP); Push(Q.CP); bMore = true; break; }
+			}
+			if (PendingGangs.IsValidIndex(i)) { Push(PendingGangs[i].CP); Push(PendingGangs[i].TP); Push(PendingGangs[i].AP); bMore = true; }
+		}
+		PackEssentialN = PackQueue.Num();
+		bMore = true;
+		for (int32 i = 0; bMore; ++i)
+		{
+			bMore = false;
+			for (const FPendingFamily& F : PendingFamilies) if (F.Paths.IsValidIndex(i)) { Push(F.Paths[i]); bMore = true; }
+		}
+	}
+	else
 	for (int32 i = 0; bMore; ++i)
 	{
 		bMore = false;
@@ -1317,13 +1374,13 @@ void FAthleteAssets::LoadNextPackChunk()
 	// ~1240 captures, the rest of each throw, catch and tackle on placed clips or locomotion with code-driven arms. Now the
 	// first share of the queue, six of every family, loads unless memory is critical; the rest stops at the floor.)
 	const bool bEssential = PackQueuePos < PackEssentialN && !AAthlete::ArmSweepOff();
-	const bool bLowMem = FreeMB < (bEssential ? 400.0 : PackFloorMB());
+	const bool bLowMem = FreeMB < (bEssential ? 250.0 : PackFloorMB());
 	const int32 Rooted = BatchRoots[PackBatch % 2].Num();
 	if (PackChunk > 0 && PackChunk % 4 == 0)
 		UE_LOG(LogTemp, Display, TEXT("TAG: pack batch %d: %d of %d captures, %d rooted, %.0f MB of clips (%.1f MB a clip), %.0f MB used, %.0f s"), PackBatch, PackQueuePos, PackQueue.Num(), Rooted,
 			PackLoadedMB, Rooted ? PackLoadedMB / Rooted : 0.0, UsedMB, FPlatformTime::Seconds() - PackT0);
 	const bool bDone = PackQueuePos >= PackQueue.Num();
-	if (bDone || PackLoadedMB > PackBudgetMB || UsedMB > CeilingMB || bLowMem)
+	if (bDone || (PackLoadedMB > PackBudgetMB && !bEssential) || UsedMB > CeilingMB || bLowMem)
 	{
 		UE_LOG(LogTemp, Display, TEXT("TAG: pack batch %d %s: %d of %d captures in %.0f s, %d rooted, %.0f MB of clips (%.0f MB used, %.0f MB free)"), PackBatch,
 			bDone ? TEXT("complete") : UsedMB > CeilingMB ? TEXT("stopped at the memory ceiling") : bLowMem ? TEXT("stopped: the machine is low on free memory") : TEXT("stopped at the clip budget"),
@@ -1492,6 +1549,32 @@ void FAthleteAssets::OnPackBatchLoaded()
 		for (const TObjectPtr<UAnimSequence>& S : Old) if (S) S->RemoveFromRoot();
 		Old.Reset();
 		for (const TObjectPtr<UAnimSequence>& S : BatchRoots[PackBatch % 2]) if (S) S->AddToRoot();
+	}
+	// (once: what every animation in memory costs, by tree and folder - the library's share of the game's memory)
+	static bool bCensus = false;
+	if (!bCensus)
+	{
+		bCensus = true;
+		TMap<FString, TPair<int32, double>> By;
+		for (TObjectIterator<UAnimSequence> It; It; ++It)
+		{
+			const FString P = It->GetPathName();
+			int32 Cut = 0;
+			for (int32 k = 0, Slashes = 0; k < P.Len(); ++k)
+				if (P[k] == TCHAR('/') && ++Slashes == 5) { Cut = k; break; }
+			const FString Key = Cut > 0 ? P.Left(Cut) : P.Left(24);
+			double Bytes = It->GetApproxCompressedSize();
+#if WITH_EDITOR
+			Bytes += It->GetApproxRawSize();
+#endif
+			TPair<int32, double>& V = By.FindOrAdd(Key);
+			++V.Key;
+			V.Value += Bytes / (1024.0 * 1024.0);
+		}
+		By.ValueSort([](const TPair<int32, double>& L, const TPair<int32, double>& R) { return L.Value > R.Value; });
+		int32 Shown = 0;
+		for (const auto& KV : By)
+			if (Shown++ < 14) UE_LOG(LogTemp, Display, TEXT("TAG: anim census %s: %d sequences, %.0f MB"), *KV.Key, KV.Value.Key, KV.Value.Value);
 	}
 	++PackBatch;
 	bPackDrawn = true;
@@ -3840,7 +3923,7 @@ static float TagCatchStart(float Start, int32 LeadFrames, float CatchIn, float R
 }
 
 /** The one-man catch capture in the draw that fits this ball: his gait, where the ball comes from, its height. */
-static const FAthleteAssets::FPackClip* BestCatchFit(const FVector& LastVelW, const FVector& Fwd, int32 Num, float BallZCm, const FVector& BallVelW, int32 Seq)
+static const FAthleteAssets::FPackClip* BestCatchFit(const FVector& LastVelW, const FVector& Fwd, int32 Num, float BallZCm, const FVector& BallVelW, int32 Seq, float CatchIn, const TArray<FAthleteAssets::FPackClip>* Only = nullptr)
 {
 	const FAthleteAssets& A = FAthleteAssets::Get();
 	// how he is moving: 0 run, 1 strafe, 2 stand, 3 backpedal
@@ -3869,17 +3952,25 @@ static const FAthleteAssets::FPackClip* BestCatchFit(const FVector& LastVelW, co
 				if (N.Contains(FString::Printf(TEXT("_%d_"), Deg))) { CA = Deg; break; }
 			const float H = N.Contains(TEXT("Ankles")) ? 0.f : N.Contains(TEXT("Knees")) ? 1.f : N.Contains(TEXT("Waist")) ? 2.f : N.Contains(TEXT("Chest")) ? 3.f
 				: N.Contains(TEXT("Helmet")) ? 4.f : (N.Contains(TEXT("AboveHead")) || N.Contains(TEXT("Jump"))) ? 5.f : -1.f;
+			// (and one with run-in enough before its hands meet the ball to start now: short of it, it starts at its first
+			// frame and its time-warp has to make up the rest)
+			const float Lead = C.Start + 4.f / 30.f;
 			const float Cost = (CA >= 0 ? FMath::Abs(CA - Ang) / 45.f : 1.f) + (H >= 0.f ? FMath::Abs(H - WantH) * 0.8f : 1.f) +
-				(G < 0 ? 0.8f : G == Gait ? 0.f : (G == 0 && Gait == 1) || (G == 1 && Gait == 0) ? 0.7f : 1.2f);
+				(G < 0 ? 0.8f : G == Gait ? 0.f : (G == 0 && Gait == 1) || (G == 1 && Gait == 0) ? 0.7f : 1.2f) +
+				(CatchIn > 0.f && Lead < CatchIn ? (CatchIn - Lead) * 3.f : 0.f);
 			Cands.Add({&C, Cost});
 		}
 	};
-	Score(A.PackCatchStride);
-	Score(A.PackCatchHigh);
-	Score(A.PackCatchLow);
-	Score(A.PackCatchOverShoulder);
-	Score(A.PackCatchStand);
-	Score(A.PackCatchComeback);
+	if (Only) Score(*Only);
+	else
+	{
+		Score(A.PackCatchStride);
+		Score(A.PackCatchHigh);
+		Score(A.PackCatchLow);
+		Score(A.PackCatchOverShoulder);
+		Score(A.PackCatchStand);
+		Score(A.PackCatchComeback);
+	}
 	if (!Cands.Num()) return nullptr;
 	Cands.Sort([](const FCand& X, const FCand& Y) { return X.Cost < Y.Cost; });
 	int32 N = 1;
@@ -3910,7 +4001,11 @@ void AAthlete::PlayCatch(float BallZCm, float SpeedCm, const FVector& BallVelW, 
 		const float Rate = bAllSpec ? 1.f : (Hard >= 2 ? 0.75f : Hard == 1 ? 0.3f : 0.f) + (bAggressive ? (Hard ? 0.35f : 0.15f) : 0.f);
 		UE_LOG(LogTemp, Verbose, TEXT("TAG catch #%d hard %d (contested %d, ball %.0f cm, lateral %.0f cm)"), Player ? Player->number : -1, Hard, bContested ? 1 : 0, BallZCm, Lateral);
 		if (SidelineDirW.IsNearlyZero() && A.PackCatchSpectacular.Num() && FMath::Frac(Seq * 0.6180339f + 0.13f) < Rate)
-			if (const FAthleteAssets::FPackClip* P = FAthleteAssets::PickOr(A.PackCatchSpectacular, Seq * 5 + 1))
+			// (the one that fits where the ball comes from and its height, as the everyday catches: drawn at random, a leap to
+			// the left played for a ball dropping over the right shoulder, its hands 0.15-0.2 s off the ball; arm sweep 2)
+			if (const FAthleteAssets::FPackClip* P = !ArmSweepOff() && CatchIn >= 0.f
+				? BestCatchFit(LastVelW, GetActorForwardVector(), Player ? Player->number : -1, BallZCm, BallVelW, Seq * 5 + 1, CatchIn, &A.PackCatchSpectacular)
+				: FAthleteAssets::PickOr(A.PackCatchSpectacular, Seq * 5 + 1))
 			{
 				UE_LOG(LogTemp, Display, TEXT("TAG spectacular catch #%d: %s (hard %d%s)"), Player ? Player->number : -1, *GetNameSafe(P->Anim), Hard, bAggressive ? TEXT(", aggressive") : TEXT(""));
 				PlayOneShotFrom(P->Anim, TagCatchStart(P->Start, 4, CatchIn, 1.f + StyleJitter * 0.07f));
@@ -3965,7 +4060,7 @@ void AAthlete::PlayCatch(float BallZCm, float SpeedCm, const FVector& BallVelW, 
 		// behind played a catch of one coming at his face.)
 		// (at the boundary: the pack's toe drags first)
 		if (CatchIn >= 0.f && !ArmSweepOff() && !SidelineDirW.IsNearlyZero() && A.PackCatchSideline.Num()) P = FAthleteAssets::Pick(A.PackCatchSideline, Seq);
-		if (!P && CatchIn >= 0.f && !ArmSweepOff()) P = BestCatchFit(LastVelW, GetActorForwardVector(), Player ? Player->number : -1, BallZCm, BallVelW, Seq);
+		if (!P && CatchIn >= 0.f && !ArmSweepOff()) P = BestCatchFit(LastVelW, GetActorForwardVector(), Player ? Player->number : -1, BallZCm, BallVelW, Seq, CatchIn);
 		// (and one whose hands meet its ball at this one's height: the pack names each by it - Knees, Waist, Chest,
 		// Helmet, AboveHead. Picked in turn from the family, a strafing catch with the hands in front of the helmet
 		// played for a ball at the waist, filmed 37 cm off his hands)
@@ -4059,6 +4154,21 @@ bool AAthlete::PlayBallDefense(int32 Gait, bool bInt, float CatchIn)
 	OneShotKeyT = P.Start + 4.f / 30.f;
 	bOneShotCatch = bInt;
 	UE_LOG(LogTemp, Display, TEXT("TAG ball defense #%d: %s"), Player ? Player->number : -1, *GetNameSafe(P.Anim));
+	return true;
+}
+
+bool AAthlete::PlayPitchCatch(const FVector& BallVelW, float CatchIn)
+{
+	const FAthleteAssets& A = FAthleteAssets::Get();
+	if (ArmSweepOff() || !A.PackCatchPitch.Num() || bFalling || bRagdoll) return false;
+	static int32 GSeq = 0;
+	// (the pitch names say where it comes from - 45, 90, 135 off his heading - and its height: chest for a toss)
+	const FAthleteAssets::FPackClip* P = BestCatchFit(LastVelW, GetActorForwardVector(), Player ? Player->number : -1, 120.f, BallVelW, GSeq++, CatchIn, &A.PackCatchPitch);
+	if (!P) return false;
+	PlayOneShotFrom(P->Anim, TagCatchStart(P->Start, 4, CatchIn, 1.f + StyleJitter * 0.07f));
+	OneShotKeyT = P->Start + 4.f / 30.f;
+	bOneShotCatch = true;
+	UE_LOG(LogTemp, Display, TEXT("TAG pitch catch #%d: %s, %.2f s out"), Player ? Player->number : -1, *P->Name, CatchIn);
 	return true;
 }
 
@@ -4548,6 +4658,14 @@ bool AAthlete::PlayRepWin(AAthlete* Rusher, AAthlete* Blocker, int32 Which, bool
 	const FAthleteAssets& A = FAthleteAssets::Get();
 	const TArray<FAthleteAssets::FLineRep>& Pool = bBig && A.RepBigWins.Num() ? A.RepBigWins : A.RepWins;
 	if (!Rusher || !Blocker || !Pool.Num()) return false;
+	// the pack's two-man wins all beat the blocker to the rusher's left: a shed the sim sends to his right plays the
+	// one-man move for that side instead (played either way, the capture went left while the sim went right and the
+	// follower dragged the rusher across the turf - the most sliding capture in the arm audit's games; arm sweep 2)
+	if (!ArmSweepOff())
+	{
+		const FVector V = Rusher->IntentFrame + 1 >= GFrameCounter && !Rusher->IntentVelW.IsNearlyZero() ? Rusher->IntentVelW : Rusher->LastVelW;
+		if (FVector::DotProduct(FVector(V.X, V.Y, 0.f), Rusher->GetActorRightVector()) > 40.f) return false;
+	}
 	const FAthleteAssets::FLineRep& R = Pool[FMath::Abs(Which) % Pool.Num()];
 	// both from the capture's first frame: the two start it squared up at arm's length, as the stand-off leaves them
 	Rusher->PlayOneShotFrom(R.D.Get(), 0.f);
@@ -5315,7 +5433,14 @@ void AAthlete::AvoidOthers(const FVector& Location, const FVector& VelWorld, flo
 	// the step-asides (theirs and his), so the two settle on what is missing instead of chasing their own push.
 	// (25 Nov p4nfnew2: at 52 cm / 0.6 s / 120 cm/s two linemen walking out of the huddle head on, 5.5 m/s closing, still
 	// passed with pelvises 13 cm apart - the body sways 10-15 cm off the actor - so more room, sooner, quicker)
-	constexpr float Room = 66.f, Look = 0.8f, Reach = 450.f, MaxOff = 45.f, Rate = 160.f;
+	constexpr float RoomLive = 66.f, LookLive = 0.8f, Reach = 450.f, MaxOffLive = 45.f, RateLive = 160.f;
+	// (tried in arm sweep 2: for two men walking before the snap or after the whistle, 1.3 s / 95 cm / 75 cm / 280 cm/s. Over
+	// the four audit games the overlaps went 42 -> 36 but the hard ones 19 -> 25 - the step-aside moves the actor, and the
+	// shown pelvis rides the capture's own sway on top of it. Left off: the walk-up needs routing, not a bigger push.
+	// -TagWalkUpAvoid turns the profile on for A/B.)
+	static const bool bWalkUpAvoid = FParse::Param(FCommandLine::Get(), TEXT("TagWalkUpAvoid"));
+	const bool bWalkUp = bWalkUpAvoid && (bPreSnap || !bLiveF) && AvoidVelW.SizeSquared2D() > FMath::Square(60.f) && !ArmSweepOff();
+	const float Room = bWalkUp ? 95.f : RoomLive, Look = bWalkUp ? 1.3f : LookLive, MaxOff = bWalkUp ? 75.f : MaxOffLive, Rate = bWalkUp ? 280.f : RateLive;
 	// (the actors' places: tried 25 Nov with each body's pelvis offset off its actor as last shown - motion matching's root
 	// offset and the capture's sway put it up to 40 cm off - and the overlaps doubled, 12 -> 24 in 40 clips: the sway
 	// swings the push from step to step)
@@ -5482,7 +5607,7 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 		LastSlideRaw = RI->SlideRaw;
 		LastSlideShown = RI->SlideShown;
 		for (int32 k = 0; k < 7; ++k) LastDev[k] = RI->Dev[k];
-		for (int32 k = 0; k < 11; ++k) LastArm[k] = RI->Arm[k];
+		for (int32 k = 0; k < 17; ++k) LastArm[k] = RI->Arm[k];
 		LastPlantFeet = RI->PlantFeet;
 		// (the measures of the last frame as shown, before this frame's drive resets them: the break probe on the frame they
 		// describe - last frame's sim heading, pick, warps, slide and pelvis - and the transition jerk)
@@ -6082,7 +6207,11 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 		// a catch is over once he is away with the ball: a returner or receiver sprinting off does not keep the crouched
 		// catch pose for the clip's full length (the run crossfades in from where the catch is)
 		const bool bDiveClip = OneShot == A.CatchDive || OneShot == A.Side(A.CatchDive, true);
-		if (bOneShotCatch && !bDiveClip && OneShotAge > 0.3f && SpeedCm > 450.f) OneShotLeft = 0.f; // a layout dive plays out
+		// (a timed catch plays to 0.35 s past its own hands-on-the-ball frame - its tail tucks the ball and turns him upfield -
+		// not 0.3 s from its start: begun 0.4-0.6 s out it was cut before the ball got there, and the tuck was eased on over
+		// the run instead; arm sweep 2)
+		const bool bCatchTail = !ArmSweepOff() && OneShotKeyT >= 0.f;
+		if (bOneShotCatch && !bDiveClip && (bCatchTail ? OneShotPos > OneShotKeyT + 0.35f : OneShotAge > 0.3f) && SpeedCm > 450.f) OneShotLeft = 0.f; // a layout dive plays out
 		// (and once he has scored: a three-second catch capture played on through the celebration it should have given way to)
 		if (bOneShotCatch && !bDiveClip && OneShotAge > 0.45f && Anim == TEXT("celebrate")) OneShotLeft = 0.f;
 		// and a move made on the spot is over once the sim has him running: a beaten blocker turning to chase played his
@@ -6649,7 +6778,10 @@ void AAthlete::SetFootball(const FAthleteFootball& InF, float Dt)
 	const bool bThrow = F.ThrowT >= 0.f;
 	// a hand keyed one-shot (catch, handoff, pitch, rush move, ...), a keyed fall or get-up authors its own arms: keep
 	// the procedural tuck / secure / reach off it (they would pull the hands off the catch), ease them back after
-	const bool bKeyedArms = (OneShot && OneShotLeft > 0.f) || bFalling || bGettingUp;
+	// (and a scene - the help-up, a kick's operation: their captures put the arms where the two or three men had them; the
+	// carrier being pulled up with the ball had the tuck on top, 19 % of get-up / help-up frames over the arm tolerance;
+	// arm sweep 2)
+	const bool bKeyedArms = (OneShot && OneShotLeft > 0.f) || bFalling || bGettingUp || (bScene && !ArmSweepOff());
 	// (and a ball-carrier capture already carries the ball: no procedural tuck over Madden's own)
 	bool bCarryClip = false;
 	if (const UTagMotionMatchInstance* MI = MatchInstance())
@@ -6686,14 +6818,19 @@ void AAthlete::SetFootball(const FAthleteFootball& InF, float Dt)
 	// it will (the director's point, carried with his body). The capture puts his hands where its receiver caught his
 	// ball; this one comes in a hand or two off that. -TagNoCatchReach: the capture alone (A/B).
 	static const bool bNoCatchReach = FParse::Param(FCommandLine::Get(), TEXT("TagNoCatchReach"));
-	const bool bCatchReachOn = F.bCatchReach && !bNoCatchReach && !F.bReach && !bFalling && !bGettingUp && !bRagdoll && !bRepClip;
+	// (over a catch's own capture only, or none: a drop, a swat or a breakup capture puts the hands where the ball goes off
+	// them - reached for on top, their arms whipped 700-3200 deg/s faster than the capture's; arm sweep 2)
+	const bool bReachCapture = ArmSweepOff() || !(OneShot && OneShotLeft > 0.f) || bOneShotCatch;
+	const bool bCatchReachOn = F.bCatchReach && !bNoCatchReach && !F.bReach && !bFalling && !bGettingUp && !bRagdoll && !bRepClip && bReachCapture;
 	if (bCatchReachOn) Ease(ReachA, 1.f, 16.f);
 	else
 	Ease(ReachA, F.bReach && !bKeyedArms && !bRepClip ? 1.f : 0.f, F.bReach && !bKeyedArms && !bRepClip ? 7.f : 10.f);
 	Ease(LeanA, F.Lean, 5.f);
 	Ease(StanceA, F.bStance ? 1.f : 0.f, 6.f);
 	Ease(StanceHandA, bHandDown ? 1.f : 0.f, bHandDown ? 6.f : 12.f);
-	Ease(LookA, F.bLook ? 0.85f : 0.f, 4.f);
+	// (over a capture that turns its own head - a catch turning upfield, a drop, a throw - the look only nudges it: held on a
+	// target that jumps at the catch, the head whipped 400+ deg/s faster than the capture's in 9 % of catch frames; sweep 2)
+	Ease(LookA, F.bLook ? (!ArmSweepOff() && bKeyedArms ? 0.35f : 0.85f) : 0.f, 4.f);
 	const FTransform& C = MHBody->GetComponentTransform();
 	if (F.bReach) ReachSmoothed = ReachSmoothed.IsZero() ? F.ReachWorld : FMath::VInterpTo(ReachSmoothed, F.ReachWorld, Dt, 18.f);
 	if (F.bLook) LookSmoothed = LookSmoothed.IsZero() ? F.LookWorld : FMath::VInterpTo(LookSmoothed, F.LookWorld, Dt, 8.f);

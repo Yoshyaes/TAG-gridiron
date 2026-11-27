@@ -187,6 +187,31 @@ void FTagRetargetProxy::MeasureArms(const FPoseContext& Output, int32 Stage)
 {
 	// Stage 0: as copied (the capture as played), 1: after the football layer, 2: as shown
 	ArmJoints(Output, ArmT[Stage]);
+	// the head's turn in the chest's frame (the look layer's neck and head): as captured at stage 0, as shown at stage 2
+	auto HeadInChest = [&]() -> FQuat
+	{
+		const FBoneContainer& HBC = Output.Pose.GetBoneContainer();
+		const int32 Mh = HBC.GetPoseBoneIndexForBoneName(FName(TEXT("head")));
+		if (Mh == INDEX_NONE) return FQuat::Identity;
+		FCompactPoseBoneIndex I = HBC.MakeCompactPoseIndex(FMeshPoseBoneIndex(Mh));
+		if (!I.IsValid()) return FQuat::Identity;
+		FTransform T = Output.Pose[I];
+		for (FCompactPoseBoneIndex P = HBC.GetParentBoneIndex(I); P.IsValid(); P = HBC.GetParentBoneIndex(P)) T = T * Output.Pose[P];
+		return ArmT[Stage][0].GetRotation().Inverse() * T.GetRotation();
+	};
+	if (Stage == 0) HeadCap = HeadInChest();
+	if (Stage == 2)
+	{
+		const FQuat HeadShown = HeadInChest();
+		if (bHeadPrev && Dt > 1e-4f)
+		{
+			ArmFrame[15] = FMath::RadiansToDegrees(HeadShown.AngularDistance(HeadPrev[0])) / Dt;
+			ArmFrame[16] = FMath::RadiansToDegrees(HeadCap.AngularDistance(HeadPrev[1])) / Dt;
+		}
+		HeadPrev[0] = HeadShown;
+		HeadPrev[1] = HeadCap;
+		bHeadPrev = true;
+	}
 	if (Stage != 2) return;
 	for (int32 s = 0; s < 2; ++s)
 	{
@@ -230,6 +255,27 @@ void FTagRetargetProxy::MeasureArms(const FPoseContext& Output, int32 Stage)
 	}
 	JitHave = FMath::Min(JitHave + 1, 2);
 	ArmFrame[10] = Jit;
+	// the twist the model's helpers will share out (ApplyTwist): the hand's turn about the forearm, the upper arm's about itself
+	const FBoneContainer& TBC = Output.Pose.GetBoneContainer();
+	auto TwistOf = [&](const TCHAR* Bone, const TCHAR* Child, bool bOwn) -> float
+	{
+		const int32 M = TBC.GetPoseBoneIndexForBoneName(FName(Bone));
+		const int32 MC = TBC.GetPoseBoneIndexForBoneName(FName(Child));
+		if (M == INDEX_NONE || MC == INDEX_NONE) return 0.f;
+		const FCompactPoseBoneIndex B = TBC.MakeCompactPoseIndex(FMeshPoseBoneIndex(bOwn ? M : MC));
+		const FCompactPoseBoneIndex A = TBC.MakeCompactPoseIndex(FMeshPoseBoneIndex(bOwn ? MC : MC));
+		if (!B.IsValid() || !A.IsValid()) return 0.f;
+		const FVector Axis = Output.Pose.GetRefPose(A).GetTranslation().GetSafeNormal();
+		const FQuat Delta = bOwn ? Output.Pose.GetRefPose(B).GetRotation().Inverse() * Output.Pose[B].GetRotation()
+			: Output.Pose[B].GetRotation() * Output.Pose.GetRefPose(B).GetRotation().Inverse();
+		FQuat Swing, Twist;
+		Delta.ToSwingTwist(Axis, Swing, Twist);
+		return FMath::RadiansToDegrees(Twist.GetTwistAngle(Axis));
+	};
+	ArmFrame[11] = TwistOf(TEXT("lowerarm_l"), TEXT("hand_l"), false);
+	ArmFrame[12] = TwistOf(TEXT("lowerarm_r"), TEXT("hand_r"), false);
+	ArmFrame[13] = TwistOf(TEXT("upperarm_l"), TEXT("lowerarm_l"), true);
+	ArmFrame[14] = TwistOf(TEXT("upperarm_r"), TEXT("lowerarm_r"), true);
 }
 
 bool FTagRetargetProxy::Evaluate(FPoseContext& Output)
@@ -385,7 +431,7 @@ void FTagRetargetProxy::PostUpdate(UAnimInstance* InAnimInstance) const
 		I->SlideShown += SlideShownFrame;
 		I->Touchdowns += TouchdownsFrame;
 		for (int32 k = 0; k < 7; ++k) I->Dev[k] = DevFrame[k];
-		for (int32 k = 0; k < 11; ++k) I->Arm[k] = ArmFrame[k];
+		for (int32 k = 0; k < 17; ++k) I->Arm[k] = ArmFrame[k];
 		I->PlantFeet = PlantFeetFrame;
 		if (JerkOutFrame.Num())
 		{

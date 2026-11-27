@@ -489,7 +489,8 @@ private:
 	 *  replay, under Saved/Screenshots/<platform>/Highlights) for Tools/Art/build_highlights.py to cut the reel from. */
 	bool bHighlights = false;
 	int32 HlClip = 0, HlFrame = 0;
-	bool bFilmCloseShot = false; // a film-only close shot (-TagThrowCam / -TagCatchCam) is on this frame (-TagHlCamOnly)
+	bool bFilmCloseShot = false;
+	unsigned long long RefTdSerial = 0; // the play whose touchdown the officials have signalled // a film-only close shot (-TagThrowCam / -TagCatchCam) is on this frame (-TagHlCamOnly)
 	bool bHlInClip = false, bHlReplayLogged = false;
 	double HlStart = 0.0;
 	void TickHighlights(float Dt);

@@ -235,6 +235,8 @@ public:
 	bool PlayBallDefense(int32 Gait, bool bInt, float CatchIn = -1.f);
 	/** A returner fields a kick (the pack's kick catches, on the run or set). */
 	bool PlayKickCatch(bool bRunning, float CatchIn = -1.f);
+	/** A back taking a toss: the pack's pitch catch that fits where it comes from, timed to its arrival. */
+	bool PlayPitchCatch(const FVector& BallVelW, float CatchIn);
 	/** A shovel pass (the pack's, on the move or set), timed to its release. */
 	void PlayShovelTimed(bool bMoving, float ReleaseIn);
 	/** A pump fake (the pack's). */
@@ -563,7 +565,7 @@ public:
 	void AlignKey(float EventIn);
 	float OneShotPos = 0.f; // where the one-shot is in its clip (s): its start plus each frame's time at that frame's rate
 	/** The arms against the capture this evaluation (UTagRetargetAnimInstance::Arm), telemetry. */
-	float LastArm[11] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+	float LastArm[17] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 private:
 	// get-up after a ragdoll: snapshot the lying pose, play the matching keyed get-up where the body lies
 	void StartGetUp(const FVector& SimLoc);
@@ -972,6 +974,10 @@ struct FAthleteAssets
 	TArray<FPackClip> PackCatchStride, PackCatchHigh, PackCatchLow, PackCatchOverShoulder, PackCatchSideline, PackCatchStand, PackCatchComeback, PackCatchDive;
 	/** The spectacular ones: one-handers, fingertips, leaps (on his feet after: a catch the sim runs on from). */
 	TArray<FPackClip> PackCatchSpectacular;
+	/** A back taking a pitch (Catch_Pitch_<45|90|135>_<height>): timed to the toss's arrival (arm sweep 2). */
+	TArray<FPackClip> PackCatchPitch;
+	/** The referee's touchdown signal (Ref_Touchdown_Signal), played by the referee and the nearer wing on a touchdown. */
+	TObjectPtr<UAnimationAsset> RefTdSignal;
 	/** A scrambling quarterback giving himself up: the feet-first slide (started a beat before he goes down). */
 	TArray<FPackClip> PackQBSlide;
 	/** A defender playing the ball in the air: the pack's swats on the run, strafing, backpedalling / set, and its
