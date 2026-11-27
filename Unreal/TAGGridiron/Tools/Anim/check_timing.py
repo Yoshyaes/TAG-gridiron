@@ -1,0 +1,182 @@
+"""Timing gate: every TAG clip's duration and speed against real football and the look targets.
+
+    python Tools/Anim/check_timing.py            (reads RawArt/Anim/Clips/*.json and docs/look_targets.json)
+
+Published reference points the ranges are drawn from:
+  - NFL time to throw (snap to release, sacks excluded) averaged 2.81 s in 2024 (PFF, Next Gen Stats data); the sim's
+    own pass timing is calibrated to it. Our throw clips carry only the throwing motion itself.
+  - A quarterback's release (start of the throwing motion to the ball leaving) runs 0.35-0.47 s, ~0.40 typical
+    (video analytics of NFL quarterbacks; USC Sport Science clocked Sam Darnold at 0.39 s); the front foot lands about
+    0.21 s before release (motion analysis of Senior Bowl quarterbacks). Our set throw: plant at frame 18, release 23.
+  - Ball-carrier top speeds: season leaders 22.4 mph (Next Gen Stats 2024 and 2025), the record 23.24 mph; the sim's
+    99-speed player runs 11 yd/s (22.5 mph), which is what stride warping covers above the capture's 9.1 m/s.
+  - A five step drop ends about 7 yd behind the line (Human Kinetics, Football Skills & Drills); our under-center
+    drop clip covers 6 m in 1.5 s and the sim sets the quarterback up 6 deep.
+  - Sprint gait: 10.0 m/s at 4.70 steps/s is a 2.13 m step (Freelap / University of Oregon); elite maxima 5.06-5.28
+    steps/s at 10.6-10.8 m/s (Journal of Human Kinetics). Measured in game (AAthlete::GaitStats, -TagMoveTest): the
+    receiver at 9.4 m/s runs 4.82 steps/s with a 1.95 m step, within 4 % of the proportional reference.
+Two kinds of check:
+  1. Real-world numbers (the references above, broadcast footage, coaching manuals), hard limits per clip family:
+     release-to-follow-through of a pass 0.35-0.6 s; shotgun three step 0.6-0.9 s; under-center five step 1.3-1.9 s;
+     a tackle from contact to the ground 0.6-1.4 s; a get-up 1.5-4 s; a catch's hands-to-tuck 0.5-1.2 s;
+     jukes and spins 0.5-1.1 s; a kick's approach-to-contact 0.6-1.2 s; stance / pocket / idle loops >= 0.8 s.
+  2. The look targets (docs/LOOK_TARGETS.md, aggregate medians and p10-p90 of whole clips by category): our clip
+     lies inside the category's p10-p90, or is a one-shot that the game chains (noted, not failed): their clips carry
+     setup and recovery that ours hand to motion matching.
+Exit code 1 when a real-world limit fails.
+"""
+import glob
+import json
+import os
+import re
+import sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+PROJ = os.path.abspath(os.path.join(HERE, "..", ".."))
+CLIPS = os.path.join(PROJ, "RawArt", "Anim", "Clips")
+TARGETS = os.path.join(PROJ, "..", "..", "docs", "look_targets.json")
+
+# clip family -> (real-world min s, max s, look-target category, note)
+REAL = [
+    (r"^QB_Throw", (0.9, 2.0), "qb_throw", "set to settle; release ~0.23 s after the sim's, follow through 0.35-0.6 s"),
+    (r"^QB_Drop_Shotgun", (0.6, 0.95), "qb_dropback", "three quick steps and a hitch"),
+    (r"^QB_Drop_UnderCenter", (1.3, 1.9), "qb_dropback", "five step drop, plant and hitch"),
+    (r"^QB_Pocket_Loop", (0.8, 3.0), "stance_qb", "loop"),
+    (r"^QB_Shotgun_Loop", (2.0, 4.0), "stance_qb", "breathing loop"),
+    (r"^Celebrate_Loop", (1.2, 5.0), "celebration", "loop"),
+    (r"^QB_(SnapCatch|UnderCenterSnap)", (0.3, 0.6), "snap", ""),
+    (r"^QB_(Handoff|Pitch)", (0.5, 1.2), "handoff_pitch", ""),
+    (r"^QB_Kneel", (0.8, 2.5), "other", ""),
+    (r"^PT_.*_T$|^PT_.*_T_M$", (0.9, 1.8), "tackle", "contact to the ground, tackler"),
+    (r"^PT_.*_C$|^PT_.*_C_M$", (0.9, 1.8), "tackle", "contact to the ground, carrier"),
+    (r"^PT_PileOn", (0.5, 1.2), "tackle_multi", ""),
+    (r"^Tackle_(Wrap|High|Low|Shoulder|Arm|Assist)", (0.5, 1.3), "tackle", "sink, explode, wrap (the pair takes him down)"),
+    (r"^Tackle_Dive", (0.6, 1.4), "tackle_dive", ""),
+    (r"^Tackle_Miss", (0.6, 1.4), "tackle", "whiff and stumble"),
+    (r"^Tackled_", (0.3, 1.2), "tackle", "the carrier's hit reaction before the paired fall takes him down"),
+    (r"^Broken_Stumble", (0.5, 1.2), "bc_truck_hurdle", ""),
+    (r"^GetUp_(FaceDown|FaceUp|Roll)", (1.2, 3.0), "get_up", "to standing"),
+    (r"^GetUp_Slow", (2.0, 5.0), "get_up", "shaken up"),
+    (r"^Injured_Down", (1.5, 6.0), "injury", "chained into the slow get-up"),
+    (r"^Catch_Dive", (1.4, 2.4), "catch_dive", ""),
+    (r"^Catch_", (0.5, 1.3), "catch_other", "hands to the ball, give, tuck"),
+    (r"^(Juke|Spin)_", (0.4, 1.1), "bc_juke", "the cut itself; the run continues out of it"),
+    (r"^StiffArm_", (0.6, 1.4), "bc_stiff_arm", ""),
+    (r"^(Truck|Hurdle)", (0.6, 1.4), "bc_truck_hurdle", ""),
+    (r"^Kick_", (1.0, 2.2), "kicking", "approach, plant, contact, follow through"),
+    (r"^Lineman_GetOff", (0.3, 0.7), "block_run", "the first two steps"),
+    (r"^Block_Punch", (0.25, 0.6), "block_pass", "the strike at contact"),
+    (r"^(Block|Rush)_.*_Loop", (0.8, 2.0), "block_pass", "loop"),
+    (r"^Block_(Beaten|Finish)", (0.5, 1.2), "block_pass", ""),
+    (r"^(Rush|Shed)_", (0.4, 1.3), "rush_move", "a swim or rip is one quick beat"),
+    (r"^Def_Breakdown_Loop", (0.6, 1.2), "loco_shuffle", "loop, 4 choppy steps/s"),
+    (r"^Stance.*_Loop", (2.0, 4.0), "stance_other", "breathing loop"),
+    (r"^Idle_.*_Loop", (2.0, 4.0), "idle", "loop"),
+    (r"^Celebrate_.*_Loop", (1.2, 5.0), "celebration", "loop"),
+    (r"^Fan_Cheer_Loop", (1.0, 4.0), "celebration", "loop"),
+]
+# the drops' ground speed over the moving part, from the clip's json (traj_travel_m over traj_moving_frames at 30 fps,
+# written by Tools/Anim/build_mocap.py; the game then time-scales the clip to the sim's speed, AAthlete::Drive);
+# real: shotgun 2.5-3.2 m/s, under center 3.6-4.5
+SPEEDS = {"QB_Drop_Shotgun": (2.5, 3.2), "QB_Drop_UnderCenter": (3.6, 4.5)}
+
+
+# stance heights: hips (pelvis) in metres against the look targets' p10-p90 by stance (12 clips each) and coaching
+# (a three point stance has the hips level with or just above the shoulders, never a sprinter's set below them).
+# The targets were measured on the pack's 1.90 m body; our clips are retargeted onto the 1.75 m UEFN rig with the hips
+# scaled by BODY_SCALE (Tools/Anim/mocap_retarget.HIP_SCALE), so the bands are scaled the same way. A four point stance
+# is lower than the three point band by nature (the pack's sit 0.60-0.63 on our rig) and is only reported.
+BODY_SCALE = 0.931 / 1.038
+STANCES = {"Stance3pt_Loop": "stance_3pt", "Stance4pt_Loop": None, "Stance2pt_Loop": "stance_2pt",
+           "StanceRB_Loop": "stance_2pt", "StanceLB_Loop": "stance_2pt", "StanceDB_Loop": "stance_2pt",
+           "QB_Shotgun_Loop": "stance_qb_shotgun"}
+
+
+def stances(gait, rows):
+    fails = 0
+    for name, cat in STANCES.items():
+        path = os.path.join(CLIPS, "A_TAG_%s.json" % name)
+        if not os.path.exists(path):
+            continue
+        r = json.load(open(path))
+        hips = r["pelvis_z"]["start"]
+        if cat is None or cat not in gait:
+            rows.append((name + " hips", hips, "note", "", "stance height (no band)"))
+            continue
+        lo, hi = gait[cat]["hips_height_m"]["p10"] * BODY_SCALE, gait[cat]["hips_height_m"]["p90"] * BODY_SCALE
+        ok = lo - 0.02 <= hips <= hi + 0.02
+        rows.append((name + " hips", hips, "ok" if ok else "FAIL", "%.2f-%.2f m" % (lo, hi), "stance height (%s, scaled to the rig)" % cat))
+        fails += 0 if ok else 1
+    return fails
+
+
+def combine(rows):
+    """The sim's acceleration law (PlaySim: vmax = 8.6 + (speed - 50) * 0.049 yd/s, tau = 1 - (accel - 50) * 0.0078 s,
+    dv/dt = vmax / tau * max(0.12, 1 - v / vmax)) integrated from a standing start, against NFL Scouting Combine
+    splits: wide receivers average 4.52 s over 40 yd (NFL.com, 848 receivers since 2003; 4.44 in the 2026 class),
+    1.55 s over 10 yd (2026 class) and ~2.59 s over 20 (drafted players 2006-10). Starts, lean and stride warping all
+    follow this curve, so it is what the running looks like."""
+    fails = 0
+    refs = {10: (1.45, 1.65), 20: (2.45, 2.72), 40: (4.30, 4.65)}
+    for label, speed, accel in (("WR 90 speed / 85 accel", 90, 85), ("WR 86 speed / 82 accel (an average combine receiver)", 86, 82)):
+        vmax = 8.6 + (speed - 50) * 0.049
+        tau = 1 - (accel - 50) * 0.0078
+        v = x = t = 0.0
+        splits = {}
+        while x < 40 and t < 10:
+            v += vmax / tau * max(0.12, 1 - v / vmax) * 0.001
+            v = min(v, vmax)
+            x += v * 0.001
+            t += 0.001
+            for yd in (10, 20, 40):
+                if yd not in splits and x >= yd:
+                    splits[yd] = t
+        for yd in (10, 20, 40):
+            lo, hi = refs[yd]
+            sec = splits.get(yd, 99.0)
+            ok = lo <= sec <= hi
+            rows.append(("%s, %d yd" % (label, yd), sec, "ok" if ok else "FAIL", "%.2f-%.2f s" % (lo, hi), "combine split (sim acceleration law)"))
+            fails += 0 if ok else 1
+    return fails
+
+
+def main():
+    data = json.load(open(TARGETS)) if os.path.exists(TARGETS) else {}
+    targets = data.get("timing", {})
+    fails, rows = 0, []
+    fails += stances(data.get("gait_stance", {}), rows)
+    fails += combine(rows)
+    for path in sorted(glob.glob(os.path.join(CLIPS, "A_TAG_*.json"))):
+        r = json.load(open(path))
+        name = r["clip"]
+        if name.endswith("_M"):
+            continue  # mirrors share their original's timing
+        sec = r["seconds"]
+        fam = next((f for f in REAL if re.search(f[0], name)), None)
+        if fam is None:
+            rows.append((name, sec, "?", "", "no family"))
+            continue
+        lo, hi = fam[1]
+        ok = lo <= sec <= hi
+        cat = targets.get(fam[2])
+        band = ""
+        if cat:
+            inside = cat["p10_s"] <= sec <= cat["p90_s"]
+            band = "in %.2f-%.2f" % (cat["p10_s"], cat["p90_s"]) if inside else "chained (%.2f-%.2f whole clips)" % (cat["p10_s"], cat["p90_s"])
+        sp = ""
+        if name in SPEEDS:
+            slo, shi = SPEEDS[name]
+            travel, frames = r.get("traj_travel_m", 0.0), r.get("traj_moving_frames", 0)
+            v = travel / (frames / 30.0) if frames else 0.0
+            sp = " %.2f m/s" % v
+            ok = ok and slo <= v <= shi
+        rows.append((name, sec, "ok" if ok else "FAIL", "%.1f-%.1f s%s" % (lo, hi, sp), band + ("  " + fam[3] if fam[3] else "")))
+        fails += 0 if ok else 1
+    w = max(len(r[0]) for r in rows)
+    for name, sec, verdict, lim, note in rows:
+        print("%-*s %5.2f %s  %-4s  %-18s %s" % (w, name, sec, "m" if name.endswith("hips") else "s", verdict, lim, note))
+    print("\n%d clips, %d outside their real-world range" % (len(rows), fails))
+    sys.exit(1 if fails else 0)
+
+
+main()

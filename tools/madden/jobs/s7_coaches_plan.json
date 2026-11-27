@@ -1,0 +1,422 @@
+[
+ {
+  "id": "mvdb_4_m_g_01_hat_mesh",
+  "op": "ebx",
+  "asset": "content/characters/coach/coaches/4/4_m_g_01/4_m_g_01_hat_coachbody_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/coaches/mvdb/content__characters__coach__coaches__4__4_m_g_01__4_m_g_01_hat_coachbody_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/coach/coaches/4/4_m_g_01/4_m_g_01_hat_mesh"
+  }
+ },
+ {
+  "id": "mi_4_m_g_01_hat_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/coach/coaches/4/4_m_g_01/4_m_g_01_hat_mesh",
+  "out": "{REPO}/extracted/stage7/coaches/meshinfo/4_m_g_01_hat_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_4_m_g_01_head_mesh",
+  "op": "ebx",
+  "asset": "content/characters/coach/coaches/4/4_m_g_01/4_m_g_01_head_coachbody_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/coaches/mvdb/content__characters__coach__coaches__4__4_m_g_01__4_m_g_01_head_coachbody_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/coach/coaches/4/4_m_g_01/4_m_g_01_head_mesh"
+  }
+ },
+ {
+  "id": "mi_4_m_g_01_head_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/coach/coaches/4/4_m_g_01/4_m_g_01_head_mesh",
+  "out": "{REPO}/extracted/stage7/coaches/meshinfo/4_m_g_01_head_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_4_m_g_01_headset_mesh",
+  "op": "ebx",
+  "asset": "content/characters/coach/coaches/4/4_m_g_01/4_m_g_01_headset_coachbody_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/coaches/mvdb/content__characters__coach__coaches__4__4_m_g_01__4_m_g_01_headset_coachbody_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/coach/coaches/4/4_m_g_01/4_m_g_01_headset_mesh"
+  }
+ },
+ {
+  "id": "mi_4_m_g_01_headset_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/coach/coaches/4/4_m_g_01/4_m_g_01_headset_mesh",
+  "out": "{REPO}/extracted/stage7/coaches/meshinfo/4_m_g_01_headset_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_coachhead_1_h_n_20_head_mesh",
+  "op": "ebx",
+  "asset": "content/characters/coach/coaches/c/coachhead_1_h_n_20/coachhead_1_h_n_20_head_coachbody_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/coaches/mvdb/content__characters__coach__coaches__c__coachhead_1_h_n_20__coachhead_1_h_n_20_head_coachbody_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/coach/coaches/c/coachhead_1_h_n_20/coachhead_1_h_n_20_head_mesh"
+  }
+ },
+ {
+  "id": "mi_coachhead_1_h_n_20_head_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/coach/coaches/c/coachhead_1_h_n_20/coachhead_1_h_n_20_head_mesh",
+  "out": "{REPO}/extracted/stage7/coaches/meshinfo/coachhead_1_h_n_20_head_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_coachhead_3_h_b_20_hair_mesh",
+  "op": "ebx",
+  "asset": "content/characters/coach/coaches/c/coachhead_3_h_b_20/coachhead_3_h_b_20_hair_coachbody_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/coaches/mvdb/content__characters__coach__coaches__c__coachhead_3_h_b_20__coachhead_3_h_b_20_hair_coachbody_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/coach/coaches/c/coachhead_3_h_b_20/coachhead_3_h_b_20_hair_mesh"
+  }
+ },
+ {
+  "id": "mi_coachhead_3_h_b_20_hair_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/coach/coaches/c/coachhead_3_h_b_20/coachhead_3_h_b_20_hair_mesh",
+  "out": "{REPO}/extracted/stage7/coaches/meshinfo/coachhead_3_h_b_20_hair_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_coachhead_3_h_b_20_haircap_mesh",
+  "op": "ebx",
+  "asset": "content/characters/coach/coaches/c/coachhead_3_h_b_20/coachhead_3_h_b_20_haircap_coachbody_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/coaches/mvdb/content__characters__coach__coaches__c__coachhead_3_h_b_20__coachhead_3_h_b_20_haircap_coachbody_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/coach/coaches/c/coachhead_3_h_b_20/coachhead_3_h_b_20_haircap_mesh"
+  }
+ },
+ {
+  "id": "mi_coachhead_3_h_b_20_haircap_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/coach/coaches/c/coachhead_3_h_b_20/coachhead_3_h_b_20_haircap_mesh",
+  "out": "{REPO}/extracted/stage7/coaches/meshinfo/coachhead_3_h_b_20_haircap_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_coachhead_3_h_b_20_hat_mesh",
+  "op": "ebx",
+  "asset": "content/characters/coach/coaches/c/coachhead_3_h_b_20/coachhead_3_h_b_20_hat_coachbody_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/coaches/mvdb/content__characters__coach__coaches__c__coachhead_3_h_b_20__coachhead_3_h_b_20_hat_coachbody_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/coach/coaches/c/coachhead_3_h_b_20/coachhead_3_h_b_20_hat_mesh"
+  }
+ },
+ {
+  "id": "mi_coachhead_3_h_b_20_hat_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/coach/coaches/c/coachhead_3_h_b_20/coachhead_3_h_b_20_hat_mesh",
+  "out": "{REPO}/extracted/stage7/coaches/meshinfo/coachhead_3_h_b_20_hat_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_coachhead_3_h_b_20_head_mesh",
+  "op": "ebx",
+  "asset": "content/characters/coach/coaches/c/coachhead_3_h_b_20/coachhead_3_h_b_20_head_coachbody_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/coaches/mvdb/content__characters__coach__coaches__c__coachhead_3_h_b_20__coachhead_3_h_b_20_head_coachbody_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/coach/coaches/c/coachhead_3_h_b_20/coachhead_3_h_b_20_head_mesh"
+  }
+ },
+ {
+  "id": "mi_coachhead_3_h_b_20_head_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/coach/coaches/c/coachhead_3_h_b_20/coachhead_3_h_b_20_head_mesh",
+  "out": "{REPO}/extracted/stage7/coaches/meshinfo/coachhead_3_h_b_20_head_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_coachhead_3_h_b_20_headset_mesh",
+  "op": "ebx",
+  "asset": "content/characters/coach/coaches/c/coachhead_3_h_b_20/coachhead_3_h_b_20_headset_coachbody_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/coaches/mvdb/content__characters__coach__coaches__c__coachhead_3_h_b_20__coachhead_3_h_b_20_headset_coachbody_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/coach/coaches/c/coachhead_3_h_b_20/coachhead_3_h_b_20_headset_mesh"
+  }
+ },
+ {
+  "id": "mi_coachhead_3_h_b_20_headset_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/coach/coaches/c/coachhead_3_h_b_20/coachhead_3_h_b_20_headset_mesh",
+  "out": "{REPO}/extracted/stage7/coaches/meshinfo/coachhead_3_h_b_20_headset_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_coachhead_3_h_bd_01_head_mesh",
+  "op": "ebx",
+  "asset": "content/characters/coach/coaches/c/coachhead_3_h_bd_01/coachhead_3_h_bd_01_head_coachbody_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/coaches/mvdb/content__characters__coach__coaches__c__coachhead_3_h_bd_01__coachhead_3_h_bd_01_head_coachbody_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/coach/coaches/c/coachhead_3_h_bd_01/coachhead_3_h_bd_01_head_mesh"
+  }
+ },
+ {
+  "id": "mi_coachhead_3_h_bd_01_head_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/coach/coaches/c/coachhead_3_h_bd_01/coachhead_3_h_bd_01_head_mesh",
+  "out": "{REPO}/extracted/stage7/coaches/meshinfo/coachhead_3_h_bd_01_head_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_coachhead_7_h_n_30_head_mesh",
+  "op": "ebx",
+  "asset": "content/characters/coach/coaches/c/coachhead_7_h_n_30/coachhead_7_h_n_30_head_coachbody_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/coaches/mvdb/content__characters__coach__coaches__c__coachhead_7_h_n_30__coachhead_7_h_n_30_head_coachbody_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/coach/coaches/c/coachhead_7_h_n_30/coachhead_7_h_n_30_head_mesh"
+  }
+ },
+ {
+  "id": "mi_coachhead_7_h_n_30_head_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/coach/coaches/c/coachhead_7_h_n_30/coachhead_7_h_n_30_head_mesh",
+  "out": "{REPO}/extracted/stage7/coaches/meshinfo/coachhead_7_h_n_30_head_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_fisherjeff_body_cold_mesh",
+  "op": "ebx",
+  "asset": "content/characters/coach/coaches/f/fisherjeff/fisherjeff_body_cold_coachbody_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/coaches/mvdb/content__characters__coach__coaches__f__fisherjeff__fisherjeff_body_cold_coachbody_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/coach/coaches/f/fisherjeff/fisherjeff_body_cold_mesh"
+  }
+ },
+ {
+  "id": "mi_fisherjeff_body_cold_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/coach/coaches/f/fisherjeff/fisherjeff_body_cold_mesh",
+  "out": "{REPO}/extracted/stage7/coaches/meshinfo/fisherjeff_body_cold_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_fisherjeff_body_warm_mesh",
+  "op": "ebx",
+  "asset": "content/characters/coach/coaches/f/fisherjeff/fisherjeff_body_warm_coachbody_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/coaches/mvdb/content__characters__coach__coaches__f__fisherjeff__fisherjeff_body_warm_coachbody_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/coach/coaches/f/fisherjeff/fisherjeff_body_warm_mesh"
+  }
+ },
+ {
+  "id": "mi_fisherjeff_body_warm_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/coach/coaches/f/fisherjeff/fisherjeff_body_warm_mesh",
+  "out": "{REPO}/extracted/stage7/coaches/meshinfo/fisherjeff_body_warm_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_fisherjeff_hair_mesh",
+  "op": "ebx",
+  "asset": "content/characters/coach/coaches/f/fisherjeff/fisherjeff_hair_coachbody_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/coaches/mvdb/content__characters__coach__coaches__f__fisherjeff__fisherjeff_hair_coachbody_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/coach/coaches/f/fisherjeff/fisherjeff_hair_mesh"
+  }
+ },
+ {
+  "id": "mi_fisherjeff_hair_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/coach/coaches/f/fisherjeff/fisherjeff_hair_mesh",
+  "out": "{REPO}/extracted/stage7/coaches/meshinfo/fisherjeff_hair_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_fisherjeff_haircap_mesh",
+  "op": "ebx",
+  "asset": "content/characters/coach/coaches/f/fisherjeff/fisherjeff_haircap_coachbody_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/coaches/mvdb/content__characters__coach__coaches__f__fisherjeff__fisherjeff_haircap_coachbody_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/coach/coaches/f/fisherjeff/fisherjeff_haircap_mesh"
+  }
+ },
+ {
+  "id": "mi_fisherjeff_haircap_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/coach/coaches/f/fisherjeff/fisherjeff_haircap_mesh",
+  "out": "{REPO}/extracted/stage7/coaches/meshinfo/fisherjeff_haircap_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_fisherjeff_hat_mesh",
+  "op": "ebx",
+  "asset": "content/characters/coach/coaches/f/fisherjeff/fisherjeff_hat_coachbody_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/coaches/mvdb/content__characters__coach__coaches__f__fisherjeff__fisherjeff_hat_coachbody_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/coach/coaches/f/fisherjeff/fisherjeff_hat_mesh"
+  }
+ },
+ {
+  "id": "mi_fisherjeff_hat_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/coach/coaches/f/fisherjeff/fisherjeff_hat_mesh",
+  "out": "{REPO}/extracted/stage7/coaches/meshinfo/fisherjeff_hat_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_fisherjeff_head_mesh",
+  "op": "ebx",
+  "asset": "content/characters/coach/coaches/f/fisherjeff/fisherjeff_head_coachbody_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/coaches/mvdb/content__characters__coach__coaches__f__fisherjeff__fisherjeff_head_coachbody_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/coach/coaches/f/fisherjeff/fisherjeff_head_mesh"
+  }
+ },
+ {
+  "id": "mi_fisherjeff_head_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/coach/coaches/f/fisherjeff/fisherjeff_head_mesh",
+  "out": "{REPO}/extracted/stage7/coaches/meshinfo/fisherjeff_head_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_fisherjeff_headset_mesh",
+  "op": "ebx",
+  "asset": "content/characters/coach/coaches/f/fisherjeff/fisherjeff_headset_coachbody_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/coaches/mvdb/content__characters__coach__coaches__f__fisherjeff__fisherjeff_headset_coachbody_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/coach/coaches/f/fisherjeff/fisherjeff_headset_mesh"
+  }
+ },
+ {
+  "id": "mi_fisherjeff_headset_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/coach/coaches/f/fisherjeff/fisherjeff_headset_mesh",
+  "out": "{REPO}/extracted/stage7/coaches/meshinfo/fisherjeff_headset_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_mutscottcole_body_cold_mesh",
+  "op": "ebx",
+  "asset": "content/characters/coach/coaches/m/mutscottcole/mutscottcole_body_cold_coachbody_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/coaches/mvdb/content__characters__coach__coaches__m__mutscottcole__mutscottcole_body_cold_coachbody_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/coach/coaches/m/mutscottcole/mutscottcole_body_cold_mesh"
+  }
+ },
+ {
+  "id": "mi_mutscottcole_body_cold_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/coach/coaches/m/mutscottcole/mutscottcole_body_cold_mesh",
+  "out": "{REPO}/extracted/stage7/coaches/meshinfo/mutscottcole_body_cold_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_mutscottcole_body_warm_mesh",
+  "op": "ebx",
+  "asset": "content/characters/coach/coaches/m/mutscottcole/mutscottcole_body_warm_coachbody_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/coaches/mvdb/content__characters__coach__coaches__m__mutscottcole__mutscottcole_body_warm_coachbody_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/coach/coaches/m/mutscottcole/mutscottcole_body_warm_mesh"
+  }
+ },
+ {
+  "id": "mi_mutscottcole_body_warm_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/coach/coaches/m/mutscottcole/mutscottcole_body_warm_mesh",
+  "out": "{REPO}/extracted/stage7/coaches/meshinfo/mutscottcole_body_warm_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_mutscottcole_head_mesh",
+  "op": "ebx",
+  "asset": "content/characters/coach/coaches/m/mutscottcole/mutscottcole_head_coachbody_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/coaches/mvdb/content__characters__coach__coaches__m__mutscottcole__mutscottcole_head_coachbody_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/coach/coaches/m/mutscottcole/mutscottcole_head_mesh"
+  }
+ },
+ {
+  "id": "mi_mutscottcole_head_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/coach/coaches/m/mutscottcole/mutscottcole_head_mesh",
+  "out": "{REPO}/extracted/stage7/coaches/meshinfo/mutscottcole_head_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_mutscottcole_headset_mesh",
+  "op": "ebx",
+  "asset": "content/characters/coach/coaches/m/mutscottcole/mutscottcole_headset_coachbody_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/coaches/mvdb/content__characters__coach__coaches__m__mutscottcole__mutscottcole_headset_coachbody_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/coach/coaches/m/mutscottcole/mutscottcole_headset_mesh"
+  }
+ },
+ {
+  "id": "mi_mutscottcole_headset_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/coach/coaches/m/mutscottcole/mutscottcole_headset_mesh",
+  "out": "{REPO}/extracted/stage7/coaches/meshinfo/mutscottcole_headset_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_vrabelmike_c_pro_body_cold_mesh",
+  "op": "ebx",
+  "asset": "content/characters/coach/coaches/v/vrabelmike/vrabelmike_c_pro_body_cold_coachbody_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/coaches/mvdb/content__characters__coach__coaches__v__vrabelmike__vrabelmike_c_pro_body_cold_coachbody_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/coach/coaches/v/vrabelmike/vrabelmike_c_pro_body_cold_mesh"
+  }
+ },
+ {
+  "id": "mi_vrabelmike_c_pro_body_cold_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/coach/coaches/v/vrabelmike/vrabelmike_c_pro_body_cold_mesh",
+  "out": "{REPO}/extracted/stage7/coaches/meshinfo/vrabelmike_c_pro_body_cold_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_vrabelmike_c_pro_body_warm_mesh",
+  "op": "ebx",
+  "asset": "content/characters/coach/coaches/v/vrabelmike/vrabelmike_c_pro_body_warm_coachbody_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/coaches/mvdb/content__characters__coach__coaches__v__vrabelmike__vrabelmike_c_pro_body_warm_coachbody_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/coach/coaches/v/vrabelmike/vrabelmike_c_pro_body_warm_mesh"
+  }
+ },
+ {
+  "id": "mi_vrabelmike_c_pro_body_warm_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/coach/coaches/v/vrabelmike/vrabelmike_c_pro_body_warm_mesh",
+  "out": "{REPO}/extracted/stage7/coaches/meshinfo/vrabelmike_c_pro_body_warm_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_vrabelmike_c_pro_hair_mesh",
+  "op": "ebx",
+  "asset": "content/characters/coach/coaches/v/vrabelmike/vrabelmike_c_pro_hair_coachbody_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/coaches/mvdb/content__characters__coach__coaches__v__vrabelmike__vrabelmike_c_pro_hair_coachbody_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/coach/coaches/v/vrabelmike/vrabelmike_c_pro_hair_mesh"
+  }
+ },
+ {
+  "id": "mi_vrabelmike_c_pro_hair_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/coach/coaches/v/vrabelmike/vrabelmike_c_pro_hair_mesh",
+  "out": "{REPO}/extracted/stage7/coaches/meshinfo/vrabelmike_c_pro_hair_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_vrabelmike_c_pro_haircap_mesh",
+  "op": "ebx",
+  "asset": "content/characters/coach/coaches/v/vrabelmike/vrabelmike_c_pro_haircap_coachbody_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/coaches/mvdb/content__characters__coach__coaches__v__vrabelmike__vrabelmike_c_pro_haircap_coachbody_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/coach/coaches/v/vrabelmike/vrabelmike_c_pro_haircap_mesh"
+  }
+ },
+ {
+  "id": "mi_vrabelmike_c_pro_haircap_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/coach/coaches/v/vrabelmike/vrabelmike_c_pro_haircap_mesh",
+  "out": "{REPO}/extracted/stage7/coaches/meshinfo/vrabelmike_c_pro_haircap_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_vrabelmike_c_pro_head_mesh",
+  "op": "ebx",
+  "asset": "content/characters/coach/coaches/v/vrabelmike/vrabelmike_c_pro_head_coachbody_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/coaches/mvdb/content__characters__coach__coaches__v__vrabelmike__vrabelmike_c_pro_head_coachbody_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/coach/coaches/v/vrabelmike/vrabelmike_c_pro_head_mesh"
+  }
+ },
+ {
+  "id": "mi_vrabelmike_c_pro_head_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/coach/coaches/v/vrabelmike/vrabelmike_c_pro_head_mesh",
+  "out": "{REPO}/extracted/stage7/coaches/meshinfo/vrabelmike_c_pro_head_mesh.meshinfo.json"
+ },
+ {
+  "id": "mvdb_vrabelmike_c_pro_headset_mesh",
+  "op": "ebx",
+  "asset": "content/characters/coach/coaches/v/vrabelmike/vrabelmike_c_pro_headset_coachbody_brt/MeshVariationDb_Win32",
+  "out": "{REPO}/extracted/stage7/coaches/mvdb/content__characters__coach__coaches__v__vrabelmike__vrabelmike_c_pro_headset_coachbody_brt__MeshVariationDb_Win32.ebx.json",
+  "meta": {
+   "mesh": "content/characters/coach/coaches/v/vrabelmike/vrabelmike_c_pro_headset_mesh"
+  }
+ },
+ {
+  "id": "mi_vrabelmike_c_pro_headset_mesh",
+  "op": "meshinfo",
+  "asset": "content/characters/coach/coaches/v/vrabelmike/vrabelmike_c_pro_headset_mesh",
+  "out": "{REPO}/extracted/stage7/coaches/meshinfo/vrabelmike_c_pro_headset_mesh.meshinfo.json"
+ }
+]

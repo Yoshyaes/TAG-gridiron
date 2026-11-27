@@ -1,0 +1,1284 @@
+{
+ "bindings": [
+  {
+   "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_accessories_airxp",
+   "mi": "/Game/MaddenRef/Players/Helmets/Materials/MI_helmet_accessories_airxp_playerHelmetChinstrap_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Helmets/Textures/T_flatwhite_color",
+    "RSM": "/Game/MaddenRef/Players/Helmets/Textures/T_helmetaccessories_rsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_shell_airxp",
+   "mi": "/Game/MaddenRef/Players/Helmets/Materials/MI_helmet_shell_airxp",
+   "slot": "all",
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Helmets/Textures/T_nin_helmet_2018_golalt_helmet_col"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_accessories_pill",
+   "mi": "/Game/MaddenRef/Players/Helmets/Materials/MI_helmet_accessories_pill_playerHelmetChinstrap_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Helmets/Textures/T_flatwhite_color",
+    "RSM": "/Game/MaddenRef/Players/Helmets/Textures/T_helmetaccessories_rsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_shell_pill",
+   "mi": "/Game/MaddenRef/Players/Helmets/Materials/MI_helmet_shell_pill",
+   "slot": "all",
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Helmets/Textures/T_nin_helmet_2018_golalt_helmet_col"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_accessories_revo",
+   "mi": "/Game/MaddenRef/Players/Helmets/Materials/MI_helmet_accessories_revo_playerHelmetChinstrap_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Helmets/Textures/T_flatwhite_color",
+    "RSM": "/Game/MaddenRef/Players/Helmets/Textures/T_helmetaccessories_rsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_shell_revo",
+   "mi": "/Game/MaddenRef/Players/Helmets/Materials/MI_helmet_shell_revo",
+   "slot": "all",
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Helmets/Textures/T_nin_helmet_2018_golalt_helmet_col"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_accessories_revospeed",
+   "mi": "/Game/MaddenRef/Players/Helmets/Materials/MI_helmet_accessories_revospeed_playerHelmetChinstrap_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Helmets/Textures/T_flatwhite_color",
+    "RSM": "/Game/MaddenRef/Players/Helmets/Textures/T_helmetaccessories_rsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_shell_revospeed",
+   "mi": "/Game/MaddenRef/Players/Helmets/Materials/MI_helmet_shell_revospeed",
+   "slot": "all",
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Helmets/Textures/T_nin_helmet_2018_golalt_helmet_col"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_accessories_riddell360",
+   "mi": "/Game/MaddenRef/Players/Helmets/Materials/MI_helmet_accessories_riddell360_playerHelmetChinstrap_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Helmets/Textures/T_flatwhite_color",
+    "RSM": "/Game/MaddenRef/Players/Helmets/Textures/T_helmetaccessories_rsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_shell_riddell360",
+   "mi": "/Game/MaddenRef/Players/Helmets/Materials/MI_helmet_shell_riddell360",
+   "slot": "all",
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Helmets/Textures/T_nin_helmet_2018_golalt_helmet_col"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_accessories_schutt",
+   "mi": "/Game/MaddenRef/Players/Helmets/Materials/MI_helmet_accessories_schutt_playerHelmetChinstrap_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Helmets/Textures/T_flatwhite_color",
+    "RSM": "/Game/MaddenRef/Players/Helmets/Textures/T_helmetaccessories_rsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_shell_schutt",
+   "mi": "/Game/MaddenRef/Players/Helmets/Materials/MI_helmet_shell_schutt",
+   "slot": "all",
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Helmets/Textures/T_nin_helmet_2018_golalt_helmet_col"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_accessories_schuttvengeancez10",
+   "mi": "/Game/MaddenRef/Players/Helmets/Materials/MI_helmet_accessories_schuttvengeancez10_playerHelmetAccessories_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Helmets/Textures/T_flatwhite_color",
+    "RSM": "/Game/MaddenRef/Players/Helmets/Textures/T_helmetaccessories_rsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_shell_schuttvengeancez10",
+   "mi": "/Game/MaddenRef/Players/Helmets/Materials/MI_helmet_shell_schuttvengeancez10",
+   "slot": "all",
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Helmets/Textures/T_nin_helmet_2018_golalt_helmet_col"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_accessories_speedflex",
+   "mi": "/Game/MaddenRef/Players/Helmets/Materials/MI_helmet_accessories_speedflex_playerHelmetAccessories_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Helmets/Textures/T_flatwhite_color",
+    "RSM": "/Game/MaddenRef/Players/Helmets/Textures/T_helmetaccessories_rsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_shell_speedflex",
+   "mi": "/Game/MaddenRef/Players/Helmets/Materials/MI_helmet_shell_speedflex",
+   "slot": "all",
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Helmets/Textures/T_nin_helmet_2018_golalt_helmet_col"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_accessories_standard",
+   "mi": "/Game/MaddenRef/Players/Helmets/Materials/MI_helmet_accessories_standard_playerHelmetChinstrap_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Helmets/Textures/T_flatwhite_color",
+    "RSM": "/Game/MaddenRef/Players/Helmets/Textures/T_helmetaccessories_rsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_accessories_standardbrady",
+   "mi": "/Game/MaddenRef/Players/Helmets/Materials/MI_helmet_accessories_standardbrady_playerHelmetChinstrap_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Helmets/Textures/T_flatwhite_color",
+    "RSM": "/Game/MaddenRef/Players/Helmets/Textures/T_helmetaccessories_rsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_shell_standard",
+   "mi": "/Game/MaddenRef/Players/Helmets/Materials/MI_helmet_shell_standard",
+   "slot": "all",
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Helmets/Textures/T_nin_helmet_2018_golalt_helmet_col"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_shell_standardbrady",
+   "mi": "/Game/MaddenRef/Players/Helmets/Materials/MI_helmet_shell_standardbrady",
+   "slot": "all",
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Helmets/Textures/T_nin_helmet_2018_golalt_helmet_col"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_accessories_schuttvengeance",
+   "mi": "/Game/MaddenRef/Players/Helmets/Materials/MI_helmet_accessories_schuttvengeance_playerHelmetAccessories_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Helmets/Textures/T_flatwhite_color",
+    "RSM": "/Game/MaddenRef/Players/Helmets/Textures/T_helmetaccessories_rsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_shell_schuttvengeance",
+   "mi": "/Game/MaddenRef/Players/Helmets/Materials/MI_helmet_shell_schuttvengeance",
+   "slot": "all",
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Helmets/Textures/T_nin_helmet_2018_golalt_helmet_col"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_accessories_viciszero1",
+   "mi": "/Game/MaddenRef/Players/Helmets/Materials/MI_helmet_accessories_viciszero1_playerHelmetAccessories_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Helmets/Textures/T_flatwhite_color",
+    "RSM": "/Game/MaddenRef/Players/Helmets/Textures/T_helmetaccessories_rsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_shell_viciszero1",
+   "mi": "/Game/MaddenRef/Players/Helmets/Materials/MI_helmet_shell_viciszero1",
+   "slot": "all",
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Helmets/Textures/T_nin_helmet_2018_golalt_helmet_col"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_accessories_xenith",
+   "mi": "/Game/MaddenRef/Players/Helmets/Materials/MI_helmet_accessories_xenith_playerHelmetChinstrap_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Helmets/Textures/T_flatwhite_color",
+    "RSM": "/Game/MaddenRef/Players/Helmets/Textures/T_helmetaccessories_rsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_shell_xenith",
+   "mi": "/Game/MaddenRef/Players/Helmets/Materials/MI_helmet_shell_xenith",
+   "slot": "all",
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Helmets/Textures/T_nin_helmet_2018_golalt_helmet_col"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_accessories_xenithepic",
+   "mi": "/Game/MaddenRef/Players/Helmets/Materials/MI_helmet_accessories_xenithepic_playerHelmetAccessories_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Helmets/Textures/T_flatwhite_color",
+    "RSM": "/Game/MaddenRef/Players/Helmets/Textures/T_helmetaccessories_rsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_shell_xenithepic",
+   "mi": "/Game/MaddenRef/Players/Helmets/Materials/MI_helmet_shell_xenithepic",
+   "slot": "all",
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Helmets/Textures/T_nin_helmet_2018_golalt_helmet_col"
+   }
+  }
+ ],
+ "preview_level": {
+  "path": "/Game/MaddenRef/Maps/L_MaddenRef_Stage7Helmets",
+  "meshes": [
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_accessories_airxp",
+    "x": 0.0,
+    "label": "airxp"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_greendot_airxp",
+    "x": 0.0,
+    "label": "airxp"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_shell_airxp",
+    "x": 0.0,
+    "label": "airxp"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_visor_airxp",
+    "x": 0.0,
+    "label": "airxp"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_ballcap_backward",
+    "x": 60.0,
+    "label": "hats"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_ballcap_forward",
+    "x": 60.0,
+    "label": "hats"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_visorhat_d",
+    "x": 60.0,
+    "label": "hats"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_vintagelong",
+    "x": 120.0,
+    "label": "pill"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_vintageonebar",
+    "x": 120.0,
+    "label": "pill"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_vintagestandard",
+    "x": 120.0,
+    "label": "pill"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_vintagetowbar",
+    "x": 120.0,
+    "label": "pill"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_accessories_pill",
+    "x": 120.0,
+    "label": "pill"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_shell_pill",
+    "x": 120.0,
+    "label": "pill"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_g2b",
+    "x": 180.0,
+    "label": "revo"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_g2bd",
+    "x": 180.0,
+    "label": "revo"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_g2eg",
+    "x": 180.0,
+    "label": "revo"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_g3b",
+    "x": 180.0,
+    "label": "revo"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_g3bd",
+    "x": 180.0,
+    "label": "revo"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_g3bdu",
+    "x": 180.0,
+    "label": "revo"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_g3bn",
+    "x": 180.0,
+    "label": "revo"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_revo3bar",
+    "x": 180.0,
+    "label": "revo"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_revo3barlb",
+    "x": 180.0,
+    "label": "revo"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_revo3barrb",
+    "x": 180.0,
+    "label": "revo"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_revofullcage2",
+    "x": 180.0,
+    "label": "revo"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_revofullcage3",
+    "x": 180.0,
+    "label": "revo"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_revofullcage",
+    "x": 180.0,
+    "label": "revo"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_revokicker",
+    "x": 180.0,
+    "label": "revo"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_revorobot2",
+    "x": 180.0,
+    "label": "revo"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_revorobot",
+    "x": 180.0,
+    "label": "revo"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_accessories_revo",
+    "x": 180.0,
+    "label": "revo"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_greendot_revo",
+    "x": 180.0,
+    "label": "revo"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_shell_revo",
+    "x": 180.0,
+    "label": "revo"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_visor_revo",
+    "x": 180.0,
+    "label": "revo"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_visorclips_g3b_revo",
+    "x": 180.0,
+    "label": "revo"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_visorclips_kicker_revo",
+    "x": 180.0,
+    "label": "revo"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_visorclips_revo3barrbclip",
+    "x": 180.0,
+    "label": "revo"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_visorclips_revoclip",
+    "x": 180.0,
+    "label": "revo"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_visorclips_revofullcage3clip",
+    "x": 180.0,
+    "label": "revo"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_revospeed2bar",
+    "x": 240.0,
+    "label": "revospeed"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_revospeed2barsingle",
+    "x": 240.0,
+    "label": "revospeed"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_revospeed2barwr",
+    "x": 240.0,
+    "label": "revospeed"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_revospeed3bar",
+    "x": 240.0,
+    "label": "revospeed"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_revospeed3barlb",
+    "x": 240.0,
+    "label": "revospeed"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_revospeed3barlbstraight",
+    "x": 240.0,
+    "label": "revospeed"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_revospeed3barqb",
+    "x": 240.0,
+    "label": "revospeed"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_revospeed3barsingle",
+    "x": 240.0,
+    "label": "revospeed"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_revospeed3barstraight",
+    "x": 240.0,
+    "label": "revospeed"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_revospeed808",
+    "x": 240.0,
+    "label": "revospeed"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_revospeedcage",
+    "x": 240.0,
+    "label": "revospeed"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_revospeedfullcage2",
+    "x": 240.0,
+    "label": "revospeed"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_revospeedfullcage",
+    "x": 240.0,
+    "label": "revospeed"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_revospeedfullcagehook",
+    "x": 240.0,
+    "label": "revospeed"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_revospeedgrid",
+    "x": 240.0,
+    "label": "revospeed"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_revospeedkicker",
+    "x": 240.0,
+    "label": "revospeed"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_revospeedrobot2",
+    "x": 240.0,
+    "label": "revospeed"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_revospeedrobot",
+    "x": 240.0,
+    "label": "revospeed"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_revospeedrobotrb",
+    "x": 240.0,
+    "label": "revospeed"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_accessories_revospeed",
+    "x": 240.0,
+    "label": "revospeed"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_greendot_revospeed",
+    "x": 240.0,
+    "label": "revospeed"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_shell_revospeed",
+    "x": 240.0,
+    "label": "revospeed"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_visor_revospeed",
+    "x": 240.0,
+    "label": "revospeed"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_visorclips_revospeed2barwrclip",
+    "x": 240.0,
+    "label": "revospeed"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_visorclips_revospeedcageclip",
+    "x": 240.0,
+    "label": "revospeed"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_visorclips_revospeedclip",
+    "x": 240.0,
+    "label": "revospeed"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_visorclips_revospeedrobotclip",
+    "x": 240.0,
+    "label": "revospeed"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_riddell3603barlb",
+    "x": 300.0,
+    "label": "riddell360"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_riddell360fullcage",
+    "x": 300.0,
+    "label": "riddell360"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_riddell360robot2",
+    "x": 300.0,
+    "label": "riddell360"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_riddell360robot",
+    "x": 300.0,
+    "label": "riddell360"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_accessories_riddell360",
+    "x": 300.0,
+    "label": "riddell360"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_greendot_riddell360",
+    "x": 300.0,
+    "label": "riddell360"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_shell_riddell360",
+    "x": 300.0,
+    "label": "riddell360"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_visor_riddell360",
+    "x": 300.0,
+    "label": "riddell360"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_visorclips_riddell360clip",
+    "x": 300.0,
+    "label": "riddell360"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_accessories_schutt",
+    "x": 360.0,
+    "label": "schutt"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_greendot_schutt",
+    "x": 360.0,
+    "label": "schutt"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_shell_schutt",
+    "x": 360.0,
+    "label": "schutt"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_visor_schutt",
+    "x": 360.0,
+    "label": "schutt"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_accessories_schuttvengeancez10",
+    "x": 420.0,
+    "label": "schuttvengeancez10"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_shell_schuttvengeancez10",
+    "x": 420.0,
+    "label": "schuttvengeancez10"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_visor_schuttvengeancez10",
+    "x": 420.0,
+    "label": "schuttvengeancez10"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_visorclips_schuttvengeancez10clip",
+    "x": 420.0,
+    "label": "schuttvengeancez10"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_speedflex2bar",
+    "x": 480.0,
+    "label": "speedflex"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_speedflex2barqb",
+    "x": 480.0,
+    "label": "speedflex"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_speedflex2barsingle",
+    "x": 480.0,
+    "label": "speedflex"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_speedflex3barlb",
+    "x": 480.0,
+    "label": "speedflex"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_speedflex3barqb",
+    "x": 480.0,
+    "label": "speedflex"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_speedflex3barrb",
+    "x": 480.0,
+    "label": "speedflex"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_speedflex3barsingle",
+    "x": 480.0,
+    "label": "speedflex"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_speedflexcage",
+    "x": 480.0,
+    "label": "speedflex"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_speedflexfullcage",
+    "x": 480.0,
+    "label": "speedflex"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_speedflexrobot",
+    "x": 480.0,
+    "label": "speedflex"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_speedflexrobotrb",
+    "x": 480.0,
+    "label": "speedflex"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_speedflexrobotrbjagged",
+    "x": 480.0,
+    "label": "speedflex"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_accessories_speedflex",
+    "x": 480.0,
+    "label": "speedflex"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_greendot_speedflex",
+    "x": 480.0,
+    "label": "speedflex"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_shell_speedflex",
+    "x": 480.0,
+    "label": "speedflex"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_visor_speedflex",
+    "x": 480.0,
+    "label": "speedflex"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_visorclips_speedflexcageclip",
+    "x": 480.0,
+    "label": "speedflex"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_visorclips_speedflexclip",
+    "x": 480.0,
+    "label": "speedflex"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_3barrb",
+    "x": 540.0,
+    "label": "standard"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_3barrbjagged",
+    "x": 540.0,
+    "label": "standard"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_bullrb",
+    "x": 540.0,
+    "label": "standard"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_egjop",
+    "x": 540.0,
+    "label": "standard"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_egop",
+    "x": 540.0,
+    "label": "standard"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_egopii",
+    "x": 540.0,
+    "label": "standard"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_fullcage2",
+    "x": 540.0,
+    "label": "standard"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_fullcage",
+    "x": 540.0,
+    "label": "standard"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_fullcagesingle",
+    "x": 540.0,
+    "label": "standard"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_njop",
+    "x": 540.0,
+    "label": "standard"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_njopdw",
+    "x": 540.0,
+    "label": "standard"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_opo",
+    "x": 540.0,
+    "label": "standard"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_opodw",
+    "x": 540.0,
+    "label": "standard"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_oposw",
+    "x": 540.0,
+    "label": "standard"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_rjop",
+    "x": 540.0,
+    "label": "standard"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_rjopdw",
+    "x": 540.0,
+    "label": "standard"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_rjopubdw",
+    "x": 540.0,
+    "label": "standard"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_rkop",
+    "x": 540.0,
+    "label": "standard"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_ropo",
+    "x": 540.0,
+    "label": "standard"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_ropodw",
+    "x": 540.0,
+    "label": "standard"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_ropodwxl",
+    "x": 540.0,
+    "label": "standard"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_roposw",
+    "x": 540.0,
+    "label": "standard"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_ropoubdw",
+    "x": 540.0,
+    "label": "standard"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_standard2barwr",
+    "x": 540.0,
+    "label": "standard"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_stdbulldog",
+    "x": 540.0,
+    "label": "standard"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_accessories_standard",
+    "x": 540.0,
+    "label": "standard"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_accessories_standardbrady",
+    "x": 540.0,
+    "label": "standard"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_greendot_standard",
+    "x": 540.0,
+    "label": "standard"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_greendot_standardbrady",
+    "x": 540.0,
+    "label": "standard"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_shell_standard",
+    "x": 540.0,
+    "label": "standard"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_shell_standardbrady",
+    "x": 540.0,
+    "label": "standard"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_visor_standard",
+    "x": 540.0,
+    "label": "standard"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_visor_standardbrady",
+    "x": 540.0,
+    "label": "standard"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_visorclips_standard2clip",
+    "x": 540.0,
+    "label": "standard"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_visorclips_standardbrady2clip",
+    "x": 540.0,
+    "label": "standard"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_visorclips_standardbradyclip",
+    "x": 540.0,
+    "label": "standard"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_visorclips_standardclip",
+    "x": 540.0,
+    "label": "standard"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_vengeance3barrb",
+    "x": 600.0,
+    "label": "vengeance"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_vengeancecage",
+    "x": 600.0,
+    "label": "vengeance"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_vengeancefullcage",
+    "x": 600.0,
+    "label": "vengeance"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_vengeancefullcagebulldog",
+    "x": 600.0,
+    "label": "vengeance"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_vengeancekicker",
+    "x": 600.0,
+    "label": "vengeance"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_vengeanceqb",
+    "x": 600.0,
+    "label": "vengeance"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_vengeancerobot",
+    "x": 600.0,
+    "label": "vengeance"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_vengeancerobotrb",
+    "x": 600.0,
+    "label": "vengeance"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_vengeancez102bar",
+    "x": 600.0,
+    "label": "vengeance"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_vengeancez103barlb",
+    "x": 600.0,
+    "label": "vengeance"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_vengeancez10cage",
+    "x": 600.0,
+    "label": "vengeance"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_vengeancez10robot",
+    "x": 600.0,
+    "label": "vengeance"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_vengeancez10robotrb",
+    "x": 600.0,
+    "label": "vengeance"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_accessories_schuttvengeance",
+    "x": 600.0,
+    "label": "vengeance"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_greendot_schuttvengeance",
+    "x": 600.0,
+    "label": "vengeance"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_shell_schuttvengeance",
+    "x": 600.0,
+    "label": "vengeance"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_visor_schuttvengeance",
+    "x": 600.0,
+    "label": "vengeance"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_visorclips_vengeanceclip",
+    "x": 600.0,
+    "label": "vengeance"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_viciszero12bar",
+    "x": 660.0,
+    "label": "viciszero1"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_viciszero13bar",
+    "x": 660.0,
+    "label": "viciszero1"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_viciszero13barlb",
+    "x": 660.0,
+    "label": "viciszero1"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_viciszero13barrb",
+    "x": 660.0,
+    "label": "viciszero1"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_viciszero1bullrb",
+    "x": 660.0,
+    "label": "viciszero1"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_viciszero1fullcage",
+    "x": 660.0,
+    "label": "viciszero1"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_viciszero1robot",
+    "x": 660.0,
+    "label": "viciszero1"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_viciszero1robotrb",
+    "x": 660.0,
+    "label": "viciszero1"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_accessories_viciszero1",
+    "x": 660.0,
+    "label": "viciszero1"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_greendot_viciszero1",
+    "x": 660.0,
+    "label": "viciszero1"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_shell_viciszero1",
+    "x": 660.0,
+    "label": "viciszero1"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_visor_viciszero1",
+    "x": 660.0,
+    "label": "viciszero1"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_visorclips_viciszero1clip",
+    "x": 660.0,
+    "label": "viciszero1"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_s2egfacemask",
+    "x": 720.0,
+    "label": "xenith"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_xenith3barrb",
+    "x": 720.0,
+    "label": "xenith"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_xenithfullcage",
+    "x": 720.0,
+    "label": "xenith"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_xenithpredator",
+    "x": 720.0,
+    "label": "xenith"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_xenithprism",
+    "x": 720.0,
+    "label": "xenith"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_xenithrobot",
+    "x": 720.0,
+    "label": "xenith"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_facemask_xenithrobotrb",
+    "x": 720.0,
+    "label": "xenith"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_accessories_xenith",
+    "x": 720.0,
+    "label": "xenith"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_greendot_xenith",
+    "x": 720.0,
+    "label": "xenith"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_shell_xenith",
+    "x": 720.0,
+    "label": "xenith"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_visor_xenith",
+    "x": 720.0,
+    "label": "xenith"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_visorclips_xenithclip",
+    "x": 720.0,
+    "label": "xenith"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_visorclips_xenithprismclip",
+    "x": 720.0,
+    "label": "xenith"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_accessories_xenithepic",
+    "x": 780.0,
+    "label": "xenithepic"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_shell_xenithepic",
+    "x": 780.0,
+    "label": "xenithepic"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_visor_xenithepic",
+    "x": 780.0,
+    "label": "xenithepic"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Helmets/SK_helmet_visorclips_xenithepicclip",
+    "x": 780.0,
+    "label": "xenithepic"
+   }
+  ]
+ }
+}

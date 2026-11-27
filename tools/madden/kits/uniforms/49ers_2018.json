@@ -1,0 +1,24 @@
+{
+ "name": "49ers_2018",
+ "about": "49ers 2018 set (WHIALT jersey and pants, WHI socks, GOLALT helmet). Each rule follows the AppearanceShaderPreset Madden applies to that template piece at runtime, dumped by jobs/uniform_presets_49ers_2018.json. Jersey sleeves (player_jerseySleeve_shader on sleeve_tight) sample the jersey atlas. The facemask preset has no texture, only primaryColor (linear), smoothness 0.75 and reflectance 0.15. Numbers, names, patches, wrinkle and pad normals are not modelled.",
+ "presets": [
+  "content/characters/player/parts/uniforms/49ers/2018/NIN_JERSEY_2018_WHIALT_preset",
+  "content/characters/player/parts/uniforms/49ers/2018/NIN_JERSEY_2018_WHIALT_Sleeves_preset",
+  "content/characters/player/parts/uniforms/49ers/2018/NIN_PANTS_2018_WHIALT_preset",
+  "content/characters/player/parts/uniforms/49ers/2018/NIN_SOCKS_2018_WHI_preset",
+  "content/characters/player/parts/uniforms/49ers/2018/NIN_HELMET_2018_GOLALT_preset",
+  "content/characters/player/parts/uniforms/49ers/2018/NIN_Helmet_2018_GOLALT_facemask_preset"
+ ],
+ "textures": [
+  {"dir": "content/characters/player/parts/uniforms/49ers/2018/", "regex": "(WHIALT_(Jersey|Pants)_(COL|NORM|RSM)|GOLALT_(helmet|Sticker)_COL|socksUnder_COL)$"},
+  {"dir": "content/characters/player/parts/legsapparel/socks_under/", "regex": "socks_Under_(normal|RSM)$"}
+ ],
+ "rules": [
+  ["/jersey_[tmhd]_mesh$", {"BaseColor": "nin_jersey_2018_whialt_jersey_col", "Normal": "nin_jersey_2018_whialt_jersey_norm", "RSM": "nin_jersey_2018_whialt_jersey_rsm"}],
+  ["/sleeve_tight_[tmhd]_mesh$", {"BaseColor": "nin_jersey_2018_whialt_jersey_col", "Normal": "nin_jersey_2018_whialt_jersey_norm", "RSM": "nin_jersey_2018_whialt_jersey_rsm"}],
+  ["/pants_[tmhd]_mesh$", {"BaseColor": "nin_pants_2018_whialt_pants_col", "Normal": "nin_pants_2018_whialt_pants_norm", "RSM": "nin_pants_2018_whialt_pants_rsm"}],
+  ["/socks_mid_[tmhd]_mesh$", {"BaseColor": "nin_socks_2018_whi_socksunder_col", "Normal": "socks_under_normal", "RSM": "socks_under_rsm"}],
+  ["/helmet_shell_[a-z0-9]+_mesh$", {"BaseColor": "nin_helmet_2018_golalt_helmet_col"}],
+  ["/helmet_facemask_[a-z0-9]+_mesh$", {"vectors": {"Tint": [0.189372048, 0.205622151, 0.214041144, 1.0]}, "scalars": {"Roughness": 0.25}}]
+ ]
+}

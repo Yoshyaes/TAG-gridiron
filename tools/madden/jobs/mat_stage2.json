@@ -1,0 +1,233 @@
+{
+ "bindings": [
+  {
+   "mesh": "/Game/MaddenRef/Players/Stage2/SK_fullarms_d",
+   "mi": "/Game/MaddenRef/Players/Stage2/Materials/MI_fullarms_d",
+   "slot": "all",
+   "switches": {
+    "RSMIsSkin": true,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Stage2/Textures/T_arm_skintone7",
+    "Normal": "/Game/MaddenRef/Players/Stage2/Textures/T_arm_normal",
+    "RSM": "/Game/MaddenRef/Players/Stage2/Textures/T_arm_rsm_skintone7"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Stage2/SK_legs_d",
+   "mi": "/Game/MaddenRef/Players/Stage2/Materials/MI_legs_d",
+   "slot": "all",
+   "switches": {
+    "RSMIsSkin": true,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Stage2/Textures/T_genericpadless_legs_st7",
+    "Normal": "/Game/MaddenRef/Players/Stage2/Textures/T_ls_common_legs_normal",
+    "RSM": "/Game/MaddenRef/Players/Stage2/Textures/T_ls_common_legs_rsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Stage2/SK_jersey_d",
+   "mi": "/Game/MaddenRef/Players/Stage2/Materials/MI_jersey_d",
+   "slot": "all",
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Stage2/Textures/T_nin_jersey_2018_whialt_jersey_col",
+    "Normal": "/Game/MaddenRef/Players/Stage2/Textures/T_nin_jersey_2018_whialt_jersey_norm",
+    "RSM": "/Game/MaddenRef/Players/Stage2/Textures/T_nin_jersey_2018_whialt_jersey_rsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Stage2/SK_pants_d",
+   "mi": "/Game/MaddenRef/Players/Stage2/Materials/MI_pants_d",
+   "slot": "all",
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Stage2/Textures/T_nin_pants_2018_whialt_pants_col",
+    "Normal": "/Game/MaddenRef/Players/Stage2/Textures/T_nin_pants_2018_whialt_pants_norm",
+    "RSM": "/Game/MaddenRef/Players/Stage2/Textures/T_nin_pants_2018_whialt_pants_rsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Stage2/SK_socks_mid_d",
+   "mi": "/Game/MaddenRef/Players/Stage2/Materials/MI_socks_mid_d",
+   "slot": "all",
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Stage2/Textures/T_nin_socks_2018_whi_socksunder_col",
+    "Normal": "/Game/MaddenRef/Players/Stage2/Textures/T_socks_under_normal",
+    "RSM": "/Game/MaddenRef/Players/Stage2/Textures/T_socks_under_rsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Stage2/SK_sleeve_tight_d",
+   "mi": "/Game/MaddenRef/Players/Stage2/Materials/MI_sleeve_tight_d",
+   "slot": "all",
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Stage2/Textures/T_nin_jersey_2018_whialt_jersey_col",
+    "Normal": "/Game/MaddenRef/Players/Stage2/Textures/T_nin_jersey_2018_whialt_jersey_norm",
+    "RSM": "/Game/MaddenRef/Players/Stage2/Textures/T_nin_jersey_2018_whialt_jersey_rsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubr_d",
+   "mi": "/Game/MaddenRef/Players/Stage2/Materials/MI_shoe_low_nikealphamenaceelite99clubr_d_playerShoeR_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Stage2/Textures/T_shoe_low_nikealphamenaceelite99club_black_col",
+    "Normal": "/Game/MaddenRef/Players/Stage2/Textures/T_shoe_low_nikealphamenaceelite99club_norm",
+    "RSM": "/Game/MaddenRef/Players/Stage2/Textures/T_shoe_low_nikealphamenaceelite99club_rsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubl_d",
+   "mi": "/Game/MaddenRef/Players/Stage2/Materials/MI_shoe_low_nikealphamenaceelite99clubl_d_playerShoeL_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Stage2/Textures/T_shoe_low_nikealphamenaceelite99club_black_col",
+    "Normal": "/Game/MaddenRef/Players/Stage2/Textures/T_shoe_low_nikealphamenaceelite99club_norm",
+    "RSM": "/Game/MaddenRef/Players/Stage2/Textures/T_shoe_low_nikealphamenaceelite99club_rsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Stage2/SK_faulkmarshall_11413",
+   "mi": "/Game/MaddenRef/Players/Stage2/Materials/MI_faulkmarshall_11413_head_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": true,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Stage2/Textures/T_faulkmarshall_11413_color",
+    "Normal": "/Game/MaddenRef/Players/Stage2/Textures/T_faulkmarshall_11413_normal",
+    "RSM": "/Game/MaddenRef/Players/Stage2/Textures/T_commonrsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_shell_xenith",
+   "mi": "/Game/MaddenRef/Players/Stage2/Materials/MI_helmet_shell_xenith",
+   "slot": "all",
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Stage2/Textures/T_nin_helmet_2018_golalt_helmet_col"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_facemask_xenithprism",
+   "mi": "/Game/MaddenRef/Players/Stage2/Materials/MI_helmet_facemask_xenithprism",
+   "scalars": {
+    "Roughness": 0.25
+   },
+   "slot": "all",
+   "switches": {
+    "RSMIsSkin": false,
+    "UseRSM": false
+   },
+   "textures": {},
+   "vectors": {
+    "Tint": [
+     0.189372048,
+     0.205622151,
+     0.214041144,
+     1.0
+    ]
+   }
+  }
+ ],
+ "preview_level": {
+  "path": "/Game/MaddenRef/Maps/L_MaddenRef_Stage2Player",
+  "meshes": [
+   {
+    "mesh": "/Game/MaddenRef/Players/Stage2/SK_fullarms_d",
+    "x": 0.0,
+    "label": "d"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Stage2/SK_legs_d",
+    "x": 0.0,
+    "label": "d"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Stage2/SK_jersey_d",
+    "x": 0.0,
+    "label": "d"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Stage2/SK_pants_d",
+    "x": 0.0,
+    "label": "d"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Stage2/SK_socks_mid_d",
+    "x": 0.0,
+    "label": "d"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Stage2/SK_sleeve_tight_d",
+    "x": 0.0,
+    "label": "d"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubr_d",
+    "x": 0.0,
+    "label": "d"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Stage2/SK_shoe_low_nikealphamenaceelite99clubl_d",
+    "x": 0.0,
+    "label": "d"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Stage2/SK_glover_d",
+    "x": 0.0,
+    "label": "d"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Stage2/SK_glovel_d",
+    "x": 0.0,
+    "label": "d"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Stage2/SK_faulkmarshall_11413",
+    "x": 0.0,
+    "label": "d"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_shell_xenith",
+    "x": 0.0,
+    "label": "d"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Stage2/SK_helmet_facemask_xenithprism",
+    "x": 0.0,
+    "label": "d"
+   }
+  ]
+ }
+}

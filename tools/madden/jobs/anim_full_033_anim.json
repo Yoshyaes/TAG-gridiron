@@ -1,0 +1,1106 @@
+[
+ {
+  "name": "Juke_Left_Tackle_D4_v2__P01",
+  "file": "Juke_Left_Tackle_D4_v2__P01",
+  "clip_key": "d216e207ed1c4bf4",
+  "layer_key": "801ada6244fbcaf4",
+  "fps": 60.0,
+  "frames": 381
+ },
+ {
+  "name": "Juke_Left_Tackle_D4_v2__P02",
+  "file": "Juke_Left_Tackle_D4_v2__P02",
+  "clip_key": "c7cae0ea2053bda0",
+  "layer_key": "fb7d04b9f25ae5e9",
+  "fps": 60.0,
+  "frames": 381
+ },
+ {
+  "name": "Juke_Left_Tackle_D4_v3__P01",
+  "file": "Juke_Left_Tackle_D4_v3__P01",
+  "clip_key": "edb46c658420683f",
+  "layer_key": "8aab1f61f9b4009a",
+  "fps": 60.0,
+  "frames": 333
+ },
+ {
+  "name": "Juke_Left_Tackle_D4_v3__P02",
+  "file": "Juke_Left_Tackle_D4_v3__P02",
+  "clip_key": "30d129f6c07978bf",
+  "layer_key": "0fd5814f0fc04c20",
+  "fps": 60.0,
+  "frames": 333
+ },
+ {
+  "name": "Juke_Left_Tackle_D5_v1__P01",
+  "file": "Juke_Left_Tackle_D5_v1__P01",
+  "clip_key": "cd714d912772197a",
+  "layer_key": "bac0581db368aebe",
+  "fps": 60.0,
+  "frames": 397
+ },
+ {
+  "name": "Juke_Left_Tackle_D5_v1__P02",
+  "file": "Juke_Left_Tackle_D5_v1__P02",
+  "clip_key": "0d1dce6d03896fbf",
+  "layer_key": "a4e11fcdf667c7dc",
+  "fps": 60.0,
+  "frames": 397
+ },
+ {
+  "name": "Juke_Left_Tackle_D5_v2__P01",
+  "file": "Juke_Left_Tackle_D5_v2__P01",
+  "clip_key": "4e00ed4f751f0235",
+  "layer_key": "5b218c42a5e9018c",
+  "fps": 60.0,
+  "frames": 351
+ },
+ {
+  "name": "Juke_Left_Tackle_D5_v2__P02",
+  "file": "Juke_Left_Tackle_D5_v2__P02",
+  "clip_key": "d549261eaaf28514",
+  "layer_key": "08d15279c2810ee9",
+  "fps": 60.0,
+  "frames": 351
+ },
+ {
+  "name": "Juke_Left_Tackle_D6_v1__P01",
+  "file": "Juke_Left_Tackle_D6_v1__P01",
+  "clip_key": "acb88c4f871f11c1",
+  "layer_key": "9f3d5564f8bd4f4a",
+  "fps": 60.0,
+  "frames": 323
+ },
+ {
+  "name": "Juke_Left_Tackle_D6_v1__P02",
+  "file": "Juke_Left_Tackle_D6_v1__P02",
+  "clip_key": "0547e9156d4def90",
+  "layer_key": "be597b82bf3e1d7d",
+  "fps": 60.0,
+  "frames": 323
+ },
+ {
+  "name": "Juke_Left_Tackle_D7_v1__P01",
+  "file": "Juke_Left_Tackle_D7_v1__P01",
+  "clip_key": "c04cb9eb38af5def",
+  "layer_key": "5b19d523db996657",
+  "fps": 60.0,
+  "frames": 435
+ },
+ {
+  "name": "Juke_Left_Tackle_D7_v1__P02",
+  "file": "Juke_Left_Tackle_D7_v1__P02",
+  "clip_key": "90da6aaf6acee461",
+  "layer_key": "a575f7e9b14811fb",
+  "fps": 60.0,
+  "frames": 435
+ },
+ {
+  "name": "Juke_Left_Tackle_D8_v1__P01",
+  "file": "Juke_Left_Tackle_D8_v1__P01",
+  "clip_key": "1646d84e273b1288",
+  "layer_key": "ad6801b972f9ea32",
+  "fps": 60.0,
+  "frames": 474
+ },
+ {
+  "name": "Juke_Left_Tackle_D8_v1__P02",
+  "file": "Juke_Left_Tackle_D8_v1__P02",
+  "clip_key": "9e07eca3c5e67e20",
+  "layer_key": "6a8f24ad76be4e57",
+  "fps": 60.0,
+  "frames": 474
+ },
+ {
+  "name": "Juke_Right_Tackle_D1_v1__P01",
+  "file": "Juke_Right_Tackle_D1_v1__P01",
+  "clip_key": "8bd97739cfb2f5f0",
+  "layer_key": "4152e97f240359f7",
+  "fps": 60.0,
+  "frames": 283
+ },
+ {
+  "name": "Juke_Right_Tackle_D1_v1__P02",
+  "file": "Juke_Right_Tackle_D1_v1__P02",
+  "clip_key": "0fa95d2771566d3f",
+  "layer_key": "bec95e908d3bcae7",
+  "fps": 60.0,
+  "frames": 283
+ },
+ {
+  "name": "Juke_Right_Tackle_D1_v2__P01",
+  "file": "Juke_Right_Tackle_D1_v2__P01",
+  "clip_key": "a9ead7ba5fda6308",
+  "layer_key": "b0d72d6845ecd657",
+  "fps": 60.0,
+  "frames": 369
+ },
+ {
+  "name": "Juke_Right_Tackle_D1_v2__P02",
+  "file": "Juke_Right_Tackle_D1_v2__P02",
+  "clip_key": "da83b549c46add0f",
+  "layer_key": "4083bda434c1f47f",
+  "fps": 60.0,
+  "frames": 369
+ },
+ {
+  "name": "Juke_Right_Tackle_D2_v1__P01",
+  "file": "Juke_Right_Tackle_D2_v1__P01",
+  "clip_key": "f33bfd596fcd4330",
+  "layer_key": "a68e65bea1d56761",
+  "fps": 60.0,
+  "frames": 359
+ },
+ {
+  "name": "Juke_Right_Tackle_D2_v1__P02",
+  "file": "Juke_Right_Tackle_D2_v1__P02",
+  "clip_key": "903ebeea54ed8cdf",
+  "layer_key": "59f11b98488d5bd9",
+  "fps": 60.0,
+  "frames": 359
+ },
+ {
+  "name": "Juke_Right_Tackle_D3_v1__P01",
+  "file": "Juke_Right_Tackle_D3_v1__P01",
+  "clip_key": "6e4aa763ded9b338",
+  "layer_key": "df6ef6d90a7e62c8",
+  "fps": 60.0,
+  "frames": 375
+ },
+ {
+  "name": "Juke_Right_Tackle_D3_v1__P02",
+  "file": "Juke_Right_Tackle_D3_v1__P02",
+  "clip_key": "eab73731959aff19",
+  "layer_key": "f6fdcaccb289b6a8",
+  "fps": 60.0,
+  "frames": 375
+ },
+ {
+  "name": "Juke_Right_Tackle_D4_v1__P01",
+  "file": "Juke_Right_Tackle_D4_v1__P01",
+  "clip_key": "32ea8c468f633522",
+  "layer_key": "14bdaa68ae906a67",
+  "fps": 60.0,
+  "frames": 296
+ },
+ {
+  "name": "Juke_Right_Tackle_D4_v1__P02",
+  "file": "Juke_Right_Tackle_D4_v1__P02",
+  "clip_key": "2a7a19a224592eba",
+  "layer_key": "25ff26fc7d01b9e6",
+  "fps": 60.0,
+  "frames": 296
+ },
+ {
+  "name": "Juke_Right_Tackle_D5_v1__P01",
+  "file": "Juke_Right_Tackle_D5_v1__P01",
+  "clip_key": "3c050245c071dbf9",
+  "layer_key": "59c255156b642e91",
+  "fps": 60.0,
+  "frames": 428
+ },
+ {
+  "name": "Juke_Right_Tackle_D5_v1__P02",
+  "file": "Juke_Right_Tackle_D5_v1__P02",
+  "clip_key": "5a48c0a40218e382",
+  "layer_key": "56a883ce5ca4b63d",
+  "fps": 60.0,
+  "frames": 428
+ },
+ {
+  "name": "Juke_Right_Tackle_D6_v1__P01",
+  "file": "Juke_Right_Tackle_D6_v1__P01",
+  "clip_key": "8911b5c249edbd10",
+  "layer_key": "bdac9a3270aba6a5",
+  "fps": 60.0,
+  "frames": 447
+ },
+ {
+  "name": "Juke_Right_Tackle_D6_v1__P02",
+  "file": "Juke_Right_Tackle_D6_v1__P02",
+  "clip_key": "fb03ddc4b0157d67",
+  "layer_key": "587b6367930201a8",
+  "fps": 60.0,
+  "frames": 447
+ },
+ {
+  "name": "Juke_Right_Tackle_D7_v1__P01",
+  "file": "Juke_Right_Tackle_D7_v1__P01",
+  "clip_key": "7dfd872144926e61",
+  "layer_key": "326f76c291b23574",
+  "fps": 60.0,
+  "frames": 337
+ },
+ {
+  "name": "Juke_Right_Tackle_D7_v1__P02",
+  "file": "Juke_Right_Tackle_D7_v1__P02",
+  "clip_key": "9a50cda9296a665c",
+  "layer_key": "3b82a1235c842873",
+  "fps": 60.0,
+  "frames": 337
+ },
+ {
+  "name": "Juke_Right_Tackle_D7_v2__P01",
+  "file": "Juke_Right_Tackle_D7_v2__P01",
+  "clip_key": "3911bfc7afcc22d0",
+  "layer_key": "3e46b617fa6f5c32",
+  "fps": 60.0,
+  "frames": 445
+ },
+ {
+  "name": "Juke_Right_Tackle_D7_v2__P02",
+  "file": "Juke_Right_Tackle_D7_v2__P02",
+  "clip_key": "30221c33117885ac",
+  "layer_key": "990beabf07698d8b",
+  "fps": 60.0,
+  "frames": 445
+ },
+ {
+  "name": "Juke_Right_Tackle_D7_v3__P01",
+  "file": "Juke_Right_Tackle_D7_v3__P01",
+  "clip_key": "06967b67e1c9ed68",
+  "layer_key": "9aef7c48ce916944",
+  "fps": 60.0,
+  "frames": 360
+ },
+ {
+  "name": "Juke_Right_Tackle_D7_v3__P02",
+  "file": "Juke_Right_Tackle_D7_v3__P02",
+  "clip_key": "d6e286683b102914",
+  "layer_key": "c84519d2552a59cd",
+  "fps": 60.0,
+  "frames": 360
+ },
+ {
+  "name": "Juke_Right_Tackle_D7_v4__P01",
+  "file": "Juke_Right_Tackle_D7_v4__P01",
+  "clip_key": "e7ef0e5560bb1edf",
+  "layer_key": "15d9f6ad32332120",
+  "fps": 60.0,
+  "frames": 483
+ },
+ {
+  "name": "Juke_Right_Tackle_D7_v4__P02",
+  "file": "Juke_Right_Tackle_D7_v4__P02",
+  "clip_key": "2fccac550bf12294",
+  "layer_key": "65fc484d0966c4a9",
+  "fps": 60.0,
+  "frames": 483
+ },
+ {
+  "name": "Juke_Right_Tackle_D7_v5__P01",
+  "file": "Juke_Right_Tackle_D7_v5__P01",
+  "clip_key": "986e67039b4c959b",
+  "layer_key": "f1b6effb2d910480",
+  "fps": 60.0,
+  "frames": 435
+ },
+ {
+  "name": "Juke_Right_Tackle_D7_v5__P02",
+  "file": "Juke_Right_Tackle_D7_v5__P02",
+  "clip_key": "0ae6e33d51eafdfb",
+  "layer_key": "9e8cd7e81be887f4",
+  "fps": 60.0,
+  "frames": 435
+ },
+ {
+  "name": "Juke_Right_Tackle_D7_v6__P01",
+  "file": "Juke_Right_Tackle_D7_v6__P01",
+  "clip_key": "486eedc23d380cb4",
+  "layer_key": "1a00008911e84999",
+  "fps": 60.0,
+  "frames": 435
+ },
+ {
+  "name": "Juke_Right_Tackle_D7_v6__P02",
+  "file": "Juke_Right_Tackle_D7_v6__P02",
+  "clip_key": "878ceba6d41b0bbf",
+  "layer_key": "3a7c5001caf35148",
+  "fps": 60.0,
+  "frames": 435
+ },
+ {
+  "name": "Juke_Right_Tackle_D7_v7__P01",
+  "file": "Juke_Right_Tackle_D7_v7__P01",
+  "clip_key": "84bffcb701a5d4b1",
+  "layer_key": "a11d52d06b37d326",
+  "fps": 60.0,
+  "frames": 327
+ },
+ {
+  "name": "Juke_Right_Tackle_D7_v7__P02",
+  "file": "Juke_Right_Tackle_D7_v7__P02",
+  "clip_key": "24dcbe8886b84b54",
+  "layer_key": "9023332f132e6279",
+  "fps": 60.0,
+  "frames": 327
+ },
+ {
+  "name": "Juke_Right_Tackle_D8_v1__P01",
+  "file": "Juke_Right_Tackle_D8_v1__P01",
+  "clip_key": "a3e1abc6ea1eaad4",
+  "layer_key": "11278da6f5502b79",
+  "fps": 60.0,
+  "frames": 335
+ },
+ {
+  "name": "Juke_Right_Tackle_D8_v1__P02",
+  "file": "Juke_Right_Tackle_D8_v1__P02",
+  "clip_key": "63b107468072dbe9",
+  "layer_key": "2a81038c25d2fbbc",
+  "fps": 60.0,
+  "frames": 335
+ },
+ {
+  "name": "Juke_Right_Tackle_D8_v2__P01",
+  "file": "Juke_Right_Tackle_D8_v2__P01",
+  "clip_key": "c3e4d4945692678c",
+  "layer_key": "7bccc1291f7f5054",
+  "fps": 60.0,
+  "frames": 410
+ },
+ {
+  "name": "Juke_Right_Tackle_D8_v2__P02",
+  "file": "Juke_Right_Tackle_D8_v2__P02",
+  "clip_key": "9125941692c9b3f3",
+  "layer_key": "31427a2c2de01405",
+  "fps": 60.0,
+  "frames": 410
+ },
+ {
+  "name": "Juke_Right_Tackle_D8_v3__P01",
+  "file": "Juke_Right_Tackle_D8_v3__P01",
+  "clip_key": "4b1227e6c59b326f",
+  "layer_key": "f368774c2ee80fbf",
+  "fps": 60.0,
+  "frames": 405
+ },
+ {
+  "name": "Juke_Right_Tackle_D8_v3__P02",
+  "file": "Juke_Right_Tackle_D8_v3__P02",
+  "clip_key": "a8e803dfe5d9edc4",
+  "layer_key": "749e55e0812593a8",
+  "fps": 60.0,
+  "frames": 405
+ },
+ {
+  "name": "JustinHouston_Sig_Sack_Celebration_V1__P01",
+  "file": "JustinHouston_Sig_Sack_Celebration_V1__P01",
+  "clip_key": "378382f635a9ffbe",
+  "layer_key": "d7184c80da40bf5d",
+  "fps": 60.0,
+  "frames": 454
+ },
+ {
+  "name": "Kearse TD Dance__P01",
+  "file": "Kearse_TD_Dance__P01",
+  "clip_key": "cab45b1b196cb50b",
+  "layer_key": "5191b6d991ccb1cb",
+  "fps": 60.0,
+  "frames": 383
+ },
+ {
+  "name": "Kelce TD Dance__P01",
+  "file": "Kelce_TD_Dance__P01",
+  "clip_key": "8a0d8bb4cb330189",
+  "layer_key": "5ad2fd622f07df2e",
+  "fps": 60.0,
+  "frames": 499
+ },
+ {
+  "name": "KickCatch_0_Helmet_v2__P01",
+  "file": "KickCatch_0_Helmet_v2__P01",
+  "clip_key": "910c3e4b380cd35d",
+  "layer_key": "5c556d475deed85b",
+  "fps": 30.0,
+  "frames": 34
+ },
+ {
+  "name": "KickCatch_Chest_Run_0_Stop__P01",
+  "file": "KickCatch_Chest_Run_0_Stop__P01",
+  "clip_key": "fcf68e6c27549026",
+  "layer_key": "b3aa032d8e7047ca",
+  "fps": 30.0,
+  "frames": 40
+ },
+ {
+  "name": "KickCatch_Chest_Stand_0__P01",
+  "file": "KickCatch_Chest_Stand_0__P01",
+  "clip_key": "edf35377e9cdd86e",
+  "layer_key": "00c5962cedfdc32a",
+  "fps": 60.0,
+  "frames": 72
+ },
+ {
+  "name": "KickCatch_Helmet_Run_0_Stop__P01",
+  "file": "KickCatch_Helmet_Run_0_Stop__P01",
+  "clip_key": "a2722e72160c0213",
+  "layer_key": "4f04c0658efe5284",
+  "fps": 30.0,
+  "frames": 37
+ },
+ {
+  "name": "KickCatch_Helmet_Stand_0_ReachRT__P01",
+  "file": "KickCatch_Helmet_Stand_0_ReachRT__P01",
+  "clip_key": "8763c4d26472ed46",
+  "layer_key": "7e8129e79088b5a0",
+  "fps": 30.0,
+  "frames": 34
+ },
+ {
+  "name": "KickCatch_Helmet_Stand_0__P01",
+  "file": "KickCatch_Helmet_Stand_0__P01",
+  "clip_key": "588c51876af83184",
+  "layer_key": "dd4f718ba6cb5061",
+  "fps": 60.0,
+  "frames": 70
+ },
+ {
+  "name": "KickCatch_Run_0_Chest_InStride__P01",
+  "file": "KickCatch_Run_0_Chest_InStride__P01",
+  "clip_key": "42ecc4e807539802",
+  "layer_key": "81504ade107c462c",
+  "fps": 30.0,
+  "frames": 32
+ },
+ {
+  "name": "KickCatch_Run_0_Chest_ReachRT__P01",
+  "file": "KickCatch_Run_0_Chest_ReachRT__P01",
+  "clip_key": "952619ee09bc8c83",
+  "layer_key": "8654b8d81afdc9bf",
+  "fps": 30.0,
+  "frames": 35
+ },
+ {
+  "name": "KickCatch_Run_90_Chest_HeadUpfield__P01",
+  "file": "KickCatch_Run_90_Chest_HeadUpfield__P01",
+  "clip_key": "997cafa2651390c7",
+  "layer_key": "c014e25698a62753",
+  "fps": 30.0,
+  "frames": 35
+ },
+ {
+  "name": "KickCatch_Run_90_Chest_HeadUpfield_v2__P01",
+  "file": "KickCatch_Run_90_Chest_HeadUpfield_v2__P01",
+  "clip_key": "17b9b295a2250252",
+  "layer_key": "b738d6ba829c7a8b",
+  "fps": 30.0,
+  "frames": 34
+ },
+ {
+  "name": "KickCatch_Run_90_Chest_SlowDown_Behind__P01",
+  "file": "KickCatch_Run_90_Chest_SlowDown_Behind__P01",
+  "clip_key": "dcebe3c0de3c28cf",
+  "layer_key": "0f7aef8d657489cd",
+  "fps": 30.0,
+  "frames": 33
+ },
+ {
+  "name": "KickCatch_Run_90_Chest_SlowDown__P01",
+  "file": "KickCatch_Run_90_Chest_SlowDown__P01",
+  "clip_key": "40eda35482e0257a",
+  "layer_key": "888f05d499d2b25c",
+  "fps": 30.0,
+  "frames": 37
+ },
+ {
+  "name": "KickCatch_Run_Helmet_90_ReachBehind__P01",
+  "file": "KickCatch_Run_Helmet_90_ReachBehind__P01",
+  "clip_key": "c7e1877fd332b023",
+  "layer_key": "eeae7c5fb93cd630",
+  "fps": 30.0,
+  "frames": 42
+ },
+ {
+  "name": "KickCatch_Run_Helmet_90_v1__P01",
+  "file": "KickCatch_Run_Helmet_90_v1__P01",
+  "clip_key": "e6e97814346dde98",
+  "layer_key": "d0ca5f049a08f8ab",
+  "fps": 30.0,
+  "frames": 45
+ },
+ {
+  "name": "KickCatch_Run_Helmet_90_v2__P01",
+  "file": "KickCatch_Run_Helmet_90_v2__P01",
+  "clip_key": "449797a95ee00d1c",
+  "layer_key": "63f94d08a96e3d61",
+  "fps": 30.0,
+  "frames": 45
+ },
+ {
+  "name": "KickCatch_Run_Knees_90_Behind__P01",
+  "file": "KickCatch_Run_Knees_90_Behind__P01",
+  "clip_key": "2fc96aa2db833501",
+  "layer_key": "a9601d5407578fa4",
+  "fps": 30.0,
+  "frames": 45
+ },
+ {
+  "name": "KickCatch_Run_Knees_90_InStride__P01",
+  "file": "KickCatch_Run_Knees_90_InStride__P01",
+  "clip_key": "95cd35e3bd743948",
+  "layer_key": "f23e183ee676b66f",
+  "fps": 30.0,
+  "frames": 45
+ },
+ {
+  "name": "KickCatch_Run_Knees_90_SlowReach__P01",
+  "file": "KickCatch_Run_Knees_90_SlowReach__P01",
+  "clip_key": "d777f45d48cc302b",
+  "layer_key": "93db457cd2b630f2",
+  "fps": 30.0,
+  "frames": 38
+ },
+ {
+  "name": "KickCatch_Run_Waist_90_v1__P01",
+  "file": "KickCatch_Run_Waist_90_v1__P01",
+  "clip_key": "ac5703496cbd446c",
+  "layer_key": "9c8a981a9e17fbbb",
+  "fps": 30.0,
+  "frames": 45
+ },
+ {
+  "name": "KickCatch_Strafe_0_Chest__P01",
+  "file": "KickCatch_Strafe_0_Chest__P01",
+  "clip_key": "bb4738073a736a2e",
+  "layer_key": "9afb1aba7d56ab93",
+  "fps": 30.0,
+  "frames": 51
+ },
+ {
+  "name": "KickDiveBlock_TwoHand_v2__P01",
+  "file": "KickDiveBlock_TwoHand_v2__P01",
+  "clip_key": "3d524fe566e80acd",
+  "layer_key": "2f99f615db9aed80",
+  "fps": 60.0,
+  "frames": 188
+ },
+ {
+  "name": "KickReturnerIdle_Variation1_FBSEP07_0283_1_1__P01",
+  "file": "KickReturnerIdle_Variation1_FBSEP07_0283_1_1__P01",
+  "clip_key": "10b09c565847ed82",
+  "layer_key": "c0293667f45a4a19",
+  "fps": 30.0,
+  "frames": 323
+ },
+ {
+  "name": "KickReturnerIdle_Variation2_FBSEP07_0283_1_2__P01",
+  "file": "KickReturnerIdle_Variation2_FBSEP07_0283_1_2__P01",
+  "clip_key": "7be92f954a9d96b9",
+  "layer_key": "890f772e3dd02eb7",
+  "fps": 30.0,
+  "frames": 326
+ },
+ {
+  "name": "Kick_Suprise_Onsides__P01",
+  "file": "Kick_Suprise_Onsides__P01",
+  "clip_key": "a2adf53a0c49e667",
+  "layer_key": "97259102a8689b1c",
+  "fps": 30.0,
+  "frames": 69
+ },
+ {
+  "name": "Kicker_FG_loop_Default__P01",
+  "file": "Kicker_FG_loop_Default__P01",
+  "clip_key": "4d198dbca024d76d",
+  "layer_key": "e81df93261c0aae7",
+  "fps": 30.0,
+  "frames": 110
+ },
+ {
+  "name": "Kicker_FG_loop_JasonHansen__P01",
+  "file": "Kicker_FG_loop_JasonHansen__P01",
+  "clip_key": "4fe2eaf8e9d01f96",
+  "layer_key": "10ad32f020be7769",
+  "fps": 30.0,
+  "frames": 110
+ },
+ {
+  "name": "Kicker_FG_loop_JohnKasey__P01",
+  "file": "Kicker_FG_loop_JohnKasey__P01",
+  "clip_key": "032f71fe08243ece",
+  "layer_key": "dd7239595ff979c8",
+  "fps": 30.0,
+  "frames": 110
+ },
+ {
+  "name": "Kicker_FG_loop_JoshBrown__P01",
+  "file": "Kicker_FG_loop_JoshBrown__P01",
+  "clip_key": "04a1f6b969be6e6d",
+  "layer_key": "83b35fabbf3bdb45",
+  "fps": 30.0,
+  "frames": 110
+ },
+ {
+  "name": "Kicker_FG_loop_JoshScobee__P01",
+  "file": "Kicker_FG_loop_JoshScobee__P01",
+  "clip_key": "d9ce42031e2c5ce9",
+  "layer_key": "5b8bdddfd599bf9a",
+  "fps": 30.0,
+  "frames": 110
+ },
+ {
+  "name": "Kicker_FG_loop_KrisBrown__P01",
+  "file": "Kicker_FG_loop_KrisBrown__P01",
+  "clip_key": "ea55be3f16d16515",
+  "layer_key": "3aef0ddabfd609d8",
+  "fps": 30.0,
+  "frames": 110
+ },
+ {
+  "name": "Kicker_FG_loop_MattStover__P01",
+  "file": "Kicker_FG_loop_MattStover__P01",
+  "clip_key": "1ddf6ed1c96772d3",
+  "layer_key": "51af97ee5e31617b",
+  "fps": 30.0,
+  "frames": 110
+ },
+ {
+  "name": "Kicker_FG_loop_NeilRackers__P01",
+  "file": "Kicker_FG_loop_NeilRackers__P01",
+  "clip_key": "4ef5fcb5a012dd5c",
+  "layer_key": "93183e5324404b0a",
+  "fps": 30.0,
+  "frames": 110
+ },
+ {
+  "name": "Kicker_FG_loop_PhilDawson__P01",
+  "file": "Kicker_FG_loop_PhilDawson__P01",
+  "clip_key": "e118c66391c25aef",
+  "layer_key": "925d6f2b66c62afb",
+  "fps": 30.0,
+  "frames": 110
+ },
+ {
+  "name": "Kicker_FG_loop_RobBironas__P01",
+  "file": "Kicker_FG_loop_RobBironas__P01",
+  "clip_key": "ef4bd81c8d351550",
+  "layer_key": "9f37d9cbab086048",
+  "fps": 30.0,
+  "frames": 110
+ },
+ {
+  "name": "Kicker_FG_loop_RobbieGould__P01",
+  "file": "Kicker_FG_loop_RobbieGould__P01",
+  "clip_key": "bb6b82ab358f6ffb",
+  "layer_key": "a6fced952cdf7ee3",
+  "fps": 30.0,
+  "frames": 110
+ },
+ {
+  "name": "Kicker_FG_loop_SebastianJanikowski__P01",
+  "file": "Kicker_FG_loop_SebastianJanikowski__P01",
+  "clip_key": "3df9a23e8614b8eb",
+  "layer_key": "2ea6c655794223d6",
+  "fps": 30.0,
+  "frames": 110
+ },
+ {
+  "name": "Kicker_FG_loop_ShaunSuisham__P01",
+  "file": "Kicker_FG_loop_ShaunSuisham__P01",
+  "clip_key": "df763ae5206f7be6",
+  "layer_key": "e351c4a5334a3fee",
+  "fps": 30.0,
+  "frames": 110
+ },
+ {
+  "name": "Kicker_FG_loop_ShayneGraham__P01",
+  "file": "Kicker_FG_loop_ShayneGraham__P01",
+  "clip_key": "96edda48feafa968",
+  "layer_key": "85defa190adb2993",
+  "fps": 30.0,
+  "frames": 110
+ },
+ {
+  "name": "KickkJumpBlock_TwoHand_v2__P01",
+  "file": "KickkJumpBlock_TwoHand_v2__P01",
+  "clip_key": "7a206dec56fb4f89",
+  "layer_key": "6d0c3fa1cbff4d7d",
+  "fps": 60.0,
+  "frames": 99
+ },
+ {
+  "name": "KickkJumpBlock_TwoHand_v3__P01",
+  "file": "KickkJumpBlock_TwoHand_v3__P01",
+  "clip_key": "135704e1791b9510",
+  "layer_key": "46dc71ed1912e161",
+  "fps": 60.0,
+  "frames": 123
+ },
+ {
+  "name": "L5AULBF2_Linebacker_audible_two_hands_to_hit_helmet__P01",
+  "file": "L5AULBF2_Linebacker_audible_two_hands_to_hit_helmet__P01",
+  "clip_key": "093d9b33e183902c",
+  "layer_key": "4e24ef32aadb6698",
+  "fps": 30.0,
+  "frames": 79
+ },
+ {
+  "name": "LB_ChuckWrap_D1_FBOCT_0325_1__P01",
+  "file": "LB_ChuckWrap_D1_FBOCT_0325_1__P01",
+  "clip_key": "fce2978996ac20ca",
+  "layer_key": "1d1f72c1d47b97c6",
+  "fps": 30.0,
+  "frames": 50
+ },
+ {
+  "name": "LB_ChuckWrap_D1_FBOCT_0325_1__P02",
+  "file": "LB_ChuckWrap_D1_FBOCT_0325_1__P02",
+  "clip_key": "820f41765403143b",
+  "layer_key": "906a99af0c9ab814",
+  "fps": 30.0,
+  "frames": 40
+ },
+ {
+  "name": "LB_ChuckWrap_D3_FBOCT_0324_1__P01",
+  "file": "LB_ChuckWrap_D3_FBOCT_0324_1__P01",
+  "clip_key": "59f6c48416779af1",
+  "layer_key": "add36d277ac5b778",
+  "fps": 30.0,
+  "frames": 42
+ },
+ {
+  "name": "LB_ChuckWrap_D3_FBOCT_0324_1__P02",
+  "file": "LB_ChuckWrap_D3_FBOCT_0324_1__P02",
+  "clip_key": "24b53566adbd6617",
+  "layer_key": "1ca5b5ad0d042a7e",
+  "fps": 30.0,
+  "frames": 42
+ },
+ {
+  "name": "LB_Chuck_Zone_Moving_D1_Front__P01",
+  "file": "LB_Chuck_Zone_Moving_D1_Front__P01",
+  "clip_key": "5222a26634f0856d",
+  "layer_key": "b24c99fbfadf33c4",
+  "fps": 30.0,
+  "frames": 38
+ },
+ {
+  "name": "LB_Chuck_Zone_Moving_D1_Front__P02",
+  "file": "LB_Chuck_Zone_Moving_D1_Front__P02",
+  "clip_key": "a3660154c5bd2b20",
+  "layer_key": "833da10927fb2f1c",
+  "fps": 30.0,
+  "frames": 33
+ },
+ {
+  "name": "LB_Chuck_Zone_Moving_D1_Outside__P01",
+  "file": "LB_Chuck_Zone_Moving_D1_Outside__P01",
+  "clip_key": "4ea390c648eb725a",
+  "layer_key": "a166a39d828fbe5c",
+  "fps": 30.0,
+  "frames": 34
+ },
+ {
+  "name": "LB_Chuck_Zone_Moving_D1_Outside__P02",
+  "file": "LB_Chuck_Zone_Moving_D1_Outside__P02",
+  "clip_key": "f5d10496feae49fe",
+  "layer_key": "9182327c38a37540",
+  "fps": 30.0,
+  "frames": 39
+ },
+ {
+  "name": "Landry TD Karate Kid Crane Kick Stance__P01",
+  "file": "Landry_TD_Karate_Kid_Crane_Kick_Stance__P01",
+  "clip_key": "651aab339ddb46b5",
+  "layer_key": "e925a1b3bea1b878",
+  "fps": 60.0,
+  "frames": 811
+ },
+ {
+  "name": "Langford TD Dab__P01",
+  "file": "Langford_TD_Dab__P01",
+  "clip_key": "f3d0fd2ec306d260",
+  "layer_key": "1415f3a10d1c0e0d",
+  "fps": 60.0,
+  "frames": 599
+ },
+ {
+  "name": "Layered_Def_Point_Left-Fwd__P01",
+  "file": "Layered_Def_Point_Left_Fwd__P01",
+  "clip_key": "da2a7efb7d977f89",
+  "layer_key": "082fb615fb4d0c0b",
+  "fps": 30.0,
+  "frames": 88
+ },
+ {
+  "name": "Layered_Def_Point_Left__P01",
+  "file": "Layered_Def_Point_Left__P01",
+  "clip_key": "5c12d844394fb47f",
+  "layer_key": "7005505f3131762a",
+  "fps": 30.0,
+  "frames": 88
+ },
+ {
+  "name": "Layered_UserCatch_Run_0_v2__P01",
+  "file": "Layered_UserCatch_Run_0_v2__P01",
+  "clip_key": "db4d0ea6e94b9315",
+  "layer_key": "ab16487290de0e7f",
+  "fps": 30.0,
+  "frames": 181
+ },
+ {
+  "name": "Layered_UserCatch_Run_180_v2__P01",
+  "file": "Layered_UserCatch_Run_180_v2__P01",
+  "clip_key": "ecc5922c1ad119d1",
+  "layer_key": "f26b91b615336fe3",
+  "fps": 30.0,
+  "frames": 181
+ },
+ {
+  "name": "Layered_UserCatch_Run_90_v2__P01",
+  "file": "Layered_UserCatch_Run_90_v2__P01",
+  "clip_key": "07e68683ab23c364",
+  "layer_key": "989c58d781fcd986",
+  "fps": 30.0,
+  "frames": 181
+ },
+ {
+  "name": "Lewis TD Strut__P01",
+  "file": "Lewis_TD_Strut__P01",
+  "clip_key": "09cf8edfdeaf3f44",
+  "layer_key": "ab803e8cfefbcec1",
+  "fps": 60.0,
+  "frames": 544
+ },
+ {
+  "name": "LocoLayer_BC_Prepare_for_Tackle_Arms__P01",
+  "file": "LocoLayer_BC_Prepare_for_Tackle_Arms__P01",
+  "clip_key": "c87b87691a4982fb",
+  "layer_key": "00ab9443d44e4a6e",
+  "fps": 30.0,
+  "frames": 17
+ },
+ {
+  "name": "LocoLayer_BC_Style_Awkward_v1__P01",
+  "file": "LocoLayer_BC_Style_Awkward_v1__P01",
+  "clip_key": "ab41829b2615b589",
+  "layer_key": "e6f21ae489b30248",
+  "fps": 30.0,
+  "frames": 16
+ },
+ {
+  "name": "LocoLayer_BC_Style_BreadLoaf_v1__P01",
+  "file": "LocoLayer_BC_Style_BreadLoaf_v1__P01",
+  "clip_key": "5eb5b7edb9e965d8",
+  "layer_key": "118a39f2ff407bca",
+  "fps": 30.0,
+  "frames": 18
+ },
+ {
+  "name": "LocoLayer_BC_Style_Tight_v1__P01",
+  "file": "LocoLayer_BC_Style_Tight_v1__P01",
+  "clip_key": "553ceb9f626ff6bb",
+  "layer_key": "e189441cae36e06a",
+  "fps": 30.0,
+  "frames": 16
+ },
+ {
+  "name": "LocoLayer_NonBC_Prep4Block_Arms__P01",
+  "file": "LocoLayer_NonBC_Prep4Block_Arms__P01",
+  "clip_key": "dd5554c89a829af8",
+  "layer_key": "d4ba4d6200b07d60",
+  "fps": 30.0,
+  "frames": 181
+ },
+ {
+  "name": "LocoLayer_OL_Reach__P01",
+  "file": "LocoLayer_OL_Reach__P01",
+  "clip_key": "66a75785411eaa02",
+  "layer_key": "5e46a1cf10925e92",
+  "fps": 30.0,
+  "frames": 17
+ },
+ {
+  "name": "LocoLayer_Prep4Tackle_Arms_Hitstick_TEST",
+  "file": "LocoLayer_Prep4Tackle_Arms_Hitstick_TEST",
+  "clip_key": "c12b84309b4e75a3",
+  "layer_key": "90272682caf9a66c",
+  "fps": 30.0,
+  "frames": 45
+ },
+ {
+  "name": "LocoLayer_Prep4Tackle_V4__P01",
+  "file": "LocoLayer_Prep4Tackle_V4__P01",
+  "clip_key": "c229e0e6377519c2",
+  "layer_key": "51db01a28afe95db",
+  "fps": 30.0,
+  "frames": 23
+ },
+ {
+  "name": "Loco_NonBC_15_Jog_Loop__P01",
+  "file": "Loco_NonBC_15_Jog_Loop__P01",
+  "clip_key": "4821add0631f238a",
+  "layer_key": "4bec4a1dd38eb7b1",
+  "fps": 30.0,
+  "frames": 24
+ },
+ {
+  "name": "Loco_NonBC_15_Jog_fidget__P01",
+  "file": "Loco_NonBC_15_Jog_fidget__P01",
+  "clip_key": "a7ff3751b54f8f45",
+  "layer_key": "d0ad15b46a865ad7",
+  "fps": 30.0,
+  "frames": 237
+ },
+ {
+  "name": "Loco_NonBC_15_Walk_Loop__P01",
+  "file": "Loco_NonBC_15_Walk_Loop__P01",
+  "clip_key": "d54ad88f97662033",
+  "layer_key": "f37264bdc74716d5",
+  "fps": 30.0,
+  "frames": 37
+ },
+ {
+  "name": "Loco_NonBC_15_Walk_Slow_Loop__P01",
+  "file": "Loco_NonBC_15_Walk_Slow_Loop__P01",
+  "clip_key": "d1494a501cb17787",
+  "layer_key": "c2a5b43e63297b35",
+  "fps": 30.0,
+  "frames": 43
+ },
+ {
+  "name": "M18_Decel_Sprint_to_Jog__P01",
+  "file": "M18_Decel_Sprint_to_Jog__P01",
+  "clip_key": "ddb736a577d5c179",
+  "layer_key": "c7a7e85f93461e18",
+  "fps": 30.0,
+  "frames": 96
+ },
+ {
+  "name": "MADNAUG04_0001_1_2_idle__P01",
+  "file": "MADNAUG04_0001_1_2_idle__P01",
+  "clip_key": "ecee3fed9f9e90cd",
+  "layer_key": "e12c37875e82bba0",
+  "fps": 60.0,
+  "frames": 421
+ },
+ {
+  "name": "MADNAUG04_0003_1_1_Idle__P01",
+  "file": "MADNAUG04_0003_1_1_Idle__P01",
+  "clip_key": "c43040f38140f33c",
+  "layer_key": "596c021cfab09c25",
+  "fps": 60.0,
+  "frames": 199
+ },
+ {
+  "name": "MADNAUG04_0003_1_1_Smallsteps_Idle__P01",
+  "file": "MADNAUG04_0003_1_1_Smallsteps_Idle__P01",
+  "clip_key": "ecb63befd090396b",
+  "layer_key": "c47ec03eee9f03c5",
+  "fps": 60.0,
+  "frames": 567
+ },
+ {
+  "name": "MADNAUG04_0006_1_1_Idle__P01",
+  "file": "MADNAUG04_0006_1_1_Idle__P01",
+  "clip_key": "977d4c0c0c1609d5",
+  "layer_key": "8d8398ce4cb1a094",
+  "fps": 30.0,
+  "frames": 123
+ },
+ {
+  "name": "MADNAUG04_0009_1_1_GrabFaceMask_Idle__P01",
+  "file": "MADNAUG04_0009_1_1_GrabFaceMask_Idle__P01",
+  "clip_key": "80b5e4d7c05fee09",
+  "layer_key": "8bdd71e6e83147a1",
+  "fps": 30.0,
+  "frames": 105
+ },
+ {
+  "name": "MADNAUG04_0009_1_2_Idle__P01",
+  "file": "MADNAUG04_0009_1_2_Idle__P01",
+  "clip_key": "dc29c64ef44d3a62",
+  "layer_key": "7c5b8a868972f29b",
+  "fps": 30.0,
+  "frames": 204
+ },
+ {
+  "name": "MADNAUG04_0023_1_2_Relaxed_PostPlayWalk_Dir1_2_Dir3__P01",
+  "file": "MADNAUG04_0023_1_2_Relaxed_PostPlayWalk_Dir1_2_Dir3__P01",
+  "clip_key": "c53c7812ad1f2310",
+  "layer_key": "bc79f0489a820f53",
+  "fps": 30.0,
+  "frames": 65
+ },
+ {
+  "name": "MADNAUG04_0023_1_2_Relaxed_PostPlayWalk_Dir1_2_Dir7__P01",
+  "file": "MADNAUG04_0023_1_2_Relaxed_PostPlayWalk_Dir1_2_Dir7__P01",
+  "clip_key": "da5ccfec3d1410fd",
+  "layer_key": "f0ea04e8bf1818ba",
+  "fps": 30.0,
+  "frames": 71
+ },
+ {
+  "name": "MADNAUG04_0024_1_1_Relaxed_PostPlayWalk_Dir1_2_Dir6__P01",
+  "file": "MADNAUG04_0024_1_1_Relaxed_PostPlayWalk_Dir1_2_Dir6__P01",
+  "clip_key": "23add3f6c64c9f16",
+  "layer_key": "26f1477d8803069f",
+  "fps": 30.0,
+  "frames": 80
+ },
+ {
+  "name": "MADNAUG04_0025_1_2_Relaxed_PostPlayWalk_Dir1_2_Dir5__P01",
+  "file": "MADNAUG04_0025_1_2_Relaxed_PostPlayWalk_Dir1_2_Dir5__P01",
+  "clip_key": "60f77942b3d52243",
+  "layer_key": "867a45a6b155078b",
+  "fps": 30.0,
+  "frames": 86
+ },
+ {
+  "name": "MADNAUG04_0045_1_2__P01",
+  "file": "MADNAUG04_0045_1_2__P01",
+  "clip_key": "215ab63951a7d7da",
+  "layer_key": "fbaaec8581563583",
+  "fps": 30.0,
+  "frames": 39
+ },
+ {
+  "name": "MADNAUG04_0049_1__P01",
+  "file": "MADNAUG04_0049_1__P01",
+  "clip_key": "6ca318cd160154cc",
+  "layer_key": "7086306144576ad4",
+  "fps": 30.0,
+  "frames": 45
+ },
+ {
+  "name": "MADNAUG04_0049_1_reversed",
+  "file": "MADNAUG04_0049_1_reversed",
+  "clip_key": "15d70963afa2dbd3",
+  "layer_key": "c097cc9b6456ec43",
+  "fps": 30.0,
+  "frames": 45
+ },
+ {
+  "name": "MADNAUG04_0054_1_1_PrePlay_3ptStance_quick_LookAround__P01",
+  "file": "MADNAUG04_0054_1_1_PrePlay_3ptStance_quick_LookAround__P01",
+  "clip_key": "9bbbfb98b3b63524",
+  "layer_key": "bfdf8eae1487bcad",
+  "fps": 30.0,
+  "frames": 126
+ },
+ {
+  "name": "MADNAUG04_0055_1_1_PrePlay_3ptStance_pointing_OL__P01",
+  "file": "MADNAUG04_0055_1_1_PrePlay_3ptStance_pointing_OL__P01",
+  "clip_key": "f35257f5af4cf410",
+  "layer_key": "4fd87cbef22f17a5",
+  "fps": 30.0,
+  "frames": 181
+ },
+ {
+  "name": "MADNAUG04_0057_1_Pre_Play_Stance_DL_3_Point_Stance_Pointing_Back_At_LBs_To_Direct_Them__P01",
+  "file": "MADNAUG04_0057_1_Pre_Play_Stance_DL_3_Point_Stance_Pointing_Back_At_LBs_To_Direct_Them__P01",
+  "clip_key": "2e0669d73d3c236f",
+  "layer_key": "6f4be8299d1eb008",
+  "fps": 30.0,
+  "frames": 206
+ },
+ {
+  "name": "MADNAUG04_0061_1_Pre_Play_Stance_DL_Stance_3_Point_Intense_anticipation_digging_in_variation_2__P01",
+  "file": "MADNAUG04_0061_1_Pre_Play_Stance_DL_Stance_3_Point_Intense_anticipation_digging_in_variation_2__P01",
+  "clip_key": "16039036ed8484e5",
+  "layer_key": "88b0921342476e86",
+  "fps": 30.0,
+  "frames": 150
+ }
+]

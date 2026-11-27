@@ -10,11 +10,16 @@
 #pragma once
 
 #include <algorithm>
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <vector>
 
 namespace tag {
+
+// (Abilities.h: the Superstar / X-Factor catalog and grades; declared here so a Player can carry them)
+enum class AbilityId : uint8_t;
+enum class StarGrade : uint8_t;
 
 enum class Pos { QB, RB, FB, WR, TE, OT, OG, C, DE, DT, LB, CB, S, K, P };
 
@@ -97,6 +102,20 @@ struct Player {
   /** 0 = fresh, 1 = exhausted. Persisted across plays within a game. */
   double fatigue = 0;
   double injuredWeeks = 0;
+  /** Was on the field for the last snap (substitution hysteresis: the man in the game stays in). */
+  bool onFieldLast = false;
+  /** His grade against the league at his position (Abilities.h: Star / Superstar / X-Factor), and his loadout: the
+   *  Superstar abilities he has equipped and his X-Factor (AbilityId::None = none). */
+  StarGrade grade{};
+  std::vector<AbilityId> abilities;
+  AbilityId xFactor{};
+  /** Create-a-Player: made by the user (saved in GameUserSettings.ini, laid onto his team at startup), his archetype
+   *  (Roster.h capArchetypes, -1 none) and his look: the face (an index into the character pack's heads) and the
+   *  helmet (into the helmets of his position's facemask style); -1 = picked from his id like everybody's. */
+  bool created = false;
+  int archetype = -1;
+  int face = -1;
+  int helmet = -1;
 };
 
 struct TeamColors {
@@ -115,12 +134,21 @@ struct Team {
   std::string division;
   /** Owning storage; Player addresses are stable for the Team's lifetime. */
   std::vector<std::unique_ptr<Player>> roster;
+  /** Garbage time: well ahead late, the starters at QB/RB/WR/TE sit (set by Game before each play). */
+  bool pullStarters = false;
   /** Offensive identity 0..1 (0 = run heavy, 1 = air raid). Drives CPU play calling. */
   double passLean = 0.5;
   /** Aggressiveness on 4th downs 0..1. */
   double aggression = 0.5;
   /** Defensive blitz tendency 0..1 */
   double blitzLean = 0.28;
+  /** The playbooks: an offensive scheme ("West Coast", "Spread", ...) and a defensive one ("4-3 Cover 3", "3-4
+   *  Multiple", ...), from Playbook.h OFF_SCHEMES / DEF_SCHEMES; the team's own book is built from them (offBookFor). */
+  std::string offScheme;
+  std::string defScheme;
+  /** The depth chart the user set (Roster.h): per DSlot, the men in order by Player::id; an empty slot (or none at
+   *  all) is the coach's - the sim's old pick, best by OVR. */
+  std::vector<std::vector<int>> chart;
 
   bool hasPlayer(const Player* p) const {
     for (const auto& q : roster)
@@ -129,13 +157,8 @@ struct Team {
   }
 };
 
-/** Healthy players at a position, best overall first. */
-inline std::vector<Player*> depth(const Team& team, Pos pos) {
-  std::vector<Player*> out;
-  for (const auto& p : team.roster)
-    if (p->pos == pos && p->injuredWeeks <= 0) out.push_back(p.get());
-  std::stable_sort(out.begin(), out.end(), [](const Player* a, const Player* b) { return a->ovr > b->ovr; });
-  return out;
-}
+/** Healthy players at a position, best first: the depth chart's order where the user has set it (Roster.h; a man
+ *  listed there from another position counts), else best overall first. */
+std::vector<Player*> depth(const Team& team, Pos pos);
 
 }  // namespace tag

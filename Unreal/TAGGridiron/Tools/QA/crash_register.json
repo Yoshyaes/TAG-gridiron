@@ -1,0 +1,756 @@
+{
+ "version": 1,
+ "updated": "2026-11-25 09:08",
+ "help": "status: open | fixed | ignore; set fixed_on ('YYYY-MM-DD HH:MM') with fixed - a later report of the signature fails the check as a regression. Written by Tools/QA/crashes.py --update; status, note and fixed_on are kept across updates.",
+ "signatures": {
+  "914d6286d8": {
+   "status": "open",
+   "note": "",
+   "fixed_on": null,
+   "first_seen": "2026-11-25 08:50",
+   "reports": [
+    "UECC-Windows-22E648D248956D61112595B9C4BC1360_0000",
+    "UECC-Windows-4FAFDD764046CB1E6E030CB9150C15D0_0000",
+    "UECC-Windows-5FA61CF64BBFD36A53238480D92A5411_0000"
+   ],
+   "process": "game",
+   "kind": "assert",
+   "signature": "assert | Assertion failed: (Index >= N) & (Index < ArrayNum) [Array.h] Array index out of bounds: N into an array of size N | AMatchDirector::TickShow() < AMatchDirector::TickBroadcast()",
+   "message": "Assertion failed: (Index >= 0) & (Index < ArrayNum) [File:C:\\Program Files\\Epic Games\\UE_5.8\\Engine\\Source\\Runtime\\Core\\Public\\Containers\\Array.h] [Line: 1339] \nArray index out of bounds: 5 into an array of size 5",
+   "top": "AMatchDirector::TickShow() Source/TAGGridiron/Game/MatchBroadcast.cpp:2941",
+   "last_seen": "2026-11-25 09:04",
+   "count": 3,
+   "flags_seen": [
+    "-TagAudioSilent",
+    "-TagChartTest",
+    "-TagNoBooth",
+    "-TagNoLoad",
+    "-TagPostgameTest",
+    "-TagQuarterLen",
+    "-TagRecentNoSave",
+    "-TagRecentReset",
+    "-TagSoak",
+    "-TagWeatherSeed"
+   ]
+  },
+  "18a8154e83": {
+   "status": "open",
+   "note": "",
+   "fixed_on": null,
+   "first_seen": "2026-11-24 18:52",
+   "reports": [
+    "UECC-Windows-18A8835844C0ADE2AA886CBD0C5AB4F0_0000",
+    "UECC-Windows-C8A8C6E1453AC4E9F53D0986BE8A1944_0000"
+   ],
+   "process": "game",
+   "kind": "assert",
+   "signature": "assert | Assertion failed: NodeData [AnimNodeBase.h] | mods:UnrealEditor_Core>UnrealEditor_Engine>UnrealEditor_TAGGridiron>UnrealEditor_Engine",
+   "message": "Assertion failed: NodeData [File:D:\\build\\++UE5\\Sync\\Engine\\Source\\Runtime\\Engine\\Classes\\Animation\\AnimNodeBase.h] [Line: 825]",
+   "top": null,
+   "last_seen": "2026-11-24 18:54",
+   "count": 2,
+   "flags_seen": [
+    "-TagBench",
+    "-TagBenchWarm",
+    "-TagMMDeadBlend",
+    "-TagNoLoad",
+    "-TagSoak",
+    "-TagWeatherSeed"
+   ]
+  },
+  "671523af4a": {
+   "status": "open",
+   "note": "",
+   "fixed_on": null,
+   "first_seen": "2026-11-13 11:28",
+   "reports": [
+    "UECC-Windows-5CCC09CF4B0CDAE5C05E7899DE60FECF_0000",
+    "UECC-Windows-9B90D8DE4F78B3E6C57D699087A8013D_0000"
+   ],
+   "process": "game",
+   "kind": "gpu",
+   "signature": "gpu | GPU Crash dump Triggered | mods:UnrealEditor_D3D12RHI>UnrealEditor_Core>kernel32>ntdll",
+   "message": "GPU Crash dump Triggered",
+   "top": null,
+   "last_seen": "2026-11-24 10:02",
+   "count": 2,
+   "flags_seen": [
+    "-TagAudioSilent",
+    "-TagControlsTest",
+    "-TagNoBooth",
+    "-TagNoLoad",
+    "-TagQuarterLen",
+    "-TagTackleCam",
+    "-TagTcClips",
+    "-TagTcDir",
+    "-TagUserKicks"
+   ]
+  },
+  "2a8a69b790": {
+   "status": "open",
+   "note": "",
+   "fixed_on": null,
+   "first_seen": "2026-11-10 16:43",
+   "reports": [
+    "UECC-Windows-61C1416447575FE67B8FF990E9FF8324_0000",
+    "UECC-Windows-98363F3249483FB321A890B69E9FA01D_0000",
+    "UECC-Windows-B50ACFA64D18E100CD1B3A9A80ACDC26_0000",
+    "UECC-Windows-EA78F4AB4BE4AF364ACF1384904E1919_0000"
+   ],
+   "process": "game",
+   "kind": "crash",
+   "signature": "crash | EXCEPTION_ACCESS_VIOLATION | AAthlete::StartBodyAsset() < AAthlete::PlayClip()",
+   "message": "Unhandled Exception: EXCEPTION_ACCESS_VIOLATION 0x0000000000000000",
+   "top": "AAthlete::StartBodyAsset() Source/TAGGridiron/Render/Athlete.cpp:2601",
+   "last_seen": "2026-11-23 09:18",
+   "count": 4,
+   "flags_seen": [
+    "-TagAudioSilent",
+    "-TagAutoWatch",
+    "-TagHighlights",
+    "-TagHlDir",
+    "-TagHlFull",
+    "-TagHlMaxClips",
+    "-TagMemFloorMB",
+    "-TagNoBooth",
+    "-TagNoRoleGuard",
+    "-TagPackJsonDir",
+    "-TagPackMB",
+    "-TagPackSeed",
+    "-TagTackleCheck",
+    "-TagWeatherSeed"
+   ]
+  },
+  "bf8af92e5b": {
+   "status": "open",
+   "note": "",
+   "fixed_on": null,
+   "first_seen": "2026-11-21 14:09",
+   "reports": [
+    "UECC-Windows-AE3AACFF4AEA71D91FC2339BBB5223D6_0000"
+   ],
+   "process": "game",
+   "kind": "crash",
+   "signature": "crash | EXCEPTION_ACCESS_VIOLATION | ATagAudio::Cue() < AMatchDirector::DelayOfGame()",
+   "message": "Unhandled Exception: EXCEPTION_ACCESS_VIOLATION reading address 0xffffffffffffffff",
+   "top": "ATagAudio::Cue() Source/TAGGridiron/Audio/TagAudio.cpp:896",
+   "last_seen": "2026-11-21 14:09",
+   "count": 1,
+   "flags_seen": [
+    "-TagAudioSilent",
+    "-TagBench",
+    "-TagBenchWarm",
+    "-TagPlayNow"
+   ]
+  },
+  "3a5d3c2a6d": {
+   "status": "open",
+   "note": "",
+   "fixed_on": null,
+   "first_seen": "2026-11-19 23:32",
+   "reports": [
+    "UECC-Windows-CF41EF9F44551BFD9AFA508905669212_0002",
+    "UECC-Windows-EDBA2E404C3AD49CD1307083A955F5C3_0002"
+   ],
+   "process": "game",
+   "kind": "ensure",
+   "signature": "ensure | Ensure condition failed: UE::Private::FMTAccessDetectorOptions::bSuppressCheckFailure [MTAccessDetector.h] Data race detected: acquiring write access on thread N concurrently with N writers on thread N: Current thread N  | mods:UnrealEditor_EOSShared>UnrealEditor_Core>UnrealEditor>kernel32",
+   "message": "Ensure condition failed: UE::Private::FMTAccessDetectorOptions::bSuppressCheckFailure [File:D:\\build\\++UE5\\Sync\\Engine\\Source\\Runtime\\Core\\Public\\Misc\\MTAccessDetector.h] [Line: 646] \nData race detected: acquiring write access on thread 52608 concurrently with 1 writers on thread 18904:\nCurrent thre",
+   "top": null,
+   "last_seen": "2026-11-20 10:23",
+   "count": 2,
+   "flags_seen": [
+    "-TagHighlights",
+    "-TagHlDir",
+    "-TagHlFull",
+    "-TagHlKeepTurnovers",
+    "-TagHlMaxClips",
+    "-TagNoBooth",
+    "-TagTune",
+    "-TagWeatherSeed"
+   ]
+  },
+  "8dc131a51b": {
+   "status": "open",
+   "note": "",
+   "fixed_on": null,
+   "first_seen": "2026-11-19 23:16",
+   "reports": [
+    "UECC-Windows-CF41EF9F44551BFD9AFA508905669212_0001",
+    "UECC-Windows-EDBA2E404C3AD49CD1307083A955F5C3_0001"
+   ],
+   "process": "game",
+   "kind": "ensure",
+   "signature": "ensure | Ensure condition failed: UE::Private::FMTAccessDetectorOptions::bSuppressCheckFailure [MTAccessDetector.h] Data race detected: other thread(s) activity during acquiring write access on thread N: N -> N readers, N -> N wr | mods:UnrealEditor_Core>UnrealEditor_Engine>UnrealEditor_ProceduralMeshComponent>UnrealEditor_Renderer",
+   "message": "Ensure condition failed: UE::Private::FMTAccessDetectorOptions::bSuppressCheckFailure [File:D:\\build\\++UE5\\Sync\\Engine\\Source\\Runtime\\Core\\Public\\Misc\\MTAccessDetector.h] [Line: 661] \nData race detected: other thread(s) activity during acquiring write access on thread 18904: 0 -> 0 readers, 1 -> 0 w",
+   "top": null,
+   "last_seen": "2026-11-20 09:37",
+   "count": 2,
+   "flags_seen": [
+    "-TagHighlights",
+    "-TagHlDir",
+    "-TagHlFull",
+    "-TagHlKeepTurnovers",
+    "-TagHlMaxClips",
+    "-TagNoBooth",
+    "-TagTune",
+    "-TagWeatherSeed"
+   ]
+  },
+  "51d85cdf5f": {
+   "status": "open",
+   "note": "",
+   "fixed_on": null,
+   "first_seen": "2026-11-19 23:16",
+   "reports": [
+    "UECC-Windows-CF41EF9F44551BFD9AFA508905669212_0000",
+    "UECC-Windows-EDBA2E404C3AD49CD1307083A955F5C3_0000"
+   ],
+   "process": "game",
+   "kind": "ensure",
+   "signature": "ensure | Ensure condition failed: UE::Private::FMTAccessDetectorOptions::bSuppressCheckFailure [MTAccessDetector.h] Data race detected: acquiring write access on thread N concurrently with N writers on thread N: Current thread N  | mods:UnrealEditor_Core>UnrealEditor_Engine>UnrealEditor_ProceduralMeshComponent>UnrealEditor_Renderer",
+   "message": "Ensure condition failed: UE::Private::FMTAccessDetectorOptions::bSuppressCheckFailure [File:D:\\build\\++UE5\\Sync\\Engine\\Source\\Runtime\\Core\\Public\\Misc\\MTAccessDetector.h] [Line: 646] \nData race detected: acquiring write access on thread 18904 concurrently with 1 writers on thread 52608:\nCurrent thre",
+   "top": null,
+   "last_seen": "2026-11-20 09:36",
+   "count": 2,
+   "flags_seen": [
+    "-TagHighlights",
+    "-TagHlDir",
+    "-TagHlFull",
+    "-TagHlKeepTurnovers",
+    "-TagHlMaxClips",
+    "-TagNoBooth",
+    "-TagTune",
+    "-TagWeatherSeed"
+   ]
+  },
+  "3f7eab3d9f": {
+   "status": "open",
+   "note": "",
+   "fixed_on": null,
+   "first_seen": "2026-11-19 08:28",
+   "reports": [
+    "UECC-Windows-EC1327C54EAFDADCE902CABBB51C04F3_0000"
+   ],
+   "process": "game",
+   "kind": "ensure",
+   "signature": "ensure | Ensure condition failed: UE::Private::FMTAccessDetectorOptions::bSuppressCheckFailure [MTAccessDetector.h] Data race detected: acquiring write access on thread N concurrently with N writers on thread N: Current thread N  | mods:UnrealEditor_Core>UnrealEditor_AutomationWorker>ucrtbase>UnrealEditor_AutomationWorker",
+   "message": "Ensure condition failed: UE::Private::FMTAccessDetectorOptions::bSuppressCheckFailure [File:D:\\build\\++UE5\\Sync\\Engine\\Source\\Runtime\\Core\\Public\\Misc\\MTAccessDetector.h] [Line: 646] \nData race detected: acquiring write access on thread 23256 concurrently with 1 writers on thread 24100:\nCurrent thre",
+   "top": null,
+   "last_seen": "2026-11-19 08:28",
+   "count": 1,
+   "flags_seen": [
+    "-TagHighlights",
+    "-TagHlDir",
+    "-TagHlFull",
+    "-TagHlMaxClips",
+    "-TagNoBooth",
+    "-TagWeatherSeed"
+   ]
+  },
+  "b2fe0cce06": {
+   "status": "open",
+   "note": "",
+   "fixed_on": null,
+   "first_seen": "2026-11-19 08:28",
+   "reports": [
+    "UECC-Windows-EC1327C54EAFDADCE902CABBB51C04F3_0001"
+   ],
+   "process": "game",
+   "kind": "ensure",
+   "signature": "ensure | Ensure condition failed: UE::Private::FMTAccessDetectorOptions::bSuppressCheckFailure [MTAccessDetector.h] Data race detected: other thread(s) activity during acquiring write access on thread N: N -> N readers, N -> N wr | mods:UnrealEditor_Core>UnrealEditor_AutomationWorker>ucrtbase>UnrealEditor_AutomationWorker",
+   "message": "Ensure condition failed: UE::Private::FMTAccessDetectorOptions::bSuppressCheckFailure [File:D:\\build\\++UE5\\Sync\\Engine\\Source\\Runtime\\Core\\Public\\Misc\\MTAccessDetector.h] [Line: 661] \nData race detected: other thread(s) activity during acquiring write access on thread 23256: 0 -> 0 readers, 1 -> 0 w",
+   "top": null,
+   "last_seen": "2026-11-19 08:28",
+   "count": 1,
+   "flags_seen": [
+    "-TagHighlights",
+    "-TagHlDir",
+    "-TagHlFull",
+    "-TagHlMaxClips",
+    "-TagNoBooth",
+    "-TagWeatherSeed"
+   ]
+  },
+  "7b34eb5ce2": {
+   "status": "open",
+   "note": "",
+   "fixed_on": null,
+   "first_seen": "2026-11-19 00:20",
+   "reports": [
+    "UECC-Windows-BF9247C24C79387C43A287B9EE5B5E24_0000"
+   ],
+   "process": "game",
+   "kind": "crash",
+   "signature": "crash | EXCEPTION_ACCESS_VIOLATION | mods:UnrealEditor_TAGGridiron>UnrealEditor_Engine>UnrealEditor_TAGGridiron>UnrealEditor_Engine",
+   "message": "Unhandled Exception: EXCEPTION_ACCESS_VIOLATION reading address 0x00007f0001110000",
+   "top": null,
+   "last_seen": "2026-11-19 00:20",
+   "count": 1,
+   "flags_seen": [
+    "-TagHighlights",
+    "-TagHlDir",
+    "-TagHlFull",
+    "-TagHlMaxClips",
+    "-TagNoBooth",
+    "-TagTune"
+   ]
+  },
+  "c5cc33552a": {
+   "status": "open",
+   "note": "",
+   "fixed_on": null,
+   "first_seen": "2026-11-19 00:20",
+   "reports": [
+    "UECC-Windows-C0A92BC145E6EF97B39089B53C9645A4_0000"
+   ],
+   "process": "game",
+   "kind": "crash",
+   "signature": "crash | EXCEPTION_ACCESS_VIOLATION | std::function<void __cdecl(void)>::function<void __cdecl(void)>() < SGridironOverlay::ShowMainMenu()",
+   "message": "Unhandled Exception: EXCEPTION_ACCESS_VIOLATION reading address 0xffffffffffffffff",
+   "top": "std::function<void __cdecl(void)>::function<void __cdecl(void)>() functional:1099",
+   "last_seen": "2026-11-19 00:20",
+   "count": 1,
+   "flags_seen": [
+    "-TagNoBooth",
+    "-TagNoLoad",
+    "-TagUiShots"
+   ]
+  },
+  "8b0f35d044": {
+   "status": "open",
+   "note": "",
+   "fixed_on": null,
+   "first_seen": "2026-11-18 11:51",
+   "reports": [
+    "UECC-Windows-6156D99C4EF80F5683066E91B6FBB5FC_0000"
+   ],
+   "process": "game",
+   "kind": "assert",
+   "signature": "assert | Assertion failed: (Index >= N) & (Index < ArrayNum) [Array.h] Array index out of bounds: -N into an array of size N | AMatchDirector::TickMultiTest() < AMatchDirector::Tick()",
+   "message": "Assertion failed: (Index >= 0) & (Index < ArrayNum) [File:C:\\Program Files\\Epic Games\\UE_5.8\\Engine\\Source\\Runtime\\Core\\Public\\Containers\\Array.h] [Line: 1339] \nArray index out of bounds: -1 into an array of size 3",
+   "top": "AMatchDirector::TickMultiTest() Source/TAGGridiron/Game/MatchMulti.cpp:566",
+   "last_seen": "2026-11-18 11:51",
+   "count": 1,
+   "flags_seen": [
+    "-TagMultiTest",
+    "-TagNoBooth"
+   ]
+  },
+  "6322b39124": {
+   "status": "open",
+   "note": "",
+   "fixed_on": null,
+   "first_seen": "2026-11-10 21:55",
+   "reports": [
+    "UECC-Windows-03EF86A84598FEEDCE91C8BC7A943376_0000",
+    "UECC-Windows-05603E124CF0062F1F9DE8A1BC0DDCC9_0000",
+    "UECC-Windows-8A89FACB40360E00CD6B01A8CBF9C82D_0000",
+    "UECC-Windows-9439A2524F37072D20D3D7B735FFDDFE_0000",
+    "UECC-Windows-E0E29A4E408C222EA266D29B62946B9F_0000",
+    "UECC-Windows-FFF6AE6E44261303183671B3813ACD12_0000"
+   ],
+   "process": "game",
+   "kind": "oom",
+   "signature": "oom | system memory",
+   "message": "Fatal error: [File:D:\\build\\++UE5\\Sync\\Engine\\Source\\Runtime\\Core\\Private\\GenericPlatform\\GenericPlatformMemory.cpp] [Line: 300] \nRan out of memory allocating 1370504 (1.3 MiB) bytes with alignment 1. Last error msg: The paging file is too small for this operation to complete..",
+   "top": null,
+   "last_seen": "2026-11-18 08:32",
+   "count": 6,
+   "flags_seen": [
+    "-TagAutoWatch",
+    "-TagBench",
+    "-TagBenchWarm",
+    "-TagBoothLog",
+    "-TagBoothWriter",
+    "-TagHuddleSecs",
+    "-TagNoLoad",
+    "-TagNoRefSteer",
+    "-TagQuarterLen",
+    "-TagSoak",
+    "-TagUserKicks",
+    "-TagWeatherSeed"
+   ]
+  },
+  "ca961ced82": {
+   "status": "open",
+   "note": "",
+   "fixed_on": null,
+   "first_seen": "2026-11-17 15:59",
+   "reports": [
+    "UECC-Windows-764F73834350001A5775B9BDF5C22FF0_0000"
+   ],
+   "process": "game",
+   "kind": "assert",
+   "signature": "assert | Assertion failed: Addr < GetData() || Addr >= (GetData() + ArrayMax) [Array.h] Attempting to use a container element (00000216913C2180) which already comes from the container being modified (00000216913C2180, ArrayMax: N | SGridironOverlay::PaintLineBars() < SGridironOverlay::OnPaint()",
+   "message": "Assertion failed: Addr < GetData() || Addr >= (GetData() + ArrayMax) [File:C:\\Program Files\\Epic Games\\UE_5.8\\Engine\\Source\\Runtime\\Core\\Public\\Containers\\Array.h] [Line: 2196] \nAttempting to use a container element (00000216913C2180) which already comes from the container being modified (0000021691",
+   "top": "SGridironOverlay::PaintLineBars() Source/TAGGridiron/UI/GridironOverlay.cpp:1297",
+   "last_seen": "2026-11-17 15:59",
+   "count": 1,
+   "flags_seen": [
+    "-TagArtTest",
+    "-TagFakePad",
+    "-TagNoBooth",
+    "-TagPadTest"
+   ]
+  },
+  "d137dfe99f": {
+   "status": "open",
+   "note": "",
+   "fixed_on": null,
+   "first_seen": "2026-11-13 10:37",
+   "reports": [
+    "UECC-Windows-3D6DB3B24ABA15548BEDFC9F5F762A10_0000",
+    "UECC-Windows-46A834BA4AE2DCB26C368E82B86EE4D3_0000",
+    "UECC-Windows-6639559C46B345882E960C8C8F268327_0000"
+   ],
+   "process": "game",
+   "kind": "oom",
+   "signature": "oom | video memory",
+   "message": "Fatal error: [File:D:\\build\\++UE5\\Sync\\Engine\\Source\\Runtime\\D3D12RHI\\Private\\D3D12Util.cpp] [Line: 815] \nOut of video memory trying to allocate a rendering resource",
+   "top": null,
+   "last_seen": "2026-11-16 15:22",
+   "count": 3,
+   "flags_seen": [
+    "-TagBoothLog",
+    "-TagHighlights",
+    "-TagHlDir",
+    "-TagHlFull",
+    "-TagHlMaxClips",
+    "-TagNoBooth",
+    "-TagNoLoad",
+    "-TagQuarterLen",
+    "-TagSoak",
+    "-TagWeatherSeed"
+   ]
+  },
+  "34b79f019a": {
+   "status": "open",
+   "note": "",
+   "fixed_on": null,
+   "first_seen": "2026-11-11 23:16",
+   "reports": [
+    "UECC-Windows-D79373AB40FCA54D65A2EBAC0711C555_0000"
+   ],
+   "process": "game",
+   "kind": "crash",
+   "signature": "crash | EXCEPTION_ACCESS_VIOLATION | mods:UnrealEditor_Core>UnrealEditor_DerivedDataCache>UnrealEditor_Core>kernel32",
+   "message": "Unhandled Exception: EXCEPTION_ACCESS_VIOLATION reading address 0x00007ff9bd44d531",
+   "top": null,
+   "last_seen": "2026-11-11 23:16",
+   "count": 1,
+   "flags_seen": [
+    "-TagHighlights",
+    "-TagHlDir",
+    "-TagHlFull",
+    "-TagQuarterLen"
+   ]
+  },
+  "8e9ed4a182": {
+   "status": "open",
+   "note": "",
+   "fixed_on": null,
+   "first_seen": "2026-11-11 10:31",
+   "reports": [
+    "UECC-Windows-D48322024E383EA0C0BB06921A8C4F72_0000"
+   ],
+   "process": "game",
+   "kind": "crash",
+   "signature": "crash | EXCEPTION_ACCESS_VIOLATION | AAthlete::SidelineCheer() < AMatchDirector::TickSidelines()",
+   "message": "Unhandled Exception: EXCEPTION_ACCESS_VIOLATION 0x0000000000000000",
+   "top": "AAthlete::SidelineCheer() Source/TAGGridiron/Render/Athlete.cpp:2353",
+   "last_seen": "2026-11-11 10:31",
+   "count": 1,
+   "flags_seen": [
+    "-TagBench",
+    "-TagBenchWarm",
+    "-TagNoLoad",
+    "-TagQuarterLen",
+    "-TagSoak",
+    "-TagWeatherSeed"
+   ]
+  },
+  "4d62876f04": {
+   "status": "open",
+   "note": "",
+   "fixed_on": null,
+   "first_seen": "2026-11-10 22:09",
+   "reports": [
+    "UECC-Windows-50BFA1C44E6B4F8270F39D9DD2D39530_0000"
+   ],
+   "process": "game",
+   "kind": "assert",
+   "signature": "assert | Fatal error: [Casts.cpp] Cast of Int32Property_1094545 _577 to Package failed | mods:UnrealEditor_CoreUObject>UnrealEditor_Engine>UnrealEditor_Core>kernel32",
+   "message": "Fatal error: [File:D:\\build\\++UE5\\Sync\\Engine\\Source\\Runtime\\CoreUObject\\Private\\Templates\\Casts.cpp] [Line: 10] \nCast of Int32Property_1094545 _577 to Package failed",
+   "top": null,
+   "last_seen": "2026-11-10 22:09",
+   "count": 1,
+   "flags_seen": [
+    "-TagQuarterLen",
+    "-TagSoak"
+   ]
+  },
+  "89289b9fb5": {
+   "status": "open",
+   "note": "",
+   "fixed_on": null,
+   "first_seen": "2026-11-09 11:26",
+   "reports": [
+    "UECC-Windows-82FAFE664F84569C2BE9E2B59039B138_0000"
+   ],
+   "process": "game",
+   "kind": "crash",
+   "signature": "crash | EXCEPTION_ACCESS_VIOLATION | AAthlete::DriveMotionMatching() < AAthlete::Drive()",
+   "message": "Unhandled Exception: EXCEPTION_ACCESS_VIOLATION reading address 0xffffffffffffffff",
+   "top": "AAthlete::DriveMotionMatching() Source/TAGGridiron/Render/Athlete.cpp:783",
+   "last_seen": "2026-11-09 11:26",
+   "count": 1,
+   "flags_seen": [
+    "-TagMoveTest"
+   ]
+  },
+  "8636cd176d": {
+   "status": "open",
+   "note": "",
+   "fixed_on": null,
+   "first_seen": "2026-11-09 11:00",
+   "reports": [
+    "UECC-Windows-A62158934C492649327ACCA6E97088F3_0000"
+   ],
+   "process": "game",
+   "kind": "assert",
+   "signature": "assert | Assertion failed: Task->GetState() != FPoseSearchDatabaseAsyncCacheTask::EState::Notstarted [PoseSearchDerivedData.cpp] | FAthleteAssets::LoadMotionMatching() < FAthleteAssets::Load()",
+   "message": "Assertion failed: Task->GetState() != FPoseSearchDatabaseAsyncCacheTask::EState::Notstarted [File:D:\\build\\++UE5\\Sync\\Engine\\Plugins\\Animation\\PoseSearch\\Source\\Runtime\\Private\\PoseSearchDerivedData.cpp] [Line: 2975]",
+   "top": "FAthleteAssets::LoadMotionMatching() Source/TAGGridiron/Render/Athlete.cpp:194",
+   "last_seen": "2026-11-09 11:00",
+   "count": 1,
+   "flags_seen": [
+    "-TagAutoWatch",
+    "-TagDay",
+    "-TagShotAt",
+    "-TagShotExitAfter",
+    "-TagShotName"
+   ]
+  },
+  "d25e693ecb": {
+   "status": "open",
+   "note": "",
+   "fixed_on": null,
+   "first_seen": "2026-11-09 00:07",
+   "reports": [
+    "UECC-Windows-06BB46AA4F2D7A1F49069A8E25FC5710_0000",
+    "UECC-Windows-1F5095204D36480DB854B3A401015782_0000",
+    "UECC-Windows-5A5C79094F1CD708E278ADA86D75BFAF_0000",
+    "UECC-Windows-F73D70DA44798C6FB95F4F83F2FDEF57_0000"
+   ],
+   "process": "game",
+   "kind": "ensure",
+   "signature": "ensure | Ensure condition failed: OriginX <= OriginMax && OriginY <= OriginMax && OriginZ <= OriginMax [DoubleFloat.cpp] Found precision loss while converting matrix to GPU format, verify the input transforms. This error usually  | mods:UnrealEditor_Core>UnrealEditor_Renderer>UnrealEditor_RenderCore>UnrealEditor_Core",
+   "message": "Ensure condition failed: OriginX <= OriginMax && OriginY <= OriginMax && OriginZ <= OriginMax [File:D:\\build\\++UE5\\Sync\\Engine\\Source\\Runtime\\Core\\Private\\Math\\DoubleFloat.cpp] [Line: 19] \nFound precision loss while converting matrix to GPU format, verify the input transforms. This error usually ind",
+   "top": null,
+   "last_seen": "2026-11-09 00:13",
+   "count": 4,
+   "flags_seen": [
+    "-TagAutoWatch",
+    "-TagDay",
+    "-TagGear",
+    "-TagShotAt",
+    "-TagShotExitAfter",
+    "-TagShotName"
+   ]
+  },
+  "978706254e": {
+   "status": "open",
+   "note": "",
+   "fixed_on": null,
+   "first_seen": "2026-11-06 22:12",
+   "reports": [
+    "UECC-Windows-143AC1224EA984A34A305BA9D3E14540_0000",
+    "UECC-Windows-1FD4F7FE4884AB9F16034FA954F962CC_0000",
+    "UECC-Windows-218C2D09407EEBDBB51732A876EE86F6_0000",
+    "UECC-Windows-676F5C114DA4D0A111124D8D3B117D0A_0000",
+    "UECC-Windows-799B32654D6A97B02E900C98DD990276_0000",
+    "UECC-Windows-81FFFC4B4E1AF0A12134B896F3F295BA_0000",
+    "UECC-Windows-8706D9F64307C26E306742A26D0D2AD8_0000",
+    "UECC-Windows-B7698FBA48F735A9C9325686C2FB6DA4_0000",
+    "UECC-Windows-BE150F0446ED02073EE74583D85E82DB_0000"
+   ],
+   "process": "game",
+   "kind": "crash",
+   "signature": "crash | EXCEPTION_ACCESS_VIOLATION | AAthlete::PlayClip() < AAthlete::Drive()",
+   "message": "Unhandled Exception: EXCEPTION_ACCESS_VIOLATION 0x0000000000000000",
+   "top": "AAthlete::PlayClip() Source/TAGGridiron/Render/Athlete.cpp:430",
+   "last_seen": "2026-11-09 00:06",
+   "count": 9,
+   "flags_seen": [
+    "-TagAutoWatch",
+    "-TagDay",
+    "-TagShowSource"
+   ]
+  },
+  "fcdd05cf33": {
+   "status": "open",
+   "note": "",
+   "fixed_on": null,
+   "first_seen": "2026-11-06 22:50",
+   "reports": [
+    "UECC-Windows-F6E236454D79DE9F92039FB1AAD69A49_0000"
+   ],
+   "process": "game",
+   "kind": "crash",
+   "signature": "crash | EXCEPTION_ACCESS_VIOLATION | mods:UnrealEditor_Engine>UnrealEditor_Core>kernel32>ntdll",
+   "message": "Unhandled Exception: EXCEPTION_ACCESS_VIOLATION 0x0000000000000000",
+   "top": null,
+   "last_seen": "2026-11-06 22:50",
+   "count": 1,
+   "flags_seen": [
+    "-TagAutoWatch",
+    "-TagDay"
+   ]
+  },
+  "99694fe5e4": {
+   "status": "open",
+   "note": "",
+   "fixed_on": null,
+   "first_seen": "2026-11-16 22:17",
+   "reports": [
+    "UECC-Windows-697DEBE6401F7FE14A2FC984EE2B7356_0000",
+    "UECC-Windows-697DEBE6401F7FE14A2FC984EE2B7356_0001",
+    "UECC-Windows-B4BD26EA40CCA72876865B87AE1F3CDA_0000",
+    "UECC-Windows-E918BB6846367323DA6D9F8F50A847CB_0000"
+   ],
+   "process": "commandlet",
+   "kind": "ensure",
+   "signature": "ensure | Ensure condition failed: AnimSequence->HasCompressedDataForPlatform(TargetPlatform) [PoseSearchAssetSampler.cpp] AnimationAssetSampler initialized to forcefully sample compressed animation data, but none is currently ava | UTagEditorLib::execDatabaseTrimEnds()",
+   "message": "Ensure condition failed: AnimSequence->HasCompressedDataForPlatform(TargetPlatform) [File:D:\\build\\++UE5\\Sync\\Engine\\Plugins\\Animation\\PoseSearch\\Source\\Runtime\\Private\\PoseSearchAssetSampler.cpp] [Line: 277] \nAnimationAssetSampler initialized to forcefully sample compressed animation data, but none",
+   "top": "UTagEditorLib::execDatabaseTrimEnds() TagEditorLib.gen.cpp:536",
+   "last_seen": "2026-11-16 22:40",
+   "count": 4,
+   "flags_seen": []
+  },
+  "ce2a6938e6": {
+   "status": "open",
+   "note": "",
+   "fixed_on": null,
+   "first_seen": "2026-11-10 14:02",
+   "reports": [
+    "UECC-Windows-030A4132405245F7D02CBEA62DB95900_0000",
+    "UECC-Windows-032633574593813E821FC5ACA25E841C_0000",
+    "UECC-Windows-6C22EE814FA2F26827398EB5329E970F_0000",
+    "UECC-Windows-6F3FCECE4CDA0FA6A5C24486C6B10323_0000",
+    "UECC-Windows-9827A50140D1E9990C5FB48665034FDC_0000",
+    "UECC-Windows-9827A50140D1E9990C5FB48665034FDC_0001",
+    "UECC-Windows-983CB7F949F37A91CC94FCB24937E03F_0000",
+    "UECC-Windows-DF8970184E41B54AB4DE98850AE256AD_0000"
+   ],
+   "process": "commandlet",
+   "kind": "ensure",
+   "signature": "ensure | Ensure condition failed: AnimSequence->HasCompressedDataForPlatform(TargetPlatform) [PoseSearchAssetSampler.cpp] AnimationAssetSampler initialized to forcefully sample compressed animation data, but none is currently ava | mods:UnrealEditor_PoseSearch>UnrealEditor_DerivedDataCache>UnrealEditor_Core>kernel32",
+   "message": "Ensure condition failed: AnimSequence->HasCompressedDataForPlatform(TargetPlatform) [File:D:\\build\\++UE5\\Sync\\Engine\\Plugins\\Animation\\PoseSearch\\Source\\Runtime\\Private\\PoseSearchAssetSampler.cpp] [Line: 277] \nAnimationAssetSampler initialized to forcefully sample compressed animation data, but none",
+   "top": null,
+   "last_seen": "2026-11-16 22:20",
+   "count": 8,
+   "flags_seen": []
+  },
+  "0c552aef92": {
+   "status": "open",
+   "note": "",
+   "fixed_on": null,
+   "first_seen": "2026-11-10 14:28",
+   "reports": [
+    "UECC-Windows-032633574593813E821FC5ACA25E841C_0001",
+    "UECC-Windows-6C22EE814FA2F26827398EB5329E970F_0001",
+    "UECC-Windows-9827A50140D1E9990C5FB48665034FDC_0002",
+    "UECC-Windows-983CB7F949F37A91CC94FCB24937E03F_0001",
+    "UECC-Windows-B4BD26EA40CCA72876865B87AE1F3CDA_0001",
+    "UECC-Windows-DF8970184E41B54AB4DE98850AE256AD_0001",
+    "UECC-Windows-E918BB6846367323DA6D9F8F50A847CB_0001"
+   ],
+   "process": "commandlet",
+   "kind": "assert",
+   "signature": "assert | Assertion failed: !ExtractionContext.bEnforceCompressedDataSampling || (PlatformCompressedData.IsValid(this) && !bUseRawDataForPoseExtraction) [AnimSequence.cpp] | mods:UnrealEditor_Core>UnrealEditor_Engine>UnrealEditor_PoseSearch>UnrealEditor_Core",
+   "message": "Assertion failed: !ExtractionContext.bEnforceCompressedDataSampling || (PlatformCompressedData.IsValid(this) && !bUseRawDataForPoseExtraction) [File:D:\\build\\++UE5\\Sync\\Engine\\Source\\Runtime\\Engine\\Private\\Animation\\AnimSequence.cpp] [Line: 1783]",
+   "top": null,
+   "last_seen": "2026-11-16 22:20",
+   "count": 7,
+   "flags_seen": []
+  },
+  "c187b40ab8": {
+   "status": "open",
+   "note": "",
+   "fixed_on": null,
+   "first_seen": "2026-11-13 10:20",
+   "reports": [
+    "UECC-Windows-109052CD4CB74E9BC07CE795757A470F_0000",
+    "UECC-Windows-11D9867C4063AC6FBA6195ADF44D8C49_0000",
+    "UECC-Windows-47F3C321463609A3D1BE61A637A500BA_0000",
+    "UECC-Windows-9DABADB24792276C07A924ABFE715D86_0000",
+    "UECC-Windows-DC9E079846B61CD174548CBE5D497BF7_0000",
+    "UECC-Windows-EAE38E9A499AF985FBC09BA00DA61793_0000",
+    "UECC-Windows-F118C5974914C99D47CFE195796FDD41_0000"
+   ],
+   "process": "commandlet",
+   "kind": "ensure",
+   "signature": "ensure | Ensure condition failed: bValidTime [AnimPose.cpp] Stack: ADDR UnrealEditor-AnimationBlueprintLibrary.dll!UnknownFunction [] ADDR UnrealEditor-AnimationBlueprintLibrary.dll!UnknownFunction [] ADDR UnrealEditor-AnimationB | mods:UnrealEditor_AnimationBlueprintLibrary>UnrealEditor_CoreUObject>UnrealEditor_PythonScriptPlugin>python311",
+   "message": "Ensure condition failed: bValidTime [File:D:\\build\\++UE5\\Sync\\Engine\\Source\\Editor\\AnimationBlueprintLibrary\\Private\\AnimPose.cpp] [Line: 687] \n\nStack: \n0x00007ffba0da826e UnrealEditor-AnimationBlueprintLibrary.dll!UnknownFunction []\n0x00007ffba0da79f3 UnrealEditor-AnimationBlueprintLibrary.dll!Unkn",
+   "top": null,
+   "last_seen": "2026-11-13 12:00",
+   "count": 7,
+   "flags_seen": []
+  },
+  "56866a5f34": {
+   "status": "open",
+   "note": "",
+   "fixed_on": null,
+   "first_seen": "2026-11-09 12:31",
+   "reports": [
+    "UECC-Windows-172EAE9F406B81EC0BFD94913EF6D1F9_0000",
+    "UECC-Windows-8EECD31644102A8AD061C484BB39A81B_0000",
+    "UECC-Windows-E46FEAC44C313112644692AA3B575624_0000"
+   ],
+   "process": "commandlet",
+   "kind": "oom",
+   "signature": "oom | system memory",
+   "message": "Fatal error: [File:D:\\build\\++UE5\\Sync\\Engine\\Source\\Runtime\\Core\\Private\\GenericPlatform\\GenericPlatformMemory.cpp] [Line: 300] \nRan out of memory allocating 569704 (0.5 MiB) bytes with alignment 4. Last error msg: The paging file is too small for this operation to complete..",
+   "top": null,
+   "last_seen": "2026-11-11 03:10",
+   "count": 3,
+   "flags_seen": []
+  },
+  "93d4d39ab8": {
+   "status": "open",
+   "note": "",
+   "fixed_on": null,
+   "first_seen": "2026-11-10 14:02",
+   "reports": [
+    "UECC-Windows-030A4132405245F7D02CBEA62DB95900_0001"
+   ],
+   "process": "commandlet",
+   "kind": "assert",
+   "signature": "assert | Assertion failed: !ExtractionContext.bEnforceCompressedDataSampling || (PlatformCompressedData.IsValid(this) && !bUseRawDataForPoseExtraction) [AnimSequence.cpp] | mods:UnrealEditor_Core>UnrealEditor_Engine>UnrealEditor_PoseSearch>UnrealEditor_DerivedDataCache",
+   "message": "Assertion failed: !ExtractionContext.bEnforceCompressedDataSampling || (PlatformCompressedData.IsValid(this) && !bUseRawDataForPoseExtraction) [File:D:\\build\\++UE5\\Sync\\Engine\\Source\\Runtime\\Engine\\Private\\Animation\\AnimSequence.cpp] [Line: 1783]",
+   "top": null,
+   "last_seen": "2026-11-10 14:02",
+   "count": 1,
+   "flags_seen": []
+  },
+  "f1c108901a": {
+   "status": "open",
+   "note": "",
+   "fixed_on": null,
+   "first_seen": "2026-11-09 07:35",
+   "reports": [
+    "UECC-Windows-03F44F3849F9E55219A5BF847EB7354D_0000",
+    "UECC-Windows-E66B7FAF419B9C603A2B379397837C49_0000"
+   ],
+   "process": "commandlet",
+   "kind": "assert",
+   "signature": "assert | Assertion failed: MeshObject [SkinnedMeshComponent.cpp] | mods:UnrealEditor_Core>UnrealEditor_Engine>UnrealEditor_MeshMergeUtilities>UnrealEditor_UnrealEd",
+   "message": "Assertion failed: MeshObject [File:D:\\build\\++UE5\\Sync\\Engine\\Source\\Runtime\\Engine\\Private\\Components\\SkinnedMeshComponent.cpp] [Line: 4987]",
+   "top": null,
+   "last_seen": "2026-11-09 07:35",
+   "count": 2,
+   "flags_seen": []
+  }
+ }
+}

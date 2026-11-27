@@ -26,3 +26,18 @@ Unreal/TAGGridiron/Content/Developers/
 Unreal/**/mat.log
 Unreal/**/build_editor.log
 Assets/
+# Madden 19 private reference pipeline. Raw extracts and imported reference assets never enter git.
+extracted
+extracted/
+logs/
+Unreal/TAGGridiron/Content/MaddenRef/
+codex.cfg
+OrangeEmu64.dll
+tools/madden/FrostyHost/bin/
+__pycache__/
+
+# Epic MetaHuman Crowd Sample: junction to the engine install (Fab content, never committed)
+Unreal/TAGGridiron/Plugins/MetaHumanCrowdContent/
+
+# broadcast booth speech service (Tools/Booth/setup_booth.bat builds it)
+Unreal/TAGGridiron/Tools/Booth/.venv/

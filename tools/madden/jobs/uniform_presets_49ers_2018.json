@@ -1,0 +1,9 @@
+[
+ {"id": "e_NIN_JERSEY_2018_WHIALT_preset", "op": "ebx", "asset": "content/characters/player/parts/uniforms/49ers/2018/NIN_JERSEY_2018_WHIALT_preset", "out": "{REPO}/extracted/prototype/research/presets/NIN_JERSEY_2018_WHIALT_preset.ebx.json"},
+ {"id": "e_NIN_JERSEY_2018_WHIALT_Sleeves_preset", "op": "ebx", "asset": "content/characters/player/parts/uniforms/49ers/2018/NIN_JERSEY_2018_WHIALT_Sleeves_preset", "out": "{REPO}/extracted/prototype/research/presets/NIN_JERSEY_2018_WHIALT_Sleeves_preset.ebx.json"},
+ {"id": "e_NIN_PANTS_2018_WHIALT_preset", "op": "ebx", "asset": "content/characters/player/parts/uniforms/49ers/2018/NIN_PANTS_2018_WHIALT_preset", "out": "{REPO}/extracted/prototype/research/presets/NIN_PANTS_2018_WHIALT_preset.ebx.json"},
+ {"id": "e_NIN_SOCKS_2018_WHI_preset", "op": "ebx", "asset": "content/characters/player/parts/uniforms/49ers/2018/NIN_SOCKS_2018_WHI_preset", "out": "{REPO}/extracted/prototype/research/presets/NIN_SOCKS_2018_WHI_preset.ebx.json"},
+ {"id": "e_NIN_HELMET_2018_GOLALT_preset", "op": "ebx", "asset": "content/characters/player/parts/uniforms/49ers/2018/NIN_HELMET_2018_GOLALT_preset", "out": "{REPO}/extracted/prototype/research/presets/NIN_HELMET_2018_GOLALT_preset.ebx.json"},
+ {"id": "e_NIN_Helmet_2018_GOLALT_facemask_preset", "op": "ebx", "asset": "content/characters/player/parts/uniforms/49ers/2018/NIN_Helmet_2018_GOLALT_facemask_preset", "out": "{REPO}/extracted/prototype/research/presets/NIN_Helmet_2018_GOLALT_facemask_preset.ebx.json"},
+ {"id": "e_NIN_Helmet_2018_GOLALT_Acc_preset", "op": "ebx", "asset": "content/characters/player/parts/uniforms/49ers/2018/NIN_Helmet_2018_GOLALT_Acc_preset", "out": "{REPO}/extracted/prototype/research/presets/NIN_Helmet_2018_GOLALT_Acc_preset.ebx.json"}
+]

@@ -1,0 +1,329 @@
+{
+ "bindings": [
+  {
+   "mesh": "/Game/MaddenRef/Players/Bodies/SK_fullarms_d",
+   "mi": "/Game/MaddenRef/Players/Bodies/Materials/MI_fullarms_d_arm_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": true,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Bodies/Textures/T_arm_skintone1",
+    "Normal": "/Game/MaddenRef/Players/Bodies/Textures/T_arm_normal",
+    "RSM": "/Game/MaddenRef/Players/Bodies/Textures/T_arm_rsm_skintone2"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Bodies/SK_fullarms_h",
+   "mi": "/Game/MaddenRef/Players/Bodies/Materials/MI_fullarms_h_arm_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": true,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Bodies/Textures/T_arm_skintone1",
+    "Normal": "/Game/MaddenRef/Players/Bodies/Textures/T_arm_normal",
+    "RSM": "/Game/MaddenRef/Players/Bodies/Textures/T_arm_rsm_skintone2"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Bodies/SK_fullarms_m",
+   "mi": "/Game/MaddenRef/Players/Bodies/Materials/MI_fullarms_m_arm_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": true,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Bodies/Textures/T_arm_skintone1",
+    "Normal": "/Game/MaddenRef/Players/Bodies/Textures/T_arm_normal",
+    "RSM": "/Game/MaddenRef/Players/Bodies/Textures/T_arm_rsm_skintone2"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Bodies/SK_fullarms_t",
+   "mi": "/Game/MaddenRef/Players/Bodies/Materials/MI_fullarms_t_arm_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": true,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Bodies/Textures/T_arm_skintone1",
+    "Normal": "/Game/MaddenRef/Players/Bodies/Textures/T_arm_normal",
+    "RSM": "/Game/MaddenRef/Players/Bodies/Textures/T_arm_rsm_skintone2"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Bodies/SK_legs_d",
+   "mi": "/Game/MaddenRef/Players/Bodies/Materials/MI_legs_d_playerLegs_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": true,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Bodies/Textures/T_genericpadless_legs_st1",
+    "Normal": "/Game/MaddenRef/Players/Bodies/Textures/T_ls_common_legs_normal",
+    "RSM": "/Game/MaddenRef/Players/Bodies/Textures/T_ls_common_legs_rsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Bodies/SK_legs_h",
+   "mi": "/Game/MaddenRef/Players/Bodies/Materials/MI_legs_h_playerLegs_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": true,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Bodies/Textures/T_genericpadless_legs_st1",
+    "Normal": "/Game/MaddenRef/Players/Bodies/Textures/T_ls_common_legs_normal",
+    "RSM": "/Game/MaddenRef/Players/Bodies/Textures/T_ls_common_legs_rsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Bodies/SK_legs_m",
+   "mi": "/Game/MaddenRef/Players/Bodies/Materials/MI_legs_m_playerLegs_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": true,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Bodies/Textures/T_genericpadless_legs_st1",
+    "Normal": "/Game/MaddenRef/Players/Bodies/Textures/T_ls_common_legs_normal",
+    "RSM": "/Game/MaddenRef/Players/Bodies/Textures/T_ls_common_legs_rsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Bodies/SK_legs_t",
+   "mi": "/Game/MaddenRef/Players/Bodies/Materials/MI_legs_t_playerLegs_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": true,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Bodies/Textures/T_genericpadless_legs_st1",
+    "Normal": "/Game/MaddenRef/Players/Bodies/Textures/T_ls_common_legs_normal",
+    "RSM": "/Game/MaddenRef/Players/Bodies/Textures/T_ls_common_legs_rsm"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Bodies/SK_nohands_d",
+   "mi": "/Game/MaddenRef/Players/Bodies/Materials/MI_nohands_d_arm_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": true,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Bodies/Textures/T_arm_skintone6",
+    "Normal": "/Game/MaddenRef/Players/Bodies/Textures/T_arm_normal",
+    "RSM": "/Game/MaddenRef/Players/Bodies/Textures/T_arm_rsm_skintone6"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Bodies/SK_nohands_h",
+   "mi": "/Game/MaddenRef/Players/Bodies/Materials/MI_nohands_h_arm_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": true,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Bodies/Textures/T_arm_skintone6",
+    "Normal": "/Game/MaddenRef/Players/Bodies/Textures/T_arm_normal",
+    "RSM": "/Game/MaddenRef/Players/Bodies/Textures/T_arm_rsm_skintone6"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Bodies/SK_nohands_m",
+   "mi": "/Game/MaddenRef/Players/Bodies/Materials/MI_nohands_m_arm_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": true,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Bodies/Textures/T_arm_skintone6",
+    "Normal": "/Game/MaddenRef/Players/Bodies/Textures/T_arm_normal",
+    "RSM": "/Game/MaddenRef/Players/Bodies/Textures/T_arm_rsm_skintone6"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Bodies/SK_nohands_t",
+   "mi": "/Game/MaddenRef/Players/Bodies/Materials/MI_nohands_t_arm_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": true,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Bodies/Textures/T_arm_skintone6",
+    "Normal": "/Game/MaddenRef/Players/Bodies/Textures/T_arm_normal",
+    "RSM": "/Game/MaddenRef/Players/Bodies/Textures/T_arm_rsm_skintone6"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Bodies/SK_oldfallback_fullarms_d",
+   "mi": "/Game/MaddenRef/Players/Bodies/Materials/MI_oldfallback_fullarms_d_arm_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": true,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Bodies/Textures/T_arm_skintone1",
+    "Normal": "/Game/MaddenRef/Players/Bodies/Textures/T_arm_normal",
+    "RSM": "/Game/MaddenRef/Players/Bodies/Textures/T_arm_rsm_skintone2"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Bodies/SK_oldfallback_fullarms_h",
+   "mi": "/Game/MaddenRef/Players/Bodies/Materials/MI_oldfallback_fullarms_h_arm_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": true,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Bodies/Textures/T_arm_skintone1",
+    "Normal": "/Game/MaddenRef/Players/Bodies/Textures/T_arm_normal",
+    "RSM": "/Game/MaddenRef/Players/Bodies/Textures/T_arm_rsm_skintone2"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Bodies/SK_oldfallback_fullarms_m",
+   "mi": "/Game/MaddenRef/Players/Bodies/Materials/MI_oldfallback_fullarms_m_arm_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": true,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Bodies/Textures/T_arm_skintone1",
+    "Normal": "/Game/MaddenRef/Players/Bodies/Textures/T_arm_normal",
+    "RSM": "/Game/MaddenRef/Players/Bodies/Textures/T_arm_rsm_skintone2"
+   }
+  },
+  {
+   "mesh": "/Game/MaddenRef/Players/Bodies/SK_oldfallback_fullarms_t",
+   "mi": "/Game/MaddenRef/Players/Bodies/Materials/MI_oldfallback_fullarms_t_arm_lod0_mat",
+   "slot": 0,
+   "switches": {
+    "RSMIsSkin": true,
+    "UseRSM": true
+   },
+   "textures": {
+    "BaseColor": "/Game/MaddenRef/Players/Bodies/Textures/T_arm_skintone1",
+    "Normal": "/Game/MaddenRef/Players/Bodies/Textures/T_arm_normal",
+    "RSM": "/Game/MaddenRef/Players/Bodies/Textures/T_arm_rsm_skintone2"
+   }
+  }
+ ],
+ "preview_level": {
+  "path": "/Game/MaddenRef/Maps/L_MaddenRef_Stage7Bodies",
+  "meshes": [
+   {
+    "mesh": "/Game/MaddenRef/Players/Bodies/SK_fullarms_d",
+    "x": 0.0,
+    "y": 0.0,
+    "label": "000"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Bodies/SK_fullarms_h",
+    "x": 170.0,
+    "y": 0.0,
+    "label": "001"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Bodies/SK_fullarms_m",
+    "x": 340.0,
+    "y": 0.0,
+    "label": "002"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Bodies/SK_fullarms_t",
+    "x": 510.0,
+    "y": 0.0,
+    "label": "003"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Bodies/SK_legs_d",
+    "x": 680.0,
+    "y": 0.0,
+    "label": "004"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Bodies/SK_legs_h",
+    "x": 850.0,
+    "y": 0.0,
+    "label": "005"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Bodies/SK_legs_m",
+    "x": 1020.0,
+    "y": 0.0,
+    "label": "006"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Bodies/SK_legs_t",
+    "x": 1190.0,
+    "y": 0.0,
+    "label": "007"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Bodies/SK_nohands_d",
+    "x": 0.0,
+    "y": 170.0,
+    "label": "008"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Bodies/SK_nohands_h",
+    "x": 170.0,
+    "y": 170.0,
+    "label": "009"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Bodies/SK_nohands_m",
+    "x": 340.0,
+    "y": 170.0,
+    "label": "010"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Bodies/SK_nohands_t",
+    "x": 510.0,
+    "y": 170.0,
+    "label": "011"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Bodies/SK_oldfallback_fullarms_d",
+    "x": 680.0,
+    "y": 170.0,
+    "label": "012"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Bodies/SK_oldfallback_fullarms_h",
+    "x": 850.0,
+    "y": 170.0,
+    "label": "013"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Bodies/SK_oldfallback_fullarms_m",
+    "x": 1020.0,
+    "y": 170.0,
+    "label": "014"
+   },
+   {
+    "mesh": "/Game/MaddenRef/Players/Bodies/SK_oldfallback_fullarms_t",
+    "x": 1190.0,
+    "y": 170.0,
+    "label": "015"
+   }
+  ]
+ }
+}

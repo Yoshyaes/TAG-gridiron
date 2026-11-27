@@ -19,8 +19,8 @@ set FLAGS=/nologo /std:c++17 /O2 /EHsc /utf-8
 
 echo Building reference-math C++ dumpers...
 cl %FLAGS% /c RefMath.cpp /Fobuild\ || exit /b 1
-cl %FLAGS% /I"%SIM%" /FI"%~dp0RefMathFI.h" /c "%SIM%\League.cpp" "%SIM%\Playbook.cpp" "%SIM%\PlaySim.cpp" "%SIM%\Game.cpp" "%SIM%\Stats.cpp" gamelog_dump.cpp scenario_dump.cpp /Fobuild\ || exit /b 1
-set "OBJS=build\RefMath.obj build\League.obj build\Playbook.obj build\PlaySim.obj build\Game.obj build\Stats.obj"
+cl %FLAGS% /I"%SIM%" /FI"%~dp0RefMathFI.h" /c "%SIM%\League.cpp" "%SIM%\Playbook.cpp" "%SIM%\PlaySim.cpp" "%SIM%\Game.cpp" "%SIM%\Stats.cpp" "%SIM%\Abilities.cpp" "%SIM%\PlaceKick.cpp" gamelog_dump.cpp scenario_dump.cpp /Fobuild\ || exit /b 1
+set "OBJS=build\RefMath.obj build\League.obj build\Playbook.obj build\PlaySim.obj build\Game.obj build\Stats.obj build\Abilities.obj build\PlaceKick.obj"
 link /nologo %OBJS% build\gamelog_dump.obj /OUT:build\gamelog_dump.exe || exit /b 1
 link /nologo %OBJS% build\scenario_dump.obj /OUT:build\scenario_dump.exe || exit /b 1
 

@@ -1,0 +1,40 @@
+[
+ {
+  "id": "m_cm",
+  "op": "mesh",
+  "asset": "content/characters/player/players/f/faulkmarshall_11413/faulkmarshall_11413_mesh",
+  "out": "{REPO}/extracted/stage0b/faulkmarshall_11413_mesh_cm.fbx",
+  "units": "Centimeters",
+  "single_lod": true
+ },
+ {
+  "id": "m_m",
+  "op": "mesh",
+  "asset": "content/characters/player/players/f/faulkmarshall_11413/faulkmarshall_11413_mesh",
+  "out": "{REPO}/extracted/stage0b/faulkmarshall_11413_mesh.fbx",
+  "units": "Meters",
+  "single_lod": true
+ },
+ {
+  "id": "mi",
+  "op": "meshinfo",
+  "asset": "content/characters/player/players/f/faulkmarshall_11413/faulkmarshall_11413_mesh",
+  "out": "{REPO}/extracted/stage0b/faulkmarshall_11413_mesh.meshinfo.json"
+ },
+ {
+  "id": "e_mesh",
+  "op": "ebx",
+  "asset": "content/characters/player/players/f/faulkmarshall_11413/faulkmarshall_11413_mesh",
+  "out": "{REPO}/extracted/stage0b/faulkmarshall_11413_mesh.ebx.json"
+ },
+ {
+  "id": "t_col",
+  "op": "texture",
+  "asset": "content/characters/player/players/f/faulkmarshall_11413/faulkmarshall_11413_color",
+  "out": "{REPO}/extracted/stage0b/faulkmarshall_11413_color",
+  "formats": [
+   "dds",
+   "png"
+  ]
+ }
+]

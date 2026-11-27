@@ -1,0 +1,1397 @@
+[
+ {
+  "name": "Preplay_19_Audible_QBSG_Even_HotRoute_R_v1__P01",
+  "file": "Preplay_19_Audible_QBSG_Even_HotRoute_R_v1__P01",
+  "clip_key": "0d452952b666bfb7",
+  "layer_key": "80e982c7027f3ced",
+  "fps": 60.0,
+  "frames": 274,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBSG_Even_IDMike_v1__P01",
+  "file": "Preplay_19_Audible_QBSG_Even_IDMike_v1__P01",
+  "clip_key": "1cd480e0326b17b8",
+  "layer_key": "5dfe94a9ab1f0ea2",
+  "fps": 60.0,
+  "frames": 109,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBSG_Even_Motion_L_v1__P01",
+  "file": "Preplay_19_Audible_QBSG_Even_Motion_L_v1__P01",
+  "clip_key": "ba7aedfdcea6940a",
+  "layer_key": "e72cc928a2eb8795",
+  "fps": 60.0,
+  "frames": 243,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBSG_Even_Motion_R_v1__P01",
+  "file": "Preplay_19_Audible_QBSG_Even_Motion_R_v1__P01",
+  "clip_key": "6753106b7e56949b",
+  "layer_key": "c951d9155e66aa10",
+  "fps": 60.0,
+  "frames": 191,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBSG_IDMike_M_v1__P01",
+  "file": "Preplay_19_Audible_QBSG_IDMike_M_v1__P01",
+  "clip_key": "7ce08722e0580943",
+  "layer_key": "f807c06155ae4573",
+  "fps": 60.0,
+  "frames": 331,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBSG_OffsetR_BlockAdj_v2__P01",
+  "file": "Preplay_19_Audible_QBSG_OffsetR_BlockAdj_v2__P01",
+  "clip_key": "bfd62bcce7df92c5",
+  "layer_key": "081896bd1d515ab0",
+  "fps": 60.0,
+  "frames": 241,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBSG_OffsetR_ChangePlay_v2__P01",
+  "file": "Preplay_19_Audible_QBSG_OffsetR_ChangePlay_v2__P01",
+  "clip_key": "f42df47d0eb0bba3",
+  "layer_key": "0f7248a995f87e1b",
+  "fps": 60.0,
+  "frames": 260,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBSG_OffsetR_HotRoute_L_v2__P01",
+  "file": "Preplay_19_Audible_QBSG_OffsetR_HotRoute_L_v2__P01",
+  "clip_key": "a909d05741d9ad1e",
+  "layer_key": "743964c151e18793",
+  "fps": 60.0,
+  "frames": 143,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBSG_OffsetR_HotRoute_R_v2__P01",
+  "file": "Preplay_19_Audible_QBSG_OffsetR_HotRoute_R_v2__P01",
+  "clip_key": "0674efeea2a7ace9",
+  "layer_key": "04381df76706965f",
+  "fps": 60.0,
+  "frames": 108,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBSG_OffsetR_IDMike_L_v1__P01",
+  "file": "Preplay_19_Audible_QBSG_OffsetR_IDMike_L_v1__P01",
+  "clip_key": "869ca4d833ae9043",
+  "layer_key": "77b2947fc807228f",
+  "fps": 60.0,
+  "frames": 204,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBSG_OffsetR_IDMike_R_v1__P01",
+  "file": "Preplay_19_Audible_QBSG_OffsetR_IDMike_R_v1__P01",
+  "clip_key": "19eb6085ff26916e",
+  "layer_key": "a2df7cd6d9de9bb8",
+  "fps": 60.0,
+  "frames": 188,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBSG_OffsetR_Motion_L_v2__P01",
+  "file": "Preplay_19_Audible_QBSG_OffsetR_Motion_L_v2__P01",
+  "clip_key": "c002369156bd010d",
+  "layer_key": "04e37de5ea35449d",
+  "fps": 60.0,
+  "frames": 143,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBSG_OffsetR_Motion_R_v2__P01",
+  "file": "Preplay_19_Audible_QBSG_OffsetR_Motion_R_v2__P01",
+  "clip_key": "d3270bbc393a9840",
+  "layer_key": "6dc7d55c64886351",
+  "fps": 60.0,
+  "frames": 121,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBSG_Offset_BlockAdj_v1__P01",
+  "file": "Preplay_19_Audible_QBSG_Offset_BlockAdj_v1__P01",
+  "clip_key": "b01bb6c711747675",
+  "layer_key": "dde86eb6cf2b8215",
+  "fps": 60.0,
+  "frames": 423,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBSG_Offset_HardCount_v1__P01",
+  "file": "Preplay_19_Audible_QBSG_Offset_HardCount_v1__P01",
+  "clip_key": "7bc2abea47c07e12",
+  "layer_key": "229f9f613f102166",
+  "fps": 60.0,
+  "frames": 57,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBSG_Offset_HotRoute_L_v1__P01",
+  "file": "Preplay_19_Audible_QBSG_Offset_HotRoute_L_v1__P01",
+  "clip_key": "31ef7f860a51da3c",
+  "layer_key": "b0ca36b0cb48953f",
+  "fps": 60.0,
+  "frames": 301,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBSG_Offset_HotRoute_R_v1__P01",
+  "file": "Preplay_19_Audible_QBSG_Offset_HotRoute_R_v1__P01",
+  "clip_key": "e15ed28739e7bcaa",
+  "layer_key": "21a288a15f5bf0a6",
+  "fps": 60.0,
+  "frames": 203,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBSG_Offset_Motion_L_v1__P01",
+  "file": "Preplay_19_Audible_QBSG_Offset_Motion_L_v1__P01",
+  "clip_key": "b58bf5f6128c8826",
+  "layer_key": "1d9af954fcf02a58",
+  "fps": 60.0,
+  "frames": 190,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBSG_Offset_Motion_R_v1__P01",
+  "file": "Preplay_19_Audible_QBSG_Offset_Motion_R_v1__P01",
+  "clip_key": "13b0a2c7f3b34408",
+  "layer_key": "038a1593002ffcff",
+  "fps": 60.0,
+  "frames": 155,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBSG_TomBrady_FakeSnap_v1__P01",
+  "file": "Preplay_19_Audible_QBSG_TomBrady_FakeSnap_v1__P01",
+  "clip_key": "722dbcd55e7dc4fe",
+  "layer_key": "6979972e9d2e5e93",
+  "fps": 60.0,
+  "frames": 78,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBSG_TomBrady_HotRoute_L_v1__P01",
+  "file": "Preplay_19_Audible_QBSG_TomBrady_HotRoute_L_v1__P01",
+  "clip_key": "2633524d2e34fccf",
+  "layer_key": "12e79af2872613a0",
+  "fps": 60.0,
+  "frames": 110,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBSG_TomBrady_HotRoute_R_v1__P01",
+  "file": "Preplay_19_Audible_QBSG_TomBrady_HotRoute_R_v1__P01",
+  "clip_key": "b81365907baea9ca",
+  "layer_key": "649c27f04cc4e548",
+  "fps": 60.0,
+  "frames": 95,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBSG_TomBrady_IDMike_L_v1__P01",
+  "file": "Preplay_19_Audible_QBSG_TomBrady_IDMike_L_v1__P01",
+  "clip_key": "e9f152f57f6112f8",
+  "layer_key": "29fd64a6310b6016",
+  "fps": 60.0,
+  "frames": 129,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBSG_TomBrady_IDMike_R_v1__P01",
+  "file": "Preplay_19_Audible_QBSG_TomBrady_IDMike_R_v1__P01",
+  "clip_key": "7353411a523ac78d",
+  "layer_key": "116f798796fdaff5",
+  "fps": 60.0,
+  "frames": 101,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBSG_TomBrady_Motion_L_v1__P01",
+  "file": "Preplay_19_Audible_QBSG_TomBrady_Motion_L_v1__P01",
+  "clip_key": "bf6eb007ef7ce11f",
+  "layer_key": "1a54dfead0e028be",
+  "fps": 60.0,
+  "frames": 91,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBSG_TomBrady_Motion_R_v1__P01",
+  "file": "Preplay_19_Audible_QBSG_TomBrady_Motion_R_v1__P01",
+  "clip_key": "88d709c47dcddb6b",
+  "layer_key": "f8705007b0933c00",
+  "fps": 60.0,
+  "frames": 126,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBSG__RusselWilson_BlockAdj_v1__P01",
+  "file": "Preplay_19_Audible_QBSG__RusselWilson_BlockAdj_v1__P01",
+  "clip_key": "180a47b1e16d62ae",
+  "layer_key": "0ba77c084d8c2d0d",
+  "fps": 60.0,
+  "frames": 407,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBSG__RusselWilson_ChangePlay_v2__P01",
+  "file": "Preplay_19_Audible_QBSG__RusselWilson_ChangePlay_v2__P01",
+  "clip_key": "e671d1abeb7e104d",
+  "layer_key": "33e0f81d8d3b0640",
+  "fps": 60.0,
+  "frames": 401,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBSG__RusselWilson_HotRoute_L_v1__P01",
+  "file": "Preplay_19_Audible_QBSG__RusselWilson_HotRoute_L_v1__P01",
+  "clip_key": "7d717be6f4034e41",
+  "layer_key": "2cf5a48fa6a4c7ed",
+  "fps": 60.0,
+  "frames": 151,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBSG__RusselWilson_HotRoute_R_v1__P01",
+  "file": "Preplay_19_Audible_QBSG__RusselWilson_HotRoute_R_v1__P01",
+  "clip_key": "141579c2445ce6ac",
+  "layer_key": "057cae5c37ab0a85",
+  "fps": 60.0,
+  "frames": 128,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBSG__RusselWilson_Motion_L_v1__P01",
+  "file": "Preplay_19_Audible_QBSG__RusselWilson_Motion_L_v1__P01",
+  "clip_key": "cd174bd0902bb921",
+  "layer_key": "4b0652fc0128ad75",
+  "fps": 60.0,
+  "frames": 117,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBSG__RusselWilson_Motion_R_v1__P01",
+  "file": "Preplay_19_Audible_QBSG__RusselWilson_Motion_R_v1__P01",
+  "clip_key": "af9d09899241b998",
+  "layer_key": "74be3c2c6fe6eb83",
+  "fps": 60.0,
+  "frames": 91,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBUC_AaronRodgers_BlockAdj_v1__P01",
+  "file": "Preplay_19_Audible_QBUC_AaronRodgers_BlockAdj_v1__P01",
+  "clip_key": "babf06c4514ecdd6",
+  "layer_key": "fc1850911eefab9b",
+  "fps": 60.0,
+  "frames": 292,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBUC_AaronRodgers_FlipPlay_L_v1__P01",
+  "file": "Preplay_19_Audible_QBUC_AaronRodgers_FlipPlay_L_v1__P01",
+  "clip_key": "521ab0c2de5b39a6",
+  "layer_key": "e5665af82e33299a",
+  "fps": 60.0,
+  "frames": 127,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBUC_AaronRodgers_FlipPlay_R_v1__P01",
+  "file": "Preplay_19_Audible_QBUC_AaronRodgers_FlipPlay_R_v1__P01",
+  "clip_key": "9e69cdfa848d0901",
+  "layer_key": "325da40fe873d842",
+  "fps": 60.0,
+  "frames": 127,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBUC_AaronRodgers_HotRoute_L_v1__P01",
+  "file": "Preplay_19_Audible_QBUC_AaronRodgers_HotRoute_L_v1__P01",
+  "clip_key": "5cf019dc4029aaef",
+  "layer_key": "a105b282b3ee3897",
+  "fps": 60.0,
+  "frames": 104,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBUC_AaronRodgers_HotRoute_R_v1__P01",
+  "file": "Preplay_19_Audible_QBUC_AaronRodgers_HotRoute_R_v1__P01",
+  "clip_key": "b3f88943d6d0166c",
+  "layer_key": "16eaa4d8f784684b",
+  "fps": 60.0,
+  "frames": 96,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBUC_AaronRodgers_IDMike_L_v1__P01",
+  "file": "Preplay_19_Audible_QBUC_AaronRodgers_IDMike_L_v1__P01",
+  "clip_key": "51b7b29ce082c9a8",
+  "layer_key": "7fa00eecfc287f9b",
+  "fps": 60.0,
+  "frames": 121,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBUC_AaronRodgers_IDMike_R_v1__P01",
+  "file": "Preplay_19_Audible_QBUC_AaronRodgers_IDMike_R_v1__P01",
+  "clip_key": "8a526eb7f45b86c3",
+  "layer_key": "b63a878dbe149074",
+  "fps": 60.0,
+  "frames": 136,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBUC_AaronRodgers_Motion_L_v1__P01",
+  "file": "Preplay_19_Audible_QBUC_AaronRodgers_Motion_L_v1__P01",
+  "clip_key": "691eca6a95807b5b",
+  "layer_key": "6a871fab7fb62384",
+  "fps": 60.0,
+  "frames": 113,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBUC_AaronRodgers_Motion_R_v1__P01",
+  "file": "Preplay_19_Audible_QBUC_AaronRodgers_Motion_R_v1__P01",
+  "clip_key": "98d2007274f03caa",
+  "layer_key": "8fe7f3965f170c5b",
+  "fps": 60.0,
+  "frames": 91,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBUC_BlockAdj_v1__P01",
+  "file": "Preplay_19_Audible_QBUC_BlockAdj_v1__P01",
+  "clip_key": "5502e48682f2407c",
+  "layer_key": "265f814938aa1acb",
+  "fps": 60.0,
+  "frames": 237,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBUC_CamNewton_ChangePlay_v1__P01",
+  "file": "Preplay_19_Audible_QBUC_CamNewton_ChangePlay_v1__P01",
+  "clip_key": "666b57cecf9918d2",
+  "layer_key": "5bc09788ade9295f",
+  "fps": 60.0,
+  "frames": 254,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBUC_CamNewton_HotRoute_L_v1__P01",
+  "file": "Preplay_19_Audible_QBUC_CamNewton_HotRoute_L_v1__P01",
+  "clip_key": "4ac0f4516274e1dd",
+  "layer_key": "b0a85e33a5e7013d",
+  "fps": 60.0,
+  "frames": 126,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBUC_CamNewton_HotRoute_R_v1__P01",
+  "file": "Preplay_19_Audible_QBUC_CamNewton_HotRoute_R_v1__P01",
+  "clip_key": "e9a475a025628042",
+  "layer_key": "f70d4df21c16efc4",
+  "fps": 60.0,
+  "frames": 139,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBUC_CarsonWentz_ChangePlay_v1__P01",
+  "file": "Preplay_19_Audible_QBUC_CarsonWentz_ChangePlay_v1__P01",
+  "clip_key": "301c72d5a5317fcb",
+  "layer_key": "030931993398865c",
+  "fps": 60.0,
+  "frames": 192,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBUC_CarsonWentz_FakeSnap_v1__P01",
+  "file": "Preplay_19_Audible_QBUC_CarsonWentz_FakeSnap_v1__P01",
+  "clip_key": "191c1d3473e422ff",
+  "layer_key": "f11cac6595c38edc",
+  "fps": 60.0,
+  "frames": 60,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBUC_CarsonWentz_IDMike_L_v1__P01",
+  "file": "Preplay_19_Audible_QBUC_CarsonWentz_IDMike_L_v1__P01",
+  "clip_key": "6c3a79b900301831",
+  "layer_key": "47037afe92243688",
+  "fps": 60.0,
+  "frames": 137,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBUC_CarsonWentz_IDMike_R_v1__P01",
+  "file": "Preplay_19_Audible_QBUC_CarsonWentz_IDMike_R_v1__P01",
+  "clip_key": "b9a36c979912ad7a",
+  "layer_key": "d0793c4f6c5b0e34",
+  "fps": 60.0,
+  "frames": 147,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBUC_CarsonWentz_Motion_L_v1__P01",
+  "file": "Preplay_19_Audible_QBUC_CarsonWentz_Motion_L_v1__P01",
+  "clip_key": "164bb96bdd5a4266",
+  "layer_key": "51b9e4727a3ce53a",
+  "fps": 60.0,
+  "frames": 87,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBUC_CarsonWentz_Motion_R_v1__P01",
+  "file": "Preplay_19_Audible_QBUC_CarsonWentz_Motion_R_v1__P01",
+  "clip_key": "4f1de8321c99718b",
+  "layer_key": "6c99f0dcbabd4c09",
+  "fps": 60.0,
+  "frames": 109,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBUC_ChangePlay_v2__P01",
+  "file": "Preplay_19_Audible_QBUC_ChangePlay_v2__P01",
+  "clip_key": "be66cdf0395472f2",
+  "layer_key": "157c1a2bed23fb6a",
+  "fps": 60.0,
+  "frames": 426,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBUC_DakPrescott_IDMike_L_v1__P01",
+  "file": "Preplay_19_Audible_QBUC_DakPrescott_IDMike_L_v1__P01",
+  "clip_key": "e43165330cdbf485",
+  "layer_key": "32da331a4b78c1e7",
+  "fps": 60.0,
+  "frames": 113,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBUC_DakPrescott_IDMike_R_v1__P01",
+  "file": "Preplay_19_Audible_QBUC_DakPrescott_IDMike_R_v1__P01",
+  "clip_key": "092f22160d15e411",
+  "layer_key": "1a2ad42de9b78f30",
+  "fps": 60.0,
+  "frames": 133,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBUC_DakPrescott_Motion_L_v1__P01",
+  "file": "Preplay_19_Audible_QBUC_DakPrescott_Motion_L_v1__P01",
+  "clip_key": "c7c8912269642e85",
+  "layer_key": "ca43e6d191400787",
+  "fps": 60.0,
+  "frames": 131,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBUC_DakPrescott_Motion_R_v1__P01",
+  "file": "Preplay_19_Audible_QBUC_DakPrescott_Motion_R_v1__P01",
+  "clip_key": "d245a7a9c7266249",
+  "layer_key": "ca564ac6204affb5",
+  "fps": 60.0,
+  "frames": 145,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBUC_FlipPlay_v1__P01",
+  "file": "Preplay_19_Audible_QBUC_FlipPlay_v1__P01",
+  "clip_key": "267d0b3f7e5aeb4b",
+  "layer_key": "8c5c184464c574ff",
+  "fps": 60.0,
+  "frames": 199,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBUC_HardCount_v1__P01",
+  "file": "Preplay_19_Audible_QBUC_HardCount_v1__P01",
+  "clip_key": "ed2cb83bb68242c7",
+  "layer_key": "f65ebfe0bc9f8c7b",
+  "fps": 60.0,
+  "frames": 76,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBUC_HotRoute_L_v1__P01",
+  "file": "Preplay_19_Audible_QBUC_HotRoute_L_v1__P01",
+  "clip_key": "37fb74940c522e8b",
+  "layer_key": "df1bc51b1b9af6dd",
+  "fps": 60.0,
+  "frames": 196,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBUC_HotRoute_R_v1__P01",
+  "file": "Preplay_19_Audible_QBUC_HotRoute_R_v1__P01",
+  "clip_key": "eebb702277bede6c",
+  "layer_key": "b24d723ba81b427b",
+  "fps": 60.0,
+  "frames": 164,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBUC_IDMike_v1__P01",
+  "file": "Preplay_19_Audible_QBUC_IDMike_v1__P01",
+  "clip_key": "b34fdd881fb47eae",
+  "layer_key": "e1ee6267cf183aa7",
+  "fps": 60.0,
+  "frames": 159,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBUC_Motion_L_v1__P01",
+  "file": "Preplay_19_Audible_QBUC_Motion_L_v1__P01",
+  "clip_key": "9fb50b4b7df514d0",
+  "layer_key": "1e3e85c600dff08d",
+  "fps": 60.0,
+  "frames": 117,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBUC_Motion_R_v1__P01",
+  "file": "Preplay_19_Audible_QBUC_Motion_R_v1__P01",
+  "clip_key": "6d0c3517258011a4",
+  "layer_key": "ac6501b56192d82a",
+  "fps": 60.0,
+  "frames": 109,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBUC_TomBrady_FlipPlay_L_v1__P01",
+  "file": "Preplay_19_Audible_QBUC_TomBrady_FlipPlay_L_v1__P01",
+  "clip_key": "f014f9e7ea804fa7",
+  "layer_key": "2d1aef8918bec06d",
+  "fps": 60.0,
+  "frames": 83,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBUC_TomBrady_FlipPlay_R_v1__P01",
+  "file": "Preplay_19_Audible_QBUC_TomBrady_FlipPlay_R_v1__P01",
+  "clip_key": "fdf33c4338c20f6f",
+  "layer_key": "8d887b6051c3e189",
+  "fps": 60.0,
+  "frames": 63,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBUC_TomBrady_HotRoute_L_v1__P01",
+  "file": "Preplay_19_Audible_QBUC_TomBrady_HotRoute_L_v1__P01",
+  "clip_key": "15177e6fff9e8db3",
+  "layer_key": "97ff80edb099cf44",
+  "fps": 60.0,
+  "frames": 138,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBUC_TomBrady_HotRoute_R_v1__P01",
+  "file": "Preplay_19_Audible_QBUC_TomBrady_HotRoute_R_v1__P01",
+  "clip_key": "8f8d80f5c230ba07",
+  "layer_key": "594f6b56b0c6755e",
+  "fps": 60.0,
+  "frames": 168,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBUC_TomBrady_IDMike_L_v1__P01",
+  "file": "Preplay_19_Audible_QBUC_TomBrady_IDMike_L_v1__P01",
+  "clip_key": "f0b2897e1da84181",
+  "layer_key": "059dce1792833900",
+  "fps": 60.0,
+  "frames": 125,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBUC_TomBrady_IDMike_R_v1__P01",
+  "file": "Preplay_19_Audible_QBUC_TomBrady_IDMike_R_v1__P01",
+  "clip_key": "e5ce92997a1e8f65",
+  "layer_key": "23308ffe6de9ab6b",
+  "fps": 60.0,
+  "frames": 104,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBUC__RusselWilson_ChangePlay_v1__P01",
+  "file": "Preplay_19_Audible_QBUC__RusselWilson_ChangePlay_v1__P01",
+  "clip_key": "9e68a757863bc020",
+  "layer_key": "164f6493ea00bea2",
+  "fps": 60.0,
+  "frames": 178,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBUC__RusselWilson_HotRoute_L_v1__P01",
+  "file": "Preplay_19_Audible_QBUC__RusselWilson_HotRoute_L_v1__P01",
+  "clip_key": "d4867dc1807b8515",
+  "layer_key": "bc01e9094b2858b5",
+  "fps": 60.0,
+  "frames": 132,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBUC__RusselWilson_HotRoute_R_v1__P01",
+  "file": "Preplay_19_Audible_QBUC__RusselWilson_HotRoute_R_v1__P01",
+  "clip_key": "087b512e6a54ea7a",
+  "layer_key": "86343879e1f6779e",
+  "fps": 60.0,
+  "frames": 136,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBUC__RusselWilson_Motion_L_v1__P01",
+  "file": "Preplay_19_Audible_QBUC__RusselWilson_Motion_L_v1__P01",
+  "clip_key": "c5bb20110b3d3560",
+  "layer_key": "0df0af164adf0464",
+  "fps": 60.0,
+  "frames": 101,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBUC__RusselWilson_Motion_R_v1__P01",
+  "file": "Preplay_19_Audible_QBUC__RusselWilson_Motion_R_v1__P01",
+  "clip_key": "5c7e734bc8ff6393",
+  "layer_key": "e140aa00b150b365",
+  "fps": 60.0,
+  "frames": 91,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Audible_QBUC__TomBrady_FakeSnap_v1__P01",
+  "file": "Preplay_19_Audible_QBUC__TomBrady_FakeSnap_v1__P01",
+  "clip_key": "a4f17581b1368583",
+  "layer_key": "3e944ba5f983365f",
+  "fps": 60.0,
+  "frames": 97,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_DLShift_3pt_L_Far__P01",
+  "file": "Preplay_19_DLShift_3pt_L_Far__P01",
+  "clip_key": "96c681037e017a97",
+  "layer_key": "d75e6c62bfa9e304",
+  "fps": 60.0,
+  "frames": 119,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_DLShift_3pt_L_Med__P01",
+  "file": "Preplay_19_DLShift_3pt_L_Med__P01",
+  "clip_key": "dde4d983e1f0843c",
+  "layer_key": "a0997de6b877cf28",
+  "fps": 60.0,
+  "frames": 96,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_DLShift_3pt_L_Short__P01",
+  "file": "Preplay_19_DLShift_3pt_L_Short__P01",
+  "clip_key": "fd5025161f0b330b",
+  "layer_key": "79764b79f0f0f635",
+  "fps": 60.0,
+  "frames": 72,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_DLShift_3pt_R_Far__P01",
+  "file": "Preplay_19_DLShift_3pt_R_Far__P01",
+  "clip_key": "e15fd00b89589c51",
+  "layer_key": "cd6dce73327aab37",
+  "fps": 60.0,
+  "frames": 137,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_DLShift_3pt_R_Med__P01",
+  "file": "Preplay_19_DLShift_3pt_R_Med__P01",
+  "clip_key": "55cd3f3c494e0415",
+  "layer_key": "554eb3dc904d478e",
+  "fps": 60.0,
+  "frames": 102,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_DLShift_3pt_R_Short__P01",
+  "file": "Preplay_19_DLShift_3pt_R_Short__P01",
+  "clip_key": "ea0dbc85b1bd1415",
+  "layer_key": "50bcf6723e5873f9",
+  "fps": 60.0,
+  "frames": 80,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_FidgetLoop_QBSG_TomBrady_v1__P01",
+  "file": "Preplay_19_FidgetLoop_QBSG_TomBrady_v1__P01",
+  "clip_key": "47a87b305620e6a2",
+  "layer_key": "bb9fd2821511eb77",
+  "fps": 60.0,
+  "frames": 185,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Fidget_QBSG_AaronRodgers_v1__P01",
+  "file": "Preplay_19_Fidget_QBSG_AaronRodgers_v1__P01",
+  "clip_key": "c9b81981d223e4a2",
+  "layer_key": "184462238261c981",
+  "fps": 60.0,
+  "frames": 186,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Fidget_QBSG_CamNewton_v1__P01",
+  "file": "Preplay_19_Fidget_QBSG_CamNewton_v1__P01",
+  "clip_key": "53600537f25fae1e",
+  "layer_key": "adee275fcbb81f68",
+  "fps": 60.0,
+  "frames": 183,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Fidget_QBSG_CarsonWentz_v1__P01",
+  "file": "Preplay_19_Fidget_QBSG_CarsonWentz_v1__P01",
+  "clip_key": "570b650542472c64",
+  "layer_key": "a74806db38e47a70",
+  "fps": 60.0,
+  "frames": 299,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Fidget_QBSG_CarsonWentz_v2__P01",
+  "file": "Preplay_19_Fidget_QBSG_CarsonWentz_v2__P01",
+  "clip_key": "8e048f66d8a864e9",
+  "layer_key": "e946e08663c74ec0",
+  "fps": 60.0,
+  "frames": 168,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Fidget_QBSG_DakPrescott_v1__P01",
+  "file": "Preplay_19_Fidget_QBSG_DakPrescott_v1__P01",
+  "clip_key": "5f62dfca750885d7",
+  "layer_key": "7c0b7423a46a7990",
+  "fps": 60.0,
+  "frames": 217,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Fidget_QBSG_RusselWilson_v1__P01",
+  "file": "Preplay_19_Fidget_QBSG_RusselWilson_v1__P01",
+  "clip_key": "825deb6400d543cc",
+  "layer_key": "1be76be734dc86af",
+  "fps": 60.0,
+  "frames": 117,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Fidget_QBUC_AaronRodgers_v1__P01",
+  "file": "Preplay_19_Fidget_QBUC_AaronRodgers_v1__P01",
+  "clip_key": "8a7cfdbb103ba4df",
+  "layer_key": "2a89ec9db3d03f3e",
+  "fps": 60.0,
+  "frames": 191,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Fidget_QBUC_CamNewton_v1__P01",
+  "file": "Preplay_19_Fidget_QBUC_CamNewton_v1__P01",
+  "clip_key": "418a72839aa40258",
+  "layer_key": "da68146e7d1e5a99",
+  "fps": 60.0,
+  "frames": 113,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Fidget_QBUC_CarsonWentz_v1__P01",
+  "file": "Preplay_19_Fidget_QBUC_CarsonWentz_v1__P01",
+  "clip_key": "a95c17122d140e80",
+  "layer_key": "a4a7c27f59d1d3ba",
+  "fps": 60.0,
+  "frames": 145,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Fidget_QBUC_DakPrescott_v2__P01",
+  "file": "Preplay_19_Fidget_QBUC_DakPrescott_v2__P01",
+  "clip_key": "e6ea25c64b6db110",
+  "layer_key": "69b30248f81b135b",
+  "fps": 60.0,
+  "frames": 167,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Fidget_QBUC_RusselWilson_v1__P01",
+  "file": "Preplay_19_Fidget_QBUC_RusselWilson_v1__P01",
+  "clip_key": "9ac34d9221af630f",
+  "layer_key": "eb4d96d1246de45e",
+  "fps": 60.0,
+  "frames": 161,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Fidget_QBUC_TomBrady_v1__P01",
+  "file": "Preplay_19_Fidget_QBUC_TomBrady_v1__P01",
+  "clip_key": "f8ccd5192cfdb018",
+  "layer_key": "d3d487ea873c6fc6",
+  "fps": 60.0,
+  "frames": 169,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_HuddleBreak_CarsonWentz_v1__P01",
+  "file": "Preplay_19_HuddleBreak_CarsonWentz_v1__P01",
+  "clip_key": "3386a7c44e4748ac",
+  "layer_key": "b4f33a1dfb029351",
+  "fps": 60.0,
+  "frames": 297,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_HuddleBreak_DakPrescott_v2__P01",
+  "file": "Preplay_19_HuddleBreak_DakPrescott_v2__P01",
+  "clip_key": "18f95bee539ad355",
+  "layer_key": "0127aa0d8095332a",
+  "fps": 60.0,
+  "frames": 231,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Idle_QBSG_AaronRodgers_v2__P01",
+  "file": "Preplay_19_Idle_QBSG_AaronRodgers_v2__P01",
+  "clip_key": "648694077e574fc3",
+  "layer_key": "c1824c40b289fbcf",
+  "fps": 60.0,
+  "frames": 61,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Idle_QBSG_CamNewton_v1__P01",
+  "file": "Preplay_19_Idle_QBSG_CamNewton_v1__P01",
+  "clip_key": "a5dd9819ef6e36b3",
+  "layer_key": "f848cf0b7e3b4ee2",
+  "fps": 60.0,
+  "frames": 129,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Idle_QBSG_CarsonWentz_v1__P01",
+  "file": "Preplay_19_Idle_QBSG_CarsonWentz_v1__P01",
+  "clip_key": "d782f0c4add1ff90",
+  "layer_key": "857166b38ae6aa4e",
+  "fps": 60.0,
+  "frames": 80,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Idle_QBSG_DakPrescott_v1__P01",
+  "file": "Preplay_19_Idle_QBSG_DakPrescott_v1__P01",
+  "clip_key": "7d78109b82f8cc85",
+  "layer_key": "0ba7414ff4245d2a",
+  "fps": 60.0,
+  "frames": 101,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Idle_QBSG_OffsetR_v1__P01",
+  "file": "Preplay_19_Idle_QBSG_OffsetR_v1__P01",
+  "clip_key": "9d43415c29a701e0",
+  "layer_key": "c8b5a8c2da0ad8f6",
+  "fps": 60.0,
+  "frames": 61,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Idle_QBSG_RusselWilson_v1__P01",
+  "file": "Preplay_19_Idle_QBSG_RusselWilson_v1__P01",
+  "clip_key": "b77b20fcded344c0",
+  "layer_key": "a96b897da144b906",
+  "fps": 60.0,
+  "frames": 101,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Idle_QBSG_TomBrady_v1__P01",
+  "file": "Preplay_19_Idle_QBSG_TomBrady_v1__P01",
+  "clip_key": "2e199d3898dd5f74",
+  "layer_key": "675e474458eb6b41",
+  "fps": 60.0,
+  "frames": 161,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Idle_QBUC_AaronRodgers_v1__P01",
+  "file": "Preplay_19_Idle_QBUC_AaronRodgers_v1__P01",
+  "clip_key": "dd8897046870bc90",
+  "layer_key": "170e207c40786f00",
+  "fps": 30.0,
+  "frames": 151,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Idle_QBUC_CamNewton_v1__P01",
+  "file": "Preplay_19_Idle_QBUC_CamNewton_v1__P01",
+  "clip_key": "4b05ade83700e40b",
+  "layer_key": "de9c7393eeaacbc7",
+  "fps": 60.0,
+  "frames": 83,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Idle_QBUC_CarsonWentz_v1__P01",
+  "file": "Preplay_19_Idle_QBUC_CarsonWentz_v1__P01",
+  "clip_key": "50f3bb84a1358211",
+  "layer_key": "ca730c50371e6ac1",
+  "fps": 60.0,
+  "frames": 101,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Idle_QBUC_DakPrescott_v1__P01",
+  "file": "Preplay_19_Idle_QBUC_DakPrescott_v1__P01",
+  "clip_key": "b295e8464264843c",
+  "layer_key": "c9a847b4b5cfd967",
+  "fps": 60.0,
+  "frames": 161,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Idle_QBUC_RusselWilson_v1__P01",
+  "file": "Preplay_19_Idle_QBUC_RusselWilson_v1__P01",
+  "clip_key": "315ef6f08296f8d3",
+  "layer_key": "73548e36f19045ec",
+  "fps": 60.0,
+  "frames": 101,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Idle_QBUC_TomBrady_v1__P01",
+  "file": "Preplay_19_Idle_QBUC_TomBrady_v1__P01",
+  "clip_key": "e0f3e01ed81207b4",
+  "layer_key": "3ce813d40ca49c46",
+  "fps": 60.0,
+  "frames": 161,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Jog_D3.5_to_LB2pt_v1__P01",
+  "file": "Preplay_19_Jog_D3_5_to_LB2pt_v1__P01",
+  "clip_key": "86606cb6fccb79bc",
+  "layer_key": "f189fd0f4c61e049",
+  "fps": 60.0,
+  "frames": 211,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Jog_D3.5_to_Showblitz_v1__P01",
+  "file": "Preplay_19_Jog_D3_5_to_Showblitz_v1__P01",
+  "clip_key": "f2ded7bcd27cb320",
+  "layer_key": "3eba2d5b4b4481a2",
+  "fps": 60.0,
+  "frames": 286,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Jog_D4.5_to_DBPress_v1__P01",
+  "file": "Preplay_19_Jog_D4_5_to_DBPress_v1__P01",
+  "clip_key": "1afc4cf5d7732d98",
+  "layer_key": "904110a248ef07ef",
+  "fps": 60.0,
+  "frames": 252,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Jog_D4.5_to_DL3pt_v1__P01",
+  "file": "Preplay_19_Jog_D4_5_to_DL3pt_v1__P01",
+  "clip_key": "e989ffab727e3911",
+  "layer_key": "27c256bc99030fdd",
+  "fps": 60.0,
+  "frames": 392,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Jog_D4.5_to_DL4pt_v1__P01",
+  "file": "Preplay_19_Jog_D4_5_to_DL4pt_v1__P01",
+  "clip_key": "ada730d2674aeabf",
+  "layer_key": "627fb30e776adc0d",
+  "fps": 60.0,
+  "frames": 402,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Jog_D4.5_to_LB2pt_v1__P01",
+  "file": "Preplay_19_Jog_D4_5_to_LB2pt_v1__P01",
+  "clip_key": "9a5e10a9ab42e442",
+  "layer_key": "187bc91ba6f65d8b",
+  "fps": 60.0,
+  "frames": 318,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Jog_D4.5_to_OL2pt_v1__P01",
+  "file": "Preplay_19_Jog_D4_5_to_OL2pt_v1__P01",
+  "clip_key": "49f3cd3f7fedd5ea",
+  "layer_key": "15bbf30960f303b2",
+  "fps": 60.0,
+  "frames": 418,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Jog_D4.5_to_OL3pt_v1__P01",
+  "file": "Preplay_19_Jog_D4_5_to_OL3pt_v1__P01",
+  "clip_key": "665c849a89947e9f",
+  "layer_key": "f72fe903d8868c6a",
+  "fps": 60.0,
+  "frames": 401,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Jog_D4.5_to_OLCenter_v1__P01",
+  "file": "Preplay_19_Jog_D4_5_to_OLCenter_v1__P01",
+  "clip_key": "ba5ecf5ac42bf3af",
+  "layer_key": "cfbaa6271afacbc2",
+  "fps": 60.0,
+  "frames": 352,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Jog_D4.5_to_QBSG_Even_v1__P01",
+  "file": "Preplay_19_Jog_D4_5_to_QBSG_Even_v1__P01",
+  "clip_key": "d11e635e3ca12790",
+  "layer_key": "88c1987187420d61",
+  "fps": 60.0,
+  "frames": 412,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Jog_D4.5_to_QBUC_Even_v1__P01",
+  "file": "Preplay_19_Jog_D4_5_to_QBUC_Even_v1__P01",
+  "clip_key": "928e2e066e54eec1",
+  "layer_key": "c6ef902bd1c9e159",
+  "fps": 60.0,
+  "frames": 341,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Jog_D4.5_to_RB2pt_v1__P01",
+  "file": "Preplay_19_Jog_D4_5_to_RB2pt_v1__P01",
+  "clip_key": "8d7e081701d48d0a",
+  "layer_key": "9223a338c45aadf2",
+  "fps": 60.0,
+  "frames": 309,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Jog_D4.5_to_Showblitz_v1__P01",
+  "file": "Preplay_19_Jog_D4_5_to_Showblitz_v1__P01",
+  "clip_key": "eb152f272a264699",
+  "layer_key": "3b3bb4593754f32b",
+  "fps": 60.0,
+  "frames": 252,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Jog_D4.5_to_Showblitz_v2__P01",
+  "file": "Preplay_19_Jog_D4_5_to_Showblitz_v2__P01",
+  "clip_key": "564fdefb4bf16305",
+  "layer_key": "6cbc52f1473bca22",
+  "fps": 60.0,
+  "frames": 238,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Jog_D4.5_to_WR2pt_v1__P01",
+  "file": "Preplay_19_Jog_D4_5_to_WR2pt_v1__P01",
+  "clip_key": "6c63b02f0bacf54b",
+  "layer_key": "0daa45780d179865",
+  "fps": 60.0,
+  "frames": 317,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Jog_D5.5_to_QBUC_Even_v1__P01",
+  "file": "Preplay_19_Jog_D5_5_to_QBUC_Even_v1__P01",
+  "clip_key": "900ca9ab23d9f1f0",
+  "layer_key": "ddf60295d78b0f3f",
+  "fps": 60.0,
+  "frames": 297,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Jog_D5.5_to_QBUC_Even_v2__P01",
+  "file": "Preplay_19_Jog_D5_5_to_QBUC_Even_v2__P01",
+  "clip_key": "21510c05f3f1ac70",
+  "layer_key": "b0ef2b46f8755fa8",
+  "fps": 60.0,
+  "frames": 364,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Jog_D6.5_to_DBPress_v1__P01",
+  "file": "Preplay_19_Jog_D6_5_to_DBPress_v1__P01",
+  "clip_key": "568d182af3296aff",
+  "layer_key": "7ebe02ce735494e3",
+  "fps": 60.0,
+  "frames": 327,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Jog_to_QBSG_AaronRodgers_v1__P01",
+  "file": "Preplay_19_Jog_to_QBSG_AaronRodgers_v1__P01",
+  "clip_key": "6c82fa8bd2871d47",
+  "layer_key": "97eb93a597b9140f",
+  "fps": 60.0,
+  "frames": 195,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Jog_to_QBSG_CamNewton_v1__P01",
+  "file": "Preplay_19_Jog_to_QBSG_CamNewton_v1__P01",
+  "clip_key": "ae653dfa3e0606e4",
+  "layer_key": "4df96c8db1e5c403",
+  "fps": 60.0,
+  "frames": 122,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Jog_to_QBSG_CarsonWentz_v1__P01",
+  "file": "Preplay_19_Jog_to_QBSG_CarsonWentz_v1__P01",
+  "clip_key": "0b5e028d79f00c2e",
+  "layer_key": "5c9b7726e4b64668",
+  "fps": 60.0,
+  "frames": 242,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Jog_to_QBSG_DakPrescott_v1__P01",
+  "file": "Preplay_19_Jog_to_QBSG_DakPrescott_v1__P01",
+  "clip_key": "51fe88c68c97f06e",
+  "layer_key": "8f38f09c2dc3fb21",
+  "fps": 60.0,
+  "frames": 261,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Jog_to_QBSG_RusselWilson_v1__P01",
+  "file": "Preplay_19_Jog_to_QBSG_RusselWilson_v1__P01",
+  "clip_key": "9b871c264a377a19",
+  "layer_key": "42d956335a356213",
+  "fps": 60.0,
+  "frames": 156,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Jog_to_QBSG_TomBrady_v1__P01",
+  "file": "Preplay_19_Jog_to_QBSG_TomBrady_v1__P01",
+  "clip_key": "b638615d9638bf52",
+  "layer_key": "695ff9ca8de5ba2b",
+  "fps": 60.0,
+  "frames": 206,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Jog_to_QBUC_AaronRodgers_v1__P01",
+  "file": "Preplay_19_Jog_to_QBUC_AaronRodgers_v1__P01",
+  "clip_key": "149a1ace0c045bf2",
+  "layer_key": "ec4823c4c63de33b",
+  "fps": 60.0,
+  "frames": 246,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Jog_to_QBUC_CamNewton_v1__P01",
+  "file": "Preplay_19_Jog_to_QBUC_CamNewton_v1__P01",
+  "clip_key": "91303241191f558b",
+  "layer_key": "c8e87d1a5380c2cf",
+  "fps": 60.0,
+  "frames": 218,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Jog_to_QBUC_CarsonWentz_v1__P01",
+  "file": "Preplay_19_Jog_to_QBUC_CarsonWentz_v1__P01",
+  "clip_key": "83b72211d4c27b99",
+  "layer_key": "b0ef04fe8aba903f",
+  "fps": 60.0,
+  "frames": 288,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Jog_to_QBUC_DakPrescott_v1__P01",
+  "file": "Preplay_19_Jog_to_QBUC_DakPrescott_v1__P01",
+  "clip_key": "8655e2a1c16955c5",
+  "layer_key": "9ba0f4ebcc0a47d6",
+  "fps": 60.0,
+  "frames": 235,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Jog_to_QBUC_RusselWilson_v1__P01",
+  "file": "Preplay_19_Jog_to_QBUC_RusselWilson_v1__P01",
+  "clip_key": "d61909f2ba5a689f",
+  "layer_key": "31b7b768eae2f307",
+  "fps": 60.0,
+  "frames": 260,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Stand_to_DBPress_v1__P01",
+  "file": "Preplay_19_Stand_to_DBPress_v1__P01",
+  "clip_key": "eeec52918d3906f0",
+  "layer_key": "8033fbe9f388f606",
+  "fps": 60.0,
+  "frames": 151,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Stand_to_DL3pt_v1__P01",
+  "file": "Preplay_19_Stand_to_DL3pt_v1__P01",
+  "clip_key": "c2fb5e5554ff8c7f",
+  "layer_key": "05133842907957b4",
+  "fps": 60.0,
+  "frames": 141,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Stand_to_DL4pt_v1__P01",
+  "file": "Preplay_19_Stand_to_DL4pt_v1__P01",
+  "clip_key": "1027190aa9e968f4",
+  "layer_key": "b5c7acd90af9bc1a",
+  "fps": 60.0,
+  "frames": 251,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Stand_to_LB2pt_v1__P01",
+  "file": "Preplay_19_Stand_to_LB2pt_v1__P01",
+  "clip_key": "51978de007f2213a",
+  "layer_key": "1173b6fc68187ed7",
+  "fps": 60.0,
+  "frames": 131,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Stand_to_OL2pt_v1__P01",
+  "file": "Preplay_19_Stand_to_OL2pt_v1__P01",
+  "clip_key": "80d69d58c2b03822",
+  "layer_key": "dfab1806eab7f0a6",
+  "fps": 60.0,
+  "frames": 215,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Stand_to_OL3pt_v1__P01",
+  "file": "Preplay_19_Stand_to_OL3pt_v1__P01",
+  "clip_key": "75a7047fa78dc083",
+  "layer_key": "e8cc7dac930cb237",
+  "fps": 60.0,
+  "frames": 300,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Stand_to_OLCenter_v1__P01",
+  "file": "Preplay_19_Stand_to_OLCenter_v1__P01",
+  "clip_key": "850e8bf8d47c96b6",
+  "layer_key": "d1017ba77fa2b535",
+  "fps": 60.0,
+  "frames": 201,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Stand_to_QBSG_Even_v1__P01",
+  "file": "Preplay_19_Stand_to_QBSG_Even_v1__P01",
+  "clip_key": "7e8a253020f50898",
+  "layer_key": "e66508178d3eb8c7",
+  "fps": 60.0,
+  "frames": 301,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Stand_to_QBSG_Offset_v1__P01",
+  "file": "Preplay_19_Stand_to_QBSG_Offset_v1__P01",
+  "clip_key": "aab02095fce03ccc",
+  "layer_key": "7610d1aa9b83407a",
+  "fps": 60.0,
+  "frames": 391,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Stand_to_QBUC_Even_v2__P01",
+  "file": "Preplay_19_Stand_to_QBUC_Even_v2__P01",
+  "clip_key": "01c1e6557da94a2e",
+  "layer_key": "7d9214c5e61e78d0",
+  "fps": 60.0,
+  "frames": 201,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Stand_to_RB2pt_v1__P01",
+  "file": "Preplay_19_Stand_to_RB2pt_v1__P01",
+  "clip_key": "998f809b2c81f6b4",
+  "layer_key": "50fe3b52b760a129",
+  "fps": 60.0,
+  "frames": 171,
+  "additive": false
+ },
+ {
+  "name": "Preplay_19_Stand_to_WR2pt_v1__P01",
+  "file": "Preplay_19_Stand_to_WR2pt_v1__P01",
+  "clip_key": "19a00db9528c236f",
+  "layer_key": "18eac0d38a039261",
+  "fps": 60.0,
+  "frames": 201,
+  "additive": false
+ },
+ {
+  "name": "Preplay_Fidgets_DEF_2pt_Look_R_01__P01",
+  "file": "Preplay_Fidgets_DEF_2pt_Look_R_01__P01",
+  "clip_key": "59dcf826e511d575",
+  "layer_key": "e9cc0015015c2d24",
+  "fps": 60.0,
+  "frames": 145,
+  "additive": false
+ },
+ {
+  "name": "Preplay_Fidgets_DEF_2pt_Look_R_02__P01",
+  "file": "Preplay_Fidgets_DEF_2pt_Look_R_02__P01",
+  "clip_key": "aea0473a93706978",
+  "layer_key": "03e7a7d75eecff67",
+  "fps": 60.0,
+  "frames": 142,
+  "additive": false
+ },
+ {
+  "name": "Preplay_Fidgets_DEF_3pt_DL_Adjust_01__P01",
+  "file": "Preplay_Fidgets_DEF_3pt_DL_Adjust_01__P01",
+  "clip_key": "66ea5b20ba0880cc",
+  "layer_key": "ed943dee7f811bf0",
+  "fps": 60.0,
+  "frames": 629,
+  "additive": false
+ },
+ {
+  "name": "Preplay_Fidgets_DEF_3pt_DL_Adjust_02__P01",
+  "file": "Preplay_Fidgets_DEF_3pt_DL_Adjust_02__P01",
+  "clip_key": "4ed8abb4a340817d",
+  "layer_key": "83fc1c73a6afb2af",
+  "fps": 60.0,
+  "frames": 553,
+  "additive": false
+ },
+ {
+  "name": "Preplay_Fidgets_DEF_4pt_DL_Adjust_01__P01",
+  "file": "Preplay_Fidgets_DEF_4pt_DL_Adjust_01__P01",
+  "clip_key": "11b31cf114d34b59",
+  "layer_key": "247a0d833a271217",
+  "fps": 60.0,
+  "frames": 596,
+  "additive": false
+ }
+]

@@ -25,7 +25,7 @@ export const TEAM_SEEDS: TeamSeed[] = [
   { city: 'Albuquerque', name: 'Roadrunners', abbr: 'ABQ', primary: '#00827F', secondary: '#F4A259', accent: '#FFFFFF' },
   { city: 'Omaha', name: 'Stampede', abbr: 'OMA', primary: '#2E4057', secondary: '#D1495B', accent: '#FFFFFF' },
   { city: 'Honolulu', name: 'Waves', abbr: 'HNL', primary: '#0081A7', secondary: '#FED9B7', accent: '#F07167' },
-  { city: 'Hartford', name: 'Whalers FC', abbr: 'HFD', primary: '#003F5C', secondary: '#7FB800', accent: '#FFFFFF' },
+  { city: 'Hartford', name: 'Kestrels', abbr: 'HFD', primary: '#003F5C', secondary: '#7FB800', accent: '#FFFFFF' },
   { city: 'Raleigh', name: 'Oaks', abbr: 'RAL', primary: '#2D6A4F', secondary: '#B7472A', accent: '#FFFFFF' },
   { city: 'Richmond', name: 'Ironhorses', abbr: 'RIC', primary: '#22223B', secondary: '#C9ADA7', accent: '#F2E9E4' },
   { city: 'Boise', name: 'Bison', abbr: 'BOI', primary: '#6F1D1B', secondary: '#BB9457', accent: '#FFFFFF' },

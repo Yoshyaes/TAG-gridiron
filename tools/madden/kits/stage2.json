@@ -1,0 +1,71 @@
+{
+ "name": "stage2",
+ "about": "The Stage 2 dressed player (body type d, Marshall Faulk head, Xenith helmet) as a kit, so it takes the same uniform rules as the prototype. The animation preview levels dress their players from this folder. Arms and legs keep skin tone 7 to match the head, as chosen by hand in Stage 2.",
+ "out": "stage2",
+ "ue_dir": "/Game/MaddenRef/Players/Stage2",
+ "skeleton": "content/characters/rig/skeleton/player/MaddenFB_Hero_Skeleton",
+ "ue_skeleton": "/Game/MaddenRef/Skeleton/MaddenFB_Hero_Skeleton",
+ "skeleton_bones": 268,
+ "body_types": [
+  "d"
+ ],
+ "meshes": [
+  "content/characters/player/bodies/fullarms_{b}_mesh",
+  "content/characters/player/bodies/legs_{b}_mesh",
+  "content/characters/player/parts/torsoapparel/jersey/jersey_{b}_mesh",
+  "content/characters/player/parts/legsapparel/pants/pants_{b}_mesh",
+  "content/characters/player/parts/legsapparel/socks_mid/socks_mid_{b}_mesh",
+  "content/characters/player/parts/torsoapparel/sleeve_tight/sleeve_tight_{b}_mesh",
+  "content/characters/player/parts/footwear/shoe_low_nikealphamenaceelite99club/shoe_low_nikealphamenaceelite99clubr_{b}_mesh",
+  "content/characters/player/parts/footwear/shoe_low_nikealphamenaceelite99club/shoe_low_nikealphamenaceelite99clubl_{b}_mesh",
+  "content/characters/player/parts/armgear/glover/glover_{b}_mesh",
+  "content/characters/player/parts/armgear/glovel/glovel_{b}_mesh"
+ ],
+ "mesh_patterns": [
+  "^content/characters/player/players/f/faulkmarshall_11413/faulkmarshall_11413_mesh$",
+  "^content/characters/player/parts/helmets/xenith/helmet_shell_xenith_mesh$",
+  "^content/characters/player/parts/helmets/xenith/facemasks/helmet_facemask_xenithprism_mesh$"
+ ],
+ "uniform": "49ers_2018",
+ "extra_textures": [
+  {
+   "dir": "content/characters/common/textures/skintones/",
+   "regex": "/(arm_skintone7|arm_normal|arm_RSM_skintone7|GenericPadless_Legs_ST7)$"
+  }
+ ],
+ "overrides": [
+  [
+   "/fullarms_d_mesh$",
+   {
+    "BaseColor": "arm_skintone7",
+    "Normal": "arm_normal",
+    "RSM": "arm_rsm_skintone7",
+    "switches": {
+     "RSMIsSkin": true
+    }
+   }
+  ],
+  [
+   "/legs_d_mesh$",
+   {
+    "BaseColor": "genericpadless_legs_st7",
+    "Normal": "ls_common_legs_normal",
+    "RSM": "ls_common_legs_rsm",
+    "switches": {
+     "RSMIsSkin": true
+    }
+   }
+  ]
+ ],
+ "preview": {
+  "mode": "bodytypes",
+  "level": "Stage2Player",
+  "xs": {
+   "d": 0.0
+  },
+  "helmets": {
+   "d": "xenith"
+  },
+  "head": "SK_faulkmarshall_11413"
+ }
+}
