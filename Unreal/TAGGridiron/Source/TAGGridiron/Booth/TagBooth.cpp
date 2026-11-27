@@ -53,6 +53,8 @@ namespace
 	{
 		FString Dir;
 		if (FParse::Value(FCommandLine::Get(), Flag, Dir) && !Dir.IsEmpty()) return FPaths::ConvertRelativePathToFull(Dir);
+		// (GameUserSettings.ini first: a packaged build keeps that file, and deletes its Saved Game.ini on exit)
+		if (GConfig && GConfig->GetString(TEXT("TAG.Booth"), IniKey, Dir, GGameUserSettingsIni) && !Dir.IsEmpty()) return FPaths::ConvertRelativePathToFull(Dir);
 		if (GConfig && GConfig->GetString(TEXT("TAG.Booth"), IniKey, Dir, GGameIni) && !Dir.IsEmpty()) return FPaths::ConvertRelativePathToFull(Dir);
 		return FPaths::ConvertRelativePathToFull(Default);
 	}

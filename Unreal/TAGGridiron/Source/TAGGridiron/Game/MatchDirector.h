@@ -306,7 +306,10 @@ private:
 	 *  path read from his sim velocity: sidestep his line, not just back away); Urgency 0..1 = how close the nearest gets. */
 	FVector OfficialDodge(const FVector& Pos, float Keep, float Look, float& Urgency);
 	/** Last resort: a player inside 1.2 m pushes the official straight out (up to 6 m/s), whatever his target. */
-	void OfficialPushOut(FVector& Pos, float Dt);
+	/** Before the snap: the way an official steps out of a walking man's lane (square to it, away from the ball). */
+	FVector FlowSide(const FVector& Pos, const FVector& V, const FVector& R) const;
+	/** Lag: where his body is shown against Pos (his drive's follower lags it by up to 60 cm): the push keeps the body clear. */
+	void OfficialPushOut(FVector& Pos, float Dt, const FVector& Lag = FVector::ZeroVector);
 	/** A live kick return (the sim fields the kick and runs it back; the user returns it or covers it). */
 	bool bLiveReturn = false;
 	void StartLiveReturn(const std::vector<tag::Player*>& KickTeam, const std::vector<tag::Player*>& RecvTeam);

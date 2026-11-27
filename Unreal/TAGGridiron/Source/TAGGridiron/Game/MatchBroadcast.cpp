@@ -1307,7 +1307,22 @@ void AMatchDirector::TickReplay(float Dt, bool bSkip)
 			NextShot = ReplayT + 0.45f;
 		}
 	}
-	if (St.Phase == 1 && ReplayT >= R.T1 - 1e-3f)
+	// the lens kept clear, as the shots' rule (ShotCamera): a field-level lens with a man within 1.2 m of it, or who will be
+	// within 0.4 s - his drawn pace, or the cart's - ends the angle now, out through the wipe. (The sideline cart of the tight
+	// iso follows its man on a spring, not on the line its plan was cleared for: the 26 Nov matrix had it pass 58 cm from a
+	// head for 5 frames, cell 03 clip 18.)
+	bool bLensOut = false;
+	if (St.Phase == 1 && Camera && ReplayT < R.T1 - 1e-3f)
+	{
+		const FVector Lens = Camera->GetActorLocation();
+		const FVector LensSoon = R.Type == ETagReplayAngle::TightIso ? Lens + St.RCamVel * 0.4f : Lens;
+		if (Lens.Z < 300.0 && (NearestPerson(Lens, nullptr) < 120.f || NearestPerson(Lens, nullptr, 0.4f) < 120.f || NearestPerson(LensSoon, nullptr) < 120.f))
+		{
+			bLensOut = true;
+			UE_LOG(LogTemp, Display, TEXT("TAG replay angle %s out early: a body coming to the lens at %.2f s of the film (key %.2f)"), BcAngleName(R.Type), ReplayT, R.KeyT);
+		}
+	}
+	if (St.Phase == 1 && (ReplayT >= R.T1 - 1e-3f || bLensOut))
 	{
 		UE_LOG(LogTemp, Display, TEXT("TAG replay angle=%s ramp=%.2f,%.2f secs=%.2f (angle %d of %d, film %.2f-%.2f s, key %s at %.2f, slowest %.2fx at %.2f, subject %d, lens bad %d of %d frames)"),
 			BcAngleName(R.Type), R.KeyT - 0.6f, R.KeyT + 0.8f, R.Shown, St.Run + 1, St.Runs.Num(), R.T0, R.T1, St.RKeyKind, R.KeyT, R.SlowestRate, R.SlowestAt,
@@ -1315,7 +1330,7 @@ void AMatchDirector::TickReplay(float Dt, bool bSkip)
 		if (St.Test.Mode == 1)
 		{
 			// (the replay test: the slowest part of the ramp at the key moment, a clear lens)
-			const bool bKeyIn = R.KeyT > R.T0 + 0.2f && R.KeyT < R.T1 - 0.2f;
+			const bool bKeyIn = R.KeyT > R.T0 + 0.2f && R.KeyT < FMath::Min(R.T1, ReplayT) - 0.2f; // (of the film shown: an angle out early for its lens)
 			const bool bRampOk = !bKeyIn || FMath::Abs(R.SlowestAt - R.KeyT) <= 0.35f;
 			(bRampOk ? St.Test.Pass : St.Test.Fail)++;
 			UE_LOG(LogTemp, Display, TEXT("TAG replaytest %s: %s ramp slowest %.2fx at %.2f s, key %.2f s"), bRampOk ? TEXT("PASS") : TEXT("FAIL"), BcAngleName(R.Type), R.SlowestRate, R.SlowestAt, R.KeyT);

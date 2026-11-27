@@ -1408,6 +1408,34 @@ void AMatchDirector::TickUmpire(float Dt)
 	FVector Target = UmpPos;
 	float Jog = 380.f;
 	FVector BallW = bCall ? BetweenBallW : (Sim ? ToWorld(Sim->ball.pos.x, Sim->ball.pos.y, Dir) : Spot);
+	const FVector UmpLag = Umpire->GetActorLocation() - UmpPos; // (his body against his spot, before this frame's move)
+	// a man standing on the ball (the carrier up, a helper beside him, a man still holding it after the whistle): the
+	// referee takes it at a long arm's length (the ball is handed or flipped over), not from inside him (he walked to 12 cm
+	// of the carrier, p63 c011; at 105 cm off him the 26 Nov matrix still had him 0.7 m from a player): the spot 1.5 m off
+	// that man that keeps as far from every other man there too, the nearest such spot to where he is
+	bool bArmGo = false; // (on his way to an arm's-length spot: the dodge keeps no more than that from the man)
+	auto ArmSpot = [&](FVector& Out) -> bool
+	{
+		const AAthlete* Near = nullptr;
+		float ND = 140.f;
+		for (const auto& KV : Athletes)
+			if (const AAthlete* A = KV.Value.Get(); A && !A->IsHidden() && !A->IsDown())
+				if (const float Dd = FVector::Dist2D(A->GetActorLocation(), BallW); Dd < ND) { ND = Dd; Near = A; }
+		if (!Near) return false;
+		const FVector C = Near->GetActorLocation();
+		float BestCost = TNumericLimits<float>::Max();
+		for (int32 k = 0; k < 16; ++k)
+		{
+			const FVector P = C + FRotator(0, k * 22.5f, 0).RotateVector(FVector(155.f, 0, 0));
+			float Clear = 1e4f;
+			for (const auto& KV : Athletes)
+				if (const AAthlete* A = KV.Value.Get(); A && A != Near && !A->IsHidden())
+					Clear = FMath::Min(Clear, static_cast<float>(FVector::Dist2D(A->GetActorLocation(), P)));
+			const float Cost = static_cast<float>(FVector::Dist2D(P, UmpPos)) + (Clear < 155.f ? (155.f - Clear) * 20.f : 0.f);
+			if (Cost < BestCost) { BestCost = Cost; Out = FVector(P.X, P.Y, UmpPos.Z); }
+		}
+		return true;
+	};
 	if (Sim && Sim->isReturn() && Sim->cfg.kick->punt && Sim->t < Sim->cfg.kick->kickT + 1.0)
 	{
 		// a punt: the referee belongs behind and wide of the punter, and goes there at a run (walking to the sideline
@@ -1449,43 +1477,20 @@ void AMatchDirector::TickUmpire(float Dt)
 					Target = BallW + Back.GetSafeNormal() * 2.6f * YD;
 					break;
 				}
-		// a man standing on the ball (the carrier up, a helper beside him): he takes it at arm's length, not from inside
-		// him (he walked to 12 cm of the carrier, p63 c011)
-		bool bArm = false;
-		if (Target.Equals(BallW, 1.f))
-		{
-			const AAthlete* Near = nullptr;
-			float ND = 120.f;
-			for (const auto& KV : Athletes)
-				if (const AAthlete* A = KV.Value.Get(); A && !A->IsHidden() && !A->IsDown())
-					if (const float Dd = FVector::Dist2D(A->GetActorLocation(), BallW); Dd < ND) { ND = Dd; Near = A; }
-			if (Near)
-			{
-				// a spot a long arm's reach from him (the ball is handed or flipped over) that keeps that far from every
-				// other man there too (the helper beside a man being pulled up), the nearest such spot to where he is
-				const FVector C = Near->GetActorLocation();
-				float BestCost = TNumericLimits<float>::Max();
-				for (int32 k = 0; k < 16; ++k)
-				{
-					const FVector P = C + FRotator(0, k * 22.5f, 0).RotateVector(FVector(105.f, 0, 0));
-					float Clear = 1e4f;
-					for (const auto& KV : Athletes)
-						if (const AAthlete* A = KV.Value.Get(); A && A != Near && !A->IsHidden())
-							Clear = FMath::Min(Clear, static_cast<float>(FVector::Dist2D(A->GetActorLocation(), P)));
-					const float Cost = static_cast<float>(FVector::Dist2D(P, UmpPos)) + (Clear < 100.f ? (100.f - Clear) * 20.f : 0.f);
-					if (Cost < BestCost) { BestCost = Cost; Target = FVector(P.X, P.Y, UmpPos.Z); }
-				}
-				bArm = true;
-			}
-		}
-		if (!bUmpHasBall && !bUmpSpotted && FVector::Dist2D(UmpPos, BallW) < (bArm ? 200.f : 75.f) && FVector::Dist2D(UmpPos, Target) < 30.f + (bArm ? 0.f : 1e4f)) bUmpHasBall = true;
+		// a man standing on the ball: he takes it at arm's length (ArmSpot)
+		const bool bArm = Target.Equals(BallW, 1.f) && ArmSpot(Target);
+		bArmGo = bArm && !bUmpHasBall;
+		if (!bUmpHasBall && !bUmpSpotted && FVector::Dist2D(UmpPos, BallW) < (bArm ? 320.f : 75.f) && FVector::Dist2D(UmpPos, Target) < (bArm ? 70.f : 1e4f)) bUmpHasBall = true;
 	}
 	else if ((bDead && (State == EMatchState::Wait || State == EMatchState::Call)) || bCall)
 	{
 		if (!bUmpHasBall && !bUmpSpotted)
 		{
+			// (a man still on the ball after the whistle: from arm's length here too, the post-play rule)
 			Target = BallW;
-			if (FVector::Dist2D(UmpPos, BallW) < 75.f) bUmpHasBall = true;
+			const bool bArm = ArmSpot(Target);
+			bArmGo = bArm;
+			if (bArm ? FVector::Dist2D(UmpPos, BallW) < 320.f && FVector::Dist2D(UmpPos, Target) < 70.f : FVector::Dist2D(UmpPos, BallW) < 75.f) bUmpHasBall = true;
 		}
 		else if (bUmpHasBall)
 		{
@@ -1500,13 +1505,16 @@ void AMatchDirector::TickUmpire(float Dt)
 		// before the snap: the referee's spot, 12 yd deep and 5.5 yd wide of the quarterback
 		const FVector Down = (ToWorld(1, 0, Dir) - ToWorld(0, 0, Dir)).GetSafeNormal();
 		Target = ToWorld(Sim->los, Sim->by, Dir) - Down * 12.f * YD + FVector::CrossProduct(FVector::UpVector, Down) * 5.5f * YD;
+		// a cut onto the formation (the teams put on their spots behind it: after a break, a hurry-up): he is put on his
+		// with them (left where he was, the 26 Nov matrix had an official standing on the new ball spot inside the line)
+		if (bCamCutPending && State == EMatchState::Presnap && !Sim->isReturn()) UmpPos = FVector(Target.X, Target.Y, UmpPos.Z);
 	}
 	// in every phase he walks around players, never through them (presnap through the huddle and the formation was the
 	// worst of it); the last yard into a loose ball he has to pick up is exempt
 	if (Sim && State != EMatchState::Live && FVector::Dist2D(Target, BallW) > 0.9f * YD)
 	{
 		float Urg = 0.f;
-		const FVector Away = OfficialDodge(UmpPos, 3.f * YD, 1.4f, Urg);
+		const FVector Away = OfficialDodge(UmpPos, (bArmGo ? 1.8f : 3.f) * YD, 1.4f, Urg);
 		if (!Away.IsNearlyZero())
 		{
 			Target += Away;
@@ -1536,7 +1544,10 @@ void AMatchDirector::TickUmpire(float Dt)
 		Vel = Way * Sp;
 		UmpPos += Vel * FMath::Min(Dt, D / Sp);
 	}
-	if (FVector::Dist2D(UmpPos, BallW) > 1.5f * YD) OfficialPushOut(UmpPos, Dt); // (at the ball he takes it from the man: close by design)
+	// (at a loose ball he picks it up: the man beside it may be close. Not while the ball is live - a carrier coming at him
+	// is the one man to keep clear of - nor on his way to an arm's-length spot, which keeps him off the man anyway.)
+	const bool bPickUp = State != EMatchState::Live && !bArmGo && !bUmpHasBall && !bUmpSpotted && FVector::Dist2D(UmpPos, BallW) < 1.5f * YD;
+	if (!bPickUp) OfficialPushOut(UmpPos, Dt, UmpLag);
 	// facing: the way he goes, or the ball when he stands
 	float Yaw = Umpire->GetActorRotation().Yaw;
 	if (!Vel.IsNearlyZero()) Yaw = Vel.Rotation().Yaw;
@@ -1695,30 +1706,74 @@ FVector AMatchDirector::OfficialDodge(const FVector& Pos, float Keep, float Look
 		if (Dc >= Keep) continue;
 		if (Dc < 5.f) { Rc = FVector::CrossProduct(FVector::UpVector, V.IsNearlyZero() ? R : V).GetSafeNormal() * 5.f; Dc = 5.f; }
 		const float W = 1.f / (1.f + Tc * 2.f); // the man arriving now matters more than the one a second away
-		Push += Rc / Dc * (Keep - Dc) * W * 2.4f;
+		// (before the snap, out of the lane of a man walking at him to the side away from the ball, as OfficialPushOut: a
+		// line walking up abreast pushed him both ways at once, and he stood until it reached him)
+		const bool bFlow = State == EMatchState::Presnap && V2 > FMath::Square(60.f) && FVector::DotProduct(R, V) > 0.f;
+		Push += (bFlow ? FlowSide(Pos, V, R) : Rc / Dc) * (Keep - Dc) * W * 2.4f;
 		Urgency = FMath::Max(Urgency, (Keep - Dc) / Keep * W);
 	}
 	return Push;
 }
 
-void AMatchDirector::OfficialPushOut(FVector& Pos, float Dt)
+FVector AMatchDirector::FlowSide(const FVector& Pos, const FVector& V, const FVector& R) const
+{
+	// square to the man's walk: on the side of his lane the official is already on (R: the official off the man), or when
+	// he is square in it, the side away from the ball (out of the formation the man is walking into, never ahead of him)
+	FVector Side = FVector::CrossProduct(FVector::UpVector, FVector(V.X, V.Y, 0.f)).GetSafeNormal();
+	const float Lat = static_cast<float>(FVector::DotProduct(Side, FVector(R.X, R.Y, 0.f)));
+	if (FMath::Abs(Lat) > 40.f)
+	{
+		if (Lat < 0.f) Side = -Side;
+		return Side;
+	}
+	FVector Out = Pos - (Sim ? ToWorld(Sim->los, Sim->by, Dir) : Pos);
+	Out.Z = 0.f;
+	if (FVector::DotProduct(Side, Out) < 0.f) Side = -Side;
+	return Side;
+}
+
+void AMatchDirector::OfficialPushOut(FVector& Pos, float Dt, const FVector& Lag)
 {
 	if (!Sim || !Game) return;
 	// (a man at a sprint closes 13-15 cm a frame: at 6 m/s the push lost to him and the p39 game had an official inside
 	// a metre of a player in 0.9 % of frames, most of them the back judge with a receiver or a safety running at him)
-	const float Min = 135.f;
+	// (measured from his body as shown, not his spot - the drive's follower lags the spot by up to 30 cm standing, more on
+	// the move - and 1.55 m kept: the rule is an official 1.5 m clear of any player but at the ball)
+	const float Min = 155.f;
+	FVector LagXY(Lag.X, Lag.Y, 0.f);
+	if (LagXY.SizeSquared() > FMath::Square(150.f)) LagXY = FVector::ZeroVector; // (he was just put somewhere: no lag to speak of)
+	const FVector Shown = Pos + LagXY.GetClampedToMaxSize(80.f);
+	// before the snap, a man walking up to the line is not pushed ahead of: the official steps out of his lane to the side
+	// he is already on (FlowSide). Pushed straight away from them, the line walking up from the huddle bulldozed the umpire
+	// 8 m to the ball, where he was penned between the two lines through the snap (the 26 Nov matrix, cells 03 and 09).
+	const bool bPre = State == EMatchState::Presnap;
+	const FVector Down = ToWorld(1, 0, Dir) - ToWorld(0, 0, Dir);
+	const FVector Left = ToWorld(0, 1, Dir) - ToWorld(0, 0, Dir);
 	FVector Out = FVector::ZeroVector;
 	float Worst = 0.f;
 	for (const tag::Ent* E : Sim->ents)
 	{
 		AAthlete* P = AthleteFor(E->p, E->side == tag::Side::Off ? Game->poss : tag::other(Game->poss));
 		if (!P || P->IsHidden()) continue;
-		FVector R = Pos - P->GetActorLocation();
+		FVector R = Shown - P->GetActorLocation();
 		R.Z = 0.f;
 		const float L = R.Size();
 		if (L >= Min) continue;
-		Out += (L > 1.f ? R / L : FVector(1, 0, 0)) * (Min - L);
-		Worst = FMath::Max(Worst, Min - L);
+		FVector U = L > 1.f ? R / L : FVector(1, 0, 0);
+		float Need = Min - L;
+		if (bPre)
+		{
+			const FVector V = Down * E->vel.x + Left * E->vel.y;
+			if (V.SizeSquared2D() > FMath::Square(60.f) && FVector::DotProduct(R, V) > 0.f)
+			{
+				// (out of his lane: what is missing across it, not to his body - a man jogging straight at an official
+				// standing on the edge of the keep came through it to 42-49 cm, each frame's push only the frame's step)
+				U = FlowSide(Shown, V, R);
+				Need = Min - FMath::Abs(static_cast<float>(FVector::DotProduct(R, U)));
+			}
+		}
+		Out += U * Need;
+		Worst = FMath::Max(Worst, Need);
 	}
 	if (Out.IsNearlyZero()) return;
 	Pos += Out.GetSafeNormal() * FMath::Min(Worst, 1100.f * Dt);
@@ -1767,6 +1822,7 @@ void AMatchDirector::TickCrew(float Dt)
 		AAthlete* A = Crew[R];
 		if (!A) continue;
 		FVector& Pos = CrewPos[R];
+		const FVector Lag = A->GetActorLocation() - Pos; // (his body against his spot, before this frame's move)
 		const bool bWing = R == 1 || R == 2;
 		// his sideline is his for the game (in the world: the wings and the side judges did not swap sides at every change
 		// of possession), as an offense-frame y for this frame's direction
@@ -1847,6 +1903,15 @@ void AMatchDirector::TickCrew(float Dt)
 			// (a long way to go - the last play ended 30 yd from here, or the offense is in a hurry - and he runs: at a
 			// jog the back judge was still among the safeties at the snap. A few yards he walks.)
 			Jog = FMath::Clamp(static_cast<float>(FVector::Dist2D(Target, Pos)) * 0.5f, 170.f, 700.f);
+			// a cut onto the formation (the teams put on their spots behind it): the crew is put on its spots with them (the
+			// 26 Nov matrix had the umpire left on the new ball spot, inside the line, as the formation appeared round him)
+			if (bCamCutPending && Sim && State == EMatchState::Presnap)
+			{
+				Pos = FVector(Target.X, Target.Y, Pos.Z);
+				CrewTgt[R] = Pos;
+				CrewVel[R] = FVector::ZeroVector;
+				CrewGo[R] = false;
+			}
 		}
 		// no official is run through, and none walks through a player: give ground to anyone near (3 yd while the ball is
 		// live, 2 yd otherwise)
@@ -1887,7 +1952,7 @@ void AMatchDirector::TickCrew(float Dt)
 		FVector Vel = CrewVel[R];
 		Pos += Vel * Dt;
 		const FVector Was = Pos;
-		OfficialPushOut(Pos, Dt);
+		OfficialPushOut(Pos, Dt, Lag);
 		if (Dt > 0.f) Vel += (Pos - Was) / Dt; // (a push out of a player's way is motion too: he steps, he does not skate)
 		// facing: the ball, unless he is running somewhere (and a wing on the move watches the ball as he goes), turned at
 		// a man's pace (it flipped 180 degrees between running and standing)

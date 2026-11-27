@@ -341,7 +341,7 @@ def detect_clip(clip, d, E, fps):
         # men moved more than a step on the frame the state changes, with no camera cut on that frame (the cut usually
         # lands a frame later: one frame shows the men on their new spots in the old shot)
         cut = d.camcut.fillna(0).values.astype(float) > 0
-        m = ok & reset & (body_step > T["teleport_cm"]) & ~cut
+        m = ok & reset & (body_step > T["teleport_cm"]) & ~cut & (mode != "getup")  # (a get-up moves the actor to the lying body: nothing seen)
         if m.any():
             sub = d[m].assign(_jump=body_step[m])
             for (fr_, st_), g in sub.groupby(["frame", "state"]):
