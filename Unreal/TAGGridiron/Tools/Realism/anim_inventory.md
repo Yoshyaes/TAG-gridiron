@@ -1,6 +1,6 @@
 # Animation inventory: action state -> captures, selection, procedural layers, measured
 
-The arm sweep's map of what plays on screen (passes 1-3, 27 Nov). Measured with `Tools/Realism/arm_audit.py` over
+The arm sweep's map of what plays on screen (passes 1-4, 27-28 Nov). Measured with `Tools/Realism/arm_audit.py` over
 `-TagHlFull` telemetry of four games, seeds 7 / 11 / 29 / 41 (5-minute quarters; `armset.ps1` pattern: `-TagWeatherSeed=N
 -TagPackSeed=N -TagWeather=0 -TagHome/-TagAway -TagQuarterLen=300 -TagHighlights -TagHlFull -TagHlNoFrames`). Run
 `python arm_audit.py OUT.json RUN_DIR...`; the tables print by sim category, by playing capture family, and per event
@@ -78,7 +78,7 @@ sequences 320 MB** - pulled in by every hero MM database's hard reference to the
 | Layer | Where | Limits now |
 |---|---|---|
 | Carry tuck / two-hand secure | R `ApplyFootballLayer` R:775, eased A `Ease(CarryA` A:~6804 | off over ball clips (BC_, QB_, InPocket, Scramble, Coverball), over any capture from its first frame, over scenes |
-| Reach (catch, wrap, block hands) | R:~840 | <= 10 cm from the capture's hands; the catch reach only over a catch capture |
+| Reach (catch, wrap, block hands) | R:~840 | pass 4: <= 6 cm from the capture's hands, solved in the capture's own elbow plane (the pole is the capture's elbow off the shoulder-hand line); the catch reach only over a catch capture |
 | Throw arm IK | R:~790 | off whenever the keyed throw exists (always) |
 | Head look | R:~880 | weight 0.85, 0.35 while a capture owns the arms |
 | Lean / orient / stride | R `ApplyLean` R:975 etc. | unchanged |
@@ -161,3 +161,42 @@ What did not work and is left off: the catch seat (`-TagCatchSeat`: hands 7-9 cm
 tolerance and 152 arm pops: the body moved under the reach); fitting catches by the measured contact height alone (15 of
 100 chest-high balls went to an above-the-head leap); the window from the index mark for named captures (a leap's
 "catch" came out on its landing).
+
+## Pass 4 (contest swats, capture-plane reach, one-hand side, release seat, post-whistle and walk-up separation)
+
+Four games as above. Before = HEAD 8de3681 (`p4B`); after = the final pass-4 code (`p4A3`). Audits
+`Saved/ArmSweep/pass4/audit_before.*`, `audit_after_final.*` (rounds `audit_after1/2`); films `Saved/ArmSweep/pass4/films`.
+
+| Measure | Before (p4B) | After (p4A3) | n |
+|---|---|---|---|
+| breakups with no timed capture | 80 % | 50 % | 10 pbu a set |
+| breakup-window frames on no capture | 33 % | 14 % | 198 frames |
+| breakup key vs ball, mean / p95 | 128 / 187 ms (2 measured) | 100 / 223 ms (5 measured) | |
+| breakup-window arm pops | 5.05 % | 2.53 % | |
+| batted balls with a capture | 0 of 3 | 1 of 3 | 3 |
+| interceptions: no key / key err mean / p95 | 1 of 3 / 152 / 273 ms | 1 of 3 / 68 / 113 ms | 3 (same plays) |
+| catches over tolerance | 28 | 4 | 100 |
+| catch key vs ball, mean / p95 / max | 28 / 96 / 424 ms | 17 / 37 / 86 ms | 100 |
+| catch code hand mean / p95, elbow mean / p95 | 10.2 / 18.9 cm, 20.8 / 45.8 deg | 5.7 / 6.2 cm, 12.3 / 24.0 deg | 100 |
+| catch arm pops (events / window %) | 132 / 5.36 % | 42 / 1.77 % | |
+| one-handers / reaches picked for the ball's side | (not logged) | 18 of 19 side-specific picks | |
+| shown hands to the sim ball at a pass catch, p50 / p90 | 46 / 82 cm | 49 / 94 cm | 70 / 69 (worse: see below) |
+| overlaps pre-snap / post-whistle / live (all / hard) | 9/4, 24/10, 4/4 | 4/2, 3/2, 2/1 | |
+| foot-slide events (live / post / pre-snap) | 371 / 66 / 84 | 378 / 53 / 85 | |
+
+Changes: the defender whose path comes nearest the ball's flight (inside 1.2 yd, 2 yd on a contested catch) goes into a
+timed swat from 0.6 s out on any pass forecast caught, dropped or untouched (D forecast block, `TAG forecast contest`);
+swats are not cut for lag before the ball (`bOneShotDrop`); the catch reach is solved in the capture's own elbow plane
+and capped at 6 cm (R); catch fit has a ball-side term for one-handers / reaches (`ContactHand.X`, + right) and avoids
+captures whose run-in the 0.7x warp cannot stretch to and those whose measured contact is over 1 s from the index mark;
+the post-whistle walks and the walk-up keep 75 cm apart (render only; `-TagNoPostSep`, `-TagNoWalkPlan`).
+
+Throws, filmed close (`-TagThrowCam -TagCloseCamScale=0.8`, 1080p): one or two frames after the ball leaves, it is 30-50 cm
+above a hand already coming forward, on every throw filmed. Tried and taken out (no visible change on film): easing the
+ball onto its flight over 0.3 s instead of 0.15 s, drawing the held ball one frame of the hand's motion ahead (the pose
+read is a frame old), keying the throw 2 frames earlier. Still open. Handoffs filmed (`-TagMeshCam`): the ball sits at the
+back's belly under the quarterback's hand through the exchange.
+
+What the sim would need to expose for the rest: the breakup roll of a contested catch at the release (it is rolled at the
+ball; `fcCont` says a defender is there but not which or whether), a batted-ball roll at the release (rolled when the
+ball passes a lineman inside 0.35 s), and tips (a breakup whose ball another man then catches).

@@ -493,6 +493,7 @@ private:
 	unsigned long long RefTdSerial = 0; // the play whose touchdown the officials have signalled
 	// the play on the ball from the forecast (arm sweep 3): the pass, the men started on it and the forecast revision each was started for
 	unsigned long long FcSerial = 0;
+	const tag::Ent* FcContest = nullptr; unsigned long long FcContSerial = 0; double FcContestAt = 0.0; // the defender at a contested catch, on his swat from the forecast (arm sweep 4)
 	unsigned long long TossPairSerial = 0; // the play whose toss is one of the pack's two-man tosses (AAthlete::PlayRepToss)
 	/** The walk-up to the formation, staggered (arm sweep 3): each walker's delay behind his sim walk so no two paths cross
 	 *  at once, and the sim's own walk recorded to replay it that much later. Planned in StartPresnap (PlanWalkUp). */
@@ -503,6 +504,8 @@ private:
 	 *  crossing pass a lane apart - a line walking up mirrored crossed itself whatever the delays */
 	struct FWalkLane { FVector From = FVector::ZeroVector, To = FVector::ZeroVector; float Amp = 0.f; };
 	TMap<const tag::Ent*, FWalkLane> WalkLane;
+	/** (arm sweep 4) a walker's step aside off a man he would walk through (render only, eased; none on a set man) */
+	TMap<const tag::Ent*, FVector> WalkSep;
 	double WalkT0 = 0.0;
 	void PlanWalkUp(float SnapIn);
 	const tag::Ent* FcMain = nullptr;

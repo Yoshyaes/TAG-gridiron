@@ -854,15 +854,30 @@ void FTagRetargetProxy::ApplyFootballLayer(FPoseContext& Output) const
 			// the reach 30-90 cm off the capture over whole block loops and tackle clips; at 15 cm the elbow still bent ~25 deg
 			// off the catch capture in its last 0.2 s). -TagArmSweepOff: uncapped.
 			static const bool bSweepOff = FParse::Param(FCommandLine::Get(), TEXT("TagArmSweepOff"));
+			FVector UsePoleL = PoleL, UsePoleR = PoleR;
 			if (!bSweepOff)
 			{
-				constexpr float MaxCorr = 10.f;
+				// (6 cm, arm sweep 4: at 10 cm, even in the capture's own bend plane, 16 of the 19 catches still over tolerance had
+				// the hand at the cap and the elbow 26-50 deg off - the ball was 30-90 cm away anyway, past what a correction mends)
+				constexpr float MaxCorr = 6.f;
 				const FVector HL0 = Pos(P, B.HL), HR0 = Pos(P, B.HR);
 				TL = HL0 + (TL - HL0).GetClampedToMaxSize(MaxCorr);
 				TR = HR0 + (TR - HR0).GetClampedToMaxSize(MaxCorr);
+				// (and the elbow kept where the capture bends it: solved with the reach's own pole, a 10 cm correction swung the
+				// elbow 25-45 deg off the capture - 17 of the 21 catches over tolerance in pass 3 had the hand at the 10 cm cap
+				// and the elbow 25-46 deg off. The capture's bend plane is the pole now: the arm only extends or folds in it.)
+				auto CapturePole = [&](FCompactPoseBoneIndex CpU, FCompactPoseBoneIndex CpL, FCompactPoseBoneIndex CpHb, const FVector& Fallback)
+				{
+					const FVector CpS = Pos(P, CpU), CpE = Pos(P, CpL), CpH = Pos(P, CpHb);
+					const FVector CpAx = (CpH - CpS).GetSafeNormal();
+					const FVector CpOff = (CpE - CpS) - CpAx * FVector::DotProduct(CpE - CpS, CpAx);
+					return CpOff.Size() > 2.f ? CpOff.GetSafeNormal() : Fallback;
+				};
+				UsePoleL = CapturePole(B.UL, B.LL, B.HL, PoleL);
+				UsePoleR = CapturePole(B.UR, B.LR, B.HR, PoleR);
 			}
-			ArmIK(P, B.UL, B.LL, B.HL, TL, PoleL, In.ReachAlpha * Near);
-			ArmIK(P, B.UR, B.LR, B.HR, TR, PoleR, In.ReachAlpha * Near * (1.f - In.CarryAlpha));
+			ArmIK(P, B.UL, B.LL, B.HL, TL, UsePoleL, In.ReachAlpha * Near);
+			ArmIK(P, B.UR, B.LR, B.HR, TR, UsePoleR, In.ReachAlpha * Near * (1.f - In.CarryAlpha));
 		}
 		// --- 3-point stance: down hand on the turf in front of the right foot
 		if (In.StanceAlpha > 0.01f)

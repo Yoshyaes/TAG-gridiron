@@ -200,7 +200,7 @@ void AMatchDirector::TickPadPlayTest(float Dt)
 		break;
 	case 1: // CROSS held after the whistle: the hurry-up
 		// (not after a fourth down: one short of the line is the other side's ball, and no tempo of ours comes next)
-		if (State == EMatchState::Post && UserOff() && S && S->result && !S->result->td && !S->result->turnover && Game->down < 4)
+		if (State == EMatchState::Post && UserOff() && S && !S->isReturn() && S->result && !S->result->td && !S->result->turnover && Game->phase == tag::GamePhase::Scrimmage && Game->down < 4)
 		{
 			if (T.HoldT == 0.f) PadKey(EKeys::Gamepad_FaceButton_Bottom, true);
 			if ((T.HoldT += Dt) > 0.5f)
@@ -220,7 +220,8 @@ void AMatchDirector::TickPadPlayTest(float Dt)
 		}
 		break;
 	case 3: // TRIANGLE held after the whistle: the spike
-		if (State == EMatchState::Post && UserOff() && S && S->result && !S->result->td && !S->result->turnover && Game->phase == tag::GamePhase::Scrimmage && Game->down < 4)
+		// (not after a kick return: the director takes no tempo there)
+		if (State == EMatchState::Post && UserOff() && S && !S->isReturn() && S->result && !S->result->td && !S->result->turnover && Game->phase == tag::GamePhase::Scrimmage && Game->down < 4)
 		{
 			if (T.HoldT == 0.f) PadKey(EKeys::Gamepad_FaceButton_Top, true);
 			if ((T.HoldT += Dt) > 0.5f)

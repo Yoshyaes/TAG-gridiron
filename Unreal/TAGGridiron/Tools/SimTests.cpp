@@ -2122,6 +2122,60 @@ int main() {
     check(pct(eT, 0.9) < 0.5 && pct(eD, 0.9) < 3.0, "the standing forecasts miss the time or the place of the catch by too much");
   });
 
+  t("pass forecast, the defenders' plays: the bat, the contesting man and the tipped ball known at the release", [&] {
+    // every pass to a man over 120 games: the release's bat (fcBatted0), the man at the catch point (fcContBy0) and the
+    // tipped ball's fate (fc2Fate0) against what happened; a tip forecast left standing must be what happened
+    int n = 0, bats = 0, batFc = 0, batBoth = 0, contN = 0, contOk = 0, tipN = 0, tipOk = 0, tipStand = 0, tipStandWrong = 0, tipWrongPlace = 0, tipAll = 0;
+    std::map<std::string, int> tipConf;
+    std::vector<double> eT, eD;
+    Rng rng(991);
+    for (int i = 0; i < 120; i++) {
+      GameOptions o;
+      o.seed = static_cast<uint32_t>(rng.intRange(1, 1000000000));
+      Game g(*league[(i * 5 + 1) % 32], *league[(i * 11 + 4) % 32], o);
+      g.onPlayResult = [&](const PlaySim& sim, const PlayResult& r) {
+        if (sim.isReturn() || !sim.passThrown || r.thrownAway || r.kind != PlayKind::Pass || r.fcFate0 == 0) return;
+        n++;
+        bats += r.fcBattedOut;
+        batFc += r.fcBatted0;
+        batBoth += r.fcBatted0 && r.fcBattedOut;
+        if (r.fcContBy0 && r.fcContOut) contN++, contOk += r.fcContBy0 == r.fcContOut;
+        // (the tip only where the first play went as forecast: it is forecast off that play)
+        if (r.fc2Fate0 != 0) tipAll++;
+        if (r.fc2Fate0 != 0 && r.fcOut == r.fcFate0 && r.fcByOk) {
+          static const char* nm5[] = {"-", "caught", "-", "knocked", "picked", "falls"};
+          tipN++;
+          tipConf[std::string(nm5[r.fc2Fate0]) + ">" + nm5[r.fc2Out]]++;
+          const bool ok = r.fc2Out == r.fc2Fate0 && r.fc2ByOk;
+          tipOk += ok;
+          if (ok) eT.push_back(std::fabs(r.fc2ErrT)), eD.push_back(r.fc2ErrD);
+          if (r.fcRev == 0) {
+            tipStand++;
+            tipStandWrong += !ok;
+          }
+        }
+        if (r.fc2Fate0 != 0 && r.fcFate0 != 2 && r.fcFate0 != 3) tipWrongPlace++;
+      };
+      g.simToEnd();
+    }
+    auto pct = [](std::vector<double> v, double q) {
+      if (v.empty()) return 0.0;
+      std::sort(v.begin(), v.end());
+      return v[static_cast<size_t>(q * (v.size() - 1))];
+    };
+    std::printf("       (120 games, %d passes: bats %d, forecast %d, both %d; contested catches with the man forecast %d, the same man %d (%.0f%%); "
+                "tipped balls forecast %d, %d off a first play that went as forecast, right %d (%.0f%%), forecasts left standing %d)\n",
+                n, bats, batFc, batBoth, contN, contOk, 100.0 * contOk / (std::max)(1, contN), tipAll, tipN, tipOk, 100.0 * tipOk / (std::max)(1, tipN), tipStand);
+    std::printf("       (tipped ball, forecast > what happened:");
+    for (auto& kv : tipConf) std::printf(" %s %d", kv.first.c_str(), kv.second);
+    std::printf("; right ones' miss: time p50 %.2f p90 %.2f s, place p50 %.2f p90 %.2f yd)\n", pct(eT, 0.5), pct(eT, 0.9), pct(eD, 0.5), pct(eD, 0.9));
+    check(n > 3000, "too few passes: " + std::to_string(n));
+    check(bats > 20 && batFc > 10, "too few bats to judge: " + std::to_string(bats) + " / " + std::to_string(batFc));
+    check(tipWrongPlace == 0, std::to_string(tipWrongPlace) + " tipped-ball forecasts on a first play that leaves no ball live");
+    check(tipStandWrong == 0, std::to_string(tipStandWrong) + " tipped-ball forecasts left standing that were not what happened");
+    check(contN > 200, "too few contested catches to judge: " + std::to_string(contN));
+  });
+
   t("fouls: every player foul names the man it is on (the booth calls his number)", [&] {
     // full games: every flag on a player's act names a player "(#n name)"; only the team fouls (delay of game, too many
     // men, illegal formation / shift) go without one

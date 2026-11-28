@@ -346,7 +346,8 @@ void SGridironOverlay::StartCallCoachTest()
 			if ((O && O->IsPlayCall() && O->ModalContent == O->CallRoot) || FPlatformTime::Seconds() - S->StepT > Secs) { Axis(EKeys::Gamepad_RightY, 0.f); S->Wait = 0; return true; }
 			const int32 F = ++S->Wait % 120, Sign = (S->Wait / 120) % 2 ? 1 : -1;
 			Axis(EKeys::Gamepad_RightY, F < 40 ? -1.f * Sign : F < 48 ? 1.f * Sign : 0.f);
-			if (S->Wait % 45 == 0 && O && !O->HasModal()) { Send(EKeys::Gamepad_FaceButton_Bottom, true); Send(EKeys::Gamepad_FaceButton_Bottom, false); }
+			// (a screen that is not a play call - the try choice after a touchdown of ours - takes CROSS too: its first button, the kick)
+			if (S->Wait % 45 == 0 && O && (!O->HasModal() || !O->IsPlayCall())) { Send(EKeys::Gamepad_FaceButton_Bottom, true); Send(EKeys::Gamepad_FaceButton_Bottom, false); }
 			return false;
 		});
 	};

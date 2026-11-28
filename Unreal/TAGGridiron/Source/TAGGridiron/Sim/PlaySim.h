@@ -661,6 +661,36 @@ struct Ball {
   Ent* fcOutBy = nullptr;
   double fcOutT = -1;
   V3 fcOutAt{0, 0, 0};
+  // the defenders' plays, from the release too (round 2):
+  //   fcBatted  the first play is a lineman batting it at the line: fcFate 3, fcBy the lineman, fcAt / fcZ / fcT the bat
+  //   fcContBy  the defender at the catch point whose breakup roll a contested catch or drop forecast (fcCont, fcFate 1 /
+  //             2) was rolled against - his breakup did not come off: he is there and gets nothing; on 3 / 4 the man who
+  //             makes the play (fcBy); nullptr when nobody contests it
+  //   fc2Fate   the tipped ball: after a first play that leaves it live (fcFate 2 - off his hands - or 3 - a breakup or a
+  //             bat), what happens to it next: 1 another offensive man catches it, 3 it is knocked away again, 4 a
+  //             defender intercepts it, 5 it falls incomplete; 0 nothing to forecast (fcFate 1, 4 or 5). fc2By the man
+  //             (nullptr on 5), fc2At / fc2Z / fc2T where, at what height and when (on 5 where and when it lands). The
+  //             tipper and the tip are fcBy / fcAt / fcZ / fcT. Revised like the first play (fcRev, fcWhy "tip: <event>").
+  //   fc2Fate0 .. fc2T0  the release's tip forecast; fc2Out / fc2OutBy / fc2OutT / fc2OutAt what happened to the tipped ball
+  //   fcContOut the defender who contested the catch at the ball (what happened; nullptr: nobody)
+  bool fcBatted = false;
+  Ent* fcContBy = nullptr;
+  int fc2Fate = 0;
+  Ent* fc2By = nullptr;
+  V2 fc2At{0, 0};
+  double fc2Z = 0, fc2T = -1;
+  bool fcBatted0 = false;
+  Ent* fcContBy0 = nullptr;
+  int fc2Fate0 = 0;
+  Ent* fc2By0 = nullptr;
+  V2 fc2At0{0, 0};
+  double fc2Z0 = 0, fc2T0 = -1;
+  int fc2Out = 0;
+  Ent* fc2OutBy = nullptr;
+  double fc2OutT = -1;
+  V3 fc2OutAt{0, 0, 0};
+  Ent* fcContOut = nullptr;
+  bool fcBattedOut = false;
   double fateU[5] = {0, 0, 0, 0, 0};  // (the roll's draws: first man's play, his pick, the contested breakup, its pick, the catch)
   uint32_t fateKey = 0;               // (a lane defender's draws: off this and his key)
 };
@@ -727,6 +757,13 @@ struct PlayResult {
   // flat; and the height) of the play on the ball. fcFate0 0: no forecast (no pass to a man).
   int fcFate0 = 0, fcOut = 0, fcRev = 0;
   bool fcByOk = true;  // (on 3 / 4 and 1 / 2: the man forecast is the man who played it)
+  // round 2: the release's bat / contesting defender / tipped-ball forecast against what happened (Ball::fcBatted ..)
+  bool fcBatted0 = false, fcBattedOut = false;
+  Player* fcContBy0 = nullptr;
+  Player* fcContOut = nullptr;
+  int fc2Fate0 = 0, fc2Out = 0;
+  bool fc2ByOk = true;
+  double fc2ErrT = 0, fc2ErrD = 0;
   std::string fcWhy;
   double fcErrT = 0, fcErrD = 0, fcErrZ = 0;
   int airYards = 0;
@@ -1338,12 +1375,27 @@ class PlaySim {
     bool dive = false, cont = false;
     double p = -1, d = -1, pbu = 0;
     Ent* passed = nullptr;
+    Ent* contBy = nullptr;  // (the defender a contested catch's breakup was rolled for)
   };
+  /** The tipped ball forecast (Ball::fc2Fate ..): after the first play (kind 2 a drop off the receiver's hands, 3 a
+   *  breakup in the defender's play, 30 a breakup off the receiver's catch, 31 a bat at the line) by tipper at the
+   *  flight's state (p, v) s seconds after the release. */
+  void forecastTip(int kind, const Ent* tipper, const V3& p, const V3& v, double s);
+  /** What happened on a forecast pass, from this step's plays on the ball (the first play, the tipped ball's). */
+  void settleFate();
+  struct FcEvent {
+    int oc;
+    Ent* who;
+    double at;
+    V3 pos;
+    std::string type;
+  };
+  std::vector<FcEvent> fcPend_;
   FateRoll rollCatch(double Ta, bool forecast);
   double laneU(const Ent* o, int k) const;
   /** The pass's outcome forecast at the release (Ball::fcFate ..), and a revision of it (why) with where / when. */
   void forecastFate();
-  void reviseFate(int fate, Ent* who, const std::string& why);
+  void reviseFate(int fate, Ent* who, const std::string& why, Ent* cont = nullptr);
   /** Where and when (from now, s) the ball in the air passes nearest man x running at it (forecast geometry). */
   void fateGeom(const Ent* x, bool chase, V2& at, double& z, double& dt) const;
   std::unordered_map<const Ent*, double> lanePassed_;  // defenders whose go at this pass was rolled ahead (preRollLane)

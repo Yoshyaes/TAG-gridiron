@@ -2743,28 +2743,66 @@ void PlaySim::ev(const char* type, Ent* a, Ent* b, const std::string& note) {
   e.note = note;
   events.push_back(e);
   if (result) result->events.push_back(e);  // TS result.events aliases this.events
-  // the first play on a pass that was forecast (Ball::fcFate): what happened, and a revision when it is not what the
-  // forecast had (the presentation re-picks)
-  if (ball.fcFate != 0 && ball.fcOut == 0 && passThrown && !cfg.kick && !cfg.place) {
+  // the plays on a pass that was forecast (Ball::fcFate): kept for settleFate, which takes a step's plays together (a
+  // breakup the same man comes down with is an interception, not a breakup)
+  if (ball.fcFate != 0 && passThrown && !cfg.kick && !cfg.place && (ball.fcOut == 0 || ((ball.fcOut == 2 || ball.fcOut == 3) && ball.fc2Out == 0))) {
     const std::string ty = type;
     const int oc = ty == "catch" || ty == "divecatch" || ty == "oobcatch" ? 1 : ty == "drop" || ty == "contested_inc" ? 2 : ty == "pbu" || ty == "batted" ? 3 : ty == "int" ? 4 : ty == "incomplete" ? 5 : 0;
-    if (oc) {
-      Ent* who = oc == 5 ? nullptr : a;
-      ball.fcOut = oc;
-      ball.fcOutBy = who;
-      ball.fcOutT = t;
-      ball.fcOutAt = ball.pos;
-      if (oc != ball.fcFate || who != ball.fcBy) {
-        ball.fcFate = oc;
-        ball.fcBy = who;
-        ball.fcAt = V2{ball.pos.x, ball.pos.y};
-        ball.fcZ = ball.pos.z;
-        ball.fcT = t;
-        ball.fcRev++;
-        ball.fcWhy = "at the ball: " + ty;
-      }
+    if (oc) fcPend_.push_back(FcEvent{oc, oc == 5 ? nullptr : a, t, ball.pos, ty});
+  }
+}
+
+void PlaySim::settleFate() {
+  if (fcPend_.empty()) return;
+  Ball& b = ball;
+  size_t i = 0;
+  if (b.fcOut == 0) {
+    // the first play on the ball: an interception this step is the play (the breakup before it was its tip)
+    const FcEvent* first = &fcPend_[0];
+    for (const FcEvent& fe : fcPend_)
+      if (fe.oc == 4 && fe.at == fcPend_[0].at) first = &fe;
+    b.fcOut = first->oc;
+    b.fcOutBy = first->who;
+    b.fcOutT = first->at;
+    b.fcOutAt = first->pos;
+    b.fcBattedOut = first->type == "batted";
+    if (first->oc != b.fcFate || first->who != b.fcBy || (first->type == "batted") != b.fcBatted) {
+      b.fcFate = first->oc;
+      b.fcBy = first->who;
+      b.fcBatted = first->type == "batted";
+      b.fcAt = V2{first->pos.x, first->pos.y};
+      b.fcZ = first->pos.z;
+      b.fcT = first->at;
+      b.fcRev++;
+      b.fcWhy = "at the ball: " + first->type;
+      // (a tipped ball the forecast did not have: from here it is the play's to tell - nothing forecast for it)
+      if (b.fc2Fate != 0 && b.fcFate != 2 && b.fcFate != 3) b.fc2Fate = 0;
+    }
+    // the plays of this step after the first one go to the tipped ball (the same man's interception was the first)
+    for (i = 0; i < fcPend_.size() && fcPend_[i].at == first->at; i++) {
     }
   }
+  if ((b.fcOut == 2 || b.fcOut == 3) && b.fc2Out == 0) {
+    for (; i < fcPend_.size(); i++) {
+      const FcEvent& fe = fcPend_[i];
+      if (fe.oc != 1 && fe.oc != 4 && fe.oc != 5 && fe.oc != 3) continue;  // (a drop of a tipped ball: still live)
+      b.fc2Out = fe.oc;
+      b.fc2OutBy = fe.who;
+      b.fc2OutT = fe.at;
+      b.fc2OutAt = fe.pos;
+      if (fe.oc != b.fc2Fate || fe.who != b.fc2By) {
+        b.fc2Fate = fe.oc;
+        b.fc2By = fe.who;
+        b.fc2At = V2{fe.pos.x, fe.pos.y};
+        b.fc2Z = fe.pos.z;
+        b.fc2T = fe.at;
+        b.fcRev++;
+        b.fcWhy = "tip: " + fe.type;
+      }
+      break;
+    }
+  }
+  fcPend_.clear();
 }
 double PlaySim::ballSpotX() const { return ball.holder ? ball.holder->pos.x : ball.pos.x; }
 const std::vector<Ent*>& PlaySim::defendersOf(const Ent* e) const { return e->side == Side::Off ? def : off; }
@@ -2912,6 +2950,7 @@ void PlaySim::step(double dt) {
   }
   if (phase == SimPhase::Live) checkTackles();
   if (phase == SimPhase::Live) checkBounds();
+  settleFate();  // (the pass forecast against this step's plays on the ball)
   if (onStep) onStep(*this);
 }
 
@@ -6579,7 +6618,7 @@ void PlaySim::preRollCatch() {
   b.fateBy = r.by;
   if (r.dive) b.fateDive = true;
   // (the forecast made at the release, revised if the roll came out otherwise)
-  reviseFate(r.fate, r.fate >= 3 ? r.by : e, "roll");
+  reviseFate(r.fate, r.fate >= 3 ? r.by : e, "roll", r.cont ? r.contBy : nullptr);
 }
 
 double PlaySim::laneU(const Ent* o, int k) const {
@@ -6640,12 +6679,16 @@ void PlaySim::fateGeom(const Ent* x, bool chase, V2& at, double& z, double& dt) 
   }
 }
 
-void PlaySim::reviseFate(int fate, Ent* who, const std::string& why) {
+void PlaySim::reviseFate(int fate, Ent* who, const std::string& why, Ent* cont) {
   Ball& b = ball;
   if (b.fcFate == 0 || b.fcOut != 0) return;  // (no forecast; or the ball has been played: that is the outcome)
-  if (fate == b.fcFate && who == b.fcBy) return;
+  if (b.fcBatted && t <= b.fcT + 1e-9) return;  // (a bat at the line still ahead: it comes first)
+  if (fate >= 3) cont = who;
+  if (fate == b.fcFate && who == b.fcBy && cont == b.fcContBy && !b.fcBatted) return;
   b.fcFate = fate;
   b.fcBy = who;
+  b.fcContBy = cont;
+  b.fcBatted = false;
   b.fcRev++;
   b.fcWhy = why;
   double dt = 0;
@@ -6653,6 +6696,16 @@ void PlaySim::reviseFate(int fate, Ent* who, const std::string& why) {
   b.fcT = t + dt;
   b.fcCont = b.fateCont;
   b.fcDive = b.fateDive;
+  // the tipped ball from the revised play: the flight as it is now to the play, and off it
+  b.fc2Fate = 0;
+  b.fc2By = nullptr;
+  if ((fate == 2 || fate == 3) && who) {
+    V3 p = b.pos, v = b.vel;
+    const double k = dragK();
+    for (double s = 0; s + 1e-9 < dt; s += 1.0 / 60.0) integrate(p, v, k, 1.0 / 60.0);
+    if (fate == 2) forecastTip(2, who, p, V3{v.x * 0.2, v.y * 0.2 - 1 + 2 * laneU(who, 8), 1.2}, b.fcT);
+    else forecastTip(3, who, p, V3{v.x * 0.2 - 2 + 4 * laneU(who, 11), v.y * 0.2 - 2 + 4 * laneU(who, 12), 2}, b.fcT);
+  }
 }
 
 void PlaySim::forecastFate() {
@@ -6665,14 +6718,68 @@ void PlaySim::forecastFate() {
   const double k = dragK();
   const double h = 1.0 / 60.0;
   const V2 bp = ballLanding();
+  b.fcBatted = false;
+  b.fcContBy = nullptr;
+  b.fc2Fate = 0;
+  b.fc2By = nullptr;
   // the flight from the release, and when it passes nearest the receiver
-  std::vector<V3> path;
+  std::vector<V3> path, pathV;
   {
     V3 p = b.pos, v = b.vel;
     const double horizon = b.flightT + 0.6;
     for (double s = 0; s <= horizon && p.z > 0.05; s += h) {
       path.push_back(p);
+      pathV.push_back(v);
       integrate(p, v, k, h);
+    }
+  }
+  auto snapshot = [&] {
+    b.fcFate0 = b.fcFate;
+    b.fcBy0 = b.fcBy;
+    b.fcAt0 = b.fcAt;
+    b.fcZ0 = b.fcZ;
+    b.fcT0 = b.fcT;
+    b.fcBatted0 = b.fcBatted;
+    b.fcContBy0 = b.fcContBy;
+    b.fc2Fate0 = b.fc2Fate;
+    b.fc2By0 = b.fc2By;
+    b.fc2At0 = b.fc2At;
+    b.fc2Z0 = b.fc2Z;
+    b.fc2T0 = b.fc2T;
+  };
+  // batted at the line (resolveAir's test, tick by tick over the first 0.35 s: the first lineman whose hands the ball
+  // passes within 0.8 yd of, one swipe each, his own draw - laneU)
+  {
+    std::vector<const Ent*> swiped;
+    for (size_t i = 1; i < path.size(); i++) {
+      const double s = i * h;
+      if (b.t + s >= 0.35) break;
+      if ((pathV[i].z > 0 && b.t + s < 0.25) || path[i].z > 3.3) continue;
+      Ent* early = nullptr;
+      for (Ent* o : def) {
+        if (!o->isDL || o->state == EntState::Down || contains(swiped, static_cast<const Ent*>(o))) continue;
+        if (!o->free() && !(o->engaged && b.t + s < 0.4)) continue;
+        const double oh = o->p->heightIn / 36;
+        const double reach = oh * 0.5 + 0.55 + (o->r().ballSkills > 60 ? 0.1 : 0);
+        const double dd = jsHypot(o->pos.x + o->vel.x * s - path[i].x, o->pos.y + o->vel.y * s - path[i].y);
+        if (dd < reach && dd < 0.8 && path[i].z < oh + 0.9 && path[i].z > 0.2) {
+          early = o;
+          break;
+        }
+      }
+      if (!early) continue;
+      swiped.push_back(early);
+      if (laneU(early, 2) < 0.07 + (std::max)(0.0, early->p->heightIn - 76) * 0.02) {
+        b.fcFate = 3;
+        b.fcBy = early;
+        b.fcBatted = true;
+        b.fcAt = V2{path[i].x, path[i].y};
+        b.fcZ = path[i].z;
+        b.fcT = t + s;
+        forecastTip(31, early, path[i], V3{-3 + 6 * laneU(early, 3), -3 + 6 * laneU(early, 4), 2}, t + s);
+        snapshot();
+        return;
+      }
     }
   }
   double tgtT = b.flightT, tgtBest = 1e9;
@@ -6714,10 +6821,17 @@ void PlaySim::forecastFate() {
     const double pInt = sigmoid((o->r().catching - 62) / 10 + edge * 0.6 - 1.2 - (ln.at.x - los > 18 ? 1.0 : 0) + tune().intBias + o->fx.intAdj - (b.thrower ? b.thrower->fx.ballSafe : 0.0));
     b.fcFate = laneU(o, 1) < pInt ? 4 : 3;
     b.fcBy = o;
+    b.fcContBy = o;
     b.fcAt = V2{ln.at.x, ln.at.y};
     b.fcZ = ln.at.z;
     b.fcT = t + ln.s;
     set = true;
+    // (his breakup in his own play on it: the ball off his hands)
+    if (b.fcFate == 3) {
+      const size_t li = (std::min)(path.size() - 1, static_cast<size_t>(ln.s / h + 0.5));
+      const V3 lv = pathV[li];
+      forecastTip(3, o, ln.at, V3{lv.x * 0.2 - 2 + 4 * laneU(o, 11), lv.y * 0.2 - 2 + 4 * laneU(o, 12), 2}, t + ln.s);
+    }
     break;
   }
   if (!set) {
@@ -6731,16 +6845,167 @@ void PlaySim::forecastFate() {
       b.fcBy = r.fate >= 3 ? r.by : e;
       b.fcCont = r.cont;
       b.fcDive = r.dive;
+      b.fcContBy = r.fate >= 3 ? r.by : r.cont ? r.contBy : nullptr;
     }
     double dt = 0;
     fateGeom(b.fcBy, true, b.fcAt, b.fcZ, dt);
     b.fcT = t + dt;
+    if (b.fcFate == 2 || b.fcFate == 3) {
+      // the ball as it gets there, and how it comes off: off the receiver's hands (a drop), or a breakup - in the
+      // defender's own play on it when he gets to it before the receiver does, else off the receiver's catch
+      const size_t pi = (std::min)(path.size() - 1, static_cast<size_t>(dt / h + 0.5));
+      const V3 pv = pathV[pi];
+      const V3 pp = path[pi];
+      if (b.fcFate == 2) {
+        forecastTip(2, e, pp, V3{pv.x * 0.2, pv.y * 0.2 - 1 + 2 * laneU(e, 8), 1.2}, b.fcT);
+      } else {
+        const V2 dAt = fateRunTo(b.fcBy, bp, dt, 0.6), rAt = fateRunTo(e, bp, dt, 0.9);
+        const bool defFirst = jsHypot(dAt.x - pp.x, dAt.y - pp.y) < jsHypot(rAt.x - pp.x, rAt.y - pp.y);
+        if (defFirst) forecastTip(3, b.fcBy, pp, V3{pv.x * 0.2 - 2 + 4 * laneU(b.fcBy, 11), pv.y * 0.2 - 2 + 4 * laneU(b.fcBy, 12), 2}, b.fcT);
+        else forecastTip(30, b.fcBy, pp, V3{pv.x * 0.25, pv.y * 0.25, 1.5}, b.fcT);
+      }
+    }
   }
-  b.fcFate0 = b.fcFate;
-  b.fcBy0 = b.fcBy;
-  b.fcAt0 = b.fcAt;
-  b.fcZ0 = b.fcZ;
-  b.fcT0 = b.fcT;
+  snapshot();
+}
+
+void PlaySim::forecastTip(int kind, const Ent* tipper, const V3& p0, const V3& v0, double at) {
+  // the tipped ball's fall (no target now: anyone's), and the first man its fall comes to with his try at it coming off -
+  // resolveAir's tests and odds on where the men will be, each man's own draws (laneU)
+  Ball& b = ball;
+  const double k = dragK();
+  const double h = 1.0 / 60.0;
+  const V2 bp = ballLanding();
+  const double s0 = (std::max)(0.0, at - t);  // (from now to the tip)
+  std::vector<V3> fall, fallV;
+  {
+    V3 p = p0, v = v0;
+    for (int j = 0; j < 180 && p.z > 0.05; j++) {
+      fall.push_back(p);
+      fallV.push_back(v);
+      integrate(p, v, k, h);
+    }
+    fall.push_back(p);
+    fallV.push_back(v);
+  }
+  // (the hands: inHands on a man where he will be)
+  auto handsAt = [](double hm, double flat, double z) {
+    const double sh = 0.82 * hm;
+    if (z < 0.12 || z > hm + 0.75) return false;
+    if (z < 0.5 * hm) return flat <= 0.8;
+    return jsHypot(flat, (std::max)(0.0, std::fabs(z - sh) - (z > sh ? 0.3 : 0.0))) <= 0.95;
+  };
+  auto where = [&](const Ent* m, double s) {
+    // where he is at the tip, running at the ball's landing as forecast, and on from there at that pace
+    const double km = m == b.target ? 0.9 : 0.6;
+    const V2 a0 = fateRunTo(m, bp, s0, km);
+    const V2 a1 = fateRunTo(m, bp, (std::max)(0.0, s0 - 0.1), km);
+    V2 vm = scale(sub(a0, a1), 10.0);
+    if (len(vm) > m->vmax) vm = scale(norm(vm), m->vmax);
+    return add(a0, scale(vm, s));
+  };
+  // (after a breakup rolled for a defender, the other defenders leave the ball to him while he is on his feet)
+  const bool defsOut = (kind == 3 || kind == 30) && b.fcFate == 3;
+  struct Try {
+    Ent* m;
+    size_t j;
+    double d;
+  };
+  std::vector<Try> tries;
+  for (Ent* m : ents) {
+    if (m == b.thrower || m == tipper || m->state == EntState::Down || !m->free()) continue;
+    if ((kind == 2 || kind == 30) && m == b.target) continue;  // (his try is spent)
+    if (defsOut && m->side == Side::Def) continue;
+    const double hm = m->p->heightIn / 36;
+    const double reach = hm * 0.5 + 0.55 + (m->r().ballSkills > 60 && m->side == Side::Def ? 0.1 : 0);
+    size_t bj = 0;
+    double bd = 1e9;
+    for (size_t j = 1; j < fall.size(); j++) {
+      const V2 mp = where(m, j * h);
+      const double dd = jsHypot(fall[j].x - mp.x, fall[j].y - mp.y);
+      const bool zOk = fall[j].z < hm + 0.9 && fall[j].z > 0.2;
+      if (dd < reach && zOk && dd < bd) {
+        bd = dd;
+        bj = j;
+      } else if (bj && dd >= bd) {
+        break;  // (his closest pass: his try)
+      }
+    }
+    if (bj) tries.push_back(Try{m, bj, bd});
+  }
+  std::stable_sort(tries.begin(), tries.end(), [](const Try& x, const Try& y) { return x.j < y.j; });
+  const bool wetBall = cfg.weather.precip != Precip::None;
+  for (const Try& tr : tries) {
+    Ent* m = tr.m;
+    const V3 bpos = fall[tr.j];
+    const V3 bvel = fallV[tr.j];
+    const double hm = m->p->heightIn / 36;
+    const bool deepBall = bpos.x - los > 15;
+    const double midK = tune().midContest > 0 ? clamp((bpos.x - los - 6) / 9, 0, 1) * tune().midContest : 0;
+    const double cRad = deepBall ? 2.2 : 1.3 + 0.9 * midK;
+    const V2 mp = where(m, tr.j * h);
+    int out = 0;
+    Ent* who = nullptr;
+    if (m->side == Side::Off) {
+      if (!m->eligible || !handsAt(hm, tr.d, bpos.z)) continue;
+      Ent* dbest = nullptr;
+      double dbd = 1e9, nearOpp = 9;
+      for (Ent* o : def) {
+        if (!o->free() || o->state == EntState::Down) continue;
+        const V2 op = where(o, tr.j * h);
+        const double om = dist(op, mp);
+        if (om >= cRad) continue;
+        nearOpp = (std::min)(nearOpp, om);
+        const double ob = jsHypot(op.x - bpos.x, op.y - bpos.y);
+        if (ob < dbd) dbd = ob, dbest = o;
+      }
+      const bool contested = dbest != nullptr;
+      if (contested) {
+        const double edge = tr.d - dbd;
+        const bool sees = eyesOnBall(dbest);
+        const double pbu = sigmoid((dbest->r().ballSkills - 70) / 12 + edge * 1.6 - 1.2 + (deepBall ? 0.35 : 0) + dbest->fx.pbu - m->fx.winBall) * (deepBall ? 0.6 : 0.62) * (sees ? 1.0 : tune().swipeK);
+        if (laneU(m, 5) < pbu) {
+          const double pInt = sigmoid((dbest->r().catching - 62) / 10 + edge * 1.2 - 1.4 - (deepBall ? 1.0 : 0) + tune().intBias + dbest->fx.intAdj - (b.thrower ? b.thrower->fx.ballSafe : 0.0) - m->fx.winBall);
+          out = sees && dbd < 0.95 && laneU(m, 6) < pInt ? 4 : 3;
+          who = dbest;
+        }
+      }
+      if (!out) {
+        const double skill = contested ? m->r().catchInTraffic * 0.6 + m->r().catching * 0.4 + m->fx.contested : m->r().catching;
+        const double tight = contested ? clamp(1 - nearOpp / cRad, 0, 1) : 0;
+        const double tough = tr.d / 1.2 * 1.2 + (jsHypot(bvel.x, bvel.y, bvel.z) > 24 ? 0.25 : 0) +
+                             (contested ? tune().contested + tight * (deepBall ? tune().tightDeep : tune().tightShort + (tune().tightDeep - tune().tightShort) * midK) : 0) +
+                             (bpos.z > 2.6 ? 0.5 : 0) + (bpos.z < 0.6 ? 0.4 : 0);
+        const double p = sigmoid(4.2 + (skill - 75) / 9 - tough * 1.5 - (wetBall ? 0.25 : 0));
+        if (laneU(m, 7) < p) {
+          out = 1;
+          who = m;
+        } else {
+          continue;  // (off his hands too: on it falls - the next man's, if any)
+        }
+      }
+    } else {
+      const bool sees = eyesOnBall(m);
+      const double edge = 1.5;  // (no receiver for it now: the man at it has it to himself)
+      const double pPlay = sigmoid((m->r().ballSkills - 70) / 10 + edge * 1.0 - 1.1 - tr.d * 0.8 - (bpos.z > 2.5 ? 0.8 : 0) + m->fx.pbu) * (sees ? 1.0 : tune().swipeK);
+      if (!(laneU(m, 9) < pPlay)) continue;
+      const double pInt = sigmoid((m->r().catching - 62) / 10 + edge * 0.6 - 1.2 - (bpos.x - los > 18 ? 1.0 : 0) + tune().intBias + m->fx.intAdj - (b.thrower ? b.thrower->fx.ballSafe : 0.0));
+      out = sees && handsAt(hm, tr.d, bpos.z) && laneU(m, 10) < pInt ? 4 : 3;
+      who = m;
+    }
+    b.fc2Fate = out;
+    b.fc2By = who;
+    b.fc2At = V2{bpos.x, bpos.y};
+    b.fc2Z = bpos.z;
+    b.fc2T = at + tr.j * h;
+    return;
+  }
+  // nobody: it falls
+  b.fc2Fate = 5;
+  b.fc2By = nullptr;
+  b.fc2At = V2{fall.back().x, fall.back().y};
+  b.fc2Z = 0;
+  b.fc2T = at + (fall.size() - 1) * h;
 }
 
 PlaySim::FateRoll PlaySim::rollCatch(double Ta, bool forecast) {
@@ -6874,6 +7139,7 @@ PlaySim::FateRoll PlaySim::rollCatch(double Ta, bool forecast) {
     const double pbu = sigmoid((dbest->r().ballSkills - 70) / 12 + edge * 1.6 - 1.2 + (deepBall ? 0.35 : 0) + dbest->fx.pbu - e->fx.winBall) * (deepBall ? 0.6 : 0.62) *
                        (sees ? 1.0 : tune().swipeK);
     out.pbu = pbu;
+    out.contBy = dbest;
     if (b.fateU[2] < pbu) {
       if (!sees) {
         out.fate = 3;
@@ -7027,11 +7293,12 @@ void PlaySim::resolveAir() {
   if (early && b.t < 0.35) {
     Ent* ee = early->e;
     reached_[ee] = t;  // one swipe per lineman
-    if (rng.chance(0.07 + (std::max)(0.0, ee->p->heightIn - 76) * 0.02)) {
+    // (his draws are the pass's own, per man - laneU - the ones the release's forecast read: the same odds)
+    if (laneU(ee, 2) < 0.07 + (std::max)(0.0, ee->p->heightIn - 76) * 0.02) {
       ev("batted", ee);
       pbuBy = ee;
-      const double vx = rng.range(-3, 3);
-      const double vy = rng.range(-3, 3);
+      const double vx = -3 + 6 * laneU(ee, 3);
+      const double vy = -3 + 6 * laneU(ee, 4);
       b.vel = V3{vx, vy, 2};
       b.target = nullptr;
       startTumble(1.0);
@@ -7178,13 +7445,14 @@ void PlaySim::resolveAir() {
         const double edge = d - dist(dbest->pos, bp);  // >0: defender closer to the ball than the receiver
         contestBy = dbest;  // (a trail man playing through the hands is credited too, as the charters do)
         contestEdge = edge;
+        if (e == b.target && !b.fcContOut) b.fcContOut = dbest;  // (the pass forecast's telemetry: who contested it)
         // (eyes on the ball: one with his back to it swipes at the hands as they come up - swipeK x the odds, no pick)
         const bool sees = eyesOnBall(dbest);
         const double faceDeg = ballFacingDeg(dbest);
         const bool seeable = canSeeBall(dbest);  // (telemetry, before the breakup takes the ball off its target)
         const double pbu = sigmoid((dbest->r().ballSkills - 70) / 12 + edge * 1.6 - 1.2 + (deepBall ? 0.35 : 0) + dbest->fx.pbu - e->fx.winBall) * (deepBall ? 0.6 : 0.62) *
                            (sees ? 1.0 : tune().swipeK);
-        if (fate >= 3 || (fate == 0 && rng.chance(pbu))) {
+        if (fate >= 3 || (fate == 0 && laneU(e, 5) < pbu)) {
           pbuBy = dbest;
           pbuBlind = !sees;
           deepContested = airYds > 15;
@@ -7198,7 +7466,7 @@ void PlaySim::resolveAir() {
           const double pInt = sigmoid((dbest->r().catching - 62) / 10 + edge * 1.2 - 1.4 - (deepBall ? 1.0 : 0) + tune().intBias + dbest->fx.intAdj - (b.thrower ? b.thrower->fx.ballSafe : 0.0) - e->fx.winBall);
           // (an interception is the defender's hands on it, inHands; a ball past them he only tips)
           const bool dHands = sees && !(tune().homeA > 0 && tune().handReach > 0 && !inHands(dbest, b.pos, 1.0));
-          if (dHands && (fate == 4 || (fate == 0 && rng.chance(pInt)))) {
+          if (dHands && (fate == 4 || (fate == 0 && laneU(e, 6) < pInt))) {
             gFate.intRecv++;
             gFate.intRecvF += fate == 4;
             gContact.add(4, dbest, b.pos, fate == 4);
@@ -7210,7 +7478,7 @@ void PlaySim::resolveAir() {
         }
         if (airYds > 15) deepContested = true;
       }
-      if (fate == 1 || (fate != 2 && rng.chance(p))) {
+      if (fate == 1 || (fate != 2 && laneU(e, 7) < p)) {
         // feet in bounds?
         if (e->pos.y < -0.05 || e->pos.y > FIELD_W + 0.05 || e->pos.x > 110) {
           ev("oobcatch", e);
@@ -7263,7 +7531,7 @@ void PlaySim::resolveAir() {
       // (the box score: a contested ball he was at the catch point for is a pass he defended - Tune::pdCredit)
       if (contested && contestBy && tune().pdCredit > 0 && contestEdge > -tune().pdCredit && !pbuBy) pbuBy = contestBy;
       {
-        const double vy = b.vel.y * 0.2 + rng.range(-1, 1);
+        const double vy = b.vel.y * 0.2 - 1 + 2 * laneU(e, 8);
         b.vel = V3{b.vel.x * 0.2, vy, 1.2};
       }
       b.target = nullptr;
@@ -7285,13 +7553,13 @@ void PlaySim::resolveAir() {
       const bool sees = eyesOnBall(e);
       const double pPlay = sigmoid((e->r().ballSkills - 70) / 10 + edge * 1.0 - 1.1 - d * 0.8 - (b.pos.z > 2.5 ? 0.8 : 0) + e->fx.pbu - (tgt ? tgt->fx.winBall : 0.0)) *
                            (sees ? 1.0 : tune().swipeK);
-      if (!fated && !rng.chance(pPlay)) continue;
+      if (!fated && !(laneU(e, 9) < pPlay)) continue;
       const double pInt = sigmoid((e->r().catching - 62) / 10 + edge * 0.6 - 1.2 - (b.pos.x - los > 18 ? 1.0 : 0) + tune().intBias + e->fx.intAdj - (b.thrower ? b.thrower->fx.ballSafe : 0.0));
       // (not rolled ahead and so not brought to him: from past handReach he gets a hand to it, no more)
       // (and one rolled ahead too: an interception is his hands on it - inHands - or it is a tip)
       const bool handsOn = sees && !(tune().homeA > 0 && tune().handReach > 0 && !inHands(e, b.pos, 1.0));
       pbuBlind = !sees;
-      if (fated ? b.fate == 4 && handsOn : handsOn && rng.chance(pInt)) {
+      if (fated ? b.fate == 4 && handsOn : handsOn && laneU(e, 10) < pInt) {
         gFate.intDef++;
         gFate.intDefF += fated;
         gContact.add(6, e, b.pos, fated);
@@ -7302,8 +7570,8 @@ void PlaySim::resolveAir() {
         pbuBy = e;
         gContact.add(5, e, b.pos, fated);
         ev("pbu", e, tgt);
-        const double vx = b.vel.x * 0.2 + rng.range(-2, 2);
-        const double vy = b.vel.y * 0.2 + rng.range(-2, 2);
+        const double vx = b.vel.x * 0.2 - 2 + 4 * laneU(e, 11);
+        const double vy = b.vel.y * 0.2 - 2 + 4 * laneU(e, 12);
         b.vel = V3{vx, vy, 2};
         b.target = nullptr;
         startTumble(1.0);
@@ -7813,7 +8081,8 @@ void PlaySim::endPlay(const std::string& reason) {
     r.rusher = re ? re->p : nullptr;
   }
   // the pass's forecast against what happened (a ball dead in the air with nobody's play on it - out past a line - is
-  // "nobody gets to it")
+  // "nobody gets to it"; a tipped ball the same)
+  settleFate();
   if (ball.fcFate != 0 && ball.fcOut == 0) {
     ball.fcOut = 5;
     ball.fcOutT = t;
@@ -7824,6 +8093,28 @@ void PlaySim::endPlay(const std::string& reason) {
       ball.fcRev++;
       ball.fcWhy = "at the ball: dead";
     }
+  }
+  if (ball.fcFate != 0 && (ball.fcOut == 2 || ball.fcOut == 3) && ball.fc2Out == 0) {
+    ball.fc2Out = 5;
+    ball.fc2OutT = t;
+    ball.fc2OutAt = ball.pos;
+    if (ball.fc2Fate != 5) {
+      ball.fc2Fate = 5;
+      ball.fc2By = nullptr;
+      ball.fcRev++;
+      ball.fcWhy = "tip: dead";
+    }
+  }
+  r.fcBatted0 = ball.fcBatted0;
+  r.fcBattedOut = ball.fcBattedOut;
+  r.fcContBy0 = ball.fcContBy0 ? ball.fcContBy0->p : nullptr;
+  r.fcContOut = ball.fcContOut ? ball.fcContOut->p : nullptr;
+  r.fc2Fate0 = ball.fc2Fate0;
+  r.fc2Out = ball.fc2Out;
+  if (ball.fc2Fate0 != 0 && ball.fc2Out != 0) {
+    r.fc2ByOk = ball.fc2Out == 5 || ball.fc2OutBy == ball.fc2By0;
+    r.fc2ErrT = ball.fc2OutT - ball.fc2T0;
+    r.fc2ErrD = jsHypot(ball.fc2OutAt.x - ball.fc2At0.x, ball.fc2OutAt.y - ball.fc2At0.y);
   }
   r.fcFate0 = ball.fcFate0;
   r.fcOut = ball.fcOut;

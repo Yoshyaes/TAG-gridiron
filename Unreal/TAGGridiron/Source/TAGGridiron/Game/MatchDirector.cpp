@@ -1376,6 +1376,40 @@ void AMatchDirector::TickPostJog(float Dt)
 		PostYaw[E] = FaceYaw;
 		PostVel[E] = Step(E->p, It->second, Target);
 	}
+	// (arm sweep 4) the men walking or coasting after the whistle keep out of each other and of the men standing: each pair
+	// inside 75 cm steps apart (half each between two walkers, all of it off a man standing, a set man or one down), at most
+	// 1.5 m/s - their walks to the huddle crossed through each other (15 overlaps a set, 5 of them pelvis inside pelvis)
+	static const bool bNoPostSep = FParse::Param(FCommandLine::Get(), TEXT("TagNoPostSep"));
+	if (!AAthlete::ArmSweepOff() && !bNoPostSep && PostPos.size() > 1)
+	{
+		constexpr float Room = 75.f;
+		TArray<TPair<tag::Ent*, FVector>> Push;
+		for (auto& KV : PostPos)
+		{
+			FVector Sum = FVector::ZeroVector;
+			for (tag::Ent* O : Sim->ents)
+			{
+				if (O == KV.first) continue;
+				const auto Oj = PostPos.find(O);
+				FVector OAt;
+				if (Oj != PostPos.end()) OAt = Oj->second;
+				else
+				{
+					const AAthlete* Oa = AthleteFor(O->p, O->side == tag::Side::Off ? Game->poss : tag::other(Game->poss));
+					if (!Oa || Oa->IsHidden()) continue;
+					OAt = Oa->GetActorLocation();
+				}
+				FVector Apart = KV.second - OAt;
+				Apart.Z = 0.f;
+				const float Gap = static_cast<float>(Apart.Size());
+				if (Gap >= Room) continue;
+				const FVector Dirn = Gap > 1.f ? Apart / Gap : FVector(KV.first < O ? 1.f : -1.f, 0.f, 0.f);
+				Sum += Dirn * ((Room - Gap) * (Oj != PostPos.end() ? 0.5f : 1.f));
+			}
+			if (!Sum.IsNearlyZero()) Push.Emplace(KV.first, Sum.GetClampedToMaxSize2D(150.f * Dt));
+		}
+		for (const TPair<tag::Ent*, FVector>& Pp : Push) PostPos[Pp.Key] += Pp.Value;
+	}
 }
 
 int32 AMatchDirector::ScoreShown(tag::TeamKey K, FString* Word) const
@@ -5694,6 +5728,43 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 	}
 	AAthlete* PuntMan = nullptr;
 	FVector PuntSnapW = FVector::ZeroVector;
+	// (arm sweep 4) the walk-up's men walking through each other where their walks start - off the last play's pile, the
+	// huddle, 0.2-1 s into the walk (7 of the 8 pre-snap overlaps left in pass 3): a man still walking to his spot steps
+	// off any man inside 75 cm of him (half each between two walkers), eased at 1.5 m/s and eased back out the same way; a
+	// man set on his spot is never moved (the quarterback stands half a metre behind the centre)
+	{
+		static const bool bNoWalkSep = FParse::Param(FCommandLine::Get(), TEXT("TagNoWalkPlan"));
+		const bool bWalkOn = State == EMatchState::Presnap && !AAthlete::ArmSweepOff() && !bNoWalkSep && Dt > 0.f;
+		if (!bWalkOn) WalkSep.Reset();
+		else
+		{
+			constexpr float Room = 75.f;
+			auto Walking = [](const tag::Ent* W) { return W->shiftTo && !W->inMotion && tag::dist(W->pos, *W->shiftTo) > 0.4; };
+			for (tag::Ent* E : Sim->ents)
+			{
+				const AAthlete* Ae = AthleteFor(E->p, E->side == tag::Side::Off ? OffK : tag::other(OffK));
+				FVector& Off = WalkSep.FindOrAdd(E);
+				FVector Want = FVector::ZeroVector;
+				if (Ae && Walking(E))
+					for (const tag::Ent* O : Sim->ents)
+					{
+						if (O == E) continue;
+						const AAthlete* Ao = AthleteFor(O->p, O->side == tag::Side::Off ? OffK : tag::other(OffK));
+						if (!Ao || Ao->IsHidden()) continue;
+						FVector Apart = Ae->GetActorLocation() - Ao->GetActorLocation();
+						Apart.Z = 0.f;
+						const float Gap = static_cast<float>(Apart.Size());
+						if (Gap >= Room) continue;
+						const FVector Dn = Gap > 1.f ? Apart / Gap : FVector(E < O ? 1.f : -1.f, 0.f, 0.f);
+						Want += Dn * ((Room - Gap) * (Walking(O) ? 0.5f : 1.f));
+					}
+				Off = FMath::VInterpConstantTo(Off, Off + Want.GetClampedToMaxSize2D(60.f), Dt, 150.f);
+				if (Want.IsNearlyZero()) Off = FMath::VInterpConstantTo(Off, FVector::ZeroVector, Dt, Walking(E) ? 60.f : 150.f);
+				Off = Off.GetClampedToMaxSize2D(80.f);
+				Off.Z = 0.f;
+			}
+		}
+	}
 	for (tag::Ent* E : Sim->ents)
 	{
 		const FVector2D* PV = nullptr;
@@ -5831,6 +5902,7 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 					}
 				}
 			}
+		if (const FVector* Ws = WalkSep.Find(E); Ws && State == EMatchState::Presnap) Loc += *Ws;
 		A->Drive(Loc, Yaw, VelW, static_cast<float>(E->vmax), AnimName, AnimT, Dt, E->isOL || E->isDL);
 		A->SetSelected(false); // (the user's man is marked by the overlay ring and chevron: UpdateLineBars)
 		A->SetLabel(FString()); // receivers' buttons are drawn by the overlay (UpdateIcons)
@@ -6702,6 +6774,46 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 			FcSecondRev = B.fcRev;
 			FcSecondFate = Fate;
 		}
+		// the man who gets to the ball plays it (arm sweep 4): the sim settles most breakups at the ball - the defender nearest
+		// it when it gets to the receiver (PlaySim's contest), or one whose path the ball passes within his reach - so they
+		// were never forecast and he was on locomotion in 8 of 10. For a pass forecast caught, dropped or untouched, the
+		// defender whose path comes nearest the ball's flight (both held straight; the ball between knees and a jump's
+		// reach) goes up for it if that is inside 1.2 yd - 2 yd on a contested catch - from 0.6 s before that moment, timed
+		// onto it: a breakup then finds him in it; a catch made is his swat coming up short.
+		if ((Fate == 1 || Fate == 2 || Fate == 5) && FcContSerial != Sim->serial && SwatSerial != Sim->serial)
+		{
+			const tag::Ent* Best = nullptr;
+			double BestD = 1e9, BestT = -1.0;
+			const double Horizon = FMath::Min(TIn + 0.15, 1.3);
+			for (const tag::Ent* Dd : Sim->def)
+			{
+				if (!Dd->free() || Dd == B.fcBy) continue;
+				for (double Tq = 0.1; Tq <= Horizon; Tq += 1.0 / 30.0)
+				{
+					const double Bz = B.pos.z + B.vel.z * Tq - 0.5 * tag::G * Tq * Tq;
+					if (Bz < 0.3 || Bz > 3.2) continue;
+					const double Dq = FMath::Sqrt(FMath::Square(B.pos.x + B.vel.x * Tq - (Dd->pos.x + Dd->vel.x * Tq)) + FMath::Square(B.pos.y + B.vel.y * Tq - (Dd->pos.y + Dd->vel.y * Tq)));
+					if (Dq < BestD) { BestD = Dq; BestT = Tq; Best = Dd; }
+				}
+			}
+			const double Reach = B.fcCont && Fate != 5 ? 2.0 : 1.2;
+			if (Best && BestD < Reach && BestT > 0.1 && BestT <= 0.6)
+				if (AAthlete* Ad = AthOf(Best); Ad && !Ad->IsFalling())
+				{
+					const double Sp = tag::len(Best->vel);
+					const double Fwd = Sp > 0.3 ? (Best->vel.x * FMath::Cos(Best->face) + Best->vel.y * FMath::Sin(Best->face)) / Sp : 1.0;
+					if (Ad->PlayBallDefense(Sp < 1.5 || Fwd < -0.4 ? 2 : FMath::Abs(Fwd) < 0.5 ? 1 : 0, false, static_cast<float>(BestT)))
+					{
+						FcContSerial = Sim->serial;
+						FcContest = Best;
+						FcContestAt = Sim->t + BestT;
+						SwatSerial = Sim->serial;
+						SwatBy = Best;
+						UE_LOG(LogTemp, Display, TEXT("TAG forecast contest: #%d plays the ball, %.2f s out, %.1f yd off its flight (fate %d%s)"), Best->p ? Best->p->number : -1, BestT, BestD,
+							Fate, B.fcCont ? TEXT(", contested") : TEXT(""));
+					}
+				}
+		}
 		// the warp onto the forecast's moment (the two-man interception runs at the capture's own rate). Over the last half
 		// second it hands over to the ball's own approach (CcContactIn: when it is nearest the man it was thrown to, the
 		// moment the sim plays it): the forecast's time is the release's view, up to 0.1 s off where it stands (p90), and
@@ -6724,6 +6836,8 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 				if (AAthlete* Aw = AthOf(FcMain)) Aw->AlignKey(static_cast<float>(WarpIn));
 			if (FcSecond && FcSecondRev == B.fcRev && !(Fate == 4 && bIntPaired))
 				if (AAthlete* Aw = AthOf(FcSecond)) Aw->AlignKey(static_cast<float>(WarpIn));
+			if (FcContest && FcContSerial == Sim->serial && SwatBy == FcContest && FcContestAt - Sim->t > 0.0)
+				if (AAthlete* Aw = AthOf(FcContest)) Aw->AlignKey(static_cast<float>(FcContestAt - Sim->t));
 		}
 	}
 	if (!bFcPath && B.mode == tag::BallMode::Air && Sim->isLive() && !Sim->cfg.kick && B.target && !B.away)
