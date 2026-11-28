@@ -3882,7 +3882,100 @@ void AMatchDirector::StartPresnap(const tag::OffPlay* Op, const tag::DefCall* Dc
 			: US ? TEXT("Defending   TAB switch player   WASD move   SPACE dive tackle   F hit stick   V cut   (rushing: J finesse, K power)")
 			: TEXT("1/2/4 game speed   C camera   ESC pause"), false));
 	BeginPresnapUI();
+	PlanWalkUp(Timer * Speed);
 	SyncPlay(0.f, 1.f);
+}
+
+void AMatchDirector::PlanWalkUp(float SnapIn)
+{
+	WalkDelay.Reset();
+	WalkHist.Reset();
+	WalkLane.Reset();
+	WalkT0 = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.0;
+	static const bool bOff = FParse::Param(FCommandLine::Get(), TEXT("TagNoWalkPlan"));
+	if (!Sim || bOff || AAthlete::ArmSweepOff()) return;
+	// the men walking to their spots (Sim::walkFrom: shiftTo), straight at 4.2 yd/s; the others standing where they are.
+	// Each walker gets a lane (his path bowed to one side, Amp at its middle - none at the ends, so he leaves from where he
+	// stood and sets on the sim's spot) and a delay, picked in turn: the line first, then the backs, then the rest.
+	struct FW { const tag::Ent* E; FVector From, To; float Len, T; int32 Pri; float D; float Amp = 0.f; };
+	TArray<FW> Walk, Placed;
+	TArray<FVector> Still;
+	const float V = static_cast<float>(4.2 * YD);
+	for (const tag::Ent* E : Sim->ents)
+	{
+		const FVector At = ToWorld(E->pos.x, E->pos.y, Dir);
+		if (!E->shiftTo || E->inMotion) { Still.Add(At); continue; }
+		const FVector To = ToWorld(E->shiftTo->x, E->shiftTo->y, Dir);
+		const float L = static_cast<float>(FVector::Dist2D(At, To));
+		if (L < 60.f) { Still.Add(At); continue; }
+		// the line first, then the backs, quarterback, tight ends and linebackers, then the receivers and the secondary
+		const tag::Pos P = E->p->pos;
+		const int32 Pri = (E->isOL || E->isDL) ? 0 : (P == tag::Pos::QB || P == tag::Pos::RB || P == tag::Pos::TE || P == tag::Pos::LB) ? 1 : 2;
+		Walk.Add({E, At, To, L, L / V, Pri, 0.f});
+	}
+	if (Walk.Num() < 2) return;
+	// (held back only inside the walk's own time: the formation sets as the last man arrives - a user snaps then - so no
+	// one arrives after the longest walk plus a beat)
+	float MaxT = 0.f;
+	for (const FW& W : Walk) MaxT = FMath::Max(MaxT, W.T);
+	SnapIn = FMath::Min(SnapIn, MaxT + 0.7f);
+	Walk.StableSort([](const FW& A, const FW& B) { return A.Pri < B.Pri; });
+	auto PosAt = [](const FW& W, float T)
+	{
+		const float S = FMath::Clamp((T - W.D) / FMath::Max(W.T, 0.01f), 0.f, 1.f);
+		const FVector Dv = (W.To - W.From).GetSafeNormal2D();
+		return W.From + (W.To - W.From) * S + FVector(-Dv.Y, Dv.X, 0.f) * (W.Amp * FMath::Sin(PI * S));
+	};
+	auto Going = [](const FW& W, const FVector& P) { return FVector::Dist2D(P, W.To) > 120.f; }; // (the last 1.2 m: men set close)
+	constexpr float Clear = 110.f, Step = 0.05f;
+	int32 Delayed = 0, Laned = 0;
+	for (FW& W : Walk)
+	{
+		const float DMax = FMath::Clamp(SnapIn - W.T - 0.5f, 0.f, 1.5f);
+		// (a lane at most a sixth of the walk aside - his heading turns <= 28 degrees off the straight line - and 90 cm)
+		const float AmpMax = FMath::Min(90.f, W.Len / 6.f);
+		float BestD = 0.f, BestAmp = 0.f, BestScore = 1e9f;
+		for (int32 Lane = 0; Lane < 3 && BestScore > 0.f; ++Lane)
+		{
+			W.Amp = Lane == 0 ? 0.f : Lane == 1 ? AmpMax : -AmpMax; // straight, his right (keep right: head on, each takes his own), his left
+			for (float D = 0.f; D <= DMax + 1e-3f; D += 0.15f)
+			{
+				W.D = D;
+				const float TEnd = W.D + W.T;
+				// (a lane or a wait has to buy something: straight and now win a tie)
+				float Over = D * 15.f + (Lane ? 4.f : 0.f);
+				for (float T = 0.f; T <= TEnd + 1e-3f && Over < BestScore; T += Step)
+				{
+					const FVector Me = PosAt(W, T);
+					if (!Going(W, Me)) continue;
+					for (const FW& O : Placed)
+					{
+						const FVector Ot = PosAt(O, T);
+						const float Dd = static_cast<float>(FVector::Dist2D(Me, Ot));
+						if (Dd < Clear && Going(O, Ot)) Over += (Clear - Dd) * Step;
+					}
+					for (const FVector& S : Still)
+					{
+						const float Dd = static_cast<float>(FVector::Dist2D(Me, S));
+						if (Dd < Clear) Over += (Clear - Dd) * Step * 0.5f;
+					}
+				}
+				if (Over < BestScore - 1.f) { BestScore = Over; BestD = D; BestAmp = W.Amp; }
+				if (Over <= D * 15.f + (Lane ? 4.f : 0.f)) break; // (clear at this wait: a longer one only costs)
+			}
+		}
+		W.D = BestD;
+		W.Amp = BestAmp;
+		Placed.Add(W);
+		if (BestD > 0.01f) { WalkDelay.Add(W.E, BestD); ++Delayed; }
+		if (FMath::Abs(BestAmp) > 1.f) { WalkLane.Add(W.E, FWalkLane{W.From, W.To, BestAmp}); ++Laned; }
+		static const bool bWalkLog = FParse::Param(FCommandLine::Get(), TEXT("TagHlFull"));
+		if (bWalkLog)
+			UE_LOG(LogTemp, Display, TEXT("TAG walk-up man #%d: (%.1f, %.1f) to (%.1f, %.1f) yd, %.2f s, wait %.2f, lane %.0f cm, left over %.0f"), W.E->p ? W.E->p->number : -1,
+				W.E->pos.x, W.E->pos.y, W.E->shiftTo->x, W.E->shiftTo->y, W.T, BestD, BestAmp, BestScore);
+	}
+	UE_LOG(LogTemp, Display, TEXT("TAG walk-up plan: %d walkers, %d held back (up to %.2f s), %d in a lane; snap in %.1f s"), Walk.Num(), Delayed,
+		Delayed ? [&] { float M = 0.f; for (const auto& KV : WalkDelay) M = FMath::Max(M, KV.Value); return M; }() : 0.f, Laned, SnapIn);
 }
 
 void AMatchDirector::SyncRealClock()
@@ -5690,6 +5783,54 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 		if (Sim->isLive() && PostPos.find(E) == PostPos.end() && !E->engaged && E->stun <= 0)
 			A->SetIntent(Dir > 0 ? FVector(E->want.x, -E->want.y, 0) * YD : FVector(-E->want.x, E->want.y, 0) * YD);
 		if (Sim->isLive() && PostPos.find(E) == PostPos.end() && !E->engaged && E->stun <= 0) A->SetSimFuture(*Sim, *E, Dir, Alpha); // (and his next 1.6 s as the sim moves him: motion matching's query)
+		// the walk-up staggered (PlanWalkUp): a man held back walks the sim's own path that much later
+		if (State == EMatchState::Presnap && WalkDelay.Num() && GetWorld()) // (the sim counts the walk-up as live: not isLive)
+			if (const float* WD = WalkDelay.Find(E))
+			{
+				const double Now = GetWorld()->GetTimeSeconds() - WalkT0;
+				TArray<FWalkSample>& H = WalkHist.FindOrAdd(E);
+				if (!H.Num() || Now - H.Last().T > 1e-4) H.Add({Now, Loc, Yaw, VelW, AnimName == TEXT("run")});
+				const double Want = Now - *WD;
+				if (Want <= H[0].T) { Loc = H[0].Loc; Yaw = H.Num() > 1 ? H[1].Yaw : H[0].Yaw; VelW = FVector::ZeroVector; AnimName = TEXT("idle"); }
+				else
+				{
+					int32 k = H.Num() - 1;
+					while (k > 0 && H[k].T > Want) --k;
+					const FWalkSample& S0 = H[k];
+					const FWalkSample& S1 = H[FMath::Min(k + 1, H.Num() - 1)];
+					const double Span = S1.T - S0.T;
+					const float Al = Span > 1e-4 ? static_cast<float>((Want - S0.T) / Span) : 0.f;
+					Loc = FMath::Lerp(S0.Loc, S1.Loc, Al);
+					Yaw = S0.Yaw;
+					VelW = S0.Vel;
+					AnimName = S0.bRun ? TEXT("run") : TEXT("idle");
+				}
+			}
+		// ...and in his lane: bowed aside by how far along his walk he is (nothing at either end), heading and pace with it
+		if (State == EMatchState::Presnap && WalkLane.Num())
+			if (const FWalkLane* Ln = WalkLane.Find(E))
+			{
+				const FVector Pv = Ln->To - Ln->From;
+				const float L2 = static_cast<float>(Pv.SizeSquared2D());
+				if (L2 > 1.f)
+				{
+					const float L = FMath::Sqrt(L2);
+					const float Sv = FMath::Clamp(static_cast<float>(FVector::DotProduct(FVector(Loc.X - Ln->From.X, Loc.Y - Ln->From.Y, 0.f), FVector(Pv.X, Pv.Y, 0.f))) / L2, 0.f, 1.f);
+					const FVector Dv = FVector(Pv.X, Pv.Y, 0.f) / L, Rv(-Dv.Y, Dv.X, 0.f);
+					Loc += Rv * (Ln->Amp * FMath::Sin(PI * Sv));
+					static const bool bLaneLog = FParse::Param(FCommandLine::Get(), TEXT("TagHlFull"));
+					if (bLaneLog && FMath::Abs(Sv - 0.5f) < 0.02f)
+						UE_LOG(LogTemp, Display, TEXT("TAG walk-up lane #%d: %.0f cm aside at the middle"), E->p ? E->p->number : -1, Ln->Amp * FMath::Sin(PI * Sv));
+					// (the bow's own slope on his velocity: d(aside)/d(along) = Amp pi cos(pi s) / L)
+					const float Along = static_cast<float>(FVector::DotProduct(VelW, Dv));
+					if (Along > 20.f)
+					{
+						const FVector NewVel = VelW + Rv * (Along * Ln->Amp * PI * FMath::Cos(PI * Sv) / L);
+						Yaw += static_cast<float>(FMath::RadiansToDegrees(FMath::FindDeltaAngleRadians(FMath::Atan2(VelW.Y, VelW.X), FMath::Atan2(NewVel.Y, NewVel.X))));
+						VelW = NewVel;
+					}
+				}
+			}
 		A->Drive(Loc, Yaw, VelW, static_cast<float>(E->vmax), AnimName, AnimT, Dt, E->isOL || E->isDL);
 		A->SetSelected(false); // (the user's man is marked by the overlay ring and chevron: UpdateLineBars)
 		A->SetLabel(FString()); // receivers' buttons are drawn by the overlay (UpdateIcons)
@@ -5803,8 +5944,13 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 			if (const AAthlete* Ka = AthOf(Ev.a))
 			{
 				const float In = Ka->OneShotKeyIn();
-				UE_LOG(LogTemp, Display, TEXT("TAG keytime %s #%d clip %d frame %d: %s %.3f s (%s, at %.2f, key %.2f)"), UTF8_TO_TCHAR(Ev.type.c_str()), Ev.a->p ? Ev.a->p->number : -1,
-					HlClip, HlFrame, FMath::IsNaN(In) ? TEXT("none") : TEXT("in"), FMath::IsNaN(In) ? 0.f : In, *Ka->TelemetryAnim(), Ka->OneShotClipT(), Ka->OneShotKeyT);
+				// (and, at a catch, how far the shown hands are from the sim's ball - the check on the capture's contact frame
+				// that does not depend on how that frame was marked)
+				const FVector SimBallW = ToWorld(Sim->ball.pos.x, Sim->ball.pos.y, Dir, Sim->ball.pos.z);
+				const float HandsGap = static_cast<float>(FVector::Dist(Ka->HandsMid(), SimBallW));
+				UE_LOG(LogTemp, Display, TEXT("TAG keytime %s #%d clip %d frame %d: %s %.3f s (%s, at %.2f, key %.2f) hands %.0f cm, fc %.3f rev %d"), UTF8_TO_TCHAR(Ev.type.c_str()), Ev.a->p ? Ev.a->p->number : -1,
+					HlClip, HlFrame, FMath::IsNaN(In) ? TEXT("none") : TEXT("in"), FMath::IsNaN(In) ? 0.f : In, *Ka->TelemetryAnim(), Ka->OneShotClipT(), Ka->OneShotKeyT, HandsGap,
+					Sim->ball.fcT > 0.0 ? Sim->ball.fcT - Sim->t : -9.0, Sim->ball.fcRev);
 			}
 		if ((Ev.type == "catch" || Ev.type == "int") && Ev.a)
 		{
@@ -5874,7 +6020,7 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 				TossClipSerial = Sim->serial;
 				// the back takes it with the pack's pitch catch for where it comes from, its hands on the ball as it gets there
 				// (the sim's toss flies 0.28-0.3 s: PlaySim mesh tossDur). He ran on with nothing in his arms before.
-				if (Ev.b)
+				if (Ev.b && TossPairSerial != Sim->serial) // (the two-man toss has his catch in it)
 					if (AAthlete* Rb = AthOf(Ev.b))
 					{
 						const FVector Fly = (Rb->GetActorLocation() - Q->GetActorLocation()).GetSafeNormal2D() * 900.f;
@@ -6287,6 +6433,27 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 			if (!Qa || !Ra) {}
 			else if (Mh.toss)
 			{
+				// the two men in one of the pack's two-man tosses, started as soon as the release is no further off than the
+				// capture has before its own (arm sweep 3: the keyed pitch was untimed and the back caught it on his own)
+				// (which way it goes: the back's path at the toss - the sim's frame, + y the offense's left; an I-formation back
+				// starts straight behind him, on neither side)
+				const bool bTossLeft = FMath::Abs(Mh.dir.y) > 0.05 ? Mh.dir.y > 0.0 : Rb->pos.y > Sim->qb->pos.y;
+				if (TossClipSerial != Sim->serial && Sim->tossT0 < 0 && Mh.T - Sim->t > 0.0)
+				{
+					static int32 GTossSeq = 0;
+					if (AAthlete::PlayRepToss(Qa, Ra, Sim->qb->pos.x < Sim->los - 2.5, bTossLeft, static_cast<float>(Mh.T - Sim->t), GTossSeq))
+					{
+						++GTossSeq;
+						TossClipSerial = Sim->serial;
+						TossPairSerial = Sim->serial;
+					}
+				}
+				if (TossPairSerial == Sim->serial)
+				{
+					// (each on the sim's moments: the release at the toss, the back's hands as it gets to him)
+					if (Sim->tossT0 < 0) Qa->AlignKey(static_cast<float>(Mh.T - Sim->t));
+					Ra->AlignKey(static_cast<float>((Sim->tossT0 >= 0 ? Sim->tossT0 : Mh.T) + Mh.tossDur - Sim->t));
+				}
 				if (TossClipSerial != Sim->serial && Sim->tossT0 < 0 && Mh.T - Sim->t <= 0.2 && FAthleteAssets::Get().Pitch)
 				{
 					TossClipSerial = Sim->serial;
@@ -6456,7 +6623,110 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 	// had releases and catches up to a quarter second off the ball.
 	if (Sim->pendingThrow && !Sim->passThrown && Sim->qb && ThrowTimedSerial == Sim->serial)
 		if (AAthlete* Aq = AthOf(Sim->qb); Aq && Aq->IsThrowing()) Aq->AlignKey(static_cast<float>(Sim->pendingThrow->at - Sim->t));
-	if (B.mode == tag::BallMode::Air && Sim->isLive() && !Sim->cfg.kick && B.target && !B.away)
+	// ---- the play on the ball from the forecast at the release (PlaySim Ball::fcFate .. fcT; arm sweep 3): the man it names
+	// goes into his catch / drop / swat / interception / miss as soon as the capture has run-in for it, picked from where and
+	// how high the ball will be played and timed over the whole run-in onto fcT (a small warp over a long window, not a big
+	// one in the last 0.3 s); a revision (fcRev) re-picks from the revised forecast, started at the same time to the ball so
+	// the blend meets the new capture in step. The 0.4 s roll and the 0.3 s prime below stand aside while it runs.
+	const bool bFcPath = !AAthlete::ArmSweepOff() && B.mode == tag::BallMode::Air && Sim->isLive() && !Sim->cfg.kick && B.target && !B.away && !B.tumble &&
+		B.fcFate != 0 && B.fcT > 0.0;
+	if (bFcPath)
+	{
+		if (FcSerial != Sim->serial) { FcSerial = Sim->serial; FcMain = nullptr; FcSecond = nullptr; FcMainRev = FcSecondRev = -1; FcMainFate = FcSecondFate = 0; }
+		const double TIn = B.fcT - Sim->t;
+		const int32 Fate = B.fcFate;
+		const tag::Ent* Main = Fate == 5 ? B.target : B.fcBy;
+		const tag::Ent* Second = (Fate == 3 || Fate == 4) ? B.target : nullptr;
+		const FVector AtW = ToWorld(B.fcAt.x, B.fcAt.y, Dir, B.fcZ);
+		const float ZCm = static_cast<float>(B.fcZ * YD);
+		static int32 GFcIntSeq = 0;
+		// how far out each kind starts: its captures' run-in (a dive travels: started late as before)
+		auto Window = [&](bool bSecondMan) { return Fate == 1 && B.fcDive ? 0.3 : Fate == 4 ? 0.6 : (Fate == 3 && !bSecondMan) ? 0.6 : 0.9; };
+		auto StartOn = [&](const tag::Ent* Who, bool bSecondMan) -> bool
+		{
+			AAthlete* Aw = Who ? AthOf(Who) : nullptr;
+			if (!Aw || Aw->IsFalling()) return false;
+			const float In = static_cast<float>(TIn);
+			if (Fate == 1)
+			{
+				if (B.fcDive) { Aw->PlayDiveAttempt(In); DivePrimedSerial = Sim->serial; return true; }
+				FVector Side = FVector::ZeroVector;
+				if (Who->pos.y < 1.5 || Who->pos.y > tag::FIELD_W - 1.5)
+					Side = (ToWorld(Who->pos.x, Who->pos.y < 1.5 ? Who->pos.y - 1.0 : Who->pos.y + 1.0, Dir, 0) - ToWorld(Who->pos.x, Who->pos.y, Dir, 0)).GetSafeNormal();
+				Aw->PlayCatch(ZCm, static_cast<float>(tag::len(Who->vel) * YD), BallVelW, Side, AtW, B.fcCont, bAggroCatch, In);
+				return true;
+			}
+			if (Fate == 2 || ((Fate == 3 || Fate == 4) && bSecondMan)) return Aw->PlayDrop(In, ZCm, BallVelW);
+			if (Fate == 3)
+			{
+				const double Sp = tag::len(Who->vel);
+				const double Fwd = Sp > 0.3 ? (Who->vel.x * FMath::Cos(Who->face) + Who->vel.y * FMath::Sin(Who->face)) / Sp : 1.0;
+				return Aw->PlayBallDefense(Sp < 1.5 || Fwd < -0.4 ? 2 : FMath::Abs(Fwd) < 0.5 ? 1 : 0, false, In);
+			}
+			if (Fate == 5)
+			{
+				// (a man who can get near it reaches and misses; one who cannot gets out of the catch he was in and runs on -
+				// a forecast catch revised to an untouched ball was a catch pose with no ball in it)
+				if (FVector::Dist2D(Aw->GetActorLocation(), AtW) < 3.5f * YD && Aw->PlayMiss(ZCm, BallVelW, In)) return true;
+				if (FcMainFate == 1 || FcMainFate == 2) Aw->CancelOneShot();
+				return false;
+			}
+			return false;
+		};
+		const bool bMainDue = Main && (FcMain != Main || FcMainRev != B.fcRev) && TIn > 0.03 && TIn <= Window(false);
+		if (bMainDue)
+		{
+			bool bOk = false;
+			if (Fate == 4)
+			{
+				bIntPaired = AAthlete::PlayIntPair(AthOf(B.fcBy), AthOf(B.target), static_cast<float>(TIn), ZCm, GFcIntSeq++);
+				if (bIntPaired) { FatePrimedSerial = Sim->serial; FcSecond = B.target; FcSecondRev = B.fcRev; FcSecondFate = Fate; bOk = true; }
+				else if (AAthlete* Ad = AthOf(B.fcBy)) { bOk = Ad->PlayBallDefense(0, true, static_cast<float>(TIn)); IntPrimedSerial = Sim->serial; }
+				SwatSerial = Sim->serial;
+				SwatBy = B.fcBy;
+			}
+			else bOk = StartOn(Main, false);
+			if (Fate == 3) { SwatSerial = Sim->serial; SwatBy = Main; }
+			if (Fate == 1 || Fate == 2 || Fate == 5) { PrimedSerial = Sim->serial; PrimedCatcher = Main; }
+			FcMain = Main;
+			FcMainRev = B.fcRev;
+			FcMainFate = Fate;
+			UE_LOG(LogTemp, Display, TEXT("TAG forecast play: fate %d (rev %d%s%s) #%d, %.2f s out, ball %.0f cm%s%s"), Fate, B.fcRev, B.fcRev ? TEXT(" ") : TEXT(""),
+				UTF8_TO_TCHAR((B.fcRev ? B.fcWhy.c_str() : "")), Main->p ? Main->p->number : -1, TIn, ZCm, B.fcCont ? TEXT(", contested") : TEXT(""), bOk ? TEXT("") : TEXT(" (no capture)"));
+		}
+		const bool bSecondDue = Second && (FcSecond != Second || FcSecondRev != B.fcRev) && TIn > 0.03 && TIn <= Window(true) && !(Fate == 4 && bIntPaired && FatePrimedSerial == Sim->serial);
+		if (bSecondDue)
+		{
+			if (StartOn(Second, true)) { PrimedSerial = Sim->serial; PrimedCatcher = Second; }
+			FcSecond = Second;
+			FcSecondRev = B.fcRev;
+			FcSecondFate = Fate;
+		}
+		// the warp onto the forecast's moment (the two-man interception runs at the capture's own rate). Over the last half
+		// second it hands over to the ball's own approach (CcContactIn: when it is nearest the man it was thrown to, the
+		// moment the sim plays it): the forecast's time is the release's view, up to 0.1 s off where it stands (p90), and
+		// the catches it alone timed were 0.1 s off their hands in the p3A audit.
+		const double LiveIn = CcContactIn(B.target);
+		// (by no more than the forecast's own error, 0.12 s: the ball's nearest pass is no moment for a ball dropping in over
+		// his shoulder from behind - it closes on him slowly - and taken whole it ran a reach-behind catch to its hands
+		// 0.4 s before the ball, p3A2)
+		const double HandW = LiveIn > 0.0 && LiveIn < 0.8 ? FMath::Clamp((0.5 - TIn) / 0.3, 0.0, 1.0) : 0.0;
+		const double WarpIn = TIn + FMath::Clamp(LiveIn - TIn, -0.12, 0.12) * HandW;
+		if (WarpIn > 0.0 && WarpIn < 1.0)
+		{
+			// (and where the ball will be then, on its flight, for the catch seat: AAthlete::SetCatchBall)
+			const double Tb = FMath::Min(WarpIn, 0.8);
+			const FVector BallThenW = ToWorld(B.pos.x + B.vel.x * Tb, B.pos.y + B.vel.y * Tb, Dir, FMath::Max(0.1, B.pos.z + B.vel.z * Tb - 0.5 * tag::G * Tb * Tb));
+			for (const tag::Ent* FcWho : {FcMain, FcSecond})
+				if (FcWho && (FcWho == FcMain ? FcMainRev : FcSecondRev) == B.fcRev)
+					if (AAthlete* Asb = AthOf(FcWho)) Asb->SetCatchBall(BallThenW);
+			if (FcMain && FcMainRev == B.fcRev && !(Fate == 4 && bIntPaired))
+				if (AAthlete* Aw = AthOf(FcMain)) Aw->AlignKey(static_cast<float>(WarpIn));
+			if (FcSecond && FcSecondRev == B.fcRev && !(Fate == 4 && bIntPaired))
+				if (AAthlete* Aw = AthOf(FcSecond)) Aw->AlignKey(static_cast<float>(WarpIn));
+		}
+	}
+	if (!bFcPath && B.mode == tag::BallMode::Air && Sim->isLive() && !Sim->cfg.kick && B.target && !B.away)
 	{
 		auto AlignOn = [&](const tag::Ent* Who)
 		{
@@ -6477,7 +6747,7 @@ void AMatchDirector::SyncPlay(float Dt, float Alpha)
 	// two men are and the ball's height; both play from as far before its catch as the ball has left to fly.
 	// (Timed to when the ball meets the man it names, not the flight's planned end; and started again if the sim rolls
 	// a defender's play on it after the receiver's - an underneath man the pass will go within reach of, preRollLane.)
-	if (B.mode == tag::BallMode::Air && Sim->isLive() && B.fate != 0 && B.target && !B.tumble &&
+	if (!bFcPath && B.mode == tag::BallMode::Air && Sim->isLive() && B.fate != 0 && B.target && !B.tumble &&
 		(FatePrimedSerial != Sim->serial || FatePrimedFate != B.fate || FatePrimedBy != B.fateBy))
 	{
 		const double TArr = CcWho ? CcWhoIn : B.flightT - B.t;
@@ -7766,7 +8036,8 @@ void AMatchDirector::UpdateCamera(float Dt, const FVector& InFocus)
 					if (Sd.Y > 0.f) Sd = -Sd; // (from the broadcast side)
 					GCcCamSide = Sd;
 				}
-				P = Fo + GCcCamSide * 650.f + FVector(0, 0, 120.f);
+				static const float CloseS = [] { float V = 1.f; FParse::Value(FCommandLine::Get(), TEXT("TagCloseCamScale="), V); return V; }(); // (film: hands close)
+				P = Fo + GCcCamSide * 650.f * CloseS + FVector(0, 0, 120.f * CloseS);
 				CamLook = Fo;
 				bCcCamShot = true;
 			}
@@ -7794,11 +8065,27 @@ void AMatchDirector::UpdateCamera(float Dt, const FVector& InFocus)
 			const FVector Fo = Qa->GetActorLocation() + FVector(0, 0, 120.f - Qa->GetActorLocation().Z);
 			FVector Sd = Qa->GetActorRightVector(); // (his throwing side)
 			Sd.Z = 0.f;
-			P = Fo + Sd.GetSafeNormal() * 550.f + Qa->GetActorForwardVector() * 150.f + FVector(0, 0, 60.f);
+			static const float CloseT = [] { float V = 1.f; FParse::Value(FCommandLine::Get(), TEXT("TagCloseCamScale="), V); return V; }();
+			P = Fo + Sd.GetSafeNormal() * 550.f * CloseT + Qa->GetActorForwardVector() * 150.f * CloseT + FVector(0, 0, 60.f * CloseT);
 			CamLook = Fo;
 			bCcCamShot = true;
 		}
 	}
+	// -TagMeshCam (film only; arm sweep 3): the run exchange - a handoff's mesh or a toss - from 0.6 s before it to 0.6 s
+	// after, 4.5 m side on at waist height on the quarterback: the hands on the ball as it changes hands judged on screen
+	static const bool bMeshCam = FParse::Param(FCommandLine::Get(), TEXT("TagMeshCam"));
+	if (bMeshCam && Sim && Game && State == EMatchState::Live && !bCcCamShot && Sim->meshOn() && Sim->qb && FMath::Abs(Sim->t - Sim->mesh().T) < 0.6)
+		if (AAthlete* Qm = AthleteFor(Sim->qb->p, Game->poss))
+		{
+			const FVector Fo = Qm->GetActorLocation() + FVector(0, 0, 100.f - Qm->GetActorLocation().Z);
+			static const float CloseM = [] { float V = 1.f; FParse::Value(FCommandLine::Get(), TEXT("TagCloseCamScale="), V); return V; }();
+			FVector Sd = Qm->GetActorRightVector();
+			Sd.Z = 0.f;
+			if (Sd.Y > 0.f) Sd = -Sd; // (from the broadcast side)
+			P = Fo + Sd.GetSafeNormal() * 450.f * CloseM + FVector(0, 0, 40.f * CloseM);
+			CamLook = Fo;
+			bCcCamShot = true;
+		}
 	bFilmCloseShot = bCcCamShot;
 	Camera->SetActorLocation(P);
 	Camera->SetActorRotation((CamLook - P).Rotation() + ShakeRot);

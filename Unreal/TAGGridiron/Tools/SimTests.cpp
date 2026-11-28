@@ -2068,6 +2068,60 @@ int main() {
     check(untouched == 0, std::to_string(untouched) + " passes caught by a man they were not thrown to, untouched on the way");
   });
 
+  t("pass forecast: the outcome is known at the release and is what happens unless a flagged revision says otherwise", [&] {
+    // every pass to a man (not a throwaway) over 60 games: the release's forecast (Ball::fcFate0) against the first play
+    // on the ball (fcOut); a forecast left standing (no revision) must be what happened, by the man it named; how often
+    // it is revised and why, and its miss on the time, the place and the height of the play on the ball
+    int n = 0, unrev = 0, wrong = 0, noFc = 0;
+    std::map<std::string, int> why;
+    std::map<std::string, int> conf;
+    std::vector<double> eT, eD, eZ;
+    Rng rng(989);
+    for (int i = 0; i < 60; i++) {
+      GameOptions o;
+      o.seed = static_cast<uint32_t>(rng.intRange(1, 1000000000));
+      Game g(*league[(i * 5 + 2) % 32], *league[(i * 3 + 7) % 32], o);
+      g.onPlayResult = [&](const PlaySim& sim, const PlayResult& r) {
+        if (sim.isReturn() || !sim.passThrown || r.thrownAway || r.kind != PlayKind::Pass) return;
+        if (r.fcFate0 == 0) {
+          noFc++;
+          return;
+        }
+        n++;
+        static const char* nm5[] = {"-", "catch", "drop", "breakup", "int", "nobody"};
+        conf[std::string(nm5[r.fcFate0]) + ">" + nm5[r.fcOut]]++;
+        if (r.fcRev == 0) {
+          unrev++;
+          if (r.fcOut != r.fcFate0 || !r.fcByOk) wrong++;
+          eT.push_back(std::fabs(r.fcErrT));
+          eD.push_back(r.fcErrD);
+          eZ.push_back(std::fabs(r.fcErrZ));
+        } else {
+          why[r.fcWhy.substr(0, r.fcWhy.find(':') == std::string::npos ? r.fcWhy.size() : r.fcWhy.find(':'))]++;
+        }
+      };
+      g.simToEnd();
+    }
+    auto pct = [](std::vector<double> v, double q) {
+      if (v.empty()) return 0.0;
+      std::sort(v.begin(), v.end());
+      return v[static_cast<size_t>(q * (v.size() - 1))];
+    };
+    std::printf("       (60 games: %d passes forecast, %d to a man not forecast; left standing %d (%.1f%%), revised %d (%.1f%%):", n, noFc, unrev, 100.0 * unrev / (std::max)(1, n), n - unrev,
+                100.0 * (n - unrev) / (std::max)(1, n));
+    for (auto& kv : why) std::printf(" %s %d", kv.first.c_str(), kv.second);
+    std::printf(")\n       (left standing, the forecast's miss: time p50 %.2f p90 %.2f s, place p50 %.2f p90 %.2f yd, height p50 %.2f p90 %.2f yd)\n", pct(eT, 0.5), pct(eT, 0.9), pct(eD, 0.5),
+                pct(eD, 0.9), pct(eZ, 0.5), pct(eZ, 0.9));
+    std::printf("       (forecast > what happened:");
+    for (auto& kv : conf) std::printf(" %s %d", kv.first.c_str(), kv.second);
+    std::printf(")\n");
+    check(n > 1500, "too few passes: " + std::to_string(n));
+    check(noFc == 0, std::to_string(noFc) + " passes to a man with no forecast at the release");
+    check(wrong == 0, std::to_string(wrong) + " forecasts left standing that were not what happened");
+    check(unrev * 10 >= n * 6, "the forecast stood on too few passes: " + std::to_string(unrev) + " of " + std::to_string(n));
+    check(pct(eT, 0.9) < 0.5 && pct(eD, 0.9) < 3.0, "the standing forecasts miss the time or the place of the catch by too much");
+  });
+
   t("fouls: every player foul names the man it is on (the booth calls his number)", [&] {
     // full games: every flag on a player's act names a player "(#n name)"; only the team fouls (delay of game, too many
     // men, illegal formation / shift) go without one

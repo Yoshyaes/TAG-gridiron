@@ -631,6 +631,38 @@ struct Ball {
   V3 ghostPos, ghostVel;
   double fateP = -1, fateD = -1, fatePbu = -1;  // (diagnostics: the odds the roll was made with)
   bool fateCont = false;
+  // the pass's outcome forecast at the release (PlaySim::forecastFate), readable from the release frame on, for the
+  // presentation to pick and time the capture of it from the throw:
+  //   fcFate  0 none (no pass to a man: a throwaway, a kick), 1 caught, 2 dropped (his hands on it, it comes out - a
+  //           contested ball too), 3 broken up / batted (fcBy the defender), 4 intercepted (fcBy), 5 nobody gets to it
+  //           (overthrown, underthrown, behind him: it falls incomplete untouched)
+  //   fcBy    the man who plays the ball: the target on 1 / 2, the defender on 3 / 4, nullptr on 5
+  //   fcAt    where on the field (x, y; offense frame, yd) he plays it, fcZ the ball's height there (yd over the turf),
+  //   fcT     the sim time (PlaySim::t) it gets there (on 5: where and when it comes down)
+  //   fcCont  a defender at the catch point with him (a contested ball), fcDive a catch he lays out for
+  //   fcRev   revisions since the release: the roll 0.4 s out (fcWhy "roll"), a defender in the lane rolled ("lane"), or
+  //           what happened at the ball ("at the ball: <event>") disagreeing with the forecast. When it changes, re-pick:
+  //           fcFate / fcBy / fcAt / fcZ / fcT are the revised ones. fcFate0 .. fcZ0 keep the release's forecast.
+  //   fcOut / fcOutBy / fcOutT / fcOutAt  what happened: the first play on the ball (codes as fcFate), by whom, when, where
+  // The forecast and the roll draw the same random numbers (fateU, fateKey: drawn at the release), so they disagree only
+  // where the men's arrival turns out other than forecast.
+  int fcFate = 0;
+  Ent* fcBy = nullptr;
+  V2 fcAt{0, 0};
+  double fcZ = 0, fcT = -1;
+  bool fcCont = false, fcDive = false;
+  int fcRev = 0;
+  std::string fcWhy;
+  int fcFate0 = 0;
+  Ent* fcBy0 = nullptr;
+  V2 fcAt0{0, 0};
+  double fcZ0 = 0, fcT0 = -1;
+  int fcOut = 0;
+  Ent* fcOutBy = nullptr;
+  double fcOutT = -1;
+  V3 fcOutAt{0, 0, 0};
+  double fateU[5] = {0, 0, 0, 0, 0};  // (the roll's draws: first man's play, his pick, the contested breakup, its pick, the catch)
+  uint32_t fateKey = 0;               // (a lane defender's draws: off this and his key)
 };
 
 struct PlayEvent {
@@ -690,6 +722,13 @@ struct PlayResult {
    *  a defender's tip or bat); nullptr otherwise. A pass that went untouched to a man on the spot it was thrown to is
    *  credited to him as the target (the charters' rule: the man who caught it is the man it was thrown to). */
   Player* tippedBy = nullptr;
+  // the pass outcome forecast at the release (Ball::fcFate ..): the release's forecast, what happened (codes as fcFate),
+  // revisions and the last one's reason, and the forecast's miss on the time (s, happened - forecast) and the place (yd,
+  // flat; and the height) of the play on the ball. fcFate0 0: no forecast (no pass to a man).
+  int fcFate0 = 0, fcOut = 0, fcRev = 0;
+  bool fcByOk = true;  // (on 3 / 4 and 1 / 2: the man forecast is the man who played it)
+  std::string fcWhy;
+  double fcErrT = 0, fcErrD = 0, fcErrZ = 0;
   int airYards = 0;
   int yac = 0;
   bool deepContested = false;
@@ -1290,6 +1329,23 @@ class PlaySim {
   void preRollCatch();                               // the outcome at the ball, rolled before it gets there (Ball::fate)
   void homeBall(double dt);                          // the rolled outcome's man and the ball brought to the same place (Tune::homeA)
   void preRollLane();                                // a defender the pass will go within reach of on its way: his play on it rolled before it gets to him
+  /** The receiver's arrival rolled (preRollCatch's odds), Ta s ahead: forecast (at the release, nothing changed) or the
+   *  roll itself. Draws Ball::fateU, not the play's rng (forceInt's film roll excepted). */
+  struct FateRoll {
+    int fate = 0;          // 0 nothing to roll (he will not get there), 1..4 as Ball::fate
+    Ent* by = nullptr;
+    bool rolled = true;    // false: not yet (ask again as the ball comes on)
+    bool dive = false, cont = false;
+    double p = -1, d = -1, pbu = 0;
+    Ent* passed = nullptr;
+  };
+  FateRoll rollCatch(double Ta, bool forecast);
+  double laneU(const Ent* o, int k) const;
+  /** The pass's outcome forecast at the release (Ball::fcFate ..), and a revision of it (why) with where / when. */
+  void forecastFate();
+  void reviseFate(int fate, Ent* who, const std::string& why);
+  /** Where and when (from now, s) the ball in the air passes nearest man x running at it (forecast geometry). */
+  void fateGeom(const Ent* x, bool chase, V2& at, double& z, double& dt) const;
   std::unordered_map<const Ent*, double> lanePassed_;  // defenders whose go at this pass was rolled ahead (preRollLane)
   // exact memo for ballLanding(): pure function of ball pos/vel within a play
   mutable bool landingValid_ = false;

@@ -23,7 +23,7 @@ TOL_ELBOW = 25.0      # deg
 COLS = ["frame", "state", "simt", "ballmode", "pid", "num", "pos", "side", "role", "sstate", "sanim", "ball", "hidden", "down",
         "ahl", "ahr", "afl", "afr", "ael", "aer", "awl", "awr", "acl", "acr", "ajit", "lod", "scrx", "scry", "anim", "dev", "dxf",
         "hrx", "hry", "hrz", "hlx", "hly", "hlz", "wx", "wy", "twl", "twr", "tul", "tur", "hws", "hwc", "sls", "plf", "sanim"]
-KEY = re.compile(r"TAG keytime (\w+) #(\d+) clip (\d+) frame (\d+): (none|in) (-?[\d.]+) s \((.*?), at (-?[\d.]+), key (-?[\d.]+)\)")
+KEY = re.compile(r"TAG keytime (\w+) #(\d+) clip (\d+) frame (\d+): (none|in) (-?[\d.]+) s \((.*?), at (-?[\d.]+), key (-?[\d.]+)\)(?: hands (\d+) cm)?(?:, fc (-?[\d.]+) rev (\d+))?")
 OFF_EV = {"throw", "catch", "divecatch", "drop", "contested_inc", "oobcatch", "toss", "pump"}
 
 
@@ -103,7 +103,8 @@ def load(run):
             m = KEY.search(line)
             if m:
                 keys.append(dict(run=D.run.iloc[0], ev=m.group(1), num=int(m.group(2)), clip=int(m.group(3)), frame=int(m.group(4)),
-                                 has=m.group(5) == "in", keyin=float(m.group(6)), anim=m.group(7), at=float(m.group(8)), key=float(m.group(9))))
+                                 has=m.group(5) == "in", keyin=float(m.group(6)), anim=m.group(7), at=float(m.group(8)), key=float(m.group(9)),
+                                 hands=float(m.group(10)) if m.group(10) else None, fc=float(m.group(11)) if m.group(11) else None, fcrev=int(m.group(12)) if m.group(12) else None))
     return D, keys
 
 
@@ -188,7 +189,7 @@ def main():
         score = (1 - on_cap) * 40 + max(0.0, code_hand - TOL_HAND) + max(0.0, code_elbow - TOL_ELBOW) * 0.5 + pops * 3 + (abs(key_err) * 60 if key_err is not None else 15)
         evs.append(dict(i=i, run=k["run"], clip=k["clip"], frame=k["frame"], ev=k["ev"], num=k["num"], role=role, anim=k["anim"],
                         capture_share=round(float(on_cap), 2), code_hand_max=round(code_hand, 1), code_elbow_max=round(code_elbow, 1),
-                        hand_all_max=round(all_hand, 1), pops=pops, key_in=key_err, score=round(score, 1),
+                        hand_all_max=round(all_hand, 1), pops=pops, key_in=key_err, score=round(score, 1), hands_cm=k.get("hands"),
                         assets=sorted(set(a for a in w.asset if a))[:4],
                         flag=bool(code_hand > TOL_HAND or code_elbow > TOL_ELBOW)))
     D.loc[D.ev != "", "cat"] = "EV " + D.loc[D.ev != "", "ev"]
@@ -230,7 +231,8 @@ def main():
                             key_err_ms=[round(float(ke.abs().mean() * 1000), 0), round(float(np.percentile(ke.abs(), 95) * 1000), 0) if len(ke) else 0,
                                         round(float(ke.abs().max() * 1000), 0) if len(ke) else 0],
                             key_err_signed_ms=round(float(ke.mean() * 1000), 0) if len(ke) else 0,
-                            flagged=int(g.flag.sum()), code_hand=stats(g.code_hand_max), code_elbow=stats(g.code_elbow_max), pops=int(g.pops.sum()))
+                            flagged=int(g.flag.sum()), code_hand=stats(g.code_hand_max), code_elbow=stats(g.code_elbow_max), pops=int(g.pops.sum()),
+                            hands_to_ball_cm=stats(g.hands_cm.dropna().astype(float)) if "hands_cm" in g and g.hands_cm.notna().any() else None)
     worst = {}
     if len(E):
         for kind, evset in (("throws", {"throw", "toss", "pump"}), ("catches", {"catch", "divecatch", "int", "pbu", "drop", "contested_inc", "oobcatch"})):

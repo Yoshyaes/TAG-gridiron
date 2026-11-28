@@ -193,6 +193,29 @@ void FAthleteAssets::Load()
 				};
 				Walks(QBWalks, TEXT("Walk"));
 				Walks(QBJogs, TEXT("Jog"));
+				// the referee's runs (D1..D5: which way each goes is read off its root motion, not its name)
+				auto RefSet = [&](FWalkSet& Set, const TCHAR* Gait)
+				{
+				for (const TCHAR* D : {TEXT("D1"), TEXT("D2"), TEXT("D3"), TEXT("D4"), TEXT("D5")})
+				{
+					const FString N = FString::Printf(TEXT("A_TAG_Pack_MG_Ref_%s_%s__P01"), D, Gait);
+					UAnimSequence* Sq = LoadObject<UAnimSequence>(nullptr, *FString::Printf(TEXT("%s/Pack/PostPlay/%s.%s"), *AnimRoot, *N, *N), nullptr, LOAD_NoWarn | LOAD_Quiet);
+					if (!Sq || !Sq->HasRootMotion()) continue;
+					FVector T = Sq->ExtractRootMotionFromRange(0.0, Sq->GetPlayLength(), FAnimExtractContext(0.0, true)).GetTranslation();
+					T.Z = 0.f;
+					if (T.Size() < 20.f) continue;
+					Set.Clips.Emplace(Sq);
+					Set.Dir.Add(T.GetSafeNormal());
+					Set.Speed.Add(static_cast<float>(T.Size() / Sq->GetPlayLength()));
+					UE_LOG(LogTemp, Display, TEXT("TAG referee %s %s: %.0f cm/s toward %s"), Gait, D, T.Size() / Sq->GetPlayLength(), *T.GetSafeNormal().ToCompactString());
+				}
+				};
+				if (!AAthlete::ArmSweepOff())
+				{
+				RefSet(RefJogs, TEXT("Jog"));
+				RefSet(RefRuns, TEXT("Run"));
+				RefSet(RefSprints, TEXT("Sprint"));
+				}
 				auto QbRun = [&](const TCHAR* N, TStrongObjectPtr<UAnimSequence>& Out, float& Speed)
 				{
 					UAnimSequence* Sq = LoadObject<UAnimSequence>(nullptr, *FString::Printf(TEXT("%s/Pack/Quarterback/A_TAG_Pack_%s.A_TAG_Pack_%s"), *AnimRoot, N, N), nullptr, LOAD_NoWarn | LOAD_Quiet);
@@ -840,6 +863,31 @@ void FAthleteAssets::LoadPackDoubles()
 			if (R.Q.IsValid() && R.B.IsValid()) RepHandoffs.Add(MoveTemp(R));
 		}
 	UE_LOG(LogTemp, Display, TEXT("TAG handoffs: %d captures"), RepHandoffs.Num());
+	// and the tosses (Tools/Art/pack_tosses.py; arm sweep 3)
+	FString TsText;
+	TArray<TSharedPtr<FJsonValue>> TsRows;
+	if (FFileHelper::LoadFileToString(TsText, *PackJson(TEXT("pack_tosses.json"))) && FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(TsText), TsRows))
+		for (const TSharedPtr<FJsonValue>& V : TsRows)
+		{
+			const TSharedPtr<FJsonObject>* O = nullptr;
+			if (!V.IsValid() || !V->TryGetObject(O) || !O) continue;
+			const FString TsCat = (*O)->GetStringField(TEXT("Cat"));
+			auto LoadT = [&TsCat](const FString& N)
+			{
+				return LoadObject<UAnimSequence>(nullptr, *FString::Printf(TEXT("/Game/TAG/AnimH/Pack/%s/%s.%s"), *TsCat, *N, *N), nullptr, LOAD_NoWarn | LOAD_Quiet);
+			};
+			FTossRep R;
+			R.Q.Reset(LoadT((*O)->GetStringField(TEXT("Q"))));
+			R.B.Reset(LoadT((*O)->GetStringField(TEXT("B"))));
+			R.Tr = static_cast<float>((*O)->GetNumberField(TEXT("Tr")));
+			R.Tc = static_cast<float>((*O)->GetNumberField(TEXT("Tc")));
+			R.Bx = static_cast<float>((*O)->GetNumberField(TEXT("Bx")));
+			R.By = static_cast<float>((*O)->GetNumberField(TEXT("By")));
+			R.bGun = (*O)->GetBoolField(TEXT("Gun"));
+			R.bLeft = (*O)->GetBoolField(TEXT("Left"));
+			if (R.Q.IsValid() && R.B.IsValid() && R.Tc > R.Tr) RepTosses.Add(MoveTemp(R));
+		}
+	UE_LOG(LogTemp, Display, TEXT("TAG tosses: %d two-man captures"), RepTosses.Num());
 	// and the play-action fakes (Tools/Art/pack_pafakes.py)
 	FString PText;
 	TArray<TSharedPtr<FJsonValue>> PRows;
@@ -1155,6 +1203,8 @@ void FAthleteAssets::SelectPack(int32 Seed)
 		PackTimed(TEXT("Catching"), {TEXT("Dive"), TEXT("Layout")}, {TEXT("Catch")}, CatchNone, 8, Seed + 77, TEXT("release"), 6, 0.9f, 0.f, PackCatchDive);
 		// (the back's side of a toss: Catch_Pitch_<from>_<height>, not the BRANCHING variants that cut away mid-capture)
 		PackTimed(TEXT("Catching"), {TEXT("Catch_Pitch_")}, {}, {TEXT("BRANCHING"), TEXT("2man"), TEXT("Fumble"), TEXT("Drop")}, 12, Seed + 78, TEXT("release"), 4, 0.5f, 0.f, PackCatchPitch);
+		// (the misses: a pass that ends with nobody on it plays one on the man it was thrown to; arm sweep 3)
+		PackTimed(TEXT("Catching"), {TEXT("Catch_NonCatch_")}, {}, {TEXT("2man"), TEXT("Fumble"), TEXT("Ground"), TEXT("Dive")}, 12, Seed + 80, TEXT("release"), 4, 0.5f, 0.f, PackCatchMiss);
 		// the quarterback slide: from 0.45 s before its low point (still running in), through the slide and the get-up
 		PackTimed(TEXT("Quarterback"), {TEXT("QB_Slide")}, {}, {}, 2, Seed + 79, TEXT("pelvis_min"), 14, 1.0f, 0.f, PackQBSlide);
 		// (its own exclusions: CatchNoDive's "Tip" took every FingerTip; and these captures end a beat after the ball is
@@ -1398,6 +1448,137 @@ void FAthleteAssets::LoadNextPackChunk()
 	if (!PackHandle.IsValid()) { FillPackLoaded(); LoadNextPackChunk(); }
 }
 
+/**
+ * A catch capture's hands-on-the-ball moment, from the capture itself: in the window from just before the index's mark
+ * (its hands' fastest frame) to 0.45 s after, the frame where the hands are closest together and slowest off the pelvis
+ * (the ball stops them). One-handed captures (hands never within 35 cm) take the reaching hand's slowest frame after its
+ * peak. The index's mark alone is the reach, not the catch: one-handers, reach-behind and toe-drag captures came out
+ * 0.12-0.24 s off the ball (arm sweep 2). Kept per clip for the process.
+ */
+static float CatchContactT(const UAnimSequence* Seq, float Mark, FVector* OutHand = nullptr, float NameZ = -1.f)
+{
+	// (and where the ball is in the capture then, off its root in the root's frame (cm): the two hands' middle, or the
+	// reaching hand's - what the body is seated by onto the ball, AAthlete::CatchSeat)
+	struct FHit { float T = -1.f; FVector Hand = FVector::ZeroVector; };
+	static TMap<const UAnimSequence*, FHit> Seen;
+	if (const FHit* Hit = Seen.Find(Seq)) { if (OutHand) *OutHand = Hit->Hand; return Hit->T; }
+	FHit Out;
+	const USkeleton* Sk = Seq ? Seq->GetSkeleton() : nullptr;
+	if (Sk)
+	{
+		const FReferenceSkeleton& R = Sk->GetReferenceSkeleton();
+		const int32 HL = R.FindBoneIndex(TEXT("hand_l")), HR = R.FindBoneIndex(TEXT("hand_r")), Pv = R.FindBoneIndex(TEXT("pelvis"));
+		if (HL != INDEX_NONE && HR != INDEX_NONE && Pv != INDEX_NONE)
+		{
+			auto CSX = [&](int32 B, double T)
+			{
+				FTransform X = FTransform::Identity;
+				const FAnimExtractContext Ctx(T, false);
+				for (int32 i = B; i != INDEX_NONE; i = R.GetParentIndex(i))
+				{
+					FTransform L;
+					Seq->GetBoneTransform(L, FSkeletonPoseBoneIndex(i), Ctx, false);
+					X = X * L;
+				}
+				return X;
+			};
+			auto CS = [&](int32 B, double T) { return CSX(B, T).GetLocation(); };
+			const double Len = Seq->GetPlayLength(), Dt = 1.0 / 30.0;
+			// (not in the clip's last 0.2 s: its hands come to rest there, and a one-shot ends 0.07 s short of the end - a
+			// behind-the-back one-hander keyed at 1.40 of 1.43 s ended before its catch, the arm audit's "none")
+			// (a capture named for the height its hands meet the ball - Knees .. AboveHead - is searched over its whole length,
+			// at that height: from the index's mark alone a leap's "catch" came out on its landing, hands 89 cm up, and a
+			// fingertip dive's on the turf, 11 cm - p3A3)
+			static const bool bMarkOnly = FParse::Param(FCommandLine::Get(), TEXT("TagContactMark")); // (A/B: the window from the index's mark only)
+			const bool bNamed = NameZ > 0.f && !bMarkOnly;
+			const double T0 = bNamed ? FMath::Min(0.1, Len) : FMath::Max(0.0, Mark - 0.1);
+			const double T1 = FMath::Max(T0 + Dt, bNamed ? Len - 0.2 : FMath::Min(Len - 0.2, Mark + 0.45));
+			TArray<FVector> L, Rr;
+			TArray<double> Ts, Zs;
+			const int32 Rt = 0;
+			for (double T = T0 - Dt; T <= T1 + 1e-4; T += Dt)
+			{
+				const double Tc = FMath::Max(0.0, T);
+				const FVector P = CS(Pv, Tc);
+				const FVector Hl0 = CS(HL, Tc), Hr0 = CS(HR, Tc);
+				L.Add(Hl0 - P);
+				Rr.Add(Hr0 - P);
+				Ts.Add(Tc);
+				Zs.Add(0.5 * (Hl0.Z + Hr0.Z) - CS(Rt, Tc).Z);
+			}
+			float MinGap = 1e9f;
+			for (int32 k = 1; k < Ts.Num(); ++k) MinGap = FMath::Min(MinGap, static_cast<float>(FVector::Dist(L[k], Rr[k])));
+			float Best = 1e9f;
+			const bool bTwoHands = MinGap < 35.f;
+			int32 BestK = -1;
+			for (int32 k = 1; k < Ts.Num(); ++k)
+			{
+				const float Sl = static_cast<float>(FVector::Dist(L[k], L[k - 1])), Sr = static_cast<float>(FVector::Dist(Rr[k], Rr[k - 1]));
+				float Score = bTwoHands ? static_cast<float>(FVector::Dist(L[k], Rr[k])) + 1.5f * (Sl + Sr) : FMath::Max(Sl, Sr) + 0.02f * static_cast<float>(FMath::Abs(Ts[k] - Mark) * 30.0);
+				// (at the named height, and not far from the mark without a reason: 0.3 per cm off, 30 a second from the mark)
+				if (bNamed) Score += 0.3f * FMath::Abs(static_cast<float>(Zs[k]) - NameZ) + 30.f * static_cast<float>(FMath::Abs(Ts[k] - Mark));
+				if (Score < Best) { Best = Score; Out.T = static_cast<float>(Ts[k]); BestK = k; }
+			}
+			if (BestK >= 0)
+			{
+				const FTransform RootX = CSX(0, Ts[BestK]);
+				const FVector Hl = CS(HL, Ts[BestK]), Hr = CS(HR, Ts[BestK]);
+				// (one-handed: the hand farther out from the pelvis is the one on the ball)
+				const FVector Hb = bTwoHands ? (Hl + Hr) * 0.5f : (L[BestK].SizeSquared() > Rr[BestK].SizeSquared() ? Hl : Hr);
+				Out.Hand = RootX.InverseTransformPosition(Hb);
+			}
+		}
+	}
+	Seen.Add(Seq, Out);
+	if (OutHand) *OutHand = Out.Hand;
+	return Out.T;
+}
+
+/**
+ * A swat's (or a one-man interception's) moment on the ball, from the capture: its reaching hand at full stretch off the
+ * pelvis, after 0.15 s and before the last 0.2 s. The index's "release" (the hand's fastest frame) was 0.1 s into some
+ * swats whose hand meets the ball 0.7 s in: their defenders were timed 0.3 s early (pbu key error p95 322 ms, p3A).
+ */
+static float SwatContactT(const UAnimSequence* Seq)
+{
+	static TMap<const UAnimSequence*, float> Seen;
+	if (const float* Hit = Seen.Find(Seq)) return *Hit;
+	float Out = -1.f;
+	const USkeleton* Sk = Seq ? Seq->GetSkeleton() : nullptr;
+	if (Sk)
+	{
+		const FReferenceSkeleton& R = Sk->GetReferenceSkeleton();
+		const int32 HL = R.FindBoneIndex(TEXT("hand_l")), HR = R.FindBoneIndex(TEXT("hand_r")), Pv = R.FindBoneIndex(TEXT("pelvis"));
+		if (HL != INDEX_NONE && HR != INDEX_NONE && Pv != INDEX_NONE)
+		{
+			auto CS = [&](int32 B, double T)
+			{
+				FTransform X = FTransform::Identity;
+				const FAnimExtractContext Ctx(T, false);
+				for (int32 i = B; i != INDEX_NONE; i = R.GetParentIndex(i))
+				{
+					FTransform Lx;
+					Seq->GetBoneTransform(Lx, FSkeletonPoseBoneIndex(i), Ctx, false);
+					X = X * Lx;
+				}
+				return X.GetLocation();
+			};
+			const double Len = Seq->GetPlayLength();
+			float Best = -1.f;
+			for (double T = 0.15; T <= Len - 0.2 + 1e-4; T += 1.0 / 30.0)
+			{
+				const FVector P = CS(Pv, T);
+				const FVector Hl = CS(HL, T) - P, Hr = CS(HR, T) - P;
+				// (stretch out and up: a swat's hand goes for the ball above and beyond the body)
+				const float S = static_cast<float>(FMath::Max(Hl.Size() + 0.5 * Hl.Z, Hr.Size() + 0.5 * Hr.Z));
+				if (S > Best) { Best = S; Out = static_cast<float>(T); }
+			}
+		}
+	}
+	Seen.Add(Seq, Out);
+	return Out;
+}
+
 void FAthleteAssets::FillPackLoaded()
 {
 	// whatever has landed goes into its family now (the game draws on it from this frame); the rest waits
@@ -1441,6 +1622,17 @@ void FAthleteAssets::FillPackLoaded()
 			if (!Seq || !Seq->HasAnyFlags(RF_LoadCompleted)) continue;
 			Keep(Seq);
 			C.Anim = Seq;
+			// (the catches': their own hands-on-the-ball moment, not the index's reach mark; arm sweep 3)
+			if (!AAthlete::ArmSweepOff() && (T.Sink == &PackCatchStride || T.Sink == &PackCatchHigh || T.Sink == &PackCatchLow || T.Sink == &PackCatchOverShoulder ||
+				T.Sink == &PackCatchSideline || T.Sink == &PackCatchStand || T.Sink == &PackCatchComeback || T.Sink == &PackCatchSpectacular || T.Sink == &PackCatchPitch ||
+				T.Sink == &PackCatchDrops || T.Sink == &PackKickCatchStand || T.Sink == &PackKickCatchRun || T.Sink == &PackCatchDive || T.Sink == &PackCatchMiss || T.Sink == &PackIntCatch))
+				C.Contact = CatchContactT(Seq, C.Start + (T.Sink == &PackCatchDive || T.Sink == &PackKickCatchStand || T.Sink == &PackKickCatchRun ? 6.f : 4.f) / 30.f, &C.ContactHand,
+					// (not the kick catches: their marks were right, 8-21 cm off the ball, and searched by name their keys moved)
+					T.Sink == &PackKickCatchStand || T.Sink == &PackKickCatchRun ? -1.f : C.Name.Contains(TEXT("Ankles")) ? 30.f : C.Name.Contains(TEXT("Knees")) ? 60.f : C.Name.Contains(TEXT("Waist")) ? 100.f : C.Name.Contains(TEXT("Chest")) ? 130.f
+					: C.Name.Contains(TEXT("Helmet")) ? 170.f : C.Name.Contains(TEXT("AboveHead")) || C.Name.Contains(TEXT("Above_Head")) ? 205.f : -1.f);
+			// (a swat's: the reaching hand at full stretch)
+			else if (!AAthlete::ArmSweepOff() && (T.Sink == &PackSwatRun || T.Sink == &PackSwatStrafe || T.Sink == &PackSwatBack))
+				C.Contact = SwatContactT(Seq);
 			T.Sink->Add(C);
 		}
 		PackTimedCount += T.Sink->Num();
@@ -1549,6 +1741,33 @@ void FAthleteAssets::OnPackBatchLoaded()
 		for (const TObjectPtr<UAnimSequence>& S : Old) if (S) S->RemoveFromRoot();
 		Old.Reset();
 		for (const TObjectPtr<UAnimSequence>& S : BatchRoots[PackBatch % 2]) if (S) S->AddToRoot();
+	}
+	{
+		// the catches' measured hands-on-the-ball moments against the index's marks (CatchContactT)
+		int32 N = 0, Moved = 0, FarOut = 0;
+		double Shift = 0.0, HandZ = 0.0, HandOut = 0.0;
+		for (const TArray<FPackClip>* L : {&PackCatchStride, &PackCatchHigh, &PackCatchLow, &PackCatchOverShoulder, &PackCatchSideline, &PackCatchStand, &PackCatchComeback, &PackCatchSpectacular, &PackCatchPitch, &PackCatchDrops, &PackCatchMiss})
+			for (const FPackClip& C : *L)
+				if (C.Contact >= 0.f)
+				{
+					const float D = C.Contact - (C.Start + 4.f / 30.f);
+					++N;
+					Shift += FMath::Abs(D);
+					if (FMath::Abs(D) > 0.1f) ++Moved;
+					HandZ += C.ContactHand.Z;
+					static const bool bListContacts = FParse::Param(FCommandLine::Get(), TEXT("TagHlFull"));
+					static TSet<const UAnimationAsset*> Listed;
+					if (bListContacts && !Listed.Contains(C.Anim.Get()))
+					{
+						Listed.Add(C.Anim.Get());
+						UE_LOG(LogTemp, Display, TEXT("TAG contact %s: %.2f s (mark %.2f, len %.2f), hand %.0f up %.0f out (%.0f, %.0f)"), *C.Name, C.Contact, C.Start + 4.f / 30.f,
+							C.Anim ? C.Anim->GetPlayLength() : 0.f, C.ContactHand.Z, C.ContactHand.Size2D(), C.ContactHand.X, C.ContactHand.Y);
+					}
+					HandOut += C.ContactHand.Size2D();
+					if (C.ContactHand.Size2D() > 60.0) ++FarOut;
+				}
+		if (N) UE_LOG(LogTemp, Display, TEXT("TAG: catch contact frames measured on %d captures: %d more than 0.1 s off the index mark, mean shift %.3f s; hands then %.0f cm up, %.0f cm out (%d over 60 cm)"),
+			N, Moved, Shift / N, HandZ / N, HandOut / N, FarOut);
 	}
 	// (once: what every animation in memory costs, by tree and folder - the library's share of the game's memory)
 	static bool bCensus = false;
@@ -2825,6 +3044,8 @@ void AAthlete::PlayOneShotFrom(UAnimationAsset* Clip, float Start)
 	OneShotStart = Start;
 	OneShotPos = Start;
 	OneShotKeyT = -1.f; // (the timed starts set it after: a throw's release, a catch's contact)
+	bOneShotHand = false;
+	bOneShotDrop = false;
 	RunDblOn = nullptr; // (a run double's part sets it again: PlayRepRunDouble)
 	OneShotRate = 1.f + StyleJitter * 0.07f; // each player's own timing, within 7 %
 	// (two frames short of the end: several captures' last frame snaps back - the falls already stop a frame short -
@@ -3922,6 +4143,24 @@ static float TagCatchStart(float Start, int32 LeadFrames, float CatchIn, float R
 	return CatchIn >= 0.f ? FMath::Max(0.f, Start + LeadFrames / 30.f - FMath::Min(CatchIn, 0.6f) * Rate) : Start;
 }
 
+// Where to start a timed catch-type capture so its hands-on-the-ball moment comes CatchIn seconds from now, and that moment:
+// the capture's measured contact (FPackClip::Contact) when known, else its mark plus the family's lead. CatchIn up to the
+// capture's whole run-in (a pass planned from the throw starts it as early as it has frames for). -TagArmSweepOff: the
+// old start (TagCatchStart, mark + lead, 0.6 s at most).
+static float CatchKeyOf(const FAthleteAssets::FPackClip& P, int32 Lead)
+{
+	return !AAthlete::ArmSweepOff() && P.Contact >= 0.f ? P.Contact : P.Start + Lead / 30.f;
+}
+static void PlayAtKey(AAthlete& A, const FAthleteAssets::FPackClip& P, int32 Lead, float CatchIn, float Rate)
+{
+	const float K = CatchKeyOf(P, Lead);
+	const float From = AAthlete::ArmSweepOff() ? TagCatchStart(P.Start, Lead, CatchIn, Rate) : CatchIn >= 0.f ? FMath::Max(0.f, K - FMath::Min(CatchIn * Rate, K)) : P.Start;
+	A.PlayOneShotFrom(P.Anim, From);
+	A.OneShotKeyT = K;
+	A.OneShotHand = P.ContactHand;
+	A.bOneShotHand = !AAthlete::ArmSweepOff() && P.Contact >= 0.f && !P.ContactHand.IsNearlyZero();
+}
+
 /** The one-man catch capture in the draw that fits this ball: his gait, where the ball comes from, its height. */
 static const FAthleteAssets::FPackClip* BestCatchFit(const FVector& LastVelW, const FVector& Fwd, int32 Num, float BallZCm, const FVector& BallVelW, int32 Seq, float CatchIn, const TArray<FAthleteAssets::FPackClip>* Only = nullptr)
 {
@@ -3954,8 +4193,16 @@ static const FAthleteAssets::FPackClip* BestCatchFit(const FVector& LastVelW, co
 				: N.Contains(TEXT("Helmet")) ? 4.f : (N.Contains(TEXT("AboveHead")) || N.Contains(TEXT("Jump"))) ? 5.f : -1.f;
 			// (and one with run-in enough before its hands meet the ball to start now: short of it, it starts at its first
 			// frame and its time-warp has to make up the rest)
-			const float Lead = C.Start + 4.f / 30.f;
-			const float Cost = (CA >= 0 ? FMath::Abs(CA - Ang) / 45.f : 1.f) + (H >= 0.f ? FMath::Abs(H - WantH) * 0.8f : 1.f) +
+			const float Lead = CatchKeyOf(C, 4);
+			// (arm sweep 3: a capture's measured hands on the ball - how high, and how far out from its root - over its name:
+			// a "Chest" fingertip grab had its hands a metre out in front, and the body could only be seated 70 cm of it)
+			const bool bHandKnown = !AAthlete::ArmSweepOff() && C.Contact >= 0.f && !C.ContactHand.IsNearlyZero();
+			if (bHandKnown && C.Anim && C.Contact > C.Anim->GetPlayLength() - 0.2f) continue; // (its catch in the last frames: over before it)
+			// (the name's height first: taken alone the measured height sent 15 of 100 chest-high balls to an above-the-head
+			// leap whose arms the reach then bent - catches over tolerance 25 -> 47, p3A3; the measure only breaks a gross miss)
+			const float HCost = (H >= 0.f ? FMath::Abs(H - WantH) * 0.8f : 1.f) + (bHandKnown ? FMath::Max(0.f, FMath::Abs(static_cast<float>(C.ContactHand.Z) - BallZCm) - 50.f) / 60.f +
+				FMath::Max(0.f, static_cast<float>(C.ContactHand.Size2D()) - 70.f) / 50.f : 0.f);
+			const float Cost = (CA >= 0 ? FMath::Abs(CA - Ang) / 45.f : 1.f) + HCost +
 				(G < 0 ? 0.8f : G == Gait ? 0.f : (G == 0 && Gait == 1) || (G == 1 && Gait == 0) ? 0.7f : 1.2f) +
 				(CatchIn > 0.f && Lead < CatchIn ? (CatchIn - Lead) * 3.f : 0.f);
 			Cands.Add({&C, Cost});
@@ -4008,8 +4255,7 @@ void AAthlete::PlayCatch(float BallZCm, float SpeedCm, const FVector& BallVelW, 
 				: FAthleteAssets::PickOr(A.PackCatchSpectacular, Seq * 5 + 1))
 			{
 				UE_LOG(LogTemp, Display, TEXT("TAG spectacular catch #%d: %s (hard %d%s)"), Player ? Player->number : -1, *GetNameSafe(P->Anim), Hard, bAggressive ? TEXT(", aggressive") : TEXT(""));
-				PlayOneShotFrom(P->Anim, TagCatchStart(P->Start, 4, CatchIn, 1.f + StyleJitter * 0.07f));
-				OneShotKeyT = P->Start + 4.f / 30.f;
+				PlayAtKey(*this, *P, 4, CatchIn, 1.f + StyleJitter * 0.07f);
 				bOneShotCatch = true;
 				return;
 			}
@@ -4073,7 +4319,7 @@ void AAthlete::PlayCatch(float BallZCm, float SpeedCm, const FVector& BallVelW, 
 			if (Fit.Num()) P = Fit[FMath::Abs(Seq) % Fit.Num()];
 		}
 		if (!P) P = CatchIn >= 0.f ? FAthleteAssets::Pick(*Lib, Seq) : FAthleteAssets::PickOr(*Lib, Seq);
-		if (P) { PlayOneShotFrom(P->Anim, TagCatchStart(P->Start, 4, CatchIn, 1.f + StyleJitter * 0.07f)); OneShotKeyT = P->Start + 4.f / 30.f; bOneShotCatch = true; return; }
+		if (P) { PlayAtKey(*this, *P, 4, CatchIn, 1.f + StyleJitter * 0.07f); bOneShotCatch = true; return; }
 	}
 	if (C) PlayOneShot(A.Side(C, bMirror));
 	bOneShotCatch = C != nullptr;
@@ -4150,10 +4396,28 @@ bool AAthlete::PlayBallDefense(int32 Gait, bool bInt, float CatchIn)
 	if (!L.Num()) return false;
 	static int32 GSeq = 0;
 	const FAthleteAssets::FPackClip& P = L[(GSeq++) % L.Num()];
-	PlayOneShotFrom(P.Anim, TagCatchStart(P.Start, 4, CatchIn, 1.f + StyleJitter * 0.07f));
-	OneShotKeyT = P.Start + 4.f / 30.f;
+	// (arm sweep 3: from its measured moment on the ball, SwatContactT / CatchContactT, where it has one)
+	if (!ArmSweepOff() && P.Contact >= 0.f) PlayAtKey(*this, P, 4, CatchIn, 1.f + StyleJitter * 0.07f);
+	else
+	{
+		PlayOneShotFrom(P.Anim, TagCatchStart(P.Start, 4, CatchIn, 1.f + StyleJitter * 0.07f));
+		OneShotKeyT = P.Start + 4.f / 30.f;
+	}
+	if (!bInt) bOneShotHand = false; // (a swat's hand is not seated onto the ball: it knocks it on)
 	bOneShotCatch = bInt;
 	UE_LOG(LogTemp, Display, TEXT("TAG ball defense #%d: %s"), Player ? Player->number : -1, *GetNameSafe(P.Anim));
+	return true;
+}
+
+bool AAthlete::PlayMiss(float BallZCm, const FVector& BallVelW, float CatchIn)
+{
+	const FAthleteAssets& A = FAthleteAssets::Get();
+	if (ArmSweepOff() || !A.PackCatchMiss.Num() || bFalling || bRagdoll) return false;
+	static int32 GSeq = 0;
+	const FAthleteAssets::FPackClip* P = BestCatchFit(LastVelW, GetActorForwardVector(), Player ? Player->number : -1, BallZCm, BallVelW, GSeq++, CatchIn, &A.PackCatchMiss);
+	if (!P) return false;
+	PlayAtKey(*this, *P, 4, CatchIn, 1.f + StyleJitter * 0.07f);
+	UE_LOG(LogTemp, Display, TEXT("TAG miss #%d: %s, %.2f s out"), Player ? Player->number : -1, *P->Name, CatchIn);
 	return true;
 }
 
@@ -4165,8 +4429,7 @@ bool AAthlete::PlayPitchCatch(const FVector& BallVelW, float CatchIn)
 	// (the pitch names say where it comes from - 45, 90, 135 off his heading - and its height: chest for a toss)
 	const FAthleteAssets::FPackClip* P = BestCatchFit(LastVelW, GetActorForwardVector(), Player ? Player->number : -1, 120.f, BallVelW, GSeq++, CatchIn, &A.PackCatchPitch);
 	if (!P) return false;
-	PlayOneShotFrom(P->Anim, TagCatchStart(P->Start, 4, CatchIn, 1.f + StyleJitter * 0.07f));
-	OneShotKeyT = P->Start + 4.f / 30.f;
+	PlayAtKey(*this, *P, 4, CatchIn, 1.f + StyleJitter * 0.07f);
 	bOneShotCatch = true;
 	UE_LOG(LogTemp, Display, TEXT("TAG pitch catch #%d: %s, %.2f s out"), Player ? Player->number : -1, *P->Name, CatchIn);
 	return true;
@@ -4179,8 +4442,7 @@ bool AAthlete::PlayKickCatch(bool bRunning, float CatchIn)
 	if (!L.Num()) return false;
 	static int32 GSeq = 0;
 	const FAthleteAssets::FPackClip& P = L[(GSeq++) % L.Num()];
-	PlayOneShotFrom(P.Anim, TagCatchStart(P.Start, 6, CatchIn, 1.f + StyleJitter * 0.07f));
-	OneShotKeyT = P.Start + 6.f / 30.f;
+	PlayAtKey(*this, P, 6, CatchIn, 1.f + StyleJitter * 0.07f);
 	bOneShotCatch = true;
 	UE_LOG(LogTemp, Display, TEXT("TAG kick catch #%d: %s"), Player ? Player->number : -1, *GetNameSafe(P.Anim));
 	return true;
@@ -4284,7 +4546,7 @@ void AAthlete::PlayDiveAttempt(float CatchIn)
 	// (timed to the ball: a library capture, whose layout's hands-on-the-ball frame is known; see PlayCatch)
 	const int32 DiveSeq = GDiveSeq++;
 	if (const FAthleteAssets::FPackClip* P = CatchIn >= 0.f ? FAthleteAssets::Pick(A.PackCatchDive, DiveSeq) : FAthleteAssets::PickOr(A.PackCatchDive, DiveSeq))
-		{ PlayOneShotFrom(P->Anim, TagCatchStart(P->Start, 6, CatchIn, 1.f + StyleJitter * 0.07f)); OneShotKeyT = P->Start + 6.f / 30.f; return; }
+		{ PlayAtKey(*this, *P, 6, CatchIn, 1.f + StyleJitter * 0.07f); return; }
 	if (A.CatchDive) PlayOneShot(A.Side(A.CatchDive, Player && (Player->id % 2) == 1));
 }
 
@@ -4442,16 +4704,23 @@ bool AAthlete::PlayIntPair(AAthlete* D, AAthlete* R, float CatchIn, float BallZC
 	return true;
 }
 
-bool AAthlete::PlayDrop(float CatchIn)
+bool AAthlete::PlayDrop(float CatchIn, float DropBallZ, const FVector& DropBallVelW)
 {
 	const FAthleteAssets& A = FAthleteAssets::Get();
 	static int32 GDropSeq = 0;
-	const FAthleteAssets::FPackClip* P = FAthleteAssets::Pick(A.PackCatchDrops, GDropSeq++);
+	const int32 DropSeq = GDropSeq++;
+	// (arm sweep 3: the drop that fits how he is moving, where the ball comes from and its height, as the catches)
+	const FAthleteAssets::FPackClip* P = !ArmSweepOff() && CatchIn >= 0.f && DropBallZ > 0.f
+		? BestCatchFit(LastVelW, GetActorForwardVector(), Player ? Player->number : -1, DropBallZ, DropBallVelW, DropSeq, CatchIn, &A.PackCatchDrops)
+		: FAthleteAssets::Pick(A.PackCatchDrops, DropSeq);
 	if (!P || bFalling || bRagdoll) return false;
 	// (the family starts 4 frames before the hands reach: the reach is at Start + 4/30)
-	PlayOneShotFrom(P->Anim, FMath::Max(0.f, P->Start + 4.f / 30.f - FMath::Clamp(CatchIn, 0.f, 0.5f)));
-	OneShotKeyT = P->Start + 4.f / 30.f;
+	if (ArmSweepOff()) { PlayOneShotFrom(P->Anim, FMath::Max(0.f, P->Start + 4.f / 30.f - FMath::Clamp(CatchIn, 0.f, 0.5f))); OneShotKeyT = P->Start + 4.f / 30.f; }
+	else PlayAtKey(*this, *P, 4, FMath::Max(0.f, CatchIn), 1.f);
 	OneShotRate = 1.f;
+	// (a catch attempt: not cut for lagging its sim spot - three drops were, 0.3-0.4 s before the ball got there. Not a
+	// catch for the reach: with it the drops' arms popped on 18 % of their frames, p3A5)
+	if (!ArmSweepOff()) bOneShotDrop = true;
 	UE_LOG(LogTemp, Display, TEXT("TAG drop #%d: %s"), Player ? Player->number : -1, *GetNameSafe(P->Anim));
 	return true;
 }
@@ -4852,6 +5121,42 @@ FVector AAthlete::HandsMid() const
 	return (MHBody->GetSocketLocation(TEXT("hand_r")) + MHBody->GetSocketLocation(TEXT("hand_l"))) * 0.5f;
 }
 
+bool AAthlete::PlayRepToss(AAthlete* QB, AAthlete* Back, bool bGun, bool bLeft, float ReleaseIn, int32 Which)
+{
+	const FAthleteAssets& A = FAthleteAssets::Get();
+	if (ArmSweepOff() || !QB || !Back || !A.RepTosses.Num()) return false;
+	// where the back is around the quarterback now (m: x to his left, y behind him), against each capture's at its release
+	const FVector Rel = Back->GetActorLocation() - QB->GetActorLocation();
+	const float Lx = static_cast<float>(-FVector::DotProduct(Rel, QB->GetActorRightVector())) / 100.f;
+	const float Ly = static_cast<float>(-FVector::DotProduct(Rel, QB->GetActorForwardVector())) / 100.f;
+	const FAthleteAssets::FTossRep* Best = nullptr;
+	const FAthleteAssets::FTossRep* Second = nullptr;
+	float BestCost = 1e9f, SecondCost = 1e9f;
+	for (const FAthleteAssets::FTossRep& R : A.RepTosses)
+	{
+		if (R.bLeft != bLeft) continue; // (the captures cannot be mirrored: pitched the wrong way it goes to nobody)
+		const float Cost = (R.bGun == bGun ? 0.f : 1.5f) + FMath::Sqrt(FMath::Square(R.Bx - Lx) + FMath::Square(R.By - Ly)) / 2.f;
+		if (Cost < BestCost) { Second = Best; SecondCost = BestCost; Best = &R; BestCost = Cost; }
+		else if (Cost < SecondCost) { Second = &R; SecondCost = Cost; }
+	}
+	// (the best two take turns when they are as good as each other)
+	const FAthleteAssets::FTossRep* R = (Second && SecondCost < BestCost + 0.4f && (Which & 1)) ? Second : Best;
+	// (and not before the capture has that long to its own release: from its first frame it would pitch it early)
+	if (!R || ReleaseIn > R->Tr + 0.02f) return false;
+	const float From = FMath::Max(0.f, R->Tr - FMath::Max(0.f, ReleaseIn));
+	QB->PlayOneShotFrom(R->Q.Get(), From);
+	QB->OneShotRate = 1.f; // (the two parts in step; AlignKey keeps each on the sim's moments)
+	QB->OneShotLeft = FMath::Min(R->Q->GetPlayLength() - From - 0.07f, R->Tr - From + 0.7f); // the pitch and its follow-through, then his own motion
+	QB->OneShotKeyT = R->Tr;
+	Back->PlayOneShotFrom(R->B.Get(), From);
+	Back->OneShotRate = 1.f;
+	Back->OneShotLeft = FMath::Min(R->B->GetPlayLength() - From - 0.07f, R->Tc - From + 0.35f); // the catch and the tuck, then the run
+	Back->OneShotKeyT = R->Tc;
+	UE_LOG(LogTemp, Display, TEXT("TAG toss pair: %s from %.2f s (release in %.2f s, catch at %.2f; back %.1f m left / %.1f m back of him, capture %.1f / %.1f)"),
+		*GetNameSafe(R->Q.Get()), From, ReleaseIn, R->Tc, Lx, Ly, R->Bx, R->By);
+	return true;
+}
+
 bool AAthlete::PlayRepPaFake(AAthlete* QB, AAthlete* Back, bool bGun, bool bBoot, float MeshIn, int32 Which)
 {
 	const FAthleteAssets& A = FAthleteAssets::Get();
@@ -5156,6 +5461,7 @@ void AAthlete::BeginSoloFall(const FVector& SimLoc, const FVector& MoveDirW)
 void AAthlete::SetCivilian(ECivilian Who, int32 Index)
 {
 	FAthleteAssets& A = FAthleteAssets::Get();
+	bOfficialBody = Who == ECivilian::Official;
 	if (A.bHero && Who != ECivilian::Generic)
 	{
 		const int32 W = A.HeroWeather; // 0 warm, 1 cold, 2 rain
@@ -5820,7 +6126,32 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 	const bool bFall = Anim == TEXT("down") || Anim == TEXT("tackle") || Anim == TEXT("dive");
 	bRepClip = false; // (set again below while his part of a two-man capture plays)
 	if (bAvoidMe) AvoidOthers(Location, VelWorld, DeltaTime);
-	SetActorLocation(Location + VisOffset + AvoidOff);
+	// the catch seat (arm sweep 3): over the last half second before a timed catch capture's hands-on-the-ball frame the
+	// body is eased (<= 70 cm, 220 cm/s) to where those hands - the capture's own, off its root - meet the ball as it
+	// comes. The body kept to the sim's catch spot and the captures' hands are where their receivers reached: 26-126 cm
+	// off the ball at the catch in the p3A2 audit (a fingertip grab's hands a metre out in front). After it, eased back.
+	{
+		const float KIn = OneShotKeyIn();
+		if (bOneShotHand && OneShot && OneShotLeft > 0.f && CatchBallFrame + 2 >= GFrameCounter && MHBody && !FMath::IsNaN(KIn) && KIn > 0.f && KIn < 0.6f)
+		{
+			const FTransform RootW = MHBody->GetSocketTransform(TEXT("root"), RTS_World);
+			const FVector HandAt = RootW.TransformPosition(OneShotHand) + FVector(VelWorld.X, VelWorld.Y, 0.f) * KIn;
+			FVector SeatMiss = CatchBallW - HandAt;
+			SeatMiss.Z = 0.f;
+			const FVector Full = (CatchSeat + SeatMiss).GetClampedToMaxSize2D(70.f);
+			const float SeatW = FMath::SmoothStep(0.f, 1.f, FMath::Clamp((0.5f - KIn) / 0.35f, 0.f, 1.f));
+			CatchSeat = FMath::VInterpConstantTo(CatchSeat, Full * SeatW, DeltaTime, 220.f);
+		}
+		else if (!(bOneShotHand && OneShot && OneShotLeft > 0.f && !FMath::IsNaN(KIn) && KIn > -0.15f))
+			CatchSeat = FMath::VInterpConstantTo(CatchSeat, FVector::ZeroVector, DeltaTime, 90.f); // (held through the hands on it)
+		CatchSeat.Z = 0.f;
+		// (off unless -TagCatchSeat: over the four audit games it brought the hands to the ball 7-9 cm closer - p50 39 -> 32 cm,
+		// p90 76 -> 67 - but moved the body under the reach, and the catches whose arms left their capture went 21 -> 34 of
+		// 75, arm pops 117 -> 152; p3A5 vs p3S)
+		static const bool bSeat = FParse::Param(FCommandLine::Get(), TEXT("TagCatchSeat"));
+		if (ArmSweepOff() || !bSeat) CatchSeat = FVector::ZeroVector;
+	}
+	SetActorLocation(Location + VisOffset + AvoidOff + CatchSeat);
 	RecordTrajectory();
 	MeasureMotion(Location, DeltaTime);
 	if (RI)
@@ -6211,13 +6542,16 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 		// not 0.3 s from its start: begun 0.4-0.6 s out it was cut before the ball got there, and the tuck was eased on over
 		// the run instead; arm sweep 2)
 		const bool bCatchTail = !ArmSweepOff() && OneShotKeyT >= 0.f;
-		if (bOneShotCatch && !bDiveClip && (bCatchTail ? OneShotPos > OneShotKeyT + 0.35f : OneShotAge > 0.3f) && SpeedCm > 450.f) OneShotLeft = 0.f; // a layout dive plays out
+		const TCHAR* CutWhy = TEXT("end");
+		// (and not while the ball is still coming to him: the director names where it will meet him every frame of its flight)
+		const bool bBallComing = !ArmSweepOff() && CatchBallFrame + 2 >= GFrameCounter;
+		if (bOneShotCatch && !bDiveClip && !bBallComing && (bCatchTail ? OneShotPos > OneShotKeyT + 0.35f : OneShotAge > 0.3f) && SpeedCm > 450.f) { OneShotLeft = 0.f; CutWhy = TEXT("tail"); } // a layout dive plays out
 		// (and once he has scored: a three-second catch capture played on through the celebration it should have given way to)
-		if (bOneShotCatch && !bDiveClip && OneShotAge > 0.45f && Anim == TEXT("celebrate")) OneShotLeft = 0.f;
+		if (bOneShotCatch && !bDiveClip && OneShotAge > 0.45f && Anim == TEXT("celebrate")) { OneShotLeft = 0.f; CutWhy = TEXT("celebrate"); }
 		// and a move made on the spot is over once the sim has him running: a beaten blocker turning to chase played his
 		// lunge for a second while covering 4 m/s (a capture that travels is followed instead and keeps its feet)
 		if (!bOneShotCatch && !bOneShotRep && !bDiveClip && OneShotAge > 0.35f && SpeedCm > 320.f)
-			if (const UAnimSequence* OSq = Cast<UAnimSequence>(OneShot); OSq && !OSq->HasRootMotion()) OneShotLeft = 0.f;
+			if (const UAnimSequence* OSq = Cast<UAnimSequence>(OneShot); OSq && !OSq->HasRootMotion()) { OneShotLeft = 0.f; CutWhy = TEXT("moving"); }
 		// and a capture that travels gives way once it cannot keep the body with the sim: at the follow limit for a
 		// quarter second the man is being dragged (a rush win curling left while the sim sends him straight at the
 		// quarterback, a set angled away from where the pocket goes); what follows (the run, the pass-block walk) is
@@ -6227,7 +6561,7 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 		// blocker run over by a bull rush snapping into a shuffle, p37)
 		const bool bOnTurf = MHBody && MHBody->GetSocketLocation(TEXT("pelvis")).Z - GetActorLocation().Z < 58.f;
 		// (not a play-action fake: the two-man capture plays its mesh and the follow keeps the body with the sim)
-		if (!bOneShotCatch && !bDiveClip && !bOnTurf && !bOneShotPA && OneShotAge > 0.4f && LagTime > 0.25f) OneShotLeft = 0.f;
+		if (!bOneShotCatch && !bOneShotDrop && !bDiveClip && !bOnTurf && !bOneShotPA && OneShotAge > 0.4f && LagTime > 0.25f) { OneShotLeft = 0.f; CutWhy = TEXT("lag"); }
 		// (his part of a run double team, PlayRepRunDouble, once the sim takes the double apart: the climber off to his
 		// backer, the down lineman left with one man on him - a crossfade's worth more)
 		if (bOneShotRep && RunDblOn.IsValid() && OneShotAge > 0.1f && !RunDblHeld()) OneShotLeft = FMath::Min(OneShotLeft, 0.1f);
@@ -6238,6 +6572,11 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 		if (!BlockAlign.IsNearlyZero(0.5f)) SetActorLocation(Location + VisOffset + BlockAlign);
 		if (OneShotLeft <= 0.f)
 		{
+			// (telemetry: a timed capture over before its key moment - the arm audit's "none" at the ball)
+			static const bool bKeyLog = FParse::Param(FCommandLine::Get(), TEXT("TagHlFull"));
+			if (bKeyLog && OneShotKeyT >= 0.f && OneShotPos < OneShotKeyT - 0.04f)
+				UE_LOG(LogTemp, Display, TEXT("TAG one-shot over before its key #%d: %s at %.2f, key %.2f, age %.2f, rate %.2f, speed %.0f (%s)"), Player ? Player->number : -1,
+					*GetNameSafe(OneShot), OneShotPos, OneShotKeyT, OneShotAge, OneShotRate, SpeedCm, CutWhy);
 			bOneShotRep = false;
 			RunDblOn = nullptr;
 			// a capture that leaves him on the turf (a pancake, the blocker of a bull rush): he gets up from there
@@ -6313,6 +6652,36 @@ void AAthlete::Drive(const FVector& Location, float Yaw, const FVector& VelWorld
 	// the quarterback's drop: the keyed three step (shotgun) or five step (under center) drop while the sim backs him
 	// out of the snap with the ball, at the sim's speed; then the pocket (on the toes, ball at the chest, eyes
 	// scanning) instead of a standing idle. The throw cuts in from the pocket's pose.
+	// an official on the move: the pack's referee runs (MG_Ref_D1..D5 Jog / Run / Sprint), the one that goes his way, at his
+	// pace - they ran on the players' matched locomotion (arm sweep 3)
+	if (bOfficialBody && !ArmSweepOff() && Anim == TEXT("run") && MHBody && !(OneShot && OneShotLeft > 0.f) && SpeedCm > 150.f && A.RefJogs.Clips.Num())
+	{
+		const int32 SetId = SpeedCm > 650.f && A.RefSprints.Clips.Num() ? 2 : SpeedCm > 440.f && A.RefRuns.Clips.Num() ? 1 : 0;
+		const FAthleteAssets::FWalkSet& Set = SetId == 2 ? A.RefSprints : SetId == 1 ? A.RefRuns : A.RefJogs;
+		const FVector VelCS = MHBody->GetComponentTransform().InverseTransformVectorNoScale(FVector(VelWorld.X, VelWorld.Y, 0.f).GetSafeNormal());
+		const int32 Cur = RefLoco >= 0 && RefLoco / 10 == SetId ? RefLoco % 10 : -1;
+		RefLocoT += DeltaTime;
+		int32 Best = Cur;
+		float BestDot = Cur >= 0 && Set.Clips.IsValidIndex(Cur) ? static_cast<float>(FVector::DotProduct(Set.Dir[Cur], VelCS)) + (RefLocoT < 0.5f ? 2.f : 0.25f) : -2.f;
+		for (int32 i = 0; i < Set.Clips.Num(); ++i)
+		{
+			const float Dot = static_cast<float>(FVector::DotProduct(Set.Dir[i], VelCS));
+			if (Dot > BestDot) { BestDot = Dot; Best = i; }
+		}
+		if (Best >= 0 && Set.Clips.IsValidIndex(Best))
+		{
+			if (Best != Cur) RefLocoT = 0.f;
+			RefLoco = SetId * 10 + Best;
+			PlayClip(Set.Clips[Best].Get(), true, FMath::Clamp(SpeedCm / FMath::Max(Set.Speed[Best], 1.f), 0.7f, 1.4f));
+			// (telemetry: the officials' moving frames on the loops - they are not in the per-man csv)
+			static const bool bRefCount = FParse::Param(FCommandLine::Get(), TEXT("TagHlFull"));
+			static int32 GRefLoopFrames = 0;
+			if (bRefCount && ++GRefLoopFrames % 3000 == 0)
+				UE_LOG(LogTemp, Display, TEXT("TAG referee loops: %d official frames on the pack's jog / run / sprint (now %s at %.0f cm/s)"), GRefLoopFrames, *GetNameSafe(Set.Clips[Best].Get()), SpeedCm);
+			return;
+		}
+	}
+	RefLoco = -1;
 	if (Player && Player->pos == tag::Pos::QB && bHasBallF && bLiveF && !bPreSnap && A.QBDropShotgun && A.QBDropUnder && A.QBPocket)
 	{
 		const FVector Fwd = FRotator(0, SmoothedYaw, 0).Vector();
@@ -6798,6 +7167,9 @@ void AAthlete::SetFootball(const FAthleteFootball& InF, float Dt)
 				// the elbow 73 deg off the throw's first frames; arm audit, 27 Nov)
 				if (!ArmSweepOff() && !Nm.Contains(TEXT("NonBC")) && (Nm.Contains(TEXT("QB_")) || Nm.Contains(TEXT("InPocket")) || Nm.Contains(TEXT("Scramble")) || Nm.Contains(TEXT("Coverball"))))
 					bCarryClipIs = true;
+				// (and a celebration: the scorer's captures hold, spike or toss the ball themselves - the tuck over them was the
+				// celebrations' 4.6 % of frames over the arm tolerance; arm sweep 3)
+				if (!ArmSweepOff() && (Nm.Contains(TEXT("Celeb")) || Nm.Contains(TEXT("Celebrate")))) bCarryClipIs = true;
 				CarryClipFor = Ma;
 			}
 			bCarryClip = bCarryClipIs;

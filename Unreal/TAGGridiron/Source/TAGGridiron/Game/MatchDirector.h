@@ -490,7 +490,24 @@ private:
 	bool bHighlights = false;
 	int32 HlClip = 0, HlFrame = 0;
 	bool bFilmCloseShot = false;
-	unsigned long long RefTdSerial = 0; // the play whose touchdown the officials have signalled // a film-only close shot (-TagThrowCam / -TagCatchCam) is on this frame (-TagHlCamOnly)
+	unsigned long long RefTdSerial = 0; // the play whose touchdown the officials have signalled
+	// the play on the ball from the forecast (arm sweep 3): the pass, the men started on it and the forecast revision each was started for
+	unsigned long long FcSerial = 0;
+	unsigned long long TossPairSerial = 0; // the play whose toss is one of the pack's two-man tosses (AAthlete::PlayRepToss)
+	/** The walk-up to the formation, staggered (arm sweep 3): each walker's delay behind his sim walk so no two paths cross
+	 *  at once, and the sim's own walk recorded to replay it that much later. Planned in StartPresnap (PlanWalkUp). */
+	struct FWalkSample { double T = 0.0; FVector Loc = FVector::ZeroVector; float Yaw = 0.f; FVector Vel = FVector::ZeroVector; bool bRun = false; };
+	TMap<const tag::Ent*, float> WalkDelay;
+	TMap<const tag::Ent*, TArray<FWalkSample>> WalkHist;
+	/** and each walker's lane: his path bowed aside (Amp cm at its middle, + to his right, nothing at either end) so two men
+	 *  crossing pass a lane apart - a line walking up mirrored crossed itself whatever the delays */
+	struct FWalkLane { FVector From = FVector::ZeroVector, To = FVector::ZeroVector; float Amp = 0.f; };
+	TMap<const tag::Ent*, FWalkLane> WalkLane;
+	double WalkT0 = 0.0;
+	void PlanWalkUp(float SnapIn);
+	const tag::Ent* FcMain = nullptr;
+	const tag::Ent* FcSecond = nullptr;
+	int32 FcMainRev = -1, FcSecondRev = -1, FcMainFate = 0, FcSecondFate = 0; // a film-only close shot (-TagThrowCam / -TagCatchCam) is on this frame (-TagHlCamOnly)
 	bool bHlInClip = false, bHlReplayLogged = false;
 	double HlStart = 0.0;
 	void TickHighlights(float Dt);

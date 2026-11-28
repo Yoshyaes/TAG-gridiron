@@ -1734,6 +1734,16 @@ void AMatchDirector::BroadcastPlayDead(const tag::PlayResult& R, const tag::Ent*
 	}
 }
 
+/** A queued wide reset that would be the third wide running (a fallback wide sat between two of them). */
+static bool BcThirdWide(const FTagBcState& St, const FTagBcBeat& B)
+{
+	const int32 N = St.Seq.Num();
+	const bool bThird = B.Type == ETagShot::Wide && N >= 2 && St.Seq[N - 1] == ETagShot::Wide && St.Seq[N - 2] == ETagShot::Wide;
+	if (bThird) UE_LOG(LogTemp, Display, TEXT("TAG shot dropped: queued wide (the last two shots were wides)"));
+	return bThird;
+}
+
+
 float AMatchDirector::BroadcastAfterPlay()
 {
 	FTagBcState& St = Bc();
@@ -1854,7 +1864,7 @@ float AMatchDirector::BroadcastAfterPlay()
 	{
 		const FTagBcBeat First = St.Queue[0];
 		St.Queue.RemoveAt(0);
-		StartShot(First);
+		if (!BcThirdWide(St, First)) StartShot(First); // (a queued wide after two wides is not shown: never three of a kind)
 	}
 	return BcProgramLeft(St, ShotView);
 }
@@ -2206,7 +2216,7 @@ bool AMatchDirector::ShotCamera(float Dt, FVector& OutP, const FVector& GameT, c
 			const FTagBcBeat Nb = St.Queue[0];
 			St.Queue.RemoveAt(0);
 			St.GapLeft = 0.f;
-			StartShot(Nb);
+			if (!BcThirdWide(St, Nb)) StartShot(Nb); // (a queued wide after two wides is not shown: never three of a kind)
 			if (ShotView.bOn)
 			{
 				++St.ShotDepth;
@@ -2440,7 +2450,7 @@ void AMatchDirector::TickBeats(float SDt)
 			{
 				const FTagBcBeat B = St.Queue[0];
 				St.Queue.RemoveAt(0);
-				StartShot(B);
+				if (!BcThirdWide(St, B)) StartShot(B); // (a queued wide after two wides is not shown: never three of a kind)
 			}
 			else St.bProgram = false;
 		}

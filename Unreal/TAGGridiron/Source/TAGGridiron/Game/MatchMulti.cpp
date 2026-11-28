@@ -855,6 +855,8 @@ void AMatchDirector::TickMultiTest(float Dt)
 	case 13:
 		// (the snap waits for every man to be set, as a player's does: no snap with men still walking in)
 		if (MultiT > 0.4f && State == EMatchState::Presnap && Sim && (Sim->walking() || SetClock < 0.3f)) break;
+		// (a pre-snap flag blew the play dead, not a snap: wait for the next pre-snap)
+		if (State != EMatchState::Presnap && State != EMatchState::Live && Game && !Game->log.empty() && Game->log.back().big == tag::LogTag::Penalty) { MultiT = 0.f; break; }
 		if (MultiT > 0.4f)
 		{
 			MultiCheck(State == EMatchState::Presnap, TEXT("only the offense's caller snaps the ball"));

@@ -237,6 +237,10 @@ public:
 	bool PlayKickCatch(bool bRunning, float CatchIn = -1.f);
 	/** A back taking a toss: the pack's pitch catch that fits where it comes from, timed to its arrival. */
 	bool PlayPitchCatch(const FVector& BallVelW, float CatchIn);
+	/** A pass nobody gets to (forecast fate 5): the pack's miss for where the ball comes from and its height, timed to it. */
+	bool PlayMiss(float BallZCm, const FVector& BallVelW, float CatchIn);
+	/** End the running one-shot now (it crossfades into what he does next): a catch whose ball will not come to him. */
+	void CancelOneShot() { if (OneShot && OneShotLeft > 0.f) OneShotLeft = FMath::Min(OneShotLeft, 0.01f); }
 	/** A shovel pass (the pack's, on the move or set), timed to its release. */
 	void PlayShovelTimed(bool bMoving, float ReleaseIn);
 	/** A pump fake (the pack's). */
@@ -269,7 +273,7 @@ public:
 	 *  is time. False if none loaded. */
 	static bool PlayIntPair(AAthlete* D, AAthlete* R, float CatchIn, float BallZCm, int32 Which);
 	/** A pass rolled as dropped: the receiver's drop capture, its hands at the ball in CatchIn seconds. */
-	bool PlayDrop(float CatchIn);
+	bool PlayDrop(float CatchIn, float DropBallZ = -1.f, const FVector& DropBallVelW = FVector::ZeroVector);
 	/** The celebration this man plays when his anim is "celebrate" (a turnover's own: null = his usual pick). */
 	TObjectPtr<UAnimationAsset> CelebPick;
 	/** Which hand the ball is drawn in for the next seconds (0 right, 1 left; a strip capture's carrying arm, where the
@@ -342,6 +346,10 @@ public:
 	FVector HandsMid() const;
 	/** Play action: the quarterback and the back into one of the pack's fakes, the mesh MeshIn seconds from now. */
 	static bool PlayRepPaFake(AAthlete* QB, AAthlete* Back, bool bGun, bool bBoot, float MeshIn, int32 Which);
+	/** The toss as one of the pack's two-man tosses (RepTosses; arm sweep 3): the pair whose pitch goes the side the back is
+	 *  and from the quarterback's alignment, the back nearest where he is around the quarterback; both started so the
+	 *  release lands ReleaseIn s from now (their keys: the quarterback's release, the back's hands on the ball). */
+	static bool PlayRepToss(AAthlete* QB, AAthlete* Back, bool bGun, bool bLeft, float ReleaseIn, int32 Which);
 	/** Pancake: the blocker drives through and finishes over the man he put down. */
 	void PlayPancakeFinish();
 	/** Keyed fall to the turf, see bFalling. bEaseIn: glide from where the actor is onto From in the first 0.15 s. */
@@ -564,6 +572,18 @@ public:
 	 *  steered within 0.7-1.4 (the sim moved the release, the ball arrives sooner than the flight's plan). */
 	void AlignKey(float EventIn);
 	float OneShotPos = 0.f; // where the one-shot is in its clip (s): its start plus each frame's time at that frame's rate
+	/** The ball in the running catch capture at its key (cm off its root, in the root's frame: FPackClip::ContactHand), and
+	 *  whether there is one; set by the timed catch starts. (Arm sweep 3: the body seated so those hands meet the ball.) */
+	FVector OneShotHand = FVector::ZeroVector;
+	bool bOneShotHand = false;
+	bool bOneShotDrop = false; // the one-shot is a timed drop (PlayDrop): a catch attempt, not cut for lag
+	/** Where the ball will be when it meets him (world), for the catch seat; the director sets it every frame of the
+	 *  run-in (SetCatchBall). The seat itself: the offset of his body that puts the capture's hands on it, eased in over
+	 *  the last half second and out after. */
+	void SetCatchBall(const FVector& BallAtW) { CatchBallW = BallAtW; CatchBallFrame = GFrameCounter; }
+	FVector CatchBallW = FVector::ZeroVector;
+	uint64 CatchBallFrame = 0;
+	FVector CatchSeat = FVector::ZeroVector;
 	/** The arms against the capture this evaluation (UTagRetargetAnimInstance::Arm), telemetry. */
 	float LastArm[17] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 private:
@@ -667,6 +687,9 @@ private:
 	void SetupHero(const FUniform& U);
 	void DressHero(class USkeletalMesh* BodyMesh, class USkeletalMesh* HeadMesh, class USkeletalMesh* HelmetMesh, const FString& Rig);
 	int32 OfficialPatch = -1;                   // an official's back patch (the pack's strip: DJ LJ R U BJ SJ FJ), -1 none
+	bool bOfficialBody = false;                 // an official (SetCivilian): runs on the pack's referee locomotion
+	int32 RefLoco = -1;                         // the referee loop he is on (set * 10 + clip), -1 none
+	float RefLocoT = 0.f;
 	bool bCapTint = false;                      // the referee: the pack's black official's cap repainted white
 	FLinearColor CapTint = FLinearColor::White;
 	void HideHair(bool bHide);
@@ -878,6 +901,16 @@ struct FAthleteAssets
 		float Dc = -1.f, MinSep = -1.f;
 	};
 	TArray<FHandoffRep> RepHandoffs;
+	/** The pack's two-man tosses (pack_tosses.json, Tools/Art/pack_tosses.py; arm sweep 3): the quarterback's pitch and the
+	 *  back's catch on the run, Tr s into both of the release and Tc of the back's hands on it; the back Bx m to the
+	 *  quarterback's left / By m behind him at the release; pitched to the quarterback's left (bLeft), from the gun (bGun). */
+	struct FTossRep
+	{
+		TStrongObjectPtr<UAnimSequence> Q, B;
+		float Tr = 0.f, Tc = 0.f, Bx = 0.f, By = 0.f;
+		bool bGun = false, bLeft = false;
+	};
+	TArray<FTossRep> RepTosses;
 	/** The pack's two-man play-action fakes (pack_pafakes.json): the quarterback's part (the fake, then his drop or his boot)
 	 *  and the back's (the mesh and the carry-out), T the mesh. */
 	struct FPaFakeRep { TStrongObjectPtr<UAnimSequence> Q, B; float T = 0.f; bool bGun = false, bBoot = false; float Bx = 0.f, Len = 0.f; };
@@ -894,6 +927,8 @@ struct FAthleteAssets
 	 *  (MG_QB_InPocket_Walk / Jog D1-D8). A quarterback sliding or stepping up plays the one that goes his way. */
 	struct FWalkSet { TArray<TStrongObjectPtr<UAnimSequence>> Clips; TArray<FVector> Dir; TArray<float> Speed; };
 	FWalkSet QBWalks, QBJogs;
+	/** The officials' own running: the pack's MG_Ref_D1..D5 Jog / Run / Sprint, each clip's direction from its root motion (arm sweep 3). */
+	FWalkSet RefJogs, RefRuns, RefSprints;
 	/** A quarterback on the run with the ball (MG_Loco_QB_Scramble_Jog, MG_Loco_QB_Run_ShortStride) and the speed each covers. */
 	TStrongObjectPtr<UAnimSequence> QBScramble, QBRun;
 	/** A ball carrier covering it up (MG_BC_Coverball Idle / Jog / Run / Sprint, D1) and the speed each covers. */
@@ -968,7 +1003,9 @@ struct FAthleteAssets
 	 *  right hand's peak = a throw's release or a catch's reach, the right foot's peak = a kick's contact, the pelvis
 	 *  going down = the hit, the root's first sideways step = a juke's onset) less a lead, the way the placed clips
 	 *  were cut by hand. Every family keeps its placed clip and takes a library capture every other time. */
-	struct FPackClip { TObjectPtr<UAnimationAsset> Anim; float Start = 0.f; float Len = 0.f; float Speed = 0.f; FString Name; FSoftObjectPath Path; };
+	/** Contact: a catch's hands-on-the-ball moment in its clip (s), measured from the capture itself at load (CatchContactT:
+	 *  the hands closest together and slowest off the pelvis after their reach); < 0 unknown (then Start + its lead). */
+	struct FPackClip { TObjectPtr<UAnimationAsset> Anim; float Start = 0.f; float Len = 0.f; float Speed = 0.f; FString Name; FSoftObjectPath Path; float Contact = -1.f; FVector ContactHand = FVector::ZeroVector; };
 	TArray<FPackClip> PackThrowsSet, PackThrowsQuick, PackThrowsDeep, PackThrowsRollR, PackThrowsRollL;
 	TArray<FPackClip> PackKickoffs, PackFieldGoals, PackPunts, PackDropsSG, PackDropsUC;
 	TArray<FPackClip> PackCatchStride, PackCatchHigh, PackCatchLow, PackCatchOverShoulder, PackCatchSideline, PackCatchStand, PackCatchComeback, PackCatchDive;
@@ -976,6 +1013,8 @@ struct FAthleteAssets
 	TArray<FPackClip> PackCatchSpectacular;
 	/** A back taking a pitch (Catch_Pitch_<45|90|135>_<height>): timed to the toss's arrival (arm sweep 2). */
 	TArray<FPackClip> PackCatchPitch;
+	/** The pack's misses (Catch_NonCatch_*): a receiver who cannot get to an overthrow - the pass nobody gets to (fcFate 5). */
+	TArray<FPackClip> PackCatchMiss;
 	/** The referee's touchdown signal (Ref_Touchdown_Signal), played by the referee and the nearer wing on a touchdown. */
 	TObjectPtr<UAnimationAsset> RefTdSignal;
 	/** A scrambling quarterback giving himself up: the feet-first slide (started a beat before he goes down). */
